@@ -135,7 +135,7 @@ parseImportType = do
   name_ <- constructor
   names <- option ["*"] (parens (commaSep1 constructor))
   end <- getSourcePos
-  pure (TypeImport (Metadata start end) name_ names)
+  pure (ImportType (Metadata start end) name_ names)
 
 parseImportCotype :: Parser (Import Metadata)
 parseImportCotype = do
@@ -144,7 +144,7 @@ parseImportCotype = do
   name_ <- constructor
   names <- option ["*"] (parens (commaSep1 constructor))
   end <- getSourcePos
-  pure (CotypeImport (Metadata start end) name_ names)
+  pure (ImportCotype (Metadata start end) name_ names)
 
 parseImportTrait :: Parser (Import Metadata)
 parseImportTrait = do
@@ -153,14 +153,14 @@ parseImportTrait = do
   name_ <- constructor
   names <- option ["*"] (parens (commaSep1 name))
   end <- getSourcePos
-  pure (TraitImport (Metadata start end) name_ names)
+  pure (ImportTrait (Metadata start end) name_ names)
 
 parseImportName :: Parser (Import Metadata)
 parseImportName = do
   start <- getSourcePos
   n <- backtickString <|> name <|> identifier upperChar
   end <- getSourcePos
-  pure (NameImport (Metadata start end) n)
+  pure (ImportName (Metadata start end) n)
 
 parseImport :: Parser (Definition Metadata o ())
 parseImport = do

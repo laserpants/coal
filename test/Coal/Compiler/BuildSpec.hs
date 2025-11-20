@@ -35,8 +35,8 @@ buildSpec = do
 --  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
 --  test134 build
 --
---test133 :: ModuleBuild Metadata -> Spec
---test133 build@ModuleBuild{..} = do
+-- test133 :: ModuleBuild Metadata -> Spec
+-- test133 build@ModuleBuild{..} = do
 --  describe "DataConstructors" $ do
 --    it "" $
 --      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
@@ -61,8 +61,8 @@ buildSpec = do
 --    it "" $
 --      moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail", "main"]
 --
---test134 :: ModuleBuild Metadata -> Spec
---test134 build@ModuleBuild{..} = do
+-- test134 :: ModuleBuild Metadata -> Spec
+-- test134 build@ModuleBuild{..} = do
 --  describe "DataConstructors" $ do
 --    it "" $
 --      mapEnvironment stripMeta (exportedDataConstructors build) == mainExportedDataConstructors
@@ -99,29 +99,29 @@ buildSpec = do
 --    it "" $
 --      moduleExports == Set.fromList ["Functor", "Head", "None", "Option", "Some", "Stream", "Tail", "map", "main"]
 --
---class StripMeta i where
+-- class StripMeta i where
 --  stripMeta :: i a -> i ()
 --
---instance StripMeta DataConstructorInfo where
+-- instance StripMeta DataConstructorInfo where
 --  stripMeta (DataConstructorInfo _ n c s) = DataConstructorInfo () n c s
 --
---instance StripMeta TypeConstructorInfo where
+-- instance StripMeta TypeConstructorInfo where
 --  stripMeta (TypeConstructorInfo _ n k ns) = TypeConstructorInfo () n k ns
 --
---instance StripMeta CodataAccessorInfo where
+-- instance StripMeta CodataAccessorInfo where
 --  stripMeta (CodataAccessorInfo _ n a) = CodataAccessorInfo () n a
 --
---instance StripMeta CotypeConstructorInfo where
+-- instance StripMeta CotypeConstructorInfo where
 --  stripMeta (CotypeConstructorInfo _ n k ns) = CotypeConstructorInfo () n k ns
 --
---instance StripMeta TraitInfo where
+-- instance StripMeta TraitInfo where
 --  stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
 --
---instance StripMeta InstanceInfo where
+-- instance StripMeta InstanceInfo where
 --  stripMeta (InstanceInfo _ t t2 d) = InstanceInfo () t t2 d
 --
---mainNames :: [NameInfo]
---mainNames =
+-- mainNames :: [NameInfo]
+-- mainNames =
 --    [
 --      IType "Option" (KArrow KType KType)
 --      , ICotype "Stream" (KArrow KType KType)
@@ -132,8 +132,8 @@ buildSpec = do
 --      , IFunctionPlaceholder "main"
 --    ]
 --
---mainNames2 :: [NameInfo]
---mainNames2 =
+-- mainNames2 :: [NameInfo]
+-- mainNames2 =
 --    [
 --      IType "Option" (KArrow KType KType)
 --      , ICotype "Stream" (KArrow KType KType)
@@ -155,8 +155,8 @@ buildSpec = do
 --      , IFunctionPlaceholder "main"
 --    ]
 --
---mainExportedDataConstructors :: Environment (DataConstructorInfo ())
---mainExportedDataConstructors =
+-- mainExportedDataConstructors :: Environment (DataConstructorInfo ())
+-- mainExportedDataConstructors =
 --  Environment.fromList
 --    [
 --      ( "None"
@@ -177,8 +177,8 @@ buildSpec = do
 --      )
 --    ]
 --
---mainTypeConstructors :: Environment (TypeConstructorInfo ())
---mainTypeConstructors =
+-- mainTypeConstructors :: Environment (TypeConstructorInfo ())
+-- mainTypeConstructors =
 --  Environment.fromList
 --    [
 --      ( "Option"
@@ -190,8 +190,8 @@ buildSpec = do
 --      )
 --    ]
 --
---mainExportedTypeConstructors :: Environment (TypeConstructorInfo ())
---mainExportedTypeConstructors =
+-- mainExportedTypeConstructors :: Environment (TypeConstructorInfo ())
+-- mainExportedTypeConstructors =
 --  Environment.fromList
 --    [
 --      ( "Option"
@@ -199,8 +199,8 @@ buildSpec = do
 --      )
 --    ]
 --
---mainExportedCodataAccessors :: Environment (CodataAccessorInfo ())
---mainExportedCodataAccessors =
+-- mainExportedCodataAccessors :: Environment (CodataAccessorInfo ())
+-- mainExportedCodataAccessors =
 --  Environment.fromList
 --    [
 --      ( "Head"
@@ -224,8 +224,8 @@ buildSpec = do
 --      )
 --    ]
 --
---mainCotypeConstructors :: Environment (CotypeConstructorInfo ())
---mainCotypeConstructors =
+-- mainCotypeConstructors :: Environment (CotypeConstructorInfo ())
+-- mainCotypeConstructors =
 --  Environment.fromList
 --    [
 --      ( "Stream"
@@ -237,8 +237,8 @@ buildSpec = do
 --      )
 --    ]
 --
---mainTraits :: Environment (TraitInfo ())
---mainTraits =
+-- mainTraits :: Environment (TraitInfo ())
+-- mainTraits =
 --  Environment.fromList
 --    [
 --      ( "Functor"
@@ -262,8 +262,8 @@ buildSpec = do
 --      )
 --    ]
 --
---mainExportedInstances :: Environment (Map IndexedType (InstanceInfo ()))
---mainExportedInstances =
+-- mainExportedInstances :: Environment (Map IndexedType (InstanceInfo ()))
+-- mainExportedInstances =
 --  Environment.fromList
 --    [
 --      ( "Functor"

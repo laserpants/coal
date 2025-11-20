@@ -93,7 +93,7 @@ builtinDefinitions =
   [ DImport
       mempty
       (Path ["Builtin$"])
-      (for (builtinFunctionNames <> builtinTraitInstances) (NameImport mempty))
+      (for (builtinFunctionNames <> builtinTraitInstances) (ImportName mempty))
   , DTrait
       mempty
       "Numeric"

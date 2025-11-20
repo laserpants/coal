@@ -54,31 +54,31 @@ imports ModuleBuild{..} =
     DImport _ path names_ ->
       concat . for names_ $
         \case
-          (NameImport _ name) ->
+          (ImportName _ name) ->
             [(name, principalPath path <.> name)]
-          (TypeImport _ name ["*"]) ->
+          (ImportType _ name ["*"]) ->
             case Environment.lookup name moduleTypeConstructors of
               Nothing ->
                 error "TODO"
               Just TypeConstructorInfo{..} ->
                 [(name_, principalPath path <.> name_) | name_ <- typeConstructorInfoDataConstructors]
-          (TypeImport _ _ ctors) ->
+          (ImportType _ _ ctors) ->
             [(ctor, principalPath path <.> ctor) | ctor <- ctors]
-          (CotypeImport _ name ["*"]) ->
+          (ImportCotype _ name ["*"]) ->
             case Environment.lookup name moduleCotypeConstructors of
               Nothing ->
                 error "TODO"
               Just CotypeConstructorInfo{..} ->
                 [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorInfoDataAccessors]
-          (CotypeImport _ _ xsors) ->
+          (ImportCotype _ _ xsors) ->
             [(xsor, principalPath path <.> xsor) | xsor <- xsors]
-          (TraitImport _ name ["*"]) ->
+          (ImportTrait _ name ["*"]) ->
             case Environment.lookup name moduleTraits of
               Nothing ->
                 error "TODO"
               Just TraitInfo{..} ->
                 [(name_, principalPath path <.> name_) | name_ <- Environment.names traitInfoEntries]
-          (TraitImport _ _ entries) ->
+          (ImportTrait _ _ entries) ->
             [(entry, principalPath path <.> entry) | entry <- entries]
     _ ->
       []

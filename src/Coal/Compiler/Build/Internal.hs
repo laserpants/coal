@@ -707,7 +707,7 @@ prepareBuild (Module path exports defs) = do
 
     extra <- nub . concat <$> forM defs collectImportedInstances
 
-    let defs1 = [DImport mempty p (NameImport mempty <$> names) | (p, names) <- groupByKey extra]
+    let defs1 = [DImport mempty p (ImportName mempty <$> names) | (p, names) <- groupByKey extra]
 
     unless ([WildcardExport] == exports) $
       modify $
@@ -792,42 +792,42 @@ nameImports :: ModuleBuild a -> [Import a] -> [Name]
 nameImports ModuleBuild{..} imports =
   flip concatMap imports $
     \case
-      NameImport _ name ->
+      ImportName _ name ->
         [name]
-      TypeImport _ name ["*"] ->
+      ImportType _ name ["*"] ->
         case Environment.lookup name moduleTypeConstructors of
           Nothing ->
             error (show name)
           Just TypeConstructorInfo{..} ->
             typeConstructorInfoDataConstructors
-      TypeImport _ _ names ->
+      ImportType _ _ names ->
         names
-      CotypeImport _ name ["*"] ->
+      ImportCotype _ name ["*"] ->
         case Environment.lookup name moduleCotypeConstructors of
           Nothing ->
             error "TODO"
           Just CotypeConstructorInfo{..} ->
             cotypeConstructorInfoDataAccessors
-      CotypeImport _ _ names ->
+      ImportCotype _ _ names ->
         names
-      TraitImport _ name ["*"] ->
+      ImportTrait _ name ["*"] ->
         case Environment.lookup name moduleTraits of
           Nothing ->
             error "TODO"
           Just TraitInfo{..} ->
             Environment.names traitInfoEntries
-      TraitImport _ _ names ->
+      ImportTrait _ _ names ->
         names
 
 typeImports :: [Import a] -> [Name]
 typeImports imports =
   flip concatMap imports $
     \case
-      TypeImport _ name _ ->
+      ImportType _ name _ ->
         [name]
-      CotypeImport _ name _ ->
+      ImportCotype _ name _ ->
         [name]
-      TraitImport _ name _ ->
+      ImportTrait _ name _ ->
         [name]
       _ ->
         []
@@ -985,7 +985,7 @@ collectInstances kinds traits =
       forM_ imports $
         \case
           -- TODO: cleanup/DRY
-          TypeImport _ name _ ->
+          ImportType _ name _ ->
             forM_ (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 forM_ (Map.toList is) $
@@ -1011,7 +1011,7 @@ collectImportedInstances =
       concat <$$> forM imports $
         \case
           -- TODO: cleanup/DRY
-          TraitImport _ name _ ->
+          ImportTrait _ name _ ->
             concat <$$> forM (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 if trait == name
@@ -1021,7 +1021,7 @@ collectImportedInstances =
                         \(f, _) ->
                           pure (path, instanceLabel (Trait trait t) f)
                   else pure []
-          TypeImport _ name _ ->
+          ImportType _ name _ ->
             concat <$$> forM (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 concat <$$> forM (Map.toList is) $
@@ -1047,19 +1047,19 @@ collectImportedNames =
       unless (Path ["Builtin$"] == path) $
         forM_ imports $
           \case
-            NameImport loc name ->
+            ImportName loc name ->
               unless (name `elem` fmap nameOf names1) $ do
                 tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure
-            TypeImport loc name _ ->
+            ImportType loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
                 tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure
-            CotypeImport loc name _ ->
+            ImportCotype loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
                 tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure
-            TraitImport loc name _ ->
+            ImportTrait loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
                 tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure

@@ -1,0 +1,9 @@
+module Eq {
+
+  trait Equality<a> {
+    equal : a -> a -> bool
+  }
+
+  type Answer = Yes | No
+
+}
