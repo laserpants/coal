@@ -4,10 +4,10 @@
 
 module Coal.Language.Serializable (Serializable (..), instanceLabel) where
 
-import Coal.Language.Trait
-import Coal.Language.Type
-import Coal.Language.Type.Intrinsic
-import Coal.Language.Type.Row
+import Coal.Language.Trait (Trait (..))
+import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
+import Coal.Language.Type.Intrinsic (Intrinsic (..))
+import Coal.Language.Type.Row (Row (..))
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
 import Extras (Name)
