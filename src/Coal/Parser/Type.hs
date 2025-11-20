@@ -4,11 +4,11 @@ module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Language
 import qualified Coal.Language.Type.Row as Row
-import Coal.Parser.Core
-import Coal.Parser.Identifier
+import Coal.Parser.Core (Parser, lexeme, nonEmpty)
+import Coal.Parser.Identifier (constructor, name)
 import Coal.Parser.Symbol
 import Coal.Parser.Utils (fieldList)
-import Control.Monad.Combinators.Expr
+import Control.Monad.Combinators.Expr (Operator (InfixR), makeExprParser)
 import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map

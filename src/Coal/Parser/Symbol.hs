@@ -19,10 +19,10 @@ module Coal.Parser.Symbol (
   equalSign,
 ) where
 
-import Coal.Parser.Core
+import Coal.Parser.Core (Parser, cons, spaces)
 import Control.Monad (void)
 import Data.Text (Text)
-import Text.Megaparsec
+import Text.Megaparsec (between, sepBy, sepBy1)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 {-# INLINE symbol #-}

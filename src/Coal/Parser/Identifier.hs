@@ -11,13 +11,13 @@ module Coal.Parser.Identifier (
   backtickString,
 ) where
 
-import Coal.Parser.Core
+import Coal.Parser.Core (Parser, cons, lexeme, word)
 import Coal.Parser.Symbol (symbol)
 import Control.Monad (void)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name)
-import Text.Megaparsec
+import Text.Megaparsec (MonadParsec (takeWhileP), many, (<|>))
 import Text.Megaparsec.Char (alphaNumChar, char, lowerChar, upperChar)
 
 {-# INLINE underscore #-}

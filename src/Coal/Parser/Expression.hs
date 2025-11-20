@@ -6,8 +6,8 @@ import Coal.AST.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Parser.Core
-import Coal.Parser.Identifier
-import Coal.Parser.Metadata
+import Coal.Parser.Identifier (constructor, name)
+import Coal.Parser.Metadata (withMetadata)
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Primitive (parsePrimitive)
 import Coal.Parser.Symbol
