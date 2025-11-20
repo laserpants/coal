@@ -29,7 +29,7 @@ parseTypeExport = do
   name_ <- constructor
   names <- option ["*"] (parens (commaSep1 name))
   end <- getSourcePos
-  pure (TypeExport (Metadata start end) name_ names)
+  pure (ExportType (Metadata start end) name_ names)
 
 -- parseTypeExport :: Parser (Export Metadata)
 -- parseTypeExport = do
@@ -63,11 +63,11 @@ parseNameExport = do
   start <- getSourcePos
   n <- name
   end <- getSourcePos
-  pure (NameExport (Metadata start end) n)
+  pure (ExportName (Metadata start end) n)
 
 {-# INLINE parseModuleExports #-}
 parseModuleExports :: Parser [Export Metadata]
-parseModuleExports = option [WildcardExport] (parens (commaSep parseExportAtom))
+parseModuleExports = option [ExportAll] (parens (commaSep parseExportAtom))
 
 parseModule :: Parser (Module Metadata o ())
 parseModule = do

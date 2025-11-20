@@ -22,19 +22,11 @@ import Coal.Language.Module.Definition.Instance (InstanceDef (..))
 import Coal.Language.Module.Definition.Trait (TraitDef (..))
 import Coal.Language.Module.Definition.Type (TypeDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
+import Coal.Language.Module.Import (Import (..))
+import Coal.Language.Module.Path (Path (..))
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Name)
-
-newtype Path = Path {pathComponents :: [Name]}
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
-
-data Import a
-  = ImportName a Name
-  | ImportType a Name [Name]
-  | ImportCotype a Name [Name]
-  | ImportTrait a Name [Name]
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 data Definition a k t
   = -- | Type definition

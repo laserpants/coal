@@ -112,7 +112,7 @@ prepareBuild (Module path exports defs) = do
 
     let defs1 = [DImport mempty p (ImportName mempty <$> names) | (p, names) <- groupByKey extra]
 
-    unless ([WildcardExport] == exports) $
+    unless ([ExportAll] == exports) $
       modify $
         setExports (nameExports exports `union` Set.toList exps)
           . setTypeExports (typeExports exports `union` Set.toList typeExps)
@@ -153,9 +153,9 @@ nameExports exports =
   flip concatMap exports $
     \case
       -- TODO: Rename to ExprExport/ExprImport?
-      NameExport _ name ->
+      ExportName _ name ->
         [name]
-      TypeExport _ _ names ->
+      ExportType _ _ names ->
         names
       _ ->
         []
@@ -164,7 +164,7 @@ typeExports :: [Export a] -> [Name]
 typeExports exports =
   flip concatMap exports $
     \case
-      TypeExport _ name _ ->
+      ExportType _ name _ ->
         [name]
       _ ->
         []

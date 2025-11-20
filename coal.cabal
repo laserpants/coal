@@ -186,6 +186,9 @@ library
       Coal.Language.Module.Definition.Trait
       Coal.Language.Module.Definition.Type
       Coal.Language.Module.Definition.Unfold
+      Coal.Language.Module.Export
+      Coal.Language.Module.Import
+      Coal.Language.Module.Path
       Coal.Language.Pattern
       Coal.Language.Primitive
       Coal.Language.Serializable

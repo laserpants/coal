@@ -16,7 +16,6 @@ import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module
-import Coal.Language.Module.Definition (Import (..))
 import Control.Monad.IO.Class
 import Extras (Name, for, (<.>))
 
