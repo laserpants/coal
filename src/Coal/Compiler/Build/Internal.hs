@@ -14,13 +14,12 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
 import Coal.Compiler.Builtin.Instances (builtinInstances)
-import Coal.Compiler.Journal
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Module.Definition (Import (..))
-import Coal.TypeSystem.Substitution
-import Control.Monad.Except
+import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
+import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
 import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
 import Data.List (nub, union)
 import qualified Data.Map.Strict as Map
