@@ -48,11 +48,11 @@ module Coal.Compiler.Build (
   setPath,
 ) where
 
-import Coal.AST.Type.Parameterized
+import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module (AliasDef (..), CotypeDef (..), Path (Path), TraitDef (..), TypeDef (..))
 import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
