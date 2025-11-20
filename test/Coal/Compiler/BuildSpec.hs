@@ -20,7 +20,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (forM)
+import Extras (forM, (<$$>))
 import Test.Hspec
 
 buildSpec :: Spec
@@ -315,7 +315,7 @@ buildSpec = do
 runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild Metadata])
 runBuild names = do
   (r, _, _) <- runCompilerT emptyCompilerEnvironment prog
-  pure r
+  pure (snd <$$> r)
  where
   prog = do
     s <- runPass (parsingPhase >-> passTopologicalSort) names

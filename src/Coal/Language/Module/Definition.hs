@@ -30,7 +30,8 @@ newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 data Import a
-  = NameImport a Name
+  = -- TODO: NameImport -> ImportName
+    NameImport a Name
   | TypeImport a Name [Name]
   | CotypeImport a Name [Name]
   | TraitImport a Name [Name]

@@ -39,7 +39,7 @@ pass m@(Module path _ _) = do
   clearAssumptionsC
   clearNameStoreC
 
-  build@ModuleBuild{..} <- prepareBuild m
+  (m0, build@ModuleBuild{..}) <- prepareBuild m
   insertModuleC (principalPath path) build
 
   typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
@@ -59,7 +59,7 @@ pass m@(Module path _ _) = do
   setNamesC env
   insertNamesC builtinFunctions
 
-  m1 <- local (const cmpEnv) (runTypeInference m)
+  m1 <- local (const cmpEnv) (runTypeInference m0)
   names <- gets compilerNameStore
   replacePlaceholders names
 

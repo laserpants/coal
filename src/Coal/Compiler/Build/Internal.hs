@@ -19,12 +19,12 @@ import Coal.Language.Module
 import Coal.Language.Module.Definition (Import (..))
 import Coal.TypeSystem.Substitution
 import Control.Monad.Except
-import Control.Monad.State (StateT, execStateT, gets, modify)
-import Data.List (union)
+import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
+import Data.List (nub, union)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (Name)
+import Extras (Name, groupByKey, (<$$>))
 
 buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
 buildEnv = do
@@ -69,9 +69,9 @@ replacePlaceholders store =
       Just s ->
         modify $ addName (info name s)
 
-prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (ModuleBuild a)
-prepareBuild (Module path exports defs) =
-  flip execStateT emptyModuleBuild $ do
+prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind (), ModuleBuild a)
+prepareBuild (Module path exports defs) = do
+  flip runStateT emptyModuleBuild $ do
     modify (setPath path)
 
     inEachDef collectTypeConstructors
@@ -117,6 +117,7 @@ prepareBuild (Module path exports defs) =
 
     inEachDef (collectTraits kinds)
     traits <- traitEnv
+
     inEachDef (collectInstances kinds traits)
 
     -- Built-in instances
@@ -704,10 +705,16 @@ prepareBuild (Module path exports defs) =
     exps <- gets (Set.filter (`notElem` builtin) . moduleExports)
     typeExps <- gets (Set.filter (`notElem` builtin) . moduleTypeExports)
 
+    extra <- nub . concat <$> forM defs collectImportedInstances
+
+    let defs1 = [DImport mempty p (NameImport mempty <$> names) | (p, names) <- groupByKey extra]
+
     unless ([WildcardExport] == exports) $
       modify $
         setExports (nameExports exports `union` Set.toList exps)
           . setTypeExports (typeExports exports `union` Set.toList typeExps)
+
+    return (Module path exports (defs <> defs1))
  where
   builtin =
     Set.fromList
@@ -790,7 +797,7 @@ nameImports ModuleBuild{..} imports =
       TypeImport _ name ["*"] ->
         case Environment.lookup name moduleTypeConstructors of
           Nothing ->
-            error "TODO"
+            error (show name)
           Just TypeConstructorInfo{..} ->
             typeConstructorInfoDataConstructors
       TypeImport _ _ names ->
@@ -930,6 +937,20 @@ collectTraits env =
         addName (ITrait name)
           . insertTrait name (traitInfo loc name def)
           . addTypeExport name
+    DImport _ (Path ["Builtin$"]) _ ->
+      pure ()
+    def@(DImport loc path _) -> do
+      ModuleBuild{..} <- importedModule loc path
+      traits <- collectTypeImports def exportedTraits
+      forM_ traits $
+        \info@(TraitInfo _ name _ _) -> do
+          modify $ insertTrait name info
+          forM_ (Environment.toList moduleInstances) $
+            \(trait, is) -> do
+              when (trait == name) $
+                forM_ (Map.toList is) $
+                  \(t, InstanceInfo{..}) -> do
+                    modify $ insertInstance trait t InstanceInfo{..}
     _ ->
       pure ()
 
@@ -951,44 +972,96 @@ collectInstances kinds traits =
       case Environment.lookup trait traits of
         Nothing ->
           -- TODO
-          error "Trait not in scope!"
+          error ("Trait not in scope!: " <> show trait)
         Just (TraitInfo _ _ p dict) -> do
           modify $ insertInstance trait t1 (InstanceInfo loc q (toIndexedType kinds p q) env)
          where
           t1 = toIndexedType kinds p q
           Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
+    DImport _ (Path ["Builtin$"]) _ ->
+      pure ()
+    DImport loc path imports -> do
+      ModuleBuild{..} <- importedModule loc path
+      forM_ imports $
+        \case
+          -- TODO: cleanup/DRY
+          TypeImport _ name _ ->
+            forM_ (Environment.toList moduleInstances) $
+              \(trait, is) -> do
+                forM_ (Map.toList is) $
+                  \(t, InstanceInfo{..}) -> do
+                    when (headConstructor instanceInfoIndexedType == Just name) $
+                      modify $
+                        insertInstance trait t InstanceInfo{..}
+          _ ->
+            pure ()
     _ ->
       pure ()
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
+collectImportedInstances :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) [(Path, Name)]
+collectImportedInstances =
+  \case
+    DImport _ (Path ["Builtin$"]) _ -> do
+      pure []
+    DImport loc path imports -> do
+      ModuleBuild{..} <- importedModule loc path
+      concat <$$> forM imports $
+        \case
+          -- TODO: cleanup/DRY
+          TraitImport _ name _ ->
+            concat <$$> forM (Environment.toList moduleInstances) $
+              \(trait, is) -> do
+                if trait == name
+                  then concat <$$> forM (Map.toList is) $
+                    \(t, InstanceInfo{..}) -> do
+                      forM (Map.toList instanceInfoEntries) $
+                        \(f, _) ->
+                          pure (path, instanceLabel (Trait trait t) f)
+                  else pure []
+          TypeImport _ name _ ->
+            concat <$$> forM (Environment.toList moduleInstances) $
+              \(trait, is) -> do
+                concat <$$> forM (Map.toList is) $
+                  \(t, InstanceInfo{..}) -> do
+                    if headConstructor instanceInfoIndexedType == Just name
+                      then forM (Map.toList instanceInfoEntries) $
+                        \(f, _) ->
+                          pure (path, instanceLabel (Trait trait t) f)
+                      else pure []
+          _ ->
+            pure []
+    _ ->
+      pure []
+
 collectImportedNames :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectImportedNames =
   \case
-    def@(DImport _ module_ imports) -> do
+    def@(DImport _ path imports) -> do
       names1 <- collectNameImports def exportedNames
       names2 <- collectTypeImports def exportedTypeNames
 
-      path <- lift $ gets (principalPath . compilerCurrentModule)
-      unless (Path ["Builtin$"] == module_) $
+      this <- lift $ gets (principalPath . compilerCurrentModule)
+      unless (Path ["Builtin$"] == path) $
         forM_ imports $
           \case
             NameImport loc name ->
               unless (name `elem` fmap nameOf names1) $ do
-                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure
             TypeImport loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure
             CotypeImport loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure
             TraitImport loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name (principalPath module_) (ErrorLocation path loc)]
+                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
                 throwError PreflightFailure
 
       forM_ (names1 <> names2) $

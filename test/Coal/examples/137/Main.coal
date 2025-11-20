@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_int32)
+//  import Stuff(type Answer, stuff)
+  import Eq(type Answer, trait Equality)
+
+  fun main() =
+    if (equal(Yes, No)) 
+      then println_int32(1)
+      else println_int32(2)
+
+}

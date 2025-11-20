@@ -1,0 +1,18 @@
+module Stuff {
+
+  import Eq(trait Equality(equal))
+
+  type Answer = Yes | No
+
+  instance Equality<Answer> {
+    fun equal(x, y) =
+      match((x, y)) {
+        | (Yes, Yes) => true
+        | (No, No)   => true
+        | _          => false
+      }
+  }
+
+  fun stuff() = 123
+
+}

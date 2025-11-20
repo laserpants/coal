@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -39,7 +40,6 @@ module Coal.Compiler.Build (
   exportedDataConstructors,
   exportedTypeConstructors,
   exportedTraits,
-  exportedInstances,
   exportedNames,
   exportedTypeNames,
   traitInfo,
@@ -186,6 +186,9 @@ instance HasName (CotypeConstructorInfo a) where
 instance HasName (TraitInfo a) where
   nameOf = traitInfoName
 
+instance HasName (Name, a) where
+  nameOf = fst
+
 data ModuleBuild a = ModuleBuild
   { modulePath :: Path
   , moduleDataConstructors :: Environment (DataConstructorInfo a)
@@ -212,26 +215,20 @@ exportedNames ModuleBuild{..} = filter (memberOf moduleExports) moduleNames
 exportedTypeNames :: ModuleBuild a -> [NameInfo]
 exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNames
 
-memberOf2 :: (Ord a) => Set a -> (a, b) -> Bool
-memberOf2 s (name, _) = name `Set.member` s
-
 exportedTypeConstructors :: ModuleBuild a -> [TypeConstructorInfo a]
-exportedTypeConstructors ModuleBuild{..} = snd <$> filter (memberOf2 moduleTypeExports) (Environment.toList moduleTypeConstructors)
+exportedTypeConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTypeConstructors)
 
 exportedCotypeConstructors :: ModuleBuild a -> [CotypeConstructorInfo a]
-exportedCotypeConstructors ModuleBuild{..} = snd <$> filter (memberOf2 moduleTypeExports) (Environment.toList moduleCotypeConstructors)
+exportedCotypeConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleCotypeConstructors)
 
 exportedDataConstructors :: ModuleBuild a -> [DataConstructorInfo a]
-exportedDataConstructors ModuleBuild{..} = snd <$> filter (memberOf2 moduleExports) (Environment.toList moduleDataConstructors)
+exportedDataConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleExports) (Environment.toList moduleDataConstructors)
 
 exportedCodataAccessors :: ModuleBuild a -> [CodataAccessorInfo a]
-exportedCodataAccessors ModuleBuild{..} = snd <$> filter (memberOf2 moduleExports) (Environment.toList moduleCodataAccessors)
+exportedCodataAccessors ModuleBuild{..} = snd <$> filter (memberOf moduleExports) (Environment.toList moduleCodataAccessors)
 
-exportedTraits :: ModuleBuild a -> Environment (TraitInfo a)
-exportedTraits ModuleBuild{..} = Environment.filterNames (`Set.member` moduleTypeExports) moduleTraits
-
-exportedInstances :: ModuleBuild a -> Environment (Map IndexedType (InstanceInfo a))
-exportedInstances ModuleBuild{..} = Environment.filterNames (`Set.member` moduleExports) moduleInstances
+exportedTraits :: ModuleBuild a -> [TraitInfo a]
+exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTraits)
 
 emptyModuleBuild :: ModuleBuild a
 emptyModuleBuild =

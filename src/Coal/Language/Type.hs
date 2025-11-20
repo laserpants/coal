@@ -26,6 +26,7 @@ module Coal.Language.Type (
   isTupleType,
   fieldsRecordType,
   recordType,
+  headConstructor,
   (~>),
 ) where
 
@@ -150,6 +151,16 @@ recordType = TIntrinsic . IRecord . TRow
 
 fieldsRecordType :: Dictionary (Type o k) -> Row o k (Type o k) -> Type o k
 fieldsRecordType fields row = recordType (fromDictionary fields row)
+
+headConstructor :: Type o k -> Maybe Name
+headConstructor =
+  \case
+    TApplication _ t _ ->
+      headConstructor t
+    TConstructor _ name ->
+      Just name
+    _ ->
+      Nothing
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b

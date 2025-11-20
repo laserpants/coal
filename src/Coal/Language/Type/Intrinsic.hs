@@ -18,7 +18,7 @@ data Intrinsic t
   | IInt64
   | IBignum
   | INat
-  | IRecord t
+  | IRecord t -- TODO: Move to Type?
   | IString
   | IUnit
   | IVoid
