@@ -13,20 +13,20 @@ import Coal.Common.Name (Name)
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.DebugIO (writeDebugFile)
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language.Expression
+import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
-import Coal.Language.Expression.Choice
+import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (With (..))
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
-import Control.Monad.State
+import Control.Monad.State (MonadTrans (lift), State, foldM, forM_, modify, runState, void)
 import Data.Functor.Foldable (cata)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (traverse_)
-import Prettyprinter
+import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
 import System.FilePath ((<.>), (</>))
 import TextShow (showt)
