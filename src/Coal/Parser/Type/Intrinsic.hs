@@ -2,7 +2,7 @@
 
 module Coal.Parser.Type.Intrinsic (parseIntrinsic) where
 
-import Coal.Language
+import Coal.Language (Intrinsic (..))
 import Coal.Parser.Core (Parser, lexeme)
 import Data.Functor (($>))
 import Text.Megaparsec ((<|>))
