@@ -9,7 +9,6 @@ module Coal.Compiler.Builtin.Definitions (
 import Coal.Compiler.Builtin.Functions (builtinFunctions)
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Module.Definition (Import (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name, for)
