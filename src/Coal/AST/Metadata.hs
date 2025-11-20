@@ -5,14 +5,14 @@
 
 module Coal.AST.Metadata (Metadata (..), HasMetadata (..), metadataSpan) where
 
-import Coal.Language.Expression
+import Coal.Language.Expression (Expression (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Pattern
+import Coal.Language.Pattern (Pattern (..))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Constraint.Generation.Internal (ConstraintsGenError (..), TypeAnnotationError (..))
 import Data.Data (Data)
-import Text.Megaparsec
+import Text.Megaparsec (SourcePos (..), mkPos)
 
 data Metadata = Metadata
   { locationStart :: SourcePos
