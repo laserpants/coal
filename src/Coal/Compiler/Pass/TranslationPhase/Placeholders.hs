@@ -31,7 +31,7 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (catMaybes, fromJust)
+import Data.Maybe (catMaybes, fromJust, isNothing)
 import Data.Text (isPrefixOf)
 import Extras (Dictionary, Name)
 
@@ -164,6 +164,7 @@ lookupTraitInstance loc trait@(Trait name _) = do
 
 isConcrete :: Trait IndexedType -> Bool
 isConcrete (Trait _ TIntrinsic{}) = True
+isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
 applyTraits :: (Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a IndexedType)
@@ -257,20 +258,26 @@ instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) wh
 expandConstantDefTraits :: (Monad m, Monoid a, Data a) => Name -> ConstantDef a IndexedType -> CompilerT a m (ConstantDef a IndexedType)
 expandConstantDefTraits name =
   \case
-    ConstantDef a with (With _ t) e -> do
+    ConstantDef loc with (With _ t) e -> do
       (expr, traits) <- listenDictionaryTraits (expandTraits e)
       case nub traits of
         [] ->
-          pure $ ConstantDef a with (With [] t) expr
+          pure $ ConstantDef loc with (With [] t) expr
         tr : trs -> do
           path <- gets compilerCurrentModule
+          forM_ (filter (not . isVariable) (tr : trs)) $
+            \tr1 -> do
+              m <- findFirstMatch tr1
+              when (isNothing m) $ do
+                tellErrors [MissingInstance tr1 (ErrorLocation (principalPath path) loc)]
+                throwError TraitError
           -- Insert default instance for Numeric trait, which is int32
           if "main" == name && Path ["Main"] == path && isNumericTrait tr
             then do
-              fields <- fromJust <$> lookupTraitInstance a (Trait "Numeric" (TIntrinsic IInt32))
+              fields <- fromJust <$> lookupTraitInstance loc (Trait "Numeric" (TIntrinsic IInt32))
               pure $
                 ConstantDef
-                  a
+                  loc
                   with
                   (With trs t)
                   ( EApplication
@@ -279,7 +286,13 @@ expandConstantDefTraits name =
                       (dictionaryLambda tr trs expr)
                       (ERecord mempty (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| [])) fields Nothing :| [])
                   )
-            else pure $ ConstantDef a with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+            else
+              pure $
+                ConstantDef loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+
+isVariable :: Trait IndexedType -> Bool
+isVariable (Trait _ TVariable{}) = True
+isVariable _ = False
 
 isNumericTrait :: Trait a -> Bool
 isNumericTrait (Trait "Numeric" _) = True

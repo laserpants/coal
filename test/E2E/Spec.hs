@@ -635,7 +635,7 @@ e2eSpec = do
           , "./test/Coal/examples/139/Main.coal"
           , "./lang/Coal/Combinators.coal"
           ]
-      res `shouldBe` Left PreflightFailure
+      res `shouldBe` Left TraitError
 
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
