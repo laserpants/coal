@@ -1,150 +1,27 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StrictData #-}
+module Coal.Compiler (
+  module Coal.Compiler.Build,
+  module Coal.Compiler.Pipeline,
+  module Coal.Compiler.Config,
+  module Coal.Compiler.Environment,
+  module Coal.Compiler.Error,
+  module Coal.Compiler.Journal,
+  module Coal.Compiler.Pass,
+  module Coal.Compiler.PatternAnomalies,
+  module Coal.Compiler.PatternMatching,
+  module Coal.Compiler.Stack,
+  module Coal.Compiler.State,
+  module Coal.Compiler.TypeInference,
+) where
 
-module Coal.Compiler (pipeline, compile, compileWithCFiles, prettyError) where
-
-import Coal.AST.Metadata (Metadata (..))
-import Coal.Common.Environment (Environment (..))
-import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Config (CompilerConfig (..))
+import Coal.Compiler.Build
+import Coal.Compiler.Config
 import Coal.Compiler.Environment
-import Coal.Compiler.Error (errorLocation)
-import Coal.Compiler.Pass (Pass (..), (>->))
-import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
-import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
-import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
-import Coal.Compiler.Pass.TranslationPhase (translationPhase)
-import Coal.Compiler.Pass.TypePhase (typePhase)
+import Coal.Compiler.Error
+import Coal.Compiler.Journal
+import Coal.Compiler.Pass
+import Coal.Compiler.PatternAnomalies
+import Coal.Compiler.PatternMatching
+import Coal.Compiler.Pipeline
 import Coal.Compiler.Stack
-import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
-import Coal.Language
-import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.Internal
-import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
-import Control.Monad.Except
-import Data.Text (Text)
-import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
-import Prettyprinter
-import Prettyprinter.Render.Text (renderStrict)
-import Text.Megaparsec (errorBundlePretty)
-
-pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
-pipeline =
-  parsingPhase
-    >-> preflightPhase
-    >-> typePhase
-    >-> translationPhase
-    >-> loweringPhase
-
-compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
-compileWithCFiles config files cFiles = do
-  (e, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment $ do
-    setConfigC config{configCFiles = configCFiles config <> cFiles}
-    runPass pipeline files
-  forM_ es $
-    \err -> do
-      case errorLocation err of
-        Just (ErrorLocation name _) ->
-          Text.putStrLn ("In module '" <> name <> "':\n")
-        Nothing ->
-          pure ()
-      Text.putStrLn (prettyError compilerVerbatimSource err)
-  case e of
-    Left e1 ->
-      print e1
-    Right{} -> do
-      pure ()
-
-compile :: CompilerConfig -> [FilePath] -> IO ()
-compile config files = compileWithCFiles config files []
-
-prettyRule :: (Show a) => InferenceRule Kind a -> Text
-prettyRule =
-  \case
-    RuleAnnotation _ t1 _ ->
-      "Type annotation doesn't match inferred type, namely " <> prettyType u1
-     where
-      u1 = normalizeTypeIndexes t1
-    RuleLetImplicit _ _ t1 t2 ->
-      "Cannot unify " <> prettyType u1 <> " with " <> prettyType u2
-     where
-      u1 = normalizeTypeIndexes t1
-      u2 = normalizeTypeIndexes t2
-    RuleTypeConstraint _ name t1 s ->
-      "Cannot unify " <> "'" <> name <> "' : " <> prettyType s <> " with expected type " <> prettyType u1
-     where
-      u1 = normalizeTypeIndexes t1
-    RuleUnfoldExplicit _ t1 s ->
-      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1
-     where
-      u1 = normalizeTypeIndexes t1
-    RuleCodataRecord _ t1 s ->
-      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1
-     where
-      u1 = normalizeTypeIndexes t1
-    e ->
-      Text.pack ("TODO: " <> show e)
-
-prettyType :: (Pretty t) => t -> Text
-prettyType p = "{" <> txt <> "}"
- where
-  txt = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
-
-prettyConstraintsGenError :: (Show a) => ConstraintsGenError a -> Text
-prettyConstraintsGenError =
-  \case
-    EIllFormedTypeAnnotation (EAnnotationNonDistinctParameter _ name) ->
-      "Type annotation is too general: error in the parameter '" <> name <> "'"
-    ECodataFieldMismatch _ ->
-      "Codata type field mismatch"
-    EFoldPatternInRegularMatch _ ->
-      "Fold patterns are not allowed in regular match clauses"
-    ENoDataConstructor _ name ->
-      "Data constructor '" <> name <> "' not in scope"
-    e ->
-      Text.pack ("TODO:" <> show e)
-
-prettyError :: Environment Text -> CompilerError Metadata -> Text
-prettyError env =
-  \case
-    ParserError file err ->
-      "In file \"" <> Text.pack file <> "\":\n\n" <> Text.pack (errorBundlePretty err)
-    MisplacedImportStatement erl -> do
-      errorMessage ["Misplaced import statement"] env erl
-    ModuleNotFound name erl ->
-      errorMessage ["No such module: " <> name] env erl
-    SolverError rule erl ->
-      errorMessage ["Type error: " <> prettyRule rule] env erl
-    NameNotInScope name erl ->
-      errorMessage ["Name not in scope: '" <> name <> "'"] env erl
-    ConstraintsError e erl ->
-      errorMessage ["Type error: " <> prettyConstraintsGenError e] env erl
-    NonExhaustivePatterns erl ->
-      errorMessage ["Non-exhaustive patterns"] env erl
-    FoldPatternInRegularMatch erl ->
-      errorMessage ["Fold pattern cannot appear in regular match expression"] env erl
-    FoldPatternOutsideConstructor erl ->
-      errorMessage ["Fold pattern cannot appear outside constructor"] env erl
-    Shadowing name erl ->
-      errorMessage ["Name shadowing: '" <> name <> "'"] env erl
-    MissingInstance trait erl ->
-      errorMessage ["Missing trait instance " <> prettyType trait] env erl
-    NameAlreadyDefined name erl ->
-      errorMessage ["Name already defined: '" <> name <> "'"] env erl
-    ConflictingParameter name erl ->
-      errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
-    NameNotInModule name module_ erl ->
-      errorMessage ["The module " <> module_ <> " does not export '" <> name <> "'"] env erl
-
-errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
-errorMessage msg env (ErrorLocation path loc) =
-  case Environment.lookup path env of
-    Just src ->
-      prettyErrorMessage msg src loc
-    _ ->
-      error "Implementation error"
+import Coal.Compiler.State
+import Coal.Compiler.TypeInference

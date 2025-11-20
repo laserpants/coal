@@ -93,6 +93,7 @@ library
       Coal.Compiler.PatternMatching.Envelope
       Coal.Compiler.PatternMatching.Equation
       Coal.Compiler.PatternMatching.Rule
+      Coal.Compiler.Pipeline
       Coal.Compiler.Stack
       Coal.Compiler.State
       Coal.Compiler.Transform.WhereClauses
