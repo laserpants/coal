@@ -4,62 +4,16 @@ module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Language
 import qualified Coal.Language.Type.Row as Row
-import Coal.Parser.Core (Parser, lexeme, nonEmpty)
+import Coal.Parser.Core (Parser, nonEmpty)
 import Coal.Parser.Identifier (constructor, name)
 import Coal.Parser.Symbol
+import Coal.Parser.Type.Intrinsic (parseIntrinsic)
 import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr (Operator (InfixR), makeExprParser)
 import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Text.Megaparsec (option, optional, try, (<|>))
-
-parseInt32 :: Parser Intrinsic
-parseInt32 = lexeme "int32" $> IInt32
-
-parseInt64 :: Parser Intrinsic
-parseInt64 = lexeme "int64" $> IInt64
-
-parseBool :: Parser Intrinsic
-parseBool = lexeme "bool" $> IBool
-
-parseChar :: Parser Intrinsic
-parseChar = lexeme "char" $> IChar
-
-parseDouble :: Parser Intrinsic
-parseDouble = lexeme "double" $> IDouble
-
-parseFloat :: Parser Intrinsic
-parseFloat = lexeme "float" $> IFloat
-
-parseBignum :: Parser Intrinsic
-parseBignum = lexeme "bignum" $> IBignum
-
-parseNat :: Parser Intrinsic
-parseNat = lexeme "nat" $> INat
-
-parseString :: Parser Intrinsic
-parseString = lexeme "string" $> IString
-
-parseUnit :: Parser Intrinsic
-parseUnit = lexeme "unit" $> IUnit
-
-parseVoid :: Parser Intrinsic
-parseVoid = lexeme "void" $> IVoid
-
-parseIntrinsic :: Parser Intrinsic
-parseIntrinsic =
-  parseInt32
-    <|> parseInt64
-    <|> parseBool
-    <|> parseChar
-    <|> parseDouble
-    <|> parseFloat
-    <|> parseBignum
-    <|> parseNat
-    <|> parseString
-    <|> parseUnit
-    <|> parseVoid
 
 parseIntrinsicType :: Parser (Type Parameter ())
 parseIntrinsicType = TIntrinsic <$> parseIntrinsic
