@@ -1,0 +1,9 @@
+module Main {
+
+  import IO(println_int32)
+  import Eq(trait Fez)
+
+  fun main() =
+    println_int32(1)
+
+}

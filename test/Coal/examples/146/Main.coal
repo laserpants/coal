@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_int32)
+  import Eq(trait Equality, type Answer(Yes, No))
+
+  fun main() =
+    if (equal(Yes, No)) 
+      then println_int32(1)
+      else println_int32(2)
+
+  // Two problems:
+  //
+  // 2. equal is not imported, which should also be an error
+
+}

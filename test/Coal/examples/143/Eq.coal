@@ -1,0 +1,8 @@
+module Eq {
+
+  trait Equality<a> {
+    equal : a -> a -> bool
+    banan : a -> bool
+  }
+
+}

@@ -25,6 +25,8 @@ import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
 import Data.List (nub, union, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+
+-- import Debug.Trace
 import Extras (Name, groupByKey, (<$$>))
 
 buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
@@ -425,12 +427,25 @@ addTraitEntries env trait (TraitDef _ p entries) =
 collectInstances :: (Monad m) => Environment Kind -> Environment (TraitEntry a) -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectInstances kinds traits =
   \case
-    DInstance loc trait (InstanceDef _ q _) ->
+    DInstance loc trait (InstanceDef _ q entries) -> do
+      this <- lift $ gets (principalPath . compilerCurrentModule)
       case Environment.lookup trait traits of
         Nothing ->
-          -- TODO
-          error ("Trait not in scope!: " <> show trait)
+          error "Implementation error"
         Just (TraitEntry _ _ p dict) -> do
+          let inames = definitionName <$> entries
+              tnames = Environment.names dict
+              extra = inames \\ tnames
+              missing = tnames \\ inames
+          unless (null extra && null missing) $ do
+            forM_ missing $
+              \name -> do
+                tellErrors [MissingTraitDefinition name trait (ErrorLocation this loc)]
+                throwError PreflightFailure
+            forM_ extra $
+              \name -> do
+                tellErrors [UnexpectedTraitDefinition name trait (ErrorLocation this loc)]
+                throwError PreflightFailure
           modify $ insertInstance trait t1 (InstanceEntry loc q (toIndexedType kinds p q) env)
          where
           t1 = toIndexedType kinds p q
