@@ -269,8 +269,8 @@ collectTypeConstructors =
           . addTypeExport name
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
-    DImport loc path imports -> do
-      build@ModuleBuild{..} <- importedModule loc path
+    DImport a path imports -> do
+      build <- importedModule a path
       this <- lift $ gets (principalPath . compilerCurrentModule)
       forM_ imports $
         \case
@@ -335,8 +335,8 @@ collectDataConstructors env =
               . addExport codataAccessorName
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
-    DImport loc path imports -> do
-      build@ModuleBuild{..} <- importedModule loc path
+    DImport a path imports -> do
+      build <- importedModule a path
       this <- lift $ gets (principalPath . compilerCurrentModule)
       forM_ imports $
         \case
