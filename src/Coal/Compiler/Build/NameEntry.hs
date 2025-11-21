@@ -15,8 +15,8 @@ module Coal.Compiler.Build.NameEntry (
   HasName (..),
   aliasEntry,
   traitEntry,
-  dataConstructorEntry,
-  codataAccessorEntry,
+  dataConstructorEntries,
+  codataAccessorEntries,
   cotypeConstructorEntry,
   typeConstructorEntry,
 ) where
@@ -175,8 +175,8 @@ cotypeConstructorEntry loc name (CotypeDef ps xsors) =
 kind :: Int -> Kind
 kind n = foldr KArrow KType (replicate n KType)
 
-dataConstructorEntry :: Environment Kind -> a -> TypeDef -> [DataConstructorEntry a]
-dataConstructorEntry env loc (TypeDef _ ctors) = getEntry <$> ctors
+dataConstructorEntries :: Environment Kind -> a -> TypeDef -> [DataConstructorEntry a]
+dataConstructorEntries env loc (TypeDef _ ctors) = getEntry <$> ctors
  where
   allNames = Set.fromList (constructorName <$> ctors)
 
@@ -187,8 +187,8 @@ dataConstructorEntry env loc (TypeDef _ ctors) = getEntry <$> ctors
       DataConstructor{constructorScheme = translateScheme env constructorScheme, ..}
       allNames
 
-codataAccessorEntry :: Environment Kind -> a -> CotypeDef -> [CodataAccessorEntry a]
-codataAccessorEntry env loc (CotypeDef _ xsors) = getEntry <$> xsors
+codataAccessorEntries :: Environment Kind -> a -> CotypeDef -> [CodataAccessorEntry a]
+codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
  where
   getEntry CodataAccessor{..} =
     CodataAccessorEntry

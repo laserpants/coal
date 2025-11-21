@@ -306,14 +306,14 @@ collectDataConstructors :: (Monad m) => Environment Kind -> Definition a Kind ()
 collectDataConstructors env =
   \case
     DCotype loc _ def ->
-      forM_ (codataAccessorEntry env loc def) $
+      forM_ (codataAccessorEntries env loc def) $
         \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
           modify $
             addName (ICodataAccessor codataAccessorName codataAccessorScheme)
               . insertCodataAccessor codataAccessorName info
               . addExport codataAccessorName
     DType loc _ def ->
-      forM_ (dataConstructorEntry env loc def) $
+      forM_ (dataConstructorEntries env loc def) $
         \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do
           modify $
             addName (IDataConstructor constructorName constructorScheme)
