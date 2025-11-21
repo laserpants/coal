@@ -19,11 +19,13 @@ module Coal.Compiler.Journal (
   censorDictionaryTraits,
 ) where
 
+import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler.Error (CompilerError (..))
-import Coal.Language
+import Coal.Language.Pattern (IndexedPattern, Pattern)
+import Coal.Language.Trait (Trait)
+import Coal.Language.Type (IndexedType)
 import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Tuple.Extra (second)
-import Extras (Dictionary, Name)
 
 type RecordEntry a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
 
