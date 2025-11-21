@@ -22,7 +22,7 @@ import Coal.Language.Module
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
 import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
-import Data.List (nub, union)
+import Data.List (nub, union, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name, groupByKey, (<$$>))
@@ -267,15 +267,29 @@ collectTypeConstructors =
         insertAlias name (aliasEntry loc name alias)
           . addName (IAlias name)
           . addTypeExport name
-    def@DImport{} -> do
-      types <- collectTypeImports def exportedTypeConstructors
-      forM_ types $
-        \info@(TypeConstructorEntry _ name _ _) ->
-          modify $ insertTypeConstructor name info
-      cotypes <- collectTypeImports def exportedCotypeConstructors
-      forM_ cotypes $
-        \info@(CotypeConstructorEntry _ name _ _) ->
-          modify $ insertCotypeConstructor name info
+    DImport _ (Path ["Builtin$"]) _ ->
+      pure ()
+    DImport loc path imports -> do
+      build@ModuleBuild{..} <- importedModule loc path
+      this <- lift $ gets (principalPath . compilerCurrentModule)
+      forM_ imports $
+        \case
+          ImportType loc name _ ->
+            case Environment.lookup name (exportedTypeConstructors build) of
+              Nothing -> do
+                tellErrors [MissingType name path (ErrorLocation this loc)]
+                throwError PreflightFailure
+              Just entry ->
+                modify $ insertTypeConstructor name entry
+          ImportCotype loc name _ ->
+            case Environment.lookup name (exportedCotypeConstructors build) of
+              Nothing -> do
+                tellErrors [MissingCotype name path (ErrorLocation this loc)]
+                throwError PreflightFailure
+              Just entry ->
+                modify $ insertCotypeConstructor name entry
+          _ ->
+            pure ()
     _ ->
       pure ()
 
@@ -305,13 +319,6 @@ typeConstructorEnv = do
 collectDataConstructors :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectDataConstructors env =
   \case
-    DCotype loc _ def ->
-      forM_ (codataAccessorEntries env loc def) $
-        \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
-          modify $
-            addName (ICodataAccessor codataAccessorName codataAccessorScheme)
-              . insertCodataAccessor codataAccessorName info
-              . addExport codataAccessorName
     DType loc _ def ->
       forM_ (dataConstructorEntries env loc def) $
         \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do
@@ -319,15 +326,62 @@ collectDataConstructors env =
             addName (IDataConstructor constructorName constructorScheme)
               . insertDataConstructor constructorName info
               . addExport constructorName
-    def@DImport{} -> do
-      ctors <- collectNameImports def exportedDataConstructors
-      forM_ ctors $
-        \info@(DataConstructorEntry _ _ DataConstructor{..} _) ->
-          modify $ insertDataConstructor constructorName info
-      xsors <- collectNameImports def exportedCodataAccessors
-      forM_ xsors $
-        \info@(CodataAccessorEntry _ _ CodataAccessor{..}) ->
-          modify $ insertCodataAccessor codataAccessorName info
+    DCotype loc _ def ->
+      forM_ (codataAccessorEntries env loc def) $
+        \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
+          modify $
+            addName (ICodataAccessor codataAccessorName codataAccessorScheme)
+              . insertCodataAccessor codataAccessorName info
+              . addExport codataAccessorName
+    DImport _ (Path ["Builtin$"]) _ ->
+      pure ()
+    DImport loc path imports -> do
+      build@ModuleBuild{..} <- importedModule loc path
+      this <- lift $ gets (principalPath . compilerCurrentModule)
+      forM_ imports $
+        \case
+          ImportType loc name ctors ->
+            case Environment.lookup name (exportedTypeConstructors build) of
+              Nothing -> do
+                tellErrors [MissingType name path (ErrorLocation this loc)]
+                throwError PreflightFailure
+              Just TypeConstructorEntry{..} -> do
+                let missing = ctors \\ typeConstructorEntryDataConstructors
+                    importAll = ["*"] == ctors
+                unless (importAll || null missing) $
+                  forM_ missing $
+                    \ctor -> do
+                      tellErrors [NoDataConstructorForType ctor name path (ErrorLocation this loc)]
+                      throwError PreflightFailure
+                forM_ (if importAll then typeConstructorEntryDataConstructors else ctors) $
+                  \ctor ->
+                    case Environment.lookup ctor (exportedDataConstructors build) of
+                      Nothing ->
+                        error "Implementation error"
+                      Just entry ->
+                        modify $ insertDataConstructor ctor entry
+          ImportCotype loc name xsors ->
+            case Environment.lookup name (exportedCotypeConstructors build) of
+              Nothing -> do
+                tellErrors [MissingCotype name path (ErrorLocation this loc)]
+                throwError PreflightFailure
+              Just CotypeConstructorEntry{..} -> do
+                let missing = xsors \\ cotypeConstructorEntryDataAccessors
+                    importAll = ["*"] == xsors
+                unless (importAll || null missing) $
+                  forM_ missing $
+                    \xsor -> do
+                      tellErrors [NoCodataAccessorForCotype xsor name path (ErrorLocation this loc)]
+                      throwError PreflightFailure
+                forM_ (if importAll then cotypeConstructorEntryDataAccessors else xsors) $
+                  \xsor ->
+                    case Environment.lookup xsor (exportedCodataAccessors build) of
+                      Nothing ->
+                        error "Implementation error"
+                      Just entry ->
+                        modify $ insertCodataAccessor xsor entry
+          _ ->
+            pure ()
     _ ->
       pure ()
 
@@ -452,19 +506,19 @@ collectImportedNames =
           \case
             ImportName loc name ->
               unless (name `elem` fmap nameOf names1) $ do
-                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
+                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
             ImportType loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
+                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
             ImportCotype loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
+                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
             ImportTrait loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name (principalPath path) (ErrorLocation this loc)]
+                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
 
       forM_ (names1 <> names2) $

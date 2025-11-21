@@ -22,6 +22,7 @@ import Coal.Compiler.Pass.TypePhase (typePhase)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language
+import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
@@ -138,8 +139,16 @@ prettyError env =
       errorMessage ["Name already defined: '" <> name <> "'"] env erl
     ConflictingParameter name erl ->
       errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
-    NameNotInModule name module_ erl ->
-      errorMessage ["The module " <> module_ <> " does not export '" <> name <> "'"] env erl
+    NameNotInModule name path erl ->
+      errorMessage ["The module " <> principalPath path <> " does not export '" <> name <> "'"] env erl
+    MissingType name path erl ->
+      errorMessage ["The module " <> principalPath path <> " does not export a type '" <> name <> "'"] env erl
+    MissingCotype name path erl ->
+      errorMessage ["The module " <> principalPath path <> " does not export a coata type '" <> name <> "'"] env erl
+    NoDataConstructorForType ctor name _ erl ->
+      errorMessage ["No constructor '" <> ctor <> "' for type '" <> name <> "' in scope"] env erl
+    NoCodataAccessorForCotype xsor name _ erl ->
+      errorMessage ["No field '" <> xsor <> "' for codata type '" <> name <> "' in scope"] env erl
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msg env (ErrorLocation path loc) =

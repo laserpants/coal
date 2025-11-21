@@ -79,17 +79,17 @@ exportedNames ModuleBuild{..} = filter (memberOf moduleExports) moduleNames
 exportedTypeNames :: ModuleBuild a -> [NameEntry]
 exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNames
 
-exportedTypeConstructors :: ModuleBuild a -> [TypeConstructorEntry a]
-exportedTypeConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTypeConstructors)
+exportedTypeConstructors :: ModuleBuild a -> Environment (TypeConstructorEntry a)
+exportedTypeConstructors ModuleBuild{..} = Environment.filter (memberOf moduleTypeExports) moduleTypeConstructors
 
-exportedCotypeConstructors :: ModuleBuild a -> [CotypeConstructorEntry a]
-exportedCotypeConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleCotypeConstructors)
+exportedCotypeConstructors :: ModuleBuild a -> Environment (CotypeConstructorEntry a)
+exportedCotypeConstructors ModuleBuild{..} = Environment.filter (memberOf moduleTypeExports) moduleCotypeConstructors
 
-exportedDataConstructors :: ModuleBuild a -> [DataConstructorEntry a]
-exportedDataConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleExports) (Environment.toList moduleDataConstructors)
+exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorEntry a)
+exportedDataConstructors ModuleBuild{..} = Environment.filter (memberOf moduleExports) moduleDataConstructors
 
-exportedCodataAccessors :: ModuleBuild a -> [CodataAccessorEntry a]
-exportedCodataAccessors ModuleBuild{..} = snd <$> filter (memberOf moduleExports) (Environment.toList moduleCodataAccessors)
+exportedCodataAccessors :: ModuleBuild a -> Environment (CodataAccessorEntry a)
+exportedCodataAccessors ModuleBuild{..} = Environment.filter (memberOf moduleExports) moduleCodataAccessors
 
 exportedTraits :: ModuleBuild a -> [TraitEntry a]
 exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTraits)

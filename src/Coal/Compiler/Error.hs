@@ -9,6 +9,7 @@ module Coal.Compiler.Error (
 ) where
 
 import Coal.Language (IndexedType, Kind (..), Trait (..))
+import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Constraint.Generation.Internal
@@ -31,7 +32,11 @@ data CompilerError a
   | MissingInstance (Trait IndexedType) (ErrorLocation a)
   | NameAlreadyDefined Name (ErrorLocation a)
   | ConflictingParameter Name (ErrorLocation a)
-  | NameNotInModule Name Name (ErrorLocation a)
+  | NameNotInModule Name Path (ErrorLocation a)
+  | MissingType Name Path (ErrorLocation a)
+  | MissingCotype Name Path (ErrorLocation a)
+  | NoDataConstructorForType Name Name Path (ErrorLocation a)
+  | NoCodataAccessorForCotype Name Name Path (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -75,4 +80,12 @@ errorLocation =
     ConflictingParameter _ erl ->
       Just erl
     NameNotInModule _ _ erl ->
+      Just erl
+    MissingType _ _ erl ->
+      Just erl
+    MissingCotype _ _ erl ->
+      Just erl
+    NoDataConstructorForType _ _ _ erl ->
+      Just erl
+    NoCodataAccessorForCotype _ _ _ erl ->
       Just erl
