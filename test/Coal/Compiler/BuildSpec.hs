@@ -49,7 +49,7 @@ buildSpec = do
 --    it "" $
 --      mapEnvironment stripMeta (exportedCodataAccessors build) == mainExportedCodataAccessors
 --
---  describe "CotypeConstructorInfo" $ do
+--  describe "CotypeConstructorEntry" $ do
 --    it "" $
 --      mapEnvironment stripMeta (exportedCotypeConstructors build) == mainCotypeConstructors
 --
@@ -79,7 +79,7 @@ buildSpec = do
 --    it "" $
 --      mapEnvironment stripMeta moduleCodataAccessors == mainExportedCodataAccessors
 --
---  describe "CotypeConstructorInfo" $ do
+--  describe "CotypeConstructorEntry" $ do
 --    it "" $
 --      mapEnvironment stripMeta moduleCotypeConstructors == mainCotypeConstructors
 --
@@ -102,17 +102,17 @@ buildSpec = do
 -- class StripMeta i where
 --  stripMeta :: i a -> i ()
 --
--- instance StripMeta DataConstructorInfo where
---  stripMeta (DataConstructorInfo _ n c s) = DataConstructorInfo () n c s
+-- instance StripMeta DataConstructorEntry where
+--  stripMeta (DataConstructorEntry _ n c s) = DataConstructorEntry () n c s
 --
--- instance StripMeta TypeConstructorInfo where
---  stripMeta (TypeConstructorInfo _ n k ns) = TypeConstructorInfo () n k ns
+-- instance StripMeta TypeConstructorEntry where
+--  stripMeta (TypeConstructorEntry _ n k ns) = TypeConstructorEntry () n k ns
 --
 -- instance StripMeta CodataAccessorInfo where
 --  stripMeta (CodataAccessorInfo _ n a) = CodataAccessorInfo () n a
 --
--- instance StripMeta CotypeConstructorInfo where
---  stripMeta (CotypeConstructorInfo _ n k ns) = CotypeConstructorInfo () n k ns
+-- instance StripMeta CotypeConstructorEntry where
+--  stripMeta (CotypeConstructorEntry _ n k ns) = CotypeConstructorEntry () n k ns
 --
 -- instance StripMeta TraitInfo where
 --  stripMeta (TraitInfo _ n t d) = TraitInfo () n t d
@@ -155,12 +155,12 @@ buildSpec = do
 --      , IFunctionPlaceholder "main"
 --    ]
 --
--- mainExportedDataConstructors :: Environment (DataConstructorInfo ())
+-- mainExportedDataConstructors :: Environment (DataConstructorEntry ())
 -- mainExportedDataConstructors =
 --  Environment.fromList
 --    [
 --      ( "None"
---      , DataConstructorInfo
+--      , DataConstructorEntry
 --          ()
 --          "None"
 --          (DataConstructor "None" 0 (Forall (Set.fromList [TypeIndex KType 0]) [] (TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| []))))
@@ -168,7 +168,7 @@ buildSpec = do
 --      )
 --    ,
 --      ( "Some"
---      , DataConstructorInfo
+--      , DataConstructorEntry
 --          ()
 --          "Some"
 --          ( DataConstructor "Some" 1 (Forall (Set.fromList [TypeIndex KType 0]) [] (TVariable (TypeIndex KType 0) `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TVariable (TypeIndex KType 0) :| [])))
@@ -177,25 +177,25 @@ buildSpec = do
 --      )
 --    ]
 --
--- mainTypeConstructors :: Environment (TypeConstructorInfo ())
+-- mainTypeConstructors :: Environment (TypeConstructorEntry ())
 -- mainTypeConstructors =
 --  Environment.fromList
 --    [
 --      ( "Option"
---      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
+--      , TypeConstructorEntry () "Option" (KArrow KType KType) ["Some", "None"]
 --      )
 --    ,
 --      ( "List"
---      , TypeConstructorInfo () "List" (KArrow KType KType) []
+--      , TypeConstructorEntry () "List" (KArrow KType KType) []
 --      )
 --    ]
 --
--- mainExportedTypeConstructors :: Environment (TypeConstructorInfo ())
+-- mainExportedTypeConstructors :: Environment (TypeConstructorEntry ())
 -- mainExportedTypeConstructors =
 --  Environment.fromList
 --    [
 --      ( "Option"
---      , TypeConstructorInfo () "Option" (KArrow KType KType) ["Some", "None"]
+--      , TypeConstructorEntry () "Option" (KArrow KType KType) ["Some", "None"]
 --      )
 --    ]
 --
@@ -224,12 +224,12 @@ buildSpec = do
 --      )
 --    ]
 --
--- mainCotypeConstructors :: Environment (CotypeConstructorInfo ())
+-- mainCotypeConstructors :: Environment (CotypeConstructorEntry ())
 -- mainCotypeConstructors =
 --  Environment.fromList
 --    [
 --      ( "Stream"
---      , CotypeConstructorInfo
+--      , CotypeConstructorEntry
 --          ()
 --          "Stream"
 --          (KArrow KType KType)

@@ -171,7 +171,7 @@ compileDefinitionC =
             \(name, elem1) -> do
               env <- asks compilerCodataAccessorEnvironment
               case Environment.lookup (Text.replace "@" "" name) env of
-                Just (CodataAccessorInfo _ _ CodataAccessor{..}) -> do
+                Just (CodataAccessorEntry _ _ CodataAccessor{..}) -> do
                   if "@" `Text.isPrefixOf` name
                     then do
                       let tl = typeOf (NonEmpty.head ps)
@@ -234,7 +234,7 @@ typeDefinitionC =
       case Environment.lookup trait env of
         Nothing ->
           error ("Missing trait: " <> Text.unpack trait)
-        Just (TraitInfo _ _ p@(Parameter k _) traitInfoEntries) ->
+        Just (TraitEntry _ _ p@(Parameter k _) traitInfoEntries) ->
           forM_ ds $
             \d -> do
               case Environment.lookup (definitionName d) traitInfoEntries of

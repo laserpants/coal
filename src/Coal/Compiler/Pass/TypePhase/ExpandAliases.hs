@@ -133,8 +133,8 @@ lookupAlias t ts name = do
   case Environment.lookup name env of
     Nothing ->
       pure t
-    Just AliasInfo{..} ->
-      pure (TAlias name ts (foldr (uncurry substituteAlias) aliasInfoType (aliasInfoParams `zip` ts)))
+    Just AliasEntry{..} ->
+      pure (TAlias name ts (foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)))
 
 substituteAlias :: Name -> Type Parameter k -> Type Parameter k -> Type Parameter k
 substituteAlias name s =

@@ -59,24 +59,24 @@ imports ModuleBuild{..} =
             case Environment.lookup name moduleTypeConstructors of
               Nothing ->
                 error "TODO"
-              Just TypeConstructorInfo{..} ->
-                [(name_, principalPath path <.> name_) | name_ <- typeConstructorInfoDataConstructors]
+              Just TypeConstructorEntry{..} ->
+                [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
           (ImportType _ _ ctors) ->
             [(ctor, principalPath path <.> ctor) | ctor <- ctors]
           (ImportCotype _ name ["*"]) ->
             case Environment.lookup name moduleCotypeConstructors of
               Nothing ->
                 error "TODO"
-              Just CotypeConstructorInfo{..} ->
-                [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorInfoDataAccessors]
+              Just CotypeConstructorEntry{..} ->
+                [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorEntryDataAccessors]
           (ImportCotype _ _ xsors) ->
             [(xsor, principalPath path <.> xsor) | xsor <- xsors]
           (ImportTrait _ name ["*"]) ->
             case Environment.lookup name moduleTraits of
               Nothing ->
                 error "TODO"
-              Just TraitInfo{..} ->
-                [(name_, principalPath path <.> name_) | name_ <- Environment.names traitInfoEntries]
+              Just TraitEntry{..} ->
+                [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
           (ImportTrait _ _ entries) ->
             [(entry, principalPath path <.> entry) | entry <- entries]
     _ ->

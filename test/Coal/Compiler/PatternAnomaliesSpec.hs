@@ -102,12 +102,12 @@ example20 =
   , Con "Fez" [Lit (LBool False), Con "B" []]
   ]
 
-testEnv :: Environment (DataConstructorInfo Metadata)
+testEnv :: Environment (DataConstructorEntry Metadata)
 testEnv =
   Environment.fromList
     [
       ( "Cons"
-      , DataConstructorInfo
+      , DataConstructorEntry
           mempty
           "Cons"
           ( DataConstructor
@@ -119,7 +119,7 @@ testEnv =
       )
     ,
       ( "Nil"
-      , DataConstructorInfo
+      , DataConstructorEntry
           mempty
           "Nil"
           ( DataConstructor
@@ -131,7 +131,7 @@ testEnv =
       )
     ,
       ( "A"
-      , DataConstructorInfo
+      , DataConstructorEntry
           mempty
           "A"
           ( DataConstructor
@@ -143,7 +143,7 @@ testEnv =
       )
     ,
       ( "B"
-      , DataConstructorInfo
+      , DataConstructorEntry
           mempty
           "B"
           ( DataConstructor
@@ -155,7 +155,7 @@ testEnv =
       )
     ,
       ( "Fez"
-      , DataConstructorInfo
+      , DataConstructorEntry
           mempty
           "Fez"
           ( DataConstructor

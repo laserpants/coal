@@ -15,7 +15,7 @@ module Coal.TypeSystem.Constraint.Generation (
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Build -- (DataConstructorInfo (..), moduleDataConstructors)
+import Coal.Compiler.Build
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
@@ -39,7 +39,7 @@ lookupDataConstructor name = do
   case Environment.lookup name (moduleDataConstructors modules) of
     Nothing ->
       pure Nothing
-    Just (DataConstructorInfo _ _ ctor _) ->
+    Just (DataConstructorEntry _ _ ctor _) ->
       pure (Just ctor)
 
 -- TODO: DRY
@@ -50,7 +50,7 @@ lookupCodataAccessor name = do
   case Environment.lookup name (moduleCodataAccessors modules) of
     Nothing ->
       pure Nothing
-    Just (CodataAccessorInfo _ _ xsor) ->
+    Just (CodataAccessorEntry _ _ xsor) ->
       pure (Just xsor)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
@@ -453,7 +453,7 @@ emitConstraints =
           case Environment.lookup (Text.drop 2 field) (moduleCodataAccessors modules) of
             Nothing ->
               pure ()
-            Just (CodataAccessorInfo _ _ CodataAccessor{..}) -> do
+            Just (CodataAccessorEntry _ _ CodataAccessor{..}) -> do
               case typeOf e of
                 TArrow _ t2 -> do
                   t1 <- supplied (TVariable . TypeIndex KType)

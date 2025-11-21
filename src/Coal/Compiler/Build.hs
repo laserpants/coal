@@ -5,14 +5,14 @@
 
 module Coal.Compiler.Build (
   ModuleBuild (..),
-  CotypeConstructorInfo (..),
-  DataConstructorInfo (..),
-  TypeConstructorInfo (..),
-  CodataAccessorInfo (..),
-  TraitInfo (..),
-  InstanceInfo (..),
-  AliasInfo (..),
-  NameInfo (..),
+  CotypeConstructorEntry (..),
+  DataConstructorEntry (..),
+  TypeConstructorEntry (..),
+  CodataAccessorEntry (..),
+  TraitEntry (..),
+  InstanceEntry (..),
+  AliasEntry (..),
+  NameEntry (..),
   HasName (..),
   emptyModuleBuild,
   addName,
@@ -20,11 +20,12 @@ module Coal.Compiler.Build (
   addTypeExport,
   toIndexedScheme,
   toIndexedType,
-  dataConstructorInfo,
-  codataAccessorInfo,
-  cotypeConstructorInfo,
-  typeConstructorInfo,
-  aliasInfo,
+  dataConstructorEntry,
+  codataAccessorEntry,
+  cotypeConstructorEntry,
+  typeConstructorEntry,
+  aliasEntry,
+  traitEntry,
   insertInstance,
   insertTrait,
   insertCodataAccessor,
@@ -41,7 +42,6 @@ module Coal.Compiler.Build (
   exportedTraits,
   exportedNames,
   exportedTypeNames,
-  traitInfo,
   setExports,
   setTypeExports,
   setPath,
@@ -50,7 +50,7 @@ module Coal.Compiler.Build (
 import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build.NameInfo
+import Coal.Compiler.Build.NameEntry
 import Coal.Language
 import Coal.Language.Module (AliasDef (..), CotypeDef (..), Path (Path), TraitDef (..), TypeDef (..))
 import Control.Monad.State (evalState)
@@ -62,14 +62,14 @@ import Extras (Name, Set, for)
 
 data ModuleBuild a = ModuleBuild
   { modulePath :: Path
-  , moduleDataConstructors :: Environment (DataConstructorInfo a)
-  , moduleCodataAccessors :: Environment (CodataAccessorInfo a)
-  , moduleTypeConstructors :: Environment (TypeConstructorInfo a)
-  , moduleCotypeConstructors :: Environment (CotypeConstructorInfo a)
-  , moduleTraits :: Environment (TraitInfo a)
-  , moduleInstances :: Environment (Map IndexedType (InstanceInfo a))
-  , moduleAliases :: Environment (AliasInfo a)
-  , moduleNames :: [NameInfo]
+  , moduleDataConstructors :: Environment (DataConstructorEntry a)
+  , moduleCodataAccessors :: Environment (CodataAccessorEntry a)
+  , moduleTypeConstructors :: Environment (TypeConstructorEntry a)
+  , moduleCotypeConstructors :: Environment (CotypeConstructorEntry a)
+  , moduleTraits :: Environment (TraitEntry a)
+  , moduleInstances :: Environment (Map IndexedType (InstanceEntry a))
+  , moduleAliases :: Environment (AliasEntry a)
+  , moduleNames :: [NameEntry]
   , moduleExports :: Set Name
   , moduleTypeExports :: Set Name
   --  , moduleDefinitions ::
@@ -80,25 +80,25 @@ data ModuleBuild a = ModuleBuild
 memberOf :: (HasName a) => Set Name -> a -> Bool
 memberOf s info = nameOf info `Set.member` s
 
-exportedNames :: ModuleBuild a -> [NameInfo]
+exportedNames :: ModuleBuild a -> [NameEntry]
 exportedNames ModuleBuild{..} = filter (memberOf moduleExports) moduleNames
 
-exportedTypeNames :: ModuleBuild a -> [NameInfo]
+exportedTypeNames :: ModuleBuild a -> [NameEntry]
 exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNames
 
-exportedTypeConstructors :: ModuleBuild a -> [TypeConstructorInfo a]
+exportedTypeConstructors :: ModuleBuild a -> [TypeConstructorEntry a]
 exportedTypeConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTypeConstructors)
 
-exportedCotypeConstructors :: ModuleBuild a -> [CotypeConstructorInfo a]
+exportedCotypeConstructors :: ModuleBuild a -> [CotypeConstructorEntry a]
 exportedCotypeConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleCotypeConstructors)
 
-exportedDataConstructors :: ModuleBuild a -> [DataConstructorInfo a]
+exportedDataConstructors :: ModuleBuild a -> [DataConstructorEntry a]
 exportedDataConstructors ModuleBuild{..} = snd <$> filter (memberOf moduleExports) (Environment.toList moduleDataConstructors)
 
-exportedCodataAccessors :: ModuleBuild a -> [CodataAccessorInfo a]
+exportedCodataAccessors :: ModuleBuild a -> [CodataAccessorEntry a]
 exportedCodataAccessors ModuleBuild{..} = snd <$> filter (memberOf moduleExports) (Environment.toList moduleCodataAccessors)
 
-exportedTraits :: ModuleBuild a -> [TraitInfo a]
+exportedTraits :: ModuleBuild a -> [TraitEntry a]
 exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTraits)
 
 emptyModuleBuild :: ModuleBuild a
@@ -117,7 +117,7 @@ emptyModuleBuild =
     , moduleTypeExports = mempty
     }
 
-insertDataConstructor :: Name -> DataConstructorInfo a -> ModuleBuild a -> ModuleBuild a
+insertDataConstructor :: Name -> DataConstructorEntry a -> ModuleBuild a -> ModuleBuild a
 insertDataConstructor name info ModuleBuild{..} =
   ModuleBuild
     { moduleDataConstructors =
@@ -125,17 +125,17 @@ insertDataConstructor name info ModuleBuild{..} =
     , ..
     }
 
-insertManyDataConstructors :: [DataConstructorInfo a] -> ModuleBuild a -> ModuleBuild a
+insertManyDataConstructors :: [DataConstructorEntry a] -> ModuleBuild a -> ModuleBuild a
 insertManyDataConstructors infos ModuleBuild{..} =
   ModuleBuild
     { moduleDataConstructors =
         Environment.insertMultiple
-          [(name, info) | info@(DataConstructorInfo _ name _ _) <- infos]
+          [(name, info) | info@(DataConstructorEntry _ name _ _) <- infos]
           moduleDataConstructors
     , ..
     }
 
-insertCodataAccessor :: Name -> CodataAccessorInfo a -> ModuleBuild a -> ModuleBuild a
+insertCodataAccessor :: Name -> CodataAccessorEntry a -> ModuleBuild a -> ModuleBuild a
 insertCodataAccessor name info ModuleBuild{..} =
   ModuleBuild
     { moduleCodataAccessors =
@@ -143,17 +143,17 @@ insertCodataAccessor name info ModuleBuild{..} =
     , ..
     }
 
-insertManyCodataAccessors :: [CodataAccessorInfo a] -> ModuleBuild a -> ModuleBuild a
+insertManyCodataAccessors :: [CodataAccessorEntry a] -> ModuleBuild a -> ModuleBuild a
 insertManyCodataAccessors infos ModuleBuild{..} =
   ModuleBuild
     { moduleCodataAccessors =
         Environment.insertMultiple
-          [(name, info) | info@(CodataAccessorInfo _ name _) <- infos]
+          [(name, info) | info@(CodataAccessorEntry _ name _) <- infos]
           moduleCodataAccessors
     , ..
     }
 
-insertTypeConstructor :: Name -> TypeConstructorInfo a -> ModuleBuild a -> ModuleBuild a
+insertTypeConstructor :: Name -> TypeConstructorEntry a -> ModuleBuild a -> ModuleBuild a
 insertTypeConstructor name info ModuleBuild{..} =
   ModuleBuild
     { moduleTypeConstructors =
@@ -161,7 +161,7 @@ insertTypeConstructor name info ModuleBuild{..} =
     , ..
     }
 
-insertCotypeConstructor :: Name -> CotypeConstructorInfo a -> ModuleBuild a -> ModuleBuild a
+insertCotypeConstructor :: Name -> CotypeConstructorEntry a -> ModuleBuild a -> ModuleBuild a
 insertCotypeConstructor name info ModuleBuild{..} =
   ModuleBuild
     { moduleCotypeConstructors =
@@ -169,7 +169,7 @@ insertCotypeConstructor name info ModuleBuild{..} =
     , ..
     }
 
-insertTrait :: Name -> TraitInfo a -> ModuleBuild a -> ModuleBuild a
+insertTrait :: Name -> TraitEntry a -> ModuleBuild a -> ModuleBuild a
 insertTrait name info ModuleBuild{..} =
   ModuleBuild
     { moduleTraits =
@@ -177,7 +177,7 @@ insertTrait name info ModuleBuild{..} =
     , ..
     }
 
-insertInstance :: Name -> IndexedType -> InstanceInfo a -> ModuleBuild a -> ModuleBuild a
+insertInstance :: Name -> IndexedType -> InstanceEntry a -> ModuleBuild a -> ModuleBuild a
 insertInstance name t info ModuleBuild{..} =
   ModuleBuild
     { moduleInstances =
@@ -187,10 +187,10 @@ insertInstance name t info ModuleBuild{..} =
  where
   entries = fromMaybe mempty (Environment.lookup name moduleInstances)
 
-insertAlias :: Name -> AliasInfo a -> ModuleBuild a -> ModuleBuild a
+insertAlias :: Name -> AliasEntry a -> ModuleBuild a -> ModuleBuild a
 insertAlias name info ModuleBuild{..} = ModuleBuild{moduleAliases = Environment.insert name info moduleAliases, ..}
 
-addName :: NameInfo -> ModuleBuild a -> ModuleBuild a
+addName :: NameEntry -> ModuleBuild a -> ModuleBuild a
 addName info ModuleBuild{..} = ModuleBuild{moduleNames = info : moduleNames, ..}
 
 addExport :: Name -> ModuleBuild a -> ModuleBuild a
@@ -208,15 +208,15 @@ setTypeExports names ModuleBuild{..} = ModuleBuild{moduleTypeExports = Set.fromL
 setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} = ModuleBuild{modulePath = path, ..}
 
-typeConstructorInfo :: a -> Name -> TypeDef -> TypeConstructorInfo a
-typeConstructorInfo loc name (TypeDef ps ctors) =
-  TypeConstructorInfo loc name (kind n) (for ctors constructorName)
+typeConstructorEntry :: a -> Name -> TypeDef -> TypeConstructorEntry a
+typeConstructorEntry loc name (TypeDef ps ctors) =
+  TypeConstructorEntry loc name (kind n) (for ctors constructorName)
  where
   n = length ps
 
-cotypeConstructorInfo :: a -> Name -> CotypeDef -> CotypeConstructorInfo a
-cotypeConstructorInfo loc name (CotypeDef ps xsors) =
-  CotypeConstructorInfo loc name (kind n) (for xsors codataAccessorName)
+cotypeConstructorEntry :: a -> Name -> CotypeDef -> CotypeConstructorEntry a
+cotypeConstructorEntry loc name (CotypeDef ps xsors) =
+  CotypeConstructorEntry loc name (kind n) (for xsors codataAccessorName)
  where
   n = length ps
 
@@ -224,23 +224,23 @@ cotypeConstructorInfo loc name (CotypeDef ps xsors) =
 kind :: Int -> Kind
 kind n = foldr KArrow KType (replicate n KType)
 
-dataConstructorInfo :: Environment Kind -> a -> TypeDef -> [DataConstructorInfo a]
-dataConstructorInfo env loc (TypeDef _ ctors) = getInfo <$> ctors
+dataConstructorEntry :: Environment Kind -> a -> TypeDef -> [DataConstructorEntry a]
+dataConstructorEntry env loc (TypeDef _ ctors) = getEntry <$> ctors
  where
   allNames = Set.fromList (constructorName <$> ctors)
 
-  getInfo DataConstructor{..} =
-    DataConstructorInfo
+  getEntry DataConstructor{..} =
+    DataConstructorEntry
       loc
       constructorName
       DataConstructor{constructorScheme = translateScheme env constructorScheme, ..}
       allNames
 
-codataAccessorInfo :: Environment Kind -> a -> CotypeDef -> [CodataAccessorInfo a]
-codataAccessorInfo env loc (CotypeDef _ xsors) = getInfo <$> xsors
+codataAccessorEntry :: Environment Kind -> a -> CotypeDef -> [CodataAccessorEntry a]
+codataAccessorEntry env loc (CotypeDef _ xsors) = getEntry <$> xsors
  where
-  getInfo CodataAccessor{..} =
-    CodataAccessorInfo
+  getEntry CodataAccessor{..} =
+    CodataAccessorEntry
       loc
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
@@ -250,11 +250,11 @@ translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
  where
   t1 = evalState (instantiateVars [] env t) (0 :: Int)
 
-traitInfo :: a -> Name -> TraitDef () -> TraitInfo a
-traitInfo loc name (TraitDef _ p ps) = TraitInfo loc name p (Environment.fromList ps)
+traitEntry :: a -> Name -> TraitDef () -> TraitEntry a
+traitEntry loc name (TraitDef _ p ps) = TraitEntry loc name p (Environment.fromList ps)
 
-aliasInfo :: a -> Name -> AliasDef -> AliasInfo a
-aliasInfo loc name (AliasDef ps t) = AliasInfo loc name (parameterName <$> ps) t
+aliasEntry :: a -> Name -> AliasDef -> AliasEntry a
+aliasEntry loc name (AliasDef ps t) = AliasEntry loc name (parameterName <$> ps) t
 
 -- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType

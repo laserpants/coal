@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Builtin.Instances (builtinInstances) where
 
-import Coal.Compiler.Build (InstanceInfo (InstanceInfo))
+import Coal.Compiler.Build (InstanceEntry (InstanceEntry))
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
@@ -11,12 +11,12 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Name)
 
-builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceInfo a)]
+builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
 builtinInstances =
   [
     ( "Numeric"
     , TIntrinsic IInt32
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -47,7 +47,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IInt64
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -78,7 +78,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IFloat
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -109,7 +109,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IDouble
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -140,7 +140,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic INat
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -171,7 +171,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IBignum
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -202,7 +202,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IInt32
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -217,7 +217,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IInt64
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -232,7 +232,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IBool
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IBool)
         (TIntrinsic IBool)
@@ -247,7 +247,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic INat
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -262,7 +262,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IFloat
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -277,7 +277,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IDouble
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -292,7 +292,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IChar
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IChar)
         (TIntrinsic IChar)
@@ -307,7 +307,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IBignum
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -322,7 +322,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IInt32
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -337,7 +337,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IInt64
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -352,7 +352,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IBool
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IBool)
         (TIntrinsic IBool)
@@ -367,7 +367,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic INat
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -382,7 +382,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IFloat
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -397,7 +397,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IDouble
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -412,7 +412,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IChar
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IChar)
         (TIntrinsic IChar)
@@ -427,7 +427,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IBignum
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -442,7 +442,7 @@ builtinInstances =
   ,
     ( "Divisible"
     , TIntrinsic IFloat
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -457,7 +457,7 @@ builtinInstances =
   ,
     ( "Divisible"
     , TIntrinsic IDouble
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -472,7 +472,7 @@ builtinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IInt32
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -487,7 +487,7 @@ builtinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IInt64
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -502,7 +502,7 @@ builtinInstances =
   ,
     ( "Semigroup"
     , TIntrinsic IString
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TIntrinsic IString)
         (TIntrinsic IString)
@@ -517,7 +517,7 @@ builtinInstances =
   ,
     ( "Semigroup"
     , TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
-    , InstanceInfo
+    , InstanceEntry
         mempty
         (TApplication () (TConstructor () "List") (TVariable (Parameter () "a") :| []))
         (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| []))

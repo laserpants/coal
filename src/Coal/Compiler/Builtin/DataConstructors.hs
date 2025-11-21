@@ -7,11 +7,11 @@ import Coal.Language
 import qualified Data.Set as Set
 import Extras (Name)
 
-builtinDataConstructors :: (Monoid a) => [(Name, DataConstructorInfo a)]
+builtinDataConstructors :: (Monoid a) => [(Name, DataConstructorEntry a)]
 builtinDataConstructors =
   [
     ( "Zero"
-    , DataConstructorInfo
+    , DataConstructorEntry
         mempty
         "Zero"
         ( DataConstructor
@@ -23,7 +23,7 @@ builtinDataConstructors =
     )
   ,
     ( "Succ"
-    , DataConstructorInfo
+    , DataConstructorEntry
         mempty
         "Succ"
         ( DataConstructor

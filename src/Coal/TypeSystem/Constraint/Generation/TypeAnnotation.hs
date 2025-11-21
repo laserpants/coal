@@ -11,7 +11,7 @@ module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
 ) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build (CotypeConstructorInfo (..), ModuleBuild (..), TypeConstructorInfo (..))
+import Coal.Compiler.Build (CotypeConstructorEntry (..), ModuleBuild (..), TypeConstructorEntry (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Internal
 import Coal.TypeSystem.Substitution (Substitution (..))
@@ -37,9 +37,9 @@ lookupTypeConstructor name = do
       case Environment.lookup name moduleCotypeConstructors of
         Nothing ->
           pure Nothing
-        Just (CotypeConstructorInfo _ _ kind _) ->
+        Just (CotypeConstructorEntry _ _ kind _) ->
           pure (Just kind)
-    Just (TypeConstructorInfo _ _ kind _) ->
+    Just (TypeConstructorEntry _ _ kind _) ->
       pure (Just kind)
 
 instantiateAnnotation ::

@@ -13,7 +13,7 @@ import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Build (InstanceInfo (..))
+import Coal.Compiler.Build (InstanceEntry (..))
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
@@ -125,13 +125,13 @@ findFirstMatch (Trait name t) = do
           pure (Just (t1, k, v))
  where
   go f m = fmap catMaybes . forM (Map.toList m) $
-    \(k, InstanceInfo{..}) -> do
+    \(k, InstanceEntry{..}) -> do
       result <- f k
       case result of
         Left{} ->
           pure Nothing
         Right sub ->
-          pure $ Just (instanceInfoType, k, Map.map (substituteInScheme sub) instanceInfoEntries)
+          pure $ Just (instanceEntryType, k, Map.map (substituteInScheme sub) instanceEntryEntries)
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)

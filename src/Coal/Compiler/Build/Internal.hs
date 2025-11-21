@@ -61,7 +61,7 @@ replacePlaceholders store =
             _ ->
               pure ()
  where
-  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameInfo) -> StateT (ModuleBuild a) (CompilerT a m) ()
+  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
   go name info =
     case Environment.lookup name store of
       Nothing ->
@@ -78,7 +78,7 @@ prepareBuild (Module path exports defs) = do
 
     -- Built-in type constructors
     modify $
-      insertTypeConstructor "List" (TypeConstructorInfo mempty "List" (KArrow KType KType) [])
+      insertTypeConstructor "List" (TypeConstructorEntry mempty "List" (KArrow KType KType) [])
         . addName (IType "List" (KArrow KType KType))
 
     kinds <- typeConstructorEnv
@@ -86,7 +86,7 @@ prepareBuild (Module path exports defs) = do
 
     -- Built-in data constructors
     forM_ builtinDataConstructors $
-      \(name, info@DataConstructorInfo{dataConstructorInfoContructor = DataConstructor{..}}) ->
+      \(name, info@DataConstructorEntry{dataConstructorEntryConstructor = DataConstructor{..}}) ->
         modify $
           insertDataConstructor name info
             . addName (IDataConstructor name constructorScheme)
@@ -200,24 +200,24 @@ nameImports ModuleBuild{..} imports =
         case Environment.lookup name moduleTypeConstructors of
           Nothing ->
             error (show name)
-          Just TypeConstructorInfo{..} ->
-            typeConstructorInfoDataConstructors
+          Just TypeConstructorEntry{..} ->
+            typeConstructorEntryDataConstructors
       ImportType _ _ names ->
         names
       ImportCotype _ name ["*"] ->
         case Environment.lookup name moduleCotypeConstructors of
           Nothing ->
             error "TODO"
-          Just CotypeConstructorInfo{..} ->
-            cotypeConstructorInfoDataAccessors
+          Just CotypeConstructorEntry{..} ->
+            cotypeConstructorEntryDataAccessors
       ImportCotype _ _ names ->
         names
       ImportTrait _ name ["*"] ->
         case Environment.lookup name moduleTraits of
           Nothing ->
             error "TODO"
-          Just TraitInfo{..} ->
-            Environment.names traitInfoEntries
+          Just TraitEntry{..} ->
+            Environment.names traitEntryEntries
       ImportTrait _ _ names ->
         names
 
@@ -253,27 +253,27 @@ collectTypeConstructors =
           . addName (IType name kind_)
           . addTypeExport name
      where
-      info@(TypeConstructorInfo _ _ kind_ _) = typeConstructorInfo loc name def
+      info@(TypeConstructorEntry _ _ kind_ _) = typeConstructorEntry loc name def
     DCotype loc name def -> do
       modify $
         insertCotypeConstructor name info
           . addName (ICotype name kind_)
           . addTypeExport name
      where
-      info@(CotypeConstructorInfo _ _ kind_ _) = cotypeConstructorInfo loc name def
+      info@(CotypeConstructorEntry _ _ kind_ _) = cotypeConstructorEntry loc name def
     DTypeAlias loc name alias -> do
       modify $
-        insertAlias name (aliasInfo loc name alias)
+        insertAlias name (aliasEntry loc name alias)
           . addName (IAlias name)
           . addTypeExport name
     def@DImport{} -> do
       types <- collectTypeImports def exportedTypeConstructors
       forM_ types $
-        \info@(TypeConstructorInfo _ name _ _) ->
+        \info@(TypeConstructorEntry _ name _ _) ->
           modify $ insertTypeConstructor name info
       cotypes <- collectTypeImports def exportedCotypeConstructors
       forM_ cotypes $
-        \info@(CotypeConstructorInfo _ name _ _) ->
+        \info@(CotypeConstructorEntry _ name _ _) ->
           modify $ insertCotypeConstructor name info
     _ ->
       pure ()
@@ -282,12 +282,12 @@ collectTypeConstructors =
 foldElems :: (Monoid m) => (a -> m -> m) -> Environment a -> m
 foldElems f = foldr f mempty . Environment.elems
 
-traitEnv :: (Monad m) => StateT (ModuleBuild a) (CompilerT a m) (Environment (TraitInfo a))
+traitEnv :: (Monad m) => StateT (ModuleBuild a) (CompilerT a m) (Environment (TraitEntry a))
 traitEnv = do
-  gets (foldElems insertTraitInfo . moduleTraits)
+  gets (foldElems insertTraitEntry . moduleTraits)
  where
-  insertTraitInfo :: TraitInfo a -> Environment (TraitInfo a) -> Environment (TraitInfo a)
-  insertTraitInfo info@(TraitInfo _ name _ _) = Environment.insert name info
+  insertTraitEntry :: TraitEntry a -> Environment (TraitEntry a) -> Environment (TraitEntry a)
+  insertTraitEntry info@(TraitEntry _ name _ _) = Environment.insert name info
 
 typeConstructorEnv :: (Monad m) => StateT (ModuleBuild a) (CompilerT a m) (Environment Kind)
 typeConstructorEnv = do
@@ -295,25 +295,25 @@ typeConstructorEnv = do
   env2 <- gets (foldElems insertCotypeInfo . moduleCotypeConstructors)
   pure (env1 <> env2)
  where
-  insertTypeInfo :: TypeConstructorInfo a -> Environment Kind -> Environment Kind
-  insertTypeInfo (TypeConstructorInfo _ name kind_ _) = Environment.insert name kind_
+  insertTypeInfo :: TypeConstructorEntry a -> Environment Kind -> Environment Kind
+  insertTypeInfo (TypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
 
-  insertCotypeInfo :: CotypeConstructorInfo a -> Environment Kind -> Environment Kind
-  insertCotypeInfo (CotypeConstructorInfo _ name kind_ _) = Environment.insert name kind_
+  insertCotypeInfo :: CotypeConstructorEntry a -> Environment Kind -> Environment Kind
+  insertCotypeInfo (CotypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
 
 collectDataConstructors :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectDataConstructors env =
   \case
     DCotype loc _ def ->
-      forM_ (codataAccessorInfo env loc def) $
-        \info@(CodataAccessorInfo _ _ CodataAccessor{..}) -> do
+      forM_ (codataAccessorEntry env loc def) $
+        \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
           modify $
             addName (ICodataAccessor codataAccessorName codataAccessorScheme)
               . insertCodataAccessor codataAccessorName info
               . addExport codataAccessorName
     DType loc _ def ->
-      forM_ (dataConstructorInfo env loc def) $
-        \info@(DataConstructorInfo _ _ DataConstructor{..} _) -> do
+      forM_ (dataConstructorEntry env loc def) $
+        \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do
           modify $
             addName (IDataConstructor constructorName constructorScheme)
               . insertDataConstructor constructorName info
@@ -321,11 +321,11 @@ collectDataConstructors env =
     def@DImport{} -> do
       ctors <- collectNameImports def exportedDataConstructors
       forM_ ctors $
-        \info@(DataConstructorInfo _ _ DataConstructor{..} _) ->
+        \info@(DataConstructorEntry _ _ DataConstructor{..} _) ->
           modify $ insertDataConstructor constructorName info
       xsors <- collectNameImports def exportedCodataAccessors
       forM_ xsors $
-        \info@(CodataAccessorInfo _ _ CodataAccessor{..}) ->
+        \info@(CodataAccessorEntry _ _ CodataAccessor{..}) ->
           modify $ insertCodataAccessor codataAccessorName info
     _ ->
       pure ()
@@ -337,7 +337,7 @@ collectTraits env =
       addTraitEntries env name def
       modify $
         addName (ITrait name)
-          . insertTrait name (traitInfo loc name def)
+          . insertTrait name (traitEntry loc name def)
           . addTypeExport name
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
@@ -345,14 +345,14 @@ collectTraits env =
       ModuleBuild{..} <- importedModule loc path
       traits <- collectTypeImports def exportedTraits
       forM_ traits $
-        \info@(TraitInfo _ name _ _) -> do
+        \info@(TraitEntry _ name _ _) -> do
           modify $ insertTrait name info
           forM_ (Environment.toList moduleInstances) $
             \(trait, is) -> do
               when (trait == name) $
                 forM_ (Map.toList is) $
-                  \(t, InstanceInfo{..}) -> do
-                    modify $ insertInstance trait t InstanceInfo{..}
+                  \(t, InstanceEntry{..}) -> do
+                    modify $ insertInstance trait t InstanceEntry{..}
     _ ->
       pure ()
 
@@ -367,7 +367,7 @@ addTraitEntries env trait (TraitDef _ p entries) =
  where
   tvar = TVariable (TypeIndex (parameterKind p) 0)
 
-collectInstances :: (Monad m) => Environment Kind -> Environment (TraitInfo a) -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
+collectInstances :: (Monad m) => Environment Kind -> Environment (TraitEntry a) -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectInstances kinds traits =
   \case
     DInstance loc trait (InstanceDef _ q _) ->
@@ -375,8 +375,8 @@ collectInstances kinds traits =
         Nothing ->
           -- TODO
           error ("Trait not in scope!: " <> show trait)
-        Just (TraitInfo _ _ p dict) -> do
-          modify $ insertInstance trait t1 (InstanceInfo loc q (toIndexedType kinds p q) env)
+        Just (TraitEntry _ _ p dict) -> do
+          modify $ insertInstance trait t1 (InstanceEntry loc q (toIndexedType kinds p q) env)
          where
           t1 = toIndexedType kinds p q
           Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
@@ -391,10 +391,10 @@ collectInstances kinds traits =
             forM_ (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 forM_ (Map.toList is) $
-                  \(t, InstanceInfo{..}) -> do
-                    when (headConstructor instanceInfoIndexedType == Just name) $
+                  \(t, InstanceEntry{..}) -> do
+                    when (headConstructor instanceEntryIndexedType == Just name) $
                       modify $
-                        insertInstance trait t InstanceInfo{..}
+                        insertInstance trait t InstanceEntry{..}
           _ ->
             pure ()
     _ ->
@@ -418,8 +418,8 @@ collectImportedInstances =
               \(trait, is) -> do
                 if trait == name
                   then concat <$$> forM (Map.toList is) $
-                    \(t, InstanceInfo{..}) -> do
-                      forM (Map.toList instanceInfoEntries) $
+                    \(t, InstanceEntry{..}) -> do
+                      forM (Map.toList instanceEntryEntries) $
                         \(f, _) ->
                           pure (path, instanceLabel (Trait trait t) f)
                   else pure []
@@ -427,9 +427,9 @@ collectImportedInstances =
             concat <$$> forM (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 concat <$$> forM (Map.toList is) $
-                  \(t, InstanceInfo{..}) -> do
-                    if headConstructor instanceInfoIndexedType == Just name
-                      then forM (Map.toList instanceInfoEntries) $
+                  \(t, InstanceEntry{..}) -> do
+                    if headConstructor instanceEntryIndexedType == Just name
+                      then forM (Map.toList instanceEntryEntries) $
                         \(f, _) ->
                           pure (path, instanceLabel (Trait trait t) f)
                       else pure []
