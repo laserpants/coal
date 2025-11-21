@@ -12,7 +12,7 @@ module Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns) w
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
-import Coal.Compiler.Journal (RecordInfo, listenRecordInfo, tellRecordInfo)
+import Coal.Compiler.Journal (RecordEntry, listenRecordEntry, tellRecordEntry)
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language
@@ -70,7 +70,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Clause a IndexedType) where
   desugarRecordPatterns =
     \case
       EClause a p cs -> do
-        (q, fs) <- listenRecordInfo (desugarRecordPatterns p)
+        (q, fs) <- listenRecordEntry (desugarRecordPatterns p)
         ds <- forM cs $
           \case
             CPlain a1 gs e -> do
@@ -90,7 +90,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
         PConstructor a ll <$> desugarRecordPatterns ps
       PRecord _ t@(TRecord r) d p -> do
         name <- supplied (freshName "row")
-        tellRecordInfo [(name, d, p)]
+        tellRecordEntry [(name, d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
       PListCons a t p1 p2 ->
         PListCons a t <$> desugarRecordPatterns p1 <*> desugarRecordPatterns p2
@@ -118,7 +118,7 @@ extractVarName =
       "_"
 
 -- FIXME
-desugar :: (Data a, Monoid a, Monad m) => RecordInfo a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
+desugar :: (Data a, Monoid a, Monad m) => RecordEntry a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
 desugar (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) (supplied (freshName "row"))
   let r1 = maybe RNil extractRow p1

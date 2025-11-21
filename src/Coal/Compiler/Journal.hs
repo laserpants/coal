@@ -4,16 +4,16 @@
 
 module Coal.Compiler.Journal (
   CompilerJournal (..),
-  RecordInfo,
+  RecordEntry,
   tellPatterns,
   tellPatterns1,
   listenPatterns,
   listenWhereClauses,
-  listenRecordInfo,
+  listenRecordEntry,
   listenDictionaryTraits,
   listenErrors,
   tellWhereClauses,
-  tellRecordInfo,
+  tellRecordEntry,
   tellDictionaryTraits,
   tellErrors,
   censorDictionaryTraits,
@@ -25,12 +25,12 @@ import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Tuple.Extra (second)
 import Extras (Dictionary, Name)
 
-type RecordInfo a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
+type RecordEntry a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
 
 data CompilerJournal a = CompilerJournal
   { compilerJournalPatterns :: [(Name, Pattern a IndexedType)]
   , compilerJournalWhereClauses :: [(Name, Name)]
-  , compilerJournalRecordInfo :: [RecordInfo a]
+  , compilerJournalRecordEntries :: [RecordEntry a]
   , compilerJournalDictionaryTraits :: [Trait IndexedType]
   , compilerJournalErrors :: [CompilerError a]
   }
@@ -60,9 +60,9 @@ tellPatterns1 w = tellPatterns [w]
 tellWhereClauses :: (MonadWriter (CompilerJournal a) m) => [(Name, Name)] -> m ()
 tellWhereClauses w = tell $ CompilerJournal [] w [] [] []
 
-{-# INLINE tellRecordInfo #-}
-tellRecordInfo :: (MonadWriter (CompilerJournal a) m) => [RecordInfo a] -> m ()
-tellRecordInfo w = tell $ CompilerJournal [] [] w [] []
+{-# INLINE tellRecordEntry #-}
+tellRecordEntry :: (MonadWriter (CompilerJournal a) m) => [RecordEntry a] -> m ()
+tellRecordEntry w = tell $ CompilerJournal [] [] w [] []
 
 {-# INLINE tellDictionaryTraits #-}
 tellDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => [Trait IndexedType] -> m ()
@@ -78,8 +78,8 @@ listenPatterns w = second compilerJournalPatterns <$> listen w
 listenWhereClauses :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Name)])
 listenWhereClauses w = second compilerJournalWhereClauses <$> listen w
 
-listenRecordInfo :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [RecordInfo a])
-listenRecordInfo w = second compilerJournalRecordInfo <$> listen w
+listenRecordEntry :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [RecordEntry a])
+listenRecordEntry w = second compilerJournalRecordEntries <$> listen w
 
 listenDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [Trait IndexedType])
 listenDictionaryTraits w = second compilerJournalDictionaryTraits <$> listen w
