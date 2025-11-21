@@ -203,6 +203,6 @@ aliasEntry :: a -> Name -> AliasDef -> AliasEntry a
 aliasEntry loc name (AliasDef ps t) = AliasEntry loc name (parameterName <$> ps) t
 
 translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
-translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
+translateScheme env (Forall _ _ s) = Forall (typeIndexesIn t) [] t
  where
-  t1 = evalState (instantiateVars [] env t) (0 :: Int)
+  t = evalState (instantiateVars [] env s) (0 :: Int)

@@ -27,7 +27,6 @@ module Coal.Compiler.Build (
   insertDataConstructor,
   insertCotypeConstructor,
   insertTypeConstructor,
-  insertManyDataConstructors,
   insertManyCodataAccessors,
   exportedCotypeConstructors,
   exportedCodataAccessors,
@@ -116,16 +115,6 @@ insertDataConstructor name info ModuleBuild{..} =
   ModuleBuild
     { moduleDataConstructors =
         Environment.insert name info moduleDataConstructors
-    , ..
-    }
-
-insertManyDataConstructors :: [DataConstructorEntry a] -> ModuleBuild a -> ModuleBuild a
-insertManyDataConstructors infos ModuleBuild{..} =
-  ModuleBuild
-    { moduleDataConstructors =
-        Environment.insertMultiple
-          [(name, info) | info@(DataConstructorEntry _ name _ _) <- infos]
-          moduleDataConstructors
     , ..
     }
 
