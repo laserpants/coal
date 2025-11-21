@@ -20,12 +20,6 @@ module Coal.Compiler.Build (
   addTypeExport,
   toIndexedScheme,
   toIndexedType,
-  dataConstructorEntry,
-  codataAccessorEntry,
-  cotypeConstructorEntry,
-  typeConstructorEntry,
-  aliasEntry,
-  traitEntry,
   insertInstance,
   insertTrait,
   insertCodataAccessor,
@@ -52,13 +46,13 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.NameEntry
 import Coal.Language
-import Coal.Language.Module (AliasDef (..), CotypeDef (..), Path (Path), TraitDef (..), TypeDef (..))
+import Coal.Language.Module (Path (..))
 import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
-import Extras (Name, Set, for)
+import Extras (Name, Set)
 
 data ModuleBuild a = ModuleBuild
   { modulePath :: Path
@@ -207,54 +201,6 @@ setTypeExports names ModuleBuild{..} = ModuleBuild{moduleTypeExports = Set.fromL
 
 setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} = ModuleBuild{modulePath = path, ..}
-
-typeConstructorEntry :: a -> Name -> TypeDef -> TypeConstructorEntry a
-typeConstructorEntry loc name (TypeDef ps ctors) =
-  TypeConstructorEntry loc name (kind n) (for ctors constructorName)
- where
-  n = length ps
-
-cotypeConstructorEntry :: a -> Name -> CotypeDef -> CotypeConstructorEntry a
-cotypeConstructorEntry loc name (CotypeDef ps xsors) =
-  CotypeConstructorEntry loc name (kind n) (for xsors codataAccessorName)
- where
-  n = length ps
-
-{-# INLINE kind #-}
-kind :: Int -> Kind
-kind n = foldr KArrow KType (replicate n KType)
-
-dataConstructorEntry :: Environment Kind -> a -> TypeDef -> [DataConstructorEntry a]
-dataConstructorEntry env loc (TypeDef _ ctors) = getEntry <$> ctors
- where
-  allNames = Set.fromList (constructorName <$> ctors)
-
-  getEntry DataConstructor{..} =
-    DataConstructorEntry
-      loc
-      constructorName
-      DataConstructor{constructorScheme = translateScheme env constructorScheme, ..}
-      allNames
-
-codataAccessorEntry :: Environment Kind -> a -> CotypeDef -> [CodataAccessorEntry a]
-codataAccessorEntry env loc (CotypeDef _ xsors) = getEntry <$> xsors
- where
-  getEntry CodataAccessor{..} =
-    CodataAccessorEntry
-      loc
-      codataAccessorName
-      (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
-
-translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
-translateScheme env (Forall _ _ t) = Forall (typeIndexesIn t1) [] t1
- where
-  t1 = evalState (instantiateVars [] env t) (0 :: Int)
-
-traitEntry :: a -> Name -> TraitDef () -> TraitEntry a
-traitEntry loc name (TraitDef _ p ps) = TraitEntry loc name p (Environment.fromList ps)
-
-aliasEntry :: a -> Name -> AliasDef -> AliasEntry a
-aliasEntry loc name (AliasDef ps t) = AliasEntry loc name (parameterName <$> ps) t
 
 -- TODO
 toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType

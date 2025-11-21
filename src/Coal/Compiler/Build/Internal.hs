@@ -12,6 +12,7 @@ module Coal.Compiler.Build.Internal (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Journal (tellErrors)
