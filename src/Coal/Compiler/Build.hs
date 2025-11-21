@@ -178,10 +178,10 @@ insertTrait name info ModuleBuild{..} =
     }
 
 insertInstance :: Name -> IndexedType -> InstanceEntry a -> ModuleBuild a -> ModuleBuild a
-insertInstance name t info ModuleBuild{..} =
+insertInstance name it info ModuleBuild{..} =
   ModuleBuild
     { moduleInstances =
-        Environment.insert name (Map.insert t info entries) moduleInstances
+        Environment.insert name (Map.insert it info entries) moduleInstances
     , ..
     }
  where
