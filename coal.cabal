@@ -38,6 +38,7 @@ library
       Coal.Compiler
       Coal.Compiler.Build
       Coal.Compiler.Build.Internal
+      Coal.Compiler.Build.NameInfo
       Coal.Compiler.Builtin.DataConstructors
       Coal.Compiler.Builtin.Definitions
       Coal.Compiler.Builtin.Functions
