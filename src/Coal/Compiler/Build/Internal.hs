@@ -202,7 +202,7 @@ nameImports ModuleBuild{..} imports =
       ImportType _ name ["*"] ->
         case Environment.lookup name moduleTypeConstructors of
           Nothing ->
-            error (show name)
+            error "Implementation error"
           Just TypeConstructorEntry{..} ->
             typeConstructorEntryDataConstructors
       ImportType _ _ names ->
@@ -210,7 +210,7 @@ nameImports ModuleBuild{..} imports =
       ImportCotype _ name ["*"] ->
         case Environment.lookup name moduleCotypeConstructors of
           Nothing ->
-            error "TODO"
+            error "Implementation error"
           Just CotypeConstructorEntry{..} ->
             cotypeConstructorEntryDataAccessors
       ImportCotype _ _ names ->
@@ -218,7 +218,7 @@ nameImports ModuleBuild{..} imports =
       ImportTrait _ name ["*"] ->
         case Environment.lookup name moduleTraits of
           Nothing ->
-            error "TODO"
+            error "Implementation error"
           Just TraitEntry{..} ->
             Environment.names traitEntryEntries
       ImportTrait _ _ names ->
