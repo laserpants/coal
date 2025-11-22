@@ -738,6 +738,15 @@ e2eSpec = do
           ]
       res `shouldBe` Left NoSuchIdentifier
 
+  describe "150" $ do
+    expectOutput
+      "255"
+          [ "./test/Coal/examples/150/Eq.coal"
+          , "./test/Coal/examples/150/Stuff.coal"
+          , "./test/Coal/examples/150/Main.coal"
+          , "./lang/Coal/Combinators.coal"
+          ]
+
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
   it ("\"" <> expt <> "\"") $ do

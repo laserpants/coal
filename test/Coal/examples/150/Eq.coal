@@ -1,0 +1,29 @@
+module Eq {
+
+  trait Equality<a> {
+    equal : a -> a -> bool
+    banan : a -> bool
+  }
+
+  type Answer = Yes | No
+
+  instance Equality<Answer> {
+    fun equal(x, y) =
+      match((x, y)) {
+        | (Yes, Yes) => true
+        | (No, No)   => true
+        | _          => false
+      }
+
+    fun banan(x) =
+      true
+  }
+
+  fun equal2(x, y) =
+    match((x, y)) {
+      | (Yes, Yes) => true
+      | (No, No)   => true
+      | _          => false
+    }
+
+}
