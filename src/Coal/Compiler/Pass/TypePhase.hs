@@ -2,10 +2,10 @@
 
 module Coal.Compiler.Pass.TypePhase (typePhase) where
 
-import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
-import Coal.Compiler.Pass (Pass (..), mapPass, overlayEnvironment, (>->))
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Pass (Pass (..), mapPass, overlayEnvironment, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
+import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors)
 import Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases)
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGroups)

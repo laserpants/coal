@@ -10,10 +10,11 @@
 module Coal.Compiler.Pass.TranslationPhase.Placeholders (TraitContext (..), passPlaceholders) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Build (InstanceEntry (..))
+import Coal.Compiler.Build
 import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
@@ -24,7 +25,7 @@ import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo
 import Coal.TypeSystem.Unification
 import Control.Monad.Except (MonadError (throwError), forM)
 import Control.Monad.Reader (asks, local)
-import Control.Monad.State (gets)
+import Control.Monad.State (StateT, execStateT, gets, modify)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
@@ -33,7 +34,7 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (catMaybes, fromJust)
 import Data.Text (isPrefixOf)
-import Extras (Dictionary, Name)
+import Extras (Dictionary, Name, forM_)
 
 passPlaceholders :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPlaceholders =
@@ -45,7 +46,42 @@ passPlaceholders =
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass m@(Module p _ _) = do
   setCompilerCurrentModuleC p
-  overModuleDefinitionsM (traverse insertPlaceholders) m
+  m1 <- overModuleDefinitionsM (traverse insertPlaceholders) m
+
+  names <- gets compilerNameStore
+  replaceNames names
+
+  pure m1
+
+replaceNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+replaceNames store =
+  updateBuildC $
+    \build@ModuleBuild{..} ->
+      flip execStateT build $
+        forM_ moduleNames $
+          \case
+            IFunction name _ ->
+              go name IFunction
+            IConstant name _ ->
+              go name IConstant
+            IFold name _ ->
+              go name IFold
+            IUnfold name _ ->
+              go name IUnfold
+            IDataConstructor name _ ->
+              go name IDataConstructor
+            ICodataAccessor name _ ->
+              go name ICodataAccessor
+            _ ->
+              pure ()
+ where
+  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
+  go name info =
+    case Environment.lookup name store of
+      Nothing ->
+        pure ()
+      Just s ->
+        modify $ addName (info name s)
 
 insertPlaceholders :: (Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
 insertPlaceholders =

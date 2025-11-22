@@ -38,8 +38,8 @@ pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
   parsingPhase
     >-> preflightPhase
-    >-> typePhase   -- is now both type and translation
---    >-> translationPhase
+    >-> typePhase -- is now both type and translation
+    --    >-> translationPhase
     >-> loweringPhase
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
