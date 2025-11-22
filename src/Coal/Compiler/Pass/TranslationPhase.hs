@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Pass.TranslationPhase (translationPhase) where
+module Coal.Compiler.Pass.TranslationPhase (translationPhase, translationPhasePasses) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass, overlayEnvironment, (>->))
