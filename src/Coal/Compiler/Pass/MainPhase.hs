@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Coal.Compiler.Pass.MainPhase (mainPhase) where
 
 import Coal.AST.Metadata (Metadata (..))
