@@ -25,7 +25,6 @@ import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
 import Data.List (nub, union, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, groupByKey, (<$$>))
 
 buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
