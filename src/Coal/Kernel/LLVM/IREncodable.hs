@@ -20,17 +20,16 @@ import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i8)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Data.ByteString (ByteString)
+import qualified Data.ByteString as ByteString
 import Data.Char (isAlphaNum)
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Text.Encoding (decodeUtf8Lenient)
 import Data.Word (Word8)
 import Extras (Name, (||.))
 import Extras.Data.Char (isUnderscore)
-import TextShow (showt)
-
-import qualified Data.ByteString as ByteString
-import qualified Data.Text as Text
 import qualified Numeric
+import TextShow (showt)
 
 class IREncodable a where
   irEncode :: a -> Text
