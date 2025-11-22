@@ -49,12 +49,12 @@ pass m@(Module p _ _) = do
   m1 <- overModuleDefinitionsM (traverse insertPlaceholders) m
 
   names <- gets compilerNameStore
-  replaceNames names
+  updateNames names
 
   pure m1
 
-replaceNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
-replaceNames store =
+updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+updateNames store =
   updateBuildC $
     \build@ModuleBuild{..} ->
       flip execStateT build $
