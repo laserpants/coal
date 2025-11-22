@@ -723,11 +723,17 @@ e2eSpec = do
 
   describe "147" $ do
     expectOutput
-      "223"
+      "224"
           [ "./test/Coal/examples/147/Eq.coal"
           , "./test/Coal/examples/147/Stuff.coal"
           , "./test/Coal/examples/147/Main.coal"
           , "./lang/Coal/Combinators.coal"
+          ]
+
+  describe "148" $ do
+    expectOutput
+      "224"
+          [ "./test/Coal/examples/148/Main.coal"
           ]
 
 expectOutput :: String -> [FilePath] -> Spec
