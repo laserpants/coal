@@ -1,13 +1,13 @@
 module Main {
 
   import IO(println_int32)
-  import Eq(trait Equality(equal), type Answer(Yes, No))
+  import Eq(equalalias, type Answer(Yes, No))
 
   //import Eq(equal2, type Answer(Yes, No))
 
   fun main() =
-    if (equal(Yes, No)) 
+    if (equalalias(Yes, No)) 
       then println_int32(1)
-      else println_int32(223)
+      else println_int32(224)
 
 }
