@@ -14,6 +14,16 @@ module Eq {
         | (No, No)   => true
         | _          => false
       }
+
+    fun banan(x) =
+      true
   }
+
+  fun equal2(x, y) =
+    match((x, y)) {
+      | (Yes, Yes) => true
+      | (No, No)   => true
+      | _          => false
+    }
 
 }
