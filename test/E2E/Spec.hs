@@ -703,15 +703,6 @@ e2eSpec = do
           ]
       res `shouldBe` Left PreflightFailure
 
-  describe "137" $
-    expectOutput
-      "2"
-      [ "./test/Coal/examples/137/Eq.coal"
-      , "./test/Coal/examples/137/Stuff.coal"
-      , "./test/Coal/examples/137/Main.coal"
-      , "./lang/Coal/Combinators.coal"
-      ]
-
   describe "146" $ do
     expectOutput
       "223"

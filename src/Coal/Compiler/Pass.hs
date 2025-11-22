@@ -5,17 +5,15 @@
 module Coal.Compiler.Pass (Pass (..), (>->), mapPass, overlayEnvironment) where
 
 import Coal.AST.Metadata (Metadata (..))
-import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Internal (typeConstructorEnv)
 import Coal.Compiler.Environment
-import Coal.Compiler.Stack (CompilerT)
-import Coal.Compiler.State
+import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module
 import Control.Monad ((>=>))
 import Control.Monad.Reader (local)
-import Control.Monad.State (evalStateT, gets)
+import Control.Monad.State (evalStateT)
 import Extras (Name)
 
 data Pass a m i o = Pass
@@ -44,22 +42,18 @@ overlayEnvironment p =
     , runPass = pass
     }
  where
-  pass m@(Module path _ _) = do
-    modules <- gets compilerModules
-    case Environment.lookup (principalPath path) modules of
-      Nothing ->
-        error "Implementation error"
-      Just ModuleBuild{..} -> do
-        typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
-        let env =
-              CompilerEnvironment
-                { compilerDataConstructorEnvironment = moduleDataConstructors
-                , compilerTypeConstructorEnvironment = typeConstructors
-                , compilerAliasEnvironment = moduleAliases
-                , compilerCodataAccessorEnvironment = moduleCodataAccessors
-                , compilerTraitEnvironment = moduleTraits
-                , compilerInstanceEnvironment = moduleInstances
-                , compilerDictionaryNameEnvironment = mempty
-                , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
-                }
-        local (const env) (runPass p m)
+  pass m = do
+    ModuleBuild{..} <- getCurrentBuildC
+    typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
+    let env =
+          CompilerEnvironment
+            { compilerDataConstructorEnvironment = moduleDataConstructors
+            , compilerTypeConstructorEnvironment = typeConstructors
+            , compilerAliasEnvironment = moduleAliases
+            , compilerCodataAccessorEnvironment = moduleCodataAccessors
+            , compilerTraitEnvironment = moduleTraits
+            , compilerInstanceEnvironment = moduleInstances
+            , compilerDictionaryNameEnvironment = mempty
+            , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
+            }
+    local (const env) (runPass p m)
