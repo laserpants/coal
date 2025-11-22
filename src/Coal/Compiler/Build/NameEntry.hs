@@ -90,20 +90,20 @@ data AliasEntry a = AliasEntry
   deriving (Show, Eq, Ord, Read)
 
 data NameEntry
-  = IFunction Name IndexedScheme
-  | IConstant Name IndexedScheme
-  | IFold Name IndexedScheme
-  | IUnfold Name IndexedScheme
-  | IDataConstructor Name IndexedScheme
-  | ICodataAccessor Name IndexedScheme
-  | IType Name Kind
-  | ICotype Name Kind
-  | ITrait Name
-  | IAlias Name
-  | IFunctionPlaceholder Name
-  | IConstantPlaceholder Name
-  | IFoldPlaceholder Name
-  | IUnfoldPlaceholder Name
+  = NFunction Name IndexedScheme
+  | NConstant Name IndexedScheme
+  | NFold Name IndexedScheme
+  | NUnfold Name IndexedScheme
+  | NDataConstructor Name IndexedScheme
+  | NCodataAccessor Name IndexedScheme
+  | NType Name Kind
+  | NCotype Name Kind
+  | NTrait Name
+  | NAlias Name
+  | NFunctionPlaceholder Name
+  | NConstantPlaceholder Name
+  | NFoldPlaceholder Name
+  | NUnfoldPlaceholder Name
   deriving (Show, Eq, Ord, Read)
 
 class HasName a where
@@ -112,33 +112,33 @@ class HasName a where
 instance HasName NameEntry where
   nameOf =
     \case
-      IFunction name _ ->
+      NFunction name _ ->
         name
-      IConstant name _ ->
+      NConstant name _ ->
         name
-      IFold name _ ->
+      NFold name _ ->
         name
-      IUnfold name _ ->
+      NUnfold name _ ->
         name
-      IDataConstructor name _ ->
+      NDataConstructor name _ ->
         name
-      ICodataAccessor name _ ->
+      NCodataAccessor name _ ->
         name
-      IType name _ ->
+      NType name _ ->
         name
-      ICotype name _ ->
+      NCotype name _ ->
         name
-      ITrait name ->
+      NTrait name ->
         name
-      IAlias name ->
+      NAlias name ->
         name
-      IFunctionPlaceholder name ->
+      NFunctionPlaceholder name ->
         name
-      IConstantPlaceholder name ->
+      NConstantPlaceholder name ->
         name
-      IFoldPlaceholder name ->
+      NFoldPlaceholder name ->
         name
-      IUnfoldPlaceholder name ->
+      NUnfoldPlaceholder name ->
         name
 
 instance HasName (DataConstructorEntry a) where

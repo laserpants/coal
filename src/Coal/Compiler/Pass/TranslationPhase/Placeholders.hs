@@ -60,18 +60,18 @@ updateNames store =
       flip execStateT build $
         forM_ moduleNames $
           \case
-            IFunction name _ ->
-              go name IFunction
-            IConstant name _ ->
-              go name IConstant
-            IFold name _ ->
-              go name IFold
-            IUnfold name _ ->
-              go name IUnfold
-            IDataConstructor name _ ->
-              go name IDataConstructor
-            ICodataAccessor name _ ->
-              go name ICodataAccessor
+            NFunction name _ ->
+              go name NFunction
+            NConstant name _ ->
+              go name NConstant
+            NFold name _ ->
+              go name NFold
+            NUnfold name _ ->
+              go name NUnfold
+            NDataConstructor name _ ->
+              go name NDataConstructor
+            NCodataAccessor name _ ->
+              go name NCodataAccessor
             _ ->
               pure ()
  where

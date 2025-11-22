@@ -33,13 +33,13 @@ buildEnv = do
   flip execStateT mempty $ do
     forM_ moduleNames $
       \case
-        IFunction name s ->
+        NFunction name s ->
           modify (Environment.insert name s)
-        IConstant name s ->
+        NConstant name s ->
           modify (Environment.insert name s)
-        IFold name s ->
+        NFold name s ->
           modify (Environment.insert name s)
-        IUnfold name s ->
+        NUnfold name s ->
           modify (Environment.insert name s)
         _ ->
           pure ()
@@ -51,14 +51,14 @@ replacePlaceholders store =
       flip execStateT build $
         forM_ moduleNames $
           \case
-            IFunctionPlaceholder name ->
-              go name IFunction
-            IConstantPlaceholder name ->
-              go name IConstant
-            IFoldPlaceholder name ->
-              go name IFold
-            IUnfoldPlaceholder name ->
-              go name IUnfold
+            NFunctionPlaceholder name ->
+              go name NFunction
+            NConstantPlaceholder name ->
+              go name NConstant
+            NFoldPlaceholder name ->
+              go name NFold
+            NUnfoldPlaceholder name ->
+              go name NUnfold
             _ ->
               pure ()
  where
@@ -80,7 +80,7 @@ prepareBuild (Module path exports defs) = do
     -- Built-in type constructors
     modify $
       insertTypeConstructor "List" (TypeConstructorEntry mempty "List" (KArrow KType KType) [])
-        . addName (IType "List" (KArrow KType KType))
+        . addName (NType "List" (KArrow KType KType))
 
     kinds <- typeConstructorEnv
     inEachDef (collectDataConstructors kinds)
@@ -90,7 +90,7 @@ prepareBuild (Module path exports defs) = do
       \(name, info@DataConstructorEntry{dataConstructorEntryConstructor = DataConstructor{..}}) ->
         modify $
           insertDataConstructor name info
-            . addName (IDataConstructor name constructorScheme)
+            . addName (NDataConstructor name constructorScheme)
 
     inEachDef (collectTraits kinds)
     traits <- traitEnv
@@ -253,21 +253,21 @@ collectTypeConstructors =
     DType loc name def -> do
       modify $
         insertTypeConstructor name info
-          . addName (IType name kind_)
+          . addName (NType name kind_)
           . addTypeExport name
      where
       info@(TypeConstructorEntry _ _ kind_ _) = typeConstructorEntry loc name def
     DCotype loc name def -> do
       modify $
         insertCotypeConstructor name info
-          . addName (ICotype name kind_)
+          . addName (NCotype name kind_)
           . addTypeExport name
      where
       info@(CotypeConstructorEntry _ _ kind_ _) = cotypeConstructorEntry loc name def
     DTypeAlias loc name alias -> do
       modify $
         insertAlias name (aliasEntry loc name alias)
-          . addName (IAlias name)
+          . addName (NAlias name)
           . addTypeExport name
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
@@ -325,14 +325,14 @@ collectDataConstructors env =
       forM_ (dataConstructorEntries env loc def) $
         \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do
           modify $
-            addName (IDataConstructor constructorName constructorScheme)
+            addName (NDataConstructor constructorName constructorScheme)
               . insertDataConstructor constructorName info
               . addExport constructorName
     DCotype loc _ def ->
       forM_ (codataAccessorEntries env loc def) $
         \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
           modify $
-            addName (ICodataAccessor codataAccessorName codataAccessorScheme)
+            addName (NCodataAccessor codataAccessorName codataAccessorScheme)
               . insertCodataAccessor codataAccessorName info
               . addExport codataAccessorName
     DImport _ (Path ["Builtin$"]) _ ->
@@ -393,7 +393,7 @@ collectTraits env =
     DTrait loc name def -> do
       addTraitEntries env name def
       modify $
-        addName (ITrait name)
+        addName (NTrait name)
           . insertTrait name (traitEntry loc name def)
           . addTypeExport name
     DImport _ (Path ["Builtin$"]) _ ->
@@ -419,7 +419,7 @@ addTraitEntries env trait (TraitDef _ p entries) =
     -- TODO
     \(name, Forall _ _ t) ->
       modify $
-        addName (IFunction name $ scheme [Trait trait tvar] (toIndexedType env p t))
+        addName (NFunction name $ scheme [Trait trait tvar] (toIndexedType env p t))
           . addExport name
  where
   tvar = TVariable (TypeIndex (parameterKind p) 0)
@@ -538,13 +538,13 @@ collectImportedNames =
 
       forM_ (names1 <> names2) $
         \case
-          IFunctionPlaceholder _ ->
+          NFunctionPlaceholder _ ->
             pure ()
-          IConstantPlaceholder _ ->
+          NConstantPlaceholder _ ->
             pure ()
-          IFoldPlaceholder _ ->
+          NFoldPlaceholder _ ->
             pure ()
-          IUnfoldPlaceholder _ ->
+          NUnfoldPlaceholder _ ->
             pure ()
           info ->
             modify $ addName info
@@ -553,19 +553,19 @@ collectImportedNames =
 
 {-# INLINE exportFunction #-}
 exportFunction :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
-exportFunction name = modify $ addName (IFunctionPlaceholder name) . addExport name
+exportFunction name = modify $ addName (NFunctionPlaceholder name) . addExport name
 
 {-# INLINE exportConstant #-}
 exportConstant :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
-exportConstant name = modify $ addName (IConstantPlaceholder name) . addExport name
+exportConstant name = modify $ addName (NConstantPlaceholder name) . addExport name
 
 {-# INLINE exportFold #-}
 exportFold :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
-exportFold name = modify $ addName (IFoldPlaceholder name) . addExport name
+exportFold name = modify $ addName (NFoldPlaceholder name) . addExport name
 
 {-# INLINE exportUnfold #-}
 exportUnfold :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
-exportUnfold name = modify $ addName (IUnfoldPlaceholder name) . addExport name
+exportUnfold name = modify $ addName (NUnfoldPlaceholder name) . addExport name
 
 collectPlaceholders :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectPlaceholders =
