@@ -25,6 +25,7 @@ import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
 import Data.List (nub, union, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Debug.Trace
 
 -- import Debug.Trace
 import Extras (Name, groupByKey, (<$$>))
@@ -114,10 +115,13 @@ prepareBuild (Module path exports defs) = do
 
     let defs1 = [DImport mempty p (ImportName mempty <$> names) | (p, names) <- groupByKey extra]
 
-    unless ([ExportAll] == exports) $
-      modify $
-        setExports (nameExports exports `union` Set.toList exps)
-          . setTypeExports (typeExports exports `union` Set.toList typeExps)
+    if [ExportAll] == exports 
+        then
+          modify $ setExports (Set.toList exps) . setTypeExports (Set.toList typeExps)
+        else
+          modify $
+            setExports (nameExports exports `union` Set.toList exps)
+              . setTypeExports (typeExports exports `union` Set.toList typeExps)
 
     return (Module path exports (defs1 <> defs))
  where
