@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Pass.TranslationPhase (translationPhase, translationPhasePasses) where
+module Coal.Compiler.Pass.TranslationPhase (translationPhasePasses) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), mapPass, overlayEnvironment, (>->))
+import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeObjects)
 import Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns)
@@ -37,6 +37,3 @@ translationPhasePasses =
     >-> generateDebugArtifacts "DenormalizeObjects"
     >-> passCompileNats
     >-> generateDebugArtifacts "CompileNats"
-
-translationPhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind IndexedType] [Module Metadata Kind IndexedType]
-translationPhase = mapPass (overlayEnvironment translationPhasePasses)

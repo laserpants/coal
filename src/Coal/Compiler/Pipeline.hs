@@ -15,10 +15,9 @@ import Coal.Compiler.Environment
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
+import Coal.Compiler.Pass.MainPhase (mainPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
 import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
-import Coal.Compiler.Pass.TranslationPhase (translationPhase)
-import Coal.Compiler.Pass.TypePhase (typePhase)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language
@@ -38,8 +37,7 @@ pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
   parsingPhase
     >-> preflightPhase
-    >-> typePhase -- is now both type and translation
-    --    >-> translationPhase
+    >-> mainPhase
     >-> loweringPhase
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()

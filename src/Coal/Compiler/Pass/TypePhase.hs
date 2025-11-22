@@ -1,11 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Pass.TypePhase (typePhase) where
+module Coal.Compiler.Pass.TypePhase (typePhasePasses) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), mapPass, overlayEnvironment, (>->))
+import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
-import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors)
 import Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases)
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGroups)
@@ -35,7 +34,3 @@ typePhasePasses =
     >-> passTypeInference
     >-> generateDebugArtifacts "TypeInference"
     >-> passTypePhaseErrors
-    >-> overlayEnvironment translationPhasePasses
-
-typePhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind IndexedType]
-typePhase = mapPass typePhasePasses
