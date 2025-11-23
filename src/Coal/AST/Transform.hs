@@ -144,6 +144,10 @@ instance TransformContext Expression where
         ETuple a t <$> traverse (transform name f) es
       ECodataRecord a t d ->
         ECodataRecord a t <$> traverse (transform name f) d
+      EFFICall a ll es e ->
+        EFFICall a ll
+          <$> traverse (transform name f) es
+          <*> transform name f e
       _ ->
         error "TODO"
 
