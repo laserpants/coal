@@ -1,0 +1,18 @@
+module Main {
+
+  import IO(println_bool, println_float, println_string, println_double, println_int32)
+
+  alias User = { username : string, email : string, shoe_size : float }
+
+  fun get_shoe_size(user) =
+    user.shoe_size
+
+  fun main() =
+
+    println_float(get_shoe_size(
+      { username = "bob"
+      , email = "bob@home.com"
+      , shoe_size = 5.5f
+      }))
+
+}
