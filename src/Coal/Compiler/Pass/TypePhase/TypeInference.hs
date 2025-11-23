@@ -3,10 +3,8 @@
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
-import Coal.Compiler.Build
 import Coal.Compiler.Build.Internal
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
-import Coal.Compiler.Environment
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
@@ -16,13 +14,12 @@ import Coal.Language.Module
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Substitution
 import Control.Monad.Except
-import Control.Monad.Reader (local)
 import Control.Monad.State
 import Data.Data (Data)
 import Data.List (nub)
 import qualified Data.Text as Text
 
-passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
+passTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference =
   Pass
     { passName = "TypeInference"
@@ -33,33 +30,13 @@ passTypeInference =
 isFoldAssumption :: Assumption a t -> Bool
 isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
 
-pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+pass :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 pass m@(Module path _ _) = do
-  setCompilerCurrentModuleC path
-  clearAssumptionsC
-  clearNameStoreC
-
-  (m0, build@ModuleBuild{..}) <- prepareBuild m
-  insertModuleC (principalPath path) build
-
-  typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
-  let cmpEnv =
-        CompilerEnvironment
-          { compilerDataConstructorEnvironment = moduleDataConstructors
-          , compilerTypeConstructorEnvironment = typeConstructors
-          , compilerAliasEnvironment = moduleAliases
-          , compilerCodataAccessorEnvironment = moduleCodataAccessors
-          , compilerTraitEnvironment = moduleTraits
-          , compilerInstanceEnvironment = moduleInstances
-          , compilerDictionaryNameEnvironment = mempty
-          , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
-          }
-
   env <- buildEnv
   setNamesC env
   insertNamesC builtinFunctions
 
-  m1 <- local (const cmpEnv) (runTypeInference m0)
+  next <- runTypeInference m
   names <- gets compilerNameStore
   replacePlaceholders names
 
@@ -69,7 +46,7 @@ pass m@(Module path _ _) = do
       tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
   unless (null assumptions) $
     throwError NoSuchIdentifier
-  pure m1
+  pure next
 
 indexedC :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexedC ds = run (indexed ds) =<< gets compilerSupply

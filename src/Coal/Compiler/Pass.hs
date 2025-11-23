@@ -9,8 +9,6 @@ import Coal.Compiler.Build
 import Coal.Compiler.Build.Internal (typeConstructorEnv)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
-import Coal.Language (IndexedType, Kind)
-import Coal.Language.Module
 import Control.Monad ((>=>))
 import Control.Monad.Reader (local)
 import Control.Monad.State (evalStateT)
@@ -35,7 +33,7 @@ mapPass p =
     , runPass = traverse (runPass p)
     }
 
-overlayEnvironment :: (Monad m) => Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType) -> Pass Metadata m (Module Metadata Kind t) (Module Metadata Kind IndexedType)
+overlayEnvironment :: (Monad m) => Pass Metadata m a b -> Pass Metadata m a b
 overlayEnvironment p =
   Pass
     { passName = "overlay<" <> passName p <> ">"

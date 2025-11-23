@@ -86,6 +86,7 @@ library
       Coal.Compiler.Pass.TypePhase.ExpressionFolds
       Coal.Compiler.Pass.TypePhase.ExpressionUnfolds
       Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion
+      Coal.Compiler.Pass.TypePhase.Prep
       Coal.Compiler.Pass.TypePhase.TopLevelFolds
       Coal.Compiler.Pass.TypePhase.TopLevelUnfolds
       Coal.Compiler.Pass.TypePhase.TypeInference

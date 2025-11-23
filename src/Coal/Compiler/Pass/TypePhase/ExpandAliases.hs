@@ -9,6 +9,7 @@ module Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
+import Coal.Compiler.Environment
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language
@@ -23,8 +24,11 @@ passExpandAliases :: (Monad m, Data a) => Pass a m (Module a k ()) (Module a k (
 passExpandAliases =
   Pass
     { passName = "ExpandAliases"
-    , runPass = expandAliases
+    , runPass = pass
     }
+
+pass :: (Monad m, Data a) => Module a k () -> CompilerT a m (Module a k ())
+pass = expandAliases
 
 class TransformContext c where
   expandAliases :: (Monad m) => c -> CompilerT a m c
@@ -33,6 +37,9 @@ instance TransformContext () where
   expandAliases _ = pure ()
 
 instance (TransformContext c) => TransformContext [c] where
+  expandAliases = traverse expandAliases
+
+instance (TransformContext c) => TransformContext (Maybe c) where
   expandAliases = traverse expandAliases
 
 instance (TransformContext c) => TransformContext (Dictionary c) where
@@ -78,8 +85,9 @@ instance (TransformContext t, Data a, Data t) => TransformContext (FunctionDef a
   expandAliases =
     \case
       FunctionDef a u w ps e ->
-        FunctionDef a u
-          <$> expandAliases w
+        FunctionDef a
+          <$> expandAliases u
+          <*> expandAliases w
           <*> expandAliases ps
           <*> expandAliases e
 
@@ -87,8 +95,9 @@ instance (TransformContext t, Data a, Data t) => TransformContext (ConstantDef a
   expandAliases =
     \case
       ConstantDef a u w e ->
-        ConstantDef a u
-          <$> expandAliases w
+        ConstantDef a
+          <$> expandAliases u
+          <*> expandAliases w
           <*> expandAliases e
 
 instance (TransformContext t, Data a, Data t) => TransformContext (Definition a k t) where

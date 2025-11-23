@@ -34,6 +34,18 @@ parseDefinition =
     <|> parseTraitInstance
     <|> parseTopLevelFold
     <|> parseTopLevelUnfold
+    <|> parseTypeAlias
+
+parseTypeAlias :: Parser (Definition Metadata o ())
+parseTypeAlias = do
+  start <- getSourcePos
+  lexeme_ "alias"
+  n <- constructor
+  ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
+  symbol_ "="
+  t <- parseType
+  end <- getSourcePos
+  pure (DTypeAlias (Metadata start end) n (AliasDef ps t))
 
 parseTraitDefinition :: Parser (Definition Metadata o ())
 parseTraitDefinition = do
