@@ -1,0 +1,16 @@
+module Main {
+
+  import IO(readln, println_string, __eval_io)
+
+  fun main() = 
+    let
+      s = 
+        readln()
+      in
+         let
+           r =
+             __eval_io(s)
+           in
+             println_string(r)
+
+}

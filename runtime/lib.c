@@ -356,6 +356,49 @@ write_file(const char* filename, const char* data)
   return 0;
 }
 
+char*
+readln(void)
+{
+  size_t capacity = 128;
+  size_t length = 0;
+
+  char* buffer = gc_malloc(capacity);
+  if (!buffer) {
+    return NULL;
+  }
+
+  int c;
+  while ((c = fgetc(stdin)) != EOF) {
+    if (c == '\n') {
+      break;
+    }
+
+    // Grow buffer if needed
+    if (length + 1 >= capacity) {
+      size_t new_capacity = capacity * 2;
+      char* new_buffer = gc_malloc(new_capacity);
+      if (!new_buffer) {
+        return NULL;
+      }
+      memcpy(new_buffer, buffer, length);
+      buffer = new_buffer;
+      capacity = new_capacity;
+    }
+
+    buffer[length++] = (char)c;
+  }
+
+  // If nothing was read and we hit EOF, return NULL
+  if (length == 0 && c == EOF) {
+    return NULL;
+  }
+
+  // Null-terminate
+  buffer[length] = '\0';
+
+  return buffer;
+}
+
 /*
  * ////////////////////////////////////////////////////////////////////////////
  * Type conversions
