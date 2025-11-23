@@ -4,7 +4,7 @@ module Main {
 
   alias User = { username : string, email : string, shoe_size : float }
 
-  fun get_shoe_size(user) =
+  fun get_shoe_size(user : User) =
     user.shoe_size
 
   fun main() =
