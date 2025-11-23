@@ -331,6 +331,31 @@ read_file(const char* filename)
   return buffer;
 }
 
+int
+write_file(const char* filename, const char* data)
+{
+  if (!filename || !data) {
+    return -1;
+  }
+
+  FILE* file = fopen(filename, "wb");
+  if (!file) {
+    return -1;
+  }
+
+  size_t length = strlen(data);
+  size_t written = fwrite(data, 1, length, file);
+
+  if (written != length) {
+    fclose(file);
+    return -1;
+  }
+
+  fclose(file);
+
+  return 0;
+}
+
 /*
  * ////////////////////////////////////////////////////////////////////////////
  * Type conversions

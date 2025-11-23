@@ -1,0 +1,7 @@
+module Main {
+
+  import IO(write_file)
+
+  fun main() = write_file("test.txt", "Hello")
+
+}

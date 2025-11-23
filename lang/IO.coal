@@ -57,4 +57,7 @@ module IO {
   fun read_file(path : string) : IO<string> =
     #{read_file : string -> IO<string>}(path)(fn(s) => __return_io(s))
 
+  fun write_file(path : string, data : string) : IO<unit> =
+    #{write_file : string -> string -> IO<unit>}(path, data)(fn(_) => __return_io())
+
 }
