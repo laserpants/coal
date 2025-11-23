@@ -5,12 +5,8 @@ module Main {
   fun main() = 
     let
       s = 
-        readln()
+        readln() 
       in
-         let
-           r =
-             __eval_io(s)
-           in
-             println_string(r)
+        println_string(__eval_io(s))
 
 }
