@@ -144,6 +144,7 @@ instance HasMetadata (Definition Metadata k ()) where
       DFunction a _ _ _ -> a
       DConstant a _ _ _ -> a
       DImport a _ _ -> a
+      DQualifiedImport a _ -> a
       DTrait a _ _ -> a
       DInstance a _ _ -> a
       DTypeAlias a _ _ -> a

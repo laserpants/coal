@@ -4,9 +4,9 @@
 module Coal.Compiler.Kernel.TranslateType (translateType) where
 
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language.Type
-import Coal.Language.Type.Intrinsic
-import Coal.Language.Type.Row
+import Coal.Language.Type (Type (..), isTupleType)
+import Coal.Language.Type.Intrinsic (Intrinsic (..))
+import Coal.Language.Type.Row (Row (..))
 
 {-# INLINE tupleTCon #-}
 tupleTCon :: Kernel.Type

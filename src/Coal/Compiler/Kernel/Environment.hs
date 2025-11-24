@@ -14,7 +14,7 @@ module Coal.Compiler.Kernel.Environment (
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Environment
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Control.Monad.Reader (asks, local)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)

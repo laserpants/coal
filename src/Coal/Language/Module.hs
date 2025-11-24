@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Module (
@@ -10,6 +11,7 @@ module Coal.Language.Module (
   fromDefinitionList,
   modulePathName,
   principalPath,
+  qualified,
   module Coal.Language.Module.Definition,
   module Coal.Language.Module.Definition.Function,
   module Coal.Language.Module.Definition.Constant,
@@ -66,3 +68,6 @@ modulePath (Module path _ _) = path
 {-# INLINE modulePathName #-}
 modulePathName :: Module a k t -> Name
 modulePathName = principalPath . modulePath
+
+qualified :: Name -> Path -> Name
+qualified name path = principalPath path <> "." <> name

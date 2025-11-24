@@ -10,7 +10,7 @@ module Coal.Compiler.Kernel.TranslateExpression (
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (qualifyName, withLocalName, withLocalNames)
 import Coal.Compiler.Kernel.TranslateType (translateType)
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Data.Data (Data)

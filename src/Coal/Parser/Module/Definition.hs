@@ -177,6 +177,17 @@ parseImport :: Parser (Definition Metadata o ())
 parseImport = do
   start <- getSourcePos
   lexeme_ "import"
+  try (parseQualifiedImport start) <|> parseNormalImport start
+
+parseQualifiedImport :: SourcePos -> Parser (Definition Metadata o ())
+parseQualifiedImport start = do
+  lexeme_ "namespace"
+  path <- identifier upperChar `sepBy1` symbol "."
+  end <- getSourcePos
+  pure (DQualifiedImport (Metadata start end) (Path path))
+
+parseNormalImport :: SourcePos -> Parser (Definition Metadata o ())
+parseNormalImport start = do
   path <- (lexeme "Builtin$" <|> identifier upperChar) `sepBy1` symbol "."
   names <- parens (commaSep parseImportAtom)
   end <- getSourcePos

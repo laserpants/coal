@@ -10,12 +10,12 @@ import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
 import Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode)
 import Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate)
 import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (passLLVMOutput)
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerState (compilerConfig))
 import Coal.Graphviz.Dot (writeDotFile)
 import Coal.Kernel.Language (moduleName)
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (IndexedType, Kind)
+import Coal.Language.Module (Module)
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)

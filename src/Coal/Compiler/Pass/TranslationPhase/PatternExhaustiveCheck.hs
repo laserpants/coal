@@ -6,12 +6,12 @@
 module Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternExhaustiveCheck) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
-import Coal.Compiler.PatternAnomalies
+import Coal.Compiler.Journal (listenErrors, tellErrors)
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.PatternAnomalies (exhaustive, translatePattern)
 import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind (..))
-import Coal.Language.Expression
+import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module

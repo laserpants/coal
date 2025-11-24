@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+  import namespace List
+
+  fun main() = 
+    match(List.head([1, 2, 3] : List<int32>)) {
+      | Some(x) => IO.println_int32(x)
+      | _       => IO.println_string("b")
+    }
+
+}

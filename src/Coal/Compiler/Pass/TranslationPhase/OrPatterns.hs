@@ -8,10 +8,10 @@ module Coal.Compiler.Pass.TranslationPhase.OrPatterns (passOrPatterns) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Pass
-import Coal.Compiler.Stack
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module (Module)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty

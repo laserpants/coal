@@ -26,6 +26,7 @@ import Data.List (nub, union, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name, groupByKey, (<$$>))
+import Extras.Control.Monad (concatForM)
 
 buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
 buildEnv = do
@@ -292,6 +293,14 @@ collectTypeConstructors =
                 modify $ insertCotypeConstructor name entry
           _ ->
             pure ()
+    DQualifiedImport a path -> do
+      build <- importedModule a path
+      forM_ (Environment.toList (exportedTypeConstructors build)) $
+        \(n, entry) ->
+          modify $ insertTypeConstructor (principalPath path <> "." <> n) entry
+      forM_ (Environment.toList (exportedCotypeConstructors build)) $
+        \(n, entry) ->
+          modify $ insertCotypeConstructor (principalPath path <> "." <> n) entry
     _ ->
       pure ()
 
@@ -384,6 +393,14 @@ collectDataConstructors env =
                         modify $ insertCodataAccessor xsor entry
           _ ->
             pure ()
+    DQualifiedImport a path -> do
+      build <- importedModule a path
+      forM_ (Environment.toList (exportedDataConstructors build)) $
+        \(n, entry) ->
+          modify $ insertDataConstructor (principalPath path <> "." <> n) entry
+      forM_ (Environment.toList (exportedCodataAccessors build)) $
+        \(n, entry) ->
+          modify $ insertCodataAccessor (principalPath path <> "." <> n) entry
     _ ->
       pure ()
 
@@ -410,6 +427,12 @@ collectTraits env =
                 forM_ (Map.toList is) $
                   \(t, InstanceEntry{..}) -> do
                     modify $ insertInstance trait t InstanceEntry{..}
+    DQualifiedImport a path -> do
+      build <- importedModule a path
+      let entries = exportedTraits build
+      forM_ entries $
+        \entry ->
+          modify $ insertTrait (principalPath path <> "." <> traitEntryName entry) entry
     _ ->
       pure ()
 
@@ -480,11 +503,11 @@ collectImportedInstances =
       pure []
     DImport loc path imports -> do
       ModuleBuild{..} <- importedModule loc path
-      concat <$$> forM imports $
+      concatForM imports $
         \case
           -- TODO: cleanup/DRY
           ImportTrait _ name _ ->
-            concat <$$> forM (Environment.toList moduleInstances) $
+            concatForM (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 if trait == name
                   then concat <$$> forM (Map.toList is) $
@@ -494,9 +517,9 @@ collectImportedInstances =
                           pure (path, instanceLabel (Trait trait t) f)
                   else pure []
           ImportType _ name _ ->
-            concat <$$> forM (Environment.toList moduleInstances) $
+            concatForM (Environment.toList moduleInstances) $
               \(trait, is) -> do
-                concat <$$> forM (Map.toList is) $
+                concatForM (Map.toList is) $
                   \(t, InstanceEntry{..}) -> do
                     if headConstructor instanceEntryIndexedType == Just name
                       then forM (Map.toList instanceEntryEntries) $
@@ -548,6 +571,38 @@ collectImportedNames =
             pure ()
           info ->
             modify $ addName info
+    DQualifiedImport a path -> do
+      build <- importedModule a path
+      forM_ (exportedNames build <> exportedTypeNames build) $
+        \case
+          NFunctionPlaceholder _ ->
+            pure ()
+          NConstantPlaceholder _ ->
+            pure ()
+          NFoldPlaceholder _ ->
+            pure ()
+          NUnfoldPlaceholder _ ->
+            pure ()
+          NFunction name s ->
+            modify $ addName (NFunction (qualified name path) s)
+          NConstant name s ->
+            modify $ addName (NConstant (qualified name path) s)
+          NFold name s ->
+            modify $ addName (NFold (qualified name path) s)
+          NUnfold name s ->
+            modify $ addName (NUnfold (qualified name path) s)
+          NDataConstructor name s ->
+            modify $ addName (NDataConstructor (qualified name path) s)
+          NCodataAccessor name s ->
+            modify $ addName (NCodataAccessor (qualified name path) s)
+          NType name k ->
+            modify $ addName (NType (qualified name path) k)
+          NCotype name k ->
+            modify $ addName (NCotype (qualified name path) k)
+          NTrait name ->
+            modify $ addName (NTrait (qualified name path))
+          NAlias name ->
+            modify $ addName (NAlias (qualified name path))
     _ ->
       pure ()
 

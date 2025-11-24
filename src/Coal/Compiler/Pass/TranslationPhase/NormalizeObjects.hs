@@ -3,9 +3,9 @@
 
 module Coal.Compiler.Pass.TranslationPhase.NormalizeObjects (passNormalizeObjects) where
 
-import Coal.AST.Normalization
-import Coal.Compiler.Pass
-import Coal.Language.Module
+import Coal.AST.Normalization (NormalizationContext (normalizeObject))
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Language.Module (Module)
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
 

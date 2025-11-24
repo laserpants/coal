@@ -10,8 +10,8 @@ module Coal.Compiler.Pass.TypePhase.ExpressionUnfolds (passExpressionUnfolds) wh
 import Coal.AST.Shorthand
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
-import Coal.Compiler.Pass
-import Coal.Compiler.Stack
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Primitive (..))
 import Coal.Language.Module
 import Data.Data (Data)

@@ -17,7 +17,9 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module
 import Control.Monad.IO.Class
-import Extras (Name, for, (<.>))
+import Control.Monad.State (gets)
+import Extras (Name, (<.>))
+import Extras.Control.Monad (concatForM)
 
 passKernelTranslate :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 passKernelTranslate =
@@ -32,7 +34,7 @@ pass =
     Module path _ defs -> do
       setCompilerCurrentModuleC path
       build <- getCurrentBuildC
-      let env = collectImports build defs
+      env <- collectImports build defs
 
       insertQualifiedNames env $
         withModuleName name $
@@ -44,40 +46,69 @@ pass =
      where
       name = principalPath path
 
-collectImports :: ModuleBuild a -> [Definition a k t] -> Environment Name
-collectImports build = Environment.fromList . concatMap (imports build)
+collectImports :: (Monad m) => ModuleBuild a -> [Definition a k t] -> CompilerT Metadata m (Environment Name)
+collectImports build defs = do
+  xs <- concatForM defs (qualImports build)
+  pure (Environment.fromList xs)
 
-imports :: ModuleBuild a -> Definition a k t -> [(Name, Name)]
-imports ModuleBuild{..} =
+importedModule :: (Monad m) => Path -> CompilerT a m (ModuleBuild a)
+importedModule path = do
+  env <- gets compilerModules
+  case Environment.lookup (principalPath path) env of
+    Nothing ->
+      error "Implementation error"
+    Just build ->
+      return build
+
+qualImports :: (Monad m) => ModuleBuild a -> Definition a k t -> CompilerT Metadata m [(Name, Name)]
+qualImports ModuleBuild{..} =
   \case
     DImport _ path names_ ->
-      concat . for names_ $
+      concatForM names_ $
         \case
           (ImportName _ name) ->
-            [(name, principalPath path <.> name)]
+            pure [(name, principalPath path <.> name)]
           (ImportType _ name ["*"]) ->
             case Environment.lookup name moduleTypeConstructors of
               Nothing ->
                 error "TODO"
               Just TypeConstructorEntry{..} ->
-                [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
+                pure [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
           (ImportType _ _ ctors) ->
-            [(ctor, principalPath path <.> ctor) | ctor <- ctors]
+            pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
           (ImportCotype _ name ["*"]) ->
             case Environment.lookup name moduleCotypeConstructors of
               Nothing ->
                 error "TODO"
               Just CotypeConstructorEntry{..} ->
-                [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorEntryDataAccessors]
+                pure [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorEntryDataAccessors]
           (ImportCotype _ _ xsors) ->
-            [(xsor, principalPath path <.> xsor) | xsor <- xsors]
+            pure [(xsor, principalPath path <.> xsor) | xsor <- xsors]
           (ImportTrait _ name ["*"]) ->
             case Environment.lookup name moduleTraits of
               Nothing ->
                 error "TODO"
               Just TraitEntry{..} ->
-                [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
+                pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
           (ImportTrait _ _ entries) ->
-            [(entry, principalPath path <.> entry) | entry <- entries]
+            pure [(entry, principalPath path <.> entry) | entry <- entries]
+    DQualifiedImport _ path -> do
+      build <- importedModule path
+      concatForM (exportedNames build) $
+        \case
+          NFunction name _ ->
+            pure [(qualified name path, qualified name path)]
+          NConstant name _ ->
+            pure [(qualified name path, qualified name path)]
+          NFold name _ ->
+            pure [(qualified name path, qualified name path)]
+          NUnfold name _ ->
+            pure [(qualified name path, qualified name path)]
+          NDataConstructor name _ ->
+            pure [(qualified name path, qualified name path)]
+          NCodataAccessor name _ ->
+            pure [(qualified name path, qualified name path)]
+          _ ->
+            pure []
     _ ->
-      []
+      pure []

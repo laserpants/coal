@@ -10,8 +10,8 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Shorthand
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module (Module (..), principalPath)

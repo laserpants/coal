@@ -10,8 +10,8 @@ import Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (passNoDuplicateP
 import Coal.Compiler.Pass.PreflightPhase.Setup (passSetup)
 import Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule)
 import Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort)
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (Kind)
+import Coal.Language.Module (Module)
 import Control.Monad.IO.Class (MonadIO)
 
 preflightPhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]

@@ -9,8 +9,8 @@ module Coal.Compiler.Pass.TypePhase.TopLevelUnfolds (passTopLevelUnfolds) where
 import Coal.AST.Flattening (flattenApplication)
 import Coal.AST.Shorthand
 import Coal.Common.Supply (freshName, supplied)
-import Coal.Compiler.Pass
-import Coal.Compiler.Stack
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Expression (..), Kind (..), Pattern (..))
 import Coal.Language.Module
 import Data.Data (Data)

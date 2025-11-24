@@ -39,6 +39,8 @@ data Definition a k t
     DConstant a Name (ConstantDef a t) [Definition a k t]
   | -- | Import statement
     DImport a Path [Import a]
+  | -- | Namespace (qualified) import
+    DQualifiedImport a Path
   | -- | Trait
     DTrait a Name (TraitDef t)
   | -- | Trait instance
@@ -71,6 +73,8 @@ isDImport :: Definition a k t -> Bool
 isDImport =
   \case
     DImport{} ->
+      True
+    DQualifiedImport{} ->
       True
     _ ->
       False

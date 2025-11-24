@@ -706,26 +706,26 @@ e2eSpec = do
   describe "146" $ do
     expectOutput
       "223"
-          [ "./test/Coal/examples/146/Eq.coal"
-          , "./test/Coal/examples/146/Stuff.coal"
-          , "./test/Coal/examples/146/Main.coal"
-          , "./lang/Coal/Combinators.coal"
-          ]
+      [ "./test/Coal/examples/146/Eq.coal"
+      , "./test/Coal/examples/146/Stuff.coal"
+      , "./test/Coal/examples/146/Main.coal"
+      , "./lang/Coal/Combinators.coal"
+      ]
 
   describe "147" $ do
     expectOutput
       "224"
-          [ "./test/Coal/examples/147/Eq.coal"
-          , "./test/Coal/examples/147/Stuff.coal"
-          , "./test/Coal/examples/147/Main.coal"
-          , "./lang/Coal/Combinators.coal"
-          ]
+      [ "./test/Coal/examples/147/Eq.coal"
+      , "./test/Coal/examples/147/Stuff.coal"
+      , "./test/Coal/examples/147/Main.coal"
+      , "./lang/Coal/Combinators.coal"
+      ]
 
   describe "148" $ do
     expectOutput
       "224"
-          [ "./test/Coal/examples/148/Main.coal"
-          ]
+      [ "./test/Coal/examples/148/Main.coal"
+      ]
 
   describe "149" $ do
     it "is NoSuchIdentifier" $ do
@@ -741,23 +741,37 @@ e2eSpec = do
   describe "150" $ do
     expectOutput
       "255"
-          [ "./test/Coal/examples/150/Eq.coal"
-          , "./test/Coal/examples/150/Stuff.coal"
-          , "./test/Coal/examples/150/Main.coal"
-          , "./lang/Coal/Combinators.coal"
-          ]
+      [ "./test/Coal/examples/150/Eq.coal"
+      , "./test/Coal/examples/150/Stuff.coal"
+      , "./test/Coal/examples/150/Main.coal"
+      , "./lang/Coal/Combinators.coal"
+      ]
 
   describe "151" $ do
     expectOutput
       "22"
-          [ "./test/Coal/examples/151/Main.coal"
-          ]
+      [ "./test/Coal/examples/151/Main.coal"
+      ]
 
   describe "152" $ do
     expectOutput
       "5.500000"
-          [ "./test/Coal/examples/152/Main.coal"
-          ]
+      [ "./test/Coal/examples/152/Main.coal"
+      ]
+
+  describe "155" $ do
+    expectOutput
+      "Wat"
+      [ "./test/Coal/examples/155/Main.coal"
+      ]
+
+  describe "156" $ do
+    expectOutput
+      "1"
+      [ "./test/Coal/examples/156/Main.coal"
+      , "./lang/List.coal"
+      , "./lang/Coal/Combinators.coal"
+      ]
 
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =

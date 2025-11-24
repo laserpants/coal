@@ -7,8 +7,8 @@ import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.ParsingPhase.ImportsTopRule (passImportsTopRule)
 import Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing)
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (Kind)
+import Coal.Language.Module (Module)
 import Control.Monad.IO.Class (MonadIO)
 
 parsingPhase :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]

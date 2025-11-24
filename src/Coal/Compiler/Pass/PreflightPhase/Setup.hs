@@ -5,10 +5,10 @@ module Coal.Compiler.Pass.PreflightPhase.Setup (passSetup) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions)
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (Kind)
+import Coal.Language.Module (Module, overModuleDefinitions)
 
 passSetup :: (Monad m) => Pass a m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passSetup =

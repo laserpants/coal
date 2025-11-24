@@ -10,8 +10,8 @@ module Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases) where
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Environment
-import Coal.Compiler.Pass
-import Coal.Compiler.Stack
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
 import Control.Monad.Reader (asks)

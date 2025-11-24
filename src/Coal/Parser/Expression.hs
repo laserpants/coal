@@ -6,7 +6,7 @@ import Coal.AST.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Parser.Core
-import Coal.Parser.Identifier (constructor, name)
+import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Metadata (withMetadata)
 import Coal.Parser.Pattern (parsePattern)
 import Coal.Parser.Primitive (parsePrimitive)
@@ -17,9 +17,10 @@ import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 import Extras (Name, isConstructor)
 import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
-import Text.Megaparsec.Char (char)
+import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Expression Metadata ())
@@ -69,9 +70,9 @@ parseFunctionApplication =
   withMetadata $ do
     f <-
       try (parens parseExpression)
-        <|> parseDataConstructor
         <|> parseSpecialNameExpression
         <|> parseVariableExpression
+        <|> parseDataConstructor
     xs <- parens (nonEmptyOr parseUnit (commaSep parseExpression))
     pure (\loc -> EApplication loc () f xs)
 
@@ -91,8 +92,17 @@ parseFFICall =
 parseDataConstructor :: Parser (Expression Metadata ())
 parseDataConstructor =
   withMetadata $ do
-    ll <- Label () <$> constructor
+    ll <- try parseQualifiedConstructor <|> parseSimpleConstructor
     pure (`EConstructor` ll)
+
+parseSimpleConstructor :: Parser (Label ())
+parseSimpleConstructor = Label () <$> constructor
+
+parseQualifiedConstructor :: Parser (Label ())
+parseQualifiedConstructor = do
+  ns <- some (identifier upperChar <* symbol ".")
+  n <- constructor
+  pure (Label () (Text.intercalate "." ns <> "." <> n))
 
 patternBinding :: Parser (Binding Expression Metadata ())
 patternBinding =
@@ -171,8 +181,17 @@ parseSpecialNameExpression =
 parseVariableExpression :: Parser (Expression Metadata ())
 parseVariableExpression =
   withMetadata $ do
-    ll <- Label () <$> name
+    ll <- try parseQualifiedName <|> parseSimpleName
     pure (`EVariable` ll)
+
+parseSimpleName :: Parser (Label ())
+parseSimpleName = Label () <$> name
+
+parseQualifiedName :: Parser (Label ())
+parseQualifiedName = do
+  ns <- some (identifier upperChar <* symbol ".")
+  n <- name
+  pure (Label () (Text.intercalate "." ns <> "." <> n))
 
 parseMatchClause :: Parser (Clause Metadata ())
 parseMatchClause =

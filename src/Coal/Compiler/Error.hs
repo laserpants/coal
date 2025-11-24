@@ -11,8 +11,8 @@ module Coal.Compiler.Error (
 import Coal.Language (IndexedType, Kind (..), Trait (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
-import Coal.TypeSystem.Constraint.Generation.Internal
+import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
+import Coal.TypeSystem.Constraint.Generation.Internal (ConstraintsGenError)
 import Extras (Name)
 
 data ErrorLocation a = ErrorLocation Name a

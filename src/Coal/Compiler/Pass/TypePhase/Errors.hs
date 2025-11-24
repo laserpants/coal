@@ -3,13 +3,13 @@
 module Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors) where
 
 import Coal.AST.Metadata (Metadata (..), getMetadata)
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Language
-import Coal.Language.Module
-import Control.Monad
-import Control.Monad.Except
+import Coal.Language (IndexedType, Kind)
+import Coal.Language.Module (Module (..), principalPath)
+import Control.Monad (forM_, unless)
+import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.State (gets)
 import Data.List (nub)
 

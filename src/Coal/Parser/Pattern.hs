@@ -6,7 +6,7 @@ import Coal.AST.Metadata (Metadata (..), metadataSpan)
 import Coal.Common.Label (Label (..))
 import Coal.Language (Pattern (..), Primitive (LUnit))
 import Coal.Parser.Core (Parser, lexeme, lexeme_, spaces)
-import Coal.Parser.Identifier (constructor, name)
+import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Metadata (withMetadata)
 import qualified Coal.Parser.Primitive as Primitive
 import Coal.Parser.Symbol
@@ -16,8 +16,9 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 import Text.Megaparsec (option, optional, some, try, (<|>))
-import Text.Megaparsec.Char (char)
+import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Pattern Metadata ())
@@ -125,9 +126,18 @@ parseAtVar = do
 parseConstructorPattern :: Parser (Pattern Metadata ())
 parseConstructorPattern =
   withMetadata $ do
-    ll <- Label () <$> constructor
+    ll <- try parseQualifiedConstructor <|> parseSimpleConstructor
     ps <- option [] (parens (commaSep1 parsePattern))
     pure (\loc -> PConstructor loc ll ps)
+
+parseSimpleConstructor :: Parser (Label ())
+parseSimpleConstructor = Label () <$> constructor
+
+parseQualifiedConstructor :: Parser (Label ())
+parseQualifiedConstructor = do
+  ns <- some (identifier upperChar <* symbol ".")
+  n <- constructor
+  pure (Label () (Text.intercalate "." ns <> "." <> n))
 
 parseRecordPattern :: Parser (Pattern Metadata ())
 parseRecordPattern =

@@ -16,8 +16,8 @@ import Coal.Compiler.Pass.TypePhase.Prep (passPrep)
 import Coal.Compiler.Pass.TypePhase.TopLevelFolds (passTopLevelFolds)
 import Coal.Compiler.Pass.TypePhase.TopLevelUnfolds (passTopLevelUnfolds)
 import Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference)
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (IndexedType, Kind)
+import Coal.Language.Module (Module)
 import Control.Monad.IO.Class (MonadIO)
 
 typePhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind IndexedType)

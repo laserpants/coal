@@ -216,6 +216,8 @@ typeDefinitionC =
   \case
     DImport{} ->
       pure ()
+    DQualifiedImport{} ->
+      pure ()
     DTypeAlias{} ->
       pure ()
     DType{} ->

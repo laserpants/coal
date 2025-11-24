@@ -7,10 +7,10 @@
 
 module Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (passLambdaMatchExpansion) where
 
-import Coal.AST.Shorthand
-import Coal.Compiler.Pass
-import Coal.Compiler.Stack
-import Coal.Language
+import Coal.AST.Shorthand (lambdaE, matchE, varE, varP)
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Stack (CompilerT)
+import Coal.Language (Clause, Expression (ELambdaMatch), Kind)
 import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)

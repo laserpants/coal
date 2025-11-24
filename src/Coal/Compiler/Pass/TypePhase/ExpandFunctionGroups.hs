@@ -8,8 +8,8 @@ module Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGrou
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Shorthand
-import Coal.Compiler.Pass
-import Coal.Compiler.Stack
+import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Stack (CompilerT, setCompilerCurrentModuleC)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..))
 import Coal.Language.Module
 import Coal.Language.Trait (With (..))

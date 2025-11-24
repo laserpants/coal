@@ -15,8 +15,8 @@ import Coal.Compiler.Pass.TranslationPhase.OrPatterns
 import Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternExhaustiveCheck)
 import Coal.Compiler.Pass.TranslationPhase.Placeholders (passPlaceholders)
 import Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns)
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (IndexedType, Kind)
+import Coal.Language.Module (Module)
 import Control.Monad.IO.Class (MonadIO)
 
 translationPhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)

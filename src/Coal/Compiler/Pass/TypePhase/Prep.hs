@@ -2,13 +2,13 @@
 
 module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
-import Coal.Compiler.Build.Internal
+import Coal.Compiler.Build.Internal (buildEnv, prepareBuild)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Language
-import Coal.Language.Module
-import Control.Monad.Except
+import Coal.Language (Kind)
+import Coal.Language.Module (Module (..), principalPath)
+import Control.Monad.Except (MonadIO)
 
 passPrep :: (MonadIO m, Monoid a, Eq a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passPrep =

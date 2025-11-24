@@ -5,16 +5,16 @@ module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
 import Coal.Compiler.Build.Internal
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (typeDefinitionsC)
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (IndexedType, Kind, indexed)
+import Coal.Language.Module (Module (..), principalPath)
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
-import Coal.TypeSystem.Substitution
+import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
-import Control.Monad.State
+import Control.Monad.State (gets, runState)
 import Data.Data (Data)
 import Data.List (nub)
 import qualified Data.Text as Text

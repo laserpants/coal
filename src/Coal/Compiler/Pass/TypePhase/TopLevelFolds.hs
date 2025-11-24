@@ -11,12 +11,12 @@ import Coal.AST.Shorthand
 import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
-import Coal.Compiler.Journal
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..))
 import Coal.Language.Module
-import Control.Monad.Except
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.State (gets)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)

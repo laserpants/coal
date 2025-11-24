@@ -9,11 +9,11 @@ module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language (Kind (..))
 import Coal.Language.Module
-import Control.Monad.Except
+import Control.Monad.Except (MonadError (throwError), unless)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 

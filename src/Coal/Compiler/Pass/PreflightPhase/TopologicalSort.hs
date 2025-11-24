@@ -6,12 +6,12 @@ module Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort) w
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language
 import Coal.Language.Module
-import Control.Monad.Except
+import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (graphFromEdges, reverseTopSort)
 import Data.Maybe (fromJust)
 import Data.Set (Set)
@@ -61,6 +61,8 @@ importPath :: Definition Metadata Kind () -> [(Metadata, Name)]
 importPath =
   \case
     DImport loc p _ ->
+      [(loc, principalPath p)]
+    DQualifiedImport loc p ->
       [(loc, principalPath p)]
     _ ->
       []

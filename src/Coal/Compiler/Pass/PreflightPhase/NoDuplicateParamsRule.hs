@@ -10,8 +10,8 @@ module Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language (Kind (..))
 import Coal.Language.Module
