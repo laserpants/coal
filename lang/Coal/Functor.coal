@@ -10,4 +10,14 @@ module Functor {
     let map = map_list
   }
 
+  instance Functor<Option> {
+    fun map(f, opt) = 
+      match(opt) {
+        | None => 
+            None
+        | Some(val) =>
+            Some(f(val))
+      }
+  }
+
 }
