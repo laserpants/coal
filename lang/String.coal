@@ -1,5 +1,7 @@
 module String {
 
+  import List(reduce)
+
   fun int32_to_string(n : int32) : string =
     string$_int32_to_string(n)
 
@@ -31,5 +33,11 @@ module String {
 
   fun remove_whitespace(s : string) : string =
     string$_remove_whitespace(s)
+
+  fun intercalate(sep : string, strs : List<string>) : string =
+    match(strs) {
+      | [] => ""
+      | head :: tail => head +++ reduce(fn(t, s) => s +++ sep +++ t, "", tail)
+    }
 
 }

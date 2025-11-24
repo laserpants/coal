@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import Json(type Foo)
+
+  fun main() =
+    IO.println_string("foo")
+
+}

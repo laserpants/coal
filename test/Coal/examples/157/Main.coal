@@ -1,0 +1,20 @@
+module Main {
+
+  import namespace IO
+  import Json(encode_json, type JsonValue)
+
+  let 
+    test_value =
+      JsonArray(
+        [ JsonBool(false)
+        , JsonString("hello")
+        , JsonNumber(1.123)
+        ]
+      )
+
+  fun main() =
+    IO.println_string(
+      encode_json(test_value)
+    )
+
+}
