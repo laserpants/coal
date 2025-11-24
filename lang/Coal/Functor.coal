@@ -1,3 +1,7 @@
 module Functor {
 
+  trait Functor<f : * -> *> {
+    map : (a -> b) -> f<a> -> f<b>
+  }
+
 }
