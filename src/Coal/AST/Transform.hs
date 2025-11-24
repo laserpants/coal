@@ -6,7 +6,7 @@ module Coal.AST.Transform (replace, replaceWith, replaceMultipleWith, rename) wh
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
-import Coal.Language
+import Coal.Language (Binding (..), Choice (..), Clause (..), CompiledClause (..), Expression (..), Guard (..))
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Extras (Name, const2, (<$$>))
