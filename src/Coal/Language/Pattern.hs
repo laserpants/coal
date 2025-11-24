@@ -58,6 +58,8 @@ instance (Data a, Data t) => BoundVars (Pattern a t) where
     \case
       PRecord _ _ d mp ->
         boundIn mp <> unions (fmap boundIn d)
+      PAnnotation _ _ p ->
+        boundIn p
       p ->
         Set.fromList (universeBi p)
 

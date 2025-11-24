@@ -27,14 +27,12 @@ e2eSpec = do
     expectOutput
       "1"
       [ "./test/Coal/examples/003/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "004" $
     expectOutput
       "2"
       [ "./test/Coal/examples/004/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "005" $
@@ -51,7 +49,6 @@ e2eSpec = do
       [ "./test/Coal/examples/006/Tree.coal"
       , "./test/Coal/examples/006/Qsort.coal"
       , "./test/Coal/examples/006/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "007" $
@@ -311,16 +308,13 @@ e2eSpec = do
   describe "066" $
     expectOutput
       "7"
-      [ "./lang/Coal/Combinators.coal"
-      , "./test/Coal/examples/066/List.coal"
-      , "./test/Coal/examples/066/Main.coal"
+      [ "./test/Coal/examples/066/Main.coal"
       ]
 
   describe "067" $
     expectOutput
       "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}"
-      [ "./test/Coal/examples/067/List.coal"
-      , "./test/Coal/examples/067/StringUtils.coal"
+      [ "./test/Coal/examples/067/StringUtils.coal"
       , "./test/Coal/examples/067/Main.coal"
       , "./lang/String.coal"
       ]
@@ -605,7 +599,6 @@ e2eSpec = do
       [ "./test/Coal/examples/136/Tree.coal"
       , "./test/Coal/examples/136/Qsort.coal"
       , "./test/Coal/examples/136/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "137" $
@@ -614,7 +607,6 @@ e2eSpec = do
       [ "./test/Coal/examples/137/Eq.coal"
       , "./test/Coal/examples/137/Stuff.coal"
       , "./test/Coal/examples/137/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "138" $
@@ -623,7 +615,6 @@ e2eSpec = do
       [ "./test/Coal/examples/138/Eq.coal"
       , "./test/Coal/examples/138/Stuff.coal"
       , "./test/Coal/examples/138/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "139" $ do
@@ -633,7 +624,6 @@ e2eSpec = do
           [ "./test/Coal/examples/139/Eq.coal"
           , "./test/Coal/examples/139/Stuff.coal"
           , "./test/Coal/examples/139/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left TraitError
 
@@ -644,7 +634,6 @@ e2eSpec = do
           [ "./test/Coal/examples/140/Eq.coal"
           , "./test/Coal/examples/140/Stuff.coal"
           , "./test/Coal/examples/140/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left TypeError
 
@@ -655,7 +644,6 @@ e2eSpec = do
           [ "./test/Coal/examples/141/Eq.coal"
           , "./test/Coal/examples/141/Stuff.coal"
           , "./test/Coal/examples/141/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -666,7 +654,6 @@ e2eSpec = do
           [ "./test/Coal/examples/142/Eq.coal"
           , "./test/Coal/examples/142/Stuff.coal"
           , "./test/Coal/examples/142/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -677,7 +664,6 @@ e2eSpec = do
           [ "./test/Coal/examples/143/Eq.coal"
           , "./test/Coal/examples/143/Stuff.coal"
           , "./test/Coal/examples/143/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -688,7 +674,6 @@ e2eSpec = do
           [ "./test/Coal/examples/144/Eq.coal"
           , "./test/Coal/examples/144/Stuff.coal"
           , "./test/Coal/examples/144/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -699,7 +684,6 @@ e2eSpec = do
           [ "./test/Coal/examples/145/Eq.coal"
           , "./test/Coal/examples/145/Stuff.coal"
           , "./test/Coal/examples/145/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -709,7 +693,6 @@ e2eSpec = do
       [ "./test/Coal/examples/146/Eq.coal"
       , "./test/Coal/examples/146/Stuff.coal"
       , "./test/Coal/examples/146/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "147" $ do
@@ -718,7 +701,6 @@ e2eSpec = do
       [ "./test/Coal/examples/147/Eq.coal"
       , "./test/Coal/examples/147/Stuff.coal"
       , "./test/Coal/examples/147/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "148" $ do
@@ -734,7 +716,6 @@ e2eSpec = do
           [ "./test/Coal/examples/149/Eq.coal"
           , "./test/Coal/examples/149/Stuff.coal"
           , "./test/Coal/examples/149/Main.coal"
-          , "./lang/Coal/Combinators.coal"
           ]
       res `shouldBe` Left NoSuchIdentifier
 
@@ -744,7 +725,6 @@ e2eSpec = do
       [ "./test/Coal/examples/150/Eq.coal"
       , "./test/Coal/examples/150/Stuff.coal"
       , "./test/Coal/examples/150/Main.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "151" $ do
@@ -769,8 +749,6 @@ e2eSpec = do
     expectOutput
       "1"
       [ "./test/Coal/examples/156/Main.coal"
-      , "./lang/List.coal"
-      , "./lang/Coal/Combinators.coal"
       ]
 
   describe "158" $ do
@@ -778,9 +756,7 @@ e2eSpec = do
       "aabc"
       [ "./test/Coal/examples/158/Main.coal"
       , "./test/Coal/examples/158/Json.coal"
-      , "./lang/List.coal"
       , "./lang/String.coal"
-      , "./lang/Coal/Combinators.coal"
       , "./lang/Coal/Functor.coal"
       ]
 
@@ -803,7 +779,7 @@ runSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec files = do
   (e, _, _) <-
     runCompilerT emptyCompilerEnvironment $
-      runPass pipeline (files <> ["./lang/IO.coal"])
+      runPass pipeline (files <> ["./lang/IO.coal", "./lang/List.coal", "./lang/Coal/Combinators.coal"])
   case e of
     Left e1 ->
       pure (Left e1)
