@@ -1,7 +1,13 @@
 module Functor {
 
+  import List(map_list)
+
   trait Functor<f : * -> *> {
     map : (a -> b) -> f<a> -> f<b>
+  }
+
+  instance Functor<List> {
+    let map = map_list
   }
 
 }

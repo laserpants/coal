@@ -2,8 +2,14 @@ module Main {
 
   import namespace IO
   import Json(type Foo)
+  import Functor(map, trait Functor)
+
+  let xs = map(fn(x) => "a" <> x, ["abc", "abcd"])
 
   fun main() =
-    IO.println_string("foo")
+    match(xs) {
+      | h :: t => IO.println_string(h)
+      | _ => IO.println_string("---")
+    }
 
 }
