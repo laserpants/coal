@@ -784,6 +784,15 @@ e2eSpec = do
       , "./lang/Coal/Functor.coal"
       ]
 
+  describe "159" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          [ "./test/Coal/examples/159/Hello.coal"
+          , "./test/Coal/examples/159/Main.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
   it ("\"" <> expt <> "\"") $ do

@@ -1,0 +1,5 @@
+module Hello {
+
+  fun hello() = 2
+
+}

@@ -1,0 +1,13 @@
+module Main {
+
+  import namespace IO
+  import Hello(hello)
+
+  fun hello() = 1
+
+//  fun hello() = 1
+
+  fun main() =
+    IO.println_int32(hello())
+
+}
