@@ -232,6 +232,13 @@ objects =
                   #(double_to_string : double/string, d : double) (fn(r : string) => r : string)
               |]
         , OFunction
+            "Builtin$.string$_char_to_string"
+            [ Label Kernel.char "c"
+            ]
+            [r| 
+                  #(char_to_string : char/string, c : char) (fn(r : string) => r : string)
+              |]
+        , OFunction
             "Builtin$.nat$_unpack"
             [ Label (Kernel.TCon "$Nat" []) "nat"
             ]
@@ -833,6 +840,42 @@ objects =
             ]
             [r| 
                   #(string_remove_whitespace : string/string, str : string) (fn(a : string) => a : string)
+              |]
+        , OFunction
+            "Builtin$.string$_from_list"
+            [ Label (Kernel.TCon "List" [char]) "chars"
+            ]
+            [r| 
+                  let
+                    f : list(char)/string/string =
+                      fn(chars : list(char), result : string) =>
+                        match<string>(chars : list(char)) {
+                          | ( $Nil : list(char)
+                            ) =>  
+                              result : string
+                          | ( $Cons : char/list(char)/list(char)
+                            , c : char
+                            , cs : list(char)
+                            ) => 
+                              @<string>
+                                ( f : list(char)/string/string
+                                , cs : list(char)
+                                , @<string>
+                                    ( `Builtin$.operator$__string_concatenation` : string/string/string
+                                    , result : string 
+                                    , @<string>
+                                        ( `Builtin$.string$_char_to_string` : char/string
+                                        , c : char
+                                        )
+                                    )
+                                )
+                        }
+                  in
+                    @<string>
+                      ( f : list(char)/string/string
+                      , chars : list(char)
+                      , "" 
+                      )
               |]
         , OFunction
             "Builtin$.string$_to_list"

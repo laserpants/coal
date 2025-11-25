@@ -1,6 +1,6 @@
 module Json(encode_json, JsonValue) {
 
-  import String(intercalate, double_to_string, to_list)
+  import String(intercalate, double_to_string, to_list, from_list)
   import Functor(trait Functor)
 
   type JsonValue
@@ -63,6 +63,56 @@ module Json(encode_json, JsonValue) {
         | Some((a, rest)) => Some((f(a), rest))
         | None => None
       }
+
+  // Monadic bind
+  fun parser_bind(p : Parser<a>, f : a -> Parser<b>) : Parser<b> =
+    fn(input) =>
+      match(p(input)) {
+        | Some((a, rest)) => f(a, rest)
+        | None => None
+      }
+
+  // Choice
+  fun parser_or(p1 : Parser<a>, p2 : Parser<a>) : Parser<a> =
+    fn(input) =>
+      match(p1(input)) {
+        | Some(_) as r => r
+        | None => p2(input)
+      }
+
+  fun satisfy(pred : char -> bool) : Parser<char> =
+    fn(input) =>
+      match(to_list(input)) {
+        | ch :: rest =>
+            if pred(ch) 
+              then Some((ch, from_list(rest)))
+              else None
+        | [] => None
+      }
+
+  // Exact char
+  fun parser_char(c : char) : Parser<char> =
+    satisfy(fn(x) => x == c)
+
+  fun parser_string(s : string) : Parser<string> =
+    if s == "" 
+      then pure("") 
+      else 
+        let 
+          cs = 
+            to_list(s) 
+          in
+            fold(cs, pure([] : List<char>)) {
+              | ch :: @go =>
+                  fn(acc) =>
+                    parser_bind(acc, fn(chars) =>
+                      parser_bind(char(ch), fn(c) => pure(cons(c, chars)))
+                    )
+              | [] => 
+                  fn(acc) => acc
+            }
+//              |> parser_map(fn(chars) => from_list(reverse(chars)))
+
 
   //
 

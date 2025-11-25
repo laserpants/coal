@@ -480,6 +480,52 @@ double_to_string(double value)
 }
 
 char*
+char_to_string(uint32_t cp)
+{
+  char* out;
+
+  if (cp <= 0x7F) {
+    // 1-byte sequence
+    out = GC_malloc(2);
+    out[0] = (char)cp;
+    out[1] = '\0';
+  }
+  else if (cp <= 0x7FF) {
+    // 2-byte sequence
+    out = GC_malloc(3);
+    out[0] = (char)(0xC0 | ((cp >> 6) & 0x1F));
+    out[1] = (char)(0x80 | (cp & 0x3F));
+    out[2] = '\0';
+  }
+  else if (cp <= 0xFFFF) {
+    // Exclude UTF-16 surrogate range (invalid in UTF-8)
+    if (cp >= 0xD800 && cp <= 0xDFFF)
+      return NULL;
+
+    out = GC_malloc(4);
+    out[0] = (char)(0xE0 | ((cp >> 12) & 0x0F));
+    out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+    out[2] = (char)(0x80 | (cp & 0x3F));
+    out[3] = '\0';
+  }
+  else if (cp <= 0x10FFFF) {
+    // 4-byte sequence
+    out = GC_malloc(5);
+    out[0] = (char)(0xF0 | ((cp >> 18) & 0x07));
+    out[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
+    out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
+    out[3] = (char)(0x80 | (cp & 0x3F));
+    out[4] = '\0';
+  }
+  else {
+    // Out of Unicode range
+    return NULL;
+  }
+
+  return out;
+}
+
+char*
 string_concat(const char* a, const char* b)
 {
   if (a == NULL)

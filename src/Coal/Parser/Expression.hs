@@ -171,6 +171,7 @@ parseSpecialNameExpression =
         <|> "string$_float_to_string"
         <|> "string$_double_to_string"
         <|> "string$_to_list"
+        <|> "string$_from_list"
         <|> "string$_reverse"
         <|> "string$_remove_whitespace"
         <|> "string$_tail"

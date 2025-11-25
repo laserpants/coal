@@ -117,6 +117,10 @@ builtinFunctions =
     , forall0 (TIntrinsic IString ~> listType (TIntrinsic IChar))
     )
   ,
+    ( "string$_from_list"
+    , forall0 (listType (TIntrinsic IChar) ~> TIntrinsic IString)
+    )
+  ,
     ( "string$_tail"
     , forall0 (TIntrinsic IString ~> TIntrinsic IString)
     )
