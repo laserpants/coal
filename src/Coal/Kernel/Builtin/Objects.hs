@@ -11,7 +11,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name)
 import Text.Megaparsec (errorBundlePretty, runParser)
-import Text.RawString.QQ
+import Text.RawString.QQ (r)
 
 builtinObjects :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 builtinObjects = unsafeParseKernelExpr <$> objects

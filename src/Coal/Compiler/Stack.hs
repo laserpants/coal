@@ -52,9 +52,9 @@ import Coal.Compiler.Build (ModuleBuild)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
-import Coal.Compiler.Journal
+import Coal.Compiler.Journal (CompilerJournal (..))
 import Coal.Compiler.State
-import Coal.Language
+import Coal.Language (IndexedScheme, Kind, TypeIndex)
 import Coal.Language.Module (Module (..), modulePathName, principalPath)
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
