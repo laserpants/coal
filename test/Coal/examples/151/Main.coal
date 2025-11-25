@@ -2,7 +2,7 @@ module Main {
 
   import IO(println_int32)
 
-  alias Int32Pair = (int32, int32)
+  type alias Int32Pair = (int32, int32)
 
   let nums : Int32Pair = (11, 22) 
 

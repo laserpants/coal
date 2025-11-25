@@ -199,7 +199,7 @@ prettyTypePrec prec =
     TAlias name args t ->
       parensIf (prec > precApp) $
         group $
-          "alias"
+          "type alias"
             <+> (pretty name <> prettyArgs)
             <+> "="
             <+> prettyTypePrec precArrow t

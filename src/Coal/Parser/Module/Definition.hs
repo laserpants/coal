@@ -28,17 +28,18 @@ parseDefinition =
     <|> try parseFunctionGroup
     <|> parseFunctionDefinition
     <|> parseLetDefinition
+    <|> try parseTypeAlias
     <|> parseTypeDefinition
     <|> parseCodataDefinition
     <|> parseTraitDefinition
     <|> parseTraitInstance
     <|> parseTopLevelFold
     <|> parseTopLevelUnfold
-    <|> parseTypeAlias
 
 parseTypeAlias :: Parser (Definition Metadata o ())
 parseTypeAlias = do
   start <- getSourcePos
+  lexeme_ "type"
   lexeme_ "alias"
   n <- constructor
   ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))

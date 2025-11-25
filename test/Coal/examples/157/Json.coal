@@ -46,7 +46,7 @@ module Json(encode_json, JsonValue) {
 
   //
 
-  alias Parser<a> = string -> Option<(a, string)>
+  type alias Parser<a> = string -> Option<(a, string)>
 
   // Primitive that fails
   fun fail() : Parser<a> =
