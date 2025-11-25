@@ -9,12 +9,12 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.DebugIO (writeDebugFile)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
-import Coal.Kernel.LLVM.IRInterpreter.Monad
+import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
 import Control.Monad.State (gets)

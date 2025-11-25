@@ -6,17 +6,17 @@
 module Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Common.Environment
+import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)
 import Coal.Compiler.Kernel.TranslateDefinition (translateDefinition)
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module
-import Control.Monad.IO.Class
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
 import Extras (Name, (<.>))
 import Extras.Control.Monad (concatForM)

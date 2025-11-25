@@ -16,7 +16,7 @@ import Coal.Compiler.Journal (RecordEntry, listenRecordEntry, tellRecordEntry)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module (Module)
 import Control.Monad.RWS (forM, replicateM)
 import Data.Data (Data)
 import Data.Foldable (foldrM)

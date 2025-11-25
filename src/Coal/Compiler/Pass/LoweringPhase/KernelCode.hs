@@ -7,7 +7,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Builtin.Objects (builtinObjects)
 import qualified Coal.Kernel.Compiler as Kernel
-import Coal.Kernel.LLVM
+import Coal.Kernel.LLVM (IRConstruct, IRLine)
 import qualified Coal.Kernel.Language as Kernel
 import Control.Monad.IO.Class (MonadIO (..))
 import Extras (Name)

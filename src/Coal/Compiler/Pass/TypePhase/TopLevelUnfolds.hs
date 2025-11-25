@@ -7,7 +7,7 @@
 module Coal.Compiler.Pass.TypePhase.TopLevelUnfolds (passTopLevelUnfolds) where
 
 import Coal.AST.Flattening (flattenApplication)
-import Coal.AST.Shorthand
+import Coal.AST.Shorthand (applicationE, lambdaAnyE, lambdaE, letE, varE)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)

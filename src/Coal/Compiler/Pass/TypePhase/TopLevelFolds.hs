@@ -7,12 +7,12 @@
 
 module Coal.Compiler.Pass.TypePhase.TopLevelFolds (passTopLevelFolds) where
 
-import Coal.AST.Shorthand
+import Coal.AST.Shorthand (applicationE, lambda1E, matchE, varE)
 import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..))
 import Coal.Language.Module
