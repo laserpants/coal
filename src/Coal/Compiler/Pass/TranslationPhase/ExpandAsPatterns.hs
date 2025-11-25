@@ -15,7 +15,7 @@ import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDef (..))
 import Coal.Language.Module.Definition.Fold (FoldDef (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
-import Control.Monad.Writer
+import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)
 import Data.List.NonEmpty (NonEmpty (..))

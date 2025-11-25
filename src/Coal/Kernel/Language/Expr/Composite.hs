@@ -4,7 +4,7 @@ module Coal.Kernel.Language.Expr.Composite (tupleExpr, cons, recordExpr) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.Language.Expr (Expr)
-import Coal.Kernel.Language.Expr.Syntax
+import Coal.Kernel.Language.Expr.Syntax (app, var)
 import Coal.Kernel.Language.Type.Arrow (foldType)
 import Coal.Kernel.Language.Type.Syntax (arrow)
 import qualified Coal.Kernel.Language.Type.Syntax as Lang
