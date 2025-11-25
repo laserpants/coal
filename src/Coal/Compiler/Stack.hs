@@ -58,7 +58,7 @@ import Coal.Language (IndexedScheme, Kind, TypeIndex)
 import Coal.Language.Module (Module (..), modulePathName, principalPath)
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
-import Control.Monad.Except
+import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT)
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, gets, modify)
