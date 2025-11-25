@@ -1,6 +1,7 @@
 module Json(encode_json, JsonValue) {
 
   import String(intercalate, double_to_string, to_list, from_list)
+  import List(reverse)
   import Functor(trait Functor)
 
   type JsonValue
@@ -50,7 +51,7 @@ module Json(encode_json, JsonValue) {
 
   // Primitive that fails
   fun fail() : Parser<a> =
-    fn(input) => None
+    fn(_) => None
 
   // Succeed without consuming
   fun pure(x : a) : Parser<a> =
@@ -94,25 +95,31 @@ module Json(encode_json, JsonValue) {
   fun parser_char(c : char) : Parser<char> =
     satisfy(fn(x) => x == c)
 
-  fun parser_string(s : string) : Parser<string> =
-    if s == "" 
-      then pure("") 
-      else 
-        let 
-          cs = 
-            to_list(s) 
-          in
-            fold(cs, pure([] : List<char>)) {
-              | ch :: @go =>
-                  fn(acc) =>
-                    parser_bind(acc, fn(chars) =>
-                      parser_bind(char(ch), fn(c) => pure(cons(c, chars)))
-                    )
-              | [] => 
-                  fn(acc) => acc
-            }
-//              |> parser_map(fn(chars) => from_list(reverse(chars)))
 
+  fun parser_string(s : string) : Parser<string> =
+    if (s == "")
+      then pure("") 
+      else
+        pure("")
+
+//  fun parser_string(s : string) : Parser<string> =
+//    if s == "" 
+//      then pure("") 
+//      else 
+//        let 
+//          cs = 
+//            to_list(s) 
+//          in
+//            fold(cs, pure([] : List<char>)) {
+//              | ch :: @go =>
+//                  fn(acc) =>
+//                    parser_bind(acc, fn(chars) =>
+//                      parser_bind(parser_char(ch), fn(c) => pure(cons(c, chars)))
+//                    )
+//              | [] => 
+//                  fn(acc) => acc
+//            }
+//          |. parser_map(fn(chars) => from_list(reverse(chars)))
 
   //
 

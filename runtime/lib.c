@@ -489,15 +489,13 @@ char_to_string(uint32_t cp)
     out = GC_malloc(2);
     out[0] = (char)cp;
     out[1] = '\0';
-  }
-  else if (cp <= 0x7FF) {
+  } else if (cp <= 0x7FF) {
     // 2-byte sequence
     out = GC_malloc(3);
     out[0] = (char)(0xC0 | ((cp >> 6) & 0x1F));
     out[1] = (char)(0x80 | (cp & 0x3F));
     out[2] = '\0';
-  }
-  else if (cp <= 0xFFFF) {
+  } else if (cp <= 0xFFFF) {
     // Exclude UTF-16 surrogate range (invalid in UTF-8)
     if (cp >= 0xD800 && cp <= 0xDFFF)
       return NULL;
@@ -507,8 +505,7 @@ char_to_string(uint32_t cp)
     out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
     out[2] = (char)(0x80 | (cp & 0x3F));
     out[3] = '\0';
-  }
-  else if (cp <= 0x10FFFF) {
+  } else if (cp <= 0x10FFFF) {
     // 4-byte sequence
     out = GC_malloc(5);
     out[0] = (char)(0xF0 | ((cp >> 18) & 0x07));
@@ -516,8 +513,7 @@ char_to_string(uint32_t cp)
     out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
     out[3] = (char)(0x80 | (cp & 0x3F));
     out[4] = '\0';
-  }
-  else {
+  } else {
     // Out of Unicode range
     return NULL;
   }
@@ -739,6 +735,40 @@ string_remove_whitespace(const char* s)
 
   result[out_i] = '\0';
   return result;
+}
+
+static inline int
+utf8_char_len(unsigned char c)
+{
+  if (c < 0x80)
+    return 1;
+  else if ((c & 0xE0) == 0xC0)
+    return 2;
+  else if ((c & 0xF0) == 0xE0)
+    return 3;
+  else if ((c & 0xF8) == 0xF0)
+    return 4;
+  else
+    return 1; // fallback for invalid UTF-8
+}
+
+bool
+string_compare(const char* a, const char* b)
+{
+  while (*a && *b) {
+    uint32_t ca = string_head(a);
+    uint32_t cb = string_head(b);
+
+    if (ca != cb)
+      return false;
+
+    // advance each pointer
+    a += utf8_char_len((unsigned char)a[0]);
+    b += utf8_char_len((unsigned char)b[0]);
+  }
+
+  // both must end simultaneously
+  return *a == '\0' && *b == '\0';
 }
 
 /*

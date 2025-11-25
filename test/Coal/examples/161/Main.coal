@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+
+  fun main() =
+    let 
+      a = 
+        IO.println_bool("hello" == "hello")
+      in
+        IO.println_bool("hello" == "olleh")
+        
+}

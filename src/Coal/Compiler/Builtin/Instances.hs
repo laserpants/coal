@@ -440,6 +440,21 @@ builtinInstances =
         )
     )
   ,
+    ( "Comparable"
+    , TIntrinsic IString
+    , InstanceEntry
+        mempty
+        (TIntrinsic IString)
+        (TIntrinsic IString)
+        ( Map.fromList
+            [
+              ( "(==)"
+              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IBool)
+              )
+            ]
+        )
+    )
+  ,
     ( "Divisible"
     , TIntrinsic IFloat
     , InstanceEntry

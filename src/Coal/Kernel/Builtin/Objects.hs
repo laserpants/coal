@@ -1005,6 +1005,14 @@ objects =
                             if ([== int32](a : int32, b : int32)) then true else false 
               |]
         , OFunction
+            "Builtin$.(==)__$impl_Comparable(Intrinsic(String))"
+            [ Label Kernel.string "str1"
+            , Label Kernel.string "str2"
+            ]
+            [r| 
+                  #(string_compare : string/string/bool, str1 : string, str2 : string) (fn(r : bool) => r : bool)
+              |]
+        , OFunction
             "Builtin$.(/)__$impl_Divisible(Intrinsic(Float))"
             [ Label Kernel.float "q"
             , Label Kernel.float "r"
