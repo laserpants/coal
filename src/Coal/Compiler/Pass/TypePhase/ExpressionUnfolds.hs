@@ -7,7 +7,7 @@
 
 module Coal.Compiler.Pass.TypePhase.ExpressionUnfolds (passExpressionUnfolds) where
 
-import Coal.AST.Shorthand
+import Coal.AST.Shorthand (applicationE, letE, selectE, varE)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
