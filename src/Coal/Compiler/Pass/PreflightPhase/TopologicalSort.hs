@@ -9,7 +9,7 @@ import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
-import Coal.Language
+import Coal.Language (Kind)
 import Coal.Language.Module
 import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (graphFromEdges, reverseTopSort)
