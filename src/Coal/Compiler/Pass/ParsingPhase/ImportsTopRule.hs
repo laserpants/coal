@@ -4,13 +4,13 @@
 module Coal.Compiler.Pass.ParsingPhase.ImportsTopRule (passImportsTopRule) where
 
 import Coal.AST.Metadata (HasMetadata (..), Metadata (..))
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
+import Coal.Compiler.Journal (listenErrors, tellErrors)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Language
+import Coal.Language (Kind)
 import Coal.Language.Module
 import Coal.Language.Module.Definition (isDImport)
-import Control.Monad.Except
+import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
 import Extras (Name)
 
 passImportsTopRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
