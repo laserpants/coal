@@ -2,17 +2,13 @@ module List {
 
   import Coal.Combinators(always, identity)
 
-  fun head(list : List<a>) : Option<a> =
-    match(list) {
-      | [] => None
-      | x :: _ => Some(x)
-    }
+  fun head : List<a> -> Option<a> 
+    | ([]) = None
+    | (x :: _) = Some(x)
 
-  fun tail(list : List<a>) : Option<List<a>> =
-    match(list) {
-      | [] => None
-      | _ :: xs => Some(xs)
-    }
+  fun tail : List<a> -> Option<List<a>>
+    | ([]) = None
+    | (_ :: xs) = Some(xs)
 
   fun uncons(list : List<a>) : Option<(a, List<a>)> =
     match(list) {
