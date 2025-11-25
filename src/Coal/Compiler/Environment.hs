@@ -14,7 +14,7 @@ module Coal.Compiler.Environment (
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Build
-import Coal.Language
+import Coal.Language (IndexedScheme, IndexedType, Kind)
 import Data.Map.Strict (Map)
 import Extras (Name, Over, Set)
 
