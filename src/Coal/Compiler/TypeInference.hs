@@ -18,7 +18,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem
-import Control.Monad.Except
+import Control.Monad.Except (MonadError (..), forM_, void, when)
 import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (asks)
 import Control.Monad.State (evalState, gets)
