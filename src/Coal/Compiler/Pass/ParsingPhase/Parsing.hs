@@ -4,11 +4,11 @@
 module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (Kind)
+import Coal.Language.Module (Module)
 import Coal.Parser (ParserError, parseModule)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
