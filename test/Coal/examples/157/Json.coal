@@ -95,12 +95,19 @@ module Json(encode_json, JsonValue) {
   fun parser_char(c : char) : Parser<char> =
     satisfy(fn(x) => x == c)
 
-
   fun parser_string(s : string) : Parser<string> =
-    if (s == "")
-      then pure("") 
-      else
-        pure("")
+    let
+      cs =
+        to_list(s)
+      in
+        fold(cs) {
+          | [] =>
+              pure("")
+          | c :: rest =>
+              pure("")
+        }
+
+//        pure("")
 
 //  fun parser_string(s : string) : Parser<string> =
 //    if s == "" 
