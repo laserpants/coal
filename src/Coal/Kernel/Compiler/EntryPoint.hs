@@ -2,7 +2,7 @@
 
 module Coal.Kernel.Compiler.EntryPoint (entryPoint) where
 
-import Coal.Kernel.LLVM
+import Coal.Kernel.LLVM (IRConstruct (CDefine), IRLine (LInstruction), i32)
 
 entryPoint :: IRConstruct [IRLine]
 entryPoint = CDefine "main" i32 Nothing [] instructions
