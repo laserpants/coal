@@ -147,6 +147,8 @@ prettyError env =
       errorMessage ["No constructor '" <> ctor <> "' for type '" <> name <> "' in scope"] env erl
     NoCodataAccessorForCotype xsor name _ erl ->
       errorMessage ["No field '" <> xsor <> "' for codata type '" <> name <> "' in scope"] env erl
+    TraitNotInScope trait erl ->
+      errorMessage ["No trait '" <> trait <> "' in scope"] env erl
     MissingTraitDefinition name trait erl ->
       errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
     UnexpectedTraitDefinition name trait erl ->

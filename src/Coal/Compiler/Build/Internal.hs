@@ -453,8 +453,9 @@ collectInstances kinds traits =
     DInstance loc trait (InstanceDef _ q entries) -> do
       this <- lift $ gets (principalPath . compilerCurrentModule)
       case Environment.lookup trait traits of
-        Nothing ->
-          error "Implementation error"
+        Nothing -> do
+          tellErrors [TraitNotInScope trait (ErrorLocation this loc)]
+          throwError PreflightFailure
         Just (TraitEntry _ _ p dict) -> do
           let inames = definitionName <$> entries
               tnames = Environment.names dict

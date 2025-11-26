@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(println_string)
+
+  instance Baz<int32> {
+    fun foo() = 1
+  }
+
+  fun main() = println_string("A")
+}

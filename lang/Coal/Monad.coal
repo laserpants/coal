@@ -1,7 +1,17 @@
 module Monad {
 
+  import Coal.Combinators(flip)
+  import IO(__eval_io)
+
   trait Monad<m : * -> *> {
     bind : m<a> -> (a -> m<b>) -> m<b>
   }
+
+  instance Monad<IO> {
+    fun bind(x, f) = f(__eval_io(x))
+  }
+
+  let and_then : (a -> m<b>) -> m<a> -> m<b> =
+    flip(bind)
 
 }
