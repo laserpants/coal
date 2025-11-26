@@ -167,6 +167,7 @@ parseSpecialNameExpression =
         <|> "io$_print_double"
         <|> "io$_eval"
         <|> "io$_return"
+        <|> "string$_char_to_string"
         <|> "string$_int32_to_string"
         <|> "string$_float_to_string"
         <|> "string$_double_to_string"

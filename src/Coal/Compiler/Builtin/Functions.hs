@@ -101,6 +101,10 @@ builtinFunctions =
     , forall0 (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
     )
   ,
+    ( "string$_char_to_string"
+    , forall0 (TIntrinsic IChar ~> TIntrinsic IString)
+    )
+  ,
     ( "string$_int32_to_string"
     , forall0 (TIntrinsic IInt32 ~> TIntrinsic IString)
     )

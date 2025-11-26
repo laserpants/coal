@@ -2,6 +2,9 @@ module String {
 
   import List(reduce)
 
+  fun char_to_string(c : char) : string =
+    string$_char_to_string(c)
+
   fun int32_to_string(n : int32) : string =
     string$_int32_to_string(n)
 
@@ -30,6 +33,9 @@ module String {
 
   fun tail(s : string) : string =
     string$_tail(s)
+
+  fun cons(c : char, str : string) : string =
+    char_to_string(c) <> str
 
   fun reverse(s : string) : string =
     string$_reverse(s)

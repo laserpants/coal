@@ -1,7 +1,8 @@
 module Main {
 
   import namespace IO
-  import Json(encode_json, type JsonValue)
+  import Json(encode_json, type JsonValue, parser_string)
+  import String(char_to_string)
 
   let 
     test_value =
@@ -13,8 +14,24 @@ module Main {
       )
 
   fun main() =
-    IO.println_string(
-      encode_json(test_value)
-    )
+    match(parser_string("", "xyz")) {
+      | None =>
+          "None"
+      | Some((s, t)) =>
+          s <> "," <> t
+    } |. IO.println_string
+
+//  fun main() =
+//    IO.println_string(
+//      encode_json(test_value)
+//    )
 
 }
+
+//        | c :: rest =>
+//            // parse one matching char, then continue
+//            bindP(char(c), fn(_) =>
+//              bindP(go(rest), fn(chars2) =>
+//                pure(cons(c, chars2))
+//              )
+//            )

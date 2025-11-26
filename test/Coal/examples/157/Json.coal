@@ -1,6 +1,6 @@
 module Json(encode_json, JsonValue) {
 
-  import String(intercalate, double_to_string, to_list, from_list)
+  import String(intercalate, double_to_string, to_list, from_list, char_to_string, cons)
   import List(reverse)
   import Functor(trait Functor)
 
@@ -96,39 +96,16 @@ module Json(encode_json, JsonValue) {
     satisfy(fn(x) => x == c)
 
   fun parser_string(s : string) : Parser<string> =
-    let
-      cs =
-        to_list(s)
-      in
-        fold(cs) {
-          | [] =>
-              pure("")
-          | c :: rest =>
-              pure("")
-        }
-
-//        pure("")
-
-//  fun parser_string(s : string) : Parser<string> =
-//    if s == "" 
-//      then pure("") 
-//      else 
-//        let 
-//          cs = 
-//            to_list(s) 
-//          in
-//            fold(cs, pure([] : List<char>)) {
-//              | ch :: @go =>
-//                  fn(acc) =>
-//                    parser_bind(acc, fn(chars) =>
-//                      parser_bind(parser_char(ch), fn(c) => pure(cons(c, chars)))
-//                    )
-//              | [] => 
-//                  fn(acc) => acc
-//            }
-//          |. parser_map(fn(chars) => from_list(reverse(chars)))
-
-  //
+    fold(to_list(s)) {
+      | [] =>
+          pure("")
+      | c :: @rest =>
+          parser_bind(parser_char(c), fn(_) => 
+            parser_bind(rest, fn(cs) => 
+              pure(cons(c, cs))
+            )
+          )
+    }
 
   fun digit_to_int32(ch) : Option<int32> =
     match(ch) {
