@@ -1,7 +1,7 @@
 module Main {
 
   import IO(readln, println_string)
-  import Monad(trait Monad, and_then)
+  import Coal.Monad(trait Monad, and_then)
 
   fun main() = 
     readln() 

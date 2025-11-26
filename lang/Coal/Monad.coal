@@ -1,4 +1,4 @@
-module Monad {
+module Coal.Monad {
 
   import Coal.Combinators(flip)
   import IO(__eval_io)

@@ -2,7 +2,7 @@ module Json(encode_json, JsonValue) {
 
   import String(intercalate, double_to_string, to_list, from_list, char_to_string, cons)
   import List(reverse)
-  import Functor(trait Functor)
+  import Coal.Functor(trait Functor)
 
   type JsonValue
     = JsonNull

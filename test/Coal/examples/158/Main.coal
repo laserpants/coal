@@ -2,7 +2,7 @@ module Main {
 
   import namespace IO
   import Json(type Foo)
-  import Functor(map, trait Functor)
+  import Coal.Functor(map, trait Functor)
 
   let xs = map(fn(x) => "a" <> x, ["abc", "abcd"])
 
