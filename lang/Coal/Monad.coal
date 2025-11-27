@@ -1,6 +1,6 @@
 module Coal.Monad {
 
-  import Coal.Combinators(flip)
+  import Coal.Combinators(flip, always)
   import IO(__eval_io)
 
   trait Monad<m : * -> *> {
@@ -11,7 +11,12 @@ module Coal.Monad {
     fun bind(x, f) = f(__eval_io(x))
   }
 
+  fun then_do(a : m<a>, b : m<b>) : m<b> =
+    bind(a, always(b))
+
   let and_then : (a -> m<b>) -> m<a> -> m<b> =
     flip(bind)
+
+  let followed_by = flip(then_do)
 
 }
