@@ -20,7 +20,6 @@ e2eSpec = do
     expectOutput
       "24"
       [ "./test/Coal/examples/002/Main.coal"
-      , "./lang/Nat.coal"
       ]
 
   describe "003" $
@@ -40,7 +39,6 @@ e2eSpec = do
       "40320"
       [ "./test/Coal/examples/005/Math.coal"
       , "./test/Coal/examples/005/Main.coal"
-      , "./lang/Nat.coal"
       ]
 
   describe "006" $
@@ -83,7 +81,6 @@ e2eSpec = do
       res <-
         runSpec
           [ "./test/Coal/examples/013/Main.coal"
-          , "./lang/Nat.coal"
           ]
       res `shouldBe` Left TypeError
 
@@ -109,7 +106,6 @@ e2eSpec = do
     expectOutput
       "40320"
       [ "./test/Coal/examples/018/Main.coal"
-      , "./lang/Nat.coal"
       ]
 
   describe "019" $
@@ -125,21 +121,18 @@ e2eSpec = do
     expectOutput
       "1234"
       [ "./test/Coal/examples/022/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "023" $
     expectOutput
       "123"
       [ "./test/Coal/examples/023/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "024" $
     expectOutput
       "x"
       [ "./test/Coal/examples/024/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "025" $ do
@@ -154,7 +147,6 @@ e2eSpec = do
     expectOutput
       "ananab"
       [ "./test/Coal/examples/027/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "028" $
@@ -167,35 +159,30 @@ e2eSpec = do
     expectOutput
       "123"
       [ "./test/Coal/examples/030/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "031" $
     expectOutput
       "111\n111"
       [ "./test/Coal/examples/031/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "032" $
     expectOutput
       "9876"
       [ "./test/Coal/examples/032/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "033" $
     expectOutput
       "-123"
       [ "./test/Coal/examples/033/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "034" $
     expectOutput
       "59876"
       [ "./test/Coal/examples/034/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "035" $
@@ -249,7 +236,6 @@ e2eSpec = do
     expectOutput
       "720"
       [ "./test/Coal/examples/050/Main.coal"
-      , "./lang/Nat.coal"
       ]
 
   describe "051" $
@@ -296,7 +282,6 @@ e2eSpec = do
     expectOutput
       "24"
       [ "./test/Coal/examples/063/Main.coal"
-      , "./lang/Nat.coal"
       ]
 
   describe "064" $
@@ -316,7 +301,6 @@ e2eSpec = do
       "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}"
       [ "./test/Coal/examples/067/StringUtils.coal"
       , "./test/Coal/examples/067/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "068" $
@@ -332,7 +316,6 @@ e2eSpec = do
     expectOutput
       "100"
       [ "./test/Coal/examples/071/Main.coal"
-      , "./lang/Nat.coal"
       ]
 
   describe "072" $
@@ -438,7 +421,6 @@ e2eSpec = do
     expectOutput
       "8"
       [ "./test/Coal/examples/099/Main.coal"
-      , "./lang/Nat.coal"
       ]
 
   describe "100" $ do
@@ -520,7 +502,6 @@ e2eSpec = do
     expectOutput
       "342"
       [ "./test/Coal/examples/121/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "122" $ do
@@ -528,7 +509,6 @@ e2eSpec = do
       res <-
         runSpec
           [ "./test/Coal/examples/122/Main.coal"
-          , "./lang/String.coal"
           ]
       res `shouldBe` Left NoSuchIdentifier
 
@@ -536,28 +516,24 @@ e2eSpec = do
     expectOutput
       "4.1"
       [ "./test/Coal/examples/123/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "124" $ do
     expectOutput
       "ail"
       [ "./test/Coal/examples/124/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "125" $ do
     expectOutput
       "11"
       [ "./test/Coal/examples/125/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "126" $ do
     expectOutput
       "h"
       [ "./test/Coal/examples/126/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "127" $ do
@@ -566,7 +542,6 @@ e2eSpec = do
         runSpec
           [ "./test/Coal/examples/127/Main.coal"
           , "./test/Coal/examples/127/Foo.coal"
-          , "./lang/String.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -575,7 +550,6 @@ e2eSpec = do
       res <-
         runSpec
           [ "./test/Coal/examples/128/Main.coal"
-          , "./lang/String.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -583,14 +557,12 @@ e2eSpec = do
     expectOutput
       "Hello, World!\n"
       [ "./test/Coal/examples/129/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "131" $ do
     expectOutput
       "🚀"
       [ "./test/Coal/examples/131/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "136" $
@@ -756,8 +728,6 @@ e2eSpec = do
       "aabc"
       [ "./test/Coal/examples/158/Main.coal"
       , "./test/Coal/examples/158/Json.coal"
-      , "./lang/String.coal"
-      , "./lang/Coal/Functor.coal"
       ]
 
   describe "159" $ do
@@ -773,14 +743,12 @@ e2eSpec = do
     expectOutput
       "hello"
       [ "./test/Coal/examples/160/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "161" $ do
     expectOutput
       "true\nfalse"
       [ "./test/Coal/examples/161/Main.coal"
-      , "./lang/String.coal"
       ]
 
   describe "163" $ do
@@ -788,7 +756,6 @@ e2eSpec = do
       res <-
         runSpec
           [ "./test/Coal/examples/163/Main.coal"
-          , "./lang/Coal/Monad.coal"
           ]
       res `shouldBe` Left PreflightFailure
 
@@ -802,7 +769,7 @@ runSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec files = do
   (e, _, _) <-
     runCompilerT emptyCompilerEnvironment $
-      runPass pipeline (files <> ["./lang/IO.coal", "./lang/List.coal", "./lang/Coal/Combinators.coal"])
+      runPass pipeline files
   case e of
     Left e1 ->
       pure (Left e1)
