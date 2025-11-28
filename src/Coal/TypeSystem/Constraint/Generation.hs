@@ -352,8 +352,6 @@ clauseConstraintsImpl (EClause loc p cs) = do
               emitConstraints g
           ms2 <- emitConstraints e
           pure (typeOf e, ms1 <> ms2)
-        CLambda{} ->
-          error "TODO"
   names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 

@@ -7,10 +7,8 @@
 module Coal.Language.Expression.Choice (Choice (..), Guard (..)) where
 
 import Coal.Common.FreeVars (FreeVars (..))
-import Coal.Language.Pattern (Pattern)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
-import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Set as Set
 
 newtype Guard e a t = CGuard (e a t)
@@ -19,9 +17,7 @@ newtype Guard e a t = CGuard (e a t)
 instance (Ord t, Data a, Data t, Data (e a t), Typeable e) => FreeVars (Guard e a t) t where
   freeIn = Set.fromList . universeBi
 
-data Choice e a t
-  = CPlain a [Guard e a t] (e a t)
-  | CLambda a (NonEmpty (Pattern a t)) [Guard e a t] (e a t)
+data Choice e a t = CPlain a [Guard e a t] (e a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 instance (Ord t, Data a, Data t, Data (e a t), Typeable e) => FreeVars (Choice e a t) t where

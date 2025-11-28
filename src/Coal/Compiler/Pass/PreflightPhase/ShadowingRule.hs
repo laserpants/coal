@@ -130,8 +130,6 @@ instance (Data t) => RuleContext (Choice Expression Metadata t) where
     \case
       CPlain a gs e ->
         CPlain a <$> detectShadowing names gs <*> detectShadowing names e
-      CLambda{} ->
-        error "TODO"
 
 instance (Data t) => RuleContext (Guard Expression Metadata t) where
   detectShadowing names =

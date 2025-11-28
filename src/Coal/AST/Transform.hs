@@ -35,8 +35,6 @@ instance Transformable (Choice Expression) where
         CPlain a
           <$> traverse (rewrite name f) gs
           <*> rewrite name f e
-      CLambda{} ->
-        error "TODO"
 
 instance Transformable Clause where
   rewrite name f =

@@ -74,8 +74,6 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (Choice Expression a ()) 
     \case
       CPlain a gs e ->
         CPlain a <$> traverse compileUnfolds gs <*> compileUnfolds e
-      CLambda{} ->
-        error "TODO"
 
 instance (Monoid a, Data a) => CompileUnfoldsContext a (Guard Expression a ()) where
   compileUnfolds =

@@ -322,8 +322,6 @@ instance (Pretty t, Show t) => Dot t (Choice Expression a t) where
         fromNode (emitRectangle "CPlain" Nothing) $ do
           emitEdgesTo gs
           emitEdgeTo e
-      CLambda{} ->
-        error "TODO"
 
 instance (Pretty t, Show t) => Dot t (Guard Expression a t) where
   toDot =

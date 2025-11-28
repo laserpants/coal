@@ -104,8 +104,6 @@ instance PatternExhaustiveCheckContext (Choice Expression Metadata t) where
         CPlain a
           <$> traverse (patternExhaustiveCheck name) gs
           <*> patternExhaustiveCheck name e
-      CLambda{} ->
-        error "Not implemented"
 
 instance PatternExhaustiveCheckContext (Guard Expression Metadata t) where
   patternExhaustiveCheck name =

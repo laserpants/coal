@@ -77,8 +77,6 @@ instance (Data a, Monoid a) => RecordDesugarable a (Clause a IndexedType) where
               hs <- desugarRecordPatterns gs
               e1 <- foldrM desugar e fs
               pure (CPlain a1 hs e1)
-            CLambda{} ->
-              error "Not implemented"
         pure (EClause a q ds)
 
 instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where

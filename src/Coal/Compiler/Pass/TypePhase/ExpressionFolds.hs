@@ -80,14 +80,10 @@ instance (Monoid a, Data a) => FoldContext a (Choice Expression a ()) where
     \case
       CPlain a gs e ->
         CPlain a gs <$> expandFolds name lls e
-      CLambda{} ->
-        error "TODO"
   expandMatch =
     \case
       CPlain _ _ e -> do
         expandMatch e
-      CLambda{} ->
-        error "TODO"
 
 instance (Monoid a, Data a) => FoldContext a (Expression a ()) where
   expandFolds = flip . foldrM . updateName

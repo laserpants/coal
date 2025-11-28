@@ -67,8 +67,6 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Choice Expression a ()) wh
     \case
       CPlain a gs e ->
         CPlain a gs <$> expandFolds name lls e
-      CLambda{} ->
-        error "Not implemented"
 
 instance (Monoid a, Data a) => TopLevelFoldContext a (Expression a ()) where
   expandFolds = flip . foldrM . updateName
