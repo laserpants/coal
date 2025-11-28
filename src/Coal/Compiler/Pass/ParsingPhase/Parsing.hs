@@ -56,6 +56,10 @@ embedded =
     , $(embedFile "lang/Coal/Functor.coal")
     )
   ,
+    ( "Coal.Applicative"
+    , $(embedFile "lang/Coal/Applicative.coal")
+    )
+  ,
     ( "Coal.Monad"
     , $(embedFile "lang/Coal/Monad.coal")
     )

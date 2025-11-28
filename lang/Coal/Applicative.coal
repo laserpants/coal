@@ -1,0 +1,13 @@
+module Coal.Applicative {
+  
+  import Coal.Functor(trait Functor)
+
+  trait Applicative<f : * -> *> {
+    ap : f<a -> b> -> f<a> -> f<b>
+    pure : a -> f<a>
+  }
+
+  fun map2(f : p -> q -> r, a1 : f<p>, a2 : f<q>) : f<r> =                 
+    ap(map(f, a1), a2)
+
+}

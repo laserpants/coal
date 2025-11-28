@@ -1,10 +1,11 @@
 module Main {
 
   import IO(readln, println_string)
-  import Coal.Monad(trait Monad, and_then, followed_by)
+  import Coal.Monad(trait Monad, and_then, and_eval)
 
   fun main() = 
     readln() 
       |. and_then(println_string)
-      |. followed_by(println_string("Foo"))
+      |. and_eval(println_string("Foo"))
+
 }

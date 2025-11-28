@@ -17,6 +17,6 @@ module Coal.Monad {
   let and_then : (a -> m<b>) -> m<a> -> m<b> =
     flip(bind)
 
-  let followed_by = flip(then_do)
+  let and_eval = flip(then_do)
 
 }
