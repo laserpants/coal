@@ -159,8 +159,10 @@ instance (Pretty t, Show t) => Dot t (Binding Expression a t) where
         fromNode (emitRectangle "BPattern\\n" Nothing) $ do
           emitEdgeTo pat
           emitEdgeWithLabelTo "=" rhs
-      BFunction{} ->
-        error "TODO"
+      BFunction _ name ps e ->
+        fromNode (emitRectangle ("BFunction\\n" <> name) Nothing) $ do
+          emitEdgesTo ps
+          emitEdgeTo e
 
 instance (Pretty t, Show t) => Dot t (Expression a t) where
   toDot =

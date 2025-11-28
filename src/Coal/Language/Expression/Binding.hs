@@ -25,8 +25,8 @@ instance (Data a, Data t) => BoundVars (Binding e a t) where
     \case
       BPattern _ p _ ->
         Set.fromList (universeBi p)
-      BFunction{} ->
-        error "Not implemented"
+      BFunction _ name _ _ ->
+        Set.singleton name
 
 instance (Data a, Data t, FreeVars (e a t) t) => FreeVars (Binding e a t) t where
   freeIn =

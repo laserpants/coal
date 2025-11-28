@@ -8,7 +8,7 @@ import Coal.Language
 import Coal.Parser.Core
 import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Metadata (withMetadata)
-import Coal.Parser.Pattern (parsePattern)
+import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Primitive (parsePrimitive)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
@@ -111,8 +111,17 @@ patternBinding =
     e <- parseExpression
     pure (\loc -> BPattern loc p e)
 
+functionBinding :: Parser (Binding Expression Metadata ())
+functionBinding =
+  withMetadata $ do
+    n <- name
+    ps <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
+    symbol_ "="
+    e <- parseExpression
+    pure (\loc -> BFunction loc n ps e)
+
 parseBinding :: Parser (Binding Expression Metadata ())
-parseBinding = patternBinding -- <|> functionBinding
+parseBinding = try functionBinding <|> patternBinding
 
 parseLetExpression :: Parser (Expression Metadata ())
 parseLetExpression =

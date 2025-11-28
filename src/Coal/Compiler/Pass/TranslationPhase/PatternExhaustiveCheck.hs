@@ -94,8 +94,8 @@ instance PatternExhaustiveCheckContext (Binding Expression Metadata t) where
     \case
       BPattern a p e ->
         BPattern a p <$> patternExhaustiveCheck name e
-      BFunction{} ->
-        error "TODO"
+      BFunction a n ps e ->
+        BFunction a n ps <$> patternExhaustiveCheck name e
 
 instance PatternExhaustiveCheckContext (Choice Expression Metadata t) where
   patternExhaustiveCheck name =

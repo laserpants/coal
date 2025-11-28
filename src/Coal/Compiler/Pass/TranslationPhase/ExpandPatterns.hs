@@ -15,7 +15,7 @@ import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
-import Coal.Language.HasType (HasType (..))
+import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDef (..))
@@ -55,7 +55,12 @@ instance TransformContext (Binding Expression Metadata IndexedType) where
       BPattern a p e ->
         BPattern a <$> desugarPatterns p <*> desugarPatterns e
       BFunction a name ps e ->
-        BFunction a name <$> traverse desugarPatterns ps <*> desugarPatterns e
+        pure
+          ( BPattern
+              a
+              (PVariable mempty (Label (foldTypeOf e ps) name))
+              (ELambda mempty ps e)
+          )
 
 instance TransformContext (Expression Metadata IndexedType) where
   desugarPatterns = go

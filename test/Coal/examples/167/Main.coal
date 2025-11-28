@@ -1,0 +1,11 @@
+module Main {
+
+  import namespace IO
+
+  fun main() =
+    let
+      f(x, y) = x + y
+      in
+        IO.println_int32(f(41, 1))
+
+}

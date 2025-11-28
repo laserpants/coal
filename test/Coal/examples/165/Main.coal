@@ -1,0 +1,18 @@
+module Main {
+
+  import namespace IO
+
+  trait Banana<b> {
+    banana : b -> int32
+  }
+
+  instance Banana<int32> {
+    fun banana(x) = x
+  }
+
+  fun get_banana(x : b) with Banana<b> = 
+    banana(x)
+
+  fun main() =
+    IO.println_string("FOO")
+}
