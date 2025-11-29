@@ -151,6 +151,8 @@ interpreter =
       instruction t next ["udiv", irEncode t, commaSep [v1, v2]]
     IFDiv t v1 v2 next ->
       instruction t next ["fdiv", irEncode t, commaSep [v1, v2]]
+    IFNeg t v next ->
+      instruction t next ["fneg", irEncode t, irEncode v]
     IICmp Eq t v1 v2 next ->
       instruction t next ["icmp", "eq", commaSep [annotated v1, irEncode v2]]
     IFCmp OEq t v1 v2 next ->

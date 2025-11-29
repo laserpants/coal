@@ -461,9 +461,8 @@ objects =
             "Builtin$.negate__$impl_Numeric(Intrinsic(Float))"
             [ Label Kernel.float "f"
             ]
-            -- TODO: Use fneg
             [r| 
-                  [- float](0.0f, f : float)
+                  [neg float](f : float)
               |]
         , -- Numeric(double)
           OFunction
@@ -501,9 +500,8 @@ objects =
             "Builtin$.negate__$impl_Numeric(Intrinsic(Double))"
             [ Label Kernel.double "d"
             ]
-            -- TODO: Use fneg
             [r| 
-                  [- double](0.0, d : double)
+                  [neg double](d : double)
               |]
         , -- Numeric(nat)
           OFunction

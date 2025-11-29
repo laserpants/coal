@@ -250,3 +250,11 @@ irEvalOp =
       irCommentBlock "ONot" $ do
         v1 <- irEval e
         xor i1 v1 (I1 True)
+    ONegFloat e -> do
+      irCommentBlock "ONegFloat" $ do
+        v1 <- irEval e
+        fneg TFloat v1
+    ONegDouble e -> do
+      irCommentBlock "ONegDouble" $ do
+        v1 <- irEval e
+        fneg TDouble v1

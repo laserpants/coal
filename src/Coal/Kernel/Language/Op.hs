@@ -15,7 +15,7 @@ import Data.Eq.Deriving (deriveEq1)
 import Data.Generics.Uniplate.Data (childrenBi)
 import Text.Show.Deriving (deriveShow1)
 
--- | Binary operators
+-- | Operators
 data Op a
   = -- | Equality
     OEqInt32 a a
@@ -77,6 +77,9 @@ data Op a
     OAnd a a
   | -- | Logical NOT
     ONot a
+  | -- | Negation
+    ONegFloat a
+  | ONegDouble a
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 deriveShow1 ''Op

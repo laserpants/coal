@@ -48,6 +48,7 @@ data InstrOpF v t next
   | IFMul t v v (v -> next)
   | IUDiv t v v (v -> next)
   | IFDiv t v v (v -> next)
+  | IFNeg t v (v -> next)
   | IXOr t v v (v -> next)
   | IAnd t v v (v -> next)
   | IOr t v v (v -> next)

@@ -5,7 +5,7 @@ module Coal.Kernel.Parser.Op (op) where
 
 import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Type (Type (..))
-import Coal.Kernel.Parser (Parser, optional, try, ($>), (<|>))
+import Coal.Kernel.Parser (Parser, lexeme, optional, try, ($>), (<|>))
 import Coal.Kernel.Parser.Symbol (brackets, pair, parens, symbol)
 import Coal.Kernel.Parser.Type (type_)
 
@@ -113,7 +113,19 @@ op2 = do
       fail "Invalid operator"
 
 op1 :: Parser (a -> Op a)
-op1 = symbol "!" $> ONot
+op1 = symbol "!" $> ONot <|> op1Neg
+
+op1Neg :: Parser (a -> Op a)
+op1Neg = do
+  _ <- lexeme "neg"
+  t <- type_
+  case t of
+    TCon "float" [] ->
+      pure ONegFloat
+    TCon "double" [] ->
+      pure ONegDouble
+    _ ->
+      fail "Invalid operator"
 
 op :: Parser a -> Parser (Op a)
 op p =

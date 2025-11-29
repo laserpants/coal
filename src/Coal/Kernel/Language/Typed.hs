@@ -98,6 +98,10 @@ instance Typed (Op a) where
         Type.bool
       ONot{} ->
         Type.bool
+      ONegFloat{} ->
+        Type.float
+      ONegDouble{} ->
+        Type.double
       OAddInt32{} ->
         Type.int32
       OAddInt64{} ->

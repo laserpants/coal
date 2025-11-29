@@ -600,6 +600,10 @@ instance Dot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
         emitOp "OAnd" [op1, op2]
       Kernel.ONot op1 ->
         emitOp "ONot" [op1]
+      Kernel.ONegFloat op1 ->
+        emitOp "ONegFloat" [op1]
+      Kernel.ONegDouble op1 ->
+        emitOp "ONegDouble" [op1]
 
 instance Dot Kernel.Type (Kernel.Expr Kernel.Type) where
   toDot =

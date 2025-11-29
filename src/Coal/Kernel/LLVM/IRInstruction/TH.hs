@@ -10,6 +10,7 @@ module Coal.Kernel.LLVM.IRInstruction.TH (
   fmul,
   udiv,
   fdiv,
+  fneg,
   xor,
   and,
   or,
@@ -90,6 +91,10 @@ udiv = iUDiv
 {-# INLINE fdiv #-}
 fdiv :: (MonadFree (IRInstrOp) m) => IRType -> IRValue -> IRValue -> m IRValue
 fdiv = iFDiv
+
+{-# INLINE fneg #-}
+fneg :: (MonadFree (IRInstrOp) m) => IRType -> IRValue -> m IRValue
+fneg = iFNeg
 
 {-# INLINE xor #-}
 xor :: (MonadFree (IRInstrOp) m) => IRType -> IRValue -> IRValue -> m IRValue
