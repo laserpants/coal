@@ -196,7 +196,7 @@ codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
 
-traitEntry :: a -> Name -> TraitDef () -> TraitEntry a
+traitEntry :: a -> Name -> TraitDef -> TraitEntry a
 traitEntry loc name (TraitDef _ p ps) = TraitEntry loc name p (Environment.fromList ps)
 
 aliasEntry :: a -> Name -> AliasDef -> AliasEntry a

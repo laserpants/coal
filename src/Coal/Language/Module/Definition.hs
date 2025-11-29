@@ -42,7 +42,7 @@ data Definition a k t
   | -- | Namespace (qualified) import
     DQualifiedImport a Path
   | -- | Trait
-    DTrait a Name (TraitDef t)
+    DTrait a Name TraitDef
   | -- | Trait instance
     DInstance a Name (InstanceDef Definition a k t)
   | -- | Type alias

@@ -436,7 +436,7 @@ collectTraits env =
     _ ->
       pure ()
 
-addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef () -> StateT (ModuleBuild a) (CompilerT a m) ()
+addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef -> StateT (ModuleBuild a) (CompilerT a m) ()
 addTraitEntries env trait (TraitDef _ p entries) =
   forM_ entries $
     -- TODO
