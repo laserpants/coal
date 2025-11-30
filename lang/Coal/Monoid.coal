@@ -4,4 +4,8 @@ module Coal.Monoid {
     id : m
   }
 
+  instance Monoid<List<a>> {
+    let id = []
+  }
+
 }
