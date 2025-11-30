@@ -1,5 +1,14 @@
 module Char {
 
+  /**
+   * Converts a numeric character ('0'–'9') into its corresponding `int32` value.
+   *
+   * If the input character is a valid decimal digit, the function returns
+   * `Some(n)`, where `n` is the integer value of that digit. For example,
+   * `'3'` produces `Some(3)`.
+   *
+   * If the character is not a digit, the function returns `None`.
+   */
   fun digit_to_int32(ch : char) : Option<int32> =
     match(ch) {
       | '0' => Some(0)
