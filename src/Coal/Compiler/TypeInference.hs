@@ -271,7 +271,7 @@ checkMain loc t ps name = do
       [ Explicit
           (RuleEntrypoint loc t1)
           t1
-          (Forall mempty [] (TIntrinsic IUnit `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| [])))
+          (Forall mempty [] (TIntrinsic IUnit `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit)))
       ]
  where
   t1 = foldTypeOf t ps

@@ -318,7 +318,7 @@ expandConstantDefTraits name =
                       mempty
                       t
                       (dictionaryLambda tr trs expr)
-                      (ERecord mempty (TApplication KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| [])) fields Nothing :| [])
+                      (ERecord mempty (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| [])) fields Nothing :| [])
                   )
             else
               pure $

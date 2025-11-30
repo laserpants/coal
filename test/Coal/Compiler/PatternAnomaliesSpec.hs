@@ -113,7 +113,7 @@ testEnv =
           ( DataConstructor
               "Cons"
               2
-              (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+              (Forall mempty [] (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
           )
           (Set.fromList ["Cons", "Nil"])
       )
@@ -125,7 +125,7 @@ testEnv =
           ( DataConstructor
               "Nil"
               0
-              (Forall mempty [] (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+              (Forall mempty [] (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
           )
           (Set.fromList ["Cons", "Nil"])
       )

@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Coal.Compiler.BuildSpec (buildSpec)
+--import Coal.Compiler.BuildSpec (buildSpec)
 import Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec)
+import Coal.Language.TypeSpec
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Kernel.Spec (e2eKernelSpec)
 import E2E.Spec
@@ -11,6 +12,8 @@ spec :: SpecWith ()
 spec =
   describe "Unit tests" $ do
     typeSystemSpec
+    listTypeArgsSpec
+    typeApplicationSpec
     patternAnomaliesSpec
 
 main :: IO ()

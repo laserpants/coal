@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -16,7 +17,7 @@ import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (Type (..), foldType, unfoldType)
+import Coal.Language.Type (KindProxy (..), Type (..), applyTypeArgs, foldType, unfoldType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
@@ -103,9 +104,9 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k
       d ->
         head (universeBi d)
 
-instance HasType o Kind (Trait (Type o Kind)) where
+instance (KindProxy o Kind) => HasType o Kind (Trait (Type o Kind)) where
   typeOf (Trait name t) =
-    TApplication KTrait (TConstructor (KType `KArrow` KTrait) name) (t :| [])
+    applyTypeArgs KTrait (TConstructor (KType `KArrow` KTrait) name) (t :| [])
 
 {-# INLINE foldTypeOf #-}
 foldTypeOf :: (HasType o k t, HasType o k s, Functor f, Foldable f) => s -> f t -> Type o k

@@ -22,6 +22,7 @@ import Control.Monad.RWS (MonadReader, asks, get)
 import Control.Monad.State (MonadState, StateT, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name, concatMapM, forM_)
 
@@ -57,19 +58,23 @@ type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictiona
 runTypeAnnotation :: (Monad m) => a -> TypeAnnotation a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
 runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
 
+instantiateTypeApplication :: (MonadReader (TypeAnnotationContext a) m) => Type Parameter () -> NonEmpty (Type Parameter ()) -> TypeAnnotation a m IndexedType
+instantiateTypeApplication con@(TConstructor _ name) ts
+  | isTupleType con =
+      applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
+        <$> traverse instantiate ts
+instantiateTypeApplication (TVariable (Parameter _ v)) ts = do
+  ts1 <- traverse instantiate ts
+  t1 <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts1)) v
+  pure (applyTypeArgs KType t1 ts1)
+instantiateTypeApplication t ts =
+  applyTypeArgs KType <$> instantiate t <*> traverse instantiate ts
+
 instantiate :: (MonadReader (TypeAnnotationContext a) m) => Type Parameter () -> TypeAnnotation a m IndexedType
 instantiate =
   \case
-    TApplication _ con@(TConstructor _ name) ts
-      | isTupleType con ->
-          TApplication KType (TConstructor (tupleKind (length ts)) name)
-            <$> traverse instantiate ts
-    TApplication _ (TVariable (Parameter _ v)) ts -> do
-      ts1 <- traverse instantiate ts
-      t1 <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts1)) v
-      pure (TApplication KType t1 ts1)
-    TApplication _ t ts ->
-      TApplication KType <$> instantiate t <*> traverse instantiate ts
+    t@TApplication{} -> do
+      uncurry instantiateTypeApplication (listTypeArgs t)
     TVariable (Parameter _ v) ->
       TVariable <$> typeIndex KType v
     TArrow t1 t2 ->

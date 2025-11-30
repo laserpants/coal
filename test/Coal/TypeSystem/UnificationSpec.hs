@@ -240,7 +240,7 @@ unifyTestCases =
   , -- List '0 ~ int32
     -- ECannotUnify
     UnifyTestCase
-      ( TApplication
+      ( applyTypeArgs
           KType
           (TConstructor (KArrow KType KType) "List")
           (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
@@ -306,12 +306,12 @@ unifyTestCases =
       )
   , UnifyTestCase
       ( (TVariable (TypeIndex KType 312) `TArrow` TVariable (TypeIndex KType 311))
-          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 312) :| [])
-          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 311) :| [])
+          `TArrow` applyTypeArgs KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 312) :| [])
+          `TArrow` applyTypeArgs KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 311) :| [])
       )
       ( (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
-          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+          `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+          `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
       )
       ( Right $
           Substitution.fromList
@@ -334,7 +334,7 @@ matchTestCases =
     -- Substitution []
     MatchTestCase
       (TIntrinsic IInt32)
-      ( TApplication
+      ( applyTypeArgs
           KType
           (TConstructor (KArrow KType KType) "List")
           (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
@@ -589,12 +589,12 @@ matchTestCases =
       (Left ECannotMatch)
   , MatchTestCase
       ( (TVariable (TypeIndex KType 312) `TArrow` TVariable (TypeIndex KType 311))
-          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 312) :| [])
-          `TArrow` TApplication KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 311) :| [])
+          `TArrow` applyTypeArgs KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 312) :| [])
+          `TArrow` applyTypeArgs KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 311) :| [])
       )
       ( (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
-          `TArrow` TApplication KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+          `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
+          `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| [])
       )
       ( Right $
           Substitution.fromList

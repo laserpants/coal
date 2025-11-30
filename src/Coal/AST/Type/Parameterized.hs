@@ -24,6 +24,20 @@ instantiateVars ts0 env t = do
   ts1 <- execWriterT (instantiateTypeIndexes t)
   runReaderT (instantiateTypeVars t) (Environment.fromList (ts0 <> ts1), env)
 
+instantiateTypeApplication :: (MonadState s m, Supply s) => Type Parameter () -> NonEmpty (Type Parameter ()) -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
+instantiateTypeApplication con@(TConstructor _ name) ts
+  | isTupleType con =
+      applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
+        <$> traverse instantiateTypeVars ts
+instantiateTypeApplication t ts = do
+  u <- instantiateTypeVars t
+  us <- traverse instantiateTypeVars ts
+  case applyKind (kindOf <$> toList us) (kindOf u) of
+    Nothing ->
+      error "Kind mismatch"
+    Just k ->
+      pure (applyTypeArgs k u us)
+
 instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter () -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
 instantiateTypeVars =
   \case
@@ -34,18 +48,8 @@ instantiateTypeVars =
           pure (TVariable v)
         Nothing ->
           error "Implementation error"
-    TApplication _ con@(TConstructor _ name) ts
-      | isTupleType con ->
-          TApplication KType (TConstructor (tupleKind (length ts)) name)
-            <$> traverse instantiateTypeVars ts
-    TApplication _ t ts -> do
-      u <- instantiateTypeVars t
-      us <- traverse instantiateTypeVars ts
-      case applyKind (kindOf <$> toList us) (kindOf u) of
-        Nothing ->
-          error "Kind mismatch"
-        Just k ->
-          pure (TApplication k u us)
+    t@TApplication{} ->
+      uncurry instantiateTypeApplication (listTypeArgs t)
     TArrow t1 t2 ->
       TArrow <$> instantiateTypeVars t1 <*> instantiateTypeVars t2
     TIntrinsic t ->

@@ -78,14 +78,14 @@ typeIndexedTrickySpec =
           , TypeIndex KRow 14
           ]
 
-    it "finds indexes in nested TApplication types" $ do
+    it "finds indexes in nested applyTypeArgs types" $ do
       let t =
-            TApplication
+            applyTypeArgs
               KType
-              (TConstructor KType "List")
+              (TConstructor (KArrow KType KType) "List")
               ( NonEmpty.fromList
                   [ TVariable (TypeIndex KType 15)
-                  , TApplication
+                  , applyTypeArgs
                       KType
                       (TConstructor KType "Option")
                       (NonEmpty.singleton (TVariable (TypeIndex KType 16)))
@@ -122,7 +122,7 @@ typeIndexedTrickySpec =
               (TVariable (TypeIndex KType 22))
               (RExtend "b" (TVariable (TypeIndex KType 23)) RNil)
           t =
-            TApplication
+            applyTypeArgs
               KType
               (TConstructor KType "Map")
               (NonEmpty.fromList [TRow row])

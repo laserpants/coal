@@ -156,8 +156,8 @@ instance Unifiable IndexedType where
     bindType t t1
   unify (TArrow t1 u1) (TArrow t2 u2) =
     unify [t1, u1] [t2, u2]
-  unify (TApplication _ t1 ts1) (TApplication _ t2 ts2) =
-    unify (t1 <| ts1) (t2 <| ts2)
+  unify (TApplication _ t1 u1) (TApplication _ t2 u2) = do
+    unify [t1, u1] [t2, u2]
   unify (TConstructor _ c1) (TConstructor _ c2)
     | c1 == c2 =
         pure mempty
@@ -178,8 +178,8 @@ instance Unifiable IndexedType where
     bindType t t2
   match (TArrow t1 u1) (TArrow t2 u2) =
     match [t1, u1] [t2, u2]
-  match (TApplication _ t1 ts1) (TApplication _ t2 ts2) = do
-    match (t1 <| ts1) (t2 <| ts2)
+  match (TApplication _ t1 u1) (TApplication _ t2 u2) = do
+    match [t1, u1] [t2, u2]
   match (TRecord r1) (TRecord r2) =
     unify r1 r2
   match (TRow r1) (TRow r2) =

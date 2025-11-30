@@ -31,14 +31,14 @@ substitutionTests =
     SubstitutionSpecTestCase
       ( mapsTo
           0
-          ( TApplication
+          ( applyTypeArgs
               KType
               (TConstructor KType "List")
               (NonEmpty.singleton (TVariable (TypeIndex KType 1)))
           )
       )
       (TVariable (TypeIndex KType 0))
-      ( TApplication
+      ( applyTypeArgs
           KType
           (TConstructor KType "List")
           (NonEmpty.singleton (TVariable (TypeIndex KType 1)))
@@ -46,12 +46,12 @@ substitutionTests =
   , -- [0 ↦ int32] applied to List<'0>
     SubstitutionSpecTestCase
       (mapsTo 0 (TIntrinsic IInt32))
-      ( TApplication
+      ( applyTypeArgs
           KType
           (TConstructor KType "List")
           (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
       )
-      ( TApplication
+      ( applyTypeArgs
           KType
           (TConstructor KType "List")
           (NonEmpty.singleton (TIntrinsic IInt32))
@@ -97,11 +97,11 @@ normalizeTests =
     , TVariable (TypeIndex KType 0)
     )
   ,
-    ( TApplication
+    ( applyTypeArgs
         KType
         (TConstructor KType "List")
         (NonEmpty.singleton (TVariable (TypeIndex KType 5)))
-    , TApplication
+    , applyTypeArgs
         KType
         (TConstructor KType "List")
         (NonEmpty.singleton (TVariable (TypeIndex KType 0)))

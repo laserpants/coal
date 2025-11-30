@@ -49,8 +49,8 @@ convertConstructor =
       pure (TIntrinsic t)
     TArrow t1 t2 ->
       TArrow <$> convertConstructor t1 <*> convertConstructor t2
-    TApplication k t ts ->
-      TApplication k <$> convertConstructor t <*> traverse convertConstructor ts
+    TApplication k t1 t2 ->
+      TApplication k <$> convertConstructor t1 <*> convertConstructor t2
     TRow r ->
       TRow <$> traverse convertConstructor r
     TAlias name ts t ->

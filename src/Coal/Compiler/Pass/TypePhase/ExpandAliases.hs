@@ -112,15 +112,19 @@ instance (TransformContext t, Data a, Data t) => TransformContext (Definition a 
       o ->
         pure o
 
+expandAliasesTypeApplication :: (Monad m) => ParameterizedType -> ParameterizedType -> NonEmpty ParameterizedType -> CompilerT a m ParameterizedType
+expandAliasesTypeApplication t (TVariable (Parameter _ name)) ts =
+  lookupAlias t (toList ts) name
+expandAliasesTypeApplication t (TConstructor _ name) ts =
+  lookupAlias t (toList ts) name
+expandAliasesTypeApplication _ t ts =
+  applyTypeArgs () <$> expandAliases t <*> expandAliases ts
+
 instance TransformContext ParameterizedType where
   expandAliases =
     \case
-      t@(TApplication _ (TVariable (Parameter _ name)) ts) -> do
-        lookupAlias t (toList ts) name
-      t@(TApplication _ (TConstructor _ name) ts) -> do
-        lookupAlias t (toList ts) name
-      TApplication k t ts ->
-        TApplication k <$> expandAliases t <*> expandAliases ts
+      t@TApplication{} ->
+        uncurry (expandAliasesTypeApplication t) (listTypeArgs t)
       TArrow t1 t2 ->
         TArrow <$> expandAliases t1 <*> expandAliases t2
       TAlias name ts t ->
@@ -153,8 +157,8 @@ substituteAlias name s =
           s
       | otherwise ->
           t
-    TApplication k t1 ts ->
-      TApplication k (substituteAlias name s t1) (substituteAlias name s <$> ts)
+    TApplication k t1 t2 ->
+      TApplication k (substituteAlias name s t1) (substituteAlias name s t2)
     TArrow t1 t2 ->
       TArrow (substituteAlias name s t1) (substituteAlias name s t2)
     TRow row ->

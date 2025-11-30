@@ -67,8 +67,8 @@ translateApplication _ _ = Kernel.TOpq
 translateType :: Type o k -> Kernel.Type
 translateType =
   \case
-    TApplication _ t ts ->
-      foldr (translateApplication . translateType) (translateType t) ts
+    TApplication _ t1 t2 ->
+      translateApplication (translateType t1) (translateType t2)
     TArrow t1 t2 ->
       Kernel.arrow (translateType t1) (translateType t2)
     con@TConstructor{}

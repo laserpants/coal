@@ -26,75 +26,75 @@ builtinFunctions =
     )
   ,
     ( "io$_println_int32"
-    , forall0 (TIntrinsic IInt32 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IInt32 ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_println_int64"
-    , forall0 (TIntrinsic IInt64 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IInt64 ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_println_bignum"
-    , forall0 (TIntrinsic IBignum ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IBignum ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_println_string"
-    , forall0 (TIntrinsic IString ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IString ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_println_bool"
-    , forall0 (TIntrinsic IBool ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IBool ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_println_char"
-    , forall0 (TIntrinsic IChar ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IChar ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_println_float"
-    , forall0 (TIntrinsic IFloat ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IFloat ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_println_double"
-    , forall0 (TIntrinsic IDouble ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IDouble ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_int32"
-    , forall0 (TIntrinsic IInt32 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IInt32 ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_int64"
-    , forall0 (TIntrinsic IInt64 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IInt64 ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_bignum"
-    , forall0 (TIntrinsic IBignum ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IBignum ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_string"
-    , forall0 (TIntrinsic IString ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IString ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_bool"
-    , forall0 (TIntrinsic IBool ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IBool ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_char"
-    , forall0 (TIntrinsic IChar ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IChar ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_float"
-    , forall0 (TIntrinsic IFloat ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IFloat ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_print_double"
-    , forall0 (TIntrinsic IDouble ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+    , forall0 (TIntrinsic IDouble ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
     ( "io$_eval"
-    , forall1 $ \t0 -> TApplication KType (TConstructor (KArrow KType KType) "IO") (t0 :| []) ~> t0
+    , forall1 $ \t0 -> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (t0 :| []) ~> t0
     )
   ,
     ( "io$_return"
-    , forall1 $ \t0 -> t0 ~> TApplication KType (TConstructor (KArrow KType KType) "IO") (t0 :| [])
+    , forall1 $ \t0 -> t0 ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (t0 :| [])
     )
   ,
     ( "operator$__string_concatenation"

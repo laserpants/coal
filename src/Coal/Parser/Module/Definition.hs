@@ -102,7 +102,7 @@ parseConstructor tn qs = do
       [] ->
         TConstructor () tn
       a : as ->
-        TApplication
+        applyTypeArgs
           ()
           (TConstructor () tn)
           (TVariable <$> (a :| as))
@@ -121,7 +121,7 @@ parseCodataDefinition = do
         [] ->
           TConstructor () n
         a : as ->
-          TApplication
+          applyTypeArgs
             ()
             (TConstructor () n)
             (TVariable <$> (a :| as))

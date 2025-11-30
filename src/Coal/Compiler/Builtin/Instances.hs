@@ -3,7 +3,7 @@
 module Coal.Compiler.Builtin.Instances (builtinInstances) where
 
 import Coal.Compiler.Build (InstanceEntry (InstanceEntry))
-import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex))
+import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
 import Coal.Language.Type.Scheme (Scheme (Forall))
@@ -531,20 +531,20 @@ builtinInstances =
     )
   ,
     ( "Semigroup"
-    , TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+    , applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
     , InstanceEntry
         mempty
-        (TApplication () (TConstructor () "List") (TVariable (Parameter () "a") :| []))
-        (TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| []))
+        (applyTypeArgs () (TConstructor () "List") (TVariable (Parameter () "a") :| []))
+        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| []))
         ( Map.fromList
             [
               ( "(<>)"
               , Forall
                   mempty
                   []
-                  ( TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
-                      `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
-                      `TArrow` TApplication KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                  ( applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
                   )
               )
             ]
