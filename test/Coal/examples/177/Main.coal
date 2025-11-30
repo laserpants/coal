@@ -1,0 +1,11 @@
+module Main {
+
+  import IO(println_string)
+
+  fun main() =
+    let
+      a = (1 : int32, "foo")
+    in
+      println_string("abc")
+
+}

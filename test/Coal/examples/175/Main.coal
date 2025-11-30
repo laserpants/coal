@@ -3,16 +3,6 @@ module Main {
   import namespace IO
   import Coal.Monad(trait Monad, and_then)
 
-  trait Monoid<m> { // with Semigroup<m> { ??
-    id : m
-  }
-
-  instance Monoid<List<a>> {
-    let id = []
-  }
-
-  /* Reader */
-
   type Reader<r, a> = Reader(r -> a)
 
   fun run_reader(reader, env) =
@@ -43,26 +33,11 @@ module Main {
   fun local(transform, Reader(f)) = 
     Reader(fn(env) => f(transform(env)))
 
-//  /* Writer */
-//
-//  type Writer<w, a> = Writer(a, w)
-// 
-//  fun run_writer | (Writer(a, w)) = (a, w)
-//
-//  /* State */
-//
-//  type State<s, a> = State(s -> (a, s))
-//  
-//  fun run_state(state, val) =
-//    match(state) {
-//      | State(f) => f(val)
-//    }
-
   fun test_reader(val : int32) : Reader<int32, int32> =
     ask()
       |. and_then(fn(r) => pure_reader(val + r))
 
   fun main() =
-    IO.println_int32(run_reader(test_reader(5), 3))
+    IO.println_int32(run_reader(test_reader(5), 5))
 
 }

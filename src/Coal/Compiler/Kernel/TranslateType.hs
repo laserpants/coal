@@ -4,9 +4,10 @@
 module Coal.Compiler.Kernel.TranslateType (translateType) where
 
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language.Type (Type (..), isTupleType, listTypeArgs)
+import Coal.Language.Type (Type (..), listTypeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Row (Row (..))
+import qualified Data.Text as Text
 
 {-# INLINE tupleTCon #-}
 tupleTCon :: Kernel.Type
@@ -61,7 +62,7 @@ translateRow =
       Kernel.RNil
 
 translateApplication :: Kernel.Type -> Kernel.Type -> Kernel.Type
-translateApplication t (Kernel.TCon name ts) = Kernel.TCon name (ts <> [t])
+translateApplication t (Kernel.TCon name ts) = Kernel.TCon name (t : ts)
 translateApplication _ _ = Kernel.TOpq
 
 translateType :: Type o k -> Kernel.Type
@@ -72,8 +73,8 @@ translateType =
        in foldr (translateApplication . translateType) (translateType t1) ts
     TArrow t1 t2 ->
       Kernel.arrow (translateType t1) (translateType t2)
-    con@TConstructor{}
-      | isTupleType con ->
+    TConstructor _ con
+      | "#Tuple" `Text.isPrefixOf` con ->
           tupleTCon
     TConstructor _ "List" ->
       listTCon
