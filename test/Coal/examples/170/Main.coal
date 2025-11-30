@@ -27,21 +27,7 @@ module Main {
         }
 
   fun parse_int32(str : string) : Option<int32> =
-    let 
-      chars = 
-        to_list(remove_whitespace(str))
-      in
-        match(chars) {
-          | '-' :: pos => 
-              match(digits_to_unsigned(pos)) {
-                | None =>
-                    None
-                | Some(p) =>
-                    Some(negate(p))
-              }
-          | _ =>
-              digits_to_unsigned(chars)
-        }
+    digits_to_unsigned(to_list(remove_whitespace(str)))
 
   fun random_int32() : IO<int32> =
     random()
