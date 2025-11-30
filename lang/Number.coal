@@ -1,15 +1,15 @@
 module Number {
 
-  fun int32_to_float(n : int32) =
+  fun int32_to_float(n : int32) : float =
     #{int32_to_float : int32 -> float}(n)(fn(f) => f)
 
-  fun int32_to_double(n : int32) =
+  fun int32_to_double(n : int32) : double =
     #{int32_to_double : int32 -> double}(n)(fn(d) => d)
 
-  fun float_to_int32(f : float) =
+  fun float_to_int32(f : float) : int32 =
     #{float_to_int32 : float -> int32}(f)(fn(n) => n)
 
-  fun double_to_int32(d : double) =
+  fun double_to_int32(d : double) : int32 =
     #{double_to_int32 : double -> int32}(d)(fn(n) => n)
 
 }
