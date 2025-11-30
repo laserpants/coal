@@ -1,0 +1,11 @@
+module Coal.Monoid {
+
+  trait Monoid<m> {
+    id : m
+  }
+
+  instance Monoid<List<a>> {
+    let id = []
+  }
+
+}
