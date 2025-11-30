@@ -60,6 +60,10 @@ embedded =
     , $(embedFile "lang/Coal/Combinators.coal")
     )
   ,
+    ( "Coal.Monoid"
+    , $(embedFile "lang/Coal/Monoid.coal")
+    )
+  ,
     ( "Coal.Functor"
     , $(embedFile "lang/Coal/Functor.coal")
     )
