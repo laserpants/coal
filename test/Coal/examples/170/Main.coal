@@ -1,12 +1,12 @@
 module Main {
 
-  import IO(readln, println_string, random, return)
-  import Coal.Monad(trait Monad, and_then, and_eval)
-  import String(to_list, remove_whitespace, int32_to_string)
-  import List(is_empty)
-  import Coal.Functor(trait Functor(map))
   import Char(digit_to_int32)
+  import Coal.Functor(trait Functor(map))
+  import Coal.Monad(trait Monad, and_then, and_eval)
+  import IO(readln, println_string, random, return)
+  import List(is_empty)
   import Number(double_to_int32)
+  import String(to_list, remove_whitespace, int32_to_string)
 
   fun digits_to_unsigned(chars) : Option<int32> =
     if (is_empty(chars)) 
