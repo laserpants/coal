@@ -405,6 +405,22 @@ readln(void)
  *
  */
 
+int32_t
+float_to_int32(float f)
+{
+  int32_t n = (int32_t) f;
+
+  return n;
+}
+
+int32_t
+double_to_int32(double d)
+{
+  int32_t n = (int32_t) d;
+
+  return n;
+}
+
 float*
 int32_to_float(int32_t n)
 {

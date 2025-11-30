@@ -54,6 +54,8 @@ module IO {
   fun __return_io(val : v) : IO<v> =
     io$_return(val)
 
+  let return = __return_io
+
   fun read_file(path : string) : IO<string> =
     #{read_file : string -> IO<string>}(path)(fn(s) => __return_io(s))
 

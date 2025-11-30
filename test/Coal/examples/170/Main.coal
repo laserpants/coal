@@ -1,11 +1,12 @@
 module Main {
 
-  import IO(readln, println_string)
+  import IO(readln, println_string, random, return)
   import Coal.Monad(trait Monad, and_then, and_eval)
-  import String(to_list, remove_whitespace)
+  import String(to_list, remove_whitespace, int32_to_string)
   import List(is_empty)
   import Coal.Functor(trait Functor(map))
   import Char(digit_to_int32)
+  import Number(double_to_int32)
 
   fun digits_to_unsigned(chars) : Option<int32> =
     if (is_empty(chars)) 
@@ -42,21 +43,28 @@ module Main {
               digits_to_unsigned(chars)
         }
 
+  fun random_int32() : IO<int32> =
+    random()
+      |. and_then(fn(n) => return(double_to_int32(n * 10)))
+
   fun main() = 
     println_string("Enter your name")
       |. and_then(readln)
       |. and_then(fn(s) => println_string("Hello, " <> s <> "!"))
-      |. and_eval(println_string("Guess what number I am thinking of"))
-      |. and_then(readln)
-      |. and_then(fn(s) => 
-           match(parse_int32(s)) {
-             | Some(n) =>
-                 if (n == 42) 
-                   then println_string("You guessed right!")
-                   else println_string("Sorry, the number I was thinking of was 42.")
-             | None =>
-                 println_string("Not a number")
-           }
-      )
+      |. and_eval(random_int32())
+      |. and_then(fn(rand) => 
+           println_string("Guess what number I am thinking of")
+             |. and_then(readln)
+             |. and_then(fn(s) => 
+                  match(parse_int32(s)) {
+                    | Some(n) =>
+                        if (n == rand) 
+                          then println_string("You guessed right!")
+                          else println_string("Sorry, the number I was thinking of was " <> int32_to_string(rand) <> ".")
+                    | None =>
+                        println_string("Not a number")
+                  }
+                )
+         )
 
 }

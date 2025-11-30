@@ -6,4 +6,10 @@ module Number {
   fun int32_to_double(n : int32) =
     #{int32_to_double : int32 -> double}(n)(fn(d) => d)
 
+  fun float_to_int32(f : float) =
+    #{float_to_int32 : float -> int32}(f)(fn(n) => n)
+
+  fun double_to_int32(d : double) =
+    #{double_to_int32 : double -> int32}(d)(fn(n) => n)
+
 }
