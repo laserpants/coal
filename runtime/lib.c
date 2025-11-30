@@ -8,6 +8,7 @@
 #include <stddef.h> // for ptrdiff_t
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 #include <wchar.h>
 
 #include "hashmap.h"
@@ -408,7 +409,7 @@ readln(void)
 int32_t
 float_to_int32(float f)
 {
-  int32_t n = (int32_t) f;
+  int32_t n = (int32_t)f;
 
   return n;
 }
@@ -416,7 +417,7 @@ float_to_int32(float f)
 int32_t
 double_to_int32(double d)
 {
-  int32_t n = (int32_t) d;
+  int32_t n = (int32_t)d;
 
   return n;
 }
@@ -821,4 +822,11 @@ double_random(void)
   *p = (double)rand() / (double)RAND_MAX;
 
   return p;
+}
+
+void
+init(void)
+{
+  gc_init();
+  srand((unsigned)time(NULL));
 }

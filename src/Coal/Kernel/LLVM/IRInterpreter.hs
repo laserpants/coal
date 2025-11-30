@@ -56,6 +56,7 @@ closureSupport =
 support :: [IRConstruct [IRLine]]
 support =
   [ CType "closure" (closureStructType 0)
+  , CDeclare "init" TVoid []
   , CDeclare "gc_init" TVoid []
   , CDeclare "gc_malloc" i8Ptr [i64]
   , CDeclare "hashmap_init" i8Ptr []
