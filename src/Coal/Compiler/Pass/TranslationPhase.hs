@@ -11,7 +11,7 @@ import Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns)
 import Coal.Compiler.Pass.TranslationPhase.MatchExpressions (passMatchExpressions)
 import Coal.Compiler.Pass.TranslationPhase.Nats (passCompileNats)
 import Coal.Compiler.Pass.TranslationPhase.NormalizeObjects (passNormalizeObjects)
-import Coal.Compiler.Pass.TranslationPhase.OrPatterns
+import Coal.Compiler.Pass.TranslationPhase.OrPatterns (passOrPatterns)
 import Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternExhaustiveCheck)
 import Coal.Compiler.Pass.TranslationPhase.Placeholders (passPlaceholders)
 import Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns)
