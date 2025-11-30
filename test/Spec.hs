@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
---import Coal.Compiler.BuildSpec (buildSpec)
+-- import Coal.Compiler.BuildSpec (buildSpec)
 import Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec)
 import Coal.Language.TypeSpec
 import Coal.TypeSystemSpec (typeSystemSpec)

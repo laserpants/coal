@@ -13,7 +13,7 @@ import Data.Functor (($>))
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import Extras.Text.Megaparsec.Char (doubleQuote, singleQuote)
-import Text.Megaparsec
+import Text.Megaparsec (MonadParsec (try), manyTill, (<|>))
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
