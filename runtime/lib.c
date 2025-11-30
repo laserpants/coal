@@ -405,16 +405,24 @@ readln(void)
  *
  */
 
-float
+float*
 int32_to_float(int32_t n)
 {
-  return (float)n;
+  float* p = gc_malloc(sizeof(float));
+
+  *p = (float)n;
+
+  return p;
 }
 
-double
+double*
 int32_to_double(int32_t n)
 {
-  return (double)n;
+  double* p = gc_malloc(sizeof(double));
+
+  *p = (double)n;
+
+  return p;
 }
 
 mpz_t*
@@ -787,4 +795,14 @@ int64_t
 int64_mod(int64_t m, int64_t n)
 {
   return m % n;
+}
+
+double*
+double_random(void)
+{
+  double* p = gc_malloc(sizeof(double));
+
+  *p = (double)rand() / (double)RAND_MAX;
+
+  return p;
 }

@@ -44,6 +44,10 @@ embedded =
     , $(embedFile "lang/Nat.coal")
     )
   ,
+    ( "Number"
+    , $(embedFile "lang/Number.coal")
+    )
+  ,
     ( "String"
     , $(embedFile "lang/String.coal")
     )

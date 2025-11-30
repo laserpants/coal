@@ -1,0 +1,9 @@
+module Number {
+
+  fun int32_to_float(n : int32) =
+    #{int32_to_float : int32 -> float}(n)(fn(f) => f)
+
+  fun int32_to_double(n : int32) =
+    #{int32_to_double : int32 -> double}(n)(fn(d) => d)
+
+}

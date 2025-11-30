@@ -1,0 +1,10 @@
+module Main {
+
+  import namespace IO
+  import Number(int32_to_float)
+
+  fun main() =
+    // This should be a type error!!
+    IO.println_double(int32_to_float(5))
+
+}

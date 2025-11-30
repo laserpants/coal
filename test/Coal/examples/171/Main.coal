@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(random, println_double)
+  import Coal.Monad(trait Monad, and_then)
+
+  fun main() =
+    random()
+      |. and_then(println_double)
+
+}
