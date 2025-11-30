@@ -1,0 +1,62 @@
+module Main {
+
+  import IO(readln, println_string)
+  import Coal.Monad(trait Monad, and_then, and_eval)
+  import String(to_list, remove_whitespace)
+  import List(is_empty)
+  import Coal.Functor(trait Functor(map))
+  import Char(digit_to_int32)
+
+  fun digits_to_unsigned(chars) : Option<int32> =
+    if (is_empty(chars)) 
+      then
+        None
+      else
+        fold(chars, Some(0)) {
+          | ch :: @go =>
+              fn(t) =>
+                match(digit_to_int32(ch)) {
+                  | Some(n) =>
+                      go(map(fn(s) => n + 10 * s, t))
+                  | None =>
+                      None
+                }
+          | [] =>
+              fn(t) => t
+        }
+
+  fun parse_int32(str : string) : Option<int32> =
+    let 
+      chars = 
+        to_list(remove_whitespace(str))
+      in
+        match(chars) {
+          | '-' :: pos => 
+              match(digits_to_unsigned(pos)) {
+                | None =>
+                    None
+                | Some(p) =>
+                    Some(negate(p))
+              }
+          | _ =>
+              digits_to_unsigned(chars)
+        }
+
+  fun main() = 
+    println_string("Enter your name")
+      |. and_then(readln)
+      |. and_then(fn(s) => println_string("Hello, " <> s <> "!"))
+      |. and_eval(println_string("Guess what number I am thinking of"))
+      |. and_then(readln)
+      |. and_then(fn(s) => 
+           match(parse_int32(s)) {
+             | Some(n) =>
+                 if (n == 42) 
+                   then println_string("You guessed right!")
+                   else println_string("Sorry, the number I was thinking of was 42.")
+             | None =>
+                 println_string("Not a number")
+           }
+      )
+
+}
