@@ -19,7 +19,7 @@ import Coal.Common.Supply (supply)
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
-import Coal.Language.Module
+import Coal.Language.Module (ConstantDef, Definition, FunctionDef, Module)
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..))
