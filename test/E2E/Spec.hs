@@ -810,6 +810,12 @@ e2eSpec = do
       [ "./test/Coal/examples/176/Main.coal"
       ]
 
+  describe "178" $ do
+    expectOutput
+      "Authentication failed"
+      [ "./test/Coal/examples/178/Main.coal"
+      ]
+
   describe "179" $ do
     expectOutput
       "aaa"
