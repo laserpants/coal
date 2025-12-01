@@ -2,47 +2,82 @@ module List {
 
   import Coal.Combinators(always, identity)
 
+  /**
+   * Return the first element of the list wrapped in `Some`, or `None` if the
+   * list is empty.
+   */
   fun head : List<a> -> Option<a> 
     | [] = None
     | x :: _ = Some(x)
 
+  /**
+   * Return the list without its first element, or `None` if the list is empty.
+   */
   fun tail : List<a> -> Option<List<a>>
     | [] = None
     | _ :: xs = Some(xs)
 
+  /**
+   * Return a pair (head, tail) wrapped in `Some`, or `None` if the list is 
+   * empty.
+   */
   fun uncons(list : List<a>) : Option<(a, List<a>)> =
     match(list) {
       | [] => None
       | x :: xs => Some((x, xs))
     }
 
+  /**
+   * Return the length of the list as a natural number.
+   */
   fun length(list : List<a>) : nat =
     fold(list) {
       | [] => Zero
       | _ :: @xs => Succ(xs)
     }
 
+  /**
+   * Right-associative fold.
+   * 
+   * Apply the function to each element and an accumulator, starting from the
+   * end of the list.
+   */
   fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
       | [] => identity
       | x :: @go => go << f(x)
     }
 
+  /**
+   * Return a list containing exactly one element.
+   */
   fun singleton(elem : a) : List<a> = 
     [elem]
 
+
+  /**
+   * Return `true` if the list is empty, `false` otherwise.
+   */
   fun is_empty(list : List<a>) : bool =
     match(list) {
       | [] => true
       | _ => false
     }
 
+  /**
+   * Flatten a list of lists into a single list.
+   */
   fun concat(list : List<List<a>>) : List<a> =
     fold(list) {
       | [] => []
       | xs :: @xss => xs ++ xss
     }
 
+  /**
+   * Return the first `n` elements of the list.
+   * 
+   * If the list is shorter than `n`, return the whole list.
+   */
   fun take(n : nat, list : List<a>) : List<a> =
     fold(n, list) {
       | Zero => 
@@ -55,6 +90,11 @@ module List {
             }
     }
 
+  /**
+   * Remove the first `n` elements from the list.
+   *
+   * If the list is shorter than `n`, return an empty list.
+   */
   fun drop(n : nat, list : List<a>) : List<a> =
     fold(n, list) {
       | Zero => 
@@ -67,27 +107,42 @@ module List {
             }
     }
 
+  /**
+   * Return the element at index `n`, or `None` if out of bounds.
+   */
   fun element_at(n : nat, list : List<a>) : Option<a> =
     head(drop(n, list)) 
 
+  /**
+   * Transform each element of a list using the given function.
+   */
   fun map(f : a -> b, list : List<a>) : List<b> =
     fold(list) {
       | [] => []
       | x :: @xs => f(x) :: xs
     }
 
+  /**
+   * Keep only the elements for which the predicate returns `true`.
+   */
   fun filter(p : a -> bool, list : List<a>) : List<a> =
     fold(list) {
       | [] => []
       | x :: @xs => if p(x) then x :: xs else xs
     }
 
+  /**
+   * Return a new list with the elements in reverse order.
+   */
   fun reverse(list : List<a>) : List<a> =
     match(list) {
       | [] => []
       | x :: xs => reduce(fn(head, tail) => head :: tail, [x], xs)
     }
 
+  /**
+   * Convert a list of pairs into a pair of lists, in the natural way.
+   */
   fun unzip(list : List<(a, b)>) : (List<a>, List<b>) =
     fold(list, ([], [])) {
       | [] => 
