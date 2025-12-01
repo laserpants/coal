@@ -2,6 +2,7 @@ module Main {
 
   import namespace IO
   import Coal.Monad(trait Monad, and_then)
+  import Coal.Combinators(fst)
 
   type State<s, a> = State(s -> (a, s))
 
@@ -10,6 +11,9 @@ module Main {
       | State(f) => 
           f(s0)
     }
+
+  fun eval_state(st, s0) =
+    fst(run_state(st, s0))
 
   fun pure_state(x) =
     State(fn(s) => (x, s))
@@ -34,12 +38,25 @@ module Main {
 
   //
 
-  fun increment() =
-    get() |. and_then(fn(n) => put(n + 1))
+  fun authenticate
+    | "password123" = put(true)
+    | _             = put(false)
 
-//  fun state_example(x) =
+   fun msg(success : bool) =
+     if (success) then "Logged in" else "Authentication failed"
+
+  fun state_example(pw : string) =
+    get()
+      |. and_then(fn(logged_in) => 
+           if (logged_in) 
+             then pure_state("Already logged in")
+             else 
+               authenticate(pw) 
+                 |. and_then(get) 
+                 |. and_then(pure_state << msg)
+      )
 
   fun main() =
-    IO.println_string("wow")
+    IO.println_string(eval_state(state_example("abc123"), false))
 
 }

@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.PatternMatching.Compiler (
@@ -71,7 +72,7 @@ compileEnvelope =
         ( EApplication
             mempty
             boolean
-            (EBinaryOperator mempty (expressionType e1 `arrow` expressionType e1 `arrow` boolean) OEqualTo)
+            (EVariable mempty (Label (expressionType e1 `arrow` expressionType e1 `arrow` boolean) "(==)"))
             (EVariable mempty ll :| [e1])
         )
         (compileEnvelope e2)
