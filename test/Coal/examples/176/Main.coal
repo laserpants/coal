@@ -41,7 +41,7 @@ module Main {
       |. and_eval(tell(["three"]))
       |. and_eval(pure_writer(100))
 
-  fun foo(msgs : List<string>) =
+  fun print_msgs(msgs : List<string>) =
     fold(msgs) {
       | [] => 
           return()
@@ -51,7 +51,7 @@ module Main {
 
   fun main() =
     match(run_writer(test_writer())) {
-      | ((r, w)) => foo(w)
+      | ((_, w)) => print_msgs(w)
     }
 
 }
