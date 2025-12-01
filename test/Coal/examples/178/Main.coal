@@ -1,7 +1,7 @@
 module Main {
 
   import namespace IO
-  import Coal.Monad(trait Monad)
+  import Coal.Monad(trait Monad, and_then)
 
   type State<s, a> = State(s -> (a, s))
 
@@ -31,6 +31,13 @@ module Main {
 
   fun modify(f) = 
     State(fn(s) => ((), f(s)))
+
+  //
+
+  fun increment() =
+    get() |. and_then(fn(n) => put(n + 1))
+
+//  fun state_example(x) =
 
   fun main() =
     IO.println_string("wow")
