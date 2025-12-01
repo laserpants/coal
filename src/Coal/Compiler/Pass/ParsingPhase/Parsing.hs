@@ -56,6 +56,10 @@ embedded =
     , $(embedFile "lang/Char.coal")
     )
   ,
+    ( "Option"
+    , $(embedFile "lang/Option.coal")
+    )
+  ,
     ( "Coal.Combinators"
     , $(embedFile "lang/Coal/Combinators.coal")
     )

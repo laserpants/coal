@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import namespace Option
+
+  fun main() =
+    IO.println_int32(Option.with_default(224, None))
+
+}

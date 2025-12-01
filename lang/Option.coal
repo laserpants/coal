@@ -1,0 +1,7 @@
+module Option {
+
+  fun with_default
+    | _, Some(value) = value
+    | value, _       = value
+
+}
