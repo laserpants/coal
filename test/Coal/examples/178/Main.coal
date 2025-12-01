@@ -1,0 +1,38 @@
+module Main {
+
+  import namespace IO
+  import Coal.Monad(trait Monad)
+
+  type State<s, a> = State(s -> (a, s))
+
+  fun run_state(st, s0) =
+    match(st) {
+      | State(f) => 
+          f(s0)
+    }
+
+  fun pure_state(x) =
+    State(fn(s) => (x, s))
+
+  instance Monad<State<s>> {
+    fun bind(m, k) =
+      State(fn(s0) =>
+        let (a, s1) = run_state(m, s0) 
+        in
+        run_state(k(a), s1)
+      )
+  }
+
+  fun get() = 
+    State(fn(s) => (s, s))
+
+  fun put(s) = 
+    State(fn(_) => ((), s))
+
+  fun modify(f) = 
+    State(fn(s) => ((), f(s)))
+
+  fun main() =
+    IO.println_string("wow")
+
+}
