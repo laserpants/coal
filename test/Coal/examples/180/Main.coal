@@ -1,0 +1,11 @@
+module Main {
+
+  import namespace IO
+
+  fun foo
+    | ((x, _)) = x
+
+  fun main() =
+    IO.println_string(foo(("abc", 3)))
+
+}
