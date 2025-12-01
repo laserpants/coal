@@ -62,11 +62,11 @@ toExpr n loc fs =
   ELambda
     loc
     (varP <$> qs)
-    (matchE (tupleE (varE <$> qs)) clauses)
+    (matchE (if length qs == 1 then varE (NonEmpty.head qs) else tupleE (varE <$> qs)) clauses)
  where
   ns = NonEmpty.fromList [1 .. n]
   qs = (<>) "$arg_" . showt <$> ns
   clauses =
-    case [EClause a (tupleP ps) (CPlain mempty [] e :| []) | FunctionDef a _ _ ps e <- fs] of
+    case [EClause a (if length ps == 1 then NonEmpty.head ps else tupleP ps) (CPlain mempty [] e :| []) | FunctionDef a _ _ ps e <- fs] of
       c : cs -> c :| cs
       [] -> error "Implementation error"
