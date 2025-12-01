@@ -3,12 +3,12 @@ module List {
   import Coal.Combinators(always, identity)
 
   fun head : List<a> -> Option<a> 
-    | ([]) = None
-    | (x :: _) = Some(x)
+    | [] = None
+    | x :: _ = Some(x)
 
   fun tail : List<a> -> Option<List<a>>
-    | ([]) = None
-    | (_ :: xs) = Some(xs)
+    | [] = None
+    | _ :: xs = Some(xs)
 
   fun uncons(list : List<a>) : Option<(a, List<a>)> =
     match(list) {

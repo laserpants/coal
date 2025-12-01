@@ -199,11 +199,19 @@ parseFunctionGroup = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> name
   ann <- optional parseAnnotation
-  fns <- some (void pipe *> parseFunctionDef ann)
+  fns <- some (void pipe *> parseGroupFunctionDef ann)
   end <- getSourcePos
   case fns of
     [] -> fail "Empty list"
     f : fs -> pure (DFunction (Metadata start end) fn (f :| fs) [])
+
+parseGroupFunctionDef :: Maybe ParameterizedType -> Parser (FunctionDef Metadata ())
+parseGroupFunctionDef ann = do
+  start <- getSourcePos
+  args <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
+  expr <- symbol_ "=" *> parseExpression
+  end <- getSourcePos
+  pure (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 -- TODO: DRY
 parseFunctionDefinition :: Parser (Definition Metadata o ())
