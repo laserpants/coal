@@ -15,6 +15,7 @@ data CompilerConfig = CompilerConfig
   , configGenerateDotFiles :: Bool
   , configGenerateLLVMOutput :: Bool
   , configCFiles :: [FilePath]
+  , configSilent :: Bool
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -26,6 +27,7 @@ defaultConfig =
     , configGenerateDotFiles = True
     , configGenerateLLVMOutput = True
     , configCFiles = []
+    , configSilent = False
     }
 
 {-# INLINE setConfigExecutableName #-}
