@@ -512,20 +512,20 @@ collectImportedInstances =
               \(trait, is) -> do
                 if trait == name
                   then concat <$$> forM (Map.toList is) $
-                    \(t, InstanceEntry{..}) -> do
+                    \(_, InstanceEntry{..}) -> do
                       forM (Map.toList instanceEntryEntries) $
                         \(f, _) ->
-                          pure (path, instanceLabel (Trait trait t) f)
+                          pure (path, instanceLabel (Trait trait instanceEntryType) f)
                   else pure []
           ImportType _ name _ ->
             concatForM (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 concatForM (Map.toList is) $
-                  \(t, InstanceEntry{..}) -> do
+                  \(_, InstanceEntry{..}) -> do
                     if headConstructor instanceEntryIndexedType == Just name
                       then forM (Map.toList instanceEntryEntries) $
                         \(f, _) ->
-                          pure (path, instanceLabel (Trait trait t) f)
+                          pure (path, instanceLabel (Trait trait instanceEntryType) f)
                       else pure []
           _ ->
             pure []

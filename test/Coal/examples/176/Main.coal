@@ -6,10 +6,6 @@ module Main {
   import Coal.Monoid(trait Monoid)
   import IO(return)
 
-  instance Monoid<List<a>> {
-    let id = []
-  }
-
   type Writer<w, a> = Writer(a, w)
 
   fun run_writer(writer) =
