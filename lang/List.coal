@@ -54,7 +54,6 @@ module List {
   fun singleton(elem : a) : List<a> = 
     [elem]
 
-
   /**
    * Return `true` if the list is empty, `false` otherwise.
    */
