@@ -2,47 +2,89 @@ module String {
 
   import List(reduce)
 
+  /**
+   * Convert a character to a one-character string.
+   */
   fun char_to_string(c : char) : string =
     string$_char_to_string(c)
 
+  /**
+   * Convert an int32 value to its string representation.
+   */
   fun int32_to_string(n : int32) : string =
     string$_int32_to_string(n)
 
+  /**
+   * Convert a floating-point value to its string representation.
+   */
   fun float_to_string(f : float) : string =
     string$_float_to_string(f)
 
+  /**
+   * Convert a double-precision value to its string representation.
+   */
   fun double_to_string(d : double) : string =
     string$_double_to_string(d)
 
+  /**
+   * Convert a string into a list of its characters.
+   */
   fun to_list(s : string) : List<char> =
     string$_to_list(s)
 
+  /**
+   * Build a string from a list of characters.
+   */
   fun from_list(chars : List<char>) : string =
     string$_from_list(chars)
 
+  /**
+   * Return the number of characters in the string.
+   */
   fun length(s : string) : int32 =
     string$_length(s)
 
+  /**
+   * Determine whether the string is empty.
+   */
   fun is_empty(s : string) : bool =
     0 == length(s)
 
+  /**
+   * Return the first character of the string, or `None` if empty.
+   */
   fun head(s : string) : Option<char> =  
     if (is_empty(s)) 
       then None
       else Some(string$_head_unsafe(s))
 
+  /**
+   * Return the string without its first character.
+   */
   fun tail(s : string) : string =
     string$_tail(s)
 
+  /**
+   * Prepend a character to the front of a string.
+   */
   fun cons(c : char, str : string) : string =
     char_to_string(c) <> str
 
+  /**
+   * Reverse the characters in the string.
+   */
   fun reverse(s : string) : string =
     string$_reverse(s)
 
+  /**
+   * Remove all whitespace characters from the string.
+   */
   fun remove_whitespace(s : string) : string =
     string$_remove_whitespace(s)
 
+  /**
+   * Insert a separator between the strings in a list and concatenate them.
+   */
   fun intercalate(sep : string, strs : List<string>) : string =
     match(strs) {
       | [] => ""
