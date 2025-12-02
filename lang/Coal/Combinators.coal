@@ -1,19 +1,43 @@
 module Coal.Combinators {
 
+  /*
+   * The identity function.
+   *
+   * Returns the value unchanged.
+   */
   fun identity(x) = x
 
+  /**
+   * When applied to one argument, return a function that always returns this 
+   * value.
+   */
   fun always(x : a, _) : a = x
 
+  /**
+   * Extract the first element of a pair.
+   */
   fun fst((a, _)) = a
 
+  /**
+   * Extract the second element of a pair.
+   */
   fun snd((_, b)) = b
 
+  /**
+   * Convert a function that takes a pair into one that takes two arguments.
+   */
   fun curry(f : (a, b) -> c, x : a, y : b) : c = 
     f((x, y))
 
+  /**
+   * Convert a function of two arguments into one that takes a pair.
+   */
   fun uncurry(f : a -> b -> c, (x, y) : (a, b)) : c = 
     f(x, y)
 
+  /**
+   * Reverse the order of the arguments to a two-argument function.
+   */
   fun flip(f : a -> b -> c, y : b, x : a) : c =
     f(x, y)
 
