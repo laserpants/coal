@@ -63,6 +63,11 @@ module List {
       | _ => false
     }
 
+  // TODO:
+
+  // fun is_nonempty
+  // fun is_singleton
+
   /**
    * Flatten a list of lists into a single list.
    */

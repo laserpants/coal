@@ -5,6 +5,7 @@
 module Coal.Compiler.Config (
   CompilerConfig (..),
   defaultConfig,
+  silentConfig,
   setConfigExecutableName,
   setConfigGenerateDotFiles,
   setConfigGenerateLLVMOutput,
@@ -29,6 +30,10 @@ defaultConfig =
     , configCFiles = []
     , configSilent = False
     }
+
+{-# INLINE silentConfig #-}
+silentConfig :: CompilerConfig
+silentConfig = defaultConfig{ configSilent = True }
 
 {-# INLINE setConfigExecutableName #-}
 setConfigExecutableName :: FilePath -> CompilerConfig -> CompilerConfig

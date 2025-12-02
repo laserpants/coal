@@ -24,6 +24,21 @@ module Coal.Combinators {
   fun snd((_, b)) = b
 
   /**
+   * Extract the first element of a triple.
+   */
+  fun fst3((a, _, _)) = a
+
+  /**
+   * Extract the second element of a triple.
+   */
+  fun snd3((_, b, _)) = b
+
+  /**
+   * Extract the third element of a triple.
+   */
+  fun thd3((_, _, c)) = c
+
+  /**
    * Convert a function that takes a pair into one that takes two arguments.
    */
   fun curry(f : (a, b) -> c, x : a, y : b) : c = 
