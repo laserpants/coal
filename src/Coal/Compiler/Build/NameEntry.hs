@@ -69,7 +69,8 @@ data TraitEntry a = TraitEntry
   { traitEntryMetadata :: a
   , traitEntryName :: Name
   , traitEntryParameter :: Parameter Kind
-  , traitEntryEntries :: Environment (Scheme Parameter () ParameterizedType)
+  , traitEntryRequiredInstances :: [Trait (Parameter Kind)]
+  , traitEntryEntries :: Environment (Scheme Parameter Kind (Type Parameter Kind))
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -196,8 +197,8 @@ codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
 
-traitEntry :: a -> Name -> TraitDef -> TraitEntry a
-traitEntry loc name (TraitDef _ p ps) = TraitEntry loc name p (Environment.fromList ps)
+traitEntry :: a -> Name -> TraitDef Kind -> TraitEntry a
+traitEntry loc name (TraitDef deps p ps) = TraitEntry loc name p deps (Environment.fromList ps)
 
 aliasEntry :: a -> Name -> AliasDef -> AliasEntry a
 aliasEntry loc name (AliasDef ps t) = AliasEntry loc name (parameterName <$> ps) t

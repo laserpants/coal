@@ -18,7 +18,7 @@ module Main {
       | _ => None
     }
 
-  trait Functor<f : * -> *> {
+  trait Functor<f> {
     map : (a -> b) -> f<a> -> f<b>
   }
 
@@ -32,7 +32,7 @@ module Main {
       }
   }
 
-  trait Applicative<f : * -> *> {
+  trait Applicative<f> {
     pure : a -> f<a>
     ap : f<a -> b> -> f<a> -> f<b>
   }

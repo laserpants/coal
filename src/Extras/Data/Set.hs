@@ -2,8 +2,6 @@ module Extras.Data.Set (unionMap) where
 
 import Data.Set (Set, unions)
 
-import qualified Data.Set as Set
-
 {-# INLINE unionMap #-}
-unionMap :: (Ord b) => (a -> Set b) -> Set a -> Set b
-unionMap f = unions . Set.map f
+unionMap :: (Foldable f, Functor f, Ord b) => (a -> Set b) -> f a -> Set b
+unionMap f = unions . fmap f

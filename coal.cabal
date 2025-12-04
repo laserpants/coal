@@ -223,6 +223,7 @@ library
       Coal.TypeSystem.Constraint.Generation.Internal
       Coal.TypeSystem.Constraint.Generation.TypeAnnotation
       Coal.TypeSystem.Constraint.Solver
+      Coal.TypeSystem.Kind.Inference
       Coal.TypeSystem.Substitution
       Coal.TypeSystem.Unification
       Coal.Utils
@@ -314,6 +315,7 @@ test-suite coal-test
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec
       Coal.TypeSystem.Constraint.GenerationSpec
+      Coal.TypeSystem.Kind.InferenceSpec
       Coal.TypeSystem.SubstitutionSpec
       Coal.TypeSystem.TypeIndexedSpec
       Coal.TypeSystem.UnificationSpec

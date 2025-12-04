@@ -1,13 +1,18 @@
 module Coal.Functor {
 
   import namespace List
+  import IO(return, __eval_io)
 
-  trait Functor<f : * -> *> {
+  trait Functor<f> {
     map : (a -> b) -> f<a> -> f<b>
   }
 
   instance Functor<List> {
     let map = List.map
+  }
+
+  instance Functor<IO> {
+    fun map(f, v) = return(f(__eval_io(v)))
   }
 
   instance Functor<Option> {

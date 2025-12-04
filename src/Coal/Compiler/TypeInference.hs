@@ -18,6 +18,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem
+import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
 import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (asks)
@@ -224,7 +225,10 @@ typeDefinitionC =
       pure ()
     DCotype{} ->
       pure ()
-    DTrait _ name (TraitDef _ (Parameter k q) ds) ->
+    DTrait _ name def -> do
+      kenv <- asks compilerTypeConstructorEnvironment
+      let (TraitDef _ (Parameter k q) ds) = inferTraitKinds kenv def
+
       forM_ ds $
         \(n, Forall _ _ s) -> do
           env <- asks compilerTypeConstructorEnvironment
@@ -236,7 +240,7 @@ typeDefinitionC =
       case Environment.lookup trait env of
         Nothing ->
           error ("Missing trait: " <> Text.unpack trait)
-        Just (TraitEntry _ _ p@(Parameter k _) traitInfoEntries) ->
+        Just (TraitEntry _ _ p@(Parameter k _) _ traitInfoEntries) ->
           forM_ ds $
             \d -> do
               case Environment.lookup (definitionName d) traitInfoEntries of

@@ -3,6 +3,8 @@ module Main {
   import namespace IO
   import namespace List
   import Coal.Monad(trait Monad, and_then, and_eval)
+  import Coal.Functor(trait Functor)
+  import Coal.Applicative(trait Applicative)
   import Coal.Monoid(trait Monoid)
   import IO(return)
 
@@ -13,8 +15,18 @@ module Main {
       | Writer(a, w) => (a, w)
     }
 
-  fun pure_writer(w) : Writer<w, a> =
-    Writer(w, id)
+  instance Functor<Writer<w>> {
+    fun map(f, Writer(a, w)) =
+      Writer(f(a), w)
+  }
+
+  instance Applicative<Writer<w>> {
+    fun pure(w) = 
+      Writer(w, id)
+
+    fun ap(Writer(f, w1), Writer(a, w2)) =
+      Writer(f(a), w1 <> w2)
+  }
 
   instance Monad<Writer<w>> {
     fun bind(writer, k) : Writer<w, b> =
@@ -35,11 +47,13 @@ module Main {
       | Writer(a, w) => Writer((a, w), w)
     }
 
+  // Example use:
+
   fun test_writer() : Writer<List<string>, int32> =
     tell(["one"])
       |. and_eval(tell(["two"]))
       |. and_eval(tell(["three"]))
-      |. and_eval(pure_writer(100))
+      |. and_eval(pure(100))
 
   fun print_msgs(msgs : List<string>) =
     fold(msgs) {

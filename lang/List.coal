@@ -55,7 +55,7 @@ module List {
     [elem]
 
   /**
-   * Return `true` if the list is empty, `false` otherwise.
+   * Return `true` if the list is empty, or `false` otherwise.
    */
   fun is_empty(list : List<a>) : bool =
     match(list) {
@@ -63,10 +63,21 @@ module List {
       | _ => false
     }
 
-  // TODO:
+  /**
+   * Return `true` if the list contains any elements, or `false` otherwise.
+   */
+  fun is_nonempty(list : List<a>) : bool =
+    ! is_empty(list)
 
-  // fun is_nonempty
-  // fun is_singleton
+  /**
+   * Return `true` if the list contains precisely one element, or `false` 
+   * otherwise.
+   */
+  fun is_singleton(list : List<a>) : bool =
+    match(list) {
+      | [_] => true
+      | _   => false
+    }
 
   /**
    * Flatten a list of lists into a single list.

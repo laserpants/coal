@@ -30,9 +30,8 @@ import Control.Monad.RWS (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
 import Data.Data (Data)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))
-import Extras (foldrM)
-
 import qualified Data.Set as Set
+import Extras (foldrM)
 
 transUnifier :: Unifier a -> Solver s (Either UnificationError a)
 transUnifier u = do

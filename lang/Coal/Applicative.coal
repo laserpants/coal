@@ -1,10 +1,16 @@
 module Coal.Applicative {
   
   import Coal.Functor(trait Functor)
+  import IO(return, __eval_io)
 
-  trait Applicative<f : * -> *> {
+  trait Applicative<f> {
     ap : f<a -> b> -> f<a> -> f<b>
     pure : a -> f<a>
+  }
+
+  instance Applicative<IO> {
+    fun ap(af, f) = map(__eval_io(af), f)
+    let pure = return
   }
 
   fun map2(f : p -> q -> r, a1 : f<p>, a2 : f<q>) : f<r> =                 

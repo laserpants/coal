@@ -19,7 +19,7 @@ import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), maps
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
 import Control.Monad.State (MonadState, State, runState)
 import Data.Data (Data)
-import Data.List.NonEmpty (NonEmpty, (<|))
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (member)
 import Extras (foldrM, (<$$>))

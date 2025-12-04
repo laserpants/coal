@@ -8,7 +8,7 @@ module Main {
 
 //  import Monad(bind)
 
-//  trait Monad<m : * -> *> {
+//  trait Monad<m> {
 //    bind : m<a> -> (a -> m<b>) -> m<b>
 //  }
 //

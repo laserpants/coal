@@ -2,8 +2,8 @@
 
 module E2E.Spec (e2eSpec, runSpec) where
 
-import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler (pipeline)
+import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
@@ -840,6 +840,34 @@ e2eSpec = do
       [ "./test/Coal/examples/182/Main.coal"
       ]
 
+  describe "183" $ do
+    expectOutput
+      "-5"
+      [ "./test/Coal/examples/183/Main.coal"
+      ]
+
+  describe "184" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          [ "./test/Coal/examples/184/Main.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
+  describe "185" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          [ "./test/Coal/examples/185/Main.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
+  describe "186" $ do
+    expectOutput
+      "true"
+      [ "./test/Coal/examples/186/Main.coal"
+      ]
+
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
   it ("\"" <> expt <> "\"") $ do
@@ -850,7 +878,7 @@ runSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec files = do
   (e, _, _) <-
     runCompilerT emptyCompilerEnvironment $ do
-      setConfigC defaultConfig{ configSilent = True }
+      setConfigC defaultConfig{configSilent = True}
       runPass pipeline files
   case e of
     Left e1 ->

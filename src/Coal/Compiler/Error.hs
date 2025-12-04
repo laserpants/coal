@@ -40,6 +40,7 @@ data CompilerError a
   | TraitNotInScope Name (ErrorLocation a)
   | MissingTraitDefinition Name Name (ErrorLocation a)
   | UnexpectedTraitDefinition Name Name (ErrorLocation a)
+  | MissingRequiredInstance Name IndexedType (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -97,4 +98,6 @@ errorLocation =
     MissingTraitDefinition _ _ erl ->
       Just erl
     UnexpectedTraitDefinition _ _ erl ->
+      Just erl
+    MissingRequiredInstance _ _ erl ->
       Just erl

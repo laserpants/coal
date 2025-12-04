@@ -2,7 +2,7 @@ module Main {
 
   import IO(println_int32, println_bool, println_string, println_char)
 
-  trait Functor<f : * -> *> {
+  trait Functor<f> {
     map : (a -> b) -> f<a> -> f<b>
   }
 
@@ -16,12 +16,12 @@ module Main {
       }
   }
 
-  trait Applicative<f : * -> *> {
+  trait Applicative<f> {
     fmap : f<a -> b> -> f<a> -> f<b>
     pure : a -> f<a>
   }
 
-  trait Monad<m : * -> *> {
+  trait Monad<m> {
     bind : m<a> -> (a -> m<b>) -> m<b>
   }
 

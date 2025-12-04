@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import List(is_nonempty)
+
+  fun main() =
+    IO.println_bool(is_nonempty([1, 2, 3]))
+
+}

@@ -7,6 +7,7 @@
 
 module Coal.Language.Type.Scheme (
   Scheme (..),
+  bound,
   forall0,
   forall1,
   forall1',
@@ -33,7 +34,22 @@ import GHC.Generics (Generic)
 import Prettyprinter (Pretty (..), hsep)
 
 data Scheme o k t = Forall (Set (o k)) [Trait t] t
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
+
+{-# INLINE bound #-}
+bound :: Scheme o k t -> Set (o k)
+bound (Forall s _ _) = s
 
 instance (Pretty k, Pretty (o k), Pretty t) => Pretty (Scheme o k t) where
   pretty =

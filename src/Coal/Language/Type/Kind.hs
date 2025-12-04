@@ -17,11 +17,10 @@ module Coal.Language.Type.Kind (
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
+import qualified Data.List.NonEmpty as NonEmpty
 import Extras.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter (Doc, Pretty (..), group, (<+>))
-
-import qualified Data.List.NonEmpty as NonEmpty
 
 data Kind
   = KType

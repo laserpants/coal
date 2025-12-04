@@ -2,6 +2,8 @@ module Main {
 
   import namespace IO
   import Coal.Monad(trait Monad, and_then)
+  import Coal.Functor(trait Functor)
+  import Coal.Applicative(trait Applicative)
 
   type Reader<r, a> = Reader(r -> a)
 
@@ -10,10 +12,25 @@ module Main {
       | Reader(f) => f(env)
     }
 
-  fun pure_reader(r) = Reader(fn(_) => r)
-
   fun ask() = 
     Reader(fn(env) => env)
+
+  instance Functor<Reader<r>> {
+    fun map(f, Reader(g)) =
+      Reader(fn(r) => f(g(r)))
+  }
+
+  instance Applicative<Reader<r>> {
+    fun pure(r) = 
+      Reader(fn(_) => r)
+
+    fun ap(Reader(f), Reader(g)) =
+      Reader(fn(r) =>
+        let func = f(r) in
+        let a    = g(r) in
+        func(a)
+      )
+  }
 
   instance Monad<Reader<r>> {
     fun bind(reader : Reader<r, a>, next : a -> Reader<r, b>) : Reader<r, b> = 
@@ -33,9 +50,11 @@ module Main {
   fun local(transform, Reader(f)) = 
     Reader(fn(env) => f(transform(env)))
 
+  // Example use:
+
   fun test_reader(val : int32) : Reader<int32, int32> =
     ask()
-      |. and_then(fn(r) => pure_reader(val + r))
+      |. and_then(fn(r) => pure(val + r))
 
   fun main() =
     IO.println_int32(run_reader(test_reader(5), 5))

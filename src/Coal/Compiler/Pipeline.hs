@@ -89,10 +89,13 @@ prettyRule =
     e ->
       Text.pack ("TODO: " <> show e)
 
+-- TODO: rename
 prettyType :: (Pretty t) => t -> Text
-prettyType p = "{" <> txt <> "}"
- where
-  txt = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
+prettyType p = "{" <> prettyType_ p <> "}"
+
+-- TODO: rename
+prettyType_ :: (Pretty t) => t -> Text
+prettyType_ p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
 
 prettyConstraintsGenError :: (Show a) => ConstraintsGenError a -> Text
 prettyConstraintsGenError =
@@ -153,6 +156,8 @@ prettyError env =
       errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
     UnexpectedTraitDefinition name trait erl ->
       errorMessage ["The trait '" <> trait <> "' does not have an entry '" <> name <> "'"] env erl
+    MissingRequiredInstance name t erl ->
+      errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType_ t <> ">'"] env erl
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msg env (ErrorLocation path loc) =

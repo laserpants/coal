@@ -100,7 +100,7 @@ builtinDefinitions =
       "Numeric"
       ( TraitDef
           []
-          (Parameter KType "a")
+          (Parameter () "a")
           [
             ( "from_int32"
             , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
@@ -128,7 +128,7 @@ builtinDefinitions =
       "Ordered"
       ( TraitDef
           []
-          (Parameter KType "a")
+          (Parameter () "a")
           [
             ( "compare"
             , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
@@ -140,7 +140,7 @@ builtinDefinitions =
       "Comparable"
       ( TraitDef
           []
-          (Parameter KType "a")
+          (Parameter () "a")
           [
             ( "(==)"
             , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
@@ -152,7 +152,7 @@ builtinDefinitions =
       "Divisible"
       ( TraitDef
           []
-          (Parameter KType "a")
+          (Parameter () "a")
           [
             ( "(/)"
             , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
@@ -164,7 +164,7 @@ builtinDefinitions =
       "Modulo"
       ( TraitDef
           []
-          (Parameter KType "a")
+          (Parameter () "a")
           [
             ( "(%)"
             , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
@@ -176,7 +176,7 @@ builtinDefinitions =
       "Semigroup"
       ( TraitDef
           []
-          (Parameter KType "a")
+          (Parameter () "a")
           [
             ( "(<>)"
             , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")

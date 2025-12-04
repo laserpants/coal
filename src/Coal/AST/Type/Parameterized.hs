@@ -19,12 +19,12 @@ import Data.List.NonEmpty (NonEmpty, toList)
 import qualified Data.Text as Text
 import Extras (Name, traverse_)
 
-instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter () -> m IndexedType
+instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter k -> m IndexedType
 instantiateVars ts0 env t = do
   ts1 <- execWriterT (instantiateTypeIndexes t)
   runReaderT (instantiateTypeVars t) (Environment.fromList (ts0 <> ts1), env)
 
-instantiateTypeApplication :: (MonadState s m, Supply s) => Type Parameter () -> NonEmpty (Type Parameter ()) -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
+instantiateTypeApplication :: (MonadState s m, Supply s) => Type Parameter k -> NonEmpty (Type Parameter k) -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
 instantiateTypeApplication con@(TConstructor _ name) ts
   | isTupleType con =
       applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
@@ -38,7 +38,7 @@ instantiateTypeApplication t ts = do
     Just k ->
       pure (applyTypeArgs k u us)
 
-instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter () -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
+instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter k -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m IndexedType
 instantiateTypeVars =
   \case
     TVariable (Parameter _ n) -> do
@@ -70,7 +70,7 @@ instantiateTypeVars =
         Nothing ->
           error ("No type constructor '" <> Text.unpack name <> "'")
 
-instantiateRowVars :: (MonadState s m, Supply s) => Row Parameter () (Type Parameter ()) -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m (Row TypeIndex Kind IndexedType)
+instantiateRowVars :: (MonadState s m, Supply s) => Row Parameter k (Type Parameter k) -> ReaderT (Environment (TypeIndex Kind), Environment Kind) m (Row TypeIndex Kind IndexedType)
 instantiateRowVars =
   \case
     RVariable (Parameter _ n) -> do
@@ -94,7 +94,7 @@ instance (Parameterized p) => Parameterized [p] where
 instance (Parameterized p) => Parameterized (NonEmpty p) where
   instantiateTypeIndexes = traverse_ instantiateTypeIndexes
 
-instance Parameterized (Type Parameter ()) where
+instance Parameterized (Type Parameter k) where
   instantiateTypeIndexes =
     \case
       TVariable p ->
@@ -116,7 +116,7 @@ instance Parameterized (Type Parameter ()) where
       TIntrinsic{} ->
         pure ()
 
-instance Parameterized (Row Parameter () (Type Parameter ())) where
+instance Parameterized (Row Parameter k (Type Parameter k)) where
   instantiateTypeIndexes =
     \case
       RVariable p ->
@@ -127,7 +127,7 @@ instance Parameterized (Row Parameter () (Type Parameter ())) where
       RNil ->
         pure ()
 
-instance Parameterized (Parameter ()) where
+instance Parameterized (Parameter k) where
   instantiateTypeIndexes p = do
     ti <- supplied (TypeIndex KType)
     tell [(parameterName p, ti)]

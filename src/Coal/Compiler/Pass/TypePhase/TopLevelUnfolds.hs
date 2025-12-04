@@ -6,7 +6,7 @@
 
 module Coal.Compiler.Pass.TypePhase.TopLevelUnfolds (passTopLevelUnfolds) where
 
-import Coal.AST.Flattening (flattenApplication)
+import Coal.AST.Flattening (deepFlattenApplications)
 import Coal.AST.Shorthand (applicationE, lambdaAnyE, lambdaE, letE, varE)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
@@ -14,7 +14,6 @@ import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Expression (..), Kind (..), Pattern (..))
 import Coal.Language.Module
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
@@ -61,7 +60,7 @@ expandTopLevelUnfold loc ps d = do
   name <- supplied (freshName "unfold")
   d1 <- mapM (translateFields name) (Map.toList d)
   pure $
-    transform flattenApplication $
+    deepFlattenApplications $
       letE
         name
         ( lambdaE

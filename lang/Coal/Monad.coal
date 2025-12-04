@@ -1,14 +1,16 @@
 module Coal.Monad {
 
   import Coal.Combinators(flip, always)
+  import Coal.Applicative(trait Applicative)
   import IO(__eval_io)
 
-  trait Monad<m : * -> *> {
+  // TODO: should check that Applicative is in scope
+  trait Monad<m> with Applicative<m> {
     bind : m<a> -> (a -> m<b>) -> m<b>
   }
 
   instance Monad<IO> {
-    fun bind(x, f) = f(__eval_io(x))
+    fun bind(v, f) = f(__eval_io(v))
   }
 
   fun then_do(a : m<a>, b : m<b>) : m<b> =

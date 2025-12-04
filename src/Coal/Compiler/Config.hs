@@ -33,7 +33,7 @@ defaultConfig =
 
 {-# INLINE silentConfig #-}
 silentConfig :: CompilerConfig
-silentConfig = defaultConfig{ configSilent = True }
+silentConfig = defaultConfig{configSilent = True}
 
 {-# INLINE setConfigExecutableName #-}
 setConfigExecutableName :: FilePath -> CompilerConfig -> CompilerConfig

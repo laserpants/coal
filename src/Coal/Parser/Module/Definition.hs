@@ -54,15 +54,16 @@ parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
   t <- angleBrackets parseParameter
+  ts <- option [] (lexeme_ "with" *> commaSep1 parseParamTrait)
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
-  pure (DTrait (Metadata start end) n (TraitDef [] t (toScheme <$$> ds)))
+  pure (DTrait (Metadata start end) n (TraitDef ts t (toScheme <$$> ds)))
 
-parseParameter :: Parser (Parameter Kind)
+parseParameter :: Parser (Parameter ())
 parseParameter = do
   n <- name
-  k <- option KType (symbol_ ":" *> parseKind)
-  pure (Parameter k n)
+  --  k <- option KType (symbol_ ":" *> parseKind)
+  pure (Parameter () n)
 
 parseTraitInstance :: Parser (Definition Metadata o ())
 parseTraitInstance = do
@@ -77,6 +78,9 @@ parseTraitInstance = do
 
 parseTrait :: Parser (Trait (Type Parameter ()))
 parseTrait = Trait <$> constructor <*> angleBrackets parseType
+
+parseParamTrait :: Parser (Trait (Parameter ()))
+parseParamTrait = Trait <$> constructor <*> angleBrackets parseParameter
 
 parseParameterList :: Parser [Parameter ()]
 parseParameterList = angleBrackets (commaSep1 (Parameter () <$> name))

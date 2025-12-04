@@ -28,6 +28,17 @@ import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Name)
 
+-- TODO: refactor to:
+--
+--  data Object a k t
+--    = OImport a Path [Import a]
+--    | OQualifiedImport a Path
+--    | ODefinition a k t
+--
+--  data Definition a k t
+--    = DConstantDef a t
+--    | ...
+--
 data Definition a k t
   = -- | Type definition
     DType a Name TypeDef
@@ -42,7 +53,7 @@ data Definition a k t
   | -- | Namespace (qualified) import
     DQualifiedImport a Path
   | -- | Trait
-    DTrait a Name TraitDef
+    DTrait a Name (TraitDef ())
   | -- | Trait instance
     DInstance a Name (InstanceDef Definition a k t)
   | -- | Type alias

@@ -19,6 +19,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.TypeSystem.Kind.Inference
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
 import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
@@ -313,7 +314,7 @@ traitEnv = do
   gets (foldElems insertTraitEntry . moduleTraits)
  where
   insertTraitEntry :: TraitEntry a -> Environment (TraitEntry a) -> Environment (TraitEntry a)
-  insertTraitEntry info@(TraitEntry _ name _ _) = Environment.insert name info
+  insertTraitEntry info@(TraitEntry _ name _ _ _) = Environment.insert name info
 
 typeConstructorEnv :: (Monad m) => StateT (ModuleBuild a) (CompilerT a m) (Environment Kind)
 typeConstructorEnv = do
@@ -408,10 +409,11 @@ collectTraits :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT
 collectTraits env =
   \case
     DTrait loc name def -> do
-      addTraitEntries env name def
+      let def1 = inferTraitKinds env def
+      addTraitEntries env name def1
       modify $
         addName (NTrait name)
-          . insertTrait name (traitEntry loc name def)
+          . insertTrait name (traitEntry loc name def1)
           . addTypeExport name
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
@@ -419,7 +421,7 @@ collectTraits env =
       ModuleBuild{..} <- importedModule loc path
       traits <- collectTypeImports def exportedTraits
       forM_ traits $
-        \info@(TraitEntry _ name _ _) -> do
+        \info@(TraitEntry _ name _ _ _) -> do
           modify $ insertTrait name info
           forM_ (Environment.toList moduleInstances) $
             \(trait, is) -> do
@@ -436,7 +438,7 @@ collectTraits env =
     _ ->
       pure ()
 
-addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef -> StateT (ModuleBuild a) (CompilerT a m) ()
+addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef Kind -> StateT (ModuleBuild a) (CompilerT a m) ()
 addTraitEntries env trait (TraitDef _ p entries) =
   forM_ entries $
     -- TODO
@@ -456,7 +458,7 @@ collectInstances kinds traits =
         Nothing -> do
           tellErrors [TraitNotInScope trait (ErrorLocation this loc)]
           throwError PreflightFailure
-        Just (TraitEntry _ _ p dict) -> do
+        Just (TraitEntry _ _ p deps dict) -> do
           let inames = definitionName <$> entries
               tnames = Environment.names dict
               extra = inames \\ tnames
@@ -471,6 +473,22 @@ collectInstances kinds traits =
                 tellErrors [UnexpectedTraitDefinition name trait (ErrorLocation this loc)]
                 throwError PreflightFailure
           modify $ insertInstance trait t1 (InstanceEntry loc q (toIndexedType kinds p q) env)
+
+          instances <- gets moduleInstances
+          forM_ deps $
+            \(Trait n t) -> do
+              let t2 = toIndexedType kinds t q
+              case Environment.lookup n instances of
+                Nothing -> do
+                  tellErrors [MissingRequiredInstance n t2 (ErrorLocation this loc)]
+                  throwError PreflightFailure
+                Just res ->
+                  case Map.lookup t2 res of
+                    Nothing -> do
+                      tellErrors [MissingRequiredInstance n t2 (ErrorLocation this loc)]
+                      throwError PreflightFailure
+                    Just{} ->
+                      pure ()
          where
           t1 = toIndexedType kinds p q
           Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict

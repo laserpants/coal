@@ -33,6 +33,7 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
+import Extras.Data.Set (unionMap)
 
 import qualified Data.Set as Set
 
@@ -43,19 +44,19 @@ instance TypeIndexed k (TypeIndex k) where
   typeIndexesIn = singleton
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Map a t) where
-  typeIndexesIn = Set.unions . fmap typeIndexesIn
+  typeIndexesIn = unionMap typeIndexesIn
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Maybe t) where
-  typeIndexesIn = Set.unions . fmap typeIndexesIn
+  typeIndexesIn = unionMap typeIndexesIn
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k [t] where
-  typeIndexesIn = Set.unions . fmap typeIndexesIn
+  typeIndexesIn = unionMap typeIndexesIn
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (NonEmpty t) where
-  typeIndexesIn = Set.unions . fmap typeIndexesIn
+  typeIndexesIn = unionMap typeIndexesIn
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Trait t) where
-  typeIndexesIn = Set.unions . fmap typeIndexesIn
+  typeIndexesIn = unionMap typeIndexesIn
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Set t) where
   typeIndexesIn = Set.unions . Set.map typeIndexesIn

@@ -27,15 +27,27 @@ data KernelEnvironment = KernelEnvironment
 
 overKernelEnvironmentModule :: Over KernelEnvironment Name
 overKernelEnvironmentModule fn KernelEnvironment{..} =
-  KernelEnvironment{kernelEnvironmentModule = fn kernelEnvironmentModule, ..}
+  KernelEnvironment
+    { kernelEnvironmentModule =
+        fn kernelEnvironmentModule
+    , ..
+    }
 
 overKernelEnvironmentLocalNames :: Over KernelEnvironment (Set Name)
 overKernelEnvironmentLocalNames fn KernelEnvironment{..} =
-  KernelEnvironment{kernelEnvironmentLocalNames = fn kernelEnvironmentLocalNames, ..}
+  KernelEnvironment
+    { kernelEnvironmentLocalNames =
+        fn kernelEnvironmentLocalNames
+    , ..
+    }
 
 overKernelEnvironmentQualifiedNames :: Over KernelEnvironment (Environment Name)
 overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
-  KernelEnvironment{kernelEnvironmentQualifiedNames = fn kernelEnvironmentQualifiedNames, ..}
+  KernelEnvironment
+    { kernelEnvironmentQualifiedNames =
+        fn kernelEnvironmentQualifiedNames
+    , ..
+    }
 
 data CompilerEnvironment a = CompilerEnvironment
   { compilerDataConstructorEnvironment :: Environment (DataConstructorEntry a)

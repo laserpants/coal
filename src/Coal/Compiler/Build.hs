@@ -192,8 +192,10 @@ setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} = ModuleBuild{modulePath = path, ..}
 
 -- TODO
-toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
+toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> Scheme TypeIndex Kind IndexedType
 toIndexedScheme env p (Forall _ _ t) = scheme [] (toIndexedType env p t)
 
-toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter () -> IndexedType
+-- TODO: This does unnecessary work. The type here already has kind information
+--  so we don't need to add this again
+toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter k -> IndexedType
 toIndexedType env (Parameter k n) t = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)

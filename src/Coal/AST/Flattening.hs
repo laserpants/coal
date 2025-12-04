@@ -1,8 +1,23 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.AST.Flattening (flattenApplication, flattenLambda) where
+module Coal.AST.Flattening (
+  flattenApplication,
+  flattenLambda,
+  deepFlattenApplications,
+  deepFlattenLambdas,
+) where
 
 import Coal.Language.Expression (Expression (..))
+import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transform)
+
+{-# INLINE deepFlattenApplications #-}
+deepFlattenApplications :: (Data a, Data t) => Expression a t -> Expression a t
+deepFlattenApplications = transform flattenApplication
+
+{-# INLINE deepFlattenLambdas #-}
+deepFlattenLambdas :: (Data a, Data t) => Expression a t -> Expression a t
+deepFlattenLambdas = transform flattenLambda
 
 flattenApplication :: Expression a t -> Expression a t
 flattenApplication =

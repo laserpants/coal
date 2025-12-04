@@ -1,0 +1,34 @@
+module Main {
+
+  import namespace IO
+
+  trait Associative<a> {
+    combine : a -> a -> a
+  }
+
+  trait Monoidal<a> with Associative<a> {
+    mempty : a 
+  }
+
+  trait Group<a> with Monoidal<a> {
+    inverse : a -> a
+  }
+
+  //
+
+  instance Associative<int32> {
+    fun combine(x, y) = x + y
+  }
+
+  instance Monoidal<int32> {
+    let mempty = 0
+  }
+
+  instance Group<int32> {
+    fun inverse(n) = -n
+  }
+
+  fun main() =
+    IO.println_int32(inverse(5))
+
+}

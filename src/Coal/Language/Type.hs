@@ -44,6 +44,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import Extras (Dictionary, Map, Name, Set)
+import Extras.Data.Set (unionMap)
 import Extras.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter
@@ -97,13 +98,13 @@ class HasActive k t | t -> k where
   activeIn :: t -> Set (TypeIndex k)
 
 instance (HasActive Kind t) => HasActive Kind (Map a t) where
-  activeIn = Set.unions . fmap activeIn
+  activeIn = unionMap activeIn
 
 instance (HasActive Kind t) => HasActive Kind [t] where
-  activeIn = Set.unions . fmap activeIn
+  activeIn = unionMap activeIn
 
 instance (HasActive Kind t) => HasActive Kind (NonEmpty t) where
-  activeIn = Set.unions . fmap activeIn
+  activeIn = unionMap activeIn
 
 {-# INLINE activeIdsIn #-}
 activeIdsIn :: (HasActive k t) => t -> Set Int

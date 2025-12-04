@@ -1,22 +1,39 @@
 module Main {
 
   import namespace IO
+  import Coal.Functor(trait Functor)
   import Coal.Monad(trait Monad, and_then)
+  import Coal.Applicative(trait Applicative)
   import Coal.Combinators(fst)
 
   type State<s, a> = State(s -> (a, s))
 
-  fun run_state(st, s0) =
-    match(st) {
-      | State(f) => 
-          f(s0)
-    }
+  fun run_state(State(f), s) = 
+    f(s)
 
   fun eval_state(st, s0) =
     fst(run_state(st, s0))
 
-  fun pure_state(x) =
-    State(fn(s) => (x, s))
+  instance Functor<State<s>> {
+    fun map(f, State(g)) =
+      State(fn(s) =>
+        let (a, s1) = g(s) 
+        in
+        (f(a), s1)
+      )
+  }
+
+  instance Applicative<State<s>> {
+    fun pure(x) =
+      State(fn(s) => (x, s))
+
+    fun ap(State(sf), State(sa)) =
+      State(fn(s0) =>
+        let (f, s1) = sf(s0) in
+        let (a, s2) = sa(s1) in
+        (f(a), s2)
+      )
+  }
 
   instance Monad<State<s>> {
     fun bind(m, k) =
@@ -36,7 +53,7 @@ module Main {
   fun modify(f) = 
     State(fn(s) => ((), f(s)))
 
-  //
+  // Example use:
 
   fun authenticate
     | "password123" = put(true)
@@ -49,11 +66,11 @@ module Main {
     get()
       |. and_then(fn(logged_in) => 
            if (logged_in) 
-             then pure_state("Already logged in")
+             then pure("Already logged in")
              else 
                authenticate(pw) 
                  |. and_then(get) 
-                 |. and_then(pure_state << msg)
+                 |. and_then(pure << msg)
       )
 
   fun main() =
