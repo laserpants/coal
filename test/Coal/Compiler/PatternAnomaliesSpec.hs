@@ -171,7 +171,7 @@ runTest :: [Pat] -> Bool
 runTest px = res
  where
   Right res = runIdentity (evalCompilerT env (exhaustive px))
-  env = emptyCompilerEnvironment{compilerDataConstructorEnvironment = testEnv}
+  env = (emptyCompilerEnvironment Nothing){compilerDataConstructorEnvironment = testEnv}
 
 example6 :: [Pattern () ()]
 example6 =
@@ -218,7 +218,7 @@ runTest2 :: [Pattern a t] -> Bool
 runTest2 px = res
  where
   Right res = runIdentity (evalCompilerT env (exhaustive (translatePattern <$> px)))
-  env = emptyCompilerEnvironment{compilerDataConstructorEnvironment = testEnv}
+  env = (emptyCompilerEnvironment Nothing){compilerDataConstructorEnvironment = testEnv}
 
 patternAnomaliesSpec :: Spec
 patternAnomaliesSpec =

@@ -314,7 +314,7 @@ buildSpec = do
 
 runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild Metadata])
 runBuild names = do
-  (r, _, _) <- runCompilerT emptyCompilerEnvironment prog
+  (r, _, _) <- runCompilerT (emptyCompilerEnvironment Nothing) prog
   pure (snd <$$> r)
  where
   prog = do

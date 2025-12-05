@@ -14,10 +14,11 @@ import Coal.Compiler.Stack
 import Coal.Language (Kind (..))
 import Coal.Language.Module
 import Control.Monad.Except (MonadError (throwError), unless)
+import Control.Monad.IO.Class (MonadIO)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
-passMainEntrypointRule :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
+passMainEntrypointRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passMainEntrypointRule =
   mapPass $
     Pass

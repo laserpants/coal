@@ -17,6 +17,7 @@ import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
+import Control.Monad.Reader (asks)
 import Control.Monad.State (gets)
 import qualified Data.ByteString as B
 import Data.Either (lefts, rights)
@@ -25,6 +26,7 @@ import Data.Foldable (for_)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Extras (Name)
+import System.Console.AsciiProgress
 import System.Directory (canonicalizePath, copyFile)
 import System.FilePath (takeBaseName, (<.>), (</>))
 import System.IO.Temp (withSystemTempDirectory)
@@ -40,7 +42,8 @@ passLLVMOutput =
 pass :: (MonadIO m) => [(Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m ()
 pass ir = do
   config <- gets compilerConfig
-  r <- liftIO $ generateLLOutput config ir
+  pb <- asks compilerProgressBar
+  r <- liftIO $ generateLLOutput pb config ir
   for_ r throwError
 
 runtimeLib :: B.ByteString
@@ -49,13 +52,15 @@ runtimeLib = $(embedFile "runtime/lib.c")
 hashmapLib :: B.ByteString
 hashmapLib = $(embedFile "runtime/hashmap.h")
 
-generateLLOutput :: CompilerConfig -> [(Name, [IRConstruct [IRLine]])] -> IO (Maybe CompilerFailureMode)
-generateLLOutput CompilerConfig{..} mods = do
+generateLLOutput :: Maybe ProgressBar -> CompilerConfig -> [(Name, [IRConstruct [IRLine]])] -> IO (Maybe CompilerFailureMode)
+generateLLOutput pb CompilerConfig{..} mods = do
   withSystemTempDirectory "coal-build" $
     \tmpDir -> do
       files <-
         forM mods $
           \(name, code) -> do
+            for_ pb tick
+
             let file = tmpDir </> Text.unpack name <.> "ll"
                 llCode = irEncode code
             Text.writeFile file llCode
@@ -76,6 +81,7 @@ generateLLOutput CompilerConfig{..} mods = do
 
       case lefts llcRes of
         [] -> do
+          unless configSilent $ putStrLn "Linking..."
           gccRes <- runGCC tmpDir (rights llcRes) cFiles
           case gccRes of
             Left e -> do
@@ -83,6 +89,10 @@ generateLLOutput CompilerConfig{..} mods = do
               pure (Just CompilerError)
             Right _ -> do
               copyFile (tmpDir </> "dist") configExecutableName
+
+              unless configSilent $ do
+                putStrLn ("Executable written to: " <> configExecutableName)
+
               pure Nothing
         errs -> do
           putStrLn "llc failed: "

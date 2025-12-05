@@ -153,7 +153,7 @@ expectOutput expt files =
 runKernelSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runKernelSpec files = do
   ir <- Kernel.compileModules (builtinObjects : mods)
-  res <- generateLLOutput config ir
+  res <- generateLLOutput Nothing config ir
   case res of
     Just err ->
       pure (Left err)

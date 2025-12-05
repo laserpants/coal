@@ -19,6 +19,7 @@ import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kin
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Module
 import Control.Monad.Except (MonadError (throwError), forM_, when)
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -26,7 +27,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 
-passShadowingRule :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
+passShadowingRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passShadowingRule =
   mapPass $
     Pass

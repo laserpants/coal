@@ -12,7 +12,7 @@ import Coal.Parser.Expression (parseExpression, parseMatchClause)
 import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
-import Coal.Parser.Type (parseKind, parseType)
+import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -229,13 +229,13 @@ parseFunctionDefinition = do
   ws <- option [] parseWhereClauses
   pure (DFunction (Metadata start end) fn (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
 
-parseFunctionDef :: Maybe ParameterizedType -> Parser (FunctionDef Metadata ())
-parseFunctionDef ann = do
-  start <- getSourcePos
-  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
-  expr <- symbol_ "=" *> parseExpression
-  end <- getSourcePos
-  pure (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
+-- parseFunctionDef :: Maybe ParameterizedType -> Parser (FunctionDef Metadata ())
+-- parseFunctionDef ann = do
+--  start <- getSourcePos
+--  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
+--  expr <- symbol_ "=" *> parseExpression
+--  end <- getSourcePos
+--  pure (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)

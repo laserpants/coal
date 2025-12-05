@@ -15,6 +15,7 @@ data CommandOptions = CommandOptions
   , debugGenerateDotfiles :: Bool
   , debugLLVMOutput :: Bool
   , extraSourceFiles :: [FilePath]
+  , silent :: Bool
   }
   deriving (Show)
 
@@ -51,6 +52,12 @@ optionsParser = do
           )
       )
 
+  silent <-
+    switch
+      ( long "silent"
+          <> help "Supress terminal output"
+      )
+
   pure CommandOptions{..}
 
 main :: IO ()
@@ -62,6 +69,7 @@ main = do
           , configGenerateDotFiles = debugGenerateDotfiles
           , configGenerateLLVMOutput = debugLLVMOutput
           , configCFiles = extraSourceFiles
+          , configSilent = silent
           }
   compile config inputFiles
 

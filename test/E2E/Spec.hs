@@ -877,7 +877,7 @@ expectOutput expt files =
 runSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec files = do
   (e, _, _) <-
-    runCompilerT emptyCompilerEnvironment $ do
+    runCompilerT (emptyCompilerEnvironment Nothing) $ do
       setConfigC defaultConfig{configSilent = True}
       runPass pipeline files
   case e of

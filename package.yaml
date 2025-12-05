@@ -41,6 +41,8 @@ dependencies:
 - temporary
 - directory
 - file-embed
+- ascii-progress
+- data-default
 
 ghc-options:
 - -Wall

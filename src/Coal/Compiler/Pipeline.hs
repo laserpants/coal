@@ -17,6 +17,7 @@ import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.MainPhase (mainPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
+import Coal.Compiler.Pass.ParsingPhase.Parsing (embedded)
 import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
@@ -31,6 +32,7 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Prettyprinter
 import Prettyprinter.Render.Text (renderStrict)
+import System.Console.AsciiProgress
 import Text.Megaparsec (errorBundlePretty)
 
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
@@ -42,22 +44,36 @@ pipeline =
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
-  (e, CompilerState{..}, es) <- runCompilerT emptyCompilerEnvironment $ do
-    setConfigC config{configCFiles = configCFiles config <> cFiles}
-    runPass pipeline files
-  forM_ es $
-    \err -> do
-      case errorLocation err of
-        Just (ErrorLocation name _) ->
-          Text.putStrLn ("In module '" <> name <> "':\n")
-        Nothing ->
-          pure ()
-      Text.putStrLn (prettyError compilerVerbatimSource err)
-  case e of
-    Left e1 ->
-      print e1
-    Right{} -> do
-      pure ()
+  if configSilent config
+    then go Nothing
+    else do
+      displayConsoleRegions $ do
+        pb <-
+          newProgressBar
+            def
+              { pgTotal = (fromIntegral (length embedded + length files) * 73) + 28
+              , pgWidth = 100
+              , pgFormat = "Compiling [:bar] :percent"
+              }
+        go (Just pb)
+ where
+  go progressBar = do
+    (e, CompilerState{..}, es) <- runCompilerT (emptyCompilerEnvironment progressBar) $ do
+      setConfigC config{configCFiles = configCFiles config <> cFiles}
+      runPass pipeline files
+    forM_ es $
+      \err -> do
+        case errorLocation err of
+          Just (ErrorLocation name _) ->
+            putStrLn ("In module '" <> Text.unpack name <> "':\n")
+          Nothing ->
+            pure ()
+        Text.putStrLn (prettyError compilerVerbatimSource err)
+    case e of
+      Left e1 ->
+        print e1
+      Right{} -> do
+        pure ()
 
 compile :: CompilerConfig -> [FilePath] -> IO ()
 compile config files = compileWithCFiles config files []

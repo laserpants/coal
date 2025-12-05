@@ -248,9 +248,11 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path
   build-depends:
-      base >=4.7 && <5
+      ascii-progress
+    , base >=4.7 && <5
     , bytestring
     , containers
+    , data-default
     , data-fix
     , deriving-compat
     , directory
@@ -279,10 +281,12 @@ executable coal
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      ascii-progress
+    , base >=4.7 && <5
     , bytestring
     , coal
     , containers
+    , data-default
     , data-fix
     , deriving-compat
     , directory
@@ -327,10 +331,12 @@ test-suite coal-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      ascii-progress
+    , base >=4.7 && <5
     , bytestring
     , coal
     , containers
+    , data-default
     , data-fix
     , deriving-compat
     , directory

@@ -17,6 +17,7 @@ import Coal.Compiler.Build
 import Coal.Language (IndexedScheme, IndexedType, Kind)
 import Data.Map.Strict (Map)
 import Extras (Name, Over, Set)
+import System.Console.AsciiProgress
 
 data KernelEnvironment = KernelEnvironment
   { kernelEnvironmentModule :: Name
@@ -58,11 +59,11 @@ data CompilerEnvironment a = CompilerEnvironment
   , compilerAliasEnvironment :: Environment (AliasEntry a)
   , compilerDictionaryNameEnvironment :: Environment IndexedScheme
   , compilerKernelEnvironment :: KernelEnvironment
+  , compilerProgressBar :: Maybe ProgressBar
   }
-  deriving (Show, Eq, Ord, Read)
 
-emptyCompilerEnvironment :: CompilerEnvironment a
-emptyCompilerEnvironment =
+emptyCompilerEnvironment :: Maybe ProgressBar -> CompilerEnvironment a
+emptyCompilerEnvironment pb =
   CompilerEnvironment
     { compilerDataConstructorEnvironment = mempty
     , compilerCodataAccessorEnvironment = mempty
@@ -72,6 +73,7 @@ emptyCompilerEnvironment =
     , compilerAliasEnvironment = mempty
     , compilerDictionaryNameEnvironment = mempty
     , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
+    , compilerProgressBar = pb
     }
 
 overCompilerDictionaryNameEnvironment ::

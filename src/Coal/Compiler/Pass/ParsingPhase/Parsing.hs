@@ -2,7 +2,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing) where
+module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, embedded) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Journal (tellErrors)

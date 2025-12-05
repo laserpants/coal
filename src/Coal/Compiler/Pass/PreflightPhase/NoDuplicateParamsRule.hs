@@ -24,7 +24,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
 
-passNoDuplicateParamsRule :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
+passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passNoDuplicateParamsRule =
   mapPass $
     Pass
@@ -32,7 +32,7 @@ passNoDuplicateParamsRule =
       , runPass = pass
       }
 
-pass :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
+pass :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 pass m@(Module p _ _) = do
   setCompilerCurrentModuleC p
   detectNoDuplicateParams m
