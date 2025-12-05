@@ -90,6 +90,7 @@ library
       Coal.Compiler.Pass.TypePhase.TopLevelFolds
       Coal.Compiler.Pass.TypePhase.TopLevelUnfolds
       Coal.Compiler.Pass.TypePhase.TypeInference
+      Coal.Compiler.Path.Resolve
       Coal.Compiler.PatternAnomalies
       Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.Compiler

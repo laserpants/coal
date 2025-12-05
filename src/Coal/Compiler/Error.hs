@@ -20,6 +20,8 @@ data ErrorLocation a = ErrorLocation Name a
 
 data CompilerError a
   = ParserError FilePath ParserError
+  | InvalidModuleName FilePath Name
+  | BadFilename FilePath String
   | MisplacedImportStatement (ErrorLocation a)
   | ModuleNotFound Name (ErrorLocation a)
   | NonExhaustivePatterns (ErrorLocation a)
@@ -58,6 +60,10 @@ errorLocation :: CompilerError a -> Maybe (ErrorLocation a)
 errorLocation =
   \case
     ParserError{} ->
+      Nothing
+    InvalidModuleName{} ->
+      Nothing
+    BadFilename{} ->
       Nothing
     MisplacedImportStatement erl ->
       Just erl

@@ -1,18 +1,23 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, embedded) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Config
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Path.Resolve
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
-import Coal.Language.Module (Module)
+import Coal.Language.Module (Module (..))
+import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseModule)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.State (gets)
 import qualified Data.ByteString as B
 import Data.Either (partitionEithers)
 import Data.FileEmbed (embedFile)
@@ -91,7 +96,7 @@ pass files = do
         ([], bundle) ->
           pure (embeddedBundle <> bundle)
         (es, _) -> do
-          forM_ es (\(file, e) -> tellErrors [ParserError file e])
+          forM_ es (tellErrors . return)
           throwError ParserFailure
     (es, _) -> do
       -- TODO
@@ -110,12 +115,21 @@ parseEmbedded (p, src) =
  where
   encodedSrc = E.decodeUtf8 src
 
-parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (FilePath, ParserError) (Module Metadata Kind ()))
+parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (Module Metadata Kind ()))
 parseFile file = do
-  src <- Text.pack <$> liftIO (readFile file)
-  case runParser parseModule "" src of
-    Left err ->
-      pure $ Left (file, err)
-    Right module_ -> do
-      setVerbatimSourceForC module_ src
-      pure $ Right module_
+  CompilerConfig{..} <- gets compilerConfig
+  res <- liftIO $ resolveModule configSourcePaths file
+  case res of
+    Right (fp, _, name) -> do
+      src <- Text.pack <$> liftIO (readFile fp)
+      case runParser parseModule "" src of
+        Left err ->
+          pure $ Left (ParserError file err)
+        Right module_@(Module path _ _) -> do
+          if Text.unpack (principalPath path) == name
+            then do
+              setVerbatimSourceForC module_ src
+              pure $ Right module_
+            else pure $ Left (InvalidModuleName file (principalPath path))
+    Left err -> do
+      pure $ Left (BadFilename file err)

@@ -12,8 +12,8 @@ import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
-import Data.Foldable (for_)
 import Control.Monad.State (evalStateT)
+import Data.Foldable (for_)
 import Extras (Name)
 import System.Console.AsciiProgress
 

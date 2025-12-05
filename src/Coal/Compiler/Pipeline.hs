@@ -132,6 +132,10 @@ prettyError env =
   \case
     ParserError file err ->
       "In file \"" <> Text.pack file <> "\":\n\n" <> Text.pack (errorBundlePretty err)
+    InvalidModuleName file path ->
+      "The module name '" <> path <> "' does not match the file name \"" <> Text.pack file
+    BadFilename _ err ->
+      Text.pack err
     MisplacedImportStatement erl -> do
       errorMessage ["Misplaced import statement"] env erl
     ModuleNotFound name erl ->
@@ -157,11 +161,11 @@ prettyError env =
     ConflictingParameter name erl ->
       errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
     NameNotInModule name path erl ->
-      errorMessage ["The module " <> principalPath path <> " does not export '" <> name <> "'"] env erl
+      errorMessage ["The module " <> principalPath path <> " doesn't export '" <> name <> "'"] env erl
     MissingType name path erl ->
-      errorMessage ["The module " <> principalPath path <> " does not export a type '" <> name <> "'"] env erl
+      errorMessage ["The module " <> principalPath path <> " doesn't export a type '" <> name <> "'"] env erl
     MissingCotype name path erl ->
-      errorMessage ["The module " <> principalPath path <> " does not export a coata type '" <> name <> "'"] env erl
+      errorMessage ["The module " <> principalPath path <> " doesn't export a codata type '" <> name <> "'"] env erl
     NoDataConstructorForType ctor name _ erl ->
       errorMessage ["No constructor '" <> ctor <> "' for type '" <> name <> "' in scope"] env erl
     NoCodataAccessorForCotype xsor name _ erl ->
@@ -171,7 +175,7 @@ prettyError env =
     MissingTraitDefinition name trait erl ->
       errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
     UnexpectedTraitDefinition name trait erl ->
-      errorMessage ["The trait '" <> trait <> "' does not have an entry '" <> name <> "'"] env erl
+      errorMessage ["The trait '" <> trait <> "' doesn't have an entry '" <> name <> "'"] env erl
     MissingRequiredInstance name t erl ->
       errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType_ t <> ">'"] env erl
 

@@ -15,6 +15,7 @@ data CompilerConfig = CompilerConfig
   { configExecutableName :: FilePath
   , configGenerateDotFiles :: Bool
   , configGenerateLLVMOutput :: Bool
+  , configSourcePaths :: [FilePath]
   , configCFiles :: [FilePath]
   , configSilent :: Bool
   }
@@ -27,6 +28,7 @@ defaultConfig =
     { configExecutableName = "dist"
     , configGenerateDotFiles = True
     , configGenerateLLVMOutput = True
+    , configSourcePaths = ["src"]
     , configCFiles = []
     , configSilent = False
     }
@@ -38,14 +40,26 @@ silentConfig = defaultConfig{configSilent = True}
 {-# INLINE setConfigExecutableName #-}
 setConfigExecutableName :: FilePath -> CompilerConfig -> CompilerConfig
 setConfigExecutableName name CompilerConfig{..} =
-  CompilerConfig{configExecutableName = name, ..}
+  CompilerConfig
+    { configExecutableName =
+        name
+    , ..
+    }
 
 {-# INLINE setConfigGenerateDotFiles #-}
 setConfigGenerateDotFiles :: Bool -> CompilerConfig -> CompilerConfig
 setConfigGenerateDotFiles flag CompilerConfig{..} =
-  CompilerConfig{configGenerateDotFiles = flag, ..}
+  CompilerConfig
+    { configGenerateDotFiles =
+        flag
+    , ..
+    }
 
 {-# INLINE setConfigGenerateLLVMOutput #-}
 setConfigGenerateLLVMOutput :: Bool -> CompilerConfig -> CompilerConfig
 setConfigGenerateLLVMOutput flag CompilerConfig{..} =
-  CompilerConfig{configGenerateLLVMOutput = flag, ..}
+  CompilerConfig
+    { configGenerateLLVMOutput =
+        flag
+    , ..
+    }

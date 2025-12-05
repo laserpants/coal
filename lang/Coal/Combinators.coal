@@ -1,6 +1,6 @@
 module Coal.Combinators {
 
-  /*
+  /**
    * The identity function.
    *
    * Returns the value unchanged.

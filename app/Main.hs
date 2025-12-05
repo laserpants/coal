@@ -7,11 +7,13 @@ module Main (main) where
 
 import Coal.Compiler (compile)
 import Coal.Compiler.Config (CompilerConfig (..))
+import Data.List (nub)
 import Options.Applicative
 
 data CommandOptions = CommandOptions
   { inputFiles :: [FilePath]
   , outputFile :: FilePath
+  , srcPaths :: [FilePath]
   , debugGenerateDotfiles :: Bool
   , debugLLVMOutput :: Bool
   , extraSourceFiles :: [FilePath]
@@ -43,6 +45,16 @@ optionsParser = do
           <> help "Output intermediate LLVM IR"
       )
 
+  srcPaths <-
+    many
+      ( strOption
+          ( long "path"
+              <> short 'I'
+              <> metavar "FILE"
+              <> help "Source file directory path (can be passed multiple times)"
+          )
+      )
+
   extraSourceFiles <-
     many
       ( strOption
@@ -55,6 +67,7 @@ optionsParser = do
   silent <-
     switch
       ( long "silent"
+          <> short 's'
           <> help "Supress terminal output"
       )
 
@@ -68,6 +81,7 @@ main = do
           { configExecutableName = outputFile
           , configGenerateDotFiles = debugGenerateDotfiles
           , configGenerateLLVMOutput = debugLLVMOutput
+          , configSourcePaths = nub ("src" : srcPaths)
           , configCFiles = extraSourceFiles
           , configSilent = silent
           }

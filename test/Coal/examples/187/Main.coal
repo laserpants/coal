@@ -1,0 +1,8 @@
+module Banana {
+
+  import IO(println_string)
+
+  fun main() =
+    println_string("abc")
+
+}
