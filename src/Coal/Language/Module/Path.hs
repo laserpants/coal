@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Coal.Language.Module.Path (Path (..), principalPath) where
 
@@ -12,4 +13,4 @@ newtype Path = Path {pathComponents :: [Name]}
 
 {-# INLINE principalPath #-}
 principalPath :: Path -> Name
-principalPath p = Text.intercalate "." path where Path path = p
+principalPath Path{..} = Text.intercalate "." pathComponents
