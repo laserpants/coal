@@ -171,8 +171,8 @@ library
       Coal.Kernel.Parser.Symbol
       Coal.Kernel.Parser.Type
       Coal.Language
-      Coal.Language.CodataAccessor
-      Coal.Language.DataConstructor
+      Coal.Language.Codata.Accessor
+      Coal.Language.Data.Constructor
       Coal.Language.Expression
       Coal.Language.Expression.Binding
       Coal.Language.Expression.Choice

@@ -3,7 +3,7 @@
 
 module Coal.Language.Module.Definition.Cotype (CotypeDef (..)) where
 
-import Coal.Language.CodataAccessor (CodataAccessor (..))
+import Coal.Language.Codata.Accessor (CodataAccessor (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
 
