@@ -4,7 +4,6 @@ module Coal.Monad {
   import Coal.Applicative(trait Applicative)
   import IO(__eval_io)
 
-  // TODO: should check that Applicative is in scope
   trait Monad<m> with Applicative<m> {
     bind : m<a> -> (a -> m<b>) -> m<b>
   }
