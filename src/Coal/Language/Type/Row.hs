@@ -53,12 +53,12 @@ normalizeRow :: Row o k t -> Row o k t
 normalizeRow = fromRowData . toRowData
 
 extractField :: Name -> Row o k t -> Maybe (t, Row o k t)
-extractField name row =
-  case Map.lookup name dict of
+extractField field row =
+  case Map.lookup field dict of
     Nothing ->
       Nothing
     Just t ->
-      Just (t, fromDictionary (Map.delete name dict) r)
+      Just (t, fromDictionary (Map.delete field dict) r)
  where
   RowData dict r =
     toRowData row
