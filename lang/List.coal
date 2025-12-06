@@ -123,6 +123,14 @@ module List {
     }
 
   /**
+   * Extract a range of elements from the list.
+   *
+   * slice(m, n, xs) = xs |. drop(m) |. take(n - m)
+   */
+  fun slice(m : nat, n : nat, list : List<a>) : List<a> =
+    list |. drop(m) |. take(n - m)
+
+  /**
    * Return the element at index `n`, or `None` if out of bounds.
    */
   fun element_at(n : nat, list : List<a>) : Option<a> =
