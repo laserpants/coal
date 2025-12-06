@@ -15,6 +15,7 @@ import Coal.Language (Kind)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseModule)
+import Coal.Parser.Core (spaces)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
@@ -25,7 +26,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as E
 import Extras (forM, forM_)
-import Text.Megaparsec (runParser)
+import Text.Megaparsec (eof, runParser)
 
 passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
 passParsing =
@@ -106,7 +107,7 @@ pass files = do
 
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (Module Metadata Kind ()))
 parseEmbedded (p, src) =
-  case runParser parseModule "" encodedSrc of
+  case runParser (parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
     Right module_ -> do
@@ -122,7 +123,7 @@ parseFile file = do
   case res of
     Right (fp, _, name) -> do
       src <- Text.pack <$> liftIO (readFile fp)
-      case runParser parseModule "" src of
+      case runParser (spaces *> parseModule <* eof) "" src of
         Left err ->
           pure $ Left (ParserError file err)
         Right module_@(Module path _ _) -> do

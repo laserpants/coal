@@ -962,6 +962,13 @@ e2eSpec = do
           ]
       res `shouldBe` Left ParserFailure
 
+  describe "188" $ do
+    expectOutput
+      "abc"
+      "test/Coal/examples/188"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
