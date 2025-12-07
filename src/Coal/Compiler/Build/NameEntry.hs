@@ -13,7 +13,6 @@ module Coal.Compiler.Build.NameEntry (
   AliasEntry (..),
   NameEntry (..),
   HasName (..),
-  aliasEntry,
   dataConstructorEntries,
   codataAccessorEntries,
   cotypeConstructorEntry,
@@ -23,7 +22,7 @@ module Coal.Compiler.Build.NameEntry (
 import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
 import Coal.Language
-import Coal.Language.Module (AliasDef (..), CotypeDef (..), TypeDef (..))
+import Coal.Language.Module (CotypeDef (..), TypeDef (..))
 import Control.Monad.State (evalState)
 import qualified Data.Set as Set
 import Extras (Dictionary, Name, Set, for)
@@ -196,9 +195,6 @@ codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
       loc
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
-
-aliasEntry :: a -> Name -> AliasDef -> AliasEntry a
-aliasEntry loc name (AliasDef ps t) = AliasEntry loc name (parameterName <$> ps) t
 
 translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
 translateScheme env (Forall _ _ s) = Forall (typeIndexesIn t) [] t

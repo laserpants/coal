@@ -266,11 +266,13 @@ collectTypeConstructors =
           . addTypeExport name
      where
       info@(CotypeConstructorEntry _ _ kind_ _) = cotypeConstructorEntry loc name def
-    DTypeAlias loc name alias -> do
+    DTypeAlias loc name (AliasDef ps t) -> do
       modify $
-        insertAlias name (aliasEntry loc name alias)
+        insertAlias name entry
           . addName (NAlias name)
           . addTypeExport name
+     where
+      entry = AliasEntry loc name (parameterName <$> ps) t
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport a path imports -> do
