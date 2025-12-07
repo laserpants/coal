@@ -10,7 +10,7 @@ import Data.Data (Data, Typeable)
 import Extras (Name)
 
 data TraitDefinition k = TraitDefinition
-  { traitDefinitionRequiredTraits :: [Trait (Parameter k)]
+  { traitDefinitionRequired :: [Trait (Parameter k)]
   , traitDefinitionParameter :: Parameter k
   , traitDefinitionMethods :: [(Name, Scheme Parameter k (Type Parameter k))]
   }
