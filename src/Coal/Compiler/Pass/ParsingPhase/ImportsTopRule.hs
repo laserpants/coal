@@ -9,7 +9,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module
-import Coal.Language.Module.Definition (isDImport)
+import Coal.Language.Module.Definition (isImport)
 import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
 import Extras (Name)
 
@@ -33,10 +33,10 @@ checkImports name defs = do
     [] ->
       pure ()
     rs -> do
-      forM_ (filter isDImport rs) $
+      forM_ (filter isImport rs) $
         \d ->
           tellErrors [MisplacedImportStatement (ErrorLocation name (getMetadata d))]
   pure defs
  where
-  ds = dropWhile isDImport defs
-  es = dropWhile (not . isDImport) ds
+  ds = dropWhile isImport defs
+  es = dropWhile (not . isImport) ds

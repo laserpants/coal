@@ -9,8 +9,8 @@ module Coal.Language.Module.Definition (
   Import (..),
   Path (..),
   definitionName,
-  isDImport,
-  isDType,
+  isImport,
+  isType,
 ) where
 
 import Coal.Language.Module.Definition.Alias (AliasDef (..))
@@ -80,8 +80,8 @@ definitionName =
     _ ->
       error "Not implemented"
 
-isDImport :: Definition a k t -> Bool
-isDImport =
+isImport :: Definition a k t -> Bool
+isImport =
   \case
     DImport{} ->
       True
@@ -90,8 +90,8 @@ isDImport =
     _ ->
       False
 
-isDType :: Definition a k t -> Bool
-isDType =
+isType :: Definition a k t -> Bool
+isType =
   \case
     DType{} ->
       True
