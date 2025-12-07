@@ -15,8 +15,6 @@ module Coal.Compiler.Build.NameEntry (
   HasName (..),
   dataConstructorEntries,
   codataAccessorEntries,
-  cotypeConstructorEntry,
-  typeConstructorEntry,
 ) where
 
 import Coal.AST.Type.Parameterized (instantiateVars)
@@ -25,7 +23,7 @@ import Coal.Language
 import Coal.Language.Module (CotypeDef (..), TypeDef (..))
 import Control.Monad.State (evalState)
 import qualified Data.Set as Set
-import Extras (Dictionary, Name, Set, for)
+import Extras (Dictionary, Name, Set)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
@@ -157,22 +155,6 @@ instance HasName (TraitEntry a) where
 instance HasName (Name, a) where
   nameOf = fst
 
-typeConstructorEntry :: a -> Name -> TypeDef -> TypeConstructorEntry a
-typeConstructorEntry loc name (TypeDef ps ctors) =
-  TypeConstructorEntry loc name (kind n) (for ctors constructorName)
- where
-  n = length ps
-
-cotypeConstructorEntry :: a -> Name -> CotypeDef -> CotypeConstructorEntry a
-cotypeConstructorEntry loc name (CotypeDef ps xsors) =
-  CotypeConstructorEntry loc name (kind n) (for xsors codataAccessorName)
- where
-  n = length ps
-
-{-# INLINE kind #-}
-kind :: Int -> Kind
-kind n = foldr KArrow KType (replicate n KType)
-
 dataConstructorEntries :: Environment Kind -> a -> TypeDef -> [DataConstructorEntry a]
 dataConstructorEntries env loc (TypeDef _ ctors) = getEntry <$> ctors
  where
@@ -196,6 +178,7 @@ codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
 
+-- TODO
 translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
 translateScheme env (Forall _ _ s) = Forall (typeIndexesIn t) [] t
  where

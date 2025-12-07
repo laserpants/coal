@@ -26,7 +26,7 @@ import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
 import Data.List (nub, union, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (Name, groupByKey, (<$$>))
+import Extras (Name, for, groupByKey, (<$$>))
 import Extras.Control.Monad (concatForM)
 
 buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
@@ -252,20 +252,22 @@ importedModule loc path = do
 collectTypeConstructors :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectTypeConstructors =
   \case
-    DType loc name def -> do
+    DType loc name (TypeDef params ctors) -> do
       modify $
-        insertTypeConstructor name info
-          . addName (NType name kind_)
+        insertTypeConstructor name entry
+          . addName (NType name kind)
           . addTypeExport name
      where
-      info@(TypeConstructorEntry _ _ kind_ _) = typeConstructorEntry loc name def
-    DCotype loc name def -> do
+      kind = foldr KArrow KType (replicate (length params) KType)
+      entry = TypeConstructorEntry loc name kind (for ctors constructorName)
+    DCotype loc name (CotypeDef params xsors) -> do
       modify $
-        insertCotypeConstructor name info
-          . addName (NCotype name kind_)
+        insertCotypeConstructor name entry
+          . addName (NCotype name kind)
           . addTypeExport name
      where
-      info@(CotypeConstructorEntry _ _ kind_ _) = cotypeConstructorEntry loc name def
+      kind = foldr KArrow KType (replicate (length params) KType)
+      entry = CotypeConstructorEntry loc name kind (for xsors codataAccessorName)
     DTypeAlias loc name (AliasDef ps t) -> do
       modify $
         insertAlias name entry
