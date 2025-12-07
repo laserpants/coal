@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Definition.Function (FunctionDef (..)) where
+module Coal.Language.Module.Definition.Function (FunctionDefinition (..)) where
 
 import Coal.Language.Expression (Expression)
 import Coal.Language.Pattern (Pattern)
@@ -11,11 +11,11 @@ import Coal.Language.Type (ParameterizedType)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 
-data FunctionDef a t = FunctionDef
-  { functionDefMetadata :: a
-  , functionDefAnnotation :: Maybe (With ParameterizedType)
-  , functionDefType :: With t
-  , functionDefPatterns :: NonEmpty (Pattern a t)
-  , functionDefExpression :: Expression a t
+data FunctionDefinition a t = FunctionDefinition
+  { functionDefinitionMetadata :: a
+  , functionDefinitionAnnotation :: Maybe (With ParameterizedType)
+  , functionDefinitionType :: With t
+  , functionDefinitionPatterns :: NonEmpty (Pattern a t)
+  , functionDefinitionExpression :: Expression a t
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

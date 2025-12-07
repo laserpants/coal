@@ -50,14 +50,14 @@ expandGroups =
   \case
     d@(DFunction _ _ (_ :| []) _) ->
       pure [d]
-    DFunction loc name fs@(FunctionDef _ w _ ps _ :| _) gs ->
+    DFunction loc name fs@(FunctionDefinition _ w _ ps _ :| _) gs ->
       pure [DConstant loc name e1 gs]
      where
-      e1 = ConstantDef loc w (With [] ()) (toExpr (NonEmpty.length ps) loc (NonEmpty.toList fs))
+      e1 = ConstantDefinition loc w (With [] ()) (toExpr (NonEmpty.length ps) loc (NonEmpty.toList fs))
     d ->
       pure [d]
 
-toExpr :: Int -> Metadata -> [FunctionDef Metadata ()] -> Expression Metadata ()
+toExpr :: Int -> Metadata -> [FunctionDefinition Metadata ()] -> Expression Metadata ()
 toExpr n loc fs =
   ELambda
     loc
@@ -67,6 +67,6 @@ toExpr n loc fs =
   ns = NonEmpty.fromList [1 .. n]
   qs = (<>) "$arg_" . showt <$> ns
   clauses =
-    case [EClause a (if length ps == 1 then NonEmpty.head ps else tupleP ps) (CPlain mempty [] e :| []) | FunctionDef a _ _ ps e <- fs] of
+    case [EClause a (if length ps == 1 then NonEmpty.head ps else tupleP ps) (CPlain mempty [] e :| []) | FunctionDefinition a _ _ ps e <- fs] of
       c : cs -> c :| cs
       [] -> error "Implementation error"

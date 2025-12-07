@@ -59,35 +59,35 @@ instance PatternExhaustiveCheckContext (Definition Metadata k t) where
       d ->
         pure d
 
-instance PatternExhaustiveCheckContext (InstanceDef Definition Metadata k t) where
+instance PatternExhaustiveCheckContext (InstanceDefinition Definition Metadata k t) where
   patternExhaustiveCheck name =
     \case
-      InstanceDef ts t ds ->
-        InstanceDef ts t <$> traverse (patternExhaustiveCheck name) ds
+      InstanceDefinition ts t ds ->
+        InstanceDefinition ts t <$> traverse (patternExhaustiveCheck name) ds
 
-instance PatternExhaustiveCheckContext (FoldDef Metadata t) where
+instance PatternExhaustiveCheckContext (FoldDefinition Metadata t) where
   patternExhaustiveCheck name =
     \case
-      FoldDef w t e ->
-        FoldDef w t <$> traverse (patternExhaustiveCheck name) e
+      FoldDefinition w t e ->
+        FoldDefinition w t <$> traverse (patternExhaustiveCheck name) e
 
-instance PatternExhaustiveCheckContext (UnfoldDef Metadata t) where
+instance PatternExhaustiveCheckContext (UnfoldDefinition Metadata t) where
   patternExhaustiveCheck name =
     \case
-      UnfoldDef w t ps e ->
-        UnfoldDef w t ps <$> traverse (patternExhaustiveCheck name) e
+      UnfoldDefinition w t ps e ->
+        UnfoldDefinition w t ps <$> traverse (patternExhaustiveCheck name) e
 
-instance PatternExhaustiveCheckContext (FunctionDef Metadata t) where
+instance PatternExhaustiveCheckContext (FunctionDefinition Metadata t) where
   patternExhaustiveCheck name =
     \case
-      FunctionDef loc w1 w2 ps e1 ->
-        FunctionDef loc w1 w2 ps <$> patternExhaustiveCheck name e1
+      FunctionDefinition loc w1 w2 ps e1 ->
+        FunctionDefinition loc w1 w2 ps <$> patternExhaustiveCheck name e1
 
-instance PatternExhaustiveCheckContext (ConstantDef Metadata t) where
+instance PatternExhaustiveCheckContext (ConstantDefinition Metadata t) where
   patternExhaustiveCheck name =
     \case
-      ConstantDef loc w1 w2 e1 ->
-        ConstantDef loc w1 w2 <$> patternExhaustiveCheck name e1
+      ConstantDefinition loc w1 w2 e1 ->
+        ConstantDefinition loc w1 w2 <$> patternExhaustiveCheck name e1
 
 instance PatternExhaustiveCheckContext (Binding Expression Metadata t) where
   patternExhaustiveCheck name =

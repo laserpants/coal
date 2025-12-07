@@ -187,29 +187,29 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Module a k ()) where
         setCompilerCurrentModuleC p
         Module p ns <$> compileFolds o
 
-instance (Monoid a, Data a) => CompileFoldsContext a (FunctionDef a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (FunctionDefinition a ()) where
   compileFolds =
     \case
-      FunctionDef a u w ps e ->
-        FunctionDef a u w ps <$> compileFolds e
+      FunctionDefinition a u w ps e ->
+        FunctionDefinition a u w ps <$> compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext a (ConstantDef a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (ConstantDefinition a ()) where
   compileFolds =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w <$> compileFolds e
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w <$> compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext a (FoldDef a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (FoldDefinition a ()) where
   compileFolds =
     \case
-      FoldDef with cs e ->
-        FoldDef with <$> traverse compileFolds cs <*> traverse compileFolds e
+      FoldDefinition with cs e ->
+        FoldDefinition with <$> traverse compileFolds cs <*> traverse compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext a (UnfoldDef a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (UnfoldDefinition a ()) where
   compileFolds =
     \case
-      UnfoldDef with ps d e ->
-        UnfoldDef with ps <$> traverse compileFolds d <*> traverse compileFolds e
+      UnfoldDefinition with ps d e ->
+        UnfoldDefinition with ps <$> traverse compileFolds d <*> traverse compileFolds e
 
 instance (Monoid a, Data a) => CompileFoldsContext a (Definition a k ()) where
   compileFolds =
@@ -218,8 +218,8 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Definition a k ()) where
         DFunction loc name <$> compileFolds f <*> traverse compileFolds fs
       DConstant loc name g fs ->
         DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
-      DInstance loc name (InstanceDef ps t ds) ->
-        DInstance loc name . InstanceDef ps t <$> compileFolds ds
+      DInstance loc name (InstanceDefinition ps t ds) ->
+        DInstance loc name . InstanceDefinition ps t <$> compileFolds ds
       DFold loc name d ->
         DFold loc name <$> compileFolds d
       DUnfold loc name d ->

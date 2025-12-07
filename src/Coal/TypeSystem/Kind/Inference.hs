@@ -8,7 +8,7 @@ module Coal.TypeSystem.Kind.Inference (inferTraitKinds) where
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
-import Coal.Language.Module.Definition.Trait (TraitDef (..))
+import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type
 import Coal.Language.Type.Kind
@@ -420,8 +420,8 @@ instance Parameterized (Parameter p) where
 instance (Parameterized p) => Parameterized (Trait p) where
   paramsIn (Trait _ t) = paramsIn t
 
-instance Parameterized (TraitDef k) where
-  paramsIn (TraitDef ts p _) = paramsIn ts <> paramsIn p
+instance Parameterized (TraitDefinition k) where
+  paramsIn (TraitDefinition ts p _) = paramsIn ts <> paramsIn p
 
 solveKindConstraints :: (Monad m) => [KindConstraint] -> m KindSubstitution
 solveKindConstraints [] =
@@ -447,8 +447,8 @@ insertTraitKind params (Trait trait (Parameter () name)) =
     Nothing ->
       error "Implementation error"
 
-inferTraitKinds :: Environment Kind -> TraitDef () -> TraitDef Kind
-inferTraitKinds env def@(TraitDef ts p defs) = do
+inferTraitKinds :: Environment Kind -> TraitDefinition () -> TraitDefinition Kind
+inferTraitKinds env def@(TraitDefinition ts p defs) = do
   let (defs0, (traits0, param0)) =
         flip runState (fmap (insertTraitKind qs) ts, insertKind qs p) $
           forM defs $
@@ -461,7 +461,7 @@ inferTraitKinds env def@(TraitDef ts p defs) = do
               sub <- solveKindConstraints cs
               modify (bimap (applyKinds sub) (applyKinds sub))
               pure (n, lowerKindsInScheme1 (applyKinds sub r))
-   in TraitDef (lowerKindsInTrait <$> traits0) (lowerKindsInParameter param0) defs0
+   in TraitDefinition (lowerKindsInTrait <$> traits0) (lowerKindsInParameter param0) defs0
  where
   ps = paramsIn def
   qs = zip (Set.toList ps) [IsKVar n | n <- [1 ..]]

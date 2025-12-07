@@ -20,7 +20,7 @@ module Coal.Compiler.Build.NameEntry (
 import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
 import Coal.Language
-import Coal.Language.Module (CotypeDef (..), TypeDef (..))
+import Coal.Language.Module (CotypeDefinition (..), TypeDefinition (..))
 import Control.Monad.State (evalState)
 import qualified Data.Set as Set
 import Extras (Dictionary, Name, Set)
@@ -155,8 +155,8 @@ instance HasName (TraitEntry a) where
 instance HasName (Name, a) where
   nameOf = fst
 
-dataConstructorEntries :: Environment Kind -> a -> TypeDef -> [DataConstructorEntry a]
-dataConstructorEntries env loc (TypeDef _ ctors) = getEntry <$> ctors
+dataConstructorEntries :: Environment Kind -> a -> TypeDefinition -> [DataConstructorEntry a]
+dataConstructorEntries env loc (TypeDefinition _ ctors) = getEntry <$> ctors
  where
   getEntry DataConstructor{constructorName = name, ..} =
     DataConstructorEntry
@@ -169,8 +169,8 @@ dataConstructorEntries env loc (TypeDef _ ctors) = getEntry <$> ctors
         }
       (Set.fromList (constructorName <$> ctors))
 
-codataAccessorEntries :: Environment Kind -> a -> CotypeDef -> [CodataAccessorEntry a]
-codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
+codataAccessorEntries :: Environment Kind -> a -> CotypeDefinition -> [CodataAccessorEntry a]
+codataAccessorEntries env loc (CotypeDefinition _ xsors) = getEntry <$> xsors
  where
   getEntry CodataAccessor{..} =
     CodataAccessorEntry

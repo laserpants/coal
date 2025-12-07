@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Definition.Unfold (UnfoldDef (..)) where
+module Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..)) where
 
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Pattern (Pattern (..))
@@ -12,10 +12,10 @@ import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Dictionary)
 
-data UnfoldDef a t = UnfoldDef
-  { unfoldDefType :: With ParameterizedType
-  , unfoldDefPatterns :: NonEmpty (Pattern a t)
-  , unfoldDefFields :: Dictionary (Expression a t)
-  , unfoldDefExpression :: Maybe (Expression a t)
+data UnfoldDefinition a t = UnfoldDefinition
+  { unfoldDefinitionType :: With ParameterizedType
+  , unfoldDefinitionPatterns :: NonEmpty (Pattern a t)
+  , unfoldDefinitionFields :: Dictionary (Expression a t)
+  , unfoldDefinitionExpression :: Maybe (Expression a t)
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

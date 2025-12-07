@@ -12,9 +12,9 @@ import Coal.Compiler.Pass
 import Coal.Language
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Definition.Constant (ConstantDef (..))
-import Coal.Language.Module.Definition.Fold (FoldDef (..))
-import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
+import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
+import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
+import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)
@@ -73,21 +73,21 @@ collectAsPatterns =
     p ->
       pure p
 
-instance (Data a, Data t, Monoid a) => TransformContext (ConstantDef a t) where
+instance (Data a, Data t, Monoid a) => TransformContext (ConstantDefinition a t) where
   expandAsPatterns =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w (expandAsPatterns e)
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w (expandAsPatterns e)
 
 instance (Data a, Data t, Monoid a) => TransformContext (Definition a k t) where
   expandAsPatterns =
     \case
       DConstant loc name g fs ->
         DConstant loc name (expandAsPatterns g) (expandAsPatterns <$> fs)
-      DFold loc n (FoldDef with cs e) ->
-        DFold loc n (FoldDef with cs (expandAsPatterns <$> e))
-      DUnfold loc n (UnfoldDef with ps d me) ->
-        DUnfold loc n (UnfoldDef with ps d (expandAsPatterns <$> me))
+      DFold loc n (FoldDefinition with cs e) ->
+        DFold loc n (FoldDefinition with cs (expandAsPatterns <$> e))
+      DUnfold loc n (UnfoldDefinition with ps d me) ->
+        DUnfold loc n (UnfoldDefinition with ps d (expandAsPatterns <$> me))
       d ->
         d
 

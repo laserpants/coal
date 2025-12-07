@@ -3,7 +3,7 @@
 module Coal.TypeSystem.Kind.InferenceSpec where
 
 import Coal.Language
-import Coal.Language.Module.Definition.Trait (TraitDef (..))
+import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Type
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Identity (runIdentity)
@@ -26,8 +26,8 @@ import qualified Data.Set as Set
 --    sub <- solveKindConstraints cs
 --    pure (lowerKinds (applyKinds sub t1))
 --
--- testTraitDef =
---  TraitDef
+-- testTraitDefinition =
+--  TraitDefinition
 --    []
 --    (Parameter () "m")
 --    [
@@ -42,10 +42,10 @@ import qualified Data.Set as Set
 --      )
 --    ]
 
-testTraitDef1 =
+testTraitDefinition1 =
   inferTraitKinds
     mempty
-    ( TraitDef
+    ( TraitDefinition
         []
         (Parameter () "m")
         [
@@ -60,7 +60,7 @@ testTraitDef1 =
           )
         ]
     )
-    == ( TraitDef
+    == ( TraitDefinition
           []
           (Parameter (KArrow KType KType) "m")
           [

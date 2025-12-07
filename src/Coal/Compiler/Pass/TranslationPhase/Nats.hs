@@ -11,7 +11,7 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
+import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
 import Control.Monad ((<=<))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
@@ -142,17 +142,17 @@ instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) wh
       Module p ns o ->
         Module p ns <$> compileNats o
 
-instance (Monoid a, Data a) => CompileNatsContext (FunctionDef a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (FunctionDefinition a IndexedType) where
   compileNats =
     \case
-      FunctionDef a u w ps e ->
-        FunctionDef a u w ps <$> compileNats e
+      FunctionDefinition a u w ps e ->
+        FunctionDefinition a u w ps <$> compileNats e
 
-instance (Monoid a, Data a) => CompileNatsContext (ConstantDef a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (ConstantDefinition a IndexedType) where
   compileNats =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w <$> compileNats e
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w <$> compileNats e
 
 instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
   compileNats =

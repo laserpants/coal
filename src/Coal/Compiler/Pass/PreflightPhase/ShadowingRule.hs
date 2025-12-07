@@ -171,18 +171,18 @@ instance (Data t) => RuleContext (Definition Metadata k t) where
       o ->
         pure o
 
-instance (Data t) => RuleContext (ConstantDef Metadata t) where
+instance (Data t) => RuleContext (ConstantDefinition Metadata t) where
   detectShadowing names =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w <$> detectShadowing names e
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w <$> detectShadowing names e
 
-instance (Data t) => RuleContext (FunctionDef Metadata t) where
+instance (Data t) => RuleContext (FunctionDefinition Metadata t) where
   detectShadowing names =
     \case
-      FunctionDef a u w ps e -> do
+      FunctionDefinition a u w ps e -> do
         names' <- addNames a (boundIn ps) names
-        FunctionDef a u w ps <$> detectShadowing names' e
+        FunctionDefinition a u w ps <$> detectShadowing names' e
 
 addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata m (Set Name)
 addNames loc new names = do

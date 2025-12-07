@@ -13,7 +13,7 @@ import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..))
+import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), InstanceDefinition (..), Module (..))
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
@@ -81,21 +81,21 @@ instance (TransformContext t, Data e, Data t) => TransformContext (Module e a t)
       Module p ns o ->
         Module p ns <$> expandAliases o
 
-instance (TransformContext t, Data a, Data t) => TransformContext (FunctionDef a t) where
+instance (TransformContext t, Data a, Data t) => TransformContext (FunctionDefinition a t) where
   expandAliases =
     \case
-      FunctionDef a u w ps e ->
-        FunctionDef a
+      FunctionDefinition a u w ps e ->
+        FunctionDefinition a
           <$> expandAliases u
           <*> expandAliases w
           <*> expandAliases ps
           <*> expandAliases e
 
-instance (TransformContext t, Data a, Data t) => TransformContext (ConstantDef a t) where
+instance (TransformContext t, Data a, Data t) => TransformContext (ConstantDefinition a t) where
   expandAliases =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a
+      ConstantDefinition a u w e ->
+        ConstantDefinition a
           <$> expandAliases u
           <*> expandAliases w
           <*> expandAliases e
@@ -107,8 +107,8 @@ instance (TransformContext t, Data a, Data t) => TransformContext (Definition a 
         DFunction loc name <$> expandAliases f <*> traverse expandAliases fs
       DConstant loc name c fs ->
         DConstant loc name <$> expandAliases c <*> traverse expandAliases fs
-      DInstance loc name (InstanceDef ts t ds) ->
-        DInstance loc name . InstanceDef ts t <$> traverse expandAliases ds
+      DInstance loc name (InstanceDefinition ts t ds) ->
+        DInstance loc name . InstanceDefinition ts t <$> traverse expandAliases ds
       o ->
         pure o
 

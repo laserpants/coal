@@ -104,9 +104,9 @@ atLabels = execWriter . transformM go
 compileTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a k () -> CompilerT a m (Definition a k ())
 compileTopLevelFolds =
   \case
-    DFold loc name (FoldDef with cs _) -> do
+    DFold loc name (FoldDefinition with cs _) -> do
       e1 <- expandTopLevelFold cs
-      pure $ DFold loc name (FoldDef with cs (Just e1))
+      pure $ DFold loc name (FoldDefinition with cs (Just e1))
     o ->
       pure o
 

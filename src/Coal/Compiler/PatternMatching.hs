@@ -22,7 +22,7 @@ import Coal.Compiler.PatternMatching.Equation (patternEquation)
 import Coal.Compiler.PatternMatching.Rule (matchPatterns)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
+import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
@@ -52,10 +52,10 @@ instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext a (Module a 
 instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext a (Definition a k t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext a (FunctionDef a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (FunctionDefinition a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext a (ConstantDef a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (ConstantDefinition a t) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
 
 instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Clause a t) where

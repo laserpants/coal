@@ -40,8 +40,8 @@ data CompilerError a
   | NoDataConstructorForType Name Name Path (ErrorLocation a)
   | NoCodataAccessorForCotype Name Name Path (ErrorLocation a)
   | TraitNotInScope Name (ErrorLocation a)
-  | MissingTraitDefinition Name Name (ErrorLocation a)
-  | UnexpectedTraitDefinition Name Name (ErrorLocation a)
+  | MissingTraitDefinitioninition Name Name (ErrorLocation a)
+  | UnexpectedTraitDefinitioninition Name Name (ErrorLocation a)
   | MissingRequiredInstance Name IndexedType (ErrorLocation a)
   deriving (Show, Eq)
 
@@ -101,9 +101,9 @@ errorLocation =
       Just erl
     TraitNotInScope _ erl ->
       Just erl
-    MissingTraitDefinition _ _ erl ->
+    MissingTraitDefinitioninition _ _ erl ->
       Just erl
-    UnexpectedTraitDefinition _ _ erl ->
+    UnexpectedTraitDefinitioninition _ _ erl ->
       Just erl
     MissingRequiredInstance _ _ erl ->
       Just erl

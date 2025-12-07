@@ -24,30 +24,30 @@ import Extras (Name, (<.>))
 translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
 translateDefinition =
   \case
-    DType _ _ (TypeDef _ ctors) ->
+    DType _ _ (TypeDefinition _ ctors) ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
-    DFunction _ name (FunctionDef _ _ _ ps e :| _) _ -> do
+    DFunction _ name (FunctionDefinition _ _ _ ps e :| _) _ -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OFunction (moduleName <.> name) qs f]
-    DConstant _ name (ConstantDef _ _ With{} e) _ -> do
+    DConstant _ name (ConstantDefinition _ _ With{} e) _ -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    DFold _ name (FoldDef _ _ (Just e)) -> do
+    DFold _ name (FoldDefinition _ _ (Just e)) -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    DUnfold _ name (UnfoldDef _ _ _ (Just e)) -> do
+    DUnfold _ name (UnfoldDefinition _ _ _ (Just e)) -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    DTrait _ name (TraitDef _ _ ds) ->
+    DTrait _ name (TraitDefinition _ _ ds) ->
       forM ds $
         \(n, Forall _ _ t) ->
           traitAccessor name n (translateType t)
-    DInstance _ name (InstanceDef _ t ds) ->
+    DInstance _ name (InstanceDefinition _ t ds) ->
       concatForM ds $
         \case
           DFunction loc n f _ ->

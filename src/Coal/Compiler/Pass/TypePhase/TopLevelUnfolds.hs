@@ -32,9 +32,9 @@ pass = overModuleDefinitionsM (traverse compileTopLevelUnfolds)
 compileTopLevelUnfolds :: (Monoid a, Data a, Monad m) => Definition a Kind () -> CompilerT a m (Definition a Kind ())
 compileTopLevelUnfolds =
   \case
-    DUnfold loc name (UnfoldDef with ps d _) -> do
+    DUnfold loc name (UnfoldDefinition with ps d _) -> do
       e1 <- expandTopLevelUnfold loc ps d
-      pure $ DUnfold loc name (UnfoldDef with ps d (Just e1))
+      pure $ DUnfold loc name (UnfoldDefinition with ps d (Just e1))
     o ->
       pure o
 

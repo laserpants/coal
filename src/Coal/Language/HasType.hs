@@ -10,10 +10,10 @@ import Coal.Common.Label (Label (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Expression.Choice (Guard (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Definition.Constant (ConstantDef (..))
-import Coal.Language.Module.Definition.Fold (FoldDef (..))
-import Coal.Language.Module.Definition.Function (FunctionDef (..))
-import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
+import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
+import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
+import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
+import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
@@ -93,13 +93,13 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
 instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
   typeOf =
     \case
-      DFunction _ _ (FunctionDef _ _ _ ps e :| _) _ ->
+      DFunction _ _ (FunctionDefinition _ _ _ ps e :| _) _ ->
         foldTypeOf e ps
-      DConstant _ _ (ConstantDef _ _ _ e) _ ->
+      DConstant _ _ (ConstantDefinition _ _ _ e) _ ->
         typeOf e
-      DFold _ _ (FoldDef _ _ (Just e)) ->
+      DFold _ _ (FoldDefinition _ _ (Just e)) ->
         typeOf e
-      DUnfold _ _ (UnfoldDef _ _ _ (Just e)) ->
+      DUnfold _ _ (UnfoldDefinition _ _ _ (Just e)) ->
         typeOf e
       d ->
         head (universeBi d)

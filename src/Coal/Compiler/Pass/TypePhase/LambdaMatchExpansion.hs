@@ -11,7 +11,7 @@ import Coal.AST.Shorthand (lambdaE, matchE, varE, varP)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Clause, Expression (ELambdaMatch), Kind)
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), Module (..))
+import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -58,17 +58,17 @@ instance (Monoid a, Data a) => TransformContext (Module a Kind ()) where
       Module p ns o ->
         Module p ns <$> expandLambdaMatchExprs o
 
-instance (Monoid a, Data a) => TransformContext (FunctionDef a ()) where
+instance (Monoid a, Data a) => TransformContext (FunctionDefinition a ()) where
   expandLambdaMatchExprs =
     \case
-      FunctionDef a u w ps e ->
-        FunctionDef a u w ps <$> expandLambdaMatchExprs e
+      FunctionDefinition a u w ps e ->
+        FunctionDefinition a u w ps <$> expandLambdaMatchExprs e
 
-instance (Monoid a, Data a) => TransformContext (ConstantDef a ()) where
+instance (Monoid a, Data a) => TransformContext (ConstantDefinition a ()) where
   expandLambdaMatchExprs =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w <$> expandLambdaMatchExprs e
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w <$> expandLambdaMatchExprs e
 
 instance (Monoid a, Data a) => TransformContext (Definition a Kind ()) where
   expandLambdaMatchExprs =

@@ -13,15 +13,15 @@ module Coal.Language.Module.Definition (
   isType,
 ) where
 
-import Coal.Language.Module.Definition.Alias (AliasDef (..))
-import Coal.Language.Module.Definition.Constant (ConstantDef (..))
-import Coal.Language.Module.Definition.Cotype (CotypeDef (..))
-import Coal.Language.Module.Definition.Fold (FoldDef (..))
-import Coal.Language.Module.Definition.Function (FunctionDef (..))
-import Coal.Language.Module.Definition.Instance (InstanceDef (..))
-import Coal.Language.Module.Definition.Trait (TraitDef (..))
-import Coal.Language.Module.Definition.Type (TypeDef (..))
-import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
+import Coal.Language.Module.Definition.Alias (AliasDefinition (..))
+import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
+import Coal.Language.Module.Definition.Cotype (CotypeDefinition (..))
+import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
+import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
+import Coal.Language.Module.Definition.Instance (InstanceDefinition (..))
+import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
+import Coal.Language.Module.Definition.Type (TypeDefinition (..))
+import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Data.Data (Data, Typeable)
@@ -30,27 +30,27 @@ import Extras (Name)
 
 data Definition a k t
   = -- | Type definition
-    DType a Name TypeDef
+    DType a Name TypeDefinition
   | -- | Codata type definition
-    DCotype a Name CotypeDef
+    DCotype a Name CotypeDefinition
   | -- | Function definition
-    DFunction a Name (NonEmpty (FunctionDef a t)) [Definition a k t]
+    DFunction a Name (NonEmpty (FunctionDefinition a t)) [Definition a k t]
   | -- | Other (constant) top-level definitions
-    DConstant a Name (ConstantDef a t) [Definition a k t]
+    DConstant a Name (ConstantDefinition a t) [Definition a k t]
   | -- | Import statement
     DImport a Path [Import a]
   | -- | Namespace (qualified) import
     DQualifiedImport a Path
   | -- | Trait
-    DTrait a Name (TraitDef ())
+    DTrait a Name (TraitDefinition ())
   | -- | Trait instance
-    DInstance a Name (InstanceDef Definition a k t)
+    DInstance a Name (InstanceDefinition Definition a k t)
   | -- | Type alias
-    DTypeAlias a Name AliasDef
+    DTypeAlias a Name AliasDefinition
   | -- | Top-level fold
-    DFold a Name (FoldDef a t)
+    DFold a Name (FoldDefinition a t)
   | -- | Top-level unfold
-    DUnfold a Name (UnfoldDef a t)
+    DUnfold a Name (UnfoldDefinition a t)
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 definitionName :: Definition a k t -> Name

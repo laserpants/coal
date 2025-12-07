@@ -172,9 +172,9 @@ prettyError env =
       errorMessage ["No field '" <> xsor <> "' for codata type '" <> name <> "' in scope"] env erl
     TraitNotInScope trait erl ->
       errorMessage ["No trait '" <> trait <> "' in scope"] env erl
-    MissingTraitDefinition name trait erl ->
+    MissingTraitDefinitioninition name trait erl ->
       errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
-    UnexpectedTraitDefinition name trait erl ->
+    UnexpectedTraitDefinitioninition name trait erl ->
       errorMessage ["The trait '" <> trait <> "' doesn't have an entry '" <> name <> "'"] env erl
     MissingRequiredInstance name t erl ->
       errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType_ t <> ">'"] env erl

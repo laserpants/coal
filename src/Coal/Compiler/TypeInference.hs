@@ -86,8 +86,8 @@ compileConstraintsC expr = do
   insertAssumptionsC (apply sub ms2)
   insertConstraintsC (cs1 <> cs2)
 
-compileFunctionC :: (Monad m, Data a, Show a) => FunctionDef a IndexedType -> CompilerT a m IndexedType
-compileFunctionC (FunctionDef loc _ (With _ t) ps e) = do
+compileFunctionC :: (Monad m, Data a, Show a) => FunctionDefinition a IndexedType -> CompilerT a m IndexedType
+compileFunctionC (FunctionDefinition loc _ (With _ t) ps e) = do
   insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
   t1 <- supplied (TVariable . TypeIndex KType)
   compileConstraintsC $
@@ -99,8 +99,8 @@ compileFunctionC (FunctionDef loc _ (With _ t) ps e) = do
  where
   placeholder = "###.function"
 
-compileConstantC :: (Monad m, Data a, Show a) => ConstantDef a IndexedType -> CompilerT a m IndexedType
-compileConstantC (ConstantDef loc _ (With _ t) e) = do
+compileConstantC :: (Monad m, Data a, Show a) => ConstantDefinition a IndexedType -> CompilerT a m IndexedType
+compileConstantC (ConstantDefinition loc _ (With _ t) e) = do
   insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
   compileConstraintsC $
     ELet
@@ -114,7 +114,7 @@ compileConstantC (ConstantDef loc _ (With _ t) e) = do
 compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> CompilerT a m ()
 compileDefinitionC =
   \case
-    DFunction _ _ (f@(FunctionDef loc (Just (With _ t)) _ _ _) :| _) _ -> do
+    DFunction _ _ (f@(FunctionDefinition loc (Just (With _ t)) _ _ _) :| _) _ -> do
       t1 <- compileFunctionC f
       r <- runConstraintsGenC (instantiateAnnotation loc t)
       case fst3 r of
@@ -122,7 +122,7 @@ compileDefinitionC =
           compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
         Right t2 ->
           insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DConstant _ _ c@(ConstantDef loc (Just (With _ t)) _ _) _ -> do
+    DConstant _ _ c@(ConstantDefinition loc (Just (With _ t)) _ _) _ -> do
       t1 <- compileConstantC c
       r <- runConstraintsGenC (instantiateAnnotation loc t)
       case fst3 r of
@@ -134,7 +134,7 @@ compileDefinitionC =
       void (compileFunctionC f)
     DConstant _ _ c _ ->
       void (compileConstantC c)
-    DFold loc _ (FoldDef (With _ t) _ (Just e)) -> do
+    DFold loc _ (FoldDefinition (With _ t) _ (Just e)) -> do
       compileConstraintsC e
       let t1 = typeOf e
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
@@ -156,7 +156,7 @@ compileDefinitionC =
     --              (EVariable undefined (Label t1 "#.a"))
     --              cs
     --          )
-    DUnfold loc _ (UnfoldDef (With _ t) ps d (Just e)) -> do
+    DUnfold loc _ (UnfoldDefinition (With _ t) ps d (Just e)) -> do
       compileConstraintsC e
       let t1 = typeOf e
       (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
@@ -227,14 +227,14 @@ typeDefinitionC =
       pure ()
     DTrait _ name def -> do
       kenv <- asks compilerTypeConstructorEnvironment
-      let (TraitDef _ (Parameter k q) ds) = inferTraitKinds kenv def
+      let (TraitDefinition _ (Parameter k q) ds) = inferTraitKinds kenv def
 
       forM_ ds $
         \(n, Forall _ _ s) -> do
           env <- asks compilerTypeConstructorEnvironment
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
-    DInstance _ trait (InstanceDef _ t0 ds) -> do
+    DInstance _ trait (InstanceDefinition _ t0 ds) -> do
       env <- asks compilerTraitEnvironment
       kinds <- asks compilerTypeConstructorEnvironment
       case Environment.lookup trait env of
@@ -251,7 +251,7 @@ typeDefinitionC =
                   let s1 = instantiateTemplateC (TypeIndex k 0) t1 (toIndexedScheme kinds p s0)
                   insertConstraintsC [Explicit (InferenceRulePlaceholder "typeDefinitionC") (typeOf d) s1]
                   compileDefinitionC d
-    d@(DFunction loc name (FunctionDef _ _ (With _ t) ps _ :| _) _) -> do
+    d@(DFunction loc name (FunctionDefinition _ _ (With _ t) ps _ :| _) _) -> do
       checkIfNameExists loc name
       checkMain loc t ps name
       compileDefinitionC d

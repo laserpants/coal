@@ -18,11 +18,11 @@ import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Definition.Constant (ConstantDef (..))
-import Coal.Language.Module.Definition.Fold (FoldDef (..))
-import Coal.Language.Module.Definition.Function (FunctionDef (..))
-import Coal.Language.Module.Definition.Instance (InstanceDef (..))
-import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
+import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
+import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
+import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
+import Coal.Language.Module.Definition.Instance (InstanceDefinition (..))
+import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Coal.Language.Pattern (IndexedPattern, Pattern (..))
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -92,19 +92,19 @@ unrollMatch loc (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause loc p (CPlain mempty [] e :| []) :| [])
 
-instance TransformContext (FunctionDef Metadata IndexedType) where
+instance TransformContext (FunctionDefinition Metadata IndexedType) where
   desugarPatterns =
     \case
-      FunctionDef a u w ps e -> do
+      FunctionDefinition a u w ps e -> do
         e1 <- desugarPatterns e
         (qs, rs) <- listenPatterns (traverse desugarPatterns ps)
-        pure (FunctionDef a u w qs (foldr (unrollMatch a) e1 rs))
+        pure (FunctionDefinition a u w qs (foldr (unrollMatch a) e1 rs))
 
-instance TransformContext (ConstantDef Metadata IndexedType) where
+instance TransformContext (ConstantDefinition Metadata IndexedType) where
   desugarPatterns =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w <$> desugarPatterns e
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w <$> desugarPatterns e
 
 instance TransformContext (Definition Metadata Kind IndexedType) where
   desugarPatterns =
@@ -113,12 +113,12 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
         DFunction loc name <$> traverse desugarPatterns f <*> traverse desugarPatterns fs
       DConstant loc name g fs ->
         DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
-      DFold loc n (FoldDef with cs e) ->
-        DFold loc n . FoldDef with cs <$> traverse desugarPatterns e
-      DUnfold loc n (UnfoldDef with ps d e) ->
-        DUnfold loc n . UnfoldDef with ps d <$> traverse desugarPatterns e
-      DInstance loc n (InstanceDef ts pt ds) ->
-        DInstance loc n . InstanceDef ts pt <$> traverse desugarPatterns ds
+      DFold loc n (FoldDefinition with cs e) ->
+        DFold loc n . FoldDefinition with cs <$> traverse desugarPatterns e
+      DUnfold loc n (UnfoldDefinition with ps d e) ->
+        DUnfold loc n . UnfoldDefinition with ps d <$> traverse desugarPatterns e
+      DInstance loc n (InstanceDefinition ts pt ds) ->
+        DInstance loc n . InstanceDefinition ts pt <$> traverse desugarPatterns ds
       d ->
         pure d
 

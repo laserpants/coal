@@ -340,26 +340,26 @@ instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
           emitEdgesTo lls
           emitEdgeTo e
 
-instance (Show t, Pretty t) => Dot t (FunctionDef a t) where
+instance (Show t, Pretty t) => Dot t (FunctionDefinition a t) where
   toDot =
     \case
-      FunctionDef _ (Just (With _ u)) (With _ t) ps e ->
-        fromNode (emitParallelogram ("FunctionDef\\n" <> prettyType u) (Just t)) $ do
+      FunctionDefinition _ (Just (With _ u)) (With _ t) ps e ->
+        fromNode (emitParallelogram ("FunctionDefinition\\n" <> prettyType u) (Just t)) $ do
           emitEdgesTo ps
           emitEdgeTo e
-      FunctionDef _ _ (With _ t) ps e ->
-        fromNode (emitParallelogram "FunctionDef" (Just t)) $ do
+      FunctionDefinition _ _ (With _ t) ps e ->
+        fromNode (emitParallelogram "FunctionDefinition" (Just t)) $ do
           emitEdgesTo ps
           emitEdgeTo e
 
-instance (Show t, Pretty t) => Dot t (ConstantDef a t) where
+instance (Show t, Pretty t) => Dot t (ConstantDefinition a t) where
   toDot =
     \case
-      ConstantDef _ (Just (With _ u)) (With _ t) e ->
-        fromNode (emitParallelogram ("ConstantDef\\n" <> prettyType u) (Just t)) $ do
+      ConstantDefinition _ (Just (With _ u)) (With _ t) e ->
+        fromNode (emitParallelogram ("ConstantDefinition\\n" <> prettyType u) (Just t)) $ do
           emitEdgeTo e
-      ConstantDef _ _ (With _ t) e ->
-        fromNode (emitParallelogram "ConstantDef" (Just t)) $ do
+      ConstantDefinition _ _ (With _ t) e ->
+        fromNode (emitParallelogram "ConstantDefinition" (Just t)) $ do
           emitEdgeTo e
 
 instance (Show t, Pretty t) => Dot t (Definition a k t) where
@@ -379,7 +379,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         emitParallelogram ("DType\\n" <> name) Nothing
       DCotype _ name _ ->
         emitParallelogram ("DCotype\\n" <> name) Nothing
-      DTrait _ name (TraitDef _ ps ds) ->
+      DTrait _ name (TraitDefinition _ ps ds) ->
         fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
           nid <- ask
           lift $ do
@@ -392,7 +392,7 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
               \(n, t) -> do
                 id1 <- emitRectangle (n <> "\\n" <> prettyType t) Nothing
                 emitEdge nid id1
-      DInstance _ name (InstanceDef ts t ds) ->
+      DInstance _ name (InstanceDefinition ts t ds) ->
         fromNode (emitParallelogram ("DInstance\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           nid <- ask
           lift $ do
@@ -401,11 +401,11 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgesTo ds
-      DFold _ name (FoldDef (With _ t) cs me) ->
+      DFold _ name (FoldDefinition (With _ t) cs me) ->
         fromNode (emitParallelogram ("DFold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           emitEdgesTo cs
           emitEdgeTo me
-      DUnfold _ name (UnfoldDef (With _ t) ps d me) ->
+      DUnfold _ name (UnfoldDefinition (With _ t) ps d me) ->
         fromNode (emitParallelogram ("DUnfold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           emitEdgesTo ps
           void (emitEdgeToFields (Map.toList d))

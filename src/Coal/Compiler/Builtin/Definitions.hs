@@ -98,7 +98,7 @@ builtinDefinitions =
   , DTrait
       mempty
       "Numeric"
-      ( TraitDef
+      ( TraitDefinition
           []
           (Parameter () "a")
           [
@@ -126,7 +126,7 @@ builtinDefinitions =
   , DTrait
       mempty
       "Ordered"
-      ( TraitDef
+      ( TraitDefinition
           []
           (Parameter () "a")
           [
@@ -138,7 +138,7 @@ builtinDefinitions =
   , DTrait
       mempty
       "Comparable"
-      ( TraitDef
+      ( TraitDefinition
           []
           (Parameter () "a")
           [
@@ -150,7 +150,7 @@ builtinDefinitions =
   , DTrait
       mempty
       "Divisible"
-      ( TraitDef
+      ( TraitDefinition
           []
           (Parameter () "a")
           [
@@ -162,7 +162,7 @@ builtinDefinitions =
   , DTrait
       mempty
       "Modulo"
-      ( TraitDef
+      ( TraitDefinition
           []
           (Parameter () "a")
           [
@@ -174,7 +174,7 @@ builtinDefinitions =
   , DTrait
       mempty
       "Semigroup"
-      ( TraitDef
+      ( TraitDefinition
           []
           (Parameter () "a")
           [
@@ -186,7 +186,7 @@ builtinDefinitions =
   , DType
       mempty
       "Ordering"
-      ( TypeDef
+      ( TypeDefinition
           []
           [ DataConstructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
           , DataConstructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
@@ -196,7 +196,7 @@ builtinDefinitions =
   , DType
       mempty
       "Option"
-      ( TypeDef
+      ( TypeDefinition
           [Parameter () "a"]
           [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
           , DataConstructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) [] (applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
@@ -205,5 +205,5 @@ builtinDefinitions =
   , DType
       mempty
       "IO"
-      (TypeDef [Parameter () "a"] [])
+      (TypeDefinition [Parameter () "a"] [])
   ]

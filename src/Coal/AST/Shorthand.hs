@@ -22,7 +22,7 @@ module Coal.AST.Shorthand (
 
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.Language.Module (FunctionDef (..))
+import Coal.Language.Module (FunctionDefinition (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name)
 
@@ -103,5 +103,5 @@ tupleP :: (Monoid a) => NonEmpty (Pattern a ()) -> Pattern a ()
 tupleP = PTuple mempty ()
 
 {-# INLINE funDef #-}
-funDef :: (Monoid a) => NonEmpty (Pattern a ()) -> Expression a () -> FunctionDef a ()
-funDef = FunctionDef mempty Nothing (With [] ())
+funDef :: (Monoid a) => NonEmpty (Pattern a ()) -> Expression a () -> FunctionDefinition a ()
+funDef = FunctionDefinition mempty Nothing (With [] ())

@@ -88,9 +88,9 @@ insertPlaceholders =
   \case
     d@(DConstant _ name _ _) ->
       insertTypeInfo name =<< expandInLocalEnv d
-    DInstance loc name (InstanceDef ts t ds) -> do
+    DInstance loc name (InstanceDefinition ts t ds) -> do
       es <- forM ds (insertPlaceholdersInDef (Trait name t))
-      pure (DInstance loc name (InstanceDef ts t es))
+      pure (DInstance loc name (InstanceDefinition ts t es))
     d@DFold{} ->
       expandInLocalEnv d
     d@DUnfold{} ->
@@ -117,7 +117,7 @@ insertTypeInfo name d = do
   pure d
 
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
-insertName (DConstant _ _ (ConstantDef _ _ (With ts t) _) _) name = insertNameC name (Forall (typeIndexesIn t) ts t)
+insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = insertNameC name (Forall (typeIndexesIn t) ts t)
 insertName _ _ = error "Implementation error"
 
 collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
@@ -287,22 +287,22 @@ instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) wh
   expandTraits =
     \case
       DConstant loc name c fs ->
-        DConstant loc name <$> expandConstantDefTraits name c <*> traverse expandTraits fs
-      DFold loc name (FoldDef with cs (Just e)) ->
-        DFold loc name . FoldDef with cs . Just <$> expandTraits e
-      DUnfold loc name (UnfoldDef with ps d (Just e)) ->
-        DUnfold loc name . UnfoldDef with ps d . Just <$> expandTraits e
+        DConstant loc name <$> expandConstantDefinitionTraits name c <*> traverse expandTraits fs
+      DFold loc name (FoldDefinition with cs (Just e)) ->
+        DFold loc name . FoldDefinition with cs . Just <$> expandTraits e
+      DUnfold loc name (UnfoldDefinition with ps d (Just e)) ->
+        DUnfold loc name . UnfoldDefinition with ps d . Just <$> expandTraits e
       d ->
         pure d
 
-expandConstantDefTraits :: (Monad m, Monoid a, Data a) => Name -> ConstantDef a IndexedType -> CompilerT a m (ConstantDef a IndexedType)
-expandConstantDefTraits name =
+expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a) => Name -> ConstantDefinition a IndexedType -> CompilerT a m (ConstantDefinition a IndexedType)
+expandConstantDefinitionTraits name =
   \case
-    ConstantDef loc with (With _ t) e -> do
+    ConstantDefinition loc with (With _ t) e -> do
       (expr, traits) <- listenDictionaryTraits (expandTraits e)
       case nub traits of
         [] ->
-          pure $ ConstantDef loc with (With [] t) expr
+          pure $ ConstantDefinition loc with (With [] t) expr
         tr : trs -> do
           path <- gets compilerCurrentModule
           -- Insert default instance for Numeric trait, which is int32
@@ -310,7 +310,7 @@ expandConstantDefTraits name =
             then do
               fields <- fromJust <$> lookupTraitInstance loc (Trait "Numeric" (TIntrinsic IInt32))
               pure $
-                ConstantDef
+                ConstantDefinition
                   loc
                   with
                   (With trs t)
@@ -322,7 +322,7 @@ expandConstantDefTraits name =
                   )
             else
               pure $
-                ConstantDef loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+                ConstantDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
 
 isVariable :: Trait IndexedType -> Bool
 isVariable (Trait _ TVariable{}) = True

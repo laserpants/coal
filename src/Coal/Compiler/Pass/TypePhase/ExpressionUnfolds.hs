@@ -87,29 +87,29 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (Module a k ()) where
       Module p ns o ->
         Module p ns <$> compileUnfolds o
 
-instance (Monoid a, Data a) => CompileUnfoldsContext a (FunctionDef a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (FunctionDefinition a ()) where
   compileUnfolds =
     \case
-      FunctionDef a u w ps e ->
-        FunctionDef a u w ps <$> compileUnfolds e
+      FunctionDefinition a u w ps e ->
+        FunctionDefinition a u w ps <$> compileUnfolds e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext a (ConstantDef a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (ConstantDefinition a ()) where
   compileUnfolds =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w <$> compileUnfolds e
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w <$> compileUnfolds e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext a (FoldDef a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (FoldDefinition a ()) where
   compileUnfolds =
     \case
-      FoldDef with cs e ->
-        FoldDef with <$> traverse compileUnfolds cs <*> traverse compileUnfolds e
+      FoldDefinition with cs e ->
+        FoldDefinition with <$> traverse compileUnfolds cs <*> traverse compileUnfolds e
 
-instance (Monoid a, Data a) => CompileUnfoldsContext a (UnfoldDef a ()) where
+instance (Monoid a, Data a) => CompileUnfoldsContext a (UnfoldDefinition a ()) where
   compileUnfolds =
     \case
-      UnfoldDef with ps d e ->
-        UnfoldDef with ps <$> traverse compileUnfolds d <*> traverse compileUnfolds e
+      UnfoldDefinition with ps d e ->
+        UnfoldDefinition with ps <$> traverse compileUnfolds d <*> traverse compileUnfolds e
 
 instance (Monoid a, Data a) => CompileUnfoldsContext a (Definition a k ()) where
   compileUnfolds =

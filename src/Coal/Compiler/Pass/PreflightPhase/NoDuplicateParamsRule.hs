@@ -62,10 +62,10 @@ instance (Data t) => RuleContext (Definition Metadata k t) where
       _ ->
         pure ()
 
-instance RuleContext (FunctionDef Metadata t) where
+instance RuleContext (FunctionDefinition Metadata t) where
   detectNoDuplicateParams =
     \case
-      FunctionDef _ _ _ ps _ -> do
+      FunctionDefinition _ _ _ ps _ -> do
         evalStateT (traverse_ checkPattern ps) mempty
 
 checkPattern :: (Monad m) => Pattern Metadata t -> StateT (Set Name) (CompilerT Metadata m) ()

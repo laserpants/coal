@@ -26,12 +26,12 @@ parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
   parseImport
     <|> try parseFunctionGroup
-    <|> parseFunctionDefinition
+    <|> parseFunctionDefinitioninition
     <|> parseLetDefinition
     <|> try parseTypeAlias
     <|> parseTypeDefinition
     <|> parseCodataDefinition
-    <|> parseTraitDefinition
+    <|> parseTraitDefinitioninition
     <|> parseTraitInstance
     <|> parseTopLevelFold
     <|> parseTopLevelUnfold
@@ -46,10 +46,10 @@ parseTypeAlias = do
   symbol_ "="
   t <- parseType
   end <- getSourcePos
-  pure (DTypeAlias (Metadata start end) n (AliasDef ps t))
+  pure (DTypeAlias (Metadata start end) n (AliasDefinition ps t))
 
-parseTraitDefinition :: Parser (Definition Metadata o ())
-parseTraitDefinition = do
+parseTraitDefinitioninition :: Parser (Definition Metadata o ())
+parseTraitDefinitioninition = do
   start <- getSourcePos
   lexeme_ "trait"
   n <- constructor
@@ -57,7 +57,7 @@ parseTraitDefinition = do
   ts <- option [] (lexeme_ "with" *> commaSep1 parseParamTrait)
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
-  pure (DTrait (Metadata start end) n (TraitDef ts t (toScheme <$$> ds)))
+  pure (DTrait (Metadata start end) n (TraitDefinition ts t (toScheme <$$> ds)))
 
 parseParameter :: Parser (Parameter ())
 parseParameter = do
@@ -74,7 +74,7 @@ parseTraitInstance = do
   end <- getSourcePos
   ts <- option [] (lexeme_ "with" *> commaSep1 parseTrait)
   ds <- braces (some parseDefinition)
-  pure (DInstance (Metadata start end) n (InstanceDef ts t ds))
+  pure (DInstance (Metadata start end) n (InstanceDefinition ts t ds))
 
 parseTrait :: Parser (Trait (Type Parameter ()))
 parseTrait = Trait <$> constructor <*> angleBrackets parseType
@@ -93,7 +93,7 @@ parseTypeDefinition = do
   ps <- option [] parseParameterList
   end <- getSourcePos
   cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
-  pure (DType (Metadata start end) n (TypeDef ps cs))
+  pure (DType (Metadata start end) n (TypeDefinition ps cs))
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
@@ -130,7 +130,7 @@ parseCodataDefinition = do
             (TConstructor () n)
             (TVariable <$> (a :| as))
   ts <- braces (fieldListWithKey constructor parseType ":")
-  pure (DCotype (Metadata start end) n (CotypeDef ps (toAccessor ps t0 <$> ts)))
+  pure (DCotype (Metadata start end) n (CotypeDefinition ps (toAccessor ps t0 <$> ts)))
 
 toAccessor :: [Parameter ()] -> Type Parameter () -> (Name, Type Parameter ()) -> CodataAccessor Parameter () (Type Parameter ())
 toAccessor ps t0 (n, t) = CodataAccessor n (Forall (Set.fromList ps) [] (t0 `TArrow` t))
@@ -203,23 +203,23 @@ parseFunctionGroup = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> name
   ann <- optional parseAnnotation
-  fns <- some (void pipe *> parseGroupFunctionDef ann)
+  fns <- some (void pipe *> parseGroupFunctionDefinition ann)
   end <- getSourcePos
   case fns of
     [] -> fail "Empty list"
     f : fs -> pure (DFunction (Metadata start end) fn (f :| fs) [])
 
-parseGroupFunctionDef :: Maybe ParameterizedType -> Parser (FunctionDef Metadata ())
-parseGroupFunctionDef ann = do
+parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata ())
+parseGroupFunctionDefinition ann = do
   start <- getSourcePos
   args <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
   expr <- symbol_ "=" *> parseExpression
   end <- getSourcePos
-  pure (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
+  pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 -- TODO: DRY
-parseFunctionDefinition :: Parser (Definition Metadata o ())
-parseFunctionDefinition = do
+parseFunctionDefinitioninition :: Parser (Definition Metadata o ())
+parseFunctionDefinitioninition = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> name
   args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
@@ -227,18 +227,18 @@ parseFunctionDefinition = do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
-  pure (DFunction (Metadata start end) fn (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
+  pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
 
--- parseFunctionDef :: Maybe ParameterizedType -> Parser (FunctionDef Metadata ())
--- parseFunctionDef ann = do
+-- parseFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata ())
+-- parseFunctionDefinition ann = do
 --  start <- getSourcePos
 --  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
 --  expr <- symbol_ "=" *> parseExpression
 --  end <- getSourcePos
---  pure (FunctionDef (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
+--  pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
-parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
+parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinitioninition)
 
 parseLetDefinition :: Parser (Definition Metadata o ())
 parseLetDefinition = do
@@ -248,7 +248,7 @@ parseLetDefinition = do
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
-  pure (DConstant (Metadata start end) c (ConstantDef (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
+  pure (DConstant (Metadata start end) c (ConstantDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
 
 parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do
@@ -257,7 +257,7 @@ parseTopLevelFold = do
   ann <- parseAnnotation
   end <- getSourcePos
   cs <- braces (nonEmpty (some parseMatchClause))
-  pure (DFold (Metadata start end) n (FoldDef (With [] ann) cs Nothing))
+  pure (DFold (Metadata start end) n (FoldDefinition (With [] ann) cs Nothing))
 
 parseTopLevelUnfold :: Parser (Definition Metadata o ())
 parseTopLevelUnfold = do
@@ -269,7 +269,7 @@ parseTopLevelUnfold = do
     void $ optional (symbol ",")
     fieldListWithKey (magicConstructor <|> constructor) parseExpression "="
   end <- getSourcePos
-  pure (DUnfold (Metadata start end) n (UnfoldDef (With [] ann) ps (Map.fromList fields) Nothing))
+  pure (DUnfold (Metadata start end) n (UnfoldDefinition (With [] ann) ps (Map.fromList fields) Nothing))
 
 {-# INLINE parseAnnotation #-}
 parseAnnotation :: Parser (Type Parameter ())

@@ -45,13 +45,13 @@ instance RuleContext (Module Metadata Kind t) where
   detectMainEntrypoint =
     \case
       Module (Path ["Main"]) _ o -> do
-        unless ("main" `elem` concatMap functionDefs o) $
+        unless ("main" `elem` concatMap functionDefinitions o) $
           throwError MissingMainEntryPoint
       _ ->
         pure ()
 
-functionDefs :: Definition Metadata Kind t -> [Name]
-functionDefs =
+functionDefinitions :: Definition Metadata Kind t -> [Name]
+functionDefinitions =
   \case
     d@DFunction{} ->
       [definitionName d]

@@ -252,7 +252,7 @@ importedModule loc path = do
 collectTypeConstructors :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectTypeConstructors =
   \case
-    DType loc name (TypeDef params ctors) -> do
+    DType loc name (TypeDefinition params ctors) -> do
       modify $
         insertTypeConstructor name entry
           . addName (NType name kind)
@@ -260,7 +260,7 @@ collectTypeConstructors =
      where
       kind = foldr KArrow KType (replicate (length params) KType)
       entry = TypeConstructorEntry loc name kind (for ctors constructorName)
-    DCotype loc name (CotypeDef params xsors) -> do
+    DCotype loc name (CotypeDefinition params xsors) -> do
       modify $
         insertCotypeConstructor name entry
           . addName (NCotype name kind)
@@ -268,7 +268,7 @@ collectTypeConstructors =
      where
       kind = foldr KArrow KType (replicate (length params) KType)
       entry = CotypeConstructorEntry loc name kind (for xsors codataAccessorName)
-    DTypeAlias loc name (AliasDef ps t) -> do
+    DTypeAlias loc name (AliasDefinition ps t) -> do
       modify $
         insertAlias name entry
           . addName (NAlias name)
@@ -419,7 +419,7 @@ collectTraits env =
           . insertTrait name entry
           . addTypeExport name
      where
-      def'@(TraitDef ts p ds) = inferTraitKinds env def
+      def'@(TraitDefinition ts p ds) = inferTraitKinds env def
       entry =
         TraitEntry loc name p ts (Environment.fromList ds)
     DImport _ (Path ["Builtin$"]) _ ->
@@ -445,8 +445,8 @@ collectTraits env =
     _ ->
       pure ()
 
-addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDef Kind -> StateT (ModuleBuild a) (CompilerT a m) ()
-addTraitEntries env trait (TraitDef _ p entries) =
+addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDefinition Kind -> StateT (ModuleBuild a) (CompilerT a m) ()
+addTraitEntries env trait (TraitDefinition _ p entries) =
   forM_ entries $
     -- TODO
     \(name, Forall _ _ t) ->
@@ -459,7 +459,7 @@ addTraitEntries env trait (TraitDef _ p entries) =
 collectInstances :: (Monad m) => Environment Kind -> Environment (TraitEntry a) -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectInstances kinds traits =
   \case
-    DInstance loc trait (InstanceDef _ q entries) -> do
+    DInstance loc trait (InstanceDefinition _ q entries) -> do
       this <- lift $ gets (principalPath . compilerCurrentModule)
       case Environment.lookup trait traits of
         Nothing -> do
@@ -473,11 +473,11 @@ collectInstances kinds traits =
           unless (null extra && null missing) $ do
             forM_ missing $
               \name -> do
-                tellErrors [MissingTraitDefinition name trait (ErrorLocation this loc)]
+                tellErrors [MissingTraitDefinitioninition name trait (ErrorLocation this loc)]
                 throwError PreflightFailure
             forM_ extra $
               \name -> do
-                tellErrors [UnexpectedTraitDefinition name trait (ErrorLocation this loc)]
+                tellErrors [UnexpectedTraitDefinitioninition name trait (ErrorLocation this loc)]
                 throwError PreflightFailure
           modify $ insertInstance trait t1 (InstanceEntry loc q (toIndexedType kinds p q) env)
 

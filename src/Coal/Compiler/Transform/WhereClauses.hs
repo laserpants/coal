@@ -56,14 +56,14 @@ replaceNames names =
     d ->
       d
 
-replaceFunctionNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> FunctionDef a t -> FunctionDef a t
+replaceFunctionNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> FunctionDefinition a t -> FunctionDefinition a t
 replaceFunctionNames names =
   \case
-    FunctionDef a u w ps e ->
-      FunctionDef a u w ps (foldr (uncurry rename) e names)
+    FunctionDefinition a u w ps e ->
+      FunctionDefinition a u w ps (foldr (uncurry rename) e names)
 
-replaceConstantNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> ConstantDef a t -> ConstantDef a t
+replaceConstantNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> ConstantDefinition a t -> ConstantDefinition a t
 replaceConstantNames names =
   \case
-    ConstantDef a u w e ->
-      ConstantDef a u w (foldr (uncurry rename) e names)
+    ConstantDefinition a u w e ->
+      ConstantDefinition a u w (foldr (uncurry rename) e names)

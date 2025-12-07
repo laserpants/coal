@@ -16,10 +16,10 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module (Module (..), principalPath)
 import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Definition.Constant (ConstantDef (..))
-import Coal.Language.Module.Definition.Fold (FoldDef (..))
-import Coal.Language.Module.Definition.Function (FunctionDef (..))
-import Coal.Language.Module.Definition.Unfold (UnfoldDef (..))
+import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
+import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
+import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
+import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
 import Control.Monad.Writer
@@ -102,17 +102,17 @@ collectIntegerLiteralPatterns =
     p ->
       pure p
 
-instance TransformContext (FunctionDef Metadata ()) where
+instance TransformContext (FunctionDefinition Metadata ()) where
   expandIntegerLiteralPatterns =
     \case
-      FunctionDef a u w ps e ->
-        FunctionDef a u w ps <$> expandIntegerLiteralPatterns e
+      FunctionDefinition a u w ps e ->
+        FunctionDefinition a u w ps <$> expandIntegerLiteralPatterns e
 
-instance TransformContext (ConstantDef Metadata ()) where
+instance TransformContext (ConstantDefinition Metadata ()) where
   expandIntegerLiteralPatterns =
     \case
-      ConstantDef a u w e ->
-        ConstantDef a u w <$> expandIntegerLiteralPatterns e
+      ConstantDefinition a u w e ->
+        ConstantDefinition a u w <$> expandIntegerLiteralPatterns e
 
 instance TransformContext (Definition Metadata Kind ()) where
   expandIntegerLiteralPatterns =
@@ -125,10 +125,10 @@ instance TransformContext (Definition Metadata Kind ()) where
         DFunction loc name
           <$> expandIntegerLiteralPatterns f
           <*> traverse expandIntegerLiteralPatterns fs
-      DFold loc n (FoldDef with cs e) ->
-        DFold loc n . FoldDef with cs <$> traverse expandIntegerLiteralPatterns e
-      DUnfold loc n (UnfoldDef with ps d me) ->
-        DUnfold loc n . UnfoldDef with ps d <$> traverse expandIntegerLiteralPatterns me
+      DFold loc n (FoldDefinition with cs e) ->
+        DFold loc n . FoldDefinition with cs <$> traverse expandIntegerLiteralPatterns e
+      DUnfold loc n (UnfoldDefinition with ps d me) ->
+        DUnfold loc n . UnfoldDefinition with ps d <$> traverse expandIntegerLiteralPatterns me
       d ->
         pure d
 

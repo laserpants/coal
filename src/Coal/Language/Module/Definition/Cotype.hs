@@ -1,14 +1,14 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Module.Definition.Cotype (CotypeDef (..)) where
+module Coal.Language.Module.Definition.Cotype (CotypeDefinition (..)) where
 
 import Coal.Language.Codata.Accessor (CodataAccessor (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
 
-data CotypeDef = CotypeDef
-  { cotypeDefParameters :: [Parameter ()]
-  , cotypeDefAccessors :: [CodataAccessor Parameter () ParameterizedType]
+data CotypeDefinition = CotypeDefinition
+  { cotypeDefinitionParameters :: [Parameter ()]
+  , cotypeDefinitionAccessors :: [CodataAccessor Parameter () ParameterizedType]
   }
   deriving (Show, Eq, Ord, Read, Data, Typeable)
