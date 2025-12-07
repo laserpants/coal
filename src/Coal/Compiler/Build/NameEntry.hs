@@ -179,14 +179,16 @@ kind n = foldr KArrow KType (replicate n KType)
 dataConstructorEntries :: Environment Kind -> a -> TypeDef -> [DataConstructorEntry a]
 dataConstructorEntries env loc (TypeDef _ ctors) = getEntry <$> ctors
  where
-  allNames = Set.fromList (constructorName <$> ctors)
-
-  getEntry DataConstructor{..} =
+  getEntry DataConstructor{constructorName = name, ..} =
     DataConstructorEntry
       loc
-      constructorName
-      DataConstructor{constructorScheme = translateScheme env constructorScheme, ..}
-      allNames
+      name
+      DataConstructor
+        { constructorName = name
+        , constructorScheme = translateScheme env constructorScheme
+        , ..
+        }
+      (Set.fromList (constructorName <$> ctors))
 
 codataAccessorEntries :: Environment Kind -> a -> CotypeDef -> [CodataAccessorEntry a]
 codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
