@@ -12,5 +12,10 @@ import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Dictionary)
 
-data UnfoldDef a t = UnfoldDef (With ParameterizedType) (NonEmpty (Pattern a t)) (Dictionary (Expression a t)) (Maybe (Expression a t))
+data UnfoldDef a t = UnfoldDef
+  { unfoldDefType :: With ParameterizedType
+  , unfoldDefPatterns :: NonEmpty (Pattern a t)
+  , unfoldDefFields :: Dictionary (Expression a t)
+  , unfoldDefExpression :: Maybe (Expression a t)
+  }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

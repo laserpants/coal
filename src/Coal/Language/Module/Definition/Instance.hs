@@ -8,5 +8,9 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (ParameterizedType)
 import Data.Data (Data, Typeable)
 
-data InstanceDef d a k t = InstanceDef [Trait ParameterizedType] ParameterizedType [d a k t]
+data InstanceDef d a k t = InstanceDef
+  { instanceDefParameters :: [Trait ParameterizedType]
+  , instanceDefType :: ParameterizedType
+  , instanceDefEntries :: [d a k t]
+  }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

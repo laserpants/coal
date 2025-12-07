@@ -7,5 +7,8 @@ import Coal.Language.Codata.Accessor (CodataAccessor (..))
 import Coal.Language.Type (Parameter, ParameterizedType)
 import Data.Data (Data, Typeable)
 
-data CotypeDef = CotypeDef [Parameter ()] [CodataAccessor Parameter () ParameterizedType]
+data CotypeDef = CotypeDef
+  { cotypeDefParameters :: [Parameter ()]
+  , cotypeDefAccessors :: [CodataAccessor Parameter () ParameterizedType]
+  }
   deriving (Show, Eq, Ord, Read, Data, Typeable)

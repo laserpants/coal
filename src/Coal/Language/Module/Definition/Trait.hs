@@ -9,5 +9,9 @@ import Coal.Language.Type.Scheme (Scheme (..))
 import Data.Data (Data, Typeable)
 import Extras (Name)
 
-data TraitDef k = TraitDef [Trait (Parameter k)] (Parameter k) [(Name, Scheme Parameter k (Type Parameter k))]
+data TraitDef k = TraitDef
+  { traitDefRequiredTraits :: [Trait (Parameter k)]
+  , traitDefParameter :: Parameter k
+  , traitDefMethods :: [(Name, Scheme Parameter k (Type Parameter k))]
+  }
   deriving (Show, Eq, Ord, Read, Data, Typeable)
