@@ -22,9 +22,8 @@ module Coal.Compiler.Build.NameEntry (
 
 import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
-import qualified Coal.Common.Environment as Environment
 import Coal.Language
-import Coal.Language.Module (AliasDef (..), CotypeDef (..), TraitDef (..), TypeDef (..))
+import Coal.Language.Module (AliasDef (..), CotypeDef (..), TypeDef (..))
 import Control.Monad.State (evalState)
 import qualified Data.Set as Set
 import Extras (Dictionary, Name, Set, for)
