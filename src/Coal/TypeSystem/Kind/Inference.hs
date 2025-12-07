@@ -254,9 +254,8 @@ indexKinds =
 indexKindsInParam :: Parameter () -> State Int (Parameter KindNode)
 indexKindsInParam =
   \case
-    Parameter () name -> do
-      k <- next
-      pure (Parameter k name)
+    Parameter () name ->
+      Parameter <$> next <*> pure name
 
 indexKindsInRow :: Row Parameter () (Type Parameter ()) -> State Int (Row Parameter KindNode (Type Parameter KindNode))
 indexKindsInRow =
