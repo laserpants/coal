@@ -15,8 +15,8 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Coal.Language.Module (ConstantDef (..), Definition (..), FunctionDef (..), InstanceDef (..), Module (..), principalPath)
+import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Pattern (..))
+import Coal.Language.Module
 import Control.Monad.Except (MonadError (throwError), void)
 import Control.Monad.State (gets)
 import Control.Monad.Writer (execWriter, tell)
@@ -162,6 +162,24 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Expression a ()) where
         e ->
           pure e
 
+instance (Monoid a, Data a) => CompileFoldsContext a (Clause a ()) where
+  compileFolds =
+    \case
+      EClause a p cs ->
+        EClause a p <$> traverse compileFolds cs
+
+instance (Monoid a, Data a) => CompileFoldsContext a (Choice Expression a ()) where
+  compileFolds =
+    \case
+      CPlain a gs e ->
+        CPlain a <$> traverse compileFolds gs <*> compileFolds e
+
+instance (Monoid a, Data a) => CompileFoldsContext a (Guard Expression a ()) where
+  compileFolds =
+    \case
+      CGuard e ->
+        CGuard <$> compileFolds e
+
 instance (Monoid a, Data a) => CompileFoldsContext a (Module a k ()) where
   compileFolds =
     \case
@@ -181,6 +199,18 @@ instance (Monoid a, Data a) => CompileFoldsContext a (ConstantDef a ()) where
       ConstantDef a u w e ->
         ConstantDef a u w <$> compileFolds e
 
+instance (Monoid a, Data a) => CompileFoldsContext a (FoldDef a ()) where
+  compileFolds =
+    \case
+      FoldDef with cs e ->
+        FoldDef with <$> traverse compileFolds cs <*> traverse compileFolds e
+
+instance (Monoid a, Data a) => CompileFoldsContext a (UnfoldDef a ()) where
+  compileFolds =
+    \case
+      UnfoldDef with ps d e ->
+        UnfoldDef with ps <$> traverse compileFolds d <*> traverse compileFolds e
+
 instance (Monoid a, Data a) => CompileFoldsContext a (Definition a k ()) where
   compileFolds =
     \case
@@ -190,5 +220,9 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Definition a k ()) where
         DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
       DInstance loc name (InstanceDef ps t ds) ->
         DInstance loc name . InstanceDef ps t <$> compileFolds ds
+      DFold loc name d ->
+        DFold loc name <$> compileFolds d
+      DUnfold loc name d ->
+        DUnfold loc name <$> compileFolds d
       o ->
         pure o
