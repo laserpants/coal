@@ -409,12 +409,15 @@ collectTraits :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT
 collectTraits env =
   \case
     DTrait loc name def -> do
-      let def1 = inferTraitKinds env def
-      addTraitEntries env name def1
+      addTraitEntries env name def'
       modify $
         addName (NTrait name)
-          . insertTrait name (traitEntry loc name def1)
+          . insertTrait name entry
           . addTypeExport name
+     where
+      def'@(TraitDef ts p ds) = inferTraitKinds env def
+      entry =
+        TraitEntry loc name p ts (Environment.fromList ds)
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     def@(DImport loc path _) -> do

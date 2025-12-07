@@ -14,7 +14,6 @@ module Coal.Compiler.Build.NameEntry (
   NameEntry (..),
   HasName (..),
   aliasEntry,
-  traitEntry,
   dataConstructorEntries,
   codataAccessorEntries,
   cotypeConstructorEntry,
@@ -198,9 +197,6 @@ codataAccessorEntries env loc (CotypeDef _ xsors) = getEntry <$> xsors
       loc
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
-
-traitEntry :: a -> Name -> TraitDef Kind -> TraitEntry a
-traitEntry loc name (TraitDef deps p ps) = TraitEntry loc name p deps (Environment.fromList ps)
 
 aliasEntry :: a -> Name -> AliasDef -> AliasEntry a
 aliasEntry loc name (AliasDef ps t) = AliasEntry loc name (parameterName <$> ps) t
