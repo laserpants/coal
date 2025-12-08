@@ -17,6 +17,8 @@ module Coal.Language.Type.Scheme (
   forall3',
   forall4,
   forall4',
+  forallN,
+  forallN',
   IndexedScheme,
   listConstructorScheme,
   tupleScheme,
@@ -27,7 +29,7 @@ import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), listType, tup
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.List (intersperse)
-import Data.List.NonEmpty (NonEmpty (..), toList)
+import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (Set)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
@@ -116,10 +118,20 @@ forall4' f = Forall (Set.fromList [a0, a1, a2, a3]) traits t
   (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3)
   (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)
 
+forallN :: Int -> ([IndexedType] -> IndexedType) -> IndexedScheme
+forallN n f = Forall (Set.fromList ixs) [] (f (TVariable <$> ixs))
+ where
+  ixs = [index i | i <- [0 .. n - 1]]
+
+forallN' :: Int -> ([IndexedType] -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
+forallN' n f = Forall (Set.fromList ixs) traits t
+ where
+  (traits, t) = f (TVariable <$> ixs)
+  ixs = [index i | i <- [0 .. n - 1]]
+
 listConstructorScheme :: IndexedScheme
 listConstructorScheme = forall1 (\a -> a ~> listType a ~> listType a)
 
 tupleScheme :: Int -> IndexedScheme
-tupleScheme n = Forall (Set.fromList (toList ixs)) [] (tupleType (TVariable <$> ixs))
- where
-  ixs = TypeIndex KType 0 :| [TypeIndex KType ti | ti <- [1 .. n - 1]]
+tupleScheme n | n < 2 = error "Invalid tuple size"
+tupleScheme n = forallN n (tupleType . NonEmpty.fromList)
