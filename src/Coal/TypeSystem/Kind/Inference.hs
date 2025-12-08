@@ -280,7 +280,10 @@ indexKindsInScheme :: Scheme Parameter () (Type Parameter ()) -> State Int (Sche
 indexKindsInScheme =
   \case
     Forall vs ts t ->
-      Forall <$> indexKindsInBound vs <*> traverse indexKindsInTrait ts <*> indexKinds t
+      Forall
+        <$> indexKindsInBound vs
+        <*> traverse indexKindsInTrait ts
+        <*> indexKinds t
 
 newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: Map Int KindNode}
   deriving (Show, Eq, Ord)
@@ -433,34 +436,34 @@ solveKindConstraints (KEquality k1 k2 : cs) = do
 insertKind :: [(Name, k)] -> Parameter () -> Parameter k
 insertKind params (Parameter () name) =
   case lookup name params of
-    Just k1 ->
-      Parameter k1 name
+    Just kind ->
+      Parameter kind name
     Nothing ->
       error "Implementation error"
 
 insertTraitKind :: [(Name, k)] -> Trait (Parameter ()) -> Trait (Parameter k)
 insertTraitKind params (Trait trait (Parameter () name)) =
   case lookup name params of
-    Just k1 ->
-      Trait trait (Parameter k1 name)
+    Just kind ->
+      Trait trait (Parameter kind name)
     Nothing ->
       error "Implementation error"
 
 inferTraitKinds :: Environment Kind -> TraitDefinition () -> TraitDefinition Kind
-inferTraitKinds env def@(TraitDefinition ts p defs) = do
-  let (defs0, (traits0, param0)) =
-        flip runState (fmap (insertTraitKind qs) ts, insertKind qs p) $
-          forM defs $
-            \(n, s) -> do
-              let (r, cs) = runKindConstraintsGen (mapEnvironment liftKind env) $ do
-                    forM_ qs (modify . uncurry Environment.insert)
-                    let aaa = evalState (indexKindsInScheme s) (length qs)
-                    emitKindConstraints aaa
-                    pure aaa
-              sub <- solveKindConstraints cs
-              modify (bimap (applyKinds sub) (applyKinds sub))
-              pure (n, lowerKindsInScheme1 (applyKinds sub r))
-   in TraitDefinition (lowerKindsInTrait <$> traits0) (lowerKindsInParameter param0) defs0
+inferTraitKinds env def@(TraitDefinition ts p defs) =
+  TraitDefinition (lowerKindsInTrait <$> traits0) (lowerKindsInParameter param0) defs0
  where
   ps = paramsIn def
   qs = zip (Set.toList ps) [IsKVar n | n <- [1 ..]]
+  (defs0, (traits0, param0)) =
+    flip runState (fmap (insertTraitKind qs) ts, insertKind qs p) $
+      forM defs $
+        \(n, s) -> do
+          let (r, cs) = runKindConstraintsGen (mapEnvironment liftKind env) $ do
+                forM_ qs (modify . uncurry Environment.insert)
+                let aaa = evalState (indexKindsInScheme s) (length qs)
+                emitKindConstraints aaa
+                pure aaa
+          sub <- solveKindConstraints cs
+          modify (bimap (applyKinds sub) (applyKinds sub))
+          pure (n, lowerKindsInScheme1 (applyKinds sub r))
