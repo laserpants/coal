@@ -5,6 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Coal.TypeSystem.Kind.Inference (inferTraitKinds) where
 
@@ -227,60 +228,90 @@ next = do
   modify (+ 1)
   gets IsKVar
 
-indexKinds :: Type Parameter () -> State Int (Type Parameter KindNode)
-indexKinds =
-  \case
+class IndexKinds a where
+  type Indexed a
+  indexKinds :: a -> State Int (Indexed a)
+
+instance IndexKinds (Parameter ()) where
+  type Indexed (Parameter ()) = Parameter KindNode
+  indexKinds = \case
+    Parameter () name -> do
+      k <- next
+      pure (Parameter k name)
+
+instance IndexKinds (Type Parameter ()) where
+  type Indexed (Type Parameter ()) = Type Parameter KindNode
+  indexKinds = \case
     TApplication () t1 t2 -> do
-      TApplication <$> next <*> indexKinds t1 <*> indexKinds t2
-    TArrow t1 t2 ->
-      TArrow <$> indexKinds t1 <*> indexKinds t2
+      k <- next
+      t1' <- indexKinds t1
+      t2' <- indexKinds t2
+      pure $ TApplication k t1' t2'
+    TArrow t1 t2 -> do
+      t1' <- indexKinds t1
+      t2' <- indexKinds t2
+      pure $ TArrow t1' t2'
     TConstructor () name -> do
       k <- next
-      pure (TConstructor k name)
+      pure $ TConstructor k name
     TIntrinsic i ->
-      pure (TIntrinsic i)
-    TRecord t ->
-      TRecord <$> indexKinds t
-    TRow row ->
-      TRow <$> indexKindsInRow row
+      pure $ TIntrinsic i
+    TRecord t -> do
+      t' <- indexKinds t
+      pure $ TRecord t'
+    TRow row -> do
+      row' <- indexKinds row
+      pure $ TRow row'
     TVariable p -> do
-      TVariable <$> indexKindsInParam p
-    TAlias name ts t ->
-      TAlias name <$> traverse indexKinds ts <*> indexKinds t
+      p' <- indexKinds p
+      pure $ TVariable p'
+    TAlias name ts t -> do
+      ts' <- traverse indexKinds ts
+      t' <- indexKinds t
+      pure $ TAlias name ts' t'
 
-indexKindsInParam :: Parameter () -> State Int (Parameter KindNode)
-indexKindsInParam =
-  \case
-    Parameter () name ->
-      Parameter <$> next <*> pure name
+instance IndexKinds (Row Parameter () (Type Parameter ())) where
+  type
+    Indexed (Row Parameter () (Type Parameter ())) =
+      Row Parameter KindNode (Type Parameter KindNode)
+  indexKinds = \case
+    RExtend name t row -> do
+      t' <- indexKinds t
+      row' <- indexKinds row
+      pure $ RExtend name t' row'
+    RVariable (Parameter () name) ->
+      pure $ RVariable (Parameter IsKRow name)
+    RNil -> pure RNil
 
-indexKindsInRow :: Row Parameter () (Type Parameter ()) -> State Int (Row Parameter KindNode (Type Parameter KindNode))
-indexKindsInRow =
-  \case
-    RExtend name t row ->
-      RExtend name <$> indexKinds t <*> indexKindsInRow row
-    RVariable (Parameter () name) -> do
-      pure (RVariable (Parameter IsKRow name))
-    RNil ->
-      pure RNil
+instance IndexKinds (Trait (Type Parameter ())) where
+  type Indexed (Trait (Type Parameter ())) = Trait (Type Parameter KindNode)
+  indexKinds (Trait name t) = do
+    t' <- indexKinds t
+    pure $ Trait name t'
 
-indexKindsInTrait :: Trait (Type Parameter ()) -> State Int (Trait (Type Parameter KindNode))
-indexKindsInTrait =
-  \case
-    Trait name t ->
-      Trait name <$> indexKinds t
+instance IndexKinds (Trait (Parameter ())) where
+  type Indexed (Trait (Parameter ())) = Trait (Parameter KindNode)
+  indexKinds (Trait name p) = do
+    p' <- indexKinds p
+    pure $ Trait name p'
 
-indexKindsInBound :: Set (Parameter ()) -> State Int (Set (Parameter KindNode))
-indexKindsInBound s = Set.fromList <$> traverse indexKindsInParam (Set.toList s)
+instance IndexKinds (Set (Parameter ())) where
+  type Indexed (Set (Parameter ())) = Set (Parameter KindNode)
+  indexKinds s = do
+    let xs = Set.toList s
+    ys <- traverse indexKinds xs
+    pure $ Set.fromList ys
 
-indexKindsInScheme :: Scheme Parameter () (Type Parameter ()) -> State Int (Scheme Parameter KindNode (Type Parameter KindNode))
-indexKindsInScheme =
-  \case
-    Forall vs ts t ->
-      Forall
-        <$> indexKindsInBound vs
-        <*> traverse indexKindsInTrait ts
-        <*> indexKinds t
+instance IndexKinds (Scheme Parameter () (Type Parameter ())) where
+  type
+    Indexed (Scheme Parameter () (Type Parameter ())) =
+      Scheme Parameter KindNode (Type Parameter KindNode)
+  indexKinds = \case
+    Forall vs ts t -> do
+      vs' <- indexKinds vs
+      ts' <- traverse indexKinds ts
+      t' <- indexKinds t
+      pure $ Forall vs' ts' t'
 
 newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: Map Int KindNode}
   deriving (Show, Eq, Ord)
@@ -458,9 +489,9 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
         \(n, s) -> do
           let (r, cs) = runKindConstraintsGen (mapEnvironment liftKind env) $ do
                 forM_ qs (modify . uncurry Environment.insert)
-                let aaa = evalState (indexKindsInScheme s) (length qs)
-                emitKindConstraints aaa
-                pure aaa
+                let indexed = evalState (indexKinds s) (length qs)
+                emitKindConstraints indexed
+                pure indexed
           sub <- solveKindConstraints cs
           modify (bimap (applyKinds sub) (applyKinds sub))
           pure (n, lowerKinds (applyKinds sub r))
