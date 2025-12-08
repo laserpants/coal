@@ -2,6 +2,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.TypeSystem.Kind.Inference (inferTraitKinds) where
@@ -47,76 +49,71 @@ liftKind =
     KTrait ->
       IsKTrait
 
-lowerKindNode :: KindNode -> Kind
-lowerKindNode =
-  \case
-    IsKType ->
-      KType
-    IsKRow ->
-      KRow
-    IsKTrait ->
-      KTrait
-    IsKArrow k1 k2 ->
-      KArrow (lowerKindNode k1) (lowerKindNode k2)
-    IsKVar{} ->
-      KType
+class LowerKinds a b where
+  lowerKinds :: a -> b
 
-lowerKinds :: Type Parameter KindNode -> Type Parameter Kind
-lowerKinds =
-  \case
-    TApplication k t1 t2 -> do
-      TApplication (lowerKindNode k) (lowerKinds t1) (lowerKinds t2)
+instance LowerKinds KindNode Kind where
+  lowerKinds = \case
+    IsKType -> KType
+    IsKRow -> KRow
+    IsKTrait -> KTrait
+    IsKArrow a b -> KArrow (lowerKinds a) (lowerKinds b)
+    IsKVar _ -> KType
+
+instance LowerKinds (Parameter KindNode) (Parameter Kind) where
+  lowerKinds (Parameter k name) = Parameter (lowerKinds k) name
+
+instance
+  LowerKinds
+    (Row Parameter KindNode (Type Parameter KindNode))
+    (Row Parameter Kind (Type Parameter Kind))
+  where
+  lowerKinds = \case
+    RExtend name t row ->
+      RExtend name (lowerKinds t) (lowerKinds row)
+    RVariable (Parameter _ name) ->
+      RVariable (Parameter KRow name)
+    RNil -> RNil
+
+instance LowerKinds (Type Parameter KindNode) (Type Parameter Kind) where
+  lowerKinds = \case
+    TApplication k t1 t2 ->
+      TApplication (lowerKinds k) (lowerKinds t1) (lowerKinds t2)
     TArrow t1 t2 ->
       TArrow (lowerKinds t1) (lowerKinds t2)
     TConstructor k name ->
-      TConstructor (lowerKindNode k) name
+      TConstructor (lowerKinds k) name
     TIntrinsic i ->
       TIntrinsic i
     TRecord t ->
       TRecord (lowerKinds t)
     TRow row ->
-      TRow (lowerKindsInRow row)
+      TRow (lowerKinds row)
     TVariable param ->
-      TVariable (lowerKindsInParameter param)
+      TVariable (lowerKinds param)
     TAlias name ts t ->
       TAlias name (fmap lowerKinds ts) (lowerKinds t)
 
-lowerKindsInParameter :: Parameter KindNode -> Parameter Kind
-lowerKindsInParameter =
-  \case
-    (Parameter k name) ->
-      Parameter (lowerKindNode k) name
+instance LowerKinds (Trait (Parameter KindNode)) (Trait (Parameter Kind)) where
+  lowerKinds (Trait n p) = Trait n (lowerKinds p)
 
-lowerKindsInRow :: Row Parameter KindNode (Type Parameter KindNode) -> Row Parameter Kind (Type Parameter Kind)
-lowerKindsInRow =
-  \case
-    RExtend name t row ->
-      RExtend name (lowerKinds t) (lowerKindsInRow row)
-    RVariable (Parameter _ name) ->
-      RVariable (Parameter KRow name)
-    RNil ->
-      RNil
+instance
+  LowerKinds
+    (Trait (Type Parameter KindNode))
+    (Trait (Type Parameter Kind))
+  where
+  lowerKinds (Trait n t) = Trait n (lowerKinds t)
 
-lowerKindsInTrait :: Trait (Parameter KindNode) -> Trait (Parameter Kind)
-lowerKindsInTrait =
-  \case
-    Trait n p ->
-      Trait n (lowerKindsInParameter p)
+instance LowerKinds (Set (Parameter KindNode)) (Set (Parameter Kind)) where
+  lowerKinds = Set.map lowerKinds
 
-lowerKindsInTrait1 :: Trait (Type Parameter KindNode) -> Trait (Type Parameter Kind)
-lowerKindsInTrait1 =
-  \case
-    Trait n t ->
-      Trait n (lowerKinds t)
-
-lowerKindsInSet :: Set (Parameter KindNode) -> Set (Parameter Kind)
-lowerKindsInSet = Set.map lowerKindsInParameter
-
-lowerKindsInScheme1 :: Scheme Parameter KindNode (Type Parameter KindNode) -> Scheme Parameter Kind (Type Parameter Kind)
-lowerKindsInScheme1 =
-  \case
-    Forall vs ts t ->
-      Forall (lowerKindsInSet vs) (lowerKindsInTrait1 <$> ts) (lowerKinds t)
+instance
+  LowerKinds
+    (Scheme Parameter KindNode (Type Parameter KindNode))
+    (Scheme Parameter Kind (Type Parameter Kind))
+  where
+  lowerKinds (Forall vs ts t) =
+    Forall (lowerKinds vs) (fmap lowerKinds ts) (lowerKinds t)
 
 nodeKind :: Type Parameter KindNode -> KindNode
 nodeKind =
@@ -451,7 +448,7 @@ insertTraitKind params (Trait trait (Parameter () name)) =
 
 inferTraitKinds :: Environment Kind -> TraitDefinition () -> TraitDefinition Kind
 inferTraitKinds env def@(TraitDefinition ts p defs) =
-  TraitDefinition (lowerKindsInTrait <$> traits0) (lowerKindsInParameter param0) defs0
+  TraitDefinition (lowerKinds <$> traits0) (lowerKinds param0) defs0
  where
   ps = paramsIn def
   qs = zip (Set.toList ps) [IsKVar n | n <- [1 ..]]
@@ -466,4 +463,4 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
                 pure aaa
           sub <- solveKindConstraints cs
           modify (bimap (applyKinds sub) (applyKinds sub))
-          pure (n, lowerKindsInScheme1 (applyKinds sub r))
+          pure (n, lowerKinds (applyKinds sub r))
