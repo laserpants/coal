@@ -68,11 +68,11 @@ instance (Pretty k, Pretty (o k), Pretty t) => Pretty (Scheme o k t) where
 index :: Int -> TypeIndex Kind
 index = TypeIndex KType
 
-{-# INLINE forall0 #-}
-forall0 :: t -> Scheme TypeIndex Kind t
-forall0 = Forall mempty []
-
 type IndexedScheme = Scheme TypeIndex Kind IndexedType
+
+{-# INLINE forall0 #-}
+forall0 :: IndexedType -> IndexedScheme
+forall0 = Forall mempty []
 
 forall1 :: (IndexedType -> IndexedType) -> IndexedScheme
 forall1 f = Forall (Set.singleton a0) [] (f (TVariable a0))
