@@ -42,7 +42,6 @@ lookupDataConstructor name = do
     Just (DataConstructorEntry _ _ ctor _) ->
       pure (Just ctor)
 
--- TODO: DRY
 {-# INLINE lookupCodataAccessor #-}
 lookupCodataAccessor :: Name -> ConstraintsGenStack a TypeIndex Kind IndexedType (Maybe (CodataAccessor TypeIndex Kind IndexedType))
 lookupCodataAccessor name = do
@@ -355,18 +354,14 @@ clauseConstraintsImpl (EClause loc p cs) = do
   names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
--- emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
--- emitECodataSelectConstraints loc (Label t name) e e1 = do
 emitECodataSelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitECodataSelectConstraints loc (Label t name) e1 = do
-  --  ms1 <- emitConstraints e
   r <- lookupCodataAccessor name
   case r of
     Nothing -> do
       tellLeft [ENoCodataAccessor loc name]
       pure []
     Just CodataAccessor{..} -> do
-      -- tellRight [Explicit InferenceRulePlaceholder t1 codataAccessorScheme]
       case e1 of
         ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3 -> do
           ms2 <- emitConstraints e2
@@ -375,7 +370,6 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
           t0 <- supplied (TVariable . TypeIndex KType)
           tellRight [Explicit (InferenceRulePlaceholder "emitECodataSelectConstraints.1") (t0 `TArrow` typeOf e3) codataAccessorScheme]
           tellRight [Equality (InferenceRulePlaceholder "emitECodataSelectConstraints.2") [t, typeOf e3]]
-          -- pure (ms1 <> ms2 <> filter (not . assumptionNameIs n) ms3)
           pure (ms2 <> filter (not . assumptionNameIs n) ms3)
         _ ->
           pure []
