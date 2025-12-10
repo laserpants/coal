@@ -6,7 +6,7 @@ module Coal.Compiler (
   module Coal.Compiler.Error,
   module Coal.Compiler.Journal,
   module Coal.Compiler.Pass,
-  module Coal.Compiler.PatternAnomalies,
+  module Coal.Compiler.PatternMatching.AnomalyDetection,
   module Coal.Compiler.PatternMatching,
   module Coal.Compiler.Stack,
   module Coal.Compiler.State,
@@ -19,8 +19,8 @@ import Coal.Compiler.Environment
 import Coal.Compiler.Error
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
-import Coal.Compiler.PatternAnomalies
 import Coal.Compiler.PatternMatching
+import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Pipeline
 import Coal.Compiler.Stack
 import Coal.Compiler.State

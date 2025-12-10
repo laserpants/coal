@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE TemplateHaskell #-}
 
-module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, embedded) where
+module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config
+import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve
@@ -21,7 +21,6 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import qualified Data.ByteString as B
 import Data.Either (partitionEithers)
-import Data.FileEmbed (embedFile)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as E
@@ -29,63 +28,7 @@ import Extras (forM, forM_)
 import Text.Megaparsec (eof, runParser)
 
 passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
-passParsing =
-  Pass
-    { passName = "Parsing"
-    , runPass = pass
-    }
-
-embedded :: [(Text, B.ByteString)]
-embedded =
-  [
-    ( "IO"
-    , $(embedFile "lang/IO.coal")
-    )
-  ,
-    ( "List"
-    , $(embedFile "lang/List.coal")
-    )
-  ,
-    ( "Nat"
-    , $(embedFile "lang/Nat.coal")
-    )
-  ,
-    ( "Number"
-    , $(embedFile "lang/Number.coal")
-    )
-  ,
-    ( "String"
-    , $(embedFile "lang/String.coal")
-    )
-  ,
-    ( "Char"
-    , $(embedFile "lang/Char.coal")
-    )
-  ,
-    ( "Option"
-    , $(embedFile "lang/Option.coal")
-    )
-  ,
-    ( "Coal.Combinators"
-    , $(embedFile "lang/Coal/Combinators.coal")
-    )
-  ,
-    ( "Coal.Monoid"
-    , $(embedFile "lang/Coal/Monoid.coal")
-    )
-  ,
-    ( "Coal.Functor"
-    , $(embedFile "lang/Coal/Functor.coal")
-    )
-  ,
-    ( "Coal.Applicative"
-    , $(embedFile "lang/Coal/Applicative.coal")
-    )
-  ,
-    ( "Coal.Monad"
-    , $(embedFile "lang/Coal/Monad.coal")
-    )
-  ]
+passParsing = Pass{runPass = pass}
 
 pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass files = do
@@ -100,7 +43,6 @@ pass files = do
           forM_ es (tellErrors . return)
           throwError ParserFailure
     (es, _) -> do
-      -- TODO
       forM es $
         \(p, e) ->
           error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
@@ -131,6 +73,6 @@ parseFile file = do
             then do
               setVerbatimSourceForC module_ src
               pure $ Right module_
-            else pure $ Left (InvalidModuleName file (principalPath path))
+            else pure $ Left (BadModuleName file (principalPath path))
     Left err -> do
       pure $ Left (BadFilename file err)

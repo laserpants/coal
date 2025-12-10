@@ -26,14 +26,7 @@ import qualified Data.Map.Strict as Map
 import Extras (Name)
 
 passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
-passRecordPatterns =
-  Pass
-    { passName = "RecordPatterns"
-    , runPass = pass
-    }
-
-pass :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-pass = compileRecordPatterns
+passRecordPatterns = Pass{runPass = compileRecordPatterns}
 
 compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a (Type TypeIndex Kind)))
@@ -73,10 +66,8 @@ instance (Data a, Monoid a) => RecordDesugarable a (Clause a IndexedType) where
         (q, fs) <- listenRecordEntry (desugarRecordPatterns p)
         ds <- forM cs $
           \case
-            CPlain a1 gs e -> do
-              hs <- desugarRecordPatterns gs
-              e1 <- foldrM desugar e fs
-              pure (CPlain a1 hs e1)
+            CPlain a1 gs e ->
+              CPlain a1 <$> desugarRecordPatterns gs <*> foldrM desugar e fs
         pure (EClause a q ds)
 
 instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
@@ -115,59 +106,41 @@ extractVarName =
     _ ->
       "_"
 
--- FIXME
 desugar :: (Data a, Monoid a, Monad m) => RecordEntry a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
 desugar (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) (supplied (freshName "row"))
-  let r1 = maybe RNil extractRow p1
-      v1 = extractVarName p1
-      t1 = maybe (TRecord (TRow RNil)) typeOf p1
-      e2 = ELet mempty (BPattern mempty (PVariable mempty (Label t1 v1)) (EVariable mempty (Label t1 (name <> ".tail"))) :| [])
-  (_, _, e1) <- foldrM (go v1) (v1, r1, e2 expr) (zip fields (name : names))
+  (_, _, e1) <- foldrM go (v1, r1, e2 expr) (zip fields (name : names))
   pure e1
  where
   fields = Map.toList dict
-
--- FIXME
-go :: (Data a, Monoid a, Monad m) => Name -> ((Name, IndexedPattern a), Name) -> (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType) -> CompilerT a m (Name, Row TypeIndex Kind IndexedType, Expression a IndexedType)
-go n ((fname, p), prefix) (var, row, expr) = do
-  let t1 = typeOf expr
-      t2 = typeOf p
-      ll1 = Label t2 (prefix <> ".field." <> fname)
-      ll2 = Label (TRecord (TRow row)) (prefix <> ".tail")
-      var1 = EVariable mempty (Label (TRow (RExtend fname t2 row)) prefix)
-      var2 = EVariable mempty ll2
-
-  e2 <-
-    desugarRecordPatterns
-      ( EMatch
-          mempty
-          t1
-          (EVariable mempty ll1)
-          ( EClause
-              mempty
-              p
-              (CPlain mempty [] expr :| [])
-              :| []
+  r1 = maybe RNil extractRow p1
+  v1 = extractVarName p1
+  t1 = maybe (TRecord (TRow RNil)) typeOf p1
+  e2 = ELet mempty (BPattern mempty (PVariable mempty (Label t1 v1)) (EVariable mempty (Label t1 (name <> ".tail"))) :| [])
+  go ((fname, p), prefix) (var, row, expr2) = do
+    let t2 = typeOf p
+        ll1 = Label (typeOf p) (prefix <> ".field." <> fname)
+        ll2 = Label (TRecord (TRow row)) (prefix <> ".tail")
+        match = EMatch mempty (typeOf expr2)
+        clause q e = EClause mempty q (CPlain mempty [] e :| []) :| []
+        focus = EFocus fname ll1 ll2 (EVariable mempty (Label (TRow (RExtend fname t2 row)) prefix))
+    e3 <- desugarRecordPatterns (match (EVariable mempty ll1) (clause p expr2))
+    pure
+      ( prefix
+      , RExtend fname t2 row
+      , focus
+          ( if var == v1
+              then e3
+              else
+                match
+                  (EVariable mempty ll2)
+                  ( clause
+                      ( PConstructor
+                          mempty
+                          (Label (TRecord (TRow row)) "$Record")
+                          [PVariable mempty (Label (TRow row) var)]
+                      )
+                      e3
+                  )
           )
       )
-
-  let e3 =
-        EMatch
-          mempty
-          t1
-          var2
-          ( EClause
-              mempty
-              ( PConstructor
-                  mempty
-                  (Label (TRecord (TRow row)) "$Record")
-                  [PVariable mempty (Label (TRow row) var)]
-              )
-              (CPlain mempty [] e2 :| [])
-              :| []
-          )
-
-  let focusExpr = EFocus fname ll1 ll2 var1 (if var == n then e2 else e3)
-
-  pure (prefix, RExtend fname t2 row, focusExpr)

@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+
+  fun main() =
+    let 
+      f(x, x) =
+        "abc"
+    in
+    IO.println_string("x")
+
+}

@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors) where
 
 import Coal.AST.Metadata (Metadata (..), getMetadata)
@@ -14,11 +12,7 @@ import Control.Monad.State (gets)
 import Data.List (nub)
 
 passTypePhaseErrors :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passTypePhaseErrors =
-  Pass
-    { passName = "TypePhaseErrors"
-    , runPass = pass
-    }
+passTypePhaseErrors = Pass{runPass = pass}
 
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass m@(Module path _ _) = do

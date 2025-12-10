@@ -71,7 +71,6 @@ compileMatchExprsE :: (Eq a, MatchClasses a t, Monad m) => Expression a t -> Com
 compileMatchExprsE =
   \case
     EMatch _ _ e cs -> do
-      -- TODO
       name <- supplied (freshName "match")
       replaceWith name e <$> compileClauses (Label (expressionType e) name) cs
     e ->
@@ -87,8 +86,7 @@ type TranslatedClause e a t = ([EnvelopePattern (e a) t], EnvelopeExpression (e 
 translateClause :: (MatchClasses a t) => Clause a t -> TranslatedClause Expression a t
 translateClause (EClause _ p (CPlain _ _ e :| [])) =
   ([translatePattern p], MExpression e)
-translateClause _ =
-  error "TODO"
+translateClause _ = error "Implementation error"
 
 translatePattern :: (MatchClasses a t) => Pattern a t -> EnvelopePattern (Expression a) t
 translatePattern =

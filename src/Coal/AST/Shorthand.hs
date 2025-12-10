@@ -1,12 +1,17 @@
 module Coal.AST.Shorthand (
   matchE,
   varE,
+  varE',
   letE,
+  letE',
   ifE,
   applicationE,
+  applicationE',
   lambdaE,
+  lambdaE',
   lambda1E,
   lambdaAnyE,
+  lambdaAnyE',
   selectE,
   tupleE,
   literalBoolE,
@@ -34,6 +39,10 @@ matchE = EMatch mempty ()
 varE :: (Monoid a) => Name -> Expression a ()
 varE = EVariable mempty . label
 
+{-# INLINE varE' #-}
+varE' :: a -> Name -> Expression a ()
+varE' a = EVariable a . label
+
 {-# INLINE ifE #-}
 ifE :: (Monoid a) => Expression a () -> Expression a () -> Expression a () -> Expression a ()
 ifE = EIf mempty ()
@@ -42,13 +51,25 @@ ifE = EIf mempty ()
 letE :: (Monoid a) => Name -> Expression a () -> Expression a () -> Expression a ()
 letE name = ERecursiveLet mempty (PVariable mempty (label name))
 
+{-# INLINE letE' #-}
+letE' :: a -> Name -> Expression a () -> Expression a () -> Expression a ()
+letE' a name = ERecursiveLet a (PVariable a (label name))
+
 {-# INLINE applicationE #-}
 applicationE :: (Monoid a) => Expression a () -> NonEmpty (Expression a ()) -> Expression a ()
 applicationE = EApplication mempty ()
 
+{-# INLINE applicationE' #-}
+applicationE' :: a -> Expression a () -> NonEmpty (Expression a ()) -> Expression a ()
+applicationE' a = EApplication a ()
+
 {-# INLINE lambdaE #-}
 lambdaE :: (Monoid a) => NonEmpty (Pattern a ()) -> Expression a () -> Expression a ()
 lambdaE = ELambda mempty
+
+{-# INLINE lambdaE' #-}
+lambdaE' :: a -> NonEmpty (Pattern a ()) -> Expression a () -> Expression a ()
+lambdaE' = ELambda
 
 {-# INLINE lambda1E #-}
 lambda1E :: (Monoid a) => Name -> Expression a () -> Expression a ()
@@ -57,6 +78,10 @@ lambda1E var = ELambda mempty (PVariable mempty (label var) :| [])
 {-# INLINE lambdaAnyE #-}
 lambdaAnyE :: (Monoid a) => Expression a () -> Expression a ()
 lambdaAnyE = ELambda mempty (PAny mempty () :| [])
+
+{-# INLINE lambdaAnyE' #-}
+lambdaAnyE' :: a -> Expression a () -> Expression a ()
+lambdaAnyE' a = ELambda a (PAny a () :| [])
 
 {-# INLINE selectE #-}
 selectE :: (Monoid a) => Name -> Expression a () -> Expression a ()

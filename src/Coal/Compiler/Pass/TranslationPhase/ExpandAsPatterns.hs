@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns) where
@@ -21,11 +20,7 @@ import Data.Generics.Uniplate.Data (descend, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 
 passExpandAsPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandAsPatterns =
-  Pass
-    { passName = "ExpandAsPatterns"
-    , runPass = pure . expandAsPatterns
-    }
+passExpandAsPatterns = Pass{runPass = pure . expandAsPatterns}
 
 class TransformContext e where
   expandAsPatterns :: e -> e
@@ -44,12 +39,35 @@ instance (Data a, Data t, Monoid a) => TransformContext (Expression a t) where
       e ->
         descend expandAsPatterns e
 
+instance (Data a, Data t, Monoid a) => TransformContext (Choice Expression a t) where
+  expandAsPatterns =
+    \case
+      CPlain a gs e ->
+        CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
+
+instance (Data a, Data t, Monoid a) => TransformContext (Guard Expression a t) where
+  expandAsPatterns =
+    \case
+      CGuard e ->
+        CGuard (expandAsPatterns e)
+
+instance (Data a, Data t, Monoid a) => TransformContext (Binding Expression a t) where
+  expandAsPatterns =
+    \case
+      BPattern a p e ->
+        BPattern a p (expandAsPatterns e)
+      BFunction a name ps e ->
+        BFunction a name ps (expandAsPatterns e)
+
 expandClause :: (Monoid a, Data a, Data t) => t -> Clause a t -> Clause a t
-expandClause t cl@(EClause a p cs) =
+expandClause t (EClause a p cs) =
   case ps of
-    [] -> cl
-    _ -> EClause a q (foldr go cs ps)
+    [] ->
+      EClause a q cs'
+    _ ->
+      EClause a q (foldr go cs' ps)
  where
+  cs' = expandAsPatterns cs
   (q, ps) =
     runWriter (transformM collectAsPatterns p)
   go (ll, p1) cs1 =

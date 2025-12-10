@@ -55,7 +55,7 @@ translateDefinition =
           DConstant loc n c _ ->
             translateDefinition (DConstant loc (instanceLabel trait n) c [])
           _ ->
-            error "TODO"
+            pure []
      where
       trait = Trait name t
     _ ->

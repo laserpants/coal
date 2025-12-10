@@ -8,7 +8,7 @@ module Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternEx
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.PatternAnomalies (exhaustive, translatePattern)
+import Coal.Compiler.PatternMatching.AnomalyDetection (exhaustive, translatePattern)
 import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Expression (Clause (..), Expression (..))
@@ -23,14 +23,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Name)
 
 passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passPatternExhaustiveCheck =
-  Pass
-    { passName = "PatternExhaustiveCheck"
-    , runPass = pass
-    }
-
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass = patternExhaustiveCheckM
+passPatternExhaustiveCheck = Pass{runPass = patternExhaustiveCheckM}
 
 patternExhaustiveCheckM :: (Monad m) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
 patternExhaustiveCheckM m = do

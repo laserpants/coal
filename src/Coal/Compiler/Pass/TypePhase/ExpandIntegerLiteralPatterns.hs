@@ -30,11 +30,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import TextShow (showt)
 
 passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
-passExpandIntegerLiteralPatterns =
-  Pass
-    { passName = "ExpandIntegerLiteralPatterns"
-    , runPass = expandIntegerLiteralPatterns
-    }
+passExpandIntegerLiteralPatterns = Pass{runPass = expandIntegerLiteralPatterns}
 
 class TransformContext e where
   expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata m e
@@ -56,7 +52,7 @@ instance TransformContext (Expression Metadata ()) where
         descendM expandIntegerLiteralPatterns e
 
 expandClause :: (Monad m) => Metadata -> Expression Metadata () -> (Clause Metadata (), [Clause Metadata ()]) -> CompilerT Metadata m (Clause Metadata ())
-expandClause _ e3 (cl@(EClause a p (CPlain a1 gs e1 :| [])), ds) = do
+expandClause _ expr (cl@(EClause a p (CPlain a1 gs e1 :| [])), ds) = do
   (q, ints) <- runWriterT (transformM collectIntegerLiteralPatterns p)
   case (ints, ds) of
     ([], _) ->
@@ -69,14 +65,14 @@ expandClause _ e3 (cl@(EClause a p (CPlain a1 gs e1 :| [])), ds) = do
       e2 <-
         expandIntegerLiteralPatterns $
           ifE
-            (foldr baz (literalBoolE True) ints)
+            (foldr fromInt32 (literalBoolE True) ints)
             e1
-            (matchE e3 (c :| cs))
+            (matchE expr (c :| cs))
       pure (EClause a q (CPlain a1 gs e2 :| []))
 expandClause _ _ _ = error "Implementation error"
 
-baz :: (Label (), Integer) -> Expression Metadata () -> Expression Metadata ()
-baz (ll, int) e1 =
+fromInt32 :: (Label (), Integer) -> Expression Metadata () -> Expression Metadata ()
+fromInt32 (ll, int) e1 =
   applicationE
     opAndE
     ( e1

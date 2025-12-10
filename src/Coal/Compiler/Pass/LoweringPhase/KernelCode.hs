@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode) where
 
 import Coal.AST.Metadata (Metadata (..))
@@ -13,11 +11,7 @@ import Control.Monad.IO.Class (MonadIO (..))
 import Extras (Name)
 
 passKernelCode :: (MonadIO m) => Pass Metadata m [Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)] [(Name, [IRConstruct [IRLine]])]
-passKernelCode =
-  Pass
-    { passName = "KernelCode"
-    , runPass = pass
-    }
+passKernelCode = Pass{runPass = pass}
 
 pass :: (MonadIO m) => [Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)] -> CompilerT Metadata m [(Name, [IRConstruct [IRLine]])]
 pass ms = liftIO $ Kernel.compileModules (builtinObjects : ms)

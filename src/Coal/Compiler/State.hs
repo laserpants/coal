@@ -56,51 +56,99 @@ instance Supply (CompilerState a) where
 
 {-# INLINE overCompilerNameStore #-}
 overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
-overCompilerNameStore fn CompilerState{..} = CompilerState{compilerNameStore = fn compilerNameStore, ..}
+overCompilerNameStore fn CompilerState{..} =
+  CompilerState
+    { compilerNameStore = fn compilerNameStore
+    , ..
+    }
 
 {-# INLINE overCompilerCurrentModule #-}
 overCompilerCurrentModule :: Over (CompilerState a) Path
-overCompilerCurrentModule fn CompilerState{..} = CompilerState{compilerCurrentModule = fn compilerCurrentModule, ..}
+overCompilerCurrentModule fn CompilerState{..} =
+  CompilerState
+    { compilerCurrentModule = fn compilerCurrentModule
+    , ..
+    }
 
 {-# INLINE overCompilerSupply #-}
 overCompilerSupply :: Over (CompilerState a) Int
-overCompilerSupply fn CompilerState{..} = CompilerState{compilerSupply = fn compilerSupply, ..}
+overCompilerSupply fn CompilerState{..} =
+  CompilerState
+    { compilerSupply = fn compilerSupply
+    , ..
+    }
 
 {-# INLINE overCompilerSubstitution #-}
 overCompilerSubstitution :: Over (CompilerState a) Substitution
-overCompilerSubstitution fn CompilerState{..} = CompilerState{compilerSubstitution = fn compilerSubstitution, ..}
+overCompilerSubstitution fn CompilerState{..} =
+  CompilerState
+    { compilerSubstitution = fn compilerSubstitution
+    , ..
+    }
 
 {-# INLINE overCompilerConstraints #-}
 overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
-overCompilerConstraints fn CompilerState{..} = CompilerState{compilerConstraints = fn compilerConstraints, ..}
+overCompilerConstraints fn CompilerState{..} =
+  CompilerState
+    { compilerConstraints = fn compilerConstraints
+    , ..
+    }
 
 {-# INLINE overCompilerAssumptions #-}
 overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption a]
-overCompilerAssumptions fn CompilerState{..} = CompilerState{compilerAssumptions = fn compilerAssumptions, ..}
+overCompilerAssumptions fn CompilerState{..} =
+  CompilerState
+    { compilerAssumptions = fn compilerAssumptions
+    , ..
+    }
 
 {-# INLINE overCompilerStateConstraintsGenErrors #-}
 overCompilerStateConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
-overCompilerStateConstraintsGenErrors fn CompilerState{..} = CompilerState{compilerConstraintsGenErrors = fn compilerConstraintsGenErrors, ..}
+overCompilerStateConstraintsGenErrors fn CompilerState{..} =
+  CompilerState
+    { compilerConstraintsGenErrors = fn compilerConstraintsGenErrors
+    , ..
+    }
 
 {-# INLINE overCompilerTypeAnnotationParams #-}
 overCompilerTypeAnnotationParams :: Over (CompilerState a) (Dictionary (a, TypeIndex Kind))
-overCompilerTypeAnnotationParams fn CompilerState{..} = CompilerState{compilerTypeAnnotationParams = fn compilerTypeAnnotationParams, ..}
+overCompilerTypeAnnotationParams fn CompilerState{..} =
+  CompilerState
+    { compilerTypeAnnotationParams = fn compilerTypeAnnotationParams
+    , ..
+    }
 
 {-# INLINE overCompilerSolverRuleViolations #-}
 overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
-overCompilerSolverRuleViolations fn CompilerState{..} = CompilerState{compilerSolverRuleViolations = fn compilerSolverRuleViolations, ..}
+overCompilerSolverRuleViolations fn CompilerState{..} =
+  CompilerState
+    { compilerSolverRuleViolations = fn compilerSolverRuleViolations
+    , ..
+    }
 
 {-# INLINE overCompilerVerbatimSource #-}
 overCompilerVerbatimSource :: Over (CompilerState a) (Environment Text)
-overCompilerVerbatimSource fn CompilerState{..} = CompilerState{compilerVerbatimSource = fn compilerVerbatimSource, ..}
+overCompilerVerbatimSource fn CompilerState{..} =
+  CompilerState
+    { compilerVerbatimSource = fn compilerVerbatimSource
+    , ..
+    }
 
 {-# INLINE overCompilerConfig #-}
 overCompilerConfig :: Over (CompilerState a) CompilerConfig
-overCompilerConfig fn CompilerState{..} = CompilerState{compilerConfig = fn compilerConfig, ..}
+overCompilerConfig fn CompilerState{..} =
+  CompilerState
+    { compilerConfig = fn compilerConfig
+    , ..
+    }
 
 {-# INLINE overCompilerModules #-}
 overCompilerModules :: Over (CompilerState a) (Environment (ModuleBuild a))
-overCompilerModules fn CompilerState{..} = CompilerState{compilerModules = fn compilerModules, ..}
+overCompilerModules fn CompilerState{..} =
+  CompilerState
+    { compilerModules = fn compilerModules
+    , ..
+    }
 
 initialCompilerState :: CompilerState a
 initialCompilerState =

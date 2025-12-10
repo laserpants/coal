@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort) where
@@ -20,11 +19,7 @@ import Data.Tuple.Extra (fst3)
 import Extras (Name, concatForM)
 
 passTopologicalSort :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
-passTopologicalSort =
-  Pass
-    { passName = "TopologicalSort"
-    , runPass = pass
-    }
+passTopologicalSort = Pass{runPass = pass}
 
 pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass modules = do

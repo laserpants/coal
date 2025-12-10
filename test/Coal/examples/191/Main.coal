@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+
+  fun main() =
+    let 
+      { hello = foo } = 
+        { hello = "wat" }
+      in
+        let 
+          foo = "baz"
+        in
+        IO.println_string("A")
+
+}

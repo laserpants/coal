@@ -20,14 +20,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary, Name)
 
 passExpressionUnfolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a k ()) (Module a k ())
-passExpressionUnfolds =
-  Pass
-    { passName = "ExpressionUnfolds"
-    , runPass = pass
-    }
-
-pass :: (Monad m, Monoid a, Data a) => Module a k () -> CompilerT a m (Module a k ())
-pass = compileUnfolds
+passExpressionUnfolds = Pass{runPass = compileUnfolds}
 
 expandCodataSelect :: (Monoid a, Monad m) => Name -> Expression a () -> CompilerT a m (Expression a ())
 expandCodataSelect field e = do
@@ -109,7 +102,9 @@ instance (Monoid a, Data a) => CompileUnfoldsContext a (UnfoldDefinition a ()) w
   compileUnfolds =
     \case
       UnfoldDefinition with ps d e ->
-        UnfoldDefinition with ps <$> traverse compileUnfolds d <*> traverse compileUnfolds e
+        UnfoldDefinition with ps
+          <$> traverse compileUnfolds d
+          <*> traverse compileUnfolds e
 
 instance (Monoid a, Data a) => CompileUnfoldsContext a (Definition a k ()) where
   compileUnfolds =

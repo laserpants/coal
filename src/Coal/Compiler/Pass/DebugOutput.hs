@@ -18,11 +18,7 @@ import Extras (forM_)
 import Prettyprinter (Pretty (..))
 
 generateDebugArtifacts :: (MonadIO m, Pretty t, Show t) => Text -> Pass a m (Module a k t) (Module a k t)
-generateDebugArtifacts ll =
-  Pass
-    { passName = "debug<" <> ll <> ">"
-    , runPass = pass ll
-    }
+generateDebugArtifacts ll = Pass{runPass = pass ll}
 
 pass :: (MonadIO m, Pretty t, Show t) => Text -> Module a k t -> CompilerT a m (Module a k t)
 pass label m = do
@@ -38,11 +34,11 @@ writeDotFiles ns m@(Module (Path path) _ defs) = do
   forM_ defs $
     \case
       def@DFunction{} ->
-        writeDotFile (prefixed $ definitionName def) def
+        writeDotFile (prefixedName def) def
       def@DConstant{} ->
-        writeDotFile (prefixed $ definitionName def) def
+        writeDotFile (prefixedName def) def
       _ ->
         pure ()
  where
   prefix = ns <> "__" <> Text.intercalate "_" path
-  prefixed n = prefix <> "_" <> n
+  prefixedName n = prefix <> "_" <> definitionName n

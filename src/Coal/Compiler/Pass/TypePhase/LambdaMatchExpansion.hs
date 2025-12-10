@@ -10,7 +10,7 @@ module Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (passLambdaMatchExpansi
 import Coal.AST.Shorthand (lambdaE, matchE, varE, varP)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Language (Clause, Expression (ELambdaMatch), Kind)
+import Coal.Language (Expression (ELambdaMatch), Kind)
 import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
@@ -18,11 +18,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary)
 
 passLambdaMatchExpansion :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
-passLambdaMatchExpansion =
-  Pass
-    { passName = "LambdaMatchExpansion"
-    , runPass = expandLambdaMatchExprs
-    }
+passLambdaMatchExpansion = Pass{runPass = expandLambdaMatchExprs}
 
 class TransformContext c where
   expandLambdaMatchExprs :: (Monad m) => c -> CompilerT a m c
@@ -39,18 +35,16 @@ instance (TransformContext a) => TransformContext (Dictionary a) where
 instance (Monoid a, Data a) => TransformContext (Expression a ()) where
   expandLambdaMatchExprs = transformM $
     \case
-      ELambdaMatch a t cs Nothing -> do
-        e1 <- expandLambdaMatch cs
-        pure (ELambdaMatch a t cs (Just e1))
+      ELambdaMatch a t cs Nothing ->
+        ELambdaMatch a t cs . Just <$> expandLambdaMatch
+       where
+        expandLambdaMatch =
+          pure $
+            lambdaE
+              (varP "$lambda_match" :| [])
+              (matchE (varE "$lambda_match") cs)
       e ->
         pure e
-
-expandLambdaMatch :: (Monoid a, Monad m) => NonEmpty (Clause a ()) -> CompilerT o m (Expression a ())
-expandLambdaMatch cs =
-  pure $
-    lambdaE
-      (varP "$lambda_match" :| [])
-      (matchE (varE "$lambda_match") cs)
 
 instance (Monoid a, Data a) => TransformContext (Module a Kind ()) where
   expandLambdaMatchExprs =

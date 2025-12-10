@@ -44,12 +44,17 @@ library
       Coal.Compiler.Builtin.Functions
       Coal.Compiler.Builtin.Instances
       Coal.Compiler.Config
+      Coal.Compiler.Embedded
       Coal.Compiler.Environment
       Coal.Compiler.Error
       Coal.Compiler.Journal
       Coal.Compiler.Kernel.Environment
       Coal.Compiler.Kernel.TranslateDefinition
       Coal.Compiler.Kernel.TranslateExpression
+      Coal.Compiler.Kernel.TranslateOperator
+      Coal.Compiler.Kernel.TranslatePattern
+      Coal.Compiler.Kernel.TranslatePrimitive
+      Coal.Compiler.Kernel.TranslateRecord
       Coal.Compiler.Kernel.TranslateType
       Coal.Compiler.Pass
       Coal.Compiler.Pass.DebugOutput
@@ -67,6 +72,7 @@ library
       Coal.Compiler.Pass.PreflightPhase.Setup
       Coal.Compiler.Pass.PreflightPhase.ShadowingRule
       Coal.Compiler.Pass.PreflightPhase.TopologicalSort
+      Coal.Compiler.Pass.PreflightPhase.WhereClauses
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
@@ -91,8 +97,8 @@ library
       Coal.Compiler.Pass.TypePhase.TopLevelUnfolds
       Coal.Compiler.Pass.TypePhase.TypeInference
       Coal.Compiler.Path.Resolve
-      Coal.Compiler.PatternAnomalies
       Coal.Compiler.PatternMatching
+      Coal.Compiler.PatternMatching.AnomalyDetection
       Coal.Compiler.PatternMatching.Compiler
       Coal.Compiler.PatternMatching.Envelope
       Coal.Compiler.PatternMatching.Equation
@@ -100,7 +106,6 @@ library
       Coal.Compiler.Pipeline
       Coal.Compiler.Stack
       Coal.Compiler.State
-      Coal.Compiler.Transform.WhereClauses
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
       Coal.DebugIO
@@ -220,9 +225,13 @@ library
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption
       Coal.TypeSystem.Constraint.Generation
+      Coal.TypeSystem.Constraint.Generation.Annotation
+      Coal.TypeSystem.Constraint.Generation.Annotation.Error
+      Coal.TypeSystem.Constraint.Generation.Context
+      Coal.TypeSystem.Constraint.Generation.Error
       Coal.TypeSystem.Constraint.Generation.InferenceRule
-      Coal.TypeSystem.Constraint.Generation.Internal
-      Coal.TypeSystem.Constraint.Generation.TypeAnnotation
+      Coal.TypeSystem.Constraint.Generation.Stack
+      Coal.TypeSystem.Constraint.Generation.State
       Coal.TypeSystem.Constraint.Solver
       Coal.TypeSystem.Kind.Inference
       Coal.TypeSystem.Substitution
@@ -314,7 +323,7 @@ test-suite coal-test
   main-is: Spec.hs
   other-modules:
       Coal.Compiler.BuildSpec
-      Coal.Compiler.PatternAnomaliesSpec
+      Coal.Compiler.PatternMatching.AnomalyDetectionSpec
       Coal.Language.TypeSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec

@@ -80,7 +80,6 @@ compileEnvelope =
 
 compileEnvelopeClause :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a) t -> CompiledClause a t
 compileEnvelopeClause (EnvelopeClause (Label t name) ls e) =
-  -- TODO
   ECompiledClause mempty (Label (folded t ls) name :| ls) (compileEnvelope e)
 
 clauseList :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a) t] -> NonEmpty (CompiledClause a t)

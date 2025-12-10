@@ -146,8 +146,8 @@ instance Transformable Expression where
         EFFICall a ll
           <$> traverse (rewrite name f) es
           <*> rewrite name f e
-      _ ->
-        error "TODO"
+      expr@ETraitDictionary{} ->
+        pure expr
 
 {-# INLINE isNotBoundIn #-}
 isNotBoundIn :: (BoundVars b) => Name -> b -> Bool
@@ -163,4 +163,4 @@ replaceMultipleWith :: (Ord t, Data a, Data t) => [(Name, Expression a t)] -> Ex
 replaceMultipleWith = flip $ foldr (uncurry replaceWith)
 
 rename :: (Ord t, Data a, Data t) => Name -> Name -> Expression a t -> Expression a t
-rename old name = replace old var where var a t = EVariable a (Label t name)
+rename old new = replace old var where var a t = EVariable a (Label t new)

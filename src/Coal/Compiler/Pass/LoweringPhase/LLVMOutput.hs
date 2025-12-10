@@ -33,11 +33,7 @@ import System.IO.Temp (withSystemTempDirectory)
 import System.Process (createProcess, cwd, proc, waitForProcess)
 
 passLLVMOutput :: (MonadIO m) => Pass Metadata m [(Name, [IRConstruct [IRLine]])] ()
-passLLVMOutput =
-  Pass
-    { passName = "LLVMOutput"
-    , runPass = pass
-    }
+passLLVMOutput = Pass{runPass = pass}
 
 pass :: (MonadIO m) => [(Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m ()
 pass ir = do

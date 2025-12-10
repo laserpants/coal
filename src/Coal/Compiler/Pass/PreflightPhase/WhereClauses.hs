@@ -2,14 +2,18 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Transform.WhereClauses (expandWhereClausesModule) where
+module Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses) where
 
 import Coal.AST.Transform
 import Coal.Compiler.Journal
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language.Module
 import Data.Data (Data)
 import Extras (Name)
+
+passWhereClauses :: (Monad m, Data a, Data t, Ord t) => Pass a m (Module a k t) (Module a k t)
+passWhereClauses = Pass{runPass = expandWhereClausesModule}
 
 liftWhereClause :: (Monad m) => Name -> Definition a k t -> CompilerT a m (Definition a k t)
 liftWhereClause name =

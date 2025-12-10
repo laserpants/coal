@@ -10,7 +10,7 @@ import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
-import Coal.TypeSystem.Constraint.Generation.Internal (ConstraintsGenError (..), TypeAnnotationError (..))
+import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError (..), TypeAnnotationError (..))
 import Data.Data (Data)
 import Text.Megaparsec (SourcePos (..), mkPos)
 
@@ -92,7 +92,6 @@ instance HasMetadata (Pattern Metadata t) where
 instance HasMetadata (InferenceRule k Metadata) where
   getMetadata =
     \case
-      InferenceRulePlaceholder _ -> Metadata defaultSourcePos defaultSourcePos -- TODO error "Not implemented"
       RuleAnnotation a _ _ -> a
       RuleApplication a _ _ -> a
       RuleIfCondition a _ -> a
@@ -108,10 +107,25 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleTopLevelConstant a -> a
       RuleTypeConstraint a _ _ _ -> a
       RuleDataConstructor a _ _ _ -> a
-      RuleCodataRecord a _ _ -> a
-      RuleUnfoldEquality a _ _ -> a
+      RuleCodataRecordExplicit a _ _ -> a
+      RuleCodataRecordEquality a _ _ -> a
+      RuleUnfoldEquality a _ _ _ -> a
       RuleUnfoldExplicit a _ _ -> a
       RuleEntrypoint a _ -> a
+      RuleTuple a _ _ -> a
+      RuleListLiteral a _ -> a
+      RuleListConstructor a _ _ -> a
+      RuleSelectEquality a _ _ -> a
+      RuleRecordEquality a _ _ -> a
+      RuleAssumption a _ _ -> a
+      RuleAsConstraint a -> a
+      RuleRecordField a _ _ -> a
+      RuleRecordLacks a _ _ -> a
+      RuleTailRow a _ _ -> a
+      RuleFoldType a -> a
+      RuleOrConstraint a _ -> a
+      RuleTraitInstance a _ _ -> a
+      RuleAssumptionExplicit a _ _ -> a
 
 instance HasMetadata (ConstraintsGenError Metadata) where
   getMetadata =

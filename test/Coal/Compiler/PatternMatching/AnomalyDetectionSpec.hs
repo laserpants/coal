@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec) where
+module Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
@@ -8,7 +8,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Environment
-import Coal.Compiler.PatternAnomalies
+import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
 import Coal.Language
 import Control.Monad.Identity (runIdentity)

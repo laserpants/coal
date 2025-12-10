@@ -1,11 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE StrictData #-}
+{-# LANGUAGE TypeFamilies #-}
 
-module Coal.Compiler.TypeInference (typeDefinitionsC) where
+module Coal.Compiler.TypeInference (typeDefinitionsC, toIndexedType, toIndexedScheme) where
 
 import Coal.AST.Type.Parameterized
 import Coal.Common.Environment (Environment (..))
@@ -33,25 +34,119 @@ import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Extras (Dictionary, Name)
 
+class GenerateConstraints a o where
+  generateConstraints :: (Monad m, Data a, Show a) => o -> CompilerT a m ()
+
+instance GenerateConstraints a (Expression a IndexedType) where
+  generateConstraints expr = do
+    (ms1, cs1) <- generateExpressionConstraints expr
+    (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
+    sub <- gets compilerSubstitution
+    insertAssumptionsC (apply sub ms2)
+    insertConstraintsC (cs1 <> cs2)
+
+instance GenerateConstraints a (FunctionDefinition a IndexedType) where
+  generateConstraints (FunctionDefinition loc _ (With _ t) ps e) = do
+    insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
+    t1 <- supplied (TVariable . TypeIndex KType)
+    generateConstraints $
+      ELet
+        loc
+        (BFunction loc placeholder ps e :| [])
+        (EVariable loc (Label t1 placeholder))
+   where
+    placeholder = "###.function"
+
+instance GenerateConstraints a (ConstantDefinition a IndexedType) where
+  generateConstraints (ConstantDefinition loc _ (With _ t) e) = do
+    insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
+    generateConstraints $
+      ELet
+        loc
+        (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
+        (EVariable loc (Label t placeholder))
+   where
+    placeholder = "###.constant"
+
+instance GenerateConstraints a (Definition a Kind IndexedType) where
+  generateConstraints =
+    \case
+      DFunction _ _ (f@(FunctionDefinition loc (Just (With _ t)) (With _ t1) _ _) :| _) _ -> do
+        generateConstraints f
+        r <- runConstraintsGen (instantiateAnnotation loc t)
+        case fst3 r of
+          Left err ->
+            compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+          Right t2 ->
+            insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+      DConstant _ _ c@(ConstantDefinition loc (Just (With _ t)) (With _ t1) _) _ -> do
+        generateConstraints c
+        r <- runConstraintsGen (instantiateAnnotation loc t)
+        case fst3 r of
+          Left err ->
+            compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+          Right t2 ->
+            insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+      DFunction _ _ (f :| _) _ ->
+        void (generateConstraints f)
+      DConstant _ _ c _ ->
+        void (generateConstraints c)
+      DFold loc _ (FoldDefinition (With _ t) _ (Just e)) -> do
+        generateConstraints e
+        (r, _, _) <- runConstraintsGen (instantiateAnnotation loc t)
+        case r of
+          Left err ->
+            compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+          Right t2 -> do
+            insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
+       where
+        t1 = typeOf e
+      DUnfold loc _ (UnfoldDefinition (With _ t) ps d (Just e)) -> do
+        generateConstraints e
+        (r, _, _) <- runConstraintsGen (instantiateAnnotation loc t)
+        case r of
+          Left err ->
+            compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
+          Right t2 -> do
+            let t3 = foldTypeOf t2 ps
+                fields = Map.toList d
+            insertConstraintsC [Equality (RuleAnnotation loc t1 t3) [t1, t3]]
+            cs <- concatForM fields $
+              \(name, elem1) -> do
+                env <- asks compilerCodataAccessorEnvironment
+                case Environment.lookup (Text.replace "@" "" name) env of
+                  Just (CodataAccessorEntry _ _ CodataAccessor{..}) -> do
+                    if "@" `Text.isPrefixOf` name
+                      then do
+                        let tl = typeOf (NonEmpty.head ps)
+                            tr = typeOf elem1
+                        pure [Equality (RuleUnfoldEquality loc name tl tr) [tl, tr]]
+                      else do
+                        let tl = t2 `TArrow` typeOf elem1
+                        pure [Explicit (RuleUnfoldExplicit loc tl codataAccessorScheme) tl codataAccessorScheme]
+                  Nothing ->
+                    pure []
+            if length cs == length fields
+              then insertConstraintsC cs
+              else compilerReportConstraintsGenErrors [ECodataFieldMismatch loc]
+       where
+        t1 = typeOf e
+      _ ->
+        error "Not implemented"
+
 type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
 
-runConstraintsGenC :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
-runConstraintsGenC stack = do
+runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
+runConstraintsGen stack = do
   sup <- gets compilerSupply
   build <- getCurrentBuildC
-  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (context build) stack
+  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (emptyConstraintsGenContext{constraintsGenContextModules = build}) stack
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
- where
-  context build =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = build
-      }
 
-generateConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
-generateConstraintsC e = do
-  (assumptions, params, result) <- runConstraintsGenC (emitConstraints e)
+generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
+generateExpressionConstraints e = do
+  (assumptions, params, result) <- runConstraintsGen (emitConstraints e)
   let (errors, constraints) = partitionEithers result
   compilerReportConstraintsGenErrors errors
   compilerSetTypeAnnotationParams params
@@ -78,117 +173,6 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
-compileConstraintsC :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ()
-compileConstraintsC expr = do
-  (ms1, cs1) <- generateConstraintsC expr
-  (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
-  sub <- gets compilerSubstitution
-  insertAssumptionsC (apply sub ms2)
-  insertConstraintsC (cs1 <> cs2)
-
-compileFunctionC :: (Monad m, Data a, Show a) => FunctionDefinition a IndexedType -> CompilerT a m IndexedType
-compileFunctionC (FunctionDefinition loc _ (With _ t) ps e) = do
-  insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
-  t1 <- supplied (TVariable . TypeIndex KType)
-  compileConstraintsC $
-    ELet
-      loc
-      (BFunction loc placeholder ps e :| [])
-      (EVariable loc (Label t1 placeholder))
-  pure t
- where
-  placeholder = "###.function"
-
-compileConstantC :: (Monad m, Data a, Show a) => ConstantDefinition a IndexedType -> CompilerT a m IndexedType
-compileConstantC (ConstantDefinition loc _ (With _ t) e) = do
-  insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
-  compileConstraintsC $
-    ELet
-      loc
-      (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
-      (EVariable loc (Label t placeholder))
-  pure t
- where
-  placeholder = "###.constant"
-
-compileDefinitionC :: (Monad m, Data a, Show a) => Definition a k IndexedType -> CompilerT a m ()
-compileDefinitionC =
-  \case
-    DFunction _ _ (f@(FunctionDefinition loc (Just (With _ t)) _ _ _) :| _) _ -> do
-      t1 <- compileFunctionC f
-      r <- runConstraintsGenC (instantiateAnnotation loc t)
-      case fst3 r of
-        Left err ->
-          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-        Right t2 ->
-          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DConstant _ _ c@(ConstantDefinition loc (Just (With _ t)) _ _) _ -> do
-      t1 <- compileConstantC c
-      r <- runConstraintsGenC (instantiateAnnotation loc t)
-      case fst3 r of
-        Left err ->
-          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-        Right t2 ->
-          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    DFunction _ _ (f :| _) _ ->
-      void (compileFunctionC f)
-    DConstant _ _ c _ ->
-      void (compileConstantC c)
-    DFold loc _ (FoldDefinition (With _ t) _ (Just e)) -> do
-      compileConstraintsC e
-      let t1 = typeOf e
-      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-      case r of
-        Left err ->
-          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-        Right t2 -> do
-          insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-    --      t1 <- supplied (TVariable . TypeIndex KType)
-    --      t2 <- supplied (TVariable . TypeIndex KType)
-    --      compileConstraintsC $
-    --        ELambda
-    --          loc
-    --          (PVariable undefined (Label t1 "#.a") :| [])
-    --          (
-    --            EMatch
-    --              loc
-    --              t2
-    --              (EVariable undefined (Label t1 "#.a"))
-    --              cs
-    --          )
-    DUnfold loc _ (UnfoldDefinition (With _ t) ps d (Just e)) -> do
-      compileConstraintsC e
-      let t1 = typeOf e
-      (r, _, _) <- runConstraintsGenC (instantiateAnnotation loc t)
-      case r of
-        Left err ->
-          compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-        Right t2 -> do
-          let t3 = foldTypeOf t2 ps
-              fields = Map.toList d
-          insertConstraintsC [Equality (RuleAnnotation loc t1 t3) [t1, t3]]
-
-          cs <- concatForM fields $
-            \(name, elem1) -> do
-              env <- asks compilerCodataAccessorEnvironment
-              case Environment.lookup (Text.replace "@" "" name) env of
-                Just (CodataAccessorEntry _ _ CodataAccessor{..}) -> do
-                  if "@" `Text.isPrefixOf` name
-                    then do
-                      let tl = typeOf (NonEmpty.head ps)
-                          tr = typeOf elem1
-                      pure [Equality (RuleUnfoldEquality loc tl tr) [tl, tr]]
-                    else do
-                      let tl = t2 `TArrow` typeOf elem1
-                      pure [Explicit (RuleUnfoldExplicit loc tl codataAccessorScheme) tl codataAccessorScheme]
-                Nothing ->
-                  pure []
-          if length cs == length fields
-            then insertConstraintsC cs
-            else compilerReportConstraintsGenErrors [ECodataFieldMismatch loc]
-    _ ->
-      error "Not implemented"
-
 solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveC = do
   constraints <- gets compilerConstraints
@@ -207,34 +191,24 @@ typeDefinitionsC ds = do
   Environment env <- gets compilerNameStore
   insertConstraintsC $ do
     (n1, s) <- Map.toList env
-    Assumption _ n2 t <- ams
-    [Explicit (InferenceRulePlaceholder "typeDefinitionsC") (apply sub t) s | n1 == n2]
+    Assumption loc n2 t <- ams
+    let t1 = apply sub t
+    [Explicit (RuleAssumptionExplicit loc t1 s) t1 s | n1 == n2]
   sub1 <- solveC
   pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)
 
 typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m ()
 typeDefinitionC =
   \case
-    DImport{} ->
-      pure ()
-    DQualifiedImport{} ->
-      pure ()
-    DTypeAlias{} ->
-      pure ()
-    DType{} ->
-      pure ()
-    DCotype{} ->
-      pure ()
     DTrait _ name def -> do
       kenv <- asks compilerTypeConstructorEnvironment
       let (TraitDefinition _ (Parameter k q) ds) = inferTraitKinds kenv def
-
       forM_ ds $
         \(n, Forall _ _ s) -> do
           env <- asks compilerTypeConstructorEnvironment
           let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
           insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
-    DInstance _ trait (InstanceDefinition _ t0 ds) -> do
+    DInstance loc trait (InstanceDefinition _ t0 ds) -> do
       env <- asks compilerTraitEnvironment
       kinds <- asks compilerTypeConstructorEnvironment
       case Environment.lookup trait env of
@@ -245,27 +219,38 @@ typeDefinitionC =
             \d -> do
               case Environment.lookup (definitionName d) traitInfoEntries of
                 Nothing ->
-                  error ("Missing implementation: " <> Text.unpack (definitionName d))
+                  error ("Missing method: " <> Text.unpack (definitionName d))
                 Just s0 -> do
                   t1 <- instantiateVarsC t0
-                  let s1 = instantiateTemplateC (TypeIndex k 0) t1 (toIndexedScheme kinds p s0)
-                  insertConstraintsC [Explicit (InferenceRulePlaceholder "typeDefinitionC") (typeOf d) s1]
-                  compileDefinitionC d
+                  let s1 = instantiateTemplate (TypeIndex k 0) t1 (toIndexedScheme kinds p s0)
+                  insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s1) (typeOf d) s1]
+                  generateConstraints d
     d@(DFunction loc name (FunctionDefinition _ _ (With _ t) ps _ :| _) _) -> do
       checkIfNameExists loc name
       checkMain loc t ps name
-      compileDefinitionC d
+      generateConstraints d
       sub <- solveC
-      defineC name (typeOf (apply sub d))
+      define name (typeOf (apply sub d))
     d@(DConstant loc name _ _) -> do
       checkIfNameExists loc name
-      compileDefinitionC d
+      generateConstraints d
       sub <- solveC
-      defineC name (typeOf (apply sub d))
+      define name (typeOf (apply sub d))
+    DImport{} -> pure ()
+    DQualifiedImport{} -> pure ()
+    DTypeAlias{} -> pure ()
+    DType{} -> pure ()
+    DCotype{} -> pure ()
     d -> do
-      compileDefinitionC d
+      generateConstraints d
       sub <- solveC
-      defineC (definitionName d) (typeOf (apply sub d))
+      define (definitionName d) (typeOf (apply sub d))
+
+toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> IndexedScheme
+toIndexedScheme env p (Forall _ _ t) = scheme [] (toIndexedType env p t)
+
+toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter k -> IndexedType
+toIndexedType env (Parameter k n) t = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
 
 checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a IndexedType) -> Name -> CompilerT a m ()
 checkMain loc t ps name = do
@@ -288,15 +273,15 @@ checkIfNameExists loc name = do
     tellErrors [NameAlreadyDefined name (ErrorLocation (principalPath path) loc)]
     throwError PreflightFailure
 
-instantiateTemplateC :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
-instantiateTemplateC (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
+instantiateTemplate :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
+instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
 instantiateVarsC :: (Monad m) => Type Parameter () -> CompilerT a m IndexedType
 instantiateVarsC t = do
   env <- asks compilerTypeConstructorEnvironment
   instantiateVars [] env t
 
-defineC :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
-defineC name t = insertNameC name (Forall (typeIndexesIn s) [] s)
+define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
+define name t = insertNameC name (Forall (typeIndexesIn s) [] s)
  where
   s = normalizeTypeIndexes t

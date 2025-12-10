@@ -4,9 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (
-  passMainEntrypointRule,
-) where
+module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointRule) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
@@ -19,18 +17,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
 passMainEntrypointRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
-passMainEntrypointRule =
-  mapPass $
-    Pass
-      { passName = "MainEntrypointRule"
-      , runPass = pass
-      }
-
-pass :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
-pass m@(Module path _ _) = do
-  setCompilerCurrentModuleC path
-  detectMainEntrypoint m
-  pure m
+passMainEntrypointRule = mapPass $ Pass{runPass = withCurrentModuleC_ detectMainEntrypoint}
 
 class RuleContext e where
   detectMainEntrypoint :: (Monad m) => e -> CompilerT Metadata m ()

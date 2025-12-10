@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
+module Coal.TypeSystem.Constraint.Generation.Annotation (
   TypeAnnotationError,
   instantiateAnnotation,
   checkTypeAnnotationParameters,
@@ -13,7 +13,8 @@ module Coal.TypeSystem.Constraint.Generation.TypeAnnotation (
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (CotypeConstructorEntry (..), ModuleBuild (..), TypeConstructorEntry (..))
 import Coal.Language
-import Coal.TypeSystem.Constraint.Generation.Internal
+import Coal.TypeSystem.Constraint.Generation.Stack
+import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
 import Coal.TypeSystem.Substitution (Substitution (..))
 import Coal.Utils (lexOrderRank)
 import Control.Arrow ((>>>))
@@ -28,10 +29,8 @@ import Extras (Dictionary, Name, concatMapM, forM_)
 
 type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedType
 
-{-# INLINE lookupTypeConstructor #-}
 lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = do
-  -- TODO: DRY
   ModuleBuild{..} <- asks constraintsGenContextModules
   case Environment.lookup name moduleTypeConstructors of
     Nothing ->
@@ -50,7 +49,9 @@ instantiateAnnotation ::
   m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 instantiateAnnotation loc a = do
   (t, s) <- runTypeAnnotation loc (instantiate a)
-  forM_ (Map.toList s) $ \(n, k) -> modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
+  forM_ (Map.toList s) $
+    \(n, k) ->
+      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
   return t
 
 type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
@@ -64,9 +65,9 @@ instantiateTypeApplication con@(TConstructor _ name) ts
       applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
         <$> traverse instantiate ts
 instantiateTypeApplication (TVariable (Parameter _ v)) ts = do
-  ts1 <- traverse instantiate ts
-  t1 <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts1)) v
-  pure (applyTypeArgs KType t1 ts1)
+  ts' <- traverse instantiate ts
+  t' <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts')) v
+  pure (applyTypeArgs KType t' ts')
 instantiateTypeApplication t ts =
   applyTypeArgs KType <$> instantiate t <*> traverse instantiate ts
 

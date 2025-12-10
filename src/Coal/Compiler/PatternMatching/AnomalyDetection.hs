@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.PatternAnomalies (
+module Coal.Compiler.PatternMatching.AnomalyDetection (
   Pat (..),
   exhaustive,
   translatePattern,

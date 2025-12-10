@@ -6,7 +6,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Kernel.Compiler (compile, compileModules) where
+module Coal.Kernel.Compiler (compile, compileModules, KernelExpr) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
@@ -22,6 +22,8 @@ import Control.Monad.State (gets)
 import Data.List (nub)
 import qualified Data.Text as Text
 import Extras (Name, forM, isConstructor, (<$$>), (||.))
+
+type KernelExpr = Expr Type
 
 corePass :: Pass ObjectList ObjectList
 corePass =
@@ -77,7 +79,7 @@ compileClosureCode = do
   callDefinitions <- irCalls
   pure (support <> closureDefinitions <> callDefinitions)
 
-compileModules :: [Module Type Name (Expr Type)] -> IO [(Name, [IRConstruct [IRLine]])]
+compileModules :: [Module Type Name KernelExpr] -> IO [(Name, [IRConstruct [IRLine]])]
 compileModules modules =
   evalPipeline $ do
     mods <- forM modules $
@@ -109,17 +111,17 @@ compileModules modules =
   collectConstructors :: [Name] -> Pipeline [(Name, Int)]
   collectConstructors names = gets (Environment.lookupAll names . pipelineConstructors)
 
-  objectSignature :: Object Type (Expr Type) -> (Name, Type)
+  objectSignature :: Object Type KernelExpr -> (Name, Type)
   objectSignature obj = (objectName obj, typeOf obj)
 
-  compileModule :: [(Name, Int)] -> Module Type (Name, Type) (Expr Type) -> Pipeline [IRConstruct [IRLine]]
+  compileModule :: [(Name, Int)] -> Module Type (Name, Type) KernelExpr -> Pipeline [IRConstruct [IRLine]]
   compileModule ctors Module{..} = do
     names <- gets pipelineIRTypes
     let external = toExternal names <$> moduleImports
     compile (Environment.fromList ctors) (external <> moduleObjects)
     gets pipelineCode
 
-  toExternal :: Environment IRType -> (Name, Type) -> Object Type (Expr Type)
+  toExternal :: Environment IRType -> (Name, Type) -> Object Type KernelExpr
   toExternal env (name, t) =
     case Environment.lookup name env of
       Nothing ->

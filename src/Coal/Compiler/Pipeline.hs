@@ -5,26 +5,31 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pipeline (pipeline, compile, compileWithCFiles, prettyError) where
+module Coal.Compiler.Pipeline (
+  pipeline,
+  compile,
+  compileWithCFiles,
+  prettyError,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Config (CompilerConfig (..))
+import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.MainPhase (mainPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
-import Coal.Compiler.Pass.ParsingPhase.Parsing (embedded)
 import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.Internal
+import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except (MonadIO, forM_)
 import Data.Text (Text)
@@ -44,36 +49,37 @@ pipeline =
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
-  if configSilent config
-    then go Nothing
-    else do
-      displayConsoleRegions $ do
-        pb <-
-          newProgressBar
-            def
-              { pgTotal = (fromIntegral (length embedded + length files) * 73) + 28
-              , pgWidth = 100
-              , pgFormat = "Compiling [:bar] :percent"
-              }
-        go (Just pb)
+  (e, CompilerState{..}, es) <-
+    if configSilent config
+      then go Nothing
+      else do
+        displayConsoleRegions $ do
+          pb <-
+            newProgressBar
+              def
+                { pgTotal = (fromIntegral (length embedded + length files) * 73) + 28
+                , pgWidth = 100
+                , pgFormat = "Compiling [:bar]"
+                }
+          go (Just pb)
+  forM_ es $
+    \err -> do
+      case errorLocation err of
+        Just (ErrorLocation name _) ->
+          putStrLn ("\nIn module '" <> Text.unpack name <> "':\n")
+        Nothing ->
+          pure ()
+      Text.putStrLn (prettyError compilerVerbatimSource err)
+  case e of
+    Left e1 ->
+      print e1
+    Right{} -> do
+      pure ()
  where
   go progressBar = do
-    (e, CompilerState{..}, es) <- runCompilerT (emptyCompilerEnvironment progressBar) $ do
+    runCompilerT (emptyCompilerEnvironment progressBar) $ do
       setConfigC config{configCFiles = configCFiles config <> cFiles}
       runPass pipeline files
-    forM_ es $
-      \err -> do
-        case errorLocation err of
-          Just (ErrorLocation name _) ->
-            putStrLn ("In module '" <> Text.unpack name <> "':\n")
-          Nothing ->
-            pure ()
-        Text.putStrLn (prettyError compilerVerbatimSource err)
-    case e of
-      Left e1 ->
-        print e1
-      Right{} -> do
-        pure ()
 
 compile :: CompilerConfig -> [FilePath] -> IO ()
 compile config files = compileWithCFiles config files []
@@ -82,48 +88,71 @@ prettyRule :: (Show a) => InferenceRule Kind a -> Text
 prettyRule =
   \case
     RuleAnnotation _ t1 _ ->
-      "Type annotation doesn't match inferred type, namely " <> prettyType u1
+      "Type annotation doesn't match inferred type: " <> prettyType u1
      where
       u1 = normalizeTypeIndexes t1
     RuleLetImplicit _ _ t1 t2 ->
-      "Cannot unify " <> prettyType u1 <> " with " <> prettyType u2
+      "Cannot unify " <> prettyType u1 <> " with " <> prettyType u2 <> "."
      where
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
     RuleTypeConstraint _ name t1 s ->
-      "Cannot unify " <> "'" <> name <> "' : " <> prettyType s <> " with expected type " <> prettyType u1
+      "Cannot unify " <> "'" <> name <> "' " <> prettyType s <> " with expected type " <> prettyType u1 <> "."
      where
       u1 = normalizeTypeIndexes t1
     RuleUnfoldExplicit _ t1 s ->
-      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1
+      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1 <> "."
      where
       u1 = normalizeTypeIndexes t1
-    RuleCodataRecord _ t1 s ->
-      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1
+    RuleCodataRecordExplicit _ t1 s ->
+      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1 <> "."
      where
       u1 = normalizeTypeIndexes t1
+    RuleTuple _ t1 t2 ->
+      "Cannot unify tuple type " <> prettyType u1 <> " with " <> prettyType u2 <> "."
+     where
+      u1 = normalizeTypeIndexes t1
+      u2 = normalizeTypeIndexes t2
+    RuleListLiteral _ _ ->
+      "List elements must all have the same type."
+    RuleUnfoldEquality _ field t1 t2 ->
+      "In this unfold expression, the field "
+        <> field
+        <> " is expected have type "
+        <> prettyType u1
+        <> ", but was given type "
+        <> prettyType u2
+        <> "."
+     where
+      u1 = normalizeTypeIndexes t1
+      u2 = normalizeTypeIndexes t2
+    RuleRecordEquality _ t1 t2 ->
+      "Expected a record of the form " <> prettyType u1 <> ", but got " <> prettyType u2 <> "."
+     where
+      u1 = normalizeTypeIndexes t1
+      u2 = normalizeTypeIndexes t2
+    RuleAssumption _ t1 t2 ->
+      "Cannot unify " <> prettyType u1 <> " with " <> prettyType u2 <> "."
+     where
+      u1 = normalizeTypeIndexes t1
+      u2 = normalizeTypeIndexes t2
     e ->
       Text.pack ("TODO: " <> show e)
 
--- TODO: rename
 prettyType :: (Pretty t) => t -> Text
-prettyType p = "{" <> prettyType_ p <> "}"
-
--- TODO: rename
-prettyType_ :: (Pretty t) => t -> Text
-prettyType_ p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
+prettyType p = "`" <> (renderStrict . layoutPretty defaultLayoutOptions $ pretty p) <> "`"
 
 prettyConstraintsGenError :: (Show a) => ConstraintsGenError a -> Text
 prettyConstraintsGenError =
   \case
     EIllFormedTypeAnnotation (EAnnotationNonDistinctParameter _ name) ->
-      "Type annotation is too general: error in the parameter '" <> name <> "'"
+      "Type annotation is too general: error in the parameter '" <> name <> "'."
     ECodataFieldMismatch _ ->
-      "Codata type field mismatch"
+      "Codata type field mismatch."
     EFoldPatternInRegularMatch _ ->
-      "Fold patterns are not allowed in regular match clauses"
+      "Fold patterns are not supported in regular match expression clauses. Perhaps you intended to use a 'fold'?"
     ENoDataConstructor _ name ->
-      "Data constructor '" <> name <> "' not in scope"
+      "Data constructor '" <> name <> "' not in scope."
     e ->
       Text.pack ("TODO:" <> show e)
 
@@ -132,8 +161,8 @@ prettyError env =
   \case
     ParserError file err ->
       "In file \"" <> Text.pack file <> "\":\n\n" <> Text.pack (errorBundlePretty err)
-    InvalidModuleName file path ->
-      "The module name '" <> path <> "' does not match the file name \"" <> Text.pack file
+    BadModuleName file path ->
+      "The module name '" <> path <> "' doesn't match the file name '" <> Text.pack file <> "'."
     BadFilename _ err ->
       Text.pack err
     MisplacedImportStatement erl -> do
@@ -172,17 +201,16 @@ prettyError env =
       errorMessage ["No field '" <> xsor <> "' for codata type '" <> name <> "' in scope"] env erl
     TraitNotInScope trait erl ->
       errorMessage ["No trait '" <> trait <> "' in scope"] env erl
-    MissingTraitDefinitioninition name trait erl ->
+    MissingTraitDefinition name trait erl ->
       errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
-    UnexpectedTraitDefinitioninition name trait erl ->
-      errorMessage ["The trait '" <> trait <> "' doesn't have an entry '" <> name <> "'"] env erl
+    UnexpectedTraitDefinition name trait erl ->
+      errorMessage ["The trait '" <> trait <> "' doesn't have a method '" <> name <> "'"] env erl
     MissingRequiredInstance name t erl ->
-      errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType_ t <> ">'"] env erl
+      errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType t <> ">'"] env erl
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
-errorMessage msg env (ErrorLocation path loc) =
-  case Environment.lookup path env of
-    Just src ->
-      prettyErrorMessage msg src loc
-    _ ->
-      error "Implementation error"
+errorMessage msgs env (ErrorLocation path loc) =
+  maybe
+    (error "Implementation error")
+    (prettyErrorMessage (("\n• " <>) <$> msgs) loc)
+    (Environment.lookup path env)

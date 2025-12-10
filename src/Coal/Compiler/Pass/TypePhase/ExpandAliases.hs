@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -21,43 +20,39 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Dictionary, Name)
 
 passExpandAliases :: (Monad m, Data a) => Pass a m (Module a k ()) (Module a k ())
-passExpandAliases =
-  Pass
-    { passName = "ExpandAliases"
-    , runPass = pass
-    }
+passExpandAliases = Pass{runPass = pass}
 
 pass :: (Monad m, Data a) => Module a k () -> CompilerT a m (Module a k ())
 pass = expandAliases
 
-class TransformContext c where
+class AliasContext c where
   expandAliases :: (Monad m) => c -> CompilerT a m c
 
-instance TransformContext () where
+instance AliasContext () where
   expandAliases _ = pure ()
 
-instance (TransformContext c) => TransformContext [c] where
+instance (AliasContext c) => AliasContext [c] where
   expandAliases = traverse expandAliases
 
-instance (TransformContext c) => TransformContext (Maybe c) where
+instance (AliasContext c) => AliasContext (Maybe c) where
   expandAliases = traverse expandAliases
 
-instance (TransformContext c) => TransformContext (Dictionary c) where
+instance (AliasContext c) => AliasContext (Dictionary c) where
   expandAliases = traverse expandAliases
 
-instance (TransformContext c) => TransformContext (NonEmpty c) where
+instance (AliasContext c) => AliasContext (NonEmpty c) where
   expandAliases = traverse expandAliases
 
-instance (TransformContext t) => TransformContext (Trait t) where
+instance (AliasContext t) => AliasContext (Trait t) where
   expandAliases = traverse expandAliases
 
-instance (TransformContext t) => TransformContext (With t) where
+instance (AliasContext t) => AliasContext (With t) where
   expandAliases = traverse expandAliases
 
-instance (TransformContext t) => TransformContext (Row o k t) where
+instance (AliasContext t) => AliasContext (Row o k t) where
   expandAliases = traverse expandAliases
 
-instance (TransformContext t, Data a, Data t) => TransformContext (Pattern a t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (Pattern a t) where
   expandAliases =
     transformM $
       \case
@@ -66,7 +61,7 @@ instance (TransformContext t, Data a, Data t) => TransformContext (Pattern a t) 
         p ->
           pure p
 
-instance (TransformContext t, Data t, Data a) => TransformContext (Expression a t) where
+instance (AliasContext t, Data t, Data a) => AliasContext (Expression a t) where
   expandAliases =
     transformM $
       \case
@@ -75,13 +70,13 @@ instance (TransformContext t, Data t, Data a) => TransformContext (Expression a 
         e ->
           pure e
 
-instance (TransformContext t, Data e, Data t) => TransformContext (Module e a t) where
+instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
   expandAliases =
     \case
       Module p ns o ->
         Module p ns <$> expandAliases o
 
-instance (TransformContext t, Data a, Data t) => TransformContext (FunctionDefinition a t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (FunctionDefinition a t) where
   expandAliases =
     \case
       FunctionDefinition a u w ps e ->
@@ -91,7 +86,7 @@ instance (TransformContext t, Data a, Data t) => TransformContext (FunctionDefin
           <*> expandAliases ps
           <*> expandAliases e
 
-instance (TransformContext t, Data a, Data t) => TransformContext (ConstantDefinition a t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (ConstantDefinition a t) where
   expandAliases =
     \case
       ConstantDefinition a u w e ->
@@ -100,7 +95,7 @@ instance (TransformContext t, Data a, Data t) => TransformContext (ConstantDefin
           <*> expandAliases w
           <*> expandAliases e
 
-instance (TransformContext t, Data a, Data t) => TransformContext (Definition a k t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) where
   expandAliases =
     \case
       DFunction loc name f fs ->
@@ -120,7 +115,7 @@ expandAliasesTypeApplication t (TConstructor _ name) ts =
 expandAliasesTypeApplication _ t ts =
   applyTypeArgs () <$> expandAliases t <*> expandAliases ts
 
-instance TransformContext ParameterizedType where
+instance AliasContext ParameterizedType where
   expandAliases =
     \case
       t@TApplication{} ->

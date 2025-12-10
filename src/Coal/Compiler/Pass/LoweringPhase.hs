@@ -25,11 +25,7 @@ import Extras (Name)
 type KernelModule = Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 
 generateDebugArtifacts :: (MonadIO m) => Text -> Pass a m KernelModule KernelModule
-generateDebugArtifacts ll =
-  Pass
-    { passName = "debug<" <> ll <> ">"
-    , runPass = run
-    }
+generateDebugArtifacts ll = Pass{runPass = run}
  where
   run m = do
     CompilerConfig{..} <- gets compilerConfig

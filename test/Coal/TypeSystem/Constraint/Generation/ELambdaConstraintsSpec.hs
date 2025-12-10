@@ -23,7 +23,7 @@ fixture1 =
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint1 =
   Equality
-    (InferenceRulePlaceholder "")
+    (RuleAssumption () (TVariable (TypeIndex KType 1)) (TVariable (TypeIndex KType 0)))
     [ TVariable (TypeIndex KType 1)
     , TVariable (TypeIndex KType 0)
     ]

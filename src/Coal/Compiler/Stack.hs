@@ -41,8 +41,11 @@ module Coal.Compiler.Stack (
   setConfigGenerateLLVMOutputC,
   setConfigC,
   insertModuleC,
+  insertCurrentModuleC,
   getCurrentBuildC,
   updateBuildC,
+  withCurrentModuleC_,
+  withCurrentModuleC,
 ) where
 
 import Coal.Common.Environment (Environment)
@@ -64,7 +67,7 @@ import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, gets, modify)
 import Control.Monad.Writer (MonadWriter)
 import Data.Text (Text)
-import Extras (Dictionary, Name)
+import Extras (Dictionary, Name, fromMaybe)
 
 type CompilerStack a m c = ExceptT CompilerFailureMode (RWST (CompilerEnvironment a) (CompilerJournal a) (CompilerState a) m) c
 
@@ -121,7 +124,7 @@ clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
 clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
 
 clearAssumptionsC :: (Monad m) => CompilerT a m ()
-clearAssumptionsC = modify (overCompilerAssumptions (const []))
+clearAssumptionsC = modify (overCompilerAssumptions (const mempty))
 
 clearNameStoreC :: (Monad m) => CompilerT a m ()
 clearNameStoreC = modify (overCompilerNameStore (const mempty))
@@ -144,11 +147,7 @@ setVerbatimSourceForC module_ = setVerbatimSourceC (modulePathName module_)
 getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
 getVerbatimSourceC name = do
   s <- gets compilerVerbatimSource
-  case Environment.lookup name s of
-    Nothing ->
-      error "Implementation error"
-    Just src ->
-      pure src
+  pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
 
 setCompilerCurrentModuleC :: (Monad m) => Path -> CompilerT a m ()
 setCompilerCurrentModuleC path = modify (overCompilerCurrentModule (const path))
@@ -168,15 +167,16 @@ setConfigC config = modify (overCompilerConfig (const config))
 insertModuleC :: (Monad m) => Name -> ModuleBuild a -> CompilerT a m ()
 insertModuleC name build = modify (overCompilerModules (Environment.insert name build))
 
+insertCurrentModuleC :: (Monad m) => ModuleBuild a -> CompilerT a m ()
+insertCurrentModuleC build = do
+  path <- gets (principalPath . compilerCurrentModule)
+  modify (overCompilerModules (Environment.insert path build))
+
 getCurrentBuildC :: (Monad m) => CompilerT a m (ModuleBuild a)
 getCurrentBuildC = do
   path <- gets (principalPath . compilerCurrentModule)
   modules <- gets compilerModules
-  case Environment.lookup path modules of
-    Nothing ->
-      error "Implementation error"
-    Just build ->
-      pure build
+  pure (fromMaybe (error "Implementation error") (Environment.lookup path modules))
 
 updateBuildC :: (Monad m) => (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
 updateBuildC f = do
@@ -184,3 +184,14 @@ updateBuildC f = do
   updatedBuild <- f build
   path <- gets (principalPath . compilerCurrentModule)
   modify (overCompilerModules (Environment.insert path updatedBuild))
+
+withCurrentModuleC :: (Monad m) => (Module a k t -> CompilerT a m (Module a k t)) -> Module a k t -> CompilerT a m (Module a k t)
+withCurrentModuleC f m@(Module p _ _) = do
+  setCompilerCurrentModuleC p
+  f m
+
+withCurrentModuleC_ :: (Monad m) => (Module a k t -> CompilerT a m ()) -> Module a k t -> CompilerT a m (Module a k t)
+withCurrentModuleC_ f m@(Module p _ _) = do
+  setCompilerCurrentModuleC p
+  f m
+  pure m

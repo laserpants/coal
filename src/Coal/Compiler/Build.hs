@@ -18,8 +18,6 @@ module Coal.Compiler.Build (
   addName,
   addExport,
   addTypeExport,
-  toIndexedScheme,
-  toIndexedType,
   insertInstance,
   insertTrait,
   insertCodataAccessor,
@@ -40,13 +38,11 @@ module Coal.Compiler.Build (
   setPath,
 ) where
 
-import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.NameEntry
 import Coal.Language
 import Coal.Language.Module (Path (..))
-import Control.Monad.State (evalState)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
@@ -171,31 +167,50 @@ insertInstance name it info ModuleBuild{..} =
   entries = fromMaybe mempty (Environment.lookup name moduleInstances)
 
 insertAlias :: Name -> AliasEntry a -> ModuleBuild a -> ModuleBuild a
-insertAlias name info ModuleBuild{..} = ModuleBuild{moduleAliases = Environment.insert name info moduleAliases, ..}
+insertAlias name info ModuleBuild{..} =
+  ModuleBuild
+    { moduleAliases = Environment.insert name info moduleAliases
+    , ..
+    }
 
 addName :: NameEntry -> ModuleBuild a -> ModuleBuild a
-addName info ModuleBuild{..} = ModuleBuild{moduleNames = info : moduleNames, ..}
+addName info ModuleBuild{..} =
+  ModuleBuild
+    { moduleNames = info : moduleNames
+    , ..
+    }
 
 addExport :: Name -> ModuleBuild a -> ModuleBuild a
-addExport name ModuleBuild{..} = ModuleBuild{moduleExports = Set.insert name moduleExports, ..}
+addExport name ModuleBuild{..} =
+  ModuleBuild
+    { moduleExports = Set.insert name moduleExports
+    , ..
+    }
 
 addTypeExport :: Name -> ModuleBuild a -> ModuleBuild a
-addTypeExport name ModuleBuild{..} = ModuleBuild{moduleTypeExports = Set.insert name moduleTypeExports, ..}
+addTypeExport name ModuleBuild{..} =
+  ModuleBuild
+    { moduleTypeExports = Set.insert name moduleTypeExports
+    , ..
+    }
 
 setExports :: [Name] -> ModuleBuild a -> ModuleBuild a
-setExports names ModuleBuild{..} = ModuleBuild{moduleExports = Set.fromList names, ..}
+setExports names ModuleBuild{..} =
+  ModuleBuild
+    { moduleExports = Set.fromList names
+    , ..
+    }
 
 setTypeExports :: [Name] -> ModuleBuild a -> ModuleBuild a
-setTypeExports names ModuleBuild{..} = ModuleBuild{moduleTypeExports = Set.fromList names, ..}
+setTypeExports names ModuleBuild{..} =
+  ModuleBuild
+    { moduleTypeExports = Set.fromList names
+    , ..
+    }
 
 setPath :: Path -> ModuleBuild a -> ModuleBuild a
-setPath path ModuleBuild{..} = ModuleBuild{modulePath = path, ..}
-
--- TODO
-toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> Scheme TypeIndex Kind IndexedType
-toIndexedScheme env p (Forall _ _ t) = scheme [] (toIndexedType env p t)
-
--- TODO: This does unnecessary work. The type here already has kind information
---  so we don't need to add this again
-toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter k -> IndexedType
-toIndexedType env (Parameter k n) t = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
+setPath path ModuleBuild{..} =
+  ModuleBuild
+    { modulePath = path
+    , ..
+    }

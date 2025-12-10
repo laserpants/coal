@@ -12,7 +12,7 @@ import Coal.Language (IndexedType, Kind (..), Trait (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
-import Coal.TypeSystem.Constraint.Generation.Internal (ConstraintsGenError)
+import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError)
 import Extras (Name)
 
 data ErrorLocation a = ErrorLocation Name a
@@ -20,7 +20,7 @@ data ErrorLocation a = ErrorLocation Name a
 
 data CompilerError a
   = ParserError FilePath ParserError
-  | InvalidModuleName FilePath Name
+  | BadModuleName FilePath Name
   | BadFilename FilePath String
   | MisplacedImportStatement (ErrorLocation a)
   | ModuleNotFound Name (ErrorLocation a)
@@ -40,8 +40,8 @@ data CompilerError a
   | NoDataConstructorForType Name Name Path (ErrorLocation a)
   | NoCodataAccessorForCotype Name Name Path (ErrorLocation a)
   | TraitNotInScope Name (ErrorLocation a)
-  | MissingTraitDefinitioninition Name Name (ErrorLocation a)
-  | UnexpectedTraitDefinitioninition Name Name (ErrorLocation a)
+  | MissingTraitDefinition Name Name (ErrorLocation a)
+  | UnexpectedTraitDefinition Name Name (ErrorLocation a)
   | MissingRequiredInstance Name IndexedType (ErrorLocation a)
   deriving (Show, Eq)
 
@@ -61,7 +61,7 @@ errorLocation =
   \case
     ParserError{} ->
       Nothing
-    InvalidModuleName{} ->
+    BadModuleName{} ->
       Nothing
     BadFilename{} ->
       Nothing
@@ -101,9 +101,9 @@ errorLocation =
       Just erl
     TraitNotInScope _ erl ->
       Just erl
-    MissingTraitDefinitioninition _ _ erl ->
+    MissingTraitDefinition _ _ erl ->
       Just erl
-    UnexpectedTraitDefinitioninition _ _ erl ->
+    UnexpectedTraitDefinition _ _ erl ->
       Just erl
     MissingRequiredInstance _ _ erl ->
       Just erl

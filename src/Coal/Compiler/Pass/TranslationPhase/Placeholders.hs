@@ -37,21 +37,16 @@ import Data.Text (isPrefixOf)
 import Extras (Dictionary, Name, forM_)
 
 passPlaceholders :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passPlaceholders =
-  Pass
-    { passName = "Placeholders"
-    , runPass = pass
-    }
+passPlaceholders = Pass{runPass = pass}
 
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass m@(Module p _ _) = do
-  setCompilerCurrentModuleC p
-  m1 <- overModuleDefinitionsM (traverse insertPlaceholders) m
-
-  names <- gets compilerNameStore
-  updateNames names
-
-  pure m1
+pass =
+  withCurrentModuleC $
+    \m -> do
+      m1 <- overModuleDefinitionsM (traverse insertPlaceholders) m
+      names <- gets compilerNameStore
+      updateNames names
+      pure m1
 
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 updateNames store =
@@ -104,7 +99,7 @@ insertPlaceholdersInDef trait =
     c@DConstant{} ->
       insertTypeInfo (instanceLabel trait (definitionName c)) =<< expandInLocalEnv c
     _ ->
-      error "TODO"
+      error "Not implemented"
 
 expandInLocalEnv :: (Monad m, TraitContext a b) => b -> CompilerT a m b
 expandInLocalEnv d = do
@@ -172,13 +167,6 @@ findFirstMatch (Trait name t) = do
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-mapEntriesM ::
-  (Monad m) =>
-  Dictionary IndexedScheme ->
-  ((Name, IndexedScheme) -> m (Name, Expression a IndexedType)) ->
-  m (Dictionary (Expression a IndexedType))
-mapEntriesM d f = Map.fromList <$> traverse f (Map.toList d)
-
 lookupTraitInstance :: (Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a IndexedType)))
 lookupTraitInstance loc trait@(Trait name _) = do
   found <- findFirstMatch trait
@@ -190,13 +178,12 @@ lookupTraitInstance loc trait@(Trait name _) = do
           tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
           throwError TraitError
         else pure Nothing
-    Just (t, a, b) -> do
-      d1 <- mapEntriesM b (uncurry (go t (Trait name a)))
-      Just <$> traverse expandTraits d1
+    Just (t, a, b) ->
+      Just <$> Map.traverseWithKey (go t (Trait name a)) b
  where
-  go t1 (Trait tn _) n (Forall _ ts t) = do
-    expr <- applyTraits loc (Label t (instanceLabel (Trait tn t1) n)) ts
-    pure (n, expr)
+  go t1 (Trait tn _) n (Forall _ ts t) =
+    applyTraits loc (Label t (instanceLabel (Trait tn t1) n)) ts
+      >>= expandTraits
 
 isConcrete :: Trait IndexedType -> Bool
 isConcrete (Trait _ TIntrinsic{}) = True
@@ -332,7 +319,12 @@ isNumericTrait :: Trait a -> Bool
 isNumericTrait (Trait "Numeric" _) = True
 isNumericTrait _ = False
 
-dictionaryLambda :: (Monoid a, HasType o k (Trait (Type o k))) => Trait (Type o k) -> [Trait (Type o k)] -> Expression a (Type o k) -> Expression a (Type o k)
+dictionaryLambda ::
+  (Monoid a, HasType o k (Trait (Type o k))) =>
+  Trait (Type o k) ->
+  [Trait (Type o k)] ->
+  Expression a (Type o k) ->
+  Expression a (Type o k)
 dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
  where
   dict t = PTraitDictionary mempty (typeOf t) t

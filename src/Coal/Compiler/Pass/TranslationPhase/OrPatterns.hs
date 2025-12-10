@@ -19,11 +19,7 @@ import Data.Semigroup (sconcat)
 import Extras (Map, traverseM)
 
 passOrPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passOrPatterns =
-  Pass
-    { passName = "OrPatterns"
-    , runPass = pass
-    }
+passOrPatterns = Pass{runPass = pass}
 
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass = transformBiM expandExpression

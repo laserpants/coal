@@ -17,6 +17,7 @@ import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
+import Coal.Compiler.TypeInference (toIndexedScheme, toIndexedType)
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Kind.Inference
@@ -156,7 +157,6 @@ nameExports :: [Export a] -> [Name]
 nameExports exports =
   flip concatMap exports $
     \case
-      -- TODO: Rename to ExprExport/ExprImport?
       ExportName _ name ->
         [name]
       ExportType _ _ names ->
@@ -173,7 +173,6 @@ typeExports exports =
       _ ->
         []
 
-{-# INLINE pick #-}
 pick :: (HasName e) => [Name] -> [e] -> [e]
 pick names = filter (\e -> nameOf e `Set.member` ns)
  where
@@ -448,7 +447,6 @@ collectTraits env =
 addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDefinition Kind -> StateT (ModuleBuild a) (CompilerT a m) ()
 addTraitEntries env trait (TraitDefinition _ p entries) =
   forM_ entries $
-    -- TODO
     \(name, Forall _ _ t) ->
       modify $
         addName (NFunction name $ scheme [Trait trait tvar] (toIndexedType env p t))
@@ -473,11 +471,11 @@ collectInstances kinds traits =
           unless (null extra && null missing) $ do
             forM_ missing $
               \name -> do
-                tellErrors [MissingTraitDefinitioninition name trait (ErrorLocation this loc)]
+                tellErrors [MissingTraitDefinition name trait (ErrorLocation this loc)]
                 throwError PreflightFailure
             forM_ extra $
               \name -> do
-                tellErrors [UnexpectedTraitDefinitioninition name trait (ErrorLocation this loc)]
+                tellErrors [UnexpectedTraitDefinition name trait (ErrorLocation this loc)]
                 throwError PreflightFailure
           modify $ insertInstance trait t1 (InstanceEntry loc q (toIndexedType kinds p q) env)
 
@@ -505,7 +503,6 @@ collectInstances kinds traits =
       ModuleBuild{..} <- importedModule loc path
       forM_ imports $
         \case
-          -- TODO: cleanup/DRY
           ImportType _ name _ ->
             forM_ (Environment.toList moduleInstances) $
               \(trait, is) -> do
@@ -531,7 +528,6 @@ collectImportedInstances =
       ModuleBuild{..} <- importedModule loc path
       concatForM imports $
         \case
-          -- TODO: cleanup/DRY
           ImportTrait _ name _ ->
             concatForM (Environment.toList moduleInstances) $
               \(trait, is) -> do

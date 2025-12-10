@@ -93,6 +93,5 @@ elems = Map.elems . envDictionary
 names :: Environment a -> [Name]
 names = Map.keys . envDictionary
 
-{-# INLINE union #-}
 union :: Environment a -> Environment a -> Environment a
 union (Environment e1) (Environment e2) = Environment (e1 `Map.union` e2)

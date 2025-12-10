@@ -8,8 +8,8 @@ import qualified Data.Text as Text
 import Text.Megaparsec
 import TextShow (showt)
 
-prettyErrorMessage :: (HasMetadata a) => [Text] -> Text -> a -> Text
-prettyErrorMessage msg src err =
+prettyErrorMessage :: (HasMetadata a) => [Text] -> a -> Text -> Text
+prettyErrorMessage msg err src =
   let spanLines = extractSpan src (locationStart meta) (locationEnd meta)
       locationLine = showt (unPos $ sourceLine (locationStart meta))
       locationCol = showt (unPos $ sourceColumn (locationStart meta))

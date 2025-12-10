@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 -- import Coal.Compiler.BuildSpec (buildSpec)
-import Coal.Compiler.PatternAnomaliesSpec (patternAnomaliesSpec)
+import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Language.TypeSpec
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Kernel.Spec (e2eKernelSpec)

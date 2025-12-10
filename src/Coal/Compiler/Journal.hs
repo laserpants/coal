@@ -90,4 +90,11 @@ listenErrors :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [CompilerErr
 listenErrors w = second compilerJournalErrors <$> listen w
 
 censorDictionaryTraits :: (MonadWriter (CompilerJournal a) m) => ([Trait IndexedType] -> [Trait IndexedType]) -> m b -> m b
-censorDictionaryTraits f = censor (\CompilerJournal{..} -> CompilerJournal{compilerJournalDictionaryTraits = f compilerJournalDictionaryTraits, ..})
+censorDictionaryTraits f =
+  censor $
+    \CompilerJournal{..} ->
+      CompilerJournal
+        { compilerJournalDictionaryTraits =
+            f compilerJournalDictionaryTraits
+        , ..
+        }

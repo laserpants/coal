@@ -7,7 +7,7 @@ import Coal.Compiler.Build (emptyModuleBuild)
 import Coal.Compiler.State
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.Internal
+import Coal.TypeSystem.Constraint.Generation.Stack
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 

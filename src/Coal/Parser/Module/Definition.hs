@@ -26,12 +26,12 @@ parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
   parseImport
     <|> try parseFunctionGroup
-    <|> parseFunctionDefinitioninition
+    <|> parseFunctionDefinition
     <|> parseLetDefinition
     <|> try parseTypeAlias
     <|> parseTypeDefinition
     <|> parseCodataDefinition
-    <|> parseTraitDefinitioninition
+    <|> parseTraitDefinition
     <|> parseTraitInstance
     <|> parseTopLevelFold
     <|> parseTopLevelUnfold
@@ -48,8 +48,8 @@ parseTypeAlias = do
   end <- getSourcePos
   pure (DTypeAlias (Metadata start end) n (AliasDefinition ps t))
 
-parseTraitDefinitioninition :: Parser (Definition Metadata o ())
-parseTraitDefinitioninition = do
+parseTraitDefinition :: Parser (Definition Metadata o ())
+parseTraitDefinition = do
   start <- getSourcePos
   lexeme_ "trait"
   n <- constructor
@@ -218,8 +218,8 @@ parseGroupFunctionDefinition ann = do
   pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 -- TODO: DRY
-parseFunctionDefinitioninition :: Parser (Definition Metadata o ())
-parseFunctionDefinitioninition = do
+parseFunctionDefinition :: Parser (Definition Metadata o ())
+parseFunctionDefinition = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> name
   args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
@@ -238,7 +238,7 @@ parseFunctionDefinitioninition = do
 --  pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
-parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinitioninition)
+parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
 
 parseLetDefinition :: Parser (Definition Metadata o ())
 parseLetDefinition = do

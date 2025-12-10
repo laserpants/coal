@@ -4,10 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (
-  RuleContext (..),
-  passShadowingRule,
-) where
+module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
@@ -28,12 +25,7 @@ import qualified Data.Set as Set
 import Extras (Name)
 
 passShadowingRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
-passShadowingRule =
-  mapPass $
-    Pass
-      { passName = "ShadowingRule"
-      , runPass = detectShadowing mempty
-      }
+passShadowingRule = mapPass $ Pass{runPass = detectShadowing mempty}
 
 class RuleContext e where
   detectShadowing :: (Monad m) => Set Name -> e -> CompilerT Metadata m e
@@ -117,7 +109,7 @@ instance (Data t) => RuleContext (Expression Metadata t) where
       e@EFFICall{} ->
         pure e
       _ ->
-        error "TODO"
+        error "Not implemented"
 
 instance (Data t) => RuleContext (Clause Metadata t) where
   detectShadowing names =

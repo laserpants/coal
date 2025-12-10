@@ -4,7 +4,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Trait (Trait (..), With (..), traitName) where
+module Coal.Language.Trait (
+  Trait (..),
+  With (..),
+  traitName,
+) where
 
 import Data.Data (Data, Typeable)
 import Extras (Name)

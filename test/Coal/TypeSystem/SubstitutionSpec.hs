@@ -33,14 +33,14 @@ substitutionTests =
           0
           ( applyTypeArgs
               KType
-              (TConstructor KType "List")
+              (TConstructor (KArrow KType KType) "List")
               (NonEmpty.singleton (TVariable (TypeIndex KType 1)))
           )
       )
       (TVariable (TypeIndex KType 0))
       ( applyTypeArgs
           KType
-          (TConstructor KType "List")
+          (TConstructor (KArrow KType KType) "List")
           (NonEmpty.singleton (TVariable (TypeIndex KType 1)))
       )
   , -- [0 ↦ int32] applied to List<'0>
@@ -48,12 +48,12 @@ substitutionTests =
       (mapsTo 0 (TIntrinsic IInt32))
       ( applyTypeArgs
           KType
-          (TConstructor KType "List")
+          (TConstructor (KArrow KType KType) "List")
           (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
       )
       ( applyTypeArgs
           KType
-          (TConstructor KType "List")
+          (TConstructor (KArrow KType KType) "List")
           (NonEmpty.singleton (TIntrinsic IInt32))
       )
   , -- row variable substitution
@@ -99,11 +99,11 @@ normalizeTests =
   ,
     ( applyTypeArgs
         KType
-        (TConstructor KType "List")
+        (TConstructor (KArrow KType KType) "List")
         (NonEmpty.singleton (TVariable (TypeIndex KType 5)))
     , applyTypeArgs
         KType
-        (TConstructor KType "List")
+        (TConstructor (KArrow KType KType) "List")
         (NonEmpty.singleton (TVariable (TypeIndex KType 0)))
     )
   ]

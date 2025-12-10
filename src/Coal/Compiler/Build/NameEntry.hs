@@ -178,7 +178,7 @@ codataAccessorEntries env loc (CotypeDefinition _ xsors) = getEntry <$> xsors
       codataAccessorName
       (CodataAccessor codataAccessorName (translateScheme env codataAccessorScheme))
 
-translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> Scheme TypeIndex Kind IndexedType
+translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> IndexedScheme
 translateScheme env (Forall _ _ s) = Forall vs [] t
  where
   vs = typeIndexesIn t

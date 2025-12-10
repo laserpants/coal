@@ -25,16 +25,10 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, const2, foldrM)
 
 passTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
-passTopLevelFolds =
-  Pass
-    { passName = "TopLevelFolds"
-    , runPass = pass
-    }
+passTopLevelFolds = Pass{runPass = pass}
 
 pass :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
-pass m@(Module p _ _) = do
-  setCompilerCurrentModuleC p
-  overModuleDefinitionsM (traverse compileTopLevelFolds) m
+pass = withCurrentModuleC (overModuleDefinitionsM (traverse compileTopLevelFolds))
 
 class TopLevelFoldContext a e where
   expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> CompilerT a m e

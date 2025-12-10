@@ -29,11 +29,7 @@ import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extras (Name)
 
 passExpandPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandPatterns =
-  Pass
-    { passName = "ExpandPatterns"
-    , runPass = desugarPatterns
-    }
+passExpandPatterns = Pass{runPass = desugarPatterns}
 
 class TransformContext s where
   desugarPatterns :: (Monad m) => s -> CompilerT Metadata m s

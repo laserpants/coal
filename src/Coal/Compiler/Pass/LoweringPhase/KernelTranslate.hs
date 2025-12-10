@@ -22,11 +22,7 @@ import Extras (Name, (<.>))
 import Extras.Control.Monad (concatForM)
 
 passKernelTranslate :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
-passKernelTranslate =
-  Pass
-    { passName = "KernelTranslate"
-    , runPass = pass
-    }
+passKernelTranslate = Pass{runPass = pass}
 
 pass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 pass =
@@ -73,7 +69,7 @@ qualImports ModuleBuild{..} =
           (ImportType _ name ["*"]) ->
             case Environment.lookup name moduleTypeConstructors of
               Nothing ->
-                error "TODO"
+                error "Not implemented"
               Just TypeConstructorEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
           (ImportType _ _ ctors) ->
@@ -81,7 +77,7 @@ qualImports ModuleBuild{..} =
           (ImportCotype _ name ["*"]) ->
             case Environment.lookup name moduleCotypeConstructors of
               Nothing ->
-                error "TODO"
+                error "Not implemented"
               Just CotypeConstructorEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorEntryDataAccessors]
           (ImportCotype _ _ xsors) ->
@@ -89,7 +85,7 @@ qualImports ModuleBuild{..} =
           (ImportTrait _ name ["*"]) ->
             case Environment.lookup name moduleTraits of
               Nothing ->
-                error "TODO"
+                error "Not implemented"
               Just TraitEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
           (ImportTrait _ _ entries) ->

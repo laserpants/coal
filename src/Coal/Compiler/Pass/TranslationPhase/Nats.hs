@@ -19,14 +19,7 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras (Dictionary)
 
 passCompileNats :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passCompileNats =
-  Pass
-    { passName = "CompileNats"
-    , runPass = pass
-    }
-
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass = compileNats
+passCompileNats = Pass{runPass = compileNats}
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a m e
@@ -40,11 +33,14 @@ instance (CompileNatsContext a) => CompileNatsContext (NonEmpty a) where
 instance (CompileNatsContext a) => CompileNatsContext (Dictionary a) where
   compileNats = traverse compileNats
 
+natType :: IndexedType
+natType = TConstructor KType "$Nat"
+
 convertConstructor :: (Monad m) => IndexedType -> CompilerT a m IndexedType
 convertConstructor =
   \case
     TIntrinsic INat ->
-      pure $ TConstructor KType "$Nat"
+      pure natType
     TIntrinsic t ->
       pure (TIntrinsic t)
     TArrow t1 t2 ->
@@ -67,17 +63,17 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a IndexedType) whe
           pure $
             EApplication
               a1
-              (TConstructor KType "$Nat")
-              (EConstructor mempty (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat") "$Succ"))
+              natType
+              (EConstructor mempty (Label (TIntrinsic IInt32 `TArrow` natType) "$Succ"))
               ( EApplication
                   mempty
                   (TIntrinsic IInt32)
-                  (EVariable mempty (Label (TConstructor KType "$Nat" `TArrow` TIntrinsic IInt32) "Builtin$.unpack_nat"))
+                  (EVariable mempty (Label (natType `TArrow` TIntrinsic IInt32) "Builtin$.unpack_nat"))
                   es
                   :| []
               )
         EConstructor a (Label _ "Zero") ->
-          pure (EConstructor a (Label (TConstructor KType "$Nat") "$Zero"))
+          pure (EConstructor a (Label natType "$Zero"))
         ECompiledMatch a t e cs ->
           ECompiledMatch a t e <$> traverse compileNats cs
         e ->
@@ -89,10 +85,10 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
       ECompiledClause loc (Label _ "Succ" :| [Label _ s]) e -> do
         name <- supplied (freshName "nats")
         pure $
-          ECompiledClause loc (Label (TConstructor KType "$Nat" `TArrow` TConstructor KType "$Nat") "$Succ" :| [Label (TIntrinsic IInt32) name]) $
+          ECompiledClause loc (Label (natType `TArrow` natType) "$Succ" :| [Label (TIntrinsic IInt32) name]) $
             ERecursiveLet
               mempty
-              (PVariable mempty (Label (TConstructor KType "$Nat") s))
+              (PVariable mempty (Label natType s))
               ( EIf
                   mempty
                   (TIntrinsic IInt32)
@@ -109,11 +105,11 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
                           :| []
                       )
                   )
-                  (EConstructor mempty (Label (TConstructor KType "$Nat") "$Zero"))
+                  (EConstructor mempty (Label natType "$Zero"))
                   ( EApplication
                       mempty
-                      (TConstructor KType "$Nat")
-                      (EConstructor mempty (Label (TIntrinsic IInt32 `TArrow` TConstructor KType "$Nat") "$Succ"))
+                      natType
+                      (EConstructor mempty (Label (TIntrinsic IInt32 `TArrow` natType) "$Succ"))
                       ( EApplication
                           mempty
                           (TIntrinsic IInt32)
@@ -132,7 +128,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
               )
               e
       ECompiledClause loc (Label _ "Zero" :| []) e ->
-        pure (ECompiledClause loc (Label (TConstructor KType "$Nat") "$Zero" :| []) e)
+        pure (ECompiledClause loc (Label natType "$Zero" :| []) e)
       c ->
         pure c
 

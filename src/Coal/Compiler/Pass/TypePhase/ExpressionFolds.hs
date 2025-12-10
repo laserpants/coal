@@ -26,11 +26,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary, Name, const2, foldrM, traverse_)
 
 passExpressionFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a k ()) (Module a k ())
-passExpressionFolds =
-  Pass
-    { passName = "ExpressionFolds"
-    , runPass = pass
-    }
+passExpressionFolds = Pass{runPass = pass}
 
 pass :: (Monad m, Monoid a, Data a) => Module a k () -> CompilerT a m (Module a k ())
 pass = compileFolds
