@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import Stuff(hello)
+  
+  fun main() =
+      IO.println_string("🚀" <> hello())
+
+}

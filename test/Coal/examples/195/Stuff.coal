@@ -1,0 +1,7 @@
+module Stuff(foo) {
+
+  fun hello() = "Hello"
+
+  fun foo() = "Hello"
+
+}
