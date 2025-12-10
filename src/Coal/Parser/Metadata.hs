@@ -8,8 +8,8 @@ withMetadata :: Parser (Metadata -> p) -> Parser p
 withMetadata = withMetadataM . fmap (pure .)
 
 withMetadataM :: Parser (Metadata -> Parser p) -> Parser p
-withMetadataM p = do
+withMetadataM parser = do
   start <- getSourcePos
-  f <- p
+  f <- parser
   end <- getSourcePos
   f (Metadata start end)

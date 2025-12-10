@@ -54,16 +54,13 @@ parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
   t <- angleBrackets parseParameter
-  ts <- option [] (lexeme_ "with" *> commaSep1 parseParamTrait)
+  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
   pure (DTrait (Metadata start end) n (TraitDefinition ts t (toScheme <$$> ds)))
 
 parseParameter :: Parser (Parameter ())
-parseParameter = do
-  n <- name
-  --  k <- option KType (symbol_ ":" *> parseKind)
-  pure (Parameter () n)
+parseParameter = Parameter () <$> name
 
 parseTraitInstance :: Parser (Definition Metadata o ())
 parseTraitInstance = do
@@ -72,15 +69,12 @@ parseTraitInstance = do
   n <- constructor
   t <- angleBrackets parseType
   end <- getSourcePos
-  ts <- option [] (lexeme_ "with" *> commaSep1 parseTrait)
+  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseType))
   ds <- braces (some parseDefinition)
   pure (DInstance (Metadata start end) n (InstanceDefinition ts t ds))
 
-parseTrait :: Parser (Trait (Type Parameter ()))
-parseTrait = Trait <$> constructor <*> angleBrackets parseType
-
-parseParamTrait :: Parser (Trait (Parameter ()))
-parseParamTrait = Trait <$> constructor <*> angleBrackets parseParameter
+parseTrait :: Parser p -> Parser (Trait p)
+parseTrait p = Trait <$> constructor <*> angleBrackets p
 
 parseParameterList :: Parser [Parameter ()]
 parseParameterList = angleBrackets (commaSep1 (Parameter () <$> name))
@@ -228,14 +222,6 @@ parseFunctionDefinition = do
   expr <- symbol_ "=" *> parseExpression
   ws <- option [] parseWhereClauses
   pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
-
--- parseFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata ())
--- parseFunctionDefinition ann = do
---  start <- getSourcePos
---  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
---  expr <- symbol_ "=" *> parseExpression
---  end <- getSourcePos
---  pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
 parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)

@@ -192,11 +192,8 @@ parseSpecialNameExpression =
 parseVariableExpression :: Parser (Expression Metadata ())
 parseVariableExpression =
   withMetadata $ do
-    ll <- try parseQualifiedName <|> parseSimpleName
+    ll <- try parseQualifiedName <|> (Label () <$> name)
     pure (`EVariable` ll)
-
-parseSimpleName :: Parser (Label ())
-parseSimpleName = Label () <$> name
 
 parseQualifiedName :: Parser (Label ())
 parseQualifiedName = do
