@@ -2,18 +2,18 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.TranslateExpression (
+module Coal.Compiler.Kernel.Translate.Expression (
   translateExpression,
   translatePattern,
 ) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (qualifyName, withLocalName, withLocalNames)
-import Coal.Compiler.Kernel.TranslateOperator (translateBinaryOperator, translateUnaryOperator)
-import Coal.Compiler.Kernel.TranslatePattern (translatePattern)
-import Coal.Compiler.Kernel.TranslatePrimitive (translatePrimitive)
-import Coal.Compiler.Kernel.TranslateRecord (extractRow, makeRecord, translateRecord)
-import Coal.Compiler.Kernel.TranslateType (translateType)
+import Coal.Compiler.Kernel.Translate.Operator (translateBinaryOperator, translateUnaryOperator)
+import Coal.Compiler.Kernel.Translate.Pattern (translatePattern)
+import Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive)
+import Coal.Compiler.Kernel.Translate.Record (extractRow, makeRecord, translateRecord)
+import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Compiler (KernelExpr)
 import qualified Coal.Kernel.Language as Kernel

@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.TranslateType (translateType) where
+module Coal.Compiler.Kernel.Translate.Type (translateType) where
 
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Type (Type (..), listTypeArgs)

@@ -1,14 +1,14 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.TranslateRecord (
+module Coal.Compiler.Kernel.Translate.Record (
   translateRecord,
   extractRow,
   makeRecord,
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Kernel.TranslateType (translateType)
+import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Compiler (KernelExpr)
 import qualified Coal.Kernel.Language as Kernel

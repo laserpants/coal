@@ -10,7 +10,7 @@ import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)
-import Coal.Compiler.Kernel.TranslateDefinition (translateDefinition)
+import Coal.Compiler.Kernel.Translate.Definition (translateDefinition)
 import Coal.Compiler.Pass (Pass (..), tickBar)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel

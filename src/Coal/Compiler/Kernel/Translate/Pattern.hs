@@ -2,10 +2,10 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.TranslatePattern (translatePattern) where
+module Coal.Compiler.Kernel.Translate.Pattern (translatePattern) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Kernel.TranslateType (translateType)
+import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language

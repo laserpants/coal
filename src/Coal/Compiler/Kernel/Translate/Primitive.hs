@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.Compiler.Kernel.TranslatePrimitive (translatePrimitive) where
+module Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive) where
 
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language

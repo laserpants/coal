@@ -49,13 +49,13 @@ library
       Coal.Compiler.Error
       Coal.Compiler.Journal
       Coal.Compiler.Kernel.Environment
-      Coal.Compiler.Kernel.TranslateDefinition
-      Coal.Compiler.Kernel.TranslateExpression
-      Coal.Compiler.Kernel.TranslateOperator
-      Coal.Compiler.Kernel.TranslatePattern
-      Coal.Compiler.Kernel.TranslatePrimitive
-      Coal.Compiler.Kernel.TranslateRecord
-      Coal.Compiler.Kernel.TranslateType
+      Coal.Compiler.Kernel.Translate.Definition
+      Coal.Compiler.Kernel.Translate.Expression
+      Coal.Compiler.Kernel.Translate.Operator
+      Coal.Compiler.Kernel.Translate.Pattern
+      Coal.Compiler.Kernel.Translate.Primitive
+      Coal.Compiler.Kernel.Translate.Record
+      Coal.Compiler.Kernel.Translate.Type
       Coal.Compiler.Pass
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.LoweringPhase
