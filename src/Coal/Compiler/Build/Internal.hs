@@ -24,7 +24,7 @@ import Coal.TypeSystem.Kind.Inference
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
 import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
-import Data.List (nub, union, (\\))
+import Data.List (intersect, nub, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name, for, groupByKey, (<$$>))
@@ -119,8 +119,8 @@ prepareBuild (Module path exports defs) = do
       then modify $ setExports (Set.toList exps) . setTypeExports (Set.toList typeExps)
       else
         modify $
-          setExports (nameExports exports `union` Set.toList exps)
-            . setTypeExports (typeExports exports `union` Set.toList typeExps)
+          setExports (nameExports exports `intersect` Set.toList exps)
+            . setTypeExports (typeExports exports `intersect` Set.toList typeExps)
 
     return (Module path exports (defs1 <> defs))
  where

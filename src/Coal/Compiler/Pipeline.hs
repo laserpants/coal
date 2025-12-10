@@ -190,11 +190,11 @@ prettyError env =
     ConflictingParameter name erl ->
       errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
     NameNotInModule name path erl ->
-      errorMessage ["The module " <> principalPath path <> " doesn't export '" <> name <> "'"] env erl
+      errorMessage ["The module '" <> principalPath path <> "' doesn't export '" <> name <> "'."] env erl
     MissingType name path erl ->
-      errorMessage ["The module " <> principalPath path <> " doesn't export a type '" <> name <> "'"] env erl
+      errorMessage ["The module '" <> principalPath path <> "' doesn't export a type '" <> name <> "'."] env erl
     MissingCotype name path erl ->
-      errorMessage ["The module " <> principalPath path <> " doesn't export a codata type '" <> name <> "'"] env erl
+      errorMessage ["The module '" <> principalPath path <> "' doesn't export a codata type '" <> name <> "'."] env erl
     NoDataConstructorForType ctor name _ erl ->
       errorMessage ["No constructor '" <> ctor <> "' for type '" <> name <> "' in scope"] env erl
     NoCodataAccessorForCotype xsor name _ erl ->
