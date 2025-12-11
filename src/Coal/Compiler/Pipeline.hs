@@ -189,8 +189,10 @@ prettyError env =
       errorMessage ["Name already defined: '" <> name <> "'"] env erl
     ConflictingParameter name erl ->
       errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
-    NameNotInModule name path erl ->
+    ImportNotInModule name path erl ->
       errorMessage ["The module '" <> principalPath path <> "' doesn't export '" <> name <> "'."] env erl
+    ExportNotInModule name _ erl ->
+      errorMessage ["A definition '" <> name <> "' doesn't exist in this module."] env erl
     MissingType name path erl ->
       errorMessage ["The module '" <> principalPath path <> "' doesn't export a type '" <> name <> "'."] env erl
     MissingCotype name path erl ->

@@ -117,7 +117,20 @@ prepareBuild (Module path exports defs) = do
 
     if [ExportAll] == exports
       then modify $ setExports (Set.toList exps) . setTypeExports (Set.toList typeExps)
-      else
+      else do
+        let errs =
+              for exports $
+                \case
+                  ExportName loc name ->
+                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
+                  ExportType loc name _ ->
+                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
+                  _ ->
+                    []
+        unless (null errs) $ do
+          tellErrors (concat errs)
+          throwError PreflightFailure
+
         modify $
           setExports (nameExports exports `intersect` Set.toList exps)
             . setTypeExports (typeExports exports `intersect` Set.toList typeExps)
@@ -566,19 +579,19 @@ collectImportedNames =
           \case
             ImportName loc name ->
               unless (name `elem` fmap nameOf names1) $ do
-                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
+                tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
             ImportType loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
+                tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
             ImportCotype loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
+                tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
             ImportTrait loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [NameNotInModule name path (ErrorLocation this loc)]
+                tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
 
       forM_ (names1 <> names2) $

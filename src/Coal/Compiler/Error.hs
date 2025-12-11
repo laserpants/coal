@@ -34,7 +34,8 @@ data CompilerError a
   | MissingInstance (Trait IndexedType) (ErrorLocation a)
   | NameAlreadyDefined Name (ErrorLocation a)
   | ConflictingParameter Name (ErrorLocation a)
-  | NameNotInModule Name Path (ErrorLocation a)
+  | ImportNotInModule Name Path (ErrorLocation a)
+  | ExportNotInModule Name Path (ErrorLocation a)
   | MissingType Name Path (ErrorLocation a)
   | MissingCotype Name Path (ErrorLocation a)
   | NoDataConstructorForType Name Name Path (ErrorLocation a)
@@ -89,7 +90,9 @@ errorLocation =
       Just erl
     ConflictingParameter _ erl ->
       Just erl
-    NameNotInModule _ _ erl ->
+    ImportNotInModule _ _ erl ->
+      Just erl
+    ExportNotInModule _ _ erl ->
       Just erl
     MissingType _ _ erl ->
       Just erl

@@ -1006,6 +1006,16 @@ e2eSpec = do
       , "Qsort.coal"
       ]
 
+  describe "197" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/197"
+          [ "Main.coal"
+          , "Foo.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
