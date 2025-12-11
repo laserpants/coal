@@ -1,5 +1,6 @@
 module Main {
 
+  import Number(max)
   import namespace IO
 
   type Map<key, val>
@@ -19,8 +20,6 @@ module Main {
       | Map({ height = h | _ }) => h
     }
 
-  fun max(a, b) = a
-
   fun make_node(key, val, left, right) =
     Map({ key    = key
         , value  = val
@@ -28,13 +27,17 @@ module Main {
         , left   = left
         , right  = right
         })
+
+  fun balance_factor
+    | Empty  = 0
+    | Map(m) = height(m.left) - height(m.right)
  
   // Constructors
 
   let empty = Empty
 
-//  fun singleton(key, val) = 
-//    make_node(key, val, Empty Empty)
+  fun singleton(key, val) = 
+    make_node(key, val, Empty, Empty)
 
   fun main() = 
     IO.println_string("")
