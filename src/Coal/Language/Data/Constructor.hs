@@ -16,4 +16,15 @@ data DataConstructor o k t = DataConstructor
   , constructorArity :: Int
   , constructorScheme :: Scheme o k t
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
