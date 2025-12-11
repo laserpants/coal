@@ -41,7 +41,7 @@ module Coal.Compiler.Build (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.NameEntry
-import Coal.Language
+import Coal.Language (IndexedType)
 import Coal.Language.Module (Path (..))
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
