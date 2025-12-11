@@ -68,7 +68,7 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a IndexedType) whe
               ( EApplication
                   mempty
                   (TIntrinsic IInt32)
-                  (EVariable mempty (Label (natType `TArrow` TIntrinsic IInt32) "Builtin$.unpack_nat"))
+                  (EVariable mempty (Label (natType `TArrow` TIntrinsic IInt32) "Builtin$.nat$_unpack"))
                   es
                   :| []
               )
