@@ -9,7 +9,7 @@ import Coal.Compiler.Config
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Path.Resolve
+import Coal.Compiler.Path.Resolve (resolveModule)
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..))
