@@ -7,7 +7,7 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
-import Coal.Compiler.Build.Internal
+import Coal.Compiler.Build.Core
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)

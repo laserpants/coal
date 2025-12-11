@@ -3,7 +3,7 @@
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
-import Coal.Compiler.Build.Internal (buildEnv, replacePlaceholders)
+import Coal.Compiler.Build.Core (buildEnv, replacePlaceholders)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))

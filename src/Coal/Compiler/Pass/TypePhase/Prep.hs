@@ -1,6 +1,6 @@
 module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
-import Coal.Compiler.Build.Internal (buildEnv, prepareBuild)
+import Coal.Compiler.Build.Core (buildEnv, prepareBuild)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack

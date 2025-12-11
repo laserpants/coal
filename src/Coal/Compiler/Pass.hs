@@ -10,7 +10,7 @@ module Coal.Compiler.Pass (
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build
-import Coal.Compiler.Build.Internal (typeConstructorEnv)
+import Coal.Compiler.Build.Core (typeConstructorEnv)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
 import Control.Monad ((>=>))

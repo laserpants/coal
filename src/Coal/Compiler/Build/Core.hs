@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Build.Internal (
+module Coal.Compiler.Build.Core (
   buildEnv,
   replacePlaceholders,
   prepareBuild,
