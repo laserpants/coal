@@ -39,6 +39,7 @@ import Prettyprinter
 import Prettyprinter.Render.Text (renderStrict)
 import System.Console.AsciiProgress
 import Text.Megaparsec (errorBundlePretty)
+import TextShow (showt)
 
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
@@ -165,6 +166,8 @@ prettyError env =
       "The module name '" <> path <> "' doesn't match the file name '" <> Text.pack file <> "'."
     BadFilename _ err ->
       Text.pack err
+    ModuleCycle names ->
+      "Module imports form a cycle: " <> showt names
     MisplacedImportStatement erl -> do
       errorMessage ["Misplaced import statement"] env erl
     ModuleNotFound name erl ->

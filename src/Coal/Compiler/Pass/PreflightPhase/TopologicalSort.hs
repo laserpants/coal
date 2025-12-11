@@ -11,53 +11,58 @@ import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language (Kind)
 import Coal.Language.Module
 import Control.Monad.Except (MonadError (throwError))
-import Data.Graph (graphFromEdges, reverseTopSort)
-import Data.Maybe (fromJust)
+import Data.Graph (SCC (..), stronglyConnComp)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Tuple.Extra (fst3)
-import Extras (Name, concatForM)
+import Extras (Name, concatForM, forM_)
 
 passTopologicalSort :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
 passTopologicalSort = Pass{runPass = pass}
 
 pass :: (Monad m) => [Module Metadata Kind ()] -> CompilerT Metadata m [Module Metadata Kind ()]
 pass modules = do
-  edges <- traverse (collectEdges s) modules
-  let (graph, vertexToNode, _) = graphFromEdges edges
-  pure (fst3 . vertexToNode <$> reverseTopSort graph)
+  edges <- traverse (collectEdges names) modules
+  let sccs = stronglyConnComp edges
+      cyclicSCCs = filter isCyclicSCC sccs
+  forM_ cyclicSCCs $
+    \scc ->
+      tellErrors [ModuleCycle (modulePathName <$> getModulesFromSCC scc)]
+  if not (null cyclicSCCs)
+    then throwError PreflightFailure
+    else pure $ concatMap getModulesFromSCC sccs
  where
-  s = Set.fromList (modulePathName <$> modules)
+  names = Set.fromList (modulePathName <$> modules)
 
-collectEdges :: (Monad m) => Set Name -> Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind (), Int, [Int])
-collectEdges s m = do
-  ks <- concatForM deps $
-    \(loc, dep) ->
-      case index dep of
-        Just i ->
-          pure [i]
-        Nothing -> do
-          tellErrors [ModuleNotFound dep (ErrorLocation name loc)]
-          pure []
-  if length ks == length deps
-    then pure (m, fromJust (index name), ks)
-    else throwError PreflightFailure
- where
-  name = modulePathName m
-  deps = dependencies m
+isCyclicSCC :: SCC (Module Metadata Kind ()) -> Bool
+isCyclicSCC =
+  \case
+    CyclicSCC _ -> True
+    _ -> False
 
-  index :: Name -> Maybe Int
-  index n = Set.lookupIndex n s
+getModulesFromSCC :: SCC (Module Metadata Kind ()) -> [Module Metadata Kind ()]
+getModulesFromSCC =
+  \case
+    AcyclicSCC m -> [m]
+    CyclicSCC ms -> ms
+
+collectEdges :: (Monad m) => Set Name -> Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind (), Name, [Name])
+collectEdges names m = do
+  deps' <- concatForM (dependencies m) $ \(loc, dep) ->
+    if Set.member dep names
+      then pure [dep]
+      else do
+        tellErrors [ModuleNotFound dep (ErrorLocation (modulePathName m) loc)]
+        pure []
+  pure (m, modulePathName m, deps')
 
 dependencies :: Module Metadata Kind () -> [(Metadata, Name)]
-dependencies (Module _ _ ds) = concatMap importPath ds
+dependencies (Module _ _ defs) = concatMap importPath defs
 
 importPath :: Definition Metadata Kind () -> [(Metadata, Name)]
-importPath =
-  \case
-    DImport loc p _ ->
-      [(loc, principalPath p)]
-    DQualifiedImport loc p ->
-      [(loc, principalPath p)]
-    _ ->
-      []
+importPath = \case
+  DImport loc p _ ->
+    [(loc, principalPath p)]
+  DQualifiedImport loc p ->
+    [(loc, principalPath p)]
+  _ ->
+    []
