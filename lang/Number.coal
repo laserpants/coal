@@ -1,5 +1,9 @@
 module Number {
 
+  let _INT32_MAX = 2147483647
+
+  let _INT64_MAX = 9223372036854775807
+
   fun int32_to_float(n : int32) : float =
     #{int32_to_float : int32 -> float}(n)(fn(f) => f)
 

@@ -1,0 +1,13 @@
+module Main {
+
+  import namespace IO
+
+  type N = Z | S(N)
+
+  fun main() =
+    match(S(Z)) {
+      | S(_) => IO.print_string("b")
+      | Z => IO.print_string("a")
+    }
+
+}

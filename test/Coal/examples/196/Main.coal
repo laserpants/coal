@@ -1,0 +1,22 @@
+module Main {
+
+  import Qsort(sort)
+  import Coal.Monad(trait Monad, and_eval)
+  import IO(return)
+
+  import namespace IO
+
+  fun print_all(ints : List<int32>) : IO<unit> =
+    fold(ints) {
+      | [] => 
+          return()
+      | m :: @next =>
+          IO.println_int32(m) |. and_eval(next)
+    }
+
+  fun main() = 
+    let xs = [105, 103, 234, 109, 107, 55, 102, 999, 101, 8, 106, 104]
+    in
+    print_all(sort(xs))
+
+}
