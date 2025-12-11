@@ -173,6 +173,7 @@ instance EmitKinds (Type Parameter KindNode) where
         env <- ask
         case Environment.lookup name env of
           Nothing ->
+            -- TODO
             error (show name)
           Just k1 ->
             tell [KEquality k k1]
