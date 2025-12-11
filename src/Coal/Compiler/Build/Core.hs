@@ -119,7 +119,7 @@ prepareBuild (Module path exports defs) = do
       then modify $ setExports (Set.toList exps) . setTypeExports (Set.toList typeExps)
       else do
         let errs =
-              for exports $
+              flip concatMap exports $
                 \case
                   ExportName loc name ->
                     [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` exps]
@@ -128,7 +128,7 @@ prepareBuild (Module path exports defs) = do
                   _ ->
                     []
         unless (null errs) $ do
-          tellErrors (concat errs)
+          tellErrors errs
           throwError PreflightFailure
 
         modify $
