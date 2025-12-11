@@ -122,7 +122,7 @@ prepareBuild (Module path exports defs) = do
               for exports $
                 \case
                   ExportName loc name ->
-                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
+                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` exps]
                   ExportType loc name _ ->
                     [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
                   _ ->
