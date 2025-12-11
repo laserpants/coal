@@ -59,10 +59,11 @@ dependencies :: Module Metadata Kind () -> [(Metadata, Name)]
 dependencies (Module _ _ defs) = concatMap importPath defs
 
 importPath :: Definition Metadata Kind () -> [(Metadata, Name)]
-importPath = \case
-  DImport loc p _ ->
-    [(loc, principalPath p)]
-  DQualifiedImport loc p ->
-    [(loc, principalPath p)]
-  _ ->
-    []
+importPath =
+  \case
+    DImport loc p _ ->
+      [(loc, principalPath p)]
+    DQualifiedImport loc p ->
+      [(loc, principalPath p)]
+    _ ->
+      []
