@@ -43,7 +43,17 @@ import Data.Data (Data, Typeable)
 import Extras (Name, Over)
 
 data Module a k t = Module Path [Export a] [Definition a k t]
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    )
 
 {-# INLINE overModuleDefinitions #-}
 overModuleDefinitions :: Over (Module a k t) [Definition a k t]
