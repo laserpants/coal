@@ -17,4 +17,15 @@ data CodataAccessor o k t = CodataAccessor
   { codataAccessorName :: Name
   , codataAccessorScheme :: Scheme o k t
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )

@@ -1,0 +1,7 @@
+module Foo {
+
+  import Baz(baz)
+ 
+  fun foo() = ""
+
+}
