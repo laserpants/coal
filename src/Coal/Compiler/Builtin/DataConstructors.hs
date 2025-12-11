@@ -31,6 +31,6 @@ builtinDataConstructors =
             1
             (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
         )
-        (Set.fromList ["Succ", "Succ"])
+        (Set.fromList ["Succ", "Zero"])
     )
   ]
