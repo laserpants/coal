@@ -12,7 +12,7 @@ import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Compiler (KernelExpr)
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language
+import Coal.Language (Expression, IndexedType, Type)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary)

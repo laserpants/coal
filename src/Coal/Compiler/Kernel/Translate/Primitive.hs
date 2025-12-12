@@ -4,7 +4,7 @@
 module Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive) where
 
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language
+import Coal.Language (Primitive (..))
 
 translatePrimitive :: Primitive -> Kernel.Prim
 translatePrimitive =
