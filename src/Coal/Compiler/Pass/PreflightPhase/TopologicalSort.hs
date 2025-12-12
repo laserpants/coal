@@ -47,12 +47,13 @@ getModulesFromSCC =
 
 collectEdges :: (Monad m) => Set Name -> Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind (), Name, [Name])
 collectEdges names m = do
-  deps' <- concatForM (dependencies m) $ \(loc, dep) ->
-    if Set.member dep names
-      then pure [dep]
-      else do
-        tellErrors [ModuleNotFound dep (ErrorLocation (modulePathName m) loc)]
-        pure []
+  deps' <- concatForM (dependencies m) $
+    \(loc, dep) ->
+      if Set.member dep names
+        then pure [dep]
+        else do
+          tellErrors [ModuleNotFound dep (ErrorLocation (modulePathName m) loc)]
+          pure []
   pure (m, modulePathName m, deps')
 
 dependencies :: Module Metadata Kind () -> [(Metadata, Name)]
