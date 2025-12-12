@@ -3,10 +3,10 @@
 module Coal.Parser.Module (parseModule) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Language.Module
-import Coal.Parser.Core
-import Coal.Parser.Identifier
-import Coal.Parser.Module.Definition
+import Coal.Language.Module (Export (..), Module (..), Path (Path))
+import Coal.Parser.Core (Parser, lexeme_)
+import Coal.Parser.Identifier (constructor, identifier, name)
+import Coal.Parser.Module.Definition (parseDefinition)
 import Coal.Parser.Symbol
 import Extras (Name)
 import Text.Megaparsec
