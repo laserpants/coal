@@ -13,9 +13,9 @@ import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type
-import Coal.Language.Type.Kind
-import Coal.Language.Type.Row
+import Coal.Language.Type (Parameter (Parameter), Type (..))
+import Coal.Language.Type.Kind (Kind (..))
+import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
 import Control.Monad.RWS
 import Control.Monad.State (State, evalState, runState)
