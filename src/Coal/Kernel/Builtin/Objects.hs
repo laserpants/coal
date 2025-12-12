@@ -1083,14 +1083,6 @@ objects =
         ]
     }
 
--- unsafeParseKernelModule :: Text -> Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
--- unsafeParseKernelModule t =
---  case runParser (spaces *> module_ <* eof) "" t of
---    Left e ->
---      error (errorBundlePretty e)
---    Right r ->
---      r
-
 unsafeParseKernelExpr :: Text -> Kernel.Expr Kernel.Type
 unsafeParseKernelExpr t =
   case runParser expr "" (Text.stripStart t) of
