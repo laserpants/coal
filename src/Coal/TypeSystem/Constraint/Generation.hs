@@ -22,7 +22,6 @@ import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Annotation (instantiateAnnotation)
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Control.Monad.Reader (asks)
-import Control.Monad.State
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
