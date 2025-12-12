@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+  
+  trait Foo<f> {
+    x : f<Baz>
+  }
+
+  fun main() =
+    IO.println_string("")
+
+}

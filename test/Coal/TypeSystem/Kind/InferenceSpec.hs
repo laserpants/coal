@@ -60,7 +60,8 @@ testTraitDefinition1 =
           )
         ]
     )
-    == ( TraitDefinition
+    == Right
+      ( TraitDefinition
           []
           (Parameter (KArrow KType KType) "m")
           [
@@ -74,4 +75,4 @@ testTraitDefinition1 =
                 )
             )
           ]
-       )
+      )

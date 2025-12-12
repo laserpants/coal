@@ -27,6 +27,7 @@ import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
@@ -200,14 +201,18 @@ typeDefinitionsC ds = do
 typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m ()
 typeDefinitionC =
   \case
-    DTrait _ name def -> do
+    DTrait loc name def -> do
       kenv <- asks compilerTypeConstructorEnvironment
-      let (TraitDefinition _ (Parameter k q) ds) = inferTraitKinds kenv def
-      forM_ ds $
-        \(n, Forall _ _ s) -> do
-          env <- asks compilerTypeConstructorEnvironment
-          let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
-          insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
+      case inferTraitKinds kenv def of
+        Left errs -> do
+          this <- gets (principalPath . compilerCurrentModule)
+          tellErrors [KindError err (ErrorLocation this loc) | err <- nub errs]
+        Right (TraitDefinition _ (Parameter k q) ds) ->
+          forM_ ds $
+            \(n, Forall _ _ s) -> do
+              env <- asks compilerTypeConstructorEnvironment
+              let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
+              insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
     DInstance loc trait (InstanceDefinition _ t0 ds) -> do
       env <- asks compilerTraitEnvironment
       kinds <- asks compilerTypeConstructorEnvironment

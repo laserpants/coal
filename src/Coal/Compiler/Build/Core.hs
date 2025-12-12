@@ -425,15 +425,20 @@ collectTraits :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT
 collectTraits env =
   \case
     DTrait loc name def -> do
-      addTraitEntries env name def'
-      modify $
-        addName (NTrait name)
-          . insertTrait name entry
-          . addTypeExport name
-     where
-      def'@(TraitDefinition ts p ds) = inferTraitKinds env def
-      entry =
-        TraitEntry loc name p ts (Environment.fromList ds)
+      case inferTraitKinds env def of
+        Left errs -> do
+          this <- lift $ gets (principalPath . compilerCurrentModule)
+          tellErrors [KindError err (ErrorLocation this loc) | err <- nub errs]
+          throwError PreflightFailure
+        Right def'@(TraitDefinition ts p ds) -> do
+          addTraitEntries env name def'
+          modify $
+            addName (NTrait name)
+              . insertTrait name entry
+              . addTypeExport name
+         where
+          entry =
+            TraitEntry loc name p ts (Environment.fromList ds)
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     def@(DImport loc path _) -> do

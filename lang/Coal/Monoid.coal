@@ -1,8 +1,11 @@
 module Coal.Monoid {
 
-  trait Monoid<m> {
+  trait Monoid<m> { // with Semigroup<m> {
     id : m
   }
+
+//  instance Semigroup<List<a>> {
+//  }
 
   instance Monoid<List<a>> {
     let id = []

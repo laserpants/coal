@@ -7,7 +7,10 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Coal.TypeSystem.Kind.Inference (inferTraitKinds) where
+module Coal.TypeSystem.Kind.Inference (
+  KindInferenceError (..),
+  inferTraitKinds,
+) where
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
@@ -17,10 +20,12 @@ import Coal.Language.Type (Parameter (Parameter), Type (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
+import Control.Monad.Except (MonadError, throwError)
 import Control.Monad.RWS
-import Control.Monad.State (State, evalState, runState)
+import Control.Monad.State (State, evalState, runStateT)
 import Data.Bifunctor (bimap)
 import Data.Data (Data, Typeable)
+import Data.Either (partitionEithers)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -28,6 +33,7 @@ import Data.Maybe (fromMaybe)
 import Data.Set (Set, member)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
+import Extras.Control.Monad.Writer (tellLeft, tellRight)
 import Extras.Data.Set (unionMap)
 
 data KindNode
@@ -133,18 +139,26 @@ nodeKind =
 data KindConstraint = KEquality KindNode KindNode
   deriving (Show, Eq, Ord, Read)
 
-newtype KindConstraintsGen a = KindConstraintsGen {kindConstraintsGenMonad :: RWS (Environment KindNode) [KindConstraint] (Environment KindNode) a}
+data KindInferenceError
+  = ENoTypeConstructor Name
+  | ECannotUnifyKinds
+  | EInfiniteKind
+  deriving (Show, Eq, Ord, Read)
+
+type KindConstraintsGenOutput = Either KindInferenceError KindConstraint
+
+newtype KindConstraintsGen a = KindConstraintsGen {kindConstraintsGenMonad :: RWS (Environment KindNode) [KindConstraintsGenOutput] (Environment KindNode) a}
   deriving
     ( Functor
     , Applicative
     , Monad
     , MonadReader (Environment KindNode)
-    , MonadWriter [KindConstraint]
+    , MonadWriter [KindConstraintsGenOutput]
     , MonadState (Environment KindNode)
-    , MonadRWS (Environment KindNode) [KindConstraint] (Environment KindNode)
+    , MonadRWS (Environment KindNode) [KindConstraintsGenOutput] (Environment KindNode)
     )
 
-runKindConstraintsGen :: Environment KindNode -> KindConstraintsGen a -> (a, [KindConstraint])
+runKindConstraintsGen :: Environment KindNode -> KindConstraintsGen a -> (a, [KindConstraintsGenOutput])
 runKindConstraintsGen env gen = (s, w)
  where
   (s, _, w) = runRWS (kindConstraintsGenMonad gen) env mempty
@@ -164,7 +178,7 @@ instance EmitKinds (Type Parameter KindNode) where
       TApplication k t1 t2 -> do
         emitKindConstraints t1
         emitKindConstraints t2
-        tell [KEquality (nodeKind t1) (IsKArrow (nodeKind t2) k)]
+        tellRight [KEquality (nodeKind t1) (IsKArrow (nodeKind t2) k)]
       TArrow t1 t2 -> do
         emitKindConstraints t1
         emitKindConstraints t2
@@ -173,10 +187,9 @@ instance EmitKinds (Type Parameter KindNode) where
         env <- ask
         case Environment.lookup name env of
           Nothing ->
-            -- TODO
-            error (show name)
+            tellLeft [ENoTypeConstructor name]
           Just k1 ->
-            tell [KEquality k k1]
+            tellRight [KEquality k k1]
       TIntrinsic{} ->
         pure ()
       TRecord t ->
@@ -195,7 +208,7 @@ instance EmitKinds (Parameter KindNode) where
         env <- get
         case Environment.lookup name env of
           Just k1 ->
-            tell [KEquality k k1]
+            tellRight [KEquality k k1]
           Nothing ->
             modify (Environment.insert name k)
 
@@ -206,7 +219,7 @@ instance (EmitKinds k) => EmitKinds (Row Parameter KindNode k) where
         emitKindConstraints t
         emitKindConstraints row
       RVariable (Parameter k _) ->
-        tell [KEquality k IsKRow]
+        tellRight [KEquality k IsKRow]
       RNil ->
         pure ()
 
@@ -401,7 +414,15 @@ instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (Row Pa
       RNil ->
         RNil
 
-unifyKinds :: (Monad m) => KindNode -> KindNode -> m KindSubstitution
+newtype KindUnifier a = KindUnifier (Either KindInferenceError a)
+  deriving
+    ( Functor
+    , Applicative
+    , Monad
+    , MonadError KindInferenceError
+    )
+
+unifyKinds :: KindNode -> KindNode -> KindUnifier KindSubstitution
 unifyKinds (IsKArrow k1 k2) (IsKArrow k3 k4) = do
   sub1 <- unifyKinds k1 k3
   sub2 <- unifyKinds (applyKinds sub1 k2) (applyKinds sub1 k4)
@@ -412,9 +433,9 @@ unifyKinds k1 (IsKVar k2) =
   bindKind k2 k1
 unifyKinds k1 k2
   | k1 == k2 = pure mempty
-  | otherwise = error "Cannot unify"
+  | otherwise = throwError ECannotUnifyKinds
 
-bindKind :: (Monad m) => Int -> KindNode -> m KindSubstitution
+bindKind :: Int -> KindNode -> KindUnifier KindSubstitution
 bindKind n =
   \case
     IsKVar k
@@ -422,7 +443,7 @@ bindKind n =
           pure mempty
     k
       | n `member` kindIdsIn k ->
-          error "Infinite kind"
+          throwError EInfiniteKind
       | otherwise ->
           pure (KindSubstitution (Map.singleton n k))
 
@@ -454,7 +475,7 @@ instance (Parameterized p) => Parameterized (Trait p) where
 instance Parameterized (TraitDefinition k) where
   paramsIn (TraitDefinition ts p _) = paramsIn ts <> paramsIn p
 
-solveKindConstraints :: (Monad m) => [KindConstraint] -> m KindSubstitution
+solveKindConstraints :: [KindConstraint] -> KindUnifier KindSubstitution
 solveKindConstraints [] =
   pure mempty
 solveKindConstraints (KEquality k1 k2 : cs) = do
@@ -478,21 +499,34 @@ insertTraitKind params (Trait trait (Parameter () name)) =
     Nothing ->
       error "Implementation error"
 
-inferTraitKinds :: Environment Kind -> TraitDefinition () -> TraitDefinition Kind
+inferTraitKinds :: Environment Kind -> TraitDefinition () -> Either [KindInferenceError] (TraitDefinition Kind)
 inferTraitKinds env def@(TraitDefinition ts p defs) =
-  TraitDefinition (lowerKinds <$> traits0) (lowerKinds param0) defs0
+  case runStateT go (fmap (insertTraitKind qs) ts, insertKind qs p) of
+    Left errs ->
+      Left errs
+    Right (defs0, (traits0, param0)) ->
+      pure $
+        TraitDefinition
+          (lowerKinds <$> traits0)
+          (lowerKinds param0)
+          defs0
  where
-  ps = paramsIn def
-  qs = zip (Set.toList ps) [IsKVar n | n <- [1 ..]]
-  (defs0, (traits0, param0)) =
-    flip runState (fmap (insertTraitKind qs) ts, insertKind qs p) $
-      forM defs $
-        \(n, s) -> do
-          let (r, cs) = runKindConstraintsGen (mapEnvironment liftKind env) $ do
-                forM_ qs (modify . uncurry Environment.insert)
-                let indexed = evalState (indexKinds s) (length qs)
-                emitKindConstraints indexed
-                pure indexed
-          sub <- solveKindConstraints cs
-          modify (bimap (applyKinds sub) (applyKinds sub))
-          pure (n, lowerKinds (applyKinds sub r))
+  qs = zip (Set.toList (paramsIn def)) [IsKVar n | n <- [1 ..]]
+  go =
+    forM defs $
+      \(n, s) -> do
+        let (r, outs) = runKindConstraintsGen (mapEnvironment liftKind env) $ do
+              forM_ qs (modify . uncurry Environment.insert)
+              let indexed = evalState (indexKinds s) (length qs)
+              emitKindConstraints indexed
+              pure indexed
+        let (errs, cs) = partitionEithers outs
+            KindUnifier res = solveKindConstraints cs
+        unless (null errs) $
+          throwError errs
+        case res of
+          Left err ->
+            throwError [err]
+          Right sub -> do
+            modify (bimap (applyKinds sub) (applyKinds sub))
+            pure (n, lowerKinds (applyKinds sub r))
