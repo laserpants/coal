@@ -32,6 +32,22 @@ module Main {
     | Empty  = 0
     | Map(m) = height(m.left) - height(m.right)
  
+  // Rotations
+
+  fun rotate_right(map) = 
+    map
+
+  fun rotate_left(map) = 
+    map
+
+  // Rebalancing
+
+  // Lookup
+
+  // Insertion
+
+  // Deletion
+
   // Constructors
 
   let empty = Empty
