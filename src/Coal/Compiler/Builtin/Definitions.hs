@@ -7,6 +7,7 @@ module Coal.Compiler.Builtin.Definitions (
 ) where
 
 import Coal.Compiler.Builtin.Functions (builtinFunctions)
+import Coal.Compiler.Builtin.Traits (builtinTraits)
 import Coal.Language
 import Coal.Language.Module
 import Data.List.NonEmpty (NonEmpty (..))
@@ -95,94 +96,6 @@ builtinDefinitions =
       mempty
       (Path ["Builtin$"])
       (for (builtinFunctionNames <> builtinTraitInstances) (ImportName mempty))
-  , DTrait
-      mempty
-      "Numeric"
-      ( TraitDefinition
-          []
-          (Parameter () "a")
-          [
-            ( "from_int32"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
-            )
-          ,
-            ( "negate"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-            )
-          ,
-            ( "(+)"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-            )
-          ,
-            ( "(-)"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-            )
-          ,
-            ( "(*)"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-            )
-          ]
-      )
-  , DTrait
-      mempty
-      "Ordered"
-      ( TraitDefinition
-          []
-          (Parameter () "a")
-          [
-            ( "compare"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
-            )
-          ]
-      )
-  , DTrait
-      mempty
-      "Comparable"
-      ( TraitDefinition
-          []
-          (Parameter () "a")
-          [
-            ( "(==)"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
-            )
-          ]
-      )
-  , DTrait
-      mempty
-      "Divisible"
-      ( TraitDefinition
-          []
-          (Parameter () "a")
-          [
-            ( "(/)"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-            )
-          ]
-      )
-  , DTrait
-      mempty
-      "Modulo"
-      ( TraitDefinition
-          []
-          (Parameter () "a")
-          [
-            ( "(%)"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-            )
-          ]
-      )
-  , DTrait
-      mempty
-      "Semigroup"
-      ( TraitDefinition
-          []
-          (Parameter () "a")
-          [
-            ( "(<>)"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-            )
-          ]
-      )
   , DType
       mempty
       "Ordering"
@@ -207,3 +120,4 @@ builtinDefinitions =
       "IO"
       (TypeDefinition [Parameter () "a"] [])
   ]
+    <> builtinTraits
