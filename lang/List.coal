@@ -146,6 +146,14 @@ module List {
     }
 
   /**
+   * Apply a function to every element of a list, where that function must 
+   * return a list, and then concatenate the resulting lists into a single, 
+   * flattened list. 
+   */
+  fun concat_map(f : a -> List<b>) : List<a> -> List<b> =
+    concat << map(f)
+
+  /**
    * Keep only the elements for which the predicate returns `true`.
    */
   fun filter(p : a -> bool, list : List<a>) : List<a> =
