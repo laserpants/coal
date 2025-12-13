@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import Number(float_to_int32)
+
+  fun main() =
+    IO.print_int32(float_to_int32(4.13f))
+
+}

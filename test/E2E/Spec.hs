@@ -1036,6 +1036,20 @@ e2eSpec = do
           ]
       res `shouldBe` Left PreflightFailure
 
+  describe "201" $ do
+    expectOutput
+      "123"
+      "test/Coal/examples/201"
+      [ "Main.coal"
+      ]
+
+  describe "202" $ do
+    expectOutput
+      "4"
+      "test/Coal/examples/202"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
