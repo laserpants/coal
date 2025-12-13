@@ -271,7 +271,7 @@ objects =
             "Builtin$.from_int32"
             [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
             ]
-            [r| 
+            [r|
                   match<int32/*>($a : Numeric(*)) {
                     | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
                       , $r : { from_int32 : int32/* | * }
@@ -281,6 +281,38 @@ objects =
                             $r : { from_int32 : int32/* | * }
                           in
                             $f : int32/*
+                  }
+              |]
+        , OFunction
+            "Builtin$.from_int64"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r|
+                  match<int64/*>($a : Numeric(*)) {
+                    | ( $Record : { from_int64 : int64/* | * }/Numeric(*)
+                      , $r : { from_int64 : int64/* | * }
+                      ) =>
+                        select
+                          { from_int64 = $f : int64/* | _ : * } =
+                            $r : { from_int64 : int64/* | * }
+                          in
+                            $f : int64/*
+                  }
+              |]
+        , OFunction
+            "Builtin$.from_literal"
+            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
+            ]
+            [r| 
+                  match<*/*>($a : Numeric(*)) {
+                    | ( $Record : { from_literal : */* | * }/Numeric(*)
+                      , $r : { from_literal : */* | * }
+                      ) =>
+                        select
+                          { from_literal = $f : */* | _ : * } =
+                            $r : { from_literal : */* | * }
+                          in
+                            $f : */*
                   }
               |]
         , OFunction
@@ -352,8 +384,22 @@ objects =
             "Builtin$.from_int32__$impl_Numeric(Intrinsic(Int32))"
             [ Label Kernel.int32 "n"
             ]
-            [r| 
+            [r|
                   n : int32
+              |]
+        , OFunction
+            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Int32))"
+            [ Label Kernel.int64 "n"
+            ]
+            [r|
+                  n : int64
+              |]
+        , OFunction
+            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Int32))"
+            [ Label Kernel.string "s"
+            ]
+            [r| 
+                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => m : int32))
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Int32))"
@@ -391,8 +437,22 @@ objects =
             "Builtin$.from_int32__$impl_Numeric(Intrinsic(Int64))"
             [ Label Kernel.int32 "n"
             ]
-            [r| 
+            [r|
+                  n : int32
+              |]
+        , OFunction
+            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Int64))"
+            [ Label Kernel.int64 "n"
+            ]
+            [r|
                   n : int64
+              |]
+        , OFunction
+            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Int64))"
+            [ Label Kernel.string "s"
+            ]
+            [r| 
+                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_int64 : bignum/int64, n : bignum) (fn(m : int64) => m : int64))
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Int64))"
@@ -430,8 +490,22 @@ objects =
             "Builtin$.from_int32__$impl_Numeric(Intrinsic(Float))"
             [ Label Kernel.int32 "n"
             ]
+            [r|
+                  #(int32_to_float : int32/float, n : int32) (fn(f : float) => f : float)
+              |]
+        , OFunction
+            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Float))"
+            [ Label Kernel.int64 "n"
+            ]
+            [r|
+                  #(int64_to_float : int64/float, n : int64) (fn(f : float) => f : float)
+              |]
+        , OFunction
+            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Float))"
+            [ Label Kernel.string "s"
+            ]
             [r| 
-                  #(int32_to_float : int32/float, n : int32) (fn(a : *) => a : *)
+                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_float : bignum/float, n : bignum) (fn(m : float) => m : float))
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Float))"
@@ -469,8 +543,22 @@ objects =
             "Builtin$.from_int32__$impl_Numeric(Intrinsic(Double))"
             [ Label Kernel.int32 "n"
             ]
+            [r|
+                  #(int32_to_double : int32/double, n : int32) (fn(d : double) => d : double)
+              |]
+        , OFunction
+            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Double))"
+            [ Label Kernel.int64 "n"
+            ]
+            [r|
+                  #(int64_to_double : int64/double, n : int64) (fn(d : double) => d : double)
+              |]
+        , OFunction
+            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Double))"
+            [ Label Kernel.string "s"
+            ]
             [r| 
-                  #(int32_to_double : int32/double, n : int32) (fn(a : *) => a : *)
+                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_double : bignum/double, n : bignum) (fn(m : double) => m : double))
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Double))"
@@ -506,13 +594,36 @@ objects =
         , -- Numeric(nat)
           OFunction
             "Builtin$.from_int32__$impl_Numeric(Intrinsic(Nat))"
-            [ Label Kernel.int32 "n"
+            [ Label Kernel.int32 "m"
             ]
             [r| 
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int32/$Nat
-                    , n : int32
+                    , m : int32
                     )
+              |]
+        , OFunction
+            -- NOTE: Numbers larger than INT32_MAX are truncated
+            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Nat))"
+            [ Label Kernel.int64 "m"
+            ]
+            [r| 
+                  @<$Nat>
+                    ( `Builtin$.nat$_pack` : int32/$Nat
+                    , m : int64
+                    )
+              |]
+        , OFunction
+            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Nat))"
+            [ Label Kernel.string "s"
+            ]
+            [r| 
+                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => 
+                    #(bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => 
+                      @<$Nat>
+                        ( `Builtin$.nat$_pack` : int32/$Nat
+                        , m : int32
+                        )))
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Nat))"
@@ -592,8 +703,22 @@ objects =
             "Builtin$.from_int32__$impl_Numeric(Intrinsic(Bignum))"
             [ Label Kernel.int32 "n"
             ]
-            [r| 
+            [r|
                   #(int32_to_bignum : int32/bignum, n : int32) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Bignum))"
+            [ Label Kernel.int64 "n"
+            ]
+            [r|
+                  #(int64_to_bignum : int64/bignum, n : int64) (fn(a : *) => a : *)
+              |]
+        , OFunction
+            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Bignum))"
+            [ Label Kernel.string "s"
+            ]
+            [r| 
+                  #(bignum_init : string/bignum, s : string) (fn(n : *) => n : *)
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Bignum))"
@@ -1082,14 +1207,6 @@ objects =
               |]
         ]
     }
-
--- unsafeParseKernelModule :: Text -> Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
--- unsafeParseKernelModule t =
---  case runParser (spaces *> module_ <* eof) "" t of
---    Left e ->
---      error (errorBundlePretty e)
---    Right r ->
---      r
 
 unsafeParseKernelExpr :: Text -> Kernel.Expr Kernel.Type
 unsafeParseKernelExpr t =

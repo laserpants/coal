@@ -22,8 +22,10 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Kind.Inference (inferTraitKinds)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
+import Coal.TypeSystem.Unification
 import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
 import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
+import Data.Either (rights)
 import Data.List (intersect, nub, (\\))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -425,15 +427,20 @@ collectTraits :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT
 collectTraits env =
   \case
     DTrait loc name def -> do
-      addTraitEntries env name def'
-      modify $
-        addName (NTrait name)
-          . insertTrait name entry
-          . addTypeExport name
-     where
-      def'@(TraitDefinition ts p ds) = inferTraitKinds env def
-      entry =
-        TraitEntry loc name p ts (Environment.fromList ds)
+      case inferTraitKinds env def of
+        Left errs -> do
+          this <- lift $ gets (principalPath . compilerCurrentModule)
+          tellErrors [KindError err (ErrorLocation this loc) | err <- nub errs]
+          throwError PreflightFailure
+        Right def'@(TraitDefinition ts p ds) -> do
+          addTraitEntries env name def'
+          modify $
+            addName (NTrait name)
+              . insertTrait name entry
+              . addTypeExport name
+         where
+          entry =
+            TraitEntry loc name p ts (Environment.fromList ds)
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     def@(DImport loc path _) -> do
@@ -495,18 +502,19 @@ collectInstances kinds traits =
           instances <- gets moduleInstances
           forM_ deps $
             \(Trait n t) -> do
-              let t2 = toIndexedType kinds t q
+              let tx = toIndexedType kinds t q
               case Environment.lookup n instances of
                 Nothing -> do
-                  tellErrors [MissingRequiredInstance n t2 (ErrorLocation this loc)]
+                  tellErrors [MissingRequiredInstance n tx (ErrorLocation this loc)]
                   throwError PreflightFailure
-                Just res ->
-                  case Map.lookup t2 res of
-                    Nothing -> do
-                      tellErrors [MissingRequiredInstance n t2 (ErrorLocation this loc)]
-                      throwError PreflightFailure
-                    Just{} ->
-                      pure ()
+                Just m -> do
+                  let keys = Map.keys m
+                      i = freshIdIn (tx : keys)
+                      res = for keys (evalUnifier i . match tx)
+
+                  when (null (rights res)) $ do
+                    tellErrors [MissingRequiredInstance n tx (ErrorLocation this loc)]
+                    throwError PreflightFailure
          where
           t1 = toIndexedType kinds p q
           Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict

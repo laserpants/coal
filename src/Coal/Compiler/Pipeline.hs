@@ -30,6 +30,7 @@ import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
+import Coal.TypeSystem.Kind.Inference (KindInferenceError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except (MonadIO, forM_)
 import Data.Text (Text)
@@ -157,6 +158,16 @@ prettyConstraintsGenError =
     e ->
       Text.pack ("TODO:" <> show e)
 
+prettyKindInferenceError :: KindInferenceError -> Text
+prettyKindInferenceError =
+  \case
+    ENoTypeConstructor name ->
+      "No type constructor '" <> name <> "' in scope."
+    ECannotUnifyKinds ->
+      "Kind unification failed"
+    EInfiniteKind ->
+      "Infinite kind"
+
 prettyError :: Environment Text -> CompilerError Metadata -> Text
 prettyError env =
   \case
@@ -212,6 +223,8 @@ prettyError env =
       errorMessage ["The trait '" <> trait <> "' doesn't have a method '" <> name <> "'"] env erl
     MissingRequiredInstance name t erl ->
       errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType t <> ">'"] env erl
+    KindError err erl ->
+      errorMessage ["Kind error: " <> prettyKindInferenceError err] env erl
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msgs env (ErrorLocation path loc) =

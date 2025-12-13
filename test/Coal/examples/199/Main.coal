@@ -1,0 +1,61 @@
+module Main {
+
+  import Number(max)
+  import namespace IO
+
+  type Map<key, val>
+    = Empty
+    | Map({ key    : key
+          , value  : val
+          , height : int32
+          , left   : Map<key, val>
+          , right  : Map<key, val> 
+          })
+
+  // Helpers
+
+  fun height(map) =
+    match(map) {
+      | Empty => 0
+      | Map({ height = h | _ }) => h
+    }
+
+  fun make_node(key, val, left, right) =
+    Map({ key    = key
+        , value  = val
+        , height = 1 + max(height(left), height(right))
+        , left   = left
+        , right  = right
+        })
+
+  fun balance_factor
+    | Empty  = 0
+    | Map(m) = height(m.left) - height(m.right)
+ 
+  // Rotations
+
+  fun rotate_right(map) = 
+    map
+
+  fun rotate_left(map) = 
+    map
+
+  // Rebalancing
+
+  // Lookup
+
+  // Insertion
+
+  // Deletion
+
+  // Constructors
+
+  let empty = Empty
+
+  fun singleton(key, val) = 
+    make_node(key, val, Empty, Empty)
+
+  fun main() = 
+    IO.println_string("")
+
+}

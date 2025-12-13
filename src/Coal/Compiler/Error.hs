@@ -13,6 +13,7 @@ import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
 import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError)
+import Coal.TypeSystem.Kind.Inference (KindInferenceError (..))
 import Extras (Name)
 
 data ErrorLocation a = ErrorLocation Name a
@@ -45,6 +46,7 @@ data CompilerError a
   | MissingTraitDefinition Name Name (ErrorLocation a)
   | UnexpectedTraitDefinition Name Name (ErrorLocation a)
   | MissingRequiredInstance Name IndexedType (ErrorLocation a)
+  | KindError KindInferenceError (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -112,4 +114,6 @@ errorLocation =
     UnexpectedTraitDefinition _ _ erl ->
       Just erl
     MissingRequiredInstance _ _ erl ->
+      Just erl
+    KindError _ erl ->
       Just erl

@@ -26,7 +26,7 @@ import Data.Foldable (for_)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Extras (Name)
-import System.Console.AsciiProgress
+import System.Console.AsciiProgress (ProgressBar, tick)
 import System.Directory (canonicalizePath, copyFile)
 import System.FilePath (takeBaseName, (<.>), (</>))
 import System.IO.Temp (withSystemTempDirectory)

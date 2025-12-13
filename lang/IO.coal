@@ -1,5 +1,7 @@
 module IO {
 
+  import Nat(unpack)
+
   fun println_string(s : string) : IO<unit> =
     io$_println_string(s)
 
@@ -47,6 +49,12 @@ module IO {
 
   fun print_double(d : double) : IO<unit> =
     io$_print_double(d)
+
+  fun println_nat(n : nat) : IO<unit> =
+    io$_println_int32(unpack(n))
+
+  fun print_nat(n : nat) : IO<unit> =
+    io$_print_int32(unpack(n))
 
   fun __eval_io(io_val : IO<v>) : v =
     io$_eval(io_val)

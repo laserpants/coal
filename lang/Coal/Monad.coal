@@ -3,9 +3,15 @@ module Coal.Monad {
   import Coal.Combinators(flip, always)
   import Coal.Applicative(trait Applicative)
   import IO(__eval_io)
+  import namespace List
 
   trait Monad<m> with Applicative<m> {
     bind : m<a> -> (a -> m<b>) -> m<b>
+  }
+
+  instance Monad<List> {
+    // bind : List<a> -> (a -> List<b>) -> List<b>
+    fun bind(xs, f) = List.concat_map(f, xs)
   }
 
   instance Monad<IO> {

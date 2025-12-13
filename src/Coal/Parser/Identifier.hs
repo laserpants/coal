@@ -4,6 +4,7 @@ module Coal.Parser.Identifier (
   underscore,
   validChar,
   name,
+  backtickName,
   constructor,
   magicConstructor,
   withInitial,
@@ -31,6 +32,11 @@ validChar = alphaNumChar <|> underscore
 {-# INLINE name #-}
 name :: Parser Text
 name = identifier (lowerChar <|> underscore)
+
+backtickName :: Parser Text
+backtickName = do
+  s <- backtickString
+  pure ("(" <> s <> ")")
 
 {-# INLINE constructor #-}
 constructor :: Parser Text

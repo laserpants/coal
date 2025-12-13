@@ -126,6 +126,8 @@ interpretArtifact =
       pure [CType name t]
     ArtifactMemoizedConstant name ->
       pure [CGlobal name i8Ptr (Just LPrivate) Null]
+    ArtifactCFunctionCall "bignum_init" _ _ ->
+      pure []
     ArtifactCFunctionCall name t ts ->
       pure [CDeclare name t ts]
     ArtifactStringLiteral name str ->

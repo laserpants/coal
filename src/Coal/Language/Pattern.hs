@@ -58,6 +58,8 @@ instance (Data a, Data t) => BoundVars (Pattern a t) where
     \case
       PRecord _ _ d mp ->
         boundIn mp <> unions (fmap boundIn d)
+      PConstructor _ _ ps ->
+        unions (fmap boundIn ps)
       PAnnotation _ _ p ->
         boundIn p
       p ->

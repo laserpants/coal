@@ -2,10 +2,19 @@ module Coal.Applicative {
   
   import Coal.Functor(trait Functor)
   import IO(return, __eval_io)
+  import namespace List
 
-  trait Applicative<f> {
+  trait Applicative<f> with Functor<f> {
     ap : f<a -> b> -> f<a> -> f<b>
     pure : a -> f<a>
+  }
+
+  instance Applicative<List> {
+    // ap : List<a -> b> -> List<a> -> List<b>
+    fun ap(fs, xs) = 
+      List.concat_map(fn(f) => List.map(f, xs), fs)
+
+    fun pure(x) = [x]
   }
 
   instance Applicative<IO> {
