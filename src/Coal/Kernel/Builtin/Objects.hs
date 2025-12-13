@@ -603,7 +603,7 @@ objects =
                     )
               |]
         , OFunction
-            -- TODO
+            -- NOTE: Numbers larger than INT32_MAX are truncated
             "Builtin$.from_int64__$impl_Numeric(Intrinsic(Nat))"
             [ Label Kernel.int64 "m"
             ]
