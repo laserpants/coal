@@ -25,9 +25,9 @@ import Text.Megaparsec.Char (upperChar)
 parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
   parseImport
-    <|> try parseFunctionGroup
-    <|> parseFunctionDefinition
-    <|> parseLetDefinition
+    <|> try (parseFunctionGroup name)
+    <|> parseFunctionDefinition name
+    <|> parseLetDefinition name
     <|> try parseTypeAlias
     <|> parseTypeDefinition
     <|> parseCodataDefinition
@@ -70,8 +70,14 @@ parseTraitInstance = do
   t <- angleBrackets parseType
   end <- getSourcePos
   ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseType))
-  ds <- braces (some parseDefinition)
+  ds <- braces (some parseMethod)
   pure (DInstance (Metadata start end) n (InstanceDefinition ts t ds))
+ where
+  methodName = backtickName <|> name
+  parseMethod =
+    try (parseFunctionGroup methodName)
+      <|> parseFunctionDefinition methodName
+      <|> parseLetDefinition methodName
 
 parseTrait :: Parser p -> Parser (Trait p)
 parseTrait p = Trait <$> constructor <*> angleBrackets p
@@ -192,10 +198,10 @@ parseNormalImport start = do
   end <- getSourcePos
   pure (DImport (Metadata start end) (Path path) names)
 
-parseFunctionGroup :: Parser (Definition Metadata o ())
-parseFunctionGroup = do
+parseFunctionGroup :: Parser Name -> Parser (Definition Metadata o ())
+parseFunctionGroup parseName = do
   start <- getSourcePos
-  fn <- lexeme_ "fun" *> name
+  fn <- lexeme_ "fun" *> parseName
   ann <- optional parseAnnotation
   fns <- some (void pipe *> parseGroupFunctionDefinition ann)
   end <- getSourcePos
@@ -212,10 +218,10 @@ parseGroupFunctionDefinition ann = do
   pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
 -- TODO: DRY
-parseFunctionDefinition :: Parser (Definition Metadata o ())
-parseFunctionDefinition = do
+parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata o ())
+parseFunctionDefinition parseName = do
   start <- getSourcePos
-  fn <- lexeme_ "fun" *> name
+  fn <- lexeme_ "fun" *> parseName
   args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
   ann <- optional parseAnnotation
   end <- getSourcePos
@@ -224,12 +230,12 @@ parseFunctionDefinition = do
   pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
-parseWhereClauses = lexeme_ "where" *> braces (some parseFunctionDefinition)
+parseWhereClauses = lexeme_ "where" *> braces (some (parseFunctionDefinition name))
 
-parseLetDefinition :: Parser (Definition Metadata o ())
-parseLetDefinition = do
+parseLetDefinition :: Parser Name -> Parser (Definition Metadata o ())
+parseLetDefinition parseName = do
   start <- getSourcePos
-  c <- lexeme_ "let" *> name
+  c <- lexeme_ "let" *> parseName
   ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
