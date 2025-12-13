@@ -14,11 +14,13 @@ import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
+import qualified Data.ByteString.Char8 as ByteString
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Extras (Name, isConstructor)
+import GHC.Int (Int32, Int64)
 import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -262,14 +264,19 @@ parseInt :: Parser (Expression Metadata ())
 parseInt = do
   withMetadata $ do
     n <- Lexer.signed spaces (lexeme Lexer.decimal)
-    pure
-      ( \loc ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "from_int32"))
-            (ELiteral loc (LInt32 n) :| [])
-      )
+    pure (`fromLiteral` n)
+
+fromLiteral :: Metadata -> Integer -> Expression Metadata ()
+fromLiteral loc n =
+  EApplication loc () (EVariable loc (Label () f)) (ELiteral loc lit :| [])
+ where
+  (f, lit)
+    | n <= fromIntegral (maxBound :: Int32) =
+        ("from_int32", LInt32 (fromIntegral n))
+    | n <= fromIntegral (maxBound :: Int64) =
+        ("from_int64", LInt64 (fromIntegral n))
+    | otherwise =
+        ("from_literal", LString (ByteString.pack $ show n))
 
 parseListLiteral :: Parser (Expression Metadata ())
 parseListLiteral =

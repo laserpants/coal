@@ -4,7 +4,7 @@ module Coal.Applicative {
   import IO(return, __eval_io)
   import namespace List
 
-  trait Applicative<f> {
+  trait Applicative<f> with Functor<f> {
     ap : f<a -> b> -> f<a> -> f<b>
     pure : a -> f<a>
   }

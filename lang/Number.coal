@@ -10,11 +10,23 @@ module Number {
   fun int32_to_double(n : int32) : double =
     #{int32_to_double : int32 -> double}(n)(fn(d) => d)
 
+  fun int64_to_float(n : int64) : float =
+    #{int64_to_float : int64 -> float}(n)(fn(f) => f)
+
+  fun int64_to_double(n : int64) : double =
+    #{int64_to_double : int64 -> double}(n)(fn(d) => d)
+
   fun float_to_int32(f : float) : int32 =
     #{float_to_int32 : float -> int32}(f)(fn(n) => n)
 
   fun double_to_int32(d : double) : int32 =
     #{double_to_int32 : double -> int32}(d)(fn(n) => n)
+
+  fun float_to_int64(f : float) : int64 =
+    #{float_to_int64 : float -> int64}(f)(fn(n) => n)
+
+  fun double_to_int64(d : double) : int64 =
+    #{double_to_int64 : double -> int64}(d)(fn(n) => n)
 
   fun max(a, b) = if (a > b) then a else b
 

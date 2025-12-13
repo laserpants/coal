@@ -161,6 +161,14 @@ builtinFunctions =
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
     )
   ,
+    ( "from_int64"
+    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt64 ~> t0))
+    )
+  ,
+    ( "from_literal"
+    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IString ~> t0))
+    )
+  ,
     ( "negate"
     , forall1' (\t0 -> ([Trait "Numeric" t0], t0 ~> t0))
     )

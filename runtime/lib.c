@@ -422,6 +422,22 @@ double_to_int32(double d)
   return n;
 }
 
+int64_t
+float_to_int64(float f)
+{
+  int64_t n = (int64_t)f;
+
+  return n;
+}
+
+int64_t
+double_to_int64(double d)
+{
+  int64_t n = (int64_t)d;
+
+  return n;
+}
+
 float*
 int32_to_float(int32_t n)
 {
@@ -442,6 +458,26 @@ int32_to_double(int32_t n)
   return p;
 }
 
+float*
+int64_to_float(int64_t n)
+{
+  float* p = gc_malloc(sizeof(float));
+
+  *p = (float)n;
+
+  return p;
+}
+
+double*
+int64_to_double(int64_t n)
+{
+  double* p = gc_malloc(sizeof(double));
+
+  *p = (double)n;
+
+  return p;
+}
+
 mpz_t*
 int32_to_bignum(int32_t n)
 {
@@ -451,6 +487,52 @@ int32_to_bignum(int32_t n)
 
   mpz_init(*result);
   mpz_set_si(*result, (long)n); /* mpz_set_si handles negative values too */
+  return result;
+}
+
+mpz_t*
+int64_to_bignum(int64_t n)
+{
+  mpz_t* result = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!result)
+    return NULL;
+
+  mpz_init(*result);
+  mpz_set_si(*result, (long)n);
+  return result;
+}
+
+int32_t
+bignum_to_int32(const mpz_t* n)
+{
+  return (int32_t)mpz_get_si(*n);
+}
+
+int64_t
+bignum_to_int64(const mpz_t* n)
+{
+  return (int64_t)mpz_get_si(*n);
+}
+
+float*
+bignum_to_float(const mpz_t* n)
+{
+  float* result = (float*)gc_malloc(sizeof(float));
+  if (!result)
+    return NULL;
+
+  *result = (float)mpz_get_d(*n);
+  return result;
+}
+
+double*
+bignum_to_double(const mpz_t* n)
+{
+  double* result = (double*)gc_malloc(sizeof(double));
+  if (!result)
+    return NULL;
+
+  *result = mpz_get_d(*n);
   return result;
 }
 
