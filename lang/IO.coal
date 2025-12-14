@@ -64,6 +64,7 @@ module IO {
 
   let return = __return_io
 
+  // TODO: Error handling, e.g., file not found
   fun read_file(path : string) : IO<string> =
     #{read_file : string -> IO<string>}(path)(fn(s) => __return_io(s))
 
