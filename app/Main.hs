@@ -9,6 +9,7 @@ import Coal.Compiler (compile)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Data.List (nub)
 import Options.Applicative
+import Version (coalVersion)
 
 data CommandOptions = CommandOptions
   { inputFiles :: [FilePath]
@@ -90,7 +91,15 @@ main = do
 optsInfo :: ParserInfo CommandOptions
 optsInfo =
   info
-    (optionsParser <**> helper)
+    ( optionsParser
+        <**> helper
+        <**> infoOption
+          coalVersion
+          ( long "version"
+              <> short 'V'
+              <> help "Show compiler version"
+          )
+    )
     ( fullDesc
         <> progDesc "The Coal compiler command-line interface"
         <> header "Welcome to the Coal compiler"

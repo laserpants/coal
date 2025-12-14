@@ -71,6 +71,7 @@ executables:
     dependencies:
     - coal
     - optparse-applicative
+    - template-haskell
 
 tests:
   coal-test:

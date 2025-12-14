@@ -285,6 +285,8 @@ library
 executable coal
   main-is: Main.hs
   other-modules:
+      Utils
+      Version
       Paths_coal
   hs-source-dirs:
       app
@@ -311,6 +313,7 @@ executable coal
     , process
     , raw-strings-qq
     , recursion-schemes
+    , template-haskell
     , temporary
     , text
     , text-show
