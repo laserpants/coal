@@ -1,9 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
@@ -57,7 +59,15 @@ collectEdges names m = do
   pure (m, modulePathName m, deps')
 
 dependencies :: Module Metadata Kind () -> [(Metadata, Name)]
-dependencies (Module _ _ defs) = concatMap importPath defs
+dependencies (Module p _ defs)
+  | principalPath p `elem` embeddedPaths = imported
+  | otherwise = imported <> extra
+ where
+  imported = concatMap importPath defs
+  extra =
+    [ (mempty, "Coal.Applicative")
+    , (mempty, "Coal.Monad")
+    ]
 
 importPath :: Definition Metadata Kind () -> [(Metadata, Name)]
 importPath =

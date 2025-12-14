@@ -257,6 +257,8 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
         fromNode (emitRectangle ("EFFICall\\n" <> name) Nothing) $ do
           emitEdgesTo es
           emitEdgeTo e
+      EDoBlock{} ->
+        emitRectangle "EDoBlock" Nothing
 
 instance (Pretty t, Show t) => Dot t (Pattern a t) where
   toDot =

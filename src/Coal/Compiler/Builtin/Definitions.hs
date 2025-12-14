@@ -3,6 +3,7 @@
 module Coal.Compiler.Builtin.Definitions (
   module Coal.Compiler.Builtin.Functions,
   insertBuiltinDefinitions,
+  insertExtraDefinitions,
   builtinTraitInstances,
 ) where
 
@@ -18,7 +19,10 @@ import Extras (Name, for)
 insertBuiltinDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]
 insertBuiltinDefinitions = (builtinDefinitions <>)
 
-{-# INLINE builtinFunctionNames #-}
+{-# INLINE insertExtraDefinitions #-}
+insertExtraDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]
+insertExtraDefinitions = (extraDefinitions <>)
+
 builtinFunctionNames :: [Name]
 builtinFunctionNames = for builtinFunctions fst
 
@@ -100,6 +104,13 @@ builtinTraitInstances =
   , --
     "(<>)__$impl_Semigroup(Intrinsic(String))"
   , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
+  ]
+
+-- Needed to support do-notation
+extraDefinitions :: (Monoid a) => [Definition a k ()]
+extraDefinitions =
+  [ DImport mempty (Path ["Coal", "Monad"]) [ImportTrait mempty "Monad" ["bind"]]
+  , DImport mempty (Path ["Coal", "Applicative"]) [ImportTrait mempty "Applicative" ["pure"]]
   ]
 
 builtinDefinitions :: (Monoid a) => [Definition a k ()]

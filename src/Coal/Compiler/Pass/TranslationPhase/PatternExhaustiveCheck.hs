@@ -189,8 +189,10 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
         EFFICall a ll
           <$> traverse (patternExhaustiveCheck name) es
           <*> patternExhaustiveCheck name e
-      trait@ETraitDictionary{} ->
-        pure trait
+      e@ETraitDictionary{} ->
+        pure e
+      e@EDoBlock{} ->
+        pure e
 
 checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata t) -> CompilerT Metadata m (NonEmpty (Clause Metadata t))
 checkExhaustive name loc cs = do

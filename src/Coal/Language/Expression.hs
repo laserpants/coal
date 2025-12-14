@@ -73,6 +73,8 @@ data Expression a t
     ETraitDictionary a t (Trait t)
   | -- | FFI function call
     EFFICall a (Label (Type Parameter ())) [Expression a t] (Expression a t)
+  | -- | Do-notation block
+    EDoBlock a (NonEmpty (Pattern a t, Expression a t))
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
 
 data Clause a t = EClause a (Pattern a t) (NonEmpty (Choice Expression a t))

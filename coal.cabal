@@ -6,21 +6,18 @@ cabal-version: 1.12
 
 name:           coal
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/laserpants/coal#readme>
-homepage:       https://github.com/laserpants/coal#readme
-bug-reports:    https://github.com/laserpants/coal/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2025 Author name here
+synopsis:       The Coal programming language and compiler
+description:    Please see the README at <https://codeberg.org/laserpants/coal/src/branch/main/README.md>
+homepage:       https://coal-lang.org
+bug-reports:    https://codeberg.org/laserpants/coal/issues
+author:         Heikki Johannes Hildén
+maintainer:     hildenjohannes@gmail.com
+copyright:      2020-present Heikki Johannes Hildén
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
-
-source-repository head
-  type: git
-  location: https://github.com/laserpants/coal
 
 library
   exposed-modules:
@@ -68,6 +65,7 @@ library
       Coal.Compiler.Pass.ParsingPhase.ImportsTopRule
       Coal.Compiler.Pass.ParsingPhase.Parsing
       Coal.Compiler.Pass.PreflightPhase
+      Coal.Compiler.Pass.PreflightPhase.DoNotation
       Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule
       Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule
       Coal.Compiler.Pass.PreflightPhase.Setup

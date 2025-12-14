@@ -9,6 +9,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Language (Binding (..), Choice (..), Clause (..), CompiledClause (..), Expression (..), Guard (..))
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
+import Data.Tuple.Extra (secondM)
 import Extras (Name, const2, (<$$>))
 
 class Transformable e where
@@ -146,6 +147,8 @@ instance Transformable Expression where
         EFFICall a ll
           <$> traverse (rewrite name f) es
           <*> rewrite name f e
+      EDoBlock a es ->
+        EDoBlock a <$> traverse (secondM (rewrite name f)) es
       expr@ETraitDictionary{} ->
         pure expr
 

@@ -77,6 +77,7 @@ reserved =
   , "char"
   , "string"
   , "nat"
+  , "do"
   ]
 
 word :: Parser Text -> Parser Text

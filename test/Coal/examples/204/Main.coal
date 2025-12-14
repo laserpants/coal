@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(println_double, random)
+
+  fun main() = do {
+    n <- random();
+    println_double(n);
+  }
+
+}

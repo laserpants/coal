@@ -479,3 +479,5 @@ emitConstraints =
       error "Not implemented"
     ELambdaMatch{} ->
       error "Not implemented"
+    EDoBlock{} ->
+      error "Not implemented"

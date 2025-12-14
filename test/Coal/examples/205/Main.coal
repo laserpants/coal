@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(read_file, println_string)
+
+  fun main() = do {
+    s <- read_file("./test/Coal/examples/205/sample.txt");
+    println_string(s);
+  }
+
+}

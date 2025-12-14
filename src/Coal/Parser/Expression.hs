@@ -27,7 +27,8 @@ import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Expression Metadata ())
 parseAtom =
-  try parseFunctionApplication
+  try parseDoBlock
+    <|> try parseFunctionApplication
     <|> parseFFICall
     <|> parseVariableExpression
     <|> parseDataConstructor
@@ -41,6 +42,29 @@ parseAtom =
     <|> parseLetExpression
     <|> try (parens parseExpression)
     <|> parseTupleExpression
+
+parseDoBlock :: Parser (Expression Metadata ())
+parseDoBlock = do
+  withMetadata $ do
+    lexeme_ "do"
+    exprs <- braces $ do
+      nonEmpty $ some (try parseDoExpression <|> parseVoidDoExpression)
+    pure (`EDoBlock` exprs)
+
+parseDoExpression :: Parser (Pattern Metadata (), Expression Metadata ())
+parseDoExpression = do
+  p <- parsePattern
+  symbol_ "<-"
+  e <- parseExpression
+  symbol_ ";"
+  pure (p, e)
+
+parseVoidDoExpression :: Parser (Pattern Metadata (), Expression Metadata ())
+parseVoidDoExpression = do
+  e <- parseExpression
+  symbol_ ";"
+  withMetadata $
+    pure (\loc -> (PAny loc (), e))
 
 parseSelectorOp :: Parser (Expression Metadata () -> Expression Metadata ())
 parseSelectorOp = do

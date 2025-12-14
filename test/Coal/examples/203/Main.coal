@@ -1,0 +1,56 @@
+module Main {
+
+  import Char(digit_to_int32)
+  import IO(readln, println_string, random, return)
+  import Coal.Functor(trait Functor(map))
+  import Coal.Monad(and_then, and_eval)
+  import String(to_list, remove_whitespace, int32_to_string)
+  import Number(double_to_int32)
+  import List(is_empty)
+
+  fun digits_to_unsigned(chars) : Option<int32> =
+    if (is_empty(chars)) 
+      then
+        None
+      else
+        fold(chars, Some(0)) {
+          | ch :: @go =>
+              fn(t) =>
+                match(digit_to_int32(ch)) {
+                  | Some(n) =>
+                      go(map(fn(s) => n + 10 * s, t))
+                  | None =>
+                      None
+                }
+          | [] =>
+              fn(t) => t
+        }
+
+  fun parse_int32(str : string) : Option<int32> =
+    digits_to_unsigned(to_list(remove_whitespace(str)))
+
+  fun random_int32() : IO<int32> =
+    random()
+      |. and_then(fn(n) => return(double_to_int32(n * 10)))
+
+  fun main() = do {
+    println_string("Enter your name");
+    name <- readln();
+    println_string("Hello, " <> name <> "!");
+
+    rand <- random_int32();
+    println_string("Guess what number I am thinking of");
+    guess <- readln();
+
+    println_string(
+      match(parse_int32(guess)) {
+        | Some(n) =>
+            if (n == rand) 
+              then "You guessed right!"
+              else "Sorry, the number I was thinking of was " <> int32_to_string(rand) <> "."
+        | None =>
+            "Not a number"
+      });
+  }
+
+}

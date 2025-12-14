@@ -1,11 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Coal.Compiler.Embedded (embedded) where
+module Coal.Compiler.Embedded (embedded, embeddedPaths) where
 
 import Data.ByteString (ByteString)
 import Data.FileEmbed (embedFile)
 import Data.Text (Text)
+import Extras (Name, for)
+
+{-# INLINE embeddedPaths #-}
+embeddedPaths :: [Name]
+embeddedPaths = for embedded fst
 
 embedded :: [(Text, ByteString)]
 embedded =
