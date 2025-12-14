@@ -1,0 +1,16 @@
+module Main {
+
+  import IO(println_int32, println_double, random)
+
+  fun banan() : IO<int32> = do {
+    n <- random();
+//    println_double(n);
+    pure(5);
+  }
+
+  fun main() = do {
+    r <- banan();
+    println_int32(r);
+  }
+
+}

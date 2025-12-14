@@ -15,6 +15,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NonEmpty
 
 passDoNotation :: (MonadIO m, Data a, Monoid a) => Pass a m [Module a Kind ()] [Module a Kind ()]
 passDoNotation = mapPass $ Pass{runPass = desugarDoNotation}
@@ -90,12 +91,23 @@ instance (Data a, Monoid a) => TransformContext (Expression a ()) where
   desugarDoNotation =
     \case
       EDoBlock _ es ->
-        pure $ foldr go (EApplication mempty () (EVariable mempty (Label () "pure")) (ELiteral mempty LUnit :| [])) es
+        pure $ foldr go e' es'
        where
+        (e', es') = normalize es
         bind e1 e2 = EApplication mempty () (EVariable mempty (Label () "bind")) (e1 :| [e2])
         go (p, e) e2 = bind e (ELambda mempty (p :| []) e2)
       e ->
         descendM desugarDoNotation e
+
+normalize :: (Monoid a) => NonEmpty (Pattern a (), Expression a ()) -> (Expression a (), NonEmpty (Pattern a (), Expression a ()))
+normalize es =
+  case lst of
+    (PAny _ (), e) ->
+      (e, NonEmpty.fromList $ NonEmpty.init es)
+    _ ->
+      (EApplication mempty () (EVariable mempty (Label () "pure")) (ELiteral mempty LUnit :| []), es)
+ where
+  lst = NonEmpty.last es
 
 instance (Data a, Monoid a) => TransformContext (Clause a ()) where
   desugarDoNotation =
