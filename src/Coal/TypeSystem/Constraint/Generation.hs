@@ -106,7 +106,7 @@ emitPListLiteralConstraints loc t ps =
     [ Equality (RuleListLiteral loc ts) ts
     ]
  where
-  ts = t : (typeOf <$> ps)
+  ts = t : (listType . typeOf <$> ps)
 
 emitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a IndexedType) -> ConstraintsGen a ()
 emitPTupleConstraints loc t ps =
