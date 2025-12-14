@@ -1,10 +1,10 @@
 module Main {
 
-  import IO(read_file, println_string)
+  import IO(read_file, print_string)
 
   fun main() = do {
     s <- read_file("./test/Coal/examples/205/sample.txt");
-    println_string(s);
+    print_string(s);
   }
 
 }
