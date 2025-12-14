@@ -292,10 +292,18 @@ expandConstantDefinitionTraits name =
           pure $ ConstantDefinition loc with (With [] t) expr
         tr : trs -> do
           path <- gets compilerCurrentModule
-          -- Insert default instance for Numeric trait, which is int32
-          if "main" == name && Path ["Main"] == path && isNumericTrait tr
+          -- Insert default int32 instance for Numeric and Ordered traits
+          if "main" == name && Path ["Main"] == path
             then do
-              fields <- fromJust <$> lookupTraitInstance loc (Trait "Numeric" (TIntrinsic IInt32))
+              recs <- forM (tr :| trs) $
+                \(Trait trait _) -> do
+                  fields <- fromJust <$> lookupTraitInstance loc (Trait trait (TIntrinsic IInt32))
+                  pure $
+                    ERecord
+                      mempty
+                      (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (TIntrinsic IInt32 :| []))
+                      fields
+                      Nothing
               pure $
                 ConstantDefinition
                   loc
@@ -305,7 +313,7 @@ expandConstantDefinitionTraits name =
                       mempty
                       t
                       (dictionaryLambda tr trs expr)
-                      (ERecord mempty (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) "Numeric") (TIntrinsic IInt32 :| [])) fields Nothing :| [])
+                      recs
                   )
             else
               pure $
@@ -314,10 +322,6 @@ expandConstantDefinitionTraits name =
 isVariable :: Trait IndexedType -> Bool
 isVariable (Trait _ TVariable{}) = True
 isVariable _ = False
-
-isNumericTrait :: Trait a -> Bool
-isNumericTrait (Trait "Numeric" _) = True
-isNumericTrait _ = False
 
 dictionaryLambda ::
   (Monoid a, HasType o k (Trait (Type o k))) =>

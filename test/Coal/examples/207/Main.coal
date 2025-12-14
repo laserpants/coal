@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_string)
+
+  fun main() = 
+    match((5, 5)) {
+//      | (5, x) or (x, 5) => println_string("Banan")
+      | (5, x) => println_string("Banan")
+      | (x, y) => println_string("No")
+    }
+
+}

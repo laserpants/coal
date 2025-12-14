@@ -79,7 +79,7 @@ numericLiteral (ll, int) e1 =
     opAndE
     ( e1
         :| [ applicationE
-              opEqualToE
+              (EVariable mempty (Label () "(==)"))
               (EVariable mempty ll :| [fromLiteral int])
            ]
     )
