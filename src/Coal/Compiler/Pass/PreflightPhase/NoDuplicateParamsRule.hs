@@ -202,7 +202,6 @@ checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
       PTuple _ _ ps ->
         traverse_ checkPattern ps
       POr _ _ p1 p2 -> do
-        -- TODO: Make this more robust
         s <- get
         checkPattern p1
         put s
