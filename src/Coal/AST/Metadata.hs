@@ -124,7 +124,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleRecordLacks a _ _ -> a
       RuleTailRow a _ _ -> a
       RuleFoldType a -> a
-      RuleOrConstraint a _ -> a
+      RuleOrConstraint a _ _ -> a
       RuleTraitInstance a _ _ -> a
       RuleAssumptionExplicit a _ _ -> a
 

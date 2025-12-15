@@ -91,9 +91,10 @@ emitPConstructorConstraints loc (Label t name) ps = do
 
 emitPOrConstraints :: (Data a) => a -> IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
 emitPOrConstraints loc t p1 p2 = do
-  tellRight [Equality (RuleOrConstraint loc ts) ts]
+  tellRight [Equality (RuleOrConstraint loc t1 t2) [t, t1, t2]]
  where
-  ts = [t, typeOf p1, typeOf p2]
+  t1 = typeOf p1
+  t2 = typeOf p2
 
 emitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
 emitPListConsConstraints loc t p1 p2 = do
