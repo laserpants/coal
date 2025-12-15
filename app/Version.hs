@@ -3,9 +3,9 @@
 
 module Version (coalVersion) where
 
-import Control.Exception
-import Language.Haskell.TH
-import System.Process
+import Control.Exception (SomeException, catch)
+import Language.Haskell.TH (runIO, stringE)
+import System.Process (readProcess)
 import Utils (trim)
 
 coalVersion :: String

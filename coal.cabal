@@ -75,6 +75,7 @@ library
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
+      Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandPatterns
       Coal.Compiler.Pass.TranslationPhase.MatchExpressions
       Coal.Compiler.Pass.TranslationPhase.Nats
@@ -87,7 +88,6 @@ library
       Coal.Compiler.Pass.TypePhase.Errors
       Coal.Compiler.Pass.TypePhase.ExpandAliases
       Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
-      Coal.Compiler.Pass.TypePhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TypePhase.ExpressionFolds
       Coal.Compiler.Pass.TypePhase.ExpressionUnfolds
       Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion

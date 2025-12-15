@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_string, println_int32)
+
+  fun main() = 
+    match([3]) {
+      | [5 or 3] => println_string("!")
+      | [x] => println_int32(x)
+      | _ => println_string("---")
+    }
+
+}

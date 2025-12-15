@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_string, println_int32)
+
+  fun main() = 
+    let 
+      x =
+        { a = 3 }
+    in
+    match({ a = 5 }) {
+      | { a = 5 or 3 } => println_string("F")
+      | { a = z } => println_string("g")
+    }
+
+}

@@ -22,6 +22,7 @@ import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import Extras (Name)
 
@@ -46,8 +47,20 @@ instance (RecordDesugarable a p) => RecordDesugarable a (NonEmpty p) where
 instance (Data a, Monoid a) => RecordDesugarable a (Expression a IndexedType) where
   desugarRecordPatterns =
     \case
-      EMatch a t e cs ->
-        EMatch a t e <$> desugarRecordPatterns cs
+      EMatch a t e ks -> do
+        es <- forM (NonEmpty.init $ NonEmpty.tails ks) $
+          \case
+            (EClause a1 p cs : rest) -> do
+              (q, fs) <- listenRecordEntry (desugarRecordPatterns p)
+              cs' <- forM cs $
+                \case
+                  CPlain a2 gs e1 -> do
+                    e2 <- desugarRecordPatterns e1
+                    CPlain a2 <$> desugarRecordPatterns gs <*> foldrM (desugar t e rest) e2 fs
+              pure (EClause a1 q cs')
+            _ ->
+              error "Not implemented"
+        pure (EMatch a t e (NonEmpty.fromList es))
       EFold a t es cs e ->
         EFold a t es cs <$> desugarRecordPatterns e
       e ->
@@ -58,17 +71,6 @@ instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a IndexedTy
     \case
       CGuard e ->
         CGuard <$> desugarRecordPatterns e
-
-instance (Data a, Monoid a) => RecordDesugarable a (Clause a IndexedType) where
-  desugarRecordPatterns =
-    \case
-      EClause a p cs -> do
-        (q, fs) <- listenRecordEntry (desugarRecordPatterns p)
-        ds <- forM cs $
-          \case
-            CPlain a1 gs e ->
-              CPlain a1 <$> desugarRecordPatterns gs <*> foldrM desugar e fs
-        pure (EClause a q ds)
 
 instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
   desugarRecordPatterns =
@@ -106,8 +108,8 @@ extractVarName =
     _ ->
       "_"
 
-desugar :: (Data a, Monoid a, Monad m) => RecordEntry a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
-desugar (name, dict, p1) expr = do
+desugar :: (Data a, Monoid a, Monad m) => IndexedType -> Expression a IndexedType -> [Clause a IndexedType] -> RecordEntry a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
+desugar t0 e0 rest (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) (supplied (freshName "row"))
   (_, _, e1) <- foldrM go (v1, r1, e2 expr) (zip fields (name : names))
   pure e1
@@ -122,9 +124,29 @@ desugar (name, dict, p1) expr = do
         ll1 = Label (typeOf p) (prefix <> ".field." <> fname)
         ll2 = Label (TRecord (TRow row)) (prefix <> ".tail")
         match = EMatch mempty (typeOf expr2)
-        clause q e = EClause mempty q (CPlain mempty [] e :| []) :| []
+        clause q e = EClause mempty q (CPlain mempty [] e :| [])
         focus = EFocus fname ll1 ll2 (EVariable mempty (Label (TRow (RExtend fname t2 row)) prefix))
-    e3 <- desugarRecordPatterns (match (EVariable mempty ll1) (clause p expr2))
+    e3 <-
+      desugarRecordPatterns
+        ( match
+            (EVariable mempty ll1)
+            ( clause p expr2
+                :| ( case rest of
+                      [] -> []
+                      q : qs ->
+                        [ EClause
+                            mempty
+                            (PAny mempty t2)
+                            ( CPlain
+                                mempty
+                                []
+                                (EMatch mempty t0 e0 (q :| qs))
+                                :| []
+                            )
+                        ]
+                   )
+            )
+        )
     pure
       ( prefix
       , RExtend fname t2 row
@@ -141,6 +163,7 @@ desugar (name, dict, p1) expr = do
                           [PVariable mempty (Label (TRow row) var)]
                       )
                       e3
+                      :| []
                   )
           )
       )

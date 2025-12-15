@@ -7,6 +7,7 @@ import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeObjects)
 import Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns)
+import Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns)
 import Coal.Compiler.Pass.TranslationPhase.MatchExpressions (passMatchExpressions)
 import Coal.Compiler.Pass.TranslationPhase.Nats (passCompileNats)
@@ -28,6 +29,7 @@ translationPhasePasses =
     >-> passRecordPatterns
     >-> passPatternExhaustiveCheck
     >-> passExpandAsPatterns
+    >-> passExpandIntegerLiteralPatterns
     >-> generateDebugArtifacts "Patterns"
     >-> passMatchExpressions
     >-> generateDebugArtifacts "MatchExpressions"

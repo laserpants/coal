@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_string, println_int32)
+
+  fun main() = 
+    // TODO: fix
+    match((5, 9)) {
+      | (5, x) or (y, 5) => println_int32(y)
+      | (x, y) => println_string("No")
+    }
+
+}

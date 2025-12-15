@@ -4,10 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TypePhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
+module Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.AST.Shorthand
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal (tellErrors)
@@ -31,7 +30,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 import GHC.Int (Int32, Int64)
 import TextShow (showt)
 
-passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
+passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandIntegerLiteralPatterns = Pass{runPass = expandIntegerLiteralPatterns}
 
 class TransformContext e where
@@ -43,7 +42,7 @@ instance (TransformContext e) => TransformContext [e] where
 instance (TransformContext e) => TransformContext (NonEmpty e) where
   expandIntegerLiteralPatterns = traverse expandIntegerLiteralPatterns
 
-instance TransformContext (Expression Metadata ()) where
+instance TransformContext (Expression Metadata IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       EMatch a t e cs ->
@@ -53,12 +52,13 @@ instance TransformContext (Expression Metadata ()) where
       e ->
         descendM expandIntegerLiteralPatterns e
 
-expandClause :: (Monad m) => Metadata -> Expression Metadata () -> (Clause Metadata (), [Clause Metadata ()]) -> CompilerT Metadata m (Clause Metadata ())
-expandClause _ expr (cl@(EClause a p (CPlain a1 gs e1 :| [])), ds) = do
+expandClause :: (Monad m) => Metadata -> Expression Metadata IndexedType -> (Clause Metadata IndexedType, [Clause Metadata IndexedType]) -> CompilerT Metadata m (Clause Metadata IndexedType)
+expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
+  e1' <- expandIntegerLiteralPatterns e1
   (q, ints) <- runWriterT (transformM collectIntegerLiteralPatterns p)
   case (ints, ds) of
     ([], _) ->
-      pure cl
+      pure (EClause a p (CPlain a1 gs e1' :| []))
     (_, []) -> do
       path <- gets compilerCurrentModule
       tellErrors [NonExhaustivePatterns (ErrorLocation (principalPath path) a)]
@@ -66,34 +66,40 @@ expandClause _ expr (cl@(EClause a p (CPlain a1 gs e1 :| [])), ds) = do
     (_, c : cs) -> do
       e2 <-
         expandIntegerLiteralPatterns $
-          ifE
-            (foldr numericLiteral (literalBoolE True) ints)
-            e1
-            (matchE expr (c :| cs))
+          EIf
+            mempty
+            (typeOf e1')
+            (foldr numericLiteral (ELiteral mempty (LBool True)) ints)
+            e1'
+            (EMatch mempty (typeOf e1') expr (c :| cs))
       pure (EClause a q (CPlain a1 gs e2 :| []))
 expandClause _ _ _ = error "Implementation error"
 
-numericLiteral :: (Label (), Integer) -> Expression Metadata () -> Expression Metadata ()
-numericLiteral (ll, int) e1 =
-  applicationE
-    opAndE
+numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata IndexedType -> Expression Metadata IndexedType
+numericLiteral (ll@(Label t _), int) e1 =
+  EApplication
+    mempty
+    (TIntrinsic IBool)
+    (EBinaryOperator mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
     ( e1
-        :| [ applicationE
-              (EVariable mempty (Label () "(==)"))
-              (EVariable mempty ll :| [fromLiteral int])
+        :| [ EApplication
+              mempty
+              (TIntrinsic IBool)
+              (EVariable mempty (Label (t `TArrow` t `TArrow` TIntrinsic IBool) "(==)"))
+              (EVariable mempty ll :| [fromLiteral t int])
            ]
     )
 
-fromLiteral :: Integer -> Expression Metadata ()
-fromLiteral int
+fromLiteral :: IndexedType -> Integer -> Expression Metadata IndexedType
+fromLiteral t int
   | int <= fromIntegral (maxBound :: Int32) =
-      applicationE (varE "from_int32") (ELiteral mempty (LInt32 (fromIntegral int)) :| [])
+      EApplication mempty t (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` t) "from_int32")) (ELiteral mempty (LInt32 (fromIntegral int)) :| [])
   | int <= fromIntegral (maxBound :: Int64) =
-      applicationE (varE "from_int64") (ELiteral mempty (LInt64 (fromIntegral int)) :| [])
+      EApplication mempty t (EVariable mempty (Label (TIntrinsic IInt64 `TArrow` t) "from_int64")) (ELiteral mempty (LInt64 (fromIntegral int)) :| [])
   | otherwise =
-      applicationE (varE "from_literal") (ELiteral mempty (LString (ByteString.pack $ show int)) :| [])
+      EApplication mempty t (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "from_literal")) (ELiteral mempty (LString (ByteString.pack $ show int)) :| [])
 
-collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata () -> WriterT [(Label (), Integer)] (CompilerT Metadata m) (Pattern Metadata ())
+collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata IndexedType)
 collectIntegerLiteralPatterns =
   \case
     PInteger a t int -> do
@@ -104,19 +110,19 @@ collectIntegerLiteralPatterns =
     p ->
       pure p
 
-instance TransformContext (FunctionDefinition Metadata ()) where
+instance TransformContext (FunctionDefinition Metadata IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       FunctionDefinition a u w ps e ->
         FunctionDefinition a u w ps <$> expandIntegerLiteralPatterns e
 
-instance TransformContext (ConstantDefinition Metadata ()) where
+instance TransformContext (ConstantDefinition Metadata IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       ConstantDefinition a u w e ->
         ConstantDefinition a u w <$> expandIntegerLiteralPatterns e
 
-instance TransformContext (Definition Metadata Kind ()) where
+instance TransformContext (Definition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       DConstant loc name g fs ->
@@ -134,7 +140,7 @@ instance TransformContext (Definition Metadata Kind ()) where
       d ->
         pure d
 
-instance TransformContext (Module Metadata Kind ()) where
+instance TransformContext (Module Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       Module p ns o -> do

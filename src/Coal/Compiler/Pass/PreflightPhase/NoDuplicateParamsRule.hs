@@ -16,7 +16,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad.Except
-import Control.Monad.State (StateT, evalStateT, get, gets, modify)
+import Control.Monad.State (StateT, evalStateT, get, gets, modify, put)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -202,7 +202,10 @@ checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
       PTuple _ _ ps ->
         traverse_ checkPattern ps
       POr _ _ p1 p2 -> do
+        -- TODO: Make this more robust
+        s <- get
         checkPattern p1
+        put s
         checkPattern p2
       PAs _ _ p ->
         checkPattern p
