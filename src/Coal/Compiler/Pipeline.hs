@@ -225,6 +225,8 @@ prettyError env =
       errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType t <> ">'"] env erl
     KindError err erl ->
       errorMessage ["Kind error: " <> prettyKindInferenceError err] env erl
+    OrPatternVariableMismatch _ _ erl ->
+      errorMessage ["Sub-patterns must bind the same variable in or-patterns"] env erl
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msgs env (ErrorLocation path loc) =
