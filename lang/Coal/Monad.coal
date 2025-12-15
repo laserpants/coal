@@ -14,6 +14,13 @@ module Coal.Monad {
     fun bind(xs, f) = List.concat_map(f, xs)
   }
 
+  instance Monad<Option> {
+    // bind : Option<a> -> (a -> Option<b>) -> Option<b>
+    fun bind
+      | None, _    = None
+      | Some(x), f = f(x) 
+  }
+
   instance Monad<IO> {
     fun bind(v, f) = f(__eval_io(v))
   }
