@@ -21,7 +21,7 @@ import Coal.Kernel.Compiler.Pass.LambdaLifting (liftLambdaNodes)
 import Coal.Kernel.Compiler.Pass.LetLifting (liftLetNodes)
 import Coal.Kernel.Compiler.Pass.Memoize (memoize)
 import Coal.Kernel.Compiler.Pass.Suffix (suffixExpr)
-import Coal.Kernel.Compiler.Pipeline
+import Coal.Kernel.Compiler.Pipeline (Pipeline, pipelineInsertArtifacts)
 import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..), overPipelineStateSupply)
 import Coal.Kernel.LLVM (IRInterpreter, irInterpreterStateArtifacts, runInterpreter)
 import Coal.Kernel.Language
