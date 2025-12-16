@@ -211,7 +211,7 @@ If you want to work on a feature or bug fix, fork the repository and create a ne
 
 ### Contributing coffee
 
-<a href="https://www.buymeacoffee.com/laserpants"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" /></a>
+<a href="https://www.buymeacoffee.com/laserpants"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" style="height: 74px;" /></a>
 
 ### Documentation
 
