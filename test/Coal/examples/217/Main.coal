@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_string, read_file)
+  import Coal.Monad(and_then)
+
+  fun main() =
+//    read_file("coal.cabal")
+    read_file("foasfdaf")
+      |. and_then(fn(r) =>
+          match(r) {
+            | Ok(file) => println_string(file)
+            | Err(err) => println_string("Error!")
+          })
+
+}

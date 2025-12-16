@@ -884,6 +884,12 @@ string_compare(const char* a, const char* b)
  *
  */
 
+bool
+is_null(char* str)
+{
+  return (str == NULL);
+}
+
 int32_t
 int32_mod(int32_t m, int32_t n)
 {

@@ -64,12 +64,18 @@ module IO {
 
   let return = __return_io
 
-  // TODO: Error handling, e.g., file not found
-  fun read_file(path : string) : IO<string> =
-    #{read_file : string -> IO<string>}(path)(fn(s) => __return_io(s))
+  // TODO
+  type FileError = FileError
+
+  fun read_file(path : string) : IO<Result<string, FileError>> =
+    let
+      callback(str) =
+        #{is_null : string -> bool}(str)(fn(yes) => __return_io(if (yes) then Err(FileError) else Ok(str)))
+    in
+    #{read_file : string -> string}(path)(callback)
 
   fun write_file(path : string, data : string) : IO<unit> =
-    #{write_file : string -> string -> IO<unit>}(path, data)(fn(_) => __return_io())
+    #{write_file : string -> string -> unit}(path, data)(fn(_) => __return_io())
 
   fun readln(_ : unit) : IO<string> =
     #{readln : unit -> string}(())(fn(str) => __return_io(str))

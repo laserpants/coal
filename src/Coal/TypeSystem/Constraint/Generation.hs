@@ -385,8 +385,8 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
         _ ->
           pure []
 
-emitEFFICallConstraints :: (Show a, Data a) => a -> Label (Type Parameter ()) -> [Expression a IndexedType] -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
-emitEFFICallConstraints loc (Label t _) es e = do
+emitEFFICallConstraints :: (Show a, Data a) => a -> IndexedType -> Label (Type Parameter ()) -> [Expression a IndexedType] -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEFFICallConstraints loc u (Label t _) es e = do
   ms1 <- emitConstraints e
   ms2 <- concatMapM emitConstraints es
   r <- instantiateAnnotation loc t
@@ -397,7 +397,10 @@ emitEFFICallConstraints loc (Label t _) es e = do
     Right t1 -> do
       t0 <- supplied (TVariable . TypeIndex KType)
       let t2 = foldTypeOf t0 es
+          t3 = t0 `TArrow` u
+          t4 = typeOf e
       tellRight [Equality (RuleAnnotation loc t2 t1) [t2, t1]]
+      tellRight [Equality (RuleAnnotation loc t3 t4) [t3, t4]]
       pure (ms1 <> ms2)
 
 emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
@@ -470,8 +473,8 @@ emitConstraints =
       emitECodataSelectConstraints loc ll e1
     ETuple loc t es ->
       emitETupleConstraints loc t es
-    EFFICall loc ll es e ->
-      emitEFFICallConstraints loc ll es e
+    EFFICall loc t ll es e ->
+      emitEFFICallConstraints loc t ll es e
     ECodataSelect{} ->
       error "Not implemented"
     EFocus{} ->

@@ -143,8 +143,8 @@ instance Transformable Expression where
         ETuple a t <$> traverse (rewrite name f) es
       ECodataRecord a t d ->
         ECodataRecord a t <$> traverse (rewrite name f) d
-      EFFICall a ll es e ->
-        EFFICall a ll
+      EFFICall a t ll es e ->
+        EFFICall a t ll
           <$> traverse (rewrite name f) es
           <*> rewrite name f e
       EDoBlock a es ->
