@@ -22,7 +22,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Kind.Inference (inferTraitKinds)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
-import Coal.TypeSystem.Unification
+import Coal.TypeSystem.Unification (Unifiable (match), evalUnifier)
 import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
 import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
 import Data.Either (rights)
