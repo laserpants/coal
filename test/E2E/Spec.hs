@@ -1108,6 +1108,18 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "214" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/214" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  describe "215" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/215"
+      [ "Main.coal"
+      ]
+
   describe "216" $ do
     expectOutput
       "5"

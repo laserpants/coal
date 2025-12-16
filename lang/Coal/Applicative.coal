@@ -17,6 +17,16 @@ module Coal.Applicative {
     fun pure(x) = [x]
   }
 
+  instance Applicative<Option> {
+    // ap : Option<a -> b> -> Option<a> -> Option<b>
+    fun ap
+      | None, _ = None
+      | _, None = None
+      | Some(f), Some(x) = Some(f(x))
+
+    let pure = Some
+  }
+
   instance Applicative<IO> {
     fun ap(af, f) = map(__eval_io(af), f)
     let pure = return
