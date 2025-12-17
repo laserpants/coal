@@ -1129,7 +1129,7 @@ e2eSpec = do
 
   describe "217" $ do
     expectOutput
-      "Error!"
+      "File not found"
       "test/Coal/examples/217"
       [ "Main.coal"
       ]
