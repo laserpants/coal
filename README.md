@@ -146,7 +146,7 @@ cd coal && stack install
 Restart or refresh your shell, using e.g., `exec $SHELL -l`. To verify that the executable is installed, run:
 
 ```
-coal --help
+coal --version
 ```
 
 #### Hello, world!
