@@ -209,6 +209,10 @@ If you want to work on a feature or bug fix, fork the repository and create a ne
 - Why the change was made
 - Relevant issue number (if any)
 
+### Contributing coffee
+
+<a href="https://www.buymeacoffee.com/laserpants"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="74" /></a>
+
 ### Documentation
 
 The [documentation](https://coal-lang.org/) is built with MkDocs and the Material for MkDocs (mkdocs-material) theme. The source code is hosted at: [github.com/laserpants/coal-docs](https://github.com/laserpants/coal-docs).
