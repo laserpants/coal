@@ -4,9 +4,9 @@ module Main {
   import Number(is_even)
 
   instance Numeric<bool> {
-    fun from_int32(n : int32) = if (is_even(n)) then false else true
-    fun from_int64(n : int64) = if (is_even(n)) then false else true
-    fun from_bignum(n : bignum) = if (is_even(n)) then false else true
+    fun from_int32(n : int32) = is_even(n)
+    fun from_int64(n : int64) = is_even(n)
+    fun from_bignum(n : bignum) = is_even(n)
     fun negate
       | false = true
       | _     = false
