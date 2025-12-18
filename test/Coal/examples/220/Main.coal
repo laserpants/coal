@@ -1,13 +1,12 @@
 module Main {
 
-  import IO(println_string)
+  import IO(println_bool)
   import Number(parse_bignum, is_even)
 
   instance Numeric<bool> {
     fun from_int32(n : int32) = if (is_even(n)) then false else true
     fun from_int64(n : int64) = if (is_even(n)) then false else true
-    // TODO
-    fun from_bignum(s : string) = false
+    fun from_bignum(n : bignum) = if (is_even(n)) then false else true
     fun negate
       | false = true
       | _     = false
@@ -27,6 +26,6 @@ module Main {
   }
 
   fun main() =
-    println_string("")
+    println_bool(false + true * true)
 
 }
