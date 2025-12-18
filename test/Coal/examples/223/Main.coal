@@ -1,0 +1,12 @@
+module Main {
+
+  fun main() =
+    let 
+      n = 11111119223372036854775807
+    in
+      let
+        m = n + 1
+      in
+      println_bignum(m)
+
+}

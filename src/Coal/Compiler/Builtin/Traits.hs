@@ -24,7 +24,7 @@ builtinTraits =
             )
           ,
             ( "from_literal"
-            , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IString `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "negate"

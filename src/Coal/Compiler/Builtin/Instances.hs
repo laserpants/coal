@@ -31,7 +31,7 @@ builtinInstances =
               )
             ,
               ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IInt32)
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "negate"
@@ -70,7 +70,7 @@ builtinInstances =
               )
             ,
               ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IInt64)
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "negate"
@@ -109,7 +109,7 @@ builtinInstances =
               )
             ,
               ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IFloat)
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "negate"
@@ -148,7 +148,7 @@ builtinInstances =
               )
             ,
               ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IDouble)
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "negate"
@@ -187,7 +187,7 @@ builtinInstances =
               )
             ,
               ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic INat)
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic INat)
               )
             ,
               ( "negate"
@@ -226,7 +226,7 @@ builtinInstances =
               )
             ,
               ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IBignum)
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "negate"

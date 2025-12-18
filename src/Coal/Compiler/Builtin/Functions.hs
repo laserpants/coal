@@ -157,6 +157,10 @@ builtinFunctions =
     , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
     )
   ,
+    ( "number$__unsafe_parse_bignum"
+    , forall0 (TIntrinsic IString ~> TIntrinsic IBignum)
+    )
+  ,
     ( "from_int32"
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
     )
@@ -166,7 +170,7 @@ builtinFunctions =
     )
   ,
     ( "from_literal"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IString ~> t0))
+    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IBignum ~> t0))
     )
   ,
     ( "negate"

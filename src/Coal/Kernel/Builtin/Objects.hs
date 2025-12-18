@@ -41,6 +41,13 @@ objects =
                   if (a : bool) then false else true
               |]
         , OFunction
+            "Builtin$.number$__unsafe_parse_bignum"
+            [ Label Kernel.string "input"
+            ]
+            [r| 
+                  #(bignum_init : string/*, input : string) (fn(a : *) => a : *)
+              |]
+        , OFunction
             "Builtin$.operator$__reverse_composition"
             [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
             , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "g"
@@ -304,15 +311,15 @@ objects =
             [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
             ]
             [r| 
-                  match<*/*>($a : Numeric(*)) {
-                    | ( $Record : { from_literal : */* | * }/Numeric(*)
-                      , $r : { from_literal : */* | * }
+                  match<bignum/*>($a : Numeric(*)) {
+                    | ( $Record : { from_literal : bignum/* | * }/Numeric(*)
+                      , $r : { from_literal : bignum/* | * }
                       ) =>
                         select
-                          { from_literal = $f : */* | _ : * } =
-                            $r : { from_literal : */* | * }
+                          { from_literal = $f : bignum/* | _ : * } =
+                            $r : { from_literal : bignum/* | * }
                           in
-                            $f : */*
+                            $f : bignum/*
                   }
               |]
         , OFunction
@@ -396,10 +403,10 @@ objects =
               |]
         , OFunction
             "Builtin$.from_literal__$impl_Numeric(Intrinsic(Int32))"
-            [ Label Kernel.string "s"
+            [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => m : int32))
+                  #(bignum_to_int32 : bignum/int32, n : bignum)(fn(m : int32) => m : int32)
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Int32))"
@@ -449,10 +456,10 @@ objects =
               |]
         , OFunction
             "Builtin$.from_literal__$impl_Numeric(Intrinsic(Int64))"
-            [ Label Kernel.string "s"
+            [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_int64 : bignum/int64, n : bignum) (fn(m : int64) => m : int64))
+                  #(bignum_to_int64 : bignum/int64, n : bignum)(fn(m : int64) => m : int64)
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Int64))"
@@ -502,10 +509,10 @@ objects =
               |]
         , OFunction
             "Builtin$.from_literal__$impl_Numeric(Intrinsic(Float))"
-            [ Label Kernel.string "s"
+            [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_float : bignum/float, n : bignum) (fn(m : float) => m : float))
+                  #(bignum_to_float : bignum/float, n : bignum) (fn(m : float) => m : float)
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Float))"
@@ -555,10 +562,10 @@ objects =
               |]
         , OFunction
             "Builtin$.from_literal__$impl_Numeric(Intrinsic(Double))"
-            [ Label Kernel.string "s"
+            [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => #(bignum_to_double : bignum/double, n : bignum) (fn(m : double) => m : double))
+                  #(bignum_to_double : bignum/double, n : bignum)(fn(m : double) => m : double)
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Double))"
@@ -615,15 +622,14 @@ objects =
               |]
         , OFunction
             "Builtin$.from_literal__$impl_Numeric(Intrinsic(Nat))"
-            [ Label Kernel.string "s"
+            [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_init : string/bignum, s : string) (fn(n : bignum) => 
-                    #(bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => 
-                      @<$Nat>
-                        ( `Builtin$.nat$_pack` : int32/$Nat
-                        , m : int32
-                        )))
+                  #(bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => 
+                    @<$Nat>
+                      ( `Builtin$.nat$_pack` : int32/$Nat
+                      , m : int32
+                      ))
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Nat))"
@@ -715,10 +721,10 @@ objects =
               |]
         , OFunction
             "Builtin$.from_literal__$impl_Numeric(Intrinsic(Bignum))"
-            [ Label Kernel.string "s"
+            [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_init : string/bignum, s : string) (fn(n : *) => n : *)
+                  n : bignum
               |]
         , OFunction
             "Builtin$.(+)__$impl_Numeric(Intrinsic(Bignum))"

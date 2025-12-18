@@ -291,16 +291,23 @@ parseInt = do
     pure (`fromLiteral` n)
 
 fromLiteral :: Metadata -> Integer -> Expression Metadata ()
-fromLiteral loc n =
-  EApplication loc () (EVariable loc (Label () f)) (ELiteral loc lit :| [])
- where
-  (f, lit)
-    | n <= fromIntegral (maxBound :: Int32) =
-        ("from_int32", LInt32 (fromIntegral n))
-    | n <= fromIntegral (maxBound :: Int64) =
-        ("from_int64", LInt64 (fromIntegral n))
-    | otherwise =
-        ("from_literal", LString (ByteString.pack $ show n))
+fromLiteral loc n
+  | n <= fromIntegral (maxBound :: Int32) =
+      EApplication loc () (EVariable loc (Label () "from_int32")) (ELiteral loc (LInt32 (fromIntegral n)) :| [])
+  | n <= fromIntegral (maxBound :: Int64) =
+      EApplication loc () (EVariable loc (Label () "from_int64")) (ELiteral loc (LInt64 (fromIntegral n)) :| [])
+  | otherwise =
+      EApplication
+        loc
+        ()
+        (EVariable loc (Label () "from_literal"))
+        ( EApplication
+            mempty
+            ()
+            (EVariable mempty (Label () "Builtin$.number$__unsafe_parse_bignum"))
+            (ELiteral mempty (LString (ByteString.pack $ show n)) :| [])
+            :| []
+        )
 
 parseListLiteral :: Parser (Expression Metadata ())
 parseListLiteral =
