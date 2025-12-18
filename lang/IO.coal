@@ -76,7 +76,7 @@ module IO {
     #{result_status : FileIOResult -> int32}(r)(
       fn(status) => 
         match(status) {
-          | 0 => #{result_value : FileIOResult -> string}(r)(fn(s) => Ok(s))
+          | 0 => #{result_value : FileIOResult -> string}(r)(Ok)
           | 1 => Err(FileNotFound)
           | 2 => Err(IOError)
           | 3 => Err(OutOfMemory)

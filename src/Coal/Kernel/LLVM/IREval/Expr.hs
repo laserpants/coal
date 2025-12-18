@@ -7,27 +7,80 @@
 module Coal.Kernel.LLVM.IREval.Expr (IREval (..)) where
 
 import Coal.Common.Label (Label (..))
+import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IREval
-import Coal.Kernel.LLVM.IREval.Closure (irApplyClosure)
-import Coal.Kernel.LLVM.IREval.Comment (irCommentBlock)
-import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
-import Coal.Kernel.LLVM.IREval.Expr.App (irEvalApp)
+import Coal.Kernel.LLVM.IREval.Closure (irApplyClosure, irPackClosure)
+import Coal.Kernel.LLVM.IREval.Comment (irComment, irCommentBlock)
+import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irConcealArgs, irReveal)
 import Coal.Kernel.LLVM.IREval.Expr.Match (irEvalMatch)
 import Coal.Kernel.LLVM.IREval.Expr.Op (irEvalOp)
 import Coal.Kernel.LLVM.IREval.Expr.Var (irEvalVar)
-import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..))
+import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
+import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..), IRConstructor (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
-import Coal.Kernel.LLVM.IRType (IRTyped (..))
-import Coal.Kernel.LLVM.IRType.Syntax (i1, i8Ptr, stringLiteral)
+import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
+import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i8Ptr, stringLiteral, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..), irPrimValue)
 import qualified Coal.Kernel.Language as Syntax
-import Coal.Kernel.Language.Type.Arrow (returnTypeOf)
+import Coal.Kernel.Language.Type.Arrow (arity, returnTypeOf)
 import Control.Arrow ((>>>))
+import Control.Monad (unless)
 import Data.Fix (Fix (..))
 import Data.Functor.Foldable (project)
-import Data.List.NonEmpty (toList)
+import Data.List.NonEmpty (NonEmpty (..), toList)
+import Data.Text (Text)
 import qualified Data.Text as Text
-import Extras (forM)
+import Extras (Name, forM, forSM_, isConstructor)
+
+irEvalApp :: Syntax.Type -> Label Syntax.Type -> NonEmpty (Syntax.Expr Syntax.Type) -> IRInstr IRValue
+irEvalApp t ll@(Label vt var) es
+  | isConstructor var = do
+      irComment (comment1 var)
+      vs <- irConcealArgs es
+      IRConstructor i t1 <- makeConstructor (struct (i32 : replicate (arity vt) i8Ptr)) var
+      v1 <- irMalloc t1
+      v2 <- getelementptr t1 v1 (I32 0) (I32 0)
+      store (I32 (fromIntegral i)) v2
+      forSM_ 1 vs $
+        \v n -> do
+          v3 <- getelementptr t1 v1 (I32 0) (I32 n)
+          store v v3
+      bitcast v1 i8Ptr
+  | otherwise =
+      irCommentBlock "Function application" $ do
+        v <- nameLookup var
+        case v of
+          Local{} ->
+            irApplyClosure t v es
+          Global (TFun _ ts) _
+            | length ts == length es -> do
+                vs <- irConcealArgs es
+                r1 <- call i8Ptr v vs
+                r2 <- irReveal r1 (irTypeOf t)
+                unless (r1 == r2) (irComment ["^ Reveal return value as " <> irEncode (irTypeOf t)])
+                pure r2
+            | length ts > length es -> do
+                vs <- forM es irEval
+                irPackClosure var (length ts - length vs) (toList vs)
+            | otherwise ->
+                case splitAt (length ts) (toList es) of
+                  (a : as, b : bs) -> do
+                    r1 <- irEval (Syntax.app t (Syntax.var ll) (a :| as))
+                    irApplyClosure t r1 (b :| bs)
+                  ([], b : bs) -> do
+                    r1 <- irEval (Syntax.var ll)
+                    irApplyClosure t r1 (b :| bs)
+                  (_, []) ->
+                    error "Implementation error"
+          _ ->
+            error "Implementation error"
+
+{-# INLINE comment1 #-}
+comment1 :: Name -> [Text]
+comment1 name =
+  [ "Apply data constructor: " <> irEncode name
+  , "----------------------- ^"
+  ]
 
 instance IREval (Syntax.Expr Syntax.Type) where
   irEval =
