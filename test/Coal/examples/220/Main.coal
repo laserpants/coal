@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_bool)
-  import Number(parse_bignum, is_even)
+  import Number(is_even)
 
   instance Numeric<bool> {
     fun from_int32(n : int32) = if (is_even(n)) then false else true
