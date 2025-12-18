@@ -1,0 +1,23 @@
+module Main {
+
+  import IO(println_string)
+
+  type Fez = Fez(int32, int32, string)
+
+  fun baz(f) : Fez=
+    f(5, "yes")
+
+  fun wat(v) = 
+    match(v) {
+      | Fez(_, _, s) => s
+    }
+
+  fun main() =
+    let
+      a =
+        baz(Fez(1))
+    in
+    println_string(wat(a))
+
+}
+

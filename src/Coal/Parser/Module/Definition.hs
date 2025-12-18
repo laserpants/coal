@@ -92,7 +92,7 @@ parseTypeDefinition = do
   n <- constructor
   ps <- option [] parseParameterList
   end <- getSourcePos
-  cs <- symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|"
+  cs <- option [] (symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|")
   pure (DType (Metadata start end) n (TypeDefinition ps cs))
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
