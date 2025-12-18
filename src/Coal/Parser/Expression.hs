@@ -215,6 +215,7 @@ parseSpecialNameExpression =
         <|> "string$_head_unsafe"
         <|> "number$_unsafe_parse_bignum"
         <|> "char$_ord"
+        <|> "char$_chr"
     pure (\ll -> EVariable ll (Label () spec))
 
 parseVariableExpression :: Parser (Expression Metadata ())

@@ -27,4 +27,7 @@ module Char {
   fun ord(c : char) : int32 =
     char$_ord(c)
 
+  fun chr(n : int32) : char =
+    char$_chr(n)
+
 }

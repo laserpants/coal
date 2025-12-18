@@ -48,6 +48,13 @@ objects =
                   c : int32
               |]
         , OFunction
+            "Builtin$.char$_chr"
+            [ Label Kernel.int32 "n"
+            ]
+            [r| 
+                  n : char
+              |]
+        , OFunction
             "Builtin$.number$_unsafe_parse_bignum"
             [ Label Kernel.string "input"
             ]
