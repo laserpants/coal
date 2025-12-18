@@ -197,7 +197,7 @@ If you want to report a bug 🐞, [open an issue](https://codeberg.org/laserpant
 - A description of the problem
 - Steps to reproduce it
 - What you expected to happen
-- What actually happened (include error messages)
+- What actually happened (including error messages)
 
 If possible, include a small code example that demonstrates the issue — this makes debugging much easier.
 

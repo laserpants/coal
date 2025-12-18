@@ -931,9 +931,9 @@ string_compare(const char* a, const char* b)
  */
 
 bool
-is_null(char* str)
+is_null(void* ptr)
 {
-  return (str == NULL);
+  return (ptr == NULL);
 }
 
 int32_t
