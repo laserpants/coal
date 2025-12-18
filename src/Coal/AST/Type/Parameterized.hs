@@ -99,9 +99,9 @@ instance Parameterized (Type Parameter k) where
     \case
       TVariable p ->
         instantiateTypeIndexes p
-      TApplication _ t ts -> do
-        instantiateTypeIndexes t
-        instantiateTypeIndexes ts
+      TApplication _ t1 t2 -> do
+        instantiateTypeIndexes t1
+        instantiateTypeIndexes t2
       TArrow t1 t2 -> do
         instantiateTypeIndexes t1
         instantiateTypeIndexes t2

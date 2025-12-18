@@ -1,5 +1,6 @@
 // #define GC_DEBUG
 
+#include <errno.h>
 #include <gc.h>
 #include <gmp.h>
 #include <inttypes.h>
@@ -289,47 +290,92 @@ println_bignum(mpz_t* big_int)
   gmp_printf("%Zd\n", *big_int);
 }
 
+#define COAL_OK 0
+#define COAL_FILE_NOTFOUND 1
+#define COAL_IO_ERROR 2
+#define COAL_OUT_OF_MEMORY 3
+
+typedef struct
+{
+  int32_t status; /* 0 = OK, non-zero = error */
+  void* value;    /* valid iff status == 0 */
+} result_t;
+
+int32_t
+result_status(result_t* r)
+{
+  return r->status;
+}
+
 char*
+result_value(result_t* r)
+{
+  return (char*)r->value;
+}
+
+result_t*
 read_file(const char* filename)
 {
-  FILE* file = fopen(filename, "rb");
-  if (!file) {
+  result_t* res = gc_malloc(sizeof(result_t));
+  if (!res) {
+    /* Failure: runtime out of memory */
     return NULL;
   }
 
-  // Move to the end to determine file size
+  FILE* file = fopen(filename, "rb");
+  if (!file) {
+    res->value = NULL;
+    if (errno == ENOENT) {
+      res->status = COAL_FILE_NOTFOUND;
+    } else {
+      res->status = COAL_IO_ERROR;
+    }
+    return res;
+  }
+
+  /* Move to end to determine file size */
   if (fseek(file, 0, SEEK_END) != 0) {
     fclose(file);
-    return NULL;
+    res->status = COAL_IO_ERROR;
+    res->value = NULL;
+    return res;
   }
 
   long length = ftell(file);
   if (length < 0) {
     fclose(file);
-    return NULL;
+    res->status = COAL_IO_ERROR;
+    res->value = NULL;
+    return res;
   }
 
-  // Go back to start of file
   rewind(file);
 
-  // Allocate buffer (+1 for null terminator)
+  /* Allocate buffer (+1 for null terminator) */
   char* buffer = gc_malloc((size_t)length + 1);
   if (!buffer) {
     fclose(file);
-    return NULL;
+    res->status = COAL_OUT_OF_MEMORY;
+    res->value = NULL;
+    return res;
   }
 
-  // Read file contents
+  /* Read file contents */
   size_t read_size = fread(buffer, 1, (size_t)length, file);
+  fclose(file);
+
   if (read_size != (size_t)length) {
-    fclose(file);
-    return NULL;
+    res->status = COAL_IO_ERROR;
+    res->value = NULL;
+    return res;
   }
 
-  buffer[length] = '\0'; // Null-terminate the string
+  buffer[length] = '\0';
 
-  fclose(file);
-  return buffer;
+  /* Success */
+  res->status = COAL_OK;
+  res->value = buffer;
+  return res;
 }
 
 int
@@ -883,6 +929,12 @@ string_compare(const char* a, const char* b)
  * Misc.
  *
  */
+
+bool
+is_null(char* str)
+{
+  return (str == NULL);
+}
 
 int32_t
 int32_mod(int32_t m, int32_t n)

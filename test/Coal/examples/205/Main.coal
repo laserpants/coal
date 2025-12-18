@@ -4,7 +4,10 @@ module Main {
 
   fun main() = do {
     s <- read_file("./test/Coal/examples/205/sample.txt");
-    print_string(s);
+    match(s) {
+      | Ok(r) => print_string(r)
+      | Err(_) => print_string("error")
+    };
   }
 
 }

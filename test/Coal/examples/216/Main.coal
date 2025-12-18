@@ -1,0 +1,13 @@
+module Main {
+
+  import IO(println_int32, println_string)
+
+  let res : Result<int32, string> = Ok(5)
+
+  fun main() =
+    match(res) {
+      | Ok(x) => println_int32(x)
+      | Err(e) => println_string(e)
+    }
+
+}

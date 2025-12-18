@@ -1,0 +1,20 @@
+module Main {
+
+  import IO(println_string, read_file, type FileIOError)
+  import Coal.Monad(and_then)
+
+  fun show_error(error : FileIOError) =
+    match(error) {
+      | FileNotFound => println_string("File not found")
+      | _ => println_string("Unspecified error")
+    }
+
+  fun main() =
+    read_file("foasfdaf")
+      |. and_then(fn(r) =>
+          match(r) {
+            | Ok(file) => println_string(file)
+            | Err(err) => show_error(err)
+          })
+
+}

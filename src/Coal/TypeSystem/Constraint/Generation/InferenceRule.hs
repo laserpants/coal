@@ -29,7 +29,7 @@ data InferenceRule k a
   | RuleTopLevelConstant a
   | RuleAsConstraint a
   | RuleFoldType a
-  | RuleOrConstraint a [Type TypeIndex k]
+  | RuleOrConstraint a (Type TypeIndex k) (Type TypeIndex k)
   | RuleTypeConstraint a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | RuleDataConstructor a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | RuleCodataRecordExplicit a (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))

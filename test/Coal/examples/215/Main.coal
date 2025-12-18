@@ -1,0 +1,13 @@
+module Main {
+
+  import Coal.Functor(trait Functor)
+  import Coal.Applicative(ap)
+  import namespace IO
+
+  fun main() =
+    match(ap(Some(fn(x) => x + 1), Some(5))) {
+      | None => IO.println_int32(0)
+      | Some(v) => IO.println_int32(v)
+    }
+
+}

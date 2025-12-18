@@ -138,6 +138,11 @@ prettyRule =
      where
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
+    RuleOrConstraint _ t1 t2 ->
+      "Or-pattern left-hand side type " <> prettyType u1 <> " doesn't match right-hand side type " <> prettyType u2
+     where
+      u1 = normalizeTypeIndexes t1
+      u2 = normalizeTypeIndexes t2
     e ->
       Text.pack ("TODO: " <> show e)
 

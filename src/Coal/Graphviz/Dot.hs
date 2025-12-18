@@ -253,7 +253,7 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
         fromNode (emitRectangle "ELambdaMatch" (Just t)) $ do
           emitEdgesTo cs
           emitEdgesTo me
-      EFFICall _ (Label _ name) es e ->
+      EFFICall _ _ (Label _ name) es e ->
         fromNode (emitRectangle ("EFFICall\\n" <> name) Nothing) $ do
           emitEdgesTo es
           emitEdgeTo e

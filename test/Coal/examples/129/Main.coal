@@ -7,6 +7,9 @@ module Main {
       s =
         read_file("./test/Coal/examples/129/message.txt")
       in
-        println_string(__eval_io(s))
+        match(__eval_io(s)) {
+          | Ok(f) => println_string(f)
+          | Err(e) => println_string("error")
+        }
 
 }

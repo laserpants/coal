@@ -66,7 +66,7 @@ instance HasMetadata (Expression Metadata t) where
       ECodataRecord a _ _ -> a
       ETraitDictionary a _ _ -> a
       ELambdaMatch a _ _ _ -> a
-      EFFICall a _ _ _ -> a
+      EFFICall a _ _ _ _ -> a
       EDoBlock a _ -> a
       EFocus{} -> error "Not implemented"
 
@@ -124,7 +124,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleRecordLacks a _ _ -> a
       RuleTailRow a _ _ -> a
       RuleFoldType a -> a
-      RuleOrConstraint a _ -> a
+      RuleOrConstraint a _ _ -> a
       RuleTraitInstance a _ _ -> a
       RuleAssumptionExplicit a _ _ -> a
 

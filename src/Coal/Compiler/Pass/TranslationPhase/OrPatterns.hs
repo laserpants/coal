@@ -97,17 +97,5 @@ instance (Data t) => OrPattern (Pattern Metadata t) where
       PAs a ll p -> do
         q1 :| qs <- expandOrPatterns p
         pure (PAs a ll q1 :| [PAs a ll q | q <- qs])
-      p@PAny{} ->
+      p ->
         pure (NonEmpty.singleton p)
-      p@PVariable{} ->
-        pure (NonEmpty.singleton p)
-      p@PInteger{} ->
-        pure (NonEmpty.singleton p)
-      p@PLiteral{} ->
-        pure (NonEmpty.singleton p)
-      p@PAtVariable{} ->
-        pure (NonEmpty.singleton p)
-      p@PShorthand{} ->
-        pure (NonEmpty.singleton p)
-      _ ->
-        error "TODO"

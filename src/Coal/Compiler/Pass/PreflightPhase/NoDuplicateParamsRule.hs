@@ -167,7 +167,7 @@ instance RuleContext (Expression Metadata t) where
       EFocus _ _ _ e1 e2 -> do
         detectDuplicateParams e1
         detectDuplicateParams e2
-      EFFICall _ _ es e -> do
+      EFFICall _ _ _ es e -> do
         detectDuplicateParams es
         detectDuplicateParams e
       _ ->

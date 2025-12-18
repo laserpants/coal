@@ -48,6 +48,9 @@ expandGroups =
       pure [DConstant loc name e1 gs]
      where
       e1 = ConstantDefinition loc w (With [] ()) (toExpr (length ps) loc (NonEmpty.toList fs))
+    DInstance loc name (InstanceDefinition ps t ds) -> do
+      ds' <- traverse expandGroups ds
+      pure [DInstance loc name (InstanceDefinition ps t (concat ds'))]
     d ->
       pure [d]
 

@@ -113,7 +113,7 @@ parseFFICall =
       pure (n, t)
     args <- parens (commaSep parseExpression)
     cont <- parens parseExpression
-    pure (\loc -> EFFICall loc (Label t n) args cont)
+    pure (\loc -> EFFICall loc () (Label t n) args cont)
 
 parseDataConstructor :: Parser (Expression Metadata ())
 parseDataConstructor =

@@ -1108,6 +1108,46 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "214" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/214" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  describe "215" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/215"
+      [ "Main.coal"
+      ]
+
+  describe "216" $ do
+    expectOutput
+      "5"
+      "test/Coal/examples/216"
+      [ "Main.coal"
+      ]
+
+  describe "217" $ do
+    expectOutput
+      "File not found"
+      "test/Coal/examples/217"
+      [ "Main.coal"
+      ]
+
+  describe "218" $ do
+    expectOutput
+      "cool"
+      "test/Coal/examples/218"
+      [ "Main.coal"
+      ]
+
+  describe "219" $ do
+    expectOutput
+      "yes"
+      "test/Coal/examples/219"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

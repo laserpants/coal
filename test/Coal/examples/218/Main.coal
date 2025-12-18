@@ -1,0 +1,17 @@
+module Main {
+
+  import IO(println_string)
+
+  fun baz(f) = 
+    f("cool")
+
+  fun foo(v) =
+    match(v) {
+      | Ok(s) => s
+      | Err(_) => "..."
+    }
+
+  fun main() =
+    println_string(foo(baz(Ok)))
+
+}
