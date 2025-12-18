@@ -12,6 +12,7 @@ module Coal.Kernel.Compiler.Pass (
   astCloseObjects,
   astAddExtraArgs,
   astSimplify1,
+  astSaturateConstructors,
 ) where
 
 import Coal.Kernel.Compiler.Ast (flattenLambdaNodes, flattenObject, simplifyLetNodes, sortMatchClauses)
@@ -20,6 +21,7 @@ import Coal.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs)
 import Coal.Kernel.Compiler.Pass.LambdaLifting (liftLambdaNodes)
 import Coal.Kernel.Compiler.Pass.LetLifting (liftLetNodes)
 import Coal.Kernel.Compiler.Pass.Memoize (memoize)
+import Coal.Kernel.Compiler.Pass.PartialConstructors (saturateConstructors)
 import Coal.Kernel.Compiler.Pass.Suffix (suffixExpr)
 import Coal.Kernel.Compiler.Pipeline (Pipeline, pipelineInsertArtifacts)
 import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..), overPipelineStateSupply)
@@ -59,7 +61,8 @@ astSortMatchClauses
   , astSimplify2
   , astCloseObjects
   , astAddExtraArgs
-  , astSimplify1 ::
+  , astSimplify1
+  , astSaturateConstructors ::
     Pass ObjectList ObjectList
 astSortMatchClauses =
   pure3 sortMatchClauses
@@ -81,3 +84,5 @@ astAddExtraArgs =
   pure1 (fmap addImplicitArgs)
 astSimplify1 =
   pure1 (fmap flattenObject)
+astSaturateConstructors =
+  pure3 saturateConstructors

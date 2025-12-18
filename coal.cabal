@@ -120,6 +120,7 @@ library
       Coal.Kernel.Compiler.Pass.LambdaLifting
       Coal.Kernel.Compiler.Pass.LetLifting
       Coal.Kernel.Compiler.Pass.Memoize
+      Coal.Kernel.Compiler.Pass.PartialConstructors
       Coal.Kernel.Compiler.Pass.Suffix
       Coal.Kernel.Compiler.Pipeline
       Coal.Kernel.Compiler.Pipeline.State
@@ -150,7 +151,6 @@ library
       Coal.Kernel.LLVM.IREval.Comment
       Coal.Kernel.LLVM.IREval.Conceal
       Coal.Kernel.LLVM.IREval.Expr
-      Coal.Kernel.LLVM.IREval.Expr.App
       Coal.Kernel.LLVM.IREval.Expr.Match
       Coal.Kernel.LLVM.IREval.Expr.Op
       Coal.Kernel.LLVM.IREval.Expr.Var

@@ -21,7 +21,7 @@ irEvalVar :: Syntax.Type -> Name -> IRInstr IRValue
 irEvalVar t name
   | isConstructor name = do
       irComment (comment1 name)
-      IRConstructor i t1 <- makeConstructor (struct [i32]) name
+      IRConstructor i t1 <- makeConstructor (struct (i32 : replicate (arity t) i8Ptr)) name
       v1 <- irMalloc t1
       v2 <- getelementptr t1 v1 (I32 0) (I32 0)
       store (I32 (fromIntegral i)) v2

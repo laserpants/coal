@@ -32,6 +32,7 @@ corePass =
     >=> astFlatten
     >=> astLiftLetNodes
     >=> astMemoize
+    >=> astSaturateConstructors
     >=> astLiftLambdaNodes
     >=> astSimplify1
     >=> astSimplify2
