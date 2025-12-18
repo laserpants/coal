@@ -7,7 +7,7 @@ module Main {
     fun from_int32(n : int32) = if (is_even(n)) then false else true
     fun from_int64(n : int64) = if (is_even(n)) then false else true
     // TODO
-    fun from_literal(s : string) = false
+    fun from_bignum(s : string) = false
     fun negate
       | false = true
       | _     = false

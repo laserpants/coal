@@ -162,6 +162,26 @@ bignum_neg(mpz_t* m)
   return res;
 }
 
+/* compute m % n, return a newly-allocated mpz_t* */
+mpz_t*
+bignum_mod(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  /* modulo by zero is undefined */
+  if (mpz_sgn(*n) == 0)
+    return NULL;
+
+  mpz_t* res = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!res)
+    return NULL;
+
+  mpz_init(*res);
+  mpz_mod(*res, *m, *n);
+  return res;
+}
+
 /*
  * ////////////////////////////////////////////////////////////////////////////
  * Various I/O
