@@ -24,4 +24,7 @@ module Char {
       | _ => None
     }
 
+  fun ord(c : char) : int32 =
+    char$_ord(c)
+
 }

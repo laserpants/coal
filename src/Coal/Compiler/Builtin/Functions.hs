@@ -157,7 +157,11 @@ builtinFunctions =
     , forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
     )
   ,
-    ( "number$__unsafe_parse_bignum"
+    ( "char$_ord"
+    , forall0 (TIntrinsic IChar ~> TIntrinsic IInt32)
+    )
+  ,
+    ( "number$_unsafe_parse_bignum"
     , forall0 (TIntrinsic IString ~> TIntrinsic IBignum)
     )
   ,

@@ -213,7 +213,8 @@ parseSpecialNameExpression =
         <|> "string$_tail"
         <|> "string$_length"
         <|> "string$_head_unsafe"
-        <|> "number$__unsafe_parse_bignum"
+        <|> "number$_unsafe_parse_bignum"
+        <|> "char$_ord"
     pure (\ll -> EVariable ll (Label () spec))
 
 parseVariableExpression :: Parser (Expression Metadata ())
@@ -305,7 +306,7 @@ fromLiteral loc n
         ( EApplication
             mempty
             ()
-            (EVariable mempty (Label () "number$__unsafe_parse_bignum"))
+            (EVariable mempty (Label () "number$_unsafe_parse_bignum"))
             (ELiteral mempty (LString (ByteString.pack $ show n)) :| [])
             :| []
         )

@@ -1,0 +1,16 @@
+module Main {
+
+  import IO(println_bool)
+
+//  instance Ordered<bool> {
+//    fun compare
+//      | false, true  = LessThan
+//      | true, false  = GreaterThan
+//      | _, _         = EqualTo
+//  }
+
+  fun main() =
+    println_bool(false < true)
+    //println_bool(2 < 3)
+
+}

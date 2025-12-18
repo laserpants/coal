@@ -182,6 +182,33 @@ bignum_mod(mpz_t* m, mpz_t* n)
   return res;
 }
 
+bool
+bignum_lt(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  return mpz_cmp(*m, *n) < 0;
+}
+
+bool
+bignum_gt(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  return mpz_cmp(*m, *n) > 0;
+}
+
+bool
+bignum_eq(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  return mpz_cmp(*m, *n) == 0;
+}
+
 /*
  * ////////////////////////////////////////////////////////////////////////////
  * Various I/O

@@ -104,7 +104,7 @@ fromLiteral t int
         ( EApplication
             mempty
             (TIntrinsic IBignum)
-            (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "number$__unsafe_parse_bignum"))
+            (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "number$_unsafe_parse_bignum"))
             (ELiteral mempty (LString (ByteString.pack $ show int)) :| [])
             :| []
         )

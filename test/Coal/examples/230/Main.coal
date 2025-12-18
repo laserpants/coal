@@ -1,0 +1,9 @@
+module Main {
+
+  import IO(println_int32)
+  import Char(ord)
+
+  fun main() =
+    println_int32(ord('a'))
+
+}
