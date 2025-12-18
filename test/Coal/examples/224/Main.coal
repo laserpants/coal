@@ -1,0 +1,14 @@
+module Main {
+  
+  import IO(println_bignum)
+
+  fun main() =
+    let 
+      n = 11111119223372036854775807
+    in
+      let
+        m = n % 11
+      in
+      println_bignum(m)
+
+}

@@ -1163,7 +1163,7 @@ objects =
             , Label Kernel.int32 "r"
             ]
             [r| 
-                  #(int32_mod : int32/int32/int32, q : int32, r : int32) (fn(r : int32) => r : int32)
+                  #(int32_mod : int32/int32/int32, q : int32, r : int32) (fn(s : int32) => s : int32)
               |]
         , OFunction
             "Builtin$.(%)__$impl_Modulo(Intrinsic(Int64))"
@@ -1171,7 +1171,15 @@ objects =
             , Label Kernel.int64 "r"
             ]
             [r| 
-                  #(int64_mod : int64/int64/int64, q : int64, r : int64) (fn(r : int64) => r : int64)
+                  #(int64_mod : int64/int64/int64, q : int64, r : int64) (fn(s : int64) => s : int64)
+              |]
+        , OFunction
+            "Builtin$.(%)__$impl_Modulo(Intrinsic(Bignum))"
+            [ Label Kernel.bignum "q"
+            , Label Kernel.bignum "r"
+            ]
+            [r| 
+                  #(bignum_mod : bignum/bignum/bignum, q : bignum, r : bignum) (fn(s : bignum) => s : bignum)
               |]
         , OFunction
             "Builtin$.(<>)__$impl_Semigroup(Intrinsic(String))"

@@ -563,6 +563,21 @@ builtinInstances =
         )
     )
   ,
+    ( "Modulo"
+    , TIntrinsic IBignum
+    , InstanceEntry
+        mempty
+        (TIntrinsic IBignum)
+        (TIntrinsic IBignum)
+        ( Map.fromList
+            [
+              ( "(%)"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              )
+            ]
+        )
+    )
+  ,
     ( "Semigroup"
     , TIntrinsic IString
     , InstanceEntry

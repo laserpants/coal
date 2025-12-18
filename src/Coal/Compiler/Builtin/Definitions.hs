@@ -101,6 +101,7 @@ builtinTraitInstances =
   , --
     "(%)__$impl_Modulo(Intrinsic(Int32))"
   , "(%)__$impl_Modulo(Intrinsic(Int64))"
+  , "(%)__$impl_Modulo(Intrinsic(Bignum))"
   , --
     "(<>)__$impl_Semigroup(Intrinsic(String))"
   , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
