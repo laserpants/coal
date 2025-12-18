@@ -1,4 +1,6 @@
 module Main {
+  
+  import IO(println_bignum)
 
   fun main() =
     let 
