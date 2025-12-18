@@ -301,7 +301,7 @@ fromLiteral loc n
       EApplication
         loc
         ()
-        (EVariable loc (Label () "from_literal"))
+        (EVariable loc (Label () "from_bignum"))
         ( EApplication
             mempty
             ()

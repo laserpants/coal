@@ -1148,13 +1148,6 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  describe "220" $ do
-    expectOutput
-      "11111119223372036854775808"
-      "test/Coal/examples/220"
-      [ "Main.coal"
-      ]
-
   describe "221" $ do
     expectOutput
       "123"
@@ -1171,8 +1164,15 @@ e2eSpec = do
 
   describe "223" $ do
     expectOutput
-      "6"
+      "11111119223372036854775808"
       "test/Coal/examples/223"
+      [ "Main.coal"
+      ]
+
+  describe "224" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/224"
       [ "Main.coal"
       ]
 

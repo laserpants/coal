@@ -307,17 +307,17 @@ objects =
                   }
               |]
         , OFunction
-            "Builtin$.from_literal"
+            "Builtin$.from_bignum"
             [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
             ]
             [r| 
                   match<bignum/*>($a : Numeric(*)) {
-                    | ( $Record : { from_literal : bignum/* | * }/Numeric(*)
-                      , $r : { from_literal : bignum/* | * }
+                    | ( $Record : { from_bignum : bignum/* | * }/Numeric(*)
+                      , $r : { from_bignum : bignum/* | * }
                       ) =>
                         select
-                          { from_literal = $f : bignum/* | _ : * } =
-                            $r : { from_literal : bignum/* | * }
+                          { from_bignum = $f : bignum/* | _ : * } =
+                            $r : { from_bignum : bignum/* | * }
                           in
                             $f : bignum/*
                   }
@@ -402,7 +402,7 @@ objects =
                   n : int64
               |]
         , OFunction
-            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Int32))"
+            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Int32))"
             [ Label Kernel.bignum "n"
             ]
             [r| 
@@ -455,7 +455,7 @@ objects =
                   n : int64
               |]
         , OFunction
-            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Int64))"
+            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Int64))"
             [ Label Kernel.bignum "n"
             ]
             [r| 
@@ -508,7 +508,7 @@ objects =
                   #(int64_to_float : int64/float, n : int64) (fn(f : float) => f : float)
               |]
         , OFunction
-            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Float))"
+            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Float))"
             [ Label Kernel.bignum "n"
             ]
             [r| 
@@ -561,7 +561,7 @@ objects =
                   #(int64_to_double : int64/double, n : int64) (fn(d : double) => d : double)
               |]
         , OFunction
-            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Double))"
+            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Double))"
             [ Label Kernel.bignum "n"
             ]
             [r| 
@@ -621,7 +621,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Nat))"
+            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Nat))"
             [ Label Kernel.bignum "n"
             ]
             [r| 
@@ -720,7 +720,7 @@ objects =
                   #(int64_to_bignum : int64/bignum, n : int64) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.from_literal__$impl_Numeric(Intrinsic(Bignum))"
+            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Bignum))"
             [ Label Kernel.bignum "n"
             ]
             [r| 

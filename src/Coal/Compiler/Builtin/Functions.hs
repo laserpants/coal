@@ -169,7 +169,7 @@ builtinFunctions =
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt64 ~> t0))
     )
   ,
-    ( "from_literal"
+    ( "from_bignum"
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IBignum ~> t0))
     )
   ,

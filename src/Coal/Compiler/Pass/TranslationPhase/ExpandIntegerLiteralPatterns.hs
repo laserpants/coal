@@ -100,7 +100,7 @@ fromLiteral t int
       EApplication
         mempty
         t
-        (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "from_literal"))
+        (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "from_bignum"))
         ( EApplication
             mempty
             (TIntrinsic IBignum)

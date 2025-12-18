@@ -23,7 +23,7 @@ builtinTraits =
             , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a")
             )
           ,
-            ( "from_literal"
+            ( "from_bignum"
             , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a")
             )
           ,
