@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_string)
+
+  fun main() =
+    let m = 123123 : bignum in
+    let n = 523123 : bignum in
+    println_string(
+      match(compare(m, n)) {
+        | LessThan    => "LessThan"
+        | GreaterThan => "GreaterThan"
+        | EqualTo     => "EqualTo"
+      })
+
+}

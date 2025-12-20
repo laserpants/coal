@@ -1,0 +1,9 @@
+module Main {
+
+  import IO(println_char)
+  import Char(chr)
+
+  fun main() =
+    println_char(chr(52))
+
+}

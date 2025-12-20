@@ -28,7 +28,7 @@ builtinFunctionNames = for builtinFunctions fst
 
 builtinTraitInstances :: [Name]
 builtinTraitInstances =
-  [ "from_literal__$impl_Numeric(Intrinsic(Int32))"
+  [ "from_bignum__$impl_Numeric(Intrinsic(Int32))"
   , "from_int32__$impl_Numeric(Intrinsic(Int32))"
   , "from_int64__$impl_Numeric(Intrinsic(Int32))"
   , "(+)__$impl_Numeric(Intrinsic(Int32))"
@@ -36,7 +36,7 @@ builtinTraitInstances =
   , "(*)__$impl_Numeric(Intrinsic(Int32))"
   , "negate__$impl_Numeric(Intrinsic(Int32))"
   , --
-    "from_literal__$impl_Numeric(Intrinsic(Int64))"
+    "from_bignum__$impl_Numeric(Intrinsic(Int64))"
   , "from_int32__$impl_Numeric(Intrinsic(Int64))"
   , "from_int64__$impl_Numeric(Intrinsic(Int64))"
   , "(+)__$impl_Numeric(Intrinsic(Int64))"
@@ -44,7 +44,7 @@ builtinTraitInstances =
   , "(*)__$impl_Numeric(Intrinsic(Int64))"
   , "negate__$impl_Numeric(Intrinsic(Int64))"
   , --
-    "from_literal__$impl_Numeric(Intrinsic(Float))"
+    "from_bignum__$impl_Numeric(Intrinsic(Float))"
   , "from_int32__$impl_Numeric(Intrinsic(Float))"
   , "from_int64__$impl_Numeric(Intrinsic(Float))"
   , "(+)__$impl_Numeric(Intrinsic(Float))"
@@ -52,7 +52,7 @@ builtinTraitInstances =
   , "(*)__$impl_Numeric(Intrinsic(Float))"
   , "negate__$impl_Numeric(Intrinsic(Float))"
   , --
-    "from_literal__$impl_Numeric(Intrinsic(Double))"
+    "from_bignum__$impl_Numeric(Intrinsic(Double))"
   , "from_int32__$impl_Numeric(Intrinsic(Double))"
   , "from_int64__$impl_Numeric(Intrinsic(Double))"
   , "(+)__$impl_Numeric(Intrinsic(Double))"
@@ -60,7 +60,7 @@ builtinTraitInstances =
   , "(*)__$impl_Numeric(Intrinsic(Double))"
   , "negate__$impl_Numeric(Intrinsic(Double))"
   , --
-    "from_literal__$impl_Numeric(Intrinsic(Nat))"
+    "from_bignum__$impl_Numeric(Intrinsic(Nat))"
   , "from_int32__$impl_Numeric(Intrinsic(Nat))"
   , "from_int64__$impl_Numeric(Intrinsic(Nat))"
   , "(+)__$impl_Numeric(Intrinsic(Nat))"
@@ -68,7 +68,7 @@ builtinTraitInstances =
   , "(*)__$impl_Numeric(Intrinsic(Nat))"
   , "negate__$impl_Numeric(Intrinsic(Nat))"
   , --
-    "from_literal__$impl_Numeric(Intrinsic(Bignum))"
+    "from_bignum__$impl_Numeric(Intrinsic(Bignum))"
   , "from_int32__$impl_Numeric(Intrinsic(Bignum))"
   , "from_int64__$impl_Numeric(Intrinsic(Bignum))"
   , "(+)__$impl_Numeric(Intrinsic(Bignum))"
@@ -101,6 +101,7 @@ builtinTraitInstances =
   , --
     "(%)__$impl_Modulo(Intrinsic(Int32))"
   , "(%)__$impl_Modulo(Intrinsic(Int64))"
+  , "(%)__$impl_Modulo(Intrinsic(Bignum))"
   , --
     "(<>)__$impl_Semigroup(Intrinsic(String))"
   , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"

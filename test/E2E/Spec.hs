@@ -1148,6 +1148,90 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "220" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/220"
+      [ "Main.coal"
+      ]
+
+  describe "221" $ do
+    expectOutput
+      "123"
+      "test/Coal/examples/221"
+      [ "Main.coal"
+      ]
+
+  describe "222" $ do
+    expectOutput
+      "no"
+      "test/Coal/examples/222"
+      [ "Main.coal"
+      ]
+
+  describe "223" $ do
+    expectOutput
+      "11111119223372036854775808"
+      "test/Coal/examples/223"
+      [ "Main.coal"
+      ]
+
+  describe "224" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/224"
+      [ "Main.coal"
+      ]
+
+  describe "226" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/226"
+      [ "Main.coal"
+      ]
+
+  describe "227" $ do
+    expectOutput
+      "false"
+      "test/Coal/examples/227"
+      [ "Main.coal"
+      ]
+
+  describe "228" $ do
+    expectOutput
+      "LessThan"
+      "test/Coal/examples/228"
+      [ "Main.coal"
+      ]
+
+  describe "229" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/229"
+      [ "Main.coal"
+      ]
+
+  describe "230" $ do
+    expectOutput
+      "97"
+      "test/Coal/examples/230"
+      [ "Main.coal"
+      ]
+
+  describe "231" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/231"
+      [ "Main.coal"
+      ]
+
+  describe "232" $ do
+    expectOutput
+      "4"
+      "test/Coal/examples/232"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
