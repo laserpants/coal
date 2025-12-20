@@ -259,8 +259,10 @@ library
   build-depends:
       ascii-progress
     , base >=4.7 && <5
+    , binary
     , bytestring
     , containers
+    , cryptonite
     , data-default
     , data-fix
     , deriving-compat
@@ -270,6 +272,7 @@ library
     , filepath
     , free
     , megaparsec
+    , memory
     , mtl
     , parser-combinators
     , prettyprinter
@@ -294,9 +297,11 @@ executable coal
   build-depends:
       ascii-progress
     , base >=4.7 && <5
+    , binary
     , bytestring
     , coal
     , containers
+    , cryptonite
     , data-default
     , data-fix
     , deriving-compat
@@ -306,6 +311,7 @@ executable coal
     , filepath
     , free
     , megaparsec
+    , memory
     , mtl
     , optparse-applicative
     , parser-combinators
@@ -345,9 +351,11 @@ test-suite coal-test
   build-depends:
       ascii-progress
     , base >=4.7 && <5
+    , binary
     , bytestring
     , coal
     , containers
+    , cryptonite
     , data-default
     , data-fix
     , deriving-compat
@@ -358,6 +366,7 @@ test-suite coal-test
     , free
     , hspec
     , megaparsec
+    , memory
     , mtl
     , parser-combinators
     , prettyprinter

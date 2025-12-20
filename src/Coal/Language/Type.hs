@@ -37,6 +37,7 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..), tupleKind)
 import Coal.Language.Type.Row (Row (..), fromDictionary, normalizeRow)
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform, universeBi)
 import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
@@ -61,6 +62,8 @@ data Type o k
   | TAlias Name [Type o k] (Type o k)
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
+instance (Binary (o k), Binary k) => Binary (Type o k)
+
 infixr 1 `TArrow`
 
 (~>) :: Type o k -> Type o k -> Type o k
@@ -74,6 +77,8 @@ data TypeIndex k = TypeIndex
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
 
+instance (Binary k) => Binary (TypeIndex k)
+
 instance Pretty (TypeIndex k) where
   pretty (TypeIndex _ i) = pretty i
 
@@ -85,6 +90,8 @@ data Parameter k = Parameter
 
 instance Pretty (Parameter k) where
   pretty (Parameter _ name) = pretty name
+
+instance (Binary k) => Binary (Parameter k)
 
 type IndexedType = Type TypeIndex Kind
 

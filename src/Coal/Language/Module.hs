@@ -12,6 +12,7 @@ module Coal.Language.Module (
   modulePathName,
   principalPath,
   qualified,
+  importedPaths,
   module Coal.Language.Module.Definition,
   module Coal.Language.Module.Definition.Function,
   module Coal.Language.Module.Definition.Constant,
@@ -26,7 +27,7 @@ module Coal.Language.Module (
   module Coal.Language.Module.Export,
 ) where
 
-import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName)
+import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName, importPath)
 import Coal.Language.Module.Definition.Alias
 import Coal.Language.Module.Definition.Constant
 import Coal.Language.Module.Definition.Cotype
@@ -40,6 +41,7 @@ import Coal.Language.Module.Export
 import Coal.Language.Module.Import
 import Coal.Language.Module.Path (principalPath)
 import Data.Data (Data, Typeable)
+import Data.Maybe (mapMaybe)
 import Extras (Name, Over)
 
 data Module a k t = Module Path [Export a] [Definition a k t]
@@ -81,3 +83,6 @@ modulePathName = principalPath . modulePath
 
 qualified :: Name -> Path -> Name
 qualified name path = principalPath path <> "." <> name
+
+importedPaths :: Module a k t -> [(a, Path)]
+importedPaths (Module _ _ ds) = mapMaybe importPath ds

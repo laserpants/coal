@@ -6,6 +6,7 @@
 module Coal.Language.Codata.Accessor (CodataAccessor (..)) where
 
 import Coal.Language.Type.Scheme (Scheme (..))
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Extras (Name)
 import GHC.Generics (Generic)
@@ -29,3 +30,5 @@ data CodataAccessor o k t = CodataAccessor
     , Typeable
     , Generic
     )
+
+instance (Binary t, Binary (o k)) => Binary (CodataAccessor o k t)

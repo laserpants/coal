@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -18,9 +19,11 @@ import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (..), Type)
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Dictionary, Name)
+import GHC.Generics (Generic)
 
 data Expression a t
   = -- | Type-annotated expression
@@ -75,10 +78,16 @@ data Expression a t
     EFFICall a t (Label (Type Parameter ())) [Expression a t] (Expression a t)
   | -- | Do-notation block
     EDoBlock a (NonEmpty (Pattern a t, Expression a t))
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Binary a, Binary t) => Binary (Expression a t)
 
 data Clause a t = EClause a (Pattern a t) (NonEmpty (Choice Expression a t))
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Binary a, Binary t) => Binary (Clause a t)
 
 data CompiledClause a t = ECompiledClause a (NonEmpty (Label t)) (Expression a t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Binary a, Binary t) => Binary (CompiledClause a t)

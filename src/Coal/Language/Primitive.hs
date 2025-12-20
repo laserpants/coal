@@ -1,10 +1,13 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Primitive (Primitive (..)) where
 
+import Data.Binary (Binary)
 import Data.ByteString (ByteString)
 import Data.Data (Data, Typeable)
+import GHC.Generics (Generic)
 import GHC.Int (Int32, Int64)
 
 -- | Language primitives
@@ -27,4 +30,6 @@ data Primitive
     LChar Int32
   | -- | Strings
     LString ByteString
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+
+instance Binary Primitive

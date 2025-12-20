@@ -4,6 +4,7 @@
 
 module Coal.Language.Type.Intrinsic (Intrinsic (..)) where
 
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import GHC.Generics (Generic)
 
@@ -21,3 +22,5 @@ data Intrinsic
   | IUnit
   | IVoid
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+
+instance Binary Intrinsic

@@ -16,6 +16,7 @@ import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (SCC (..), stronglyConnComp)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Data.Tuple.Extra (second)
 import Extras (Name, concatForM, forM_)
 
 passTopologicalSort :: (Monad m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
@@ -59,22 +60,12 @@ collectEdges names m = do
   pure (m, modulePathName m, deps')
 
 dependencies :: Module Metadata Kind () -> [(Metadata, Name)]
-dependencies (Module p _ defs)
+dependencies m@(Module p _ _)
   | principalPath p `elem` embeddedPaths = imported
   | otherwise = imported <> extra
  where
-  imported = concatMap importPath defs
+  imported = fmap (second principalPath) (importedPaths m)
   extra =
     [ (mempty, "Coal.Applicative")
     , (mempty, "Coal.Monad")
     ]
-
-importPath :: Definition Metadata Kind () -> [(Metadata, Name)]
-importPath =
-  \case
-    DImport loc p _ ->
-      [(loc, principalPath p)]
-    DQualifiedImport loc p ->
-      [(loc, principalPath p)]
-    _ ->
-      []

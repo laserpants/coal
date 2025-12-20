@@ -1,9 +1,11 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Build (
+  Hash256 (..),
   ModuleBuild (..),
   CotypeConstructorEntry (..),
   DataConstructorEntry (..),
@@ -36,6 +38,9 @@ module Coal.Compiler.Build (
   setExports,
   setTypeExports,
   setPath,
+  setBitcode,
+  setHash,
+  insertHash,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -43,11 +48,34 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.NameEntry
 import Coal.Language (IndexedType)
 import Coal.Language.Module (Path (..))
+import Crypto.Hash
+import Data.Binary
+import Data.Binary.Get (getByteString)
+import Data.Binary.Put (putByteString)
+import qualified Data.ByteArray as ByteArray
+import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
+import Data.Text (Text)
+import qualified Data.Text.Encoding as Text
 import Extras (Name, Set)
+import GHC.Generics (Generic)
+
+newtype Hash256 = Hash256 {unHash256 :: Digest SHA256}
+  deriving (Eq, Ord, Show, Generic)
+
+instance Binary Hash256 where
+  put (Hash256 d) =
+    putByteString (ByteArray.convert d)
+  get = do
+    bs <- getByteString 32
+    case digestFromByteString bs of
+      Just d ->
+        pure (Hash256 d)
+      Nothing ->
+        fail "Invalid SHA256 digest"
 
 data ModuleBuild a = ModuleBuild
   { modulePath :: Path
@@ -61,10 +89,12 @@ data ModuleBuild a = ModuleBuild
   , moduleNames :: [NameEntry]
   , moduleExports :: Set Name
   , moduleTypeExports :: Set Name
-  --  , moduleDefinitions ::
-  --  , moduleObjectCode :: ByteString
+  , moduleBitcode :: Maybe ByteString
+  , moduleHash :: Maybe Hash256
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Generic)
+
+instance (Binary a) => Binary (ModuleBuild a)
 
 memberOf :: (HasName a) => Set Name -> a -> Bool
 memberOf s info = nameOf info `Set.member` s
@@ -104,6 +134,8 @@ emptyModuleBuild =
     , moduleNames = mempty
     , moduleExports = mempty
     , moduleTypeExports = mempty
+    , moduleBitcode = Nothing
+    , moduleHash = Nothing
     }
 
 insertDataConstructor :: Name -> DataConstructorEntry a -> ModuleBuild a -> ModuleBuild a
@@ -214,3 +246,20 @@ setPath path ModuleBuild{..} =
     { modulePath = path
     , ..
     }
+
+setBitcode :: ByteString -> ModuleBuild a -> ModuleBuild a
+setBitcode code ModuleBuild{..} =
+  ModuleBuild
+    { moduleBitcode = Just code
+    , ..
+    }
+
+setHash :: Hash256 -> ModuleBuild a -> ModuleBuild a
+setHash hash256 ModuleBuild{..} =
+  ModuleBuild
+    { moduleHash = Just hash256
+    , ..
+    }
+
+insertHash :: Text -> ModuleBuild a -> ModuleBuild a
+insertHash source = setHash (Hash256 (hash (Text.encodeUtf8 source)))

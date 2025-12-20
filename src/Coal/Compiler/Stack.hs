@@ -46,12 +46,13 @@ module Coal.Compiler.Stack (
   updateBuildC,
   withCurrentModuleC_,
   withCurrentModuleC,
+  setBitcodeC,
 ) where
 
-import Coal.Common.Environment (Environment)
+import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Build (ModuleBuild)
+import Coal.Compiler.Build (ModuleBuild, setBitcode)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
@@ -66,6 +67,8 @@ import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, gets, modify)
 import Control.Monad.Writer (MonadWriter)
+import Data.ByteString (ByteString)
+import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import Extras (Dictionary, Name, fromMaybe)
 
@@ -195,3 +198,8 @@ withCurrentModuleC_ f m@(Module p _ _) = do
   setCompilerCurrentModuleC p
   f m
   pure m
+
+setBitcodeC :: (Monad m) => Name -> ByteString -> CompilerT a m ()
+setBitcodeC name bs = modify (overCompilerModules fn)
+ where
+  fn (Environment env) = Environment (Map.update (Just . setBitcode bs) name env)

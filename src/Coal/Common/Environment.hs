@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Coal.Common.Environment (
@@ -20,8 +21,10 @@ module Coal.Common.Environment (
   union,
 ) where
 
+import Data.Binary (Binary)
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name, Over)
+import GHC.Generics (Generic)
 import Prelude hiding (filter, lookup)
 
 newtype Environment e = Environment {envDictionary :: Dictionary e}
@@ -32,7 +35,10 @@ newtype Environment e = Environment {envDictionary :: Dictionary e}
     , Read
     , Semigroup
     , Monoid
+    , Generic
     )
+
+instance (Binary e) => Binary (Environment e)
 
 {-# INLINE overEnvironment #-}
 overEnvironment :: Over (Environment e) (Dictionary e)

@@ -48,7 +48,7 @@ data CompilerState a = CompilerState
   , compilerConfig :: CompilerConfig
   , compilerModules :: Environment (ModuleBuild a)
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord)
 
 instance Supply (CompilerState a) where
   updateSupply = overCompilerSupply

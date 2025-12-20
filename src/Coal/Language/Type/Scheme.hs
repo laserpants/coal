@@ -27,6 +27,7 @@ module Coal.Language.Type.Scheme (
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), listType, tupleType, (~>))
 import Coal.Language.Type.Kind (Kind (..))
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List (intersperse)
 import qualified Data.List.NonEmpty as NonEmpty
@@ -48,6 +49,8 @@ data Scheme o k t = Forall (Set (o k)) [Trait t] t
     , Typeable
     , Generic
     )
+
+instance (Binary (o k), Binary t) => Binary (Scheme o k t)
 
 {-# INLINE bound #-}
 bound :: Scheme o k t -> Set (o k)

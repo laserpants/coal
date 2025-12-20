@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -22,8 +23,10 @@ import Coal.Common.Environment (Environment (..))
 import Coal.Language
 import Coal.Language.Module (CotypeDefinition (..), TypeDefinition (..))
 import Control.Monad.State (evalState)
+import Data.Binary (Binary)
 import qualified Data.Set as Set
 import Extras (Dictionary, Name, Set)
+import GHC.Generics (Generic)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
@@ -33,7 +36,9 @@ data DataConstructorEntry a = DataConstructorEntry
   , dataConstructorEntryConstructor :: IndexedConstructor
   , dataConstructorEntryNameSet :: Set Name
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (DataConstructorEntry a)
 
 type IndexedCodataAccessor = CodataAccessor TypeIndex Kind IndexedType
 
@@ -42,7 +47,9 @@ data CodataAccessorEntry a = CodataAccessorEntry
   , codataAccessorEntryName :: Name
   , codataAccessorEntryAccessor :: IndexedCodataAccessor
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (CodataAccessorEntry a)
 
 data TypeConstructorEntry a = TypeConstructorEntry
   { typeConstructorEntryMetadata :: a
@@ -50,7 +57,9 @@ data TypeConstructorEntry a = TypeConstructorEntry
   , typeConstructorEntryKind :: Kind
   , typeConstructorEntryDataConstructors :: [Name]
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (TypeConstructorEntry a)
 
 data CotypeConstructorEntry a = CotypeConstructorEntry
   { cotypeConstructorEntryMetadata :: a
@@ -58,7 +67,9 @@ data CotypeConstructorEntry a = CotypeConstructorEntry
   , cotypeConstructorEntryKind :: Kind
   , cotypeConstructorEntryDataAccessors :: [Name]
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (CotypeConstructorEntry a)
 
 data TraitEntry a = TraitEntry
   { traitEntryMetadata :: a
@@ -67,7 +78,9 @@ data TraitEntry a = TraitEntry
   , traitEntryRequiredInstances :: [Trait (Parameter Kind)]
   , traitEntryEntries :: Environment (Scheme Parameter Kind (Type Parameter Kind))
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (TraitEntry a)
 
 data InstanceEntry a = InstanceEntry
   { instanceEntryMetadata :: a
@@ -75,7 +88,9 @@ data InstanceEntry a = InstanceEntry
   , instanceEntryIndexedType :: IndexedType
   , instanceEntryEntries :: Dictionary IndexedScheme
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (InstanceEntry a)
 
 data AliasEntry a = AliasEntry
   { aliasEntryMetadata :: a
@@ -83,7 +98,9 @@ data AliasEntry a = AliasEntry
   , aliasEntryParams :: [Name]
   , aliasEntryType :: ParameterizedType
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (AliasEntry a)
 
 data NameEntry
   = NFunction Name IndexedScheme
@@ -100,7 +117,9 @@ data NameEntry
   | NConstantPlaceholder Name
   | NFoldPlaceholder Name
   | NUnfoldPlaceholder Name
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance Binary NameEntry
 
 class HasName a where
   nameOf :: a -> Name

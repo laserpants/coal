@@ -6,6 +6,7 @@
 module Coal.Language.Data.Constructor (DataConstructor (..)) where
 
 import Coal.Language.Type.Scheme (Scheme (..))
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Extras (Name)
 import GHC.Generics (Generic)
@@ -28,3 +29,5 @@ data DataConstructor o k t = DataConstructor
     , Typeable
     , Generic
     )
+
+instance (Binary t, Binary (o k)) => Binary (DataConstructor o k t)

@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
@@ -11,14 +12,20 @@ import Coal.Language.Pattern (Pattern (..))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError (..), TypeAnnotationError (..))
+import Data.Binary (Binary (..))
 import Data.Data (Data)
+import GHC.Generics (Generic)
 import Text.Megaparsec (SourcePos (..), mkPos)
 
 data Metadata = Metadata
   { locationStart :: SourcePos
   , locationEnd :: SourcePos
   }
-  deriving (Show, Eq, Ord, Read, Data)
+  deriving (Show, Eq, Ord, Read, Data, Generic)
+
+instance Binary Metadata where
+  put _ = pure ()
+  get = pure mempty
 
 defaultSourcePos :: SourcePos
 defaultSourcePos =

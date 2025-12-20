@@ -10,6 +10,7 @@ module Coal.Language.Trait (
   traitName,
 ) where
 
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Extras (Name)
 import GHC.Generics (Generic)
@@ -19,12 +20,16 @@ import Prettyprinter (Pretty (..))
 data Trait t = Trait Name t
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
 
+instance (Binary t) => Binary (Trait t)
+
 instance (Pretty t) => Pretty (Trait t) where
   pretty (Trait name t) =
     pretty name <> "<" <> pretty t <> ">"
 
 data With t = With [Trait t] t
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Binary t) => Binary (With t)
 
 {-# INLINE traitName #-}
 traitName :: Trait t -> Name
