@@ -65,7 +65,7 @@ A recent version of [GHC](https://www.haskell.org/ghc/) is needed. It is **recom
 
 #### LLVM
 
-An [LLVM](https://llvm.org/) toolchain that provides `llc` (the LLVM static compiler) is also required.
+An [LLVM](https://llvm.org/) toolchain that provides `llvm-as` and `llc` (the LLVM static compiler) is also required.
 
 ##### Linux
 
@@ -197,7 +197,7 @@ If you want to report a bug 🐞, [open an issue](https://codeberg.org/laserpant
 - A description of the problem
 - Steps to reproduce it
 - What you expected to happen
-- What actually happened (include error messages or stack traces)
+- What actually happened (including error messages)
 
 If possible, include a small code example that demonstrates the issue — this makes debugging much easier.
 
