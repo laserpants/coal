@@ -25,7 +25,7 @@ newtype Pass a m i o = Pass {runPass :: i -> CompilerT a m o}
 tickBar :: (MonadIO m) => CompilerT a m ()
 tickBar = do
   pb <- asks compilerProgressBar
-  for_ pb (liftIO . tick)
+  liftIO (for_ pb tick)
 
 runPassAndTickBar :: (MonadIO m) => Pass a m i b -> i -> CompilerT a m b
 runPassAndTickBar p i = do
