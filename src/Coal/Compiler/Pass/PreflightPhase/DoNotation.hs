@@ -8,7 +8,7 @@ module Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
