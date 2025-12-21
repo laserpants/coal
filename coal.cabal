@@ -62,10 +62,10 @@ library
       Coal.Compiler.Pass.LoweringPhase.LLVMOutput
       Coal.Compiler.Pass.MainPhase
       Coal.Compiler.Pass.ParsingPhase
-      Coal.Compiler.Pass.ParsingPhase.ImportsTopRule
       Coal.Compiler.Pass.ParsingPhase.Parsing
       Coal.Compiler.Pass.PreflightPhase
       Coal.Compiler.Pass.PreflightPhase.DoNotation
+      Coal.Compiler.Pass.PreflightPhase.ImportsTopRule
       Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule
       Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule
       Coal.Compiler.Pass.PreflightPhase.Setup

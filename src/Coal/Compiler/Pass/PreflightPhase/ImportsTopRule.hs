@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.ParsingPhase.ImportsTopRule (passImportsTopRule) where
+module Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule) where
 
 import Coal.AST.Metadata (HasMetadata (..), Metadata (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
