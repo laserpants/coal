@@ -41,6 +41,7 @@ module Coal.Compiler.Build (
   setBitcode,
   setHash,
   insertHash,
+  setQualifiedNames,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -87,6 +88,7 @@ data ModuleBuild a = ModuleBuild
   , moduleInstances :: Environment (Map IndexedType (InstanceEntry a))
   , moduleAliases :: Environment (AliasEntry a)
   , moduleNames :: [NameEntry]
+  , moduleQualifiedNames :: Environment Name
   , moduleExports :: Set Name
   , moduleTypeExports :: Set Name
   , moduleBitcode :: Maybe ByteString
@@ -132,6 +134,7 @@ emptyModuleBuild =
     , moduleInstances = mempty
     , moduleAliases = mempty
     , moduleNames = mempty
+    , moduleQualifiedNames = mempty
     , moduleExports = mempty
     , moduleTypeExports = mempty
     , moduleBitcode = Nothing
@@ -263,3 +266,10 @@ setHash hash256 ModuleBuild{..} =
 
 insertHash :: Text -> ModuleBuild a -> ModuleBuild a
 insertHash source = setHash (Hash256 (hash (Text.encodeUtf8 source)))
+
+setQualifiedNames :: Environment Name -> ModuleBuild a -> ModuleBuild a
+setQualifiedNames names ModuleBuild{..} =
+  ModuleBuild
+    { moduleQualifiedNames = names
+    , ..
+    }
