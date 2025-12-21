@@ -137,6 +137,13 @@ prepareBuild (Module path exports defs) = do
           setExports (nameExports exports `intersect` Set.toList exps)
             . setTypeExports (typeExports exports `intersect` Set.toList typeExps)
 
+    env <- lift $ gets compilerVerbatimSource
+    case Environment.lookup (principalPath path) env of
+      Just src ->
+        modify (insertHash src)
+      _ ->
+        error "Implementation error"
+
     return (Module path exports (defs1 <> defs))
  where
   builtin =
