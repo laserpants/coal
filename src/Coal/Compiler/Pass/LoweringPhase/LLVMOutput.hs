@@ -29,6 +29,7 @@ import qualified Data.ByteString as ByteString
 import Data.Either (partitionEithers)
 import Data.Foldable (for_)
 import Data.Maybe (fromJust)
+import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Extras (Name)
@@ -55,9 +56,12 @@ pass ir = do
       forM_ results (uncurry setBitcodeC)
       modules_ <- gets compilerModules
 
+      fresh <- gets compilerFreshModules
+      let freshModules = Environment.restrict (Set.toList fresh) modules_
+
       let buildDir = "./.build/"
       liftIO $ createDirectoryIfMissing True buildDir
-      forM_ (Environment.toList modules_) $
+      forM_ (Environment.toList freshModules) $
         uncurry (writeBuildFile buildDir)
 
       pure results
