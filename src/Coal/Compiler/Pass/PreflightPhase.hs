@@ -3,7 +3,7 @@
 module Coal.Compiler.Pass.PreflightPhase (preflightPhase) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
+import Coal.Compiler.Pass (BuildUnit, Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation)
 import Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule)
@@ -11,20 +11,18 @@ import Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointR
 import Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (passNoDuplicateParamsRule)
 import Coal.Compiler.Pass.PreflightPhase.Setup (passSetup)
 import Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule)
-import Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort)
 import Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses)
 import Coal.Language (Kind)
 import Coal.Language.Module (Module)
 import Control.Monad.IO.Class (MonadIO)
 
-preflightPhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
+preflightPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
 preflightPhase =
-  passTopologicalSort
-    >-> passImportsTopRule
+  passImportsTopRule
     >-> passSetup
     >-> mapPass passWhereClauses
     >-> passDoNotation
     >-> passShadowingRule
     >-> passMainEntrypointRule
     >-> passNoDuplicateParamsRule
-    >-> mapPass (generateDebugArtifacts "Preflight")
+    >-> mapPass (liftPass (generateDebugArtifacts "Preflight"))

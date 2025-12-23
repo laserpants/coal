@@ -22,6 +22,7 @@ extra-source-files:
 library
   exposed-modules:
       Coal.AST.Flattening
+      Coal.AST.HasMetadata
       Coal.AST.Metadata
       Coal.AST.Normalization
       Coal.AST.Shorthand
@@ -34,7 +35,9 @@ library
       Coal.Common.Supply
       Coal.Compiler
       Coal.Compiler.Build
+      Coal.Compiler.Build.Cache
       Coal.Compiler.Build.Core
+      Coal.Compiler.Build.Hash256
       Coal.Compiler.Build.NameEntry
       Coal.Compiler.Builtin.DataConstructors
       Coal.Compiler.Builtin.Definitions
@@ -59,10 +62,13 @@ library
       Coal.Compiler.Pass.LoweringPhase
       Coal.Compiler.Pass.LoweringPhase.KernelCode
       Coal.Compiler.Pass.LoweringPhase.KernelTranslate
+      Coal.Compiler.Pass.LoweringPhase.Linking
       Coal.Compiler.Pass.LoweringPhase.LLVMOutput
       Coal.Compiler.Pass.MainPhase
       Coal.Compiler.Pass.ParsingPhase
+      Coal.Compiler.Pass.ParsingPhase.CheckDeps
       Coal.Compiler.Pass.ParsingPhase.Parsing
+      Coal.Compiler.Pass.ParsingPhase.TopologicalSort
       Coal.Compiler.Pass.PreflightPhase
       Coal.Compiler.Pass.PreflightPhase.DoNotation
       Coal.Compiler.Pass.PreflightPhase.ImportsTopRule
@@ -70,7 +76,6 @@ library
       Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule
       Coal.Compiler.Pass.PreflightPhase.Setup
       Coal.Compiler.Pass.PreflightPhase.ShadowingRule
-      Coal.Compiler.Pass.PreflightPhase.TopologicalSort
       Coal.Compiler.Pass.PreflightPhase.WhereClauses
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects

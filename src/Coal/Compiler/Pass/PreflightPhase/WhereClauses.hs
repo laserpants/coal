@@ -4,18 +4,19 @@
 
 module Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses) where
 
+import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Transform
 import Coal.Compiler.Journal
-import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language.Module
 import Data.Data (Data)
 import Extras (Name)
 
-passWhereClauses :: (Monad m, Data a, Data t, Ord t) => Pass a m (Module a k t) (Module a k t)
-passWhereClauses = Pass{runPass = expandWhereClausesModule}
+passWhereClauses :: (Monad m, Data t, Ord t) => Pass Metadata m (BuildUnit (Module Metadata k t)) (BuildUnit (Module Metadata k t))
+passWhereClauses = Pass{runPass = traverse expandWhereClausesModule}
 
-liftWhereClause :: (Monad m) => Name -> Definition a k t -> CompilerT a m (Definition a k t)
+liftWhereClause :: (Monad m) => Name -> Definition Metadata k t -> CompilerT Metadata m (Definition Metadata k t)
 liftWhereClause name =
   \case
     DFunction loc old f _ -> do
@@ -27,18 +28,18 @@ liftWhereClause name =
     d ->
       pure d
 
-manufacturedName :: (Monad m) => Name -> Name -> CompilerT a m Name
+manufacturedName :: (Monad m) => Name -> Name -> CompilerT Metadata m Name
 manufacturedName name old = do
   tellWhereClauses [(old, new)]
   pure new
  where
   new = name <> "__$local_" <> old
 
-expandWhereClausesModule :: (Monad m, Data a, Ord t, Data t) => Module a k t -> CompilerT a m (Module a k t)
+expandWhereClausesModule :: (Monad m, Ord t, Data t) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
 expandWhereClausesModule (Module p ns ds) =
   Module p ns . concat <$> traverse expandWhereClausesDefinition ds
 
-expandWhereClausesDefinition :: (Monad m, Data a, Ord t, Data t) => Definition a k t -> CompilerT a m [Definition a k t]
+expandWhereClausesDefinition :: (Monad m, Ord t, Data t) => Definition Metadata k t -> CompilerT Metadata m [Definition Metadata k t]
 expandWhereClausesDefinition =
   \case
     DFunction loc name f ws -> do
@@ -50,7 +51,7 @@ expandWhereClausesDefinition =
     d ->
       pure [d]
 
-replaceNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> Definition a k t -> Definition a k t
+replaceNames :: (Data t, Ord t) => [(Name, Name)] -> Definition Metadata k t -> Definition Metadata k t
 replaceNames names =
   \case
     DFunction loc n f _ ->
@@ -60,13 +61,13 @@ replaceNames names =
     d ->
       d
 
-replaceFunctionNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> FunctionDefinition a t -> FunctionDefinition a t
+replaceFunctionNames :: (Data t, Ord t) => [(Name, Name)] -> FunctionDefinition Metadata t -> FunctionDefinition Metadata t
 replaceFunctionNames names =
   \case
     FunctionDefinition a u w ps e ->
       FunctionDefinition a u w ps (foldr (uncurry rename) e names)
 
-replaceConstantNames :: (Data a, Data t, Ord t) => [(Name, Name)] -> ConstantDefinition a t -> ConstantDefinition a t
+replaceConstantNames :: (Data t, Ord t) => [(Name, Name)] -> ConstantDefinition Metadata t -> ConstantDefinition Metadata t
 replaceConstantNames names =
   \case
     ConstantDefinition a u w e ->

@@ -2,7 +2,8 @@
 
 module Coal.Parser.Expression (parseExpression, parseMatchClause) where
 
-import Coal.AST.Metadata (Metadata (..), metadataSpan)
+import Coal.AST.HasMetadata (metadataSpan)
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Parser.Core

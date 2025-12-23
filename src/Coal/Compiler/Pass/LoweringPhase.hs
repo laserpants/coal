@@ -6,23 +6,22 @@ module Coal.Compiler.Pass.LoweringPhase (loweringPhase) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
-import Coal.Compiler.Pass (Pass (..), mapPass, (>->))
+import Coal.Compiler.Pass (BuildUnit, Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode)
 import Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate)
 import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (passLLVMOutput)
 import Coal.Compiler.Stack (CompilerState (compilerConfig))
 import Coal.Graphviz.Dot (writeDotFile)
+import Coal.Kernel.Compiler (KernelModule)
 import Coal.Kernel.Language (moduleName)
-import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module)
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
+import Data.ByteString (ByteString)
 import Data.Text (Text)
 import Extras (Name)
-
-type KernelModule = Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 
 generateDebugArtifacts :: (MonadIO m) => Text -> Pass a m KernelModule KernelModule
 generateDebugArtifacts ll = Pass{runPass = run}
@@ -34,9 +33,9 @@ generateDebugArtifacts ll = Pass{runPass = run}
         writeDotFile (ll <> "_" <> moduleName m) m
     pure m
 
-loweringPhase :: (MonadIO m) => Pass Metadata m [Module Metadata Kind IndexedType] ()
+loweringPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind IndexedType)] [(Name, ByteString)]
 loweringPhase =
   mapPass passKernelTranslate
-    >-> mapPass (generateDebugArtifacts "Kernel")
+    >-> mapPass (liftPass (generateDebugArtifacts "Kernel"))
     >-> passKernelCode
     >-> passLLVMOutput

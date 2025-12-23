@@ -2,7 +2,8 @@
 
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
-import Coal.AST.Metadata (Metadata (..), metadataSpan)
+import Coal.AST.HasMetadata (metadataSpan)
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Language (Pattern (..), Primitive (LUnit))
 import Coal.Parser.Core (Parser, lexeme, lexeme_, spaces)

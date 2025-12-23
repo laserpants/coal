@@ -17,6 +17,7 @@ module Coal.Compiler.State (
   overCompilerCurrentModule,
   overCompilerConfig,
   overCompilerModules,
+  overCompilerFreshModules,
   initialCompilerState,
 ) where
 
@@ -27,8 +28,9 @@ import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Language
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
+import Data.Set (Set)
 import Data.Text (Text)
-import Extras (Dictionary, Over)
+import Extras (Dictionary, Name, Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
@@ -38,6 +40,7 @@ data CompilerState a = CompilerState
   { compilerSupply :: Int
   , compilerNameStore :: Environment IndexedScheme
   , compilerCurrentModule :: Path
+  , compilerFreshModules :: Set Name
   , compilerSubstitution :: Substitution
   , compilerConstraints :: [CompilerConstraint a]
   , compilerConstraintsGenErrors :: [ConstraintsGenError a]
@@ -67,6 +70,14 @@ overCompilerCurrentModule :: Over (CompilerState a) Path
 overCompilerCurrentModule fn CompilerState{..} =
   CompilerState
     { compilerCurrentModule = fn compilerCurrentModule
+    , ..
+    }
+
+{-# INLINE overCompilerFreshModules #-}
+overCompilerFreshModules :: Over (CompilerState a) (Set Name)
+overCompilerFreshModules fn CompilerState{..} =
+  CompilerState
+    { compilerFreshModules = fn compilerFreshModules
     , ..
     }
 
@@ -156,6 +167,7 @@ initialCompilerState =
     { compilerSupply = 0
     , compilerNameStore = mempty
     , compilerCurrentModule = Path mempty
+    , compilerFreshModules = mempty
     , compilerSubstitution = mempty
     , compilerConstraints = []
     , compilerConstraintsGenErrors = []

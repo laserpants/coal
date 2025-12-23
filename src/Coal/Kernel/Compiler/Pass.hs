@@ -23,31 +23,32 @@ import Coal.Kernel.Compiler.Pass.LetLifting (liftLetNodes)
 import Coal.Kernel.Compiler.Pass.Memoize (memoize)
 import Coal.Kernel.Compiler.Pass.PartialConstructors (saturateConstructors)
 import Coal.Kernel.Compiler.Pass.Suffix (suffixExpr)
-import Coal.Kernel.Compiler.Pipeline (Pipeline, pipelineInsertArtifacts)
+import Coal.Kernel.Compiler.Pipeline (PipelineT, pipelineInsertArtifacts)
 import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..), overPipelineStateSupply)
 import Coal.Kernel.LLVM (IRInterpreter, irInterpreterStateArtifacts, runInterpreter)
 import Coal.Kernel.Language
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (State, gets, modify, runState)
 import Control.Monad.Writer (Writer, runWriter)
 import Extras (traverse2)
 import Extras.Control.Applicative (pure1, pure3)
 
-transformSuffixMonad :: State Int a -> Pipeline a
+transformSuffixMonad :: (MonadIO m) => State Int a -> PipelineT m a
 transformSuffixMonad a = do
   (v, n) <- gets (runState a . pipelineSupply)
   modify (overPipelineStateSupply (const n))
   pure v
 
-transformInterpreter :: IRInterpreter a -> Pipeline a
+transformInterpreter :: (MonadIO m) => IRInterpreter a -> PipelineT m a
 transformInterpreter p = do
   env <- gets pipelineInterpreterEnv
   let (a, s, _) = runInterpreter env p
   pipelineInsertArtifacts (irInterpreterStateArtifacts s)
   pure a
 
-type Pass i o = i -> Pipeline o
+type Pass m i o = i -> PipelineT m o
 
-collectObjs :: (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> Pass ObjectList ObjectList
+collectObjs :: (MonadIO m) => (Expr Type -> Writer [Binding Type (Expr Type)] (Expr Type)) -> Pass m ObjectList ObjectList
 collectObjs f as = pure (ls <> fmap fromBinding rs)
  where
   (ls, rs) = runWriter (traverse2 f as)
@@ -63,7 +64,7 @@ astSortMatchClauses
   , astAddExtraArgs
   , astSimplify1
   , astSaturateConstructors ::
-    Pass ObjectList ObjectList
+    (MonadIO m) => Pass m ObjectList ObjectList
 astSortMatchClauses =
   pure3 sortMatchClauses
 astSuffix =

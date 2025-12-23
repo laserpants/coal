@@ -10,7 +10,7 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (Pass (..), mapPass)
+import Coal.Compiler.Pass (BuildUnit, Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kind (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -24,8 +24,8 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 
-passShadowingRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
-passShadowingRule = mapPass $ Pass{runPass = detectShadowing mempty}
+passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
+passShadowingRule = mapPass $ Pass{runPass = traverse (detectShadowing mempty)}
 
 class RuleContext e where
   detectShadowing :: (Monad m) => Set Name -> e -> CompilerT Metadata m e

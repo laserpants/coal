@@ -7,6 +7,7 @@ module Coal.Compiler.Build.Core (
   replacePlaceholders,
   prepareBuild,
   typeConstructorEnv,
+  dependencies,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -15,6 +16,7 @@ import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
 import Coal.Compiler.Builtin.Instances (builtinInstances)
+import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (toIndexedScheme, toIndexedType)
@@ -28,6 +30,7 @@ import Control.Monad.State (StateT, execStateT, get, gets, modify, runStateT)
 import Data.Either (rights)
 import Data.List (intersect, nub, (\\))
 import qualified Data.Map.Strict as Map
+import Data.Maybe (mapMaybe)
 import qualified Data.Set as Set
 import Extras (Name, for, groupByKey, (<$$>), (<.>))
 import Extras.Control.Monad (concatForM)
@@ -51,7 +54,7 @@ buildEnv = do
 
 replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 replacePlaceholders store =
-  updateBuildC $
+  updateCurrentBuildC $
     \build@ModuleBuild{..} ->
       flip execStateT build $
         forM_ moduleNames $
@@ -76,7 +79,7 @@ replacePlaceholders store =
         modify $ addName (info name s)
 
 prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind (), ModuleBuild a)
-prepareBuild (Module path exports defs) = do
+prepareBuild module_@(Module path exports defs) = do
   flip runStateT emptyModuleBuild $ do
     modify (setPath path)
 
@@ -144,6 +147,8 @@ prepareBuild (Module path exports defs) = do
       _ ->
         error "Implementation error"
 
+    modify $ setDependencies (filter (`notElem` [Path ["Builtin$"]]) (snd <$> dependencies module_))
+
     let ds' = defs1 <> defs
 
     build <- get
@@ -183,6 +188,17 @@ prepareBuild (Module path exports defs) = do
       , "negate"
       ]
   inEachDef = forM_ defs
+
+dependencies :: (Monoid a) => Module a k t -> [(a, Path)]
+dependencies (Module p _ defs)
+  | principalPath p `elem` embeddedPaths = imported
+  | otherwise = imported <> extra
+ where
+  imported = mapMaybe importPath defs
+  extra =
+    [ (mempty, Path ["Coal", "Applicative"])
+    , (mempty, Path ["Coal", "Monad"])
+    ]
 
 nameExports :: [Export a] -> [Name]
 nameExports exports =
@@ -695,7 +711,8 @@ importedModule loc path = do
   env <- gets compilerModules
   case Environment.lookup (principalPath path) env of
     Nothing -> do
-      tellErrors [ModuleNotFound (principalPath path) (ErrorLocation (principalPath path) loc)]
+      this <- gets (principalPath . compilerCurrentModule)
+      tellErrors [ModuleNotFound (principalPath path) (ErrorLocation this loc)]
       throwError PreflightFailure
     Just build ->
       return build

@@ -1,6 +1,7 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TupleSections #-}
 
 module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
   passLLVMOutput,
@@ -8,115 +9,111 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
+import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build (ModuleBuild (..))
+import Coal.Compiler.Build.Cache (writeBuildFile)
 import Coal.Compiler.Config (CompilerConfig (..))
-import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
 import Coal.Compiler.Stack
 import Coal.DebugIO (writeDebugFile)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
+import Coal.Language.Module
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
 import Control.Monad.Reader (asks)
 import Control.Monad.State (gets)
-import qualified Data.ByteString as B
-import Data.Either (lefts, rights)
-import Data.FileEmbed (embedFile)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as ByteString
+import Data.Either (partitionEithers)
 import Data.Foldable (for_)
+import Data.Maybe (fromJust)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Extras (Name)
 import System.Console.AsciiProgress (ProgressBar, tick)
-import System.Directory (canonicalizePath, copyFile)
-import System.FilePath (takeBaseName, (<.>), (</>))
+import System.Directory (createDirectoryIfMissing)
+import System.Exit (ExitCode (..))
+import System.FilePath ((<.>), (</>))
+import System.IO (hClose)
 import System.IO.Temp (withSystemTempDirectory)
-import System.Process (createProcess, cwd, proc, waitForProcess)
+import System.Process
 
-passLLVMOutput :: (MonadIO m) => Pass Metadata m [(Name, [IRConstruct [IRLine]])] ()
+passLLVMOutput :: (MonadIO m) => Pass Metadata m [BuildUnit (Name, [IRConstruct [IRLine]])] [(Name, ByteString)]
 passLLVMOutput = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [(Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m ()
+pass :: (MonadIO m) => [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m [(Name, ByteString)]
 pass ir = do
   config <- gets compilerConfig
   pb <- asks compilerProgressBar
-  r <- liftIO $ generateLLOutput pb config ir
-  for_ r throwError
+  res <- liftIO $ generateLLOutput pb config ir
+  case res of
+    Left err ->
+      throwError err
+    Right results -> do
+      forM_ results (uncurry setBitcodeC)
+      modules_ <- gets compilerModules
 
-runtimeLib :: B.ByteString
-runtimeLib = $(embedFile "runtime/lib.c")
+      let buildDir = "./.build/"
+      liftIO $ createDirectoryIfMissing True buildDir
+      forM_ (Environment.toList modules_) $
+        uncurry (writeBuildFile buildDir)
 
-hashmapLib :: B.ByteString
-hashmapLib = $(embedFile "runtime/hashmap.h")
+      pure results
 
-generateLLOutput :: Maybe ProgressBar -> CompilerConfig -> [(Name, [IRConstruct [IRLine]])] -> IO (Maybe CompilerFailureMode)
+generateLLOutput :: Maybe ProgressBar -> CompilerConfig -> [BuildUnit (Name, [IRConstruct [IRLine]])] -> IO (Either CompilerFailureMode [(Name, ByteString)])
 generateLLOutput pb CompilerConfig{..} mods = do
   withSystemTempDirectory "coal-build" $
     \tmpDir -> do
-      files <-
-        forM mods $
-          \(name, code) -> do
-            for_ pb tick
-
-            let file = tmpDir </> Text.unpack name <.> "ll"
-                llCode = irEncode code
-            Text.writeFile file llCode
-            when configGenerateLLVMOutput $
-              writeDebugFile ("./.debug" </> Text.unpack name <.> "ll") llCode
-            pure file
-
-      B.writeFile (tmpDir </> "runtime.c") runtimeLib
-      B.writeFile (tmpDir </> "hashmap.h") hashmapLib
-
-      cFiles <- traverse canonicalizePath configCFiles
-
-      forM_ cFiles $
-        \file -> do
-          copyFile file (tmpDir </> takeBaseName file)
-
-      llcRes <- traverse (runLLC tmpDir) files
-
-      case lefts llcRes of
+      llvmRes <- forM mods (irOutput pb CompilerConfig{..} tmpDir)
+      let (lefts, rights) = partitionEithers llvmRes
+      case lefts of
         [] -> do
-          unless configSilent $ putStrLn "Linking..."
-          gccRes <- runGCC tmpDir (rights llcRes) cFiles
-          case gccRes of
-            Left e -> do
-              putStrLn ("gcc failed: " ++ show e)
-              pure (Just CompilerError)
-            Right _ -> do
-              copyFile (tmpDir </> "dist") configExecutableName
-
-              unless configSilent $ do
-                putStrLn ("Executable written to: " <> configExecutableName)
-
-              pure Nothing
+          pure (Right rights)
         errs -> do
-          putStrLn "llc failed: "
+          putStrLn "llvm-as failed: "
           forM_ errs print
-          pure (Just CompilerError)
+          pure (Left CompilerError)
 
-runGCC :: FilePath -> [FilePath] -> [FilePath] -> IO (Either SomeException ())
-runGCC tmpDir objFiles cFiles =
-  try $ do
-    (_, _, _, ph) <- createProcess procSpec
-    _ <- waitForProcess ph
-    pure ()
- where
-  procSpec = (proc "gcc" args){cwd = Just tmpDir}
-  args =
-    ["-no-pie", "-g", "-I."]
-      <> ["runtime.c"]
-      <> cFiles
-      <> objFiles
-      <> ["-o", "dist"]
-      <> ["-lgc", "-lgmp"]
+irOutput :: Maybe ProgressBar -> CompilerConfig -> FilePath -> BuildUnit (Name, [IRConstruct [IRLine]]) -> IO (Either SomeException (Name, ByteString))
+irOutput pb CompilerConfig{..} tmpDir = do
+  \case
+    BSource (name, code) -> do
+      for_ pb tick
 
-runLLC :: FilePath -> FilePath -> IO (Either SomeException FilePath)
-runLLC tmpDir llFile =
+      let file = tmpDir </> Text.unpack name <.> "ll"
+          llCode = irEncode code
+
+      Text.writeFile file llCode
+      when configGenerateLLVMOutput $
+        writeDebugFile ("./.debug" </> Text.unpack name <.> "ll") llCode
+
+      bs <- runLLVM tmpDir file
+      pure (fmap (name,) bs)
+    BCached ModuleBuild{..} ->
+      pure (Right (principalPath modulePath, fromJust moduleBitcode))
+
+runLLVM :: FilePath -> FilePath -> IO (Either SomeException ByteString)
+runLLVM dir src =
   try $ do
-    (_, _, _, ph) <- createProcess procSpec
-    _ <- waitForProcess ph
-    pure target
+    (_, Just hOut, Just hErr, ph) <- createProcess process
+    out <- ByteString.hGetContents hOut
+    err <- ByteString.hGetContents hErr
+    exit <- waitForProcess ph
+    hClose hOut
+    hClose hErr
+    case exit of
+      ExitSuccess ->
+        pure out
+      ExitFailure _ ->
+        error $
+          "llvm-as failed:\n"
+            ++ (if ByteString.null err then "<no stderr>" else show err)
  where
-  procSpec = (proc "llc" ["-filetype=obj", "-relocation-model=pic", llFile, "-o", target]){cwd = Just tmpDir}
-  target = takeBaseName llFile <.> "o"
+  process =
+    (proc "llvm-as" [src, "-o", "-"])
+      { cwd = Just dir
+      , std_out = CreatePipe
+      , std_err = CreatePipe
+      }

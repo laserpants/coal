@@ -19,8 +19,9 @@ import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
-import Coal.Compiler.Pass (Pass (..), (>->))
+import Coal.Compiler.Pass (BuildUnit (..), Pass (..), tickBar, (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
+import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
 import Coal.Compiler.Pass.MainPhase (mainPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
 import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
@@ -32,7 +33,9 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Inference (KindInferenceError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
+import Control.Monad (replicateM_)
 import Control.Monad.Except (MonadIO, forM_)
+import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
@@ -47,7 +50,17 @@ pipeline =
   parsingPhase
     >-> preflightPhase
     >-> mainPhase
+    >-> Pass extraTicks
     >-> loweringPhase
+    >-> passLinking
+
+extraTicks :: (MonadIO m) => [BuildUnit a] -> CompilerT Metadata m [BuildUnit a]
+extraTicks units = do
+  forM_ units $
+    \case
+      BCached{} -> replicateM_ 73 tickBar
+      _ -> pure ()
+  pure units
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
@@ -61,10 +74,10 @@ compileWithCFiles config files cFiles = do
               def
                 { pgTotal = (fromIntegral (length embedded + length files) * 73) + 28
                 , pgWidth = 100
-                , pgFormat = "Compiling [:bar]"
+                , pgFormat = "Compiling [:bar] :current/:total"
                 }
           go (Just pb)
-  forM_ es $
+  forM_ (nub es) $
     \err -> do
       case errorLocation err of
         Just (ErrorLocation name _) ->
