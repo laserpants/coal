@@ -162,6 +162,53 @@ bignum_neg(mpz_t* m)
   return res;
 }
 
+/* compute m % n, return a newly-allocated mpz_t* */
+mpz_t*
+bignum_mod(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  /* modulo by zero is undefined */
+  if (mpz_sgn(*n) == 0)
+    return NULL;
+
+  mpz_t* res = (mpz_t*)gc_malloc(sizeof(mpz_t));
+  if (!res)
+    return NULL;
+
+  mpz_init(*res);
+  mpz_mod(*res, *m, *n);
+  return res;
+}
+
+bool
+bignum_lt(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  return mpz_cmp(*m, *n) < 0;
+}
+
+bool
+bignum_gt(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  return mpz_cmp(*m, *n) > 0;
+}
+
+bool
+bignum_eq(mpz_t* m, mpz_t* n)
+{
+  if (!m || !n)
+    return NULL;
+
+  return mpz_cmp(*m, *n) == 0;
+}
+
 /*
  * ////////////////////////////////////////////////////////////////////////////
  * Various I/O
@@ -639,12 +686,12 @@ char_to_string(uint32_t cp)
 
   if (cp <= 0x7F) {
     // 1-byte sequence
-    out = GC_malloc(2);
+    out = gc_malloc(2);
     out[0] = (char)cp;
     out[1] = '\0';
   } else if (cp <= 0x7FF) {
     // 2-byte sequence
-    out = GC_malloc(3);
+    out = gc_malloc(3);
     out[0] = (char)(0xC0 | ((cp >> 6) & 0x1F));
     out[1] = (char)(0x80 | (cp & 0x3F));
     out[2] = '\0';
@@ -653,14 +700,14 @@ char_to_string(uint32_t cp)
     if (cp >= 0xD800 && cp <= 0xDFFF)
       return NULL;
 
-    out = GC_malloc(4);
+    out = gc_malloc(4);
     out[0] = (char)(0xE0 | ((cp >> 12) & 0x0F));
     out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
     out[2] = (char)(0x80 | (cp & 0x3F));
     out[3] = '\0';
   } else if (cp <= 0x10FFFF) {
     // 4-byte sequence
-    out = GC_malloc(5);
+    out = gc_malloc(5);
     out[0] = (char)(0xF0 | ((cp >> 18) & 0x07));
     out[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
     out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
@@ -796,7 +843,7 @@ string_reverse(const char* s)
     total_bytes += char_lens[j];
   }
 
-  char* result = (char*)malloc(total_bytes + 1);
+  char* result = (char*)gc_malloc(total_bytes + 1);
 
   if (!result) {
     free(chars);
@@ -868,7 +915,7 @@ string_remove_whitespace(const char* s)
   size_t len = strlen(s);
 
   // Allocate output buffer same size as input (worst case)
-  char* result = (char*)malloc(len + 1);
+  char* result = (char*)gc_malloc(len + 1);
   if (!result)
     return NULL;
 
@@ -931,9 +978,9 @@ string_compare(const char* a, const char* b)
  */
 
 bool
-is_null(char* str)
+is_null(void* ptr)
 {
-  return (str == NULL);
+  return (ptr == NULL);
 }
 
 int32_t

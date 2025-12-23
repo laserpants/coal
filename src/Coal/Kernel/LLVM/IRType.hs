@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -12,7 +13,9 @@ module Coal.Kernel.LLVM.IRType (
 import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Typed (Typed (..))
+import Data.Binary (Binary)
 import Extras (Name)
+import GHC.Generics (Generic)
 
 -- | LLVM IR language types
 data IRType
@@ -40,7 +43,9 @@ data IRType
     TNamed Name IRType
   | -- | Array type (elements sequentially arranged in memory)
     TArray Int IRType
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance Binary IRType
 
 class IRTyped t where
   irTypeOf :: t -> IRType

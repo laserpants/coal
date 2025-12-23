@@ -43,15 +43,18 @@ module Coal.Compiler.Stack (
   insertModuleC,
   insertCurrentModuleC,
   getCurrentBuildC,
+  updateCurrentBuildC,
   updateBuildC,
   withCurrentModuleC_,
   withCurrentModuleC,
+  setBitcodeC,
+  insertFreshModule,
 ) where
 
-import Coal.Common.Environment (Environment)
+import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Build (ModuleBuild)
+import Coal.Compiler.Build (ModuleBuild, setBitcode)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
@@ -66,6 +69,9 @@ import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, gets, modify)
 import Control.Monad.Writer (MonadWriter)
+import Data.ByteString (ByteString)
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Data.Text (Text)
 import Extras (Dictionary, Name, fromMaybe)
 
@@ -172,18 +178,30 @@ insertCurrentModuleC build = do
   path <- gets (principalPath . compilerCurrentModule)
   modify (overCompilerModules (Environment.insert path build))
 
+getBuildC :: (Monad m) => Name -> CompilerT a m (Maybe (ModuleBuild a))
+getBuildC path = do
+  modules <- gets compilerModules
+  pure (Environment.lookup path modules)
+
 getCurrentBuildC :: (Monad m) => CompilerT a m (ModuleBuild a)
 getCurrentBuildC = do
   path <- gets (principalPath . compilerCurrentModule)
-  modules <- gets compilerModules
-  pure (fromMaybe (error "Implementation error") (Environment.lookup path modules))
+  fromMaybe (error "Implementation error") <$> getBuildC path
 
-updateBuildC :: (Monad m) => (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
-updateBuildC f = do
-  build <- getCurrentBuildC
-  updatedBuild <- f build
+updateBuildC :: (Monad m) => Name -> (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
+updateBuildC path f = do
+  build <- getBuildC path
+  case build of
+    Nothing ->
+      pure ()
+    Just b -> do
+      updatedBuild <- f b
+      modify (overCompilerModules (Environment.insert path updatedBuild))
+
+updateCurrentBuildC :: (Monad m) => (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
+updateCurrentBuildC f = do
   path <- gets (principalPath . compilerCurrentModule)
-  modify (overCompilerModules (Environment.insert path updatedBuild))
+  updateBuildC path f
 
 withCurrentModuleC :: (Monad m) => (Module a k t -> CompilerT a m (Module a k t)) -> Module a k t -> CompilerT a m (Module a k t)
 withCurrentModuleC f m@(Module p _ _) = do
@@ -195,3 +213,11 @@ withCurrentModuleC_ f m@(Module p _ _) = do
   setCompilerCurrentModuleC p
   f m
   pure m
+
+setBitcodeC :: (Monad m) => Name -> ByteString -> CompilerT a m ()
+setBitcodeC name bs = modify (overCompilerModules fn)
+ where
+  fn (Environment env) = Environment (Map.update (Just . setBitcode bs) name env)
+
+insertFreshModule :: (Monad m) => Name -> CompilerT a m ()
+insertFreshModule path = modify (overCompilerFreshModules (Set.insert path))

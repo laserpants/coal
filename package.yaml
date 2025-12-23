@@ -44,6 +44,9 @@ dependencies:
 - file-embed
 - ascii-progress
 - data-default
+- binary
+- cryptonite
+- memory
 
 ghc-options:
 - -Wall

@@ -11,7 +11,7 @@ module Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (Pass (..), mapPass)
+import Coal.Compiler.Pass (BuildUnit, Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
@@ -24,8 +24,8 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
 
-passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [Module Metadata Kind ()] [Module Metadata Kind ()]
-passNoDuplicateParamsRule = mapPass $ Pass{runPass = withCurrentModuleC_ detectDuplicateParams}
+passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
+passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse (withCurrentModuleC_ detectDuplicateParams)}
 
 class RuleContext e where
   detectDuplicateParams :: (Monad m) => e -> CompilerT Metadata m ()

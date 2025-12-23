@@ -1,9 +1,11 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Build (
+  Hash256 (..),
   ModuleBuild (..),
   CotypeConstructorEntry (..),
   DataConstructorEntry (..),
@@ -36,21 +38,39 @@ module Coal.Compiler.Build (
   setExports,
   setTypeExports,
   setPath,
+  setBitcode,
+  setDependencies,
+  setHash,
+  insertHash,
+  setQualifiedNames,
+  setKernelNames,
+  setKernelIRTypes,
+  setKernelConstructors,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Build.NameEntry
+import Coal.Kernel.LLVM.IRType (IRType)
+import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType)
 import Coal.Language.Module (Path (..))
+import Crypto.Hash
+import Data.Binary
+import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
+import Data.Text (Text)
+import qualified Data.Text.Encoding as Text
 import Extras (Name, Set)
+import GHC.Generics (Generic)
 
 data ModuleBuild a = ModuleBuild
   { modulePath :: Path
+  , moduleFilePath :: Text
   , moduleDataConstructors :: Environment (DataConstructorEntry a)
   , moduleCodataAccessors :: Environment (CodataAccessorEntry a)
   , moduleTypeConstructors :: Environment (TypeConstructorEntry a)
@@ -59,12 +79,19 @@ data ModuleBuild a = ModuleBuild
   , moduleInstances :: Environment (Map IndexedType (InstanceEntry a))
   , moduleAliases :: Environment (AliasEntry a)
   , moduleNames :: [NameEntry]
+  , moduleDependencies :: [Path]
+  , moduleQualifiedNames :: Environment Name
   , moduleExports :: Set Name
   , moduleTypeExports :: Set Name
-  --  , moduleDefinitions ::
-  --  , moduleObjectCode :: ByteString
+  , moduleBitcode :: Maybe ByteString
+  , moduleHash :: Maybe Hash256
+  , moduleKernelNames :: Environment Kernel.Type
+  , moduleKernelIRTypes :: Environment IRType
+  , moduleKernelConstructors :: Environment Int
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Generic)
+
+instance (Binary a) => Binary (ModuleBuild a)
 
 memberOf :: (HasName a) => Set Name -> a -> Bool
 memberOf s info = nameOf info `Set.member` s
@@ -94,6 +121,7 @@ emptyModuleBuild :: ModuleBuild a
 emptyModuleBuild =
   ModuleBuild
     { modulePath = Path []
+    , moduleFilePath = mempty
     , moduleDataConstructors = mempty
     , moduleCodataAccessors = mempty
     , moduleTypeConstructors = mempty
@@ -102,8 +130,15 @@ emptyModuleBuild =
     , moduleInstances = mempty
     , moduleAliases = mempty
     , moduleNames = mempty
+    , moduleDependencies = mempty
+    , moduleQualifiedNames = mempty
     , moduleExports = mempty
     , moduleTypeExports = mempty
+    , moduleBitcode = Nothing
+    , moduleHash = Nothing
+    , moduleKernelNames = mempty
+    , moduleKernelIRTypes = mempty
+    , moduleKernelConstructors = mempty
     }
 
 insertDataConstructor :: Name -> DataConstructorEntry a -> ModuleBuild a -> ModuleBuild a
@@ -212,5 +247,57 @@ setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} =
   ModuleBuild
     { modulePath = path
+    , ..
+    }
+
+setBitcode :: ByteString -> ModuleBuild a -> ModuleBuild a
+setBitcode code ModuleBuild{..} =
+  ModuleBuild
+    { moduleBitcode = Just code
+    , ..
+    }
+
+setDependencies :: [Path] -> ModuleBuild a -> ModuleBuild a
+setDependencies paths ModuleBuild{..} =
+  ModuleBuild
+    { moduleDependencies = paths
+    , ..
+    }
+
+setHash :: Hash256 -> ModuleBuild a -> ModuleBuild a
+setHash hash256 ModuleBuild{..} =
+  ModuleBuild
+    { moduleHash = Just hash256
+    , ..
+    }
+
+insertHash :: Text -> ModuleBuild a -> ModuleBuild a
+insertHash source = setHash (Hash256 (hash (Text.encodeUtf8 source)))
+
+setQualifiedNames :: Environment Name -> ModuleBuild a -> ModuleBuild a
+setQualifiedNames names ModuleBuild{..} =
+  ModuleBuild
+    { moduleQualifiedNames = names
+    , ..
+    }
+
+setKernelNames :: Environment Kernel.Type -> ModuleBuild a -> ModuleBuild a
+setKernelNames env ModuleBuild{..} =
+  ModuleBuild
+    { moduleKernelNames = env
+    , ..
+    }
+
+setKernelIRTypes :: Environment IRType -> ModuleBuild a -> ModuleBuild a
+setKernelIRTypes env ModuleBuild{..} =
+  ModuleBuild
+    { moduleKernelIRTypes = env
+    , ..
+    }
+
+setKernelConstructors :: Environment Int -> ModuleBuild a -> ModuleBuild a
+setKernelConstructors env ModuleBuild{..} =
+  ModuleBuild
+    { moduleKernelConstructors = env
     , ..
     }

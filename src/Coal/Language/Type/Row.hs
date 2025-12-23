@@ -15,17 +15,19 @@ module Coal.Language.Type.Row (
   updateTail,
 ) where
 
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
+import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name, (<$$>))
 import GHC.Generics (Generic)
-
-import qualified Data.Map.Strict as Map
 
 data Row o k t
   = RExtend Name t (Row o k t)
   | RVariable (o k)
   | RNil
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Binary (o k), Binary k, Binary t) => Binary (Row o k t)
 
 data RowData o k t = RowData (Dictionary t) (Row o k t)
   deriving (Show, Eq, Ord, Read)

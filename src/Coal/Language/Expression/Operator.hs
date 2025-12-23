@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
@@ -12,7 +13,9 @@ module Coal.Language.Expression.Operator (
 import Coal.Language.Type (Type (..), listType, (~>))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Scheme (IndexedScheme, Scheme (..), forall0, forall1, forall2, forall3)
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
+import GHC.Generics (Generic)
 
 -- | Unary operators
 data UnaryOperator
@@ -20,7 +23,9 @@ data UnaryOperator
     OLogicalNot
   | -- | Negation (-)
     ONegate
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+
+instance Binary UnaryOperator
 
 -- | Binary operators
 data BinaryOperator
@@ -66,7 +71,9 @@ data BinaryOperator
     OListConcatenation
   | -- | Semmigroup operation (<>)
     OSemigroupOp
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+
+instance Binary BinaryOperator
 
 unaryOperatorTypeScheme :: UnaryOperator -> IndexedScheme
 unaryOperatorTypeScheme =

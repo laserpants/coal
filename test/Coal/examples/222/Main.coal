@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_string, println_bignum)
+  import Number(parse_bignum)
+
+  fun main() =
+    match(parse_bignum("xyz")) {
+      | None => println_string("no")
+      | Some(big) => println_bignum(big)
+    }
+
+}

@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(println_bool)
+
+  fun main() =
+    let m = 5 : nat in
+    let n = 8 : nat in
+    println_bool(m > n)
+
+}

@@ -26,24 +26,24 @@ saturateConstructors =
               ( Syntax.app
                   Syntax.opaque
                   (Syntax.var ll)
-                  (NonEmpty.append es (Syntax.var <$> ps))
+                  (NonEmpty.append es (Syntax.var <$> NonEmpty.fromList qs))
               )
         | otherwise ->
             Syntax.app u (Syntax.var ll) es
        where
-        n = arity t
-        ts = NonEmpty.drop (length es) (unfoldType t)
-        ls = (\t0 -> "a" <> showt t0) <$> [1 .. n - length es]
-        ps = NonEmpty.fromList (uncurry Label <$> zip ts ls)
+        ps = labels t
+        qs = NonEmpty.drop (length es) ps
       Syntax.EVar ll@(Label t var)
         | isConstructor var && arity t > 0 -> do
             Syntax.lam ps (Syntax.app Syntax.opaque (Syntax.var ll) (Syntax.var <$> ps))
         | otherwise ->
             Syntax.var ll
        where
-        n = arity t
-        ts = unfoldType t
-        ls = (\t0 -> "a" <> showt t0) <$> (1 :| [2 .. n])
-        ps = uncurry Label <$> NonEmpty.zip ts ls
+        ps = labels t
       e ->
         embed e
+
+labels :: Type -> NonEmpty (Label Type)
+labels t = uncurry Label <$> NonEmpty.zip (unfoldType t) ls
+ where
+  ls = (\t0 -> "$#arg" <> showt t0) <$> (1 :| [2 .. arity t])

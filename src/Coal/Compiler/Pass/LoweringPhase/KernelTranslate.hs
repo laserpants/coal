@@ -1,112 +1,38 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)
 import Coal.Compiler.Kernel.Translate.Definition (translateDefinition)
-import Coal.Compiler.Pass (Pass (..), tickBar)
+import Coal.Compiler.Pass (BuildUnit, Pass (..), tickBar)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.State (gets)
-import Extras (Name, (<.>))
-import Extras.Control.Monad (concatForM)
+import Extras (Name)
 
-passKernelTranslate :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
-passKernelTranslate = Pass{runPass = pass}
+passKernelTranslate :: (MonadIO m) => Pass Metadata m (BuildUnit (Module Metadata Kind IndexedType)) (BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)))
+passKernelTranslate = Pass{runPass = \p -> tickBar >> traverse pass p}
 
 pass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 pass =
   \case
     Module path _ defs -> do
-      tickBar
-
       setCompilerCurrentModuleC path
-      build <- getCurrentBuildC
-      env <- collectImports build defs
+      ModuleBuild{..} <- getCurrentBuildC
 
-      insertQualifiedNames env $
+      insertQualifiedNames moduleQualifiedNames $
         withModuleName name $
           Kernel.Module
             name
-            (Environment.elems env)
+            (Environment.elems moduleQualifiedNames)
             . concat
             <$> traverse translateDefinition defs
      where
       name = principalPath path
-
-collectImports :: (Monad m) => ModuleBuild a -> [Definition a k t] -> CompilerT Metadata m (Environment Name)
-collectImports build defs = do
-  xs <- concatForM defs (qualImports build)
-  pure (Environment.fromList xs)
-
-importedModule :: (Monad m) => Path -> CompilerT a m (ModuleBuild a)
-importedModule path = do
-  env <- gets compilerModules
-  case Environment.lookup (principalPath path) env of
-    Nothing ->
-      error "Implementation error"
-    Just build ->
-      return build
-
-qualImports :: (Monad m) => ModuleBuild a -> Definition a k t -> CompilerT Metadata m [(Name, Name)]
-qualImports ModuleBuild{..} =
-  \case
-    DImport _ path names_ ->
-      concatForM names_ $
-        \case
-          (ImportName _ name) ->
-            pure [(name, principalPath path <.> name)]
-          (ImportType _ name ["*"]) ->
-            case Environment.lookup name moduleTypeConstructors of
-              Nothing ->
-                error "Not implemented"
-              Just TypeConstructorEntry{..} ->
-                pure [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
-          (ImportType _ _ ctors) ->
-            pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
-          (ImportCotype _ name ["*"]) ->
-            case Environment.lookup name moduleCotypeConstructors of
-              Nothing ->
-                error "Not implemented"
-              Just CotypeConstructorEntry{..} ->
-                pure [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorEntryDataAccessors]
-          (ImportCotype _ _ xsors) ->
-            pure [(xsor, principalPath path <.> xsor) | xsor <- xsors]
-          (ImportTrait _ name ["*"]) ->
-            case Environment.lookup name moduleTraits of
-              Nothing ->
-                error "Not implemented"
-              Just TraitEntry{..} ->
-                pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
-          (ImportTrait _ _ entries) ->
-            pure [(entry, principalPath path <.> entry) | entry <- entries]
-    DQualifiedImport _ path -> do
-      build <- importedModule path
-      concatForM (exportedNames build) $
-        \case
-          NFunction name _ ->
-            pure [(qualified name path, qualified name path)]
-          NConstant name _ ->
-            pure [(qualified name path, qualified name path)]
-          NFold name _ ->
-            pure [(qualified name path, qualified name path)]
-          NUnfold name _ ->
-            pure [(qualified name path, qualified name path)]
-          NDataConstructor name _ ->
-            pure [(qualified name path, qualified name path)]
-          NCodataAccessor name _ ->
-            pure [(qualified name path, qualified name path)]
-          _ ->
-            pure []
-    _ ->
-      pure []

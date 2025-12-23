@@ -30,8 +30,8 @@ builtinInstances =
               , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt32)
               )
             ,
-              ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IInt32)
+              ( "from_bignum"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "negate"
@@ -69,8 +69,8 @@ builtinInstances =
               , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
-              ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IInt64)
+              ( "from_bignum"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "negate"
@@ -108,8 +108,8 @@ builtinInstances =
               , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IFloat)
               )
             ,
-              ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IFloat)
+              ( "from_bignum"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "negate"
@@ -147,8 +147,8 @@ builtinInstances =
               , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IDouble)
               )
             ,
-              ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IDouble)
+              ( "from_bignum"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "negate"
@@ -186,8 +186,8 @@ builtinInstances =
               , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic INat)
               )
             ,
-              ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic INat)
+              ( "from_bignum"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic INat)
               )
             ,
               ( "negate"
@@ -225,8 +225,8 @@ builtinInstances =
               , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IBignum)
               )
             ,
-              ( "from_literal"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IBignum)
+              ( "from_bignum"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "negate"
@@ -558,6 +558,21 @@ builtinInstances =
             [
               ( "(%)"
               , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              )
+            ]
+        )
+    )
+  ,
+    ( "Modulo"
+    , TIntrinsic IBignum
+    , InstanceEntry
+        mempty
+        (TIntrinsic IBignum)
+        (TIntrinsic IBignum)
+        ( Map.fromList
+            [
+              ( "(%)"
+              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ]
         )

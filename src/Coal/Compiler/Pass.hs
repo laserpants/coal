@@ -1,10 +1,16 @@
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass (
   Pass (..),
+  BuildUnit (..),
   (>->),
   mapPass,
+  liftPass,
   overlayEnvironment,
+  partitionBuildUnits,
   tickBar,
 ) where
 
@@ -20,12 +26,27 @@ import Control.Monad.State (evalStateT)
 import Data.Foldable (for_)
 import System.Console.AsciiProgress
 
+data BuildUnit a
+  = BSource a
+  | BCached (ModuleBuild Metadata)
+  deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
+
+partitionBuildUnits :: [BuildUnit a] -> ([a], [ModuleBuild Metadata])
+partitionBuildUnits = foldr (flip go) ([], [])
+ where
+  go (sources, cached) =
+    \case
+      BSource m ->
+        (m : sources, cached)
+      BCached b ->
+        (sources, b : cached)
+
 newtype Pass a m i o = Pass {runPass :: i -> CompilerT a m o}
 
 tickBar :: (MonadIO m) => CompilerT a m ()
 tickBar = do
   pb <- asks compilerProgressBar
-  for_ pb (liftIO . tick)
+  liftIO (for_ pb tick)
 
 runPassAndTickBar :: (MonadIO m) => Pass a m i b -> i -> CompilerT a m b
 runPassAndTickBar p i = do
@@ -37,6 +58,9 @@ p1 >-> p2 = Pass{runPass = runPassAndTickBar p1 >=> runPassAndTickBar p2}
 
 mapPass :: (MonadIO m) => Pass a m i o -> Pass a m [i] [o]
 mapPass p = Pass{runPass = traverse (runPassAndTickBar p)}
+
+liftPass :: (Monad m) => Pass a m i o -> Pass a m (BuildUnit i) (BuildUnit o)
+liftPass (Pass p) = Pass (traverse p)
 
 overlayEnvironment :: (MonadIO m) => Pass Metadata m a b -> Pass Metadata m a b
 overlayEnvironment p = Pass{runPass = pass}

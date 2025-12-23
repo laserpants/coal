@@ -1,0 +1,9 @@
+module Main {
+
+  import IO(println_bool)
+  import Char(ord)
+
+  fun main() =
+    println_bool('a' < 'b')
+
+}

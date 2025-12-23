@@ -14,6 +14,7 @@ module Coal.Language.Type.Kind (
   tupleKind,
 ) where
 
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
@@ -28,6 +29,8 @@ data Kind
   | KArrow Kind Kind
   | KTrait
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+
+instance Binary Kind
 
 infixr 1 `KArrow`
 

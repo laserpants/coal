@@ -2,12 +2,20 @@
 
 module E2E.Kernel.Spec (e2eKernelSpec) where
 
+import Coal.Compiler.Environment (emptyCompilerEnvironment)
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad (void)
+import Control.Monad.Except (throwError)
+import Coal.AST.Metadata (Metadata (..))
+import Coal.Kernel.Compiler.Pipeline (evalPipelineT)
+import Coal.Compiler.Pass.LoweringPhase.KernelCode (compileUnits)
 import Coal.Common.Name (Name)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
+import Coal.Compiler.Pass (BuildUnit (..))
 import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (generateLLOutput)
+import Coal.Compiler.Pass.LoweringPhase.Linking (compileBitcode)
 import Coal.Compiler.Stack
 import Coal.Kernel.Builtin.Objects (builtinObjects)
-import qualified Coal.Kernel.Compiler as Kernel
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Parser (spaces)
@@ -147,21 +155,22 @@ e2eKernelSpec = do
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
   it ("\"" <> expt <> "\"") $ do
-    res <- runKernelSpec files
+    res <- evalCompilerT (emptyCompilerEnvironment Nothing) (runKernelSpec files)
     res `shouldBe` Right expt
 
-runKernelSpec :: [FilePath] -> IO (Either CompilerFailureMode String)
+runKernelSpec :: [FilePath] -> CompilerT Metadata IO String -- (Either CompilerFailureMode String)
 runKernelSpec files = do
-  ir <- Kernel.compileModules (builtinObjects : mods)
-  res <- generateLLOutput Nothing config ir
+  ir <- evalPipelineT (compileUnits (BSource builtinObjects : mods))
+  res <- liftIO $ generateLLOutput Nothing config ir
   case res of
-    Just err ->
-      pure (Left err)
-    Nothing -> do
-      txt <- readProcess "./dist" [] ""
-      pure (Right txt)
+    Left err ->
+      throwError err
+    Right bc -> do
+      liftIO $ do
+        void $ compileBitcode config bc
+        readProcess "./dist" [] ""
  where
-  mods = unsafeParseFile <$> files
+  mods = BSource . unsafeParseFile <$> files
   config =
     defaultConfig
       { configGenerateDotFiles = False

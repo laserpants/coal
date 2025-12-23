@@ -1,13 +1,16 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Kernel.Language.Type (Type (..)) where
 
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Extras (Name)
 import Extras.Prettyprinter (parensIf)
+import GHC.Generics (Generic)
 import Prettyprinter
 
 -- | Core language types
@@ -20,7 +23,9 @@ data Type
     RExt Name Type Type
   | -- | Empty row
     RNil
-  deriving (Show, Eq, Ord, Read, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+
+instance Binary Type
 
 precArrow, precApp :: Int
 precArrow = 1

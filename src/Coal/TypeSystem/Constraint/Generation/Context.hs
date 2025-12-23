@@ -14,7 +14,7 @@ data ConstraintsGenContext g o a t = ConstraintsGenContext
   { constraintsGenContextMonomorphicSet :: Monomorphic (o a)
   , constraintsGenContextModules :: ModuleBuild g
   }
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord)
 
 emptyConstraintsGenContext :: (Ord (o a)) => ConstraintsGenContext g o a t
 emptyConstraintsGenContext =

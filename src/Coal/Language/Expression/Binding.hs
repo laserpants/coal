@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
@@ -9,16 +10,20 @@ module Coal.Language.Expression.Binding (Binding (..)) where
 
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)
 import Coal.Language.Pattern (Pattern (..))
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Set as Set
 import Extras (Name)
+import GHC.Generics (Generic)
 
 data Binding e a t
   = BPattern a (Pattern a t) (e a t)
   | BFunction a Name (NonEmpty (Pattern a t)) (e a t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+
+instance (Binary a, Binary t, Binary (e a t)) => Binary (Binding e a t)
 
 instance (Data a, Data t) => BoundVars (Binding e a t) where
   boundIn =

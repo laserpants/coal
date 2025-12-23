@@ -2,17 +2,18 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing) where
+module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, fromSource) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build.Cache (cachedBuild)
 import Coal.Compiler.Config
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
-import Coal.Language.Module (Module (..))
+import Coal.Language.Module (Module (..), modulePathName)
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseModule)
 import Coal.Parser.Core (spaces)
@@ -24,13 +25,14 @@ import Data.Either (partitionEithers)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as E
-import Extras (forM, forM_)
+import qualified Data.Text.IO as Text
+import Extras (Name, forM, forM_)
 import Text.Megaparsec (eof, runParser)
 
-passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [Module Metadata Kind ()]
+passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildUnit (Module Metadata Kind ())]
 passParsing = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [Module Metadata Kind ()]
+pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildUnit (Module Metadata Kind ())]
 pass files = do
   embeddedFiles <- traverse parseEmbedded embedded
   case partitionEithers embeddedFiles of
@@ -47,32 +49,54 @@ pass files = do
         \(p, e) ->
           error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
 
-parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (Module Metadata Kind ()))
+parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildUnit (Module Metadata Kind ())))
 parseEmbedded (p, src) =
   case runParser (parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
     Right module_ -> do
+      let name = modulePathName module_
+      -- Check cached build files
+      cached <- cachedBuild name encodedSrc
       setVerbatimSourceForC module_ encodedSrc
-      pure $ Right module_
+      case cached of
+        Just mb -> do
+          insertModuleC name mb
+          pure $ Right (BCached mb)
+        Nothing -> do
+          insertFreshModule name
+          pure $ Right (BSource module_)
  where
+  encodedSrc :: Text
   encodedSrc = E.decodeUtf8 src
 
-parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (Module Metadata Kind ()))
+fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildUnit (Module Metadata Kind ())))
+fromSource name file src = do
+  insertFreshModule name
+  case runParser (spaces *> parseModule <* eof) "" src of
+    Left err ->
+      pure $ Left (ParserError file err)
+    Right module_@(Module path _ _) -> do
+      if principalPath path == name
+        then do
+          pure $ Right (BSource module_)
+        else pure $ Left (BadModuleName file (principalPath path))
+
+parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildUnit (Module Metadata Kind ())))
 parseFile file = do
   CompilerConfig{..} <- gets compilerConfig
   res <- liftIO $ resolveModule configSourcePaths file
   case res of
     Right (fp, _, name) -> do
-      src <- Text.pack <$> liftIO (readFile fp)
-      case runParser (spaces *> parseModule <* eof) "" src of
-        Left err ->
-          pure $ Left (ParserError file err)
-        Right module_@(Module path _ _) -> do
-          if Text.unpack (principalPath path) == name
-            then do
-              setVerbatimSourceForC module_ src
-              pure $ Right module_
-            else pure $ Left (BadModuleName file (principalPath path))
+      src <- liftIO (Text.readFile fp)
+      -- Check cached build files
+      cached <- cachedBuild name src
+      setVerbatimSourceC name src
+      case cached of
+        Just mb -> do
+          insertModuleC name mb
+          pure $ Right (BCached mb)
+        Nothing -> do
+          fromSource name file src
     Left err -> do
       pure $ Left (BadFilename file err)

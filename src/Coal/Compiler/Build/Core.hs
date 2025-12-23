@@ -7,6 +7,7 @@ module Coal.Compiler.Build.Core (
   replacePlaceholders,
   prepareBuild,
   typeConstructorEnv,
+  dependencies,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -15,6 +16,7 @@ import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
 import Coal.Compiler.Builtin.Instances (builtinInstances)
+import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (toIndexedScheme, toIndexedType)
@@ -24,12 +26,13 @@ import Coal.TypeSystem.Kind.Inference (inferTraitKinds)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification (Unifiable (match), evalUnifier)
 import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
-import Control.Monad.State (StateT, execStateT, gets, modify, runStateT)
+import Control.Monad.State (StateT, execStateT, get, gets, modify, runStateT)
 import Data.Either (rights)
 import Data.List (intersect, nub, (\\))
 import qualified Data.Map.Strict as Map
+import Data.Maybe (mapMaybe)
 import qualified Data.Set as Set
-import Extras (Name, for, groupByKey, (<$$>))
+import Extras (Name, for, groupByKey, (<$$>), (<.>))
 import Extras.Control.Monad (concatForM)
 
 buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
@@ -51,7 +54,7 @@ buildEnv = do
 
 replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 replacePlaceholders store =
-  updateBuildC $
+  updateCurrentBuildC $
     \build@ModuleBuild{..} ->
       flip execStateT build $
         forM_ moduleNames $
@@ -76,7 +79,7 @@ replacePlaceholders store =
         modify $ addName (info name s)
 
 prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind (), ModuleBuild a)
-prepareBuild (Module path exports defs) = do
+prepareBuild module_@(Module path exports defs) = do
   flip runStateT emptyModuleBuild $ do
     modify (setPath path)
 
@@ -137,7 +140,22 @@ prepareBuild (Module path exports defs) = do
           setExports (nameExports exports `intersect` Set.toList exps)
             . setTypeExports (typeExports exports `intersect` Set.toList typeExps)
 
-    return (Module path exports (defs1 <> defs))
+    env <- lift $ gets compilerVerbatimSource
+    case Environment.lookup (principalPath path) env of
+      Just src ->
+        modify (insertHash src)
+      _ ->
+        error "Implementation error"
+
+    modify $ setDependencies (filter (`notElem` [Path ["Builtin$"]]) (snd <$> dependencies module_))
+
+    let ds' = defs1 <> defs
+
+    build <- get
+    names <- lift $ collectImports build ds'
+    modify (setQualifiedNames names)
+
+    return (Module path exports ds')
  where
   builtin =
     Set.fromList
@@ -171,6 +189,17 @@ prepareBuild (Module path exports defs) = do
       ]
   inEachDef = forM_ defs
 
+dependencies :: (Monoid a) => Module a k t -> [(a, Path)]
+dependencies (Module p _ defs)
+  | principalPath p `elem` embeddedPaths = imported
+  | otherwise = imported <> extra
+ where
+  imported = mapMaybe importPath defs
+  extra =
+    [ (mempty, Path ["Coal", "Applicative"])
+    , (mempty, Path ["Coal", "Monad"])
+    ]
+
 nameExports :: [Export a] -> [Name]
 nameExports exports =
   flip concatMap exports $
@@ -199,7 +228,7 @@ pick names = filter (\e -> nameOf e `Set.member` ns)
 collectNameImports :: (Monad m, HasName e) => Definition a Kind () -> (ModuleBuild a -> [e]) -> StateT (ModuleBuild a) (CompilerT a m) [e]
 collectNameImports (DImport _ (Path ["Builtin$"]) _) _ = pure []
 collectNameImports (DImport loc path imports) getter = do
-  build <- importedModule loc path
+  build <- lift $ importedModule loc path
   let env = getter build
   pure (pick (nameImports build imports) env)
 collectNameImports _ _ = error "Implementation error"
@@ -207,7 +236,7 @@ collectNameImports _ _ = error "Implementation error"
 collectTypeImports :: (Monad m, HasName e) => Definition a Kind () -> (ModuleBuild a -> [e]) -> StateT (ModuleBuild a) (CompilerT a m) [e]
 collectTypeImports (DImport _ (Path ["Builtin$"]) _) _ = pure []
 collectTypeImports (DImport loc path imports) getter = do
-  build <- importedModule loc path
+  build <- lift $ importedModule loc path
   let env = getter build
   pure (pick (typeImports imports) env)
 collectTypeImports _ _ = error "Implementation error"
@@ -256,16 +285,6 @@ typeImports imports =
       _ ->
         []
 
-importedModule :: (Monad m) => a -> Path -> StateT (ModuleBuild a) (CompilerT a m) (ModuleBuild a)
-importedModule loc path = do
-  env <- lift (gets compilerModules)
-  case Environment.lookup (principalPath path) env of
-    Nothing -> do
-      tellErrors [ModuleNotFound (principalPath path) (ErrorLocation (principalPath path) loc)]
-      throwError PreflightFailure
-    Just build -> do
-      return build
-
 collectTypeConstructors :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectTypeConstructors =
   \case
@@ -295,7 +314,7 @@ collectTypeConstructors =
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport a path imports -> do
-      build <- importedModule a path
+      build <- lift $ importedModule a path
       this <- lift $ gets (principalPath . compilerCurrentModule)
       forM_ imports $
         \case
@@ -316,7 +335,7 @@ collectTypeConstructors =
           _ ->
             pure ()
     DQualifiedImport a path -> do
-      build <- importedModule a path
+      build <- lift $ importedModule a path
       forM_ (Environment.toList (exportedTypeConstructors build)) $
         \(n, entry) ->
           modify $ insertTypeConstructor (principalPath path <> "." <> n) entry
@@ -369,7 +388,7 @@ collectDataConstructors env =
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport a path imports -> do
-      build <- importedModule a path
+      build <- lift $ importedModule a path
       this <- lift $ gets (principalPath . compilerCurrentModule)
       forM_ imports $
         \case
@@ -416,7 +435,7 @@ collectDataConstructors env =
           _ ->
             pure ()
     DQualifiedImport a path -> do
-      build <- importedModule a path
+      build <- lift $ importedModule a path
       forM_ (Environment.toList (exportedDataConstructors build)) $
         \(n, entry) ->
           modify $ insertDataConstructor (principalPath path <> "." <> n) entry
@@ -447,7 +466,7 @@ collectTraits env =
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     def@(DImport loc path _) -> do
-      ModuleBuild{..} <- importedModule loc path
+      ModuleBuild{..} <- lift $ importedModule loc path
       traits <- collectTypeImports def exportedTraits
       forM_ traits $
         \info@(TraitEntry _ name _ _ _) -> do
@@ -459,7 +478,7 @@ collectTraits env =
                   \(t, InstanceEntry{..}) -> do
                     modify $ insertInstance trait t InstanceEntry{..}
     DQualifiedImport a path -> do
-      build <- importedModule a path
+      build <- lift $ importedModule a path
       let entries = exportedTraits build
       forM_ entries $
         \entry ->
@@ -524,7 +543,7 @@ collectInstances kinds traits =
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport loc path imports -> do
-      ModuleBuild{..} <- importedModule loc path
+      ModuleBuild{..} <- lift $ importedModule loc path
       forM_ imports $
         \case
           ImportType _ name _ ->
@@ -549,7 +568,7 @@ collectImportedInstances =
     DImport _ (Path ["Builtin$"]) _ -> do
       pure []
     DImport loc path imports -> do
-      ModuleBuild{..} <- importedModule loc path
+      ModuleBuild{..} <- lift $ importedModule loc path
       concatForM imports $
         \case
           ImportTrait _ name _ ->
@@ -618,7 +637,7 @@ collectImportedNames =
           info ->
             modify $ addName info
     DQualifiedImport a path -> do
-      build <- importedModule a path
+      build <- lift $ importedModule a path
       forM_ (exportedNames build <> exportedTypeNames build) $
         \case
           NFunctionPlaceholder _ ->
@@ -681,3 +700,72 @@ collectPlaceholders =
       exportUnfold name
     _ ->
       pure ()
+
+collectImports :: (Monad m) => ModuleBuild a -> [Definition a k t] -> CompilerT a m (Environment Name)
+collectImports build defs = do
+  xs <- concatForM defs (qualImports build)
+  pure (Environment.fromList xs)
+
+importedModule :: (Monad m) => a -> Path -> CompilerT a m (ModuleBuild a)
+importedModule loc path = do
+  env <- gets compilerModules
+  case Environment.lookup (principalPath path) env of
+    Nothing -> do
+      this <- gets (principalPath . compilerCurrentModule)
+      tellErrors [ModuleNotFound (principalPath path) (ErrorLocation this loc)]
+      throwError PreflightFailure
+    Just build ->
+      return build
+
+qualImports :: (Monad m) => ModuleBuild a -> Definition a k t -> CompilerT a m [(Name, Name)]
+qualImports ModuleBuild{..} =
+  \case
+    DImport _ path names_ ->
+      concatForM names_ $
+        \case
+          (ImportName _ name) ->
+            pure [(name, principalPath path <.> name)]
+          (ImportType _ name ["*"]) ->
+            case Environment.lookup name moduleTypeConstructors of
+              Nothing ->
+                error "Not implemented"
+              Just TypeConstructorEntry{..} ->
+                pure [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
+          (ImportType _ _ ctors) ->
+            pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
+          (ImportCotype _ name ["*"]) ->
+            case Environment.lookup name moduleCotypeConstructors of
+              Nothing ->
+                error "Not implemented"
+              Just CotypeConstructorEntry{..} ->
+                pure [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorEntryDataAccessors]
+          (ImportCotype _ _ xsors) ->
+            pure [(xsor, principalPath path <.> xsor) | xsor <- xsors]
+          (ImportTrait _ name ["*"]) ->
+            case Environment.lookup name moduleTraits of
+              Nothing ->
+                error "Not implemented"
+              Just TraitEntry{..} ->
+                pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
+          (ImportTrait _ _ entries) ->
+            pure [(entry, principalPath path <.> entry) | entry <- entries]
+    DQualifiedImport loc path -> do
+      build <- importedModule loc path
+      concatForM (exportedNames build) $
+        \case
+          NFunction name _ ->
+            pure [(qualified name path, qualified name path)]
+          NConstant name _ ->
+            pure [(qualified name path, qualified name path)]
+          NFold name _ ->
+            pure [(qualified name path, qualified name path)]
+          NUnfold name _ ->
+            pure [(qualified name path, qualified name path)]
+          NDataConstructor name _ ->
+            pure [(qualified name path, qualified name path)]
+          NCodataAccessor name _ ->
+            pure [(qualified name path, qualified name path)]
+          _ ->
+            pure []
+    _ ->
+      pure []

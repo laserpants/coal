@@ -11,6 +11,7 @@ module Coal.Language.Module.Definition (
   definitionName,
   isImport,
   isType,
+  importPath,
 ) where
 
 import Coal.Language.Module.Definition.Alias (AliasDefinition (..))
@@ -86,3 +87,13 @@ isType =
       True
     _ ->
       False
+
+importPath :: Definition a k t -> Maybe (a, Path)
+importPath =
+  \case
+    DImport loc p _ ->
+      Just (loc, p)
+    DQualifiedImport loc p ->
+      Just (loc, p)
+    _ ->
+      Nothing

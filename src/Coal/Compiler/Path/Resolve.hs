@@ -8,6 +8,8 @@ import Control.Monad.IO.Class (liftIO)
 import Data.Char (isAlpha, isAlphaNum)
 import Data.List (intercalate, maximumBy)
 import Data.Ord (comparing)
+import Data.Text (Text)
+import qualified Data.Text as Text
 import System.Directory (canonicalizePath, doesFileExist)
 import System.FilePath
 
@@ -31,7 +33,7 @@ isDirectoryPrefix root p =
   rootComps = filter (not . null) $ splitDirectories rn
   pathComps = filter (not . null) $ splitDirectories pn
 
-resolveModule :: [FilePath] -> FilePath -> IO (Either String (FilePath, FilePath, String))
+resolveModule :: [FilePath] -> FilePath -> IO (Either String (FilePath, FilePath, Text))
 resolveModule roots fp =
   runExceptT $ do
     roots' <- liftIO $ mapM canonicalizePath roots
@@ -75,4 +77,4 @@ resolveModule roots fp =
       Right{} ->
         return ()
 
-    return (canFile, bestRoot, intercalate "." comps)
+    return (canFile, bestRoot, Text.pack (intercalate "." comps))

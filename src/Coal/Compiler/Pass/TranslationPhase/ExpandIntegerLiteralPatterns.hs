@@ -97,7 +97,17 @@ fromLiteral t int
   | int <= fromIntegral (maxBound :: Int64) =
       EApplication mempty t (EVariable mempty (Label (TIntrinsic IInt64 `TArrow` t) "from_int64")) (ELiteral mempty (LInt64 (fromIntegral int)) :| [])
   | otherwise =
-      EApplication mempty t (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "from_literal")) (ELiteral mempty (LString (ByteString.pack $ show int)) :| [])
+      EApplication
+        mempty
+        t
+        (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "from_bignum"))
+        ( EApplication
+            mempty
+            (TIntrinsic IBignum)
+            (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "number$_unsafe_parse_bignum"))
+            (ELiteral mempty (LString (ByteString.pack $ show int)) :| [])
+            :| []
+        )
 
 collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata IndexedType)
 collectIntegerLiteralPatterns =

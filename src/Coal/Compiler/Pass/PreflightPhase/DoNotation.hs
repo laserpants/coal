@@ -6,9 +6,10 @@
 
 module Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation) where
 
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.Stack
+import Coal.Compiler.Pass (BuildUnit (..), Pass (..), mapPass)
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
@@ -17,8 +18,8 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
-passDoNotation :: (MonadIO m, Data a, Monoid a) => Pass a m [Module a Kind ()] [Module a Kind ()]
-passDoNotation = mapPass $ Pass{runPass = desugarDoNotation}
+passDoNotation :: (MonadIO m) => Pass a m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
+passDoNotation = mapPass $ Pass{runPass = traverse desugarDoNotation}
 
 class TransformContext e where
   desugarDoNotation :: (Monad m) => e -> CompilerT a m e

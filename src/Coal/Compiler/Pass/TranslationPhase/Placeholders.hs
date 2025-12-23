@@ -50,7 +50,7 @@ pass =
 
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 updateNames store =
-  updateBuildC $
+  updateCurrentBuildC $
     \build@ModuleBuild{..} ->
       flip execStateT build $
         forM_ moduleNames $

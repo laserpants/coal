@@ -11,7 +11,7 @@ import Coal.Compiler.Build.Core
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
-import Coal.Compiler.Pass.PreflightPhase.TopologicalSort (passTopologicalSort)
+import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
@@ -314,9 +314,11 @@ buildSpec = do
 
 runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild Metadata])
 runBuild names = do
-  (r, _, _) <- runCompilerT (emptyCompilerEnvironment Nothing) prog
-  pure (snd <$$> r)
- where
-  prog = do
-    s <- runPass (parsingPhase >-> passTopologicalSort) names
-    forM s prepareBuild
+  undefined
+
+--  (r, _, _) <- runCompilerT (emptyCompilerEnvironment Nothing) prog
+--  pure (snd <$$> r)
+-- where
+--  prog = do
+--    s <- runPass (parsingPhase >-> passTopologicalSort) names
+--    forM s prepareBuild

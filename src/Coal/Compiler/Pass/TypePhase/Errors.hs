@@ -1,6 +1,7 @@
 module Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors) where
 
-import Coal.AST.Metadata (Metadata (..), getMetadata)
+import Coal.AST.HasMetadata (getMetadata)
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
