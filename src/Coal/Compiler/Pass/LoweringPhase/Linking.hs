@@ -15,6 +15,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.FileEmbed (embedFile)
 import Data.Foldable (for_)
+import Data.List (isInfixOf)
 import qualified Data.Text as Text
 import Extras (Name)
 import System.Directory (canonicalizePath, copyFile)
@@ -72,13 +73,16 @@ runLLC dir name bcode = do
   target = takeBaseName file <.> "o"
 
 runGCC :: FilePath -> [FilePath] -> [FilePath] -> IO (Either SomeException ())
-runGCC dir objFiles cFiles =
+runGCC dir objFiles cFiles = do
+  isClang <- ("clang" `isInfixOf`) <$> readProcess "cc" ["--version"] ""
+  let
+    args = (if isClang then flags else "-no-pie" : flags) <> commonArgs
+    process = (proc "gcc" args){cwd = Just dir}
   try $ execProcess process
  where
-  process = (proc "gcc" args){cwd = Just dir}
-  args =
-    ["-no-pie", "-g", "-I."]
-      <> ["runtime.c"]
+  flags = ["-g", "-I."]
+  commonArgs =
+    ["runtime.c"]
       <> cFiles
       <> objFiles
       <> ["-o", "dist"]
