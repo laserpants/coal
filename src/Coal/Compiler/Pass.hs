@@ -7,6 +7,7 @@ module Coal.Compiler.Pass (
   Pass (..),
   BuildUnit (..),
   (>->),
+  unitPathName,
   mapPass,
   liftPass,
   overlayEnvironment,
@@ -19,17 +20,27 @@ import Coal.Compiler.Build
 import Coal.Compiler.Build.Core (typeConstructorEnv)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
+import Coal.Language.Module
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
 import Control.Monad.State (evalStateT)
 import Data.Foldable (for_)
+import Extras (Name)
 import System.Console.AsciiProgress
 
 data BuildUnit a
   = BSource a
   | BCached (ModuleBuild Metadata)
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
+
+unitPathName :: BuildUnit (Module a k ()) -> Name
+unitPathName =
+  \case
+    BSource m ->
+      modulePathName m
+    BCached b ->
+      principalPath (modulePath b)
 
 partitionBuildUnits :: [BuildUnit a] -> ([a], [ModuleBuild Metadata])
 partitionBuildUnits = foldr (flip go) ([], [])
