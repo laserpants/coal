@@ -2,24 +2,24 @@
 
 module E2E.Kernel.Spec (e2eKernelSpec) where
 
-import Coal.Compiler.Environment (emptyCompilerEnvironment)
-import Control.Monad.IO.Class (liftIO)
-import Control.Monad (void)
-import Control.Monad.Except (throwError)
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Kernel.Compiler.Pipeline (evalPipelineT)
-import Coal.Compiler.Pass.LoweringPhase.KernelCode (compileUnits)
 import Coal.Common.Name (Name)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
+import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Pass (BuildUnit (..))
+import Coal.Compiler.Pass.LoweringPhase.KernelCode (compileUnits)
 import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (generateLLOutput)
 import Coal.Compiler.Pass.LoweringPhase.Linking (compileBitcode)
 import Coal.Compiler.Stack
 import Coal.Kernel.Builtin.Objects (builtinObjects)
+import Coal.Kernel.Compiler.Pipeline (evalPipelineT)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Parser (spaces)
 import Coal.Kernel.Parser.Module (module_)
+import Control.Monad (void)
+import Control.Monad.Except (throwError)
+import Control.Monad.IO.Class (liftIO)
 import Data.Text (Text)
 import qualified Data.Text.IO as Text
 import System.IO.Unsafe (unsafePerformIO)

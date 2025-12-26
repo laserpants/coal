@@ -173,6 +173,9 @@ module List {
 
   /**
    * Convert a list of pairs into a pair of lists, in the natural way.
+   *
+   * E.g., unzip([(1, "one"), (2, "two")]) returns:
+   * ([1, 2], ["one", "two"])
    */
   fun unzip(list : List<(a, b)>) : (List<a>, List<b>) =
     fold(list, ([], [])) {
@@ -182,5 +185,20 @@ module List {
           fn((xs, ys)) =>
             f((x :: xs, y :: ys))
     }
+
+  /**
+   * Convert two lists into a list of pairs, in the natural way.
+   *
+   * E.g., zip([1, 2], ["one", "two"]) returns:
+   * [(1, "one"), (2, "two")]
+   */
+  fun zip(xs : List<a>, ys : List<b>) : List<(a, b)> =
+    let step(x, f) =
+      match {
+        | [] => []
+        | y :: ys_ => (x, y) :: f(ys_)
+      }
+    in
+    reduce(step, always([]), xs, ys)
 
 }

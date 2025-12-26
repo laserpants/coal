@@ -1,18 +1,20 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TupleSections #-}
 
 module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build (moduleDependencies, modulePath)
+import Coal.Compiler.Build (moduleDependencies)
 import Coal.Compiler.Build.Core (dependencies)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
+import Coal.Compiler.Pass (BuildUnit (..), Pass (..), unitPathName)
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language (Kind)
 import Coal.Language.Module
+import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (SCC (..), stronglyConnComp)
 import Data.Set (Set)
@@ -25,6 +27,10 @@ passTopologicalSort = Pass{runPass = pass}
 
 pass :: (Monad m) => [BuildUnit (Module Metadata Kind ())] -> CompilerT Metadata m [BuildUnit (Module Metadata Kind ())]
 pass units = do
+  unless ("Main" `elem` names) $ do
+    tellErrors [NoModuleMain]
+    throwError PreflightFailure
+
   edges <- traverse (collectEdges names) units
   let sccs = stronglyConnComp edges
       cyclicSCCs = filter isCyclicSCC sccs
@@ -36,14 +42,6 @@ pass units = do
     else pure $ concatMap getModulesFromSCC sccs
  where
   names = Set.fromList (unitPathName <$> units)
-
-unitPathName :: BuildUnit (Module Metadata Kind ()) -> Name
-unitPathName =
-  \case
-    BSource m ->
-      modulePathName m
-    BCached b ->
-      principalPath (modulePath b)
 
 isCyclicSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> Bool
 isCyclicSCC =

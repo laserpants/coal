@@ -1,0 +1,9 @@
+module Main {
+  
+  import IO(println_nat)
+  import Nat(pack)
+
+  fun main() =
+    println_nat(pack(-2))
+
+}

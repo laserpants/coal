@@ -195,6 +195,8 @@ prettyError env =
       "The module name '" <> path <> "' doesn't match the file name '" <> Text.pack file <> "'."
     BadFilename _ err ->
       Text.pack err
+    NoModuleMain ->
+      "No 'Main' module"
     ModuleCycle names ->
       "Module imports form a cycle: " <> showt names
     MisplacedImportStatement erl -> do

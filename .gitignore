@@ -3,3 +3,6 @@
 dist
 .debug
 .build
+.coal
+coal.lock.json
+coal.json

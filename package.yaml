@@ -47,6 +47,7 @@ dependencies:
 - binary
 - cryptonite
 - memory
+- process-extras
 
 ghc-options:
 - -Wall
@@ -75,6 +76,9 @@ executables:
     - coal
     - optparse-applicative
     - template-haskell
+    - aeson
+    - aeson-pretty
+    - semver
 
 tests:
   coal-test:

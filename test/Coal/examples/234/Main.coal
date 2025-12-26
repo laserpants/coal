@@ -1,0 +1,16 @@
+module Main {
+
+  import namespace List
+  import String(int32_to_string)
+  import IO(println_string)
+
+  fun main() =
+    let
+      xs = List.zip(["a", "b", "c"], [1, 2, 3])
+    in
+      match(xs) {
+        | _ :: (s, n) :: _ => println_string(s <> int32_to_string(n)) // b2
+        | _ => println_string("nope")
+      }
+
+}

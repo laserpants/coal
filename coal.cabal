@@ -282,6 +282,7 @@ library
     , parser-combinators
     , prettyprinter
     , process
+    , process-extras
     , raw-strings-qq
     , recursion-schemes
     , temporary
@@ -293,14 +294,36 @@ library
 executable coal
   main-is: Main.hs
   other-modules:
-      Utils
-      Version
+      Coal.CLI.Command
+      Coal.CLI.Command.Build
+      Coal.CLI.Command.Clean
+      Coal.CLI.Command.Compile
+      Coal.CLI.Command.Install
+      Coal.CLI.Command.Version
+      Coal.CLI.Error
+      Coal.CLI.Git
+      Coal.CLI.Git.Commit
+      Coal.CLI.Git.Repo
+      Coal.CLI.Options.CompileCmd
+      Coal.CLI.Options.InstallCmd
+      Coal.CLI.Parser.Command
+      Coal.CLI.Parser.CompileCmd
+      Coal.Package
+      Coal.Package.Dependency
+      Coal.Package.Entry
+      Coal.Package.Error
+      Coal.Package.Lock
+      Coal.Package.Lock.Spec
+      Coal.Package.Manifest
+      Coal.Package.Version
       Paths_coal
   hs-source-dirs:
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ascii-progress
+      aeson
+    , aeson-pretty
+    , ascii-progress
     , base >=4.7 && <5
     , binary
     , bytestring
@@ -322,8 +345,10 @@ executable coal
     , parser-combinators
     , prettyprinter
     , process
+    , process-extras
     , raw-strings-qq
     , recursion-schemes
+    , semver
     , template-haskell
     , temporary
     , text
@@ -376,6 +401,7 @@ test-suite coal-test
     , parser-combinators
     , prettyprinter
     , process
+    , process-extras
     , raw-strings-qq
     , recursion-schemes
     , temporary

@@ -24,9 +24,21 @@ module Char {
       | _ => None
     }
 
+  /**
+   * Return the Unicode code point of a character.
+   *
+   * Convert the given character into its numeric Unicode scalar value
+   * and return it as an `int32`. This is the inverse of `chr`.
+   */
   fun ord(c : char) : int32 =
     char$_ord(c)
 
+  /**
+   * Construct a character from a Unicode code point.
+   *
+   * Convert the given numeric Unicode scalar value into the corresponding
+   * character. This is the inverse of `ord`.
+   */
   fun chr(n : int32) : char =
     char$_chr(n)
 
