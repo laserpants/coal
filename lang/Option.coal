@@ -1,5 +1,9 @@
 module Option {
 
+  /**
+   * Extract a value of type `a` from an `Option<a>` by providing a default 
+   * value for the case when the input is `None`.
+   */ 
   fun with_default
     | _, Some(value) = value
     | value, _       = value

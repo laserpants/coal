@@ -1,7 +1,19 @@
 module Nat {
 
+  /**
+   * Convert an `int32` value into a natural number.
+   *
+   * Interpret the given integer as a natural number and return the
+   * corresponding `nat` value. If the input is negative, the function
+   * will return `Zero`.
+   */
   fun pack(m : int32) : nat = nat$_pack(m)
 
+  /**
+   * Convert a natural number into an `int32` value.
+   *
+   * Return the integer representation of the given value as an `int32`.
+   */
   fun unpack(n : nat) : int32 = nat$_unpack(n)
 
 }

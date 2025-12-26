@@ -37,9 +37,9 @@ import System.Console.AsciiProgress (ProgressBar, tick)
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode (..))
 import System.FilePath ((<.>), (</>))
-import System.IO (hClose)
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process
+import qualified System.Process.ByteString as ByteString
 
 passLLVMOutput :: (MonadIO m) => Pass Metadata m [BuildUnit (Name, [IRConstruct [IRLine]])] [(Name, ByteString)]
 passLLVMOutput = Pass{runPass = pass}
@@ -101,12 +101,7 @@ irOutput pb CompilerConfig{..} tmpDir = do
 runLLVM :: FilePath -> FilePath -> IO (Either SomeException ByteString)
 runLLVM dir src =
   try $ do
-    (_, Just hOut, Just hErr, ph) <- createProcess process
-    out <- ByteString.hGetContents hOut
-    err <- ByteString.hGetContents hErr
-    exit <- waitForProcess ph
-    hClose hOut
-    hClose hErr
+    (exit, out, err) <- ByteString.readCreateProcessWithExitCode process ""
     case exit of
       ExitSuccess ->
         pure out

@@ -165,7 +165,7 @@ module Main {
 Save this program as "Main.coal". Compile the program with the command:
 
 ```
-coal -I./ Main.coal -o dist
+coal compile -I. Main.coal -o dist
 ```
 <!--
 

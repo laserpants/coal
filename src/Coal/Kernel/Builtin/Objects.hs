@@ -279,7 +279,7 @@ objects =
             [ Label Kernel.int32 "n"
             ]
             [r| 
-                  if ([== int32](n : int32, 0))
+                  if ([<= int32](n : int32, 0))
                     then
                       $Zero : $Nat
                     else
