@@ -126,29 +126,11 @@ module Main {
           if (key == key_) then
             Some(value)
           else 
-            None // left
-
-//            if (key < key_) then
-//              left
-//            else
-//              right
+            if (key < key_) then
+              left
+            else
+              right
     }
-
-
-
-  type X = X(int32, X) | E
-
-  fun zoom(x : X) =
-    fold(x) {
-      | X(n, @y) => y
-      | E => 0
-    }
-
-
-
-
-
-
 
   // Insertion
 
