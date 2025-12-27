@@ -33,6 +33,13 @@ module Main {
     | Empty  = 0
     | Map(m) = height(m.left) - height(m.right)
  
+  // Constructors
+
+  let empty = Empty
+
+  fun singleton(key, val) = 
+    make_node(key, val, Empty, Empty)
+
   // Rotations
 
   //
@@ -128,29 +135,19 @@ module Main {
   // Insertion
 
 // fun insert(key, val, map) =
-//   match(map) {
+//   fold(map) {
 //     | Empty =>
 //         singleton(key, val)
-// 
-//     | Map(m) =>
-//         if key == m.key then
+//
+//     | Map({ left = @left, right = @right } as m) =>
+//         if (key == m.key) then
 //           make_node(key, val, m.left, m.right)
 // 
-//         else if key < m.key then
-//           rebalance(
-//             make_node(m.key, m.value,
-//               insert(key, val, m.left),
-//               m.right
-//             )
-//           )
+//         else if (key < m.key) then
+//           rebalance(make_node(m.key, m.value, left, m.right))
 // 
 //         else
-//           rebalance(
-//             make_node(m.key, m.value,
-//               m.left,
-//               insert(key, val, m.right)
-//             )
-//           )
+//           rebalance(make_node(m.key, m.value, m.left, right))
 //   }
 
   // Deletion
@@ -197,13 +194,6 @@ module Main {
 //                   )
 //           }
 //   }
-
-  // Constructors
-
-  let empty = Empty
-
-  fun singleton(key, val) = 
-    make_node(key, val, Empty, Empty)
 
   fun main() = 
     IO.println_string("wat")
