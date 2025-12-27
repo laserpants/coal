@@ -3,22 +3,15 @@ module Main {
   import Number(max)
   import namespace IO
 
-//  type alias Fields<key, val> =
-//    { key    : key
-//    , value  : val
-//    , height : int32
-//    , left   : Map<key, val>
-//    , right  : Map<key, val> 
-//    }
+  type alias MapFields<key, val> =
+    { key    : key
+    , value  : val
+    , height : int32
+    , left   : Map<key, val>
+    , right  : Map<key, val> 
+    }
 
-  type Map<key, val>
-    = Empty
-    | Map({ key    : key
-          , value  : val
-          , height : int32
-          , left   : Map<key, val>
-          , right  : Map<key, val> 
-          })
+  type Map<key, val> = Empty | Map(MapFields<key, val>)
 
   // Helpers
 

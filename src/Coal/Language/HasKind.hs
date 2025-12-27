@@ -5,7 +5,7 @@
 
 module Coal.Language.HasKind (HasKind (..)) where
 
-import Coal.Language.Type (Type (..), TypeIndex (..))
+import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
@@ -17,6 +17,9 @@ instance HasKind Kind where
   kindOf = id
 
 instance HasKind (TypeIndex Kind) where
+  kindOf = head . universeBi
+
+instance HasKind (Parameter Kind) where
   kindOf = head . universeBi
 
 instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
