@@ -22,6 +22,7 @@ preflightPhase =
     >-> passSetup
     >-> mapPass passWhereClauses
     >-> passDoNotation
+    >-> mapPass (liftPass (generateDebugArtifacts "DoNotation"))
     >-> passShadowingRule
     >-> passMainEntrypointRule
     >-> passNoDuplicateParamsRule
