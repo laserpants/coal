@@ -112,7 +112,7 @@ prettyRule =
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
     RuleTypeConstraint _ name t1 s ->
-      "Cannot unify " <> "'" <> name <> "' " <> prettyType s <> " with expected type " <> prettyType u1 <> "."
+      "Cannot unify the type of `" <> name <> "`\n\n  " <> prettyType s <> "\n\nwith type\n\n  " <> prettyType u1
      where
       u1 = normalizeTypeIndexes t1
     RuleUnfoldExplicit _ t1 s ->
