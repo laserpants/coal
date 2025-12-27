@@ -1,0 +1,32 @@
+module Main {
+
+  import Number(max)
+  import namespace IO
+
+  type Map<key, val> 
+    = Empty 
+    | Map({ key    : key
+          , value  : val
+          , height : int32
+          , left   : Map<key, val>
+          , right  : Map<key, val> })
+
+  fun lookup(key, map) =
+    fold(map) {
+      | Empty =>
+          None
+
+      | Map({ key = key_, value = value, left = @left, right = @right | _ }) =>
+          if (key == key_) then
+            Some(value)
+          else 
+            if (key < key_) then
+              left
+            else
+              right
+    }
+
+  fun main() = 
+    IO.println_string("wat")
+
+}
