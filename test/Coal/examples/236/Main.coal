@@ -3,6 +3,14 @@ module Main {
   import Number(max)
   import namespace IO
 
+//  type alias Fields<key, val> =
+//    { key    : key
+//    , value  : val
+//    , height : int32
+//    , left   : Map<key, val>
+//    , right  : Map<key, val> 
+//    }
+
   type Map<key, val>
     = Empty
     | Map({ key    : key
@@ -81,8 +89,8 @@ module Main {
 
       | Map(m) =>
           let bf = balance_factor(map) in
-          if bf > 1 then
-            if balance_factor(m.left) < 0 then
+          if (bf > 1) then
+            if (balance_factor(m.left) < 0) then
               rotate_right(
                 make_node(m.key, m.value,
                   rotate_left(m.left),
@@ -92,8 +100,8 @@ module Main {
             else
               rotate_right(map)
 
-          else if bf < -1 then
-            if balance_factor(m.right) > 0 then
+          else if (bf < -1) then
+            if (balance_factor(m.right) > 0) then
               rotate_left(
                 make_node(m.key, m.value,
                   m.left,
@@ -109,19 +117,38 @@ module Main {
 
   // Lookup
 
-//  fun lookup(key, map) =
-//    match(map) {
-//      | Empty =>
-//          None
-//
-//      | Map(m) =>
-//          if key == m.key then
-//            Some(m.value)
-//          else if key < m.key then
-//            lookup(key, m.left)
-//          else
-//            lookup(key, m.right)
-//    }
+  fun lookup(key, map) =
+    fold(map) {
+      | Empty =>
+          None
+
+      | Map({ key = key_, value = value, left = @left, right = @right | _ }) =>
+          if (key == key_) then
+            Some(value)
+          else 
+            None // left
+
+//            if (key < key_) then
+//              left
+//            else
+//              right
+    }
+
+
+
+  type X = X(int32, X) | E
+
+  fun zoom(x : X) =
+    fold(x) {
+      | X(n, @y) => y
+      | E => 0
+    }
+
+
+
+
+
+
 
   // Insertion
 
