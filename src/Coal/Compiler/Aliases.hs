@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Aliases where
+module Coal.Compiler.Aliases (AliasContext (..)) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
