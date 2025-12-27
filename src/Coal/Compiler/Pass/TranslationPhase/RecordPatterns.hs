@@ -89,6 +89,8 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
         PListLiteral a t <$> desugarRecordPatterns ps
       PTuple a t ps ->
         PTuple a t <$> desugarRecordPatterns ps
+      PAs a ll p ->
+        PAs a ll <$> desugarRecordPatterns p
       p ->
         pure p
 
