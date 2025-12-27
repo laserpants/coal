@@ -152,11 +152,15 @@ module Main {
  
   // Deletion
 
-// fun min_node(map) =
-//   match(map) {
-//     | Map({ left = Empty | _ }) => map
-//     | Map(m) => min_node(m.left)
-//   }
+  fun min_node(map) =
+    fold(map) {
+      | Map({ left = Empty | _ }) => 
+          map
+      | Map({ left = @left | _ }) => 
+          left
+      | Empty => 
+          Empty
+    }
 
 // fun delete(key, map) =
 //   match(map) {
