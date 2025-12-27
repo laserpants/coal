@@ -168,10 +168,8 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
       ECompiledMatch{} ->
         error "Implementation error"
       EFold a t es cs me ->
-        EFold a t
-          <$> traverse (patternExhaustiveCheck name) es
-          <*> (checkExhaustive name a cs >> traverse (patternExhaustiveCheck name) cs)
-          <*> traverse (patternExhaustiveCheck name) me
+        EFold a t es cs
+          <$> traverse (patternExhaustiveCheck name) me
       ESelect a ll e ->
         ESelect a ll <$> patternExhaustiveCheck name e
       ECodataSelect a ll e1 e2 ->
