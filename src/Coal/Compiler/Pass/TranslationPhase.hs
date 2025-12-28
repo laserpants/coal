@@ -26,9 +26,9 @@ translationPhasePasses =
     >-> generateDebugArtifacts "NormalizeObjects"
     >-> passExpandPatterns
     >-> passOrPatterns
+    >-> passPatternExhaustiveCheck
     >-> passRecordPatterns
     >-> generateDebugArtifacts "RecordPatterns"
-    >-> passPatternExhaustiveCheck
     >-> passExpandAsPatterns
     >-> passExpandIntegerLiteralPatterns
     >-> generateDebugArtifacts "Patterns"
