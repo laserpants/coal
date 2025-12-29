@@ -37,6 +37,10 @@ writeDotFiles ns m@(Module (Path path) _ defs) = do
         writeDotFile (prefixedName def) def
       def@DConstant{} ->
         writeDotFile (prefixedName def) def
+      def@DFold{} ->
+        writeDotFile (prefixedName def) def
+      def@DUnfold{} ->
+        writeDotFile (prefixedName def) def
       _ ->
         pure ()
  where

@@ -1,0 +1,41 @@
+module Main {
+
+  import Number(max)
+  import namespace IO
+
+  fun lookup(r : { key : string }) =
+    match(r) {
+      | { key = k | _ } as m =>
+          None
+    }
+
+  // Insertion
+
+// fun insert(key, val, map) =
+//   fold(map) {
+//     | Empty =>
+//         singleton(key, val)
+//
+//     | Map({ left = @left, right = @right } as m) =>
+//         if (key == m.key) then
+//           make_node(key, val, m.left, m.right)
+// 
+//         else if (key < m.key) then
+//           rebalance(make_node(m.key, m.value, left, m.right))
+// 
+//         else
+//           rebalance(make_node(m.key, m.value, m.left, right))
+//   }
+
+  // Deletion
+
+// fun min_node(map) =
+//   match(map) {
+//     | Map({ left = Empty | _ }) => map
+//     | Map(m) => min_node(m.left)
+//   }
+
+  fun main() = 
+    IO.println_string("wat")
+
+}

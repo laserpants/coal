@@ -12,6 +12,7 @@ module Coal.Compiler.Build.Core (
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Aliases
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
@@ -25,7 +26,8 @@ import Coal.Language.Module
 import Coal.TypeSystem.Kind.Inference (inferTraitKinds)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification (Unifiable (match), evalUnifier)
-import Control.Monad.Except (MonadError (throwError), MonadTrans (lift), forM, forM_, unless, when)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.Reader
 import Control.Monad.State (StateT, execStateT, get, gets, modify, runStateT)
 import Data.Either (rights)
 import Data.List (intersect, nub, (\\))
@@ -90,8 +92,10 @@ prepareBuild module_@(Module path exports defs) = do
       insertTypeConstructor "List" (TypeConstructorEntry mempty "List" (KArrow KType KType) [])
         . addName (NType "List" (KArrow KType KType))
 
+    aliases <- gets moduleAliases
+
     kinds <- typeConstructorEnv
-    inEachDef (collectDataConstructors kinds)
+    inEachDef (collectDataConstructors aliases kinds)
 
     -- Built-in data constructors
     forM_ builtinDataConstructors $
@@ -294,6 +298,7 @@ collectTypeConstructors =
           . addName (NType name kind)
           . addTypeExport name
      where
+      -- TODO: Support higher-kinded type parameters
       kind = foldr KArrow KType (replicate (length params) KType)
       entry = TypeConstructorEntry loc name kind (for ctors constructorName)
     DCotype loc name (CotypeDefinition params xsors) -> do
@@ -302,6 +307,7 @@ collectTypeConstructors =
           . addName (NCotype name kind)
           . addTypeExport name
      where
+      -- TODO: Support higher-kinded type parameters
       kind = foldr KArrow KType (replicate (length params) KType)
       entry = CotypeConstructorEntry loc name kind (for xsors codataAccessorName)
     DTypeAlias loc name (AliasDefinition ps t) -> do
@@ -368,18 +374,20 @@ typeConstructorEnv = do
   insertCotypeInfo :: CotypeConstructorEntry a -> Environment Kind -> Environment Kind
   insertCotypeInfo (CotypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
 
-collectDataConstructors :: (Monad m) => Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
-collectDataConstructors env =
+collectDataConstructors :: (Monad m) => Environment (AliasEntry a) -> Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
+collectDataConstructors aliases env =
   \case
-    DType loc _ def ->
-      forM_ (dataConstructorEntries env loc def) $
+    DType loc _ def -> do
+      def' <- lift $ local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
+      forM_ (dataConstructorEntries env loc def') $
         \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do
           modify $
             addName (NDataConstructor constructorName constructorScheme)
               . insertDataConstructor constructorName info
               . addExport constructorName
-    DCotype loc _ def ->
-      forM_ (codataAccessorEntries env loc def) $
+    DCotype loc _ def -> do
+      def' <- lift $ local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
+      forM_ (codataAccessorEntries env loc def') $
         \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
           modify $
             addName (NCodataAccessor codataAccessorName codataAccessorScheme)

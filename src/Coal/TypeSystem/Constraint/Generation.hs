@@ -442,8 +442,7 @@ emitConstraints =
       pure []
     ESelect loc ll e ->
       emitESelectConstraints loc ll e
-    EFold loc t (e :| es) cs e1 -> do
-      ms1 <- emitClauseConstraints loc t e es cs
+    EFold loc t (e :| es) _ e1 -> do
       ms2 <- concatMapM emitConstraints es
       ms3 <- concatMapM emitConstraints e1
       case e1 of
@@ -451,7 +450,7 @@ emitConstraints =
           tellRight [Equality (RuleFoldType loc) [foldTypeOf t (e :| es), t1]]
         _ ->
           pure ()
-      pure (ms1 <> ms2 <> ms3)
+      pure (ms2 <> ms3)
     ECodataRecord loc _ d -> do
       concatForM (Map.toList d) $
         \(field, e) -> do

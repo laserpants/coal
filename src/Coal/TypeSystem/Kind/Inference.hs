@@ -10,6 +10,7 @@
 module Coal.TypeSystem.Kind.Inference (
   KindInferenceError (..),
   inferTraitKinds,
+  inferTypeKinds,
 ) where
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
@@ -530,3 +531,20 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
           Right sub -> do
             modify (bimap (applyKinds sub) (applyKinds sub))
             pure (n, lowerKinds (applyKinds sub r))
+
+inferTypeKinds :: Type Parameter () -> Either [KindInferenceError] (Type Parameter Kind)
+inferTypeKinds t = do
+  -- TODO: DRY
+  let (r, outs) = runKindConstraintsGen mempty $ do
+        let indexed = evalState (indexKinds t) 0
+        emitKindConstraints indexed
+        pure indexed
+  let (errs, cs) = partitionEithers outs
+      KindUnifier res = solveKindConstraints cs
+  unless (null errs) $
+    Left errs
+  case res of
+    Left err ->
+      Left [err]
+    Right sub -> do
+      Right (lowerKinds (applyKinds sub r))

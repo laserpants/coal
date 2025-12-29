@@ -67,6 +67,8 @@ instance (Data a, Data t) => BoundVars (Pattern a t) where
         unions (fmap boundIn ps)
       PAnnotation _ _ p ->
         boundIn p
+      PAs _ ll p ->
+        boundIn ll <> boundIn p
       p ->
         Set.fromList (universeBi p)
 
