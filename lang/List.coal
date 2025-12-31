@@ -49,6 +49,15 @@ module List {
     }
 
   /**
+   * Left-associative fold.
+   */
+  fun reduce_left(f : b -> a -> b, init : b, list : List<a>) : b =
+    let
+     step(x, g, a) = g(f(a, x))
+    in
+      reduce(step, fn(x) => x, list, init)
+
+  /**
    * Return a list containing exactly one element.
    */
   fun singleton(elem : a) : List<a> = 
