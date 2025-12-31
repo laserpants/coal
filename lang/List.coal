@@ -55,7 +55,7 @@ module List {
     let
      step(x, g, a) = g(f(a, x))
     in
-      reduce(step, fn(x) => x, list, init)
+      reduce(step, identity, list, init)
 
   /**
    * Return a list containing exactly one element.
