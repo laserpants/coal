@@ -53,7 +53,7 @@ module List {
    */
   fun reduce_left(f : b -> a -> b, init : b, list : List<a>) : b =
     let
-     step(x, g, a) = g(f(a, x))
+      step(x, g, a) = g(f(a, x))
     in
       reduce(step, identity, list, init)
 
