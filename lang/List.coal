@@ -210,12 +210,20 @@ module List {
     in
     reduce(step, always([]), xs, ys)
 
+  /**
+   * Return `true` if and only if any element of the list satisfies the given 
+   * predicate.
+   */
   fun any(p : a -> bool, list : List<a>) : bool =
     fold(list) {
       | [] => false
       | x :: @xs => if (p(x)) then true else xs
     }
 
+  /**
+   * Return `true` if and only if all element of the list satisfy the given 
+   * predicate.
+   */
   fun all(p : a -> bool, list : List<a>) : bool =
     fold(list) {
       | [] => true
