@@ -2,8 +2,9 @@ module Main {
 
   import IO(println_string, println_int32)
   import Char(digit_to_int32)
-  import String(from_list, to_list, cons, concat)
+  import String(from_list, to_list, cons, concat, length)
   import Coal.Functor(trait Functor)
+  import Nat(pack)
 
   type alias Parser<a> = string -> Option<(a, string)>
 
@@ -57,10 +58,10 @@ module Main {
 
   fun many(p : Parser<a>) : Parser<List<a>> =
     fn(input) =>
-      (fold(to_list(input), ([], input)) {
-        | [] =>
-            fn(_, _) => None
-        | _ :: @cont =>
+      (fold(length(input), ([], input)) {
+        | Zero =>
+            fn(r, _) => Some(r)
+        | Succ(@cont) =>
             fn((xs, str)) => 
               match(p(str)) {
                 | None => fn(_) => Some((xs, str))
@@ -134,13 +135,14 @@ module Main {
 //    }
 
   fun main() =
-    //let p = satisfy(fn(c) => c == 'x')
-    let p = parser_string("yes")
+    let p = satisfy(fn(c) => c == 'x')
+    //let p = parser_string("yes")
     in
-    //match(many(p, "xxxxrest")) {
-    match(many(p, "yesyesno")) {
+    match(many(p, "xx")) {
+    //match(many(p, "yesyesno")) {
       | Some((x, y)) =>
-          println_string(concat(x) <> ":" <> y)
+          //println_string(concat(x) <> ":" <> y)
+          println_string(from_list(x) <> ":" <> y)
       | None =>
           println_string("None")
     }

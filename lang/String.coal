@@ -1,6 +1,7 @@
 module String {
 
   import List(reduce)
+  import Nat(pack)
 
   /**
    * Convert a character to a one-character string.
@@ -47,8 +48,8 @@ module String {
   /**
    * Return the number of characters in the string.
    */
-  fun length(s : string) : int32 =
-    string$_length(s)
+  fun length(s : string) : nat =
+    pack(string$_length(s))
 
   /**
    * Determine whether the string is empty.

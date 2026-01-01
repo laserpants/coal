@@ -1,9 +1,9 @@
 module Main {
 
-  import IO(println_int32)
+  import IO(println_nat)
   import String(length)
 
   fun main() =
-    println_int32(length("hello123123"))
+    println_nat(length("hello123123"))
 
 }
