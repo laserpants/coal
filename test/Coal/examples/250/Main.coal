@@ -1,0 +1,160 @@
+module Main {
+
+  import IO(println_string, println_int32)
+  import Char(digit_to_int32)
+  import String(from_list, to_list, cons)
+  import Coal.Functor(trait Functor)
+
+  type alias Parser<a> = string -> Option<(a, string)>
+
+  // Primitive that fails
+  fun fail() : Parser<a> =
+    fn(_) => None
+
+  // Succeed without consuming
+  fun parser_pure(x : a) : Parser<a> =
+    fn(input) => Some((x, input))
+
+  // Apply a parser and map its result
+  fun parser_map(p : Parser<a>, f : a -> b) : Parser<b> =
+    fn(input) =>
+      match(p(input)) {
+        | Some((a, rest)) => Some((f(a), rest))
+        | None => None
+      }
+
+  // Monadic bind
+  fun parser_bind(p : Parser<a>, f : a -> Parser<b>) : Parser<b> =
+    fn(input) =>
+      match(p(input)) {
+        | Some((a, rest)) => f(a, rest)
+        | None => None
+      }
+
+  // Choice
+  fun parser_or(p1 : Parser<a>, p2 : Parser<a>) : Parser<a> =
+    fn(input) =>
+      match(p1(input)) {
+        | Some(_) as r => r
+        | None => p2(input)
+      }
+
+  fun parser_then(p : Parser<a>, q : Parser<b>) : Parser<b> =
+    parser_bind(p, fn(_) => q)
+
+  fun parser_before(p : Parser<a>, q : Parser<b>) : Parser<a> =
+    parser_bind(p, fn(x) => parser_map(q, fn(_) => x))
+
+  fun satisfy(predicate : char -> bool) : Parser<char> =
+    fn(input) =>
+      match(to_list(input)) {
+        | ch :: rest =>
+            if predicate(ch) 
+              then Some((ch, from_list(rest)))
+              else None
+        | [] => None
+      }
+
+  fun many(p : Parser<a>) : Parser<List<a>> =
+    let 
+      go(input) =
+        fold(to_list(input), ([], input)) {
+          | [] =>
+              fn(_, _) => None
+          | _ :: @cont =>
+              fn((xs, hot)) => 
+                match(p(hot)) {
+                  | None => fn(_) => Some((xs, hot))
+                  | Some((x, rest)) => cont((x :: xs, rest))
+                }
+        }
+      in go(input)
+
+//  fun many(p : Parser<a>, input : string) : Parser<List<a>> =
+//    fold(to_list(input), ([], input)) {
+//      | [] =>
+//          fn(_, _) => None
+//      | _ :: @cont =>
+//          fn((xs, hot)) => 
+//            match(p(hot)) {
+//              | None => fn(_) => Some((xs, hot))
+//              | Some((x, rest)) => cont((x :: xs, rest))
+//            }
+//    }
+
+  // Exact char
+  fun parser_char(c : char) : Parser<char> =
+    satisfy(fn(x) => x == c)
+
+  fun parser_string(s : string) : Parser<string> =
+    fold(to_list(s)) {
+      | [] =>
+          parser_pure("")
+      | c :: @rest =>
+          parser_bind(parser_char(c), fn(_) => 
+            parser_bind(rest, fn(cs) => 
+              parser_pure(cons(c, cs))
+            )
+          )
+    }
+
+  fun parse_unsigned(str : string) : Option<int32> =
+    let 
+      chars = 
+        to_list(str)
+      in
+        fold(chars, Some(0)) {
+          | ch :: @go =>
+              fn(t) =>
+                match(digit_to_int32(ch)) {
+                  | Some(n) =>
+                      go(map(fn(s) => n + 10 * s, t))
+                  | None =>
+                      None
+                }
+          | [] =>
+              fn(t) => t
+        }
+
+  // string -> Option<(List<char>, string)>
+
+//  fun many(p : Parser<a>) : Parser<List<a>> =
+//    fn(input) =>
+//      match(p(input)) {
+//        | None => Some(([], input))
+//        | Some((x, rest)) =>
+//            fold(p(rest)) {
+//              | Some((xs, @rest2)) =>
+//                  Some((x :: xs, rest2))
+//              | None => None
+//            }
+//      }
+//
+//  fun is_space(c : char) : bool =
+//    c == ' ' || c == '\n' || c == '\t' || c == '\r'
+//
+//  fun spaces() : Parser<unit> =
+//    fold_many(satisfy(is_space), fn(_) => ())
+//
+//  fun token(p : Parser<a>) : Parser<a> =
+//    parser_before(parser_then(spaces(), p), spaces())
+
+//  fun main() =
+//    match(parse_unsigned("3123")) {
+//      | None =>
+//          println_string("Nope")
+//      | Some(n) =>
+//          println_int32(n)
+//    }
+
+  fun main() =
+    let p = satisfy(fn(c) => c == 'x')
+    in
+    match(many(p, "xxxxyy")) {
+      | Some((x, y)) =>
+          println_string(from_list(x) <> ":" <> y)
+      | None =>
+          println_string("None")
+    }
+  
+}
