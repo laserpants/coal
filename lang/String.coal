@@ -97,4 +97,10 @@ module String {
       | head :: tail => head +++ reduce(fn(t, s) => s +++ sep +++ t, "", tail)
     }
 
+  /**
+   * Take a list of strings and concatenate them into a single string. 
+   */ 
+  fun concat(strs : List<string>) : string =
+    intercalate("", strs)
+
 }
