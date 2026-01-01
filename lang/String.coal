@@ -9,6 +9,12 @@ module String {
     string$_char_to_string(c)
 
   /**
+   * Convert a boolean to a string, i.e., either "true" or "false".
+   */
+  fun bool_to_string(b : bool) : string =
+    string$_bool_to_string(b)
+
+  /**
    * Convert an int32 value to its string representation.
    */
   fun int32_to_string(n : int32) : string =

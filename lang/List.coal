@@ -210,4 +210,22 @@ module List {
     in
     reduce(step, always([]), xs, ys)
 
+  fun any(p : a -> bool, list : List<a>) : bool =
+    fold(list) {
+      | [] => false
+      | x :: @xs => if (p(x)) then true else xs
+    }
+
+  fun all(p : a -> bool, list : List<a>) : bool =
+    fold(list) {
+      | [] => true
+      | x :: @xs => if(! p(x)) then false else xs
+    }
+
+  fun find(p : a -> bool, list : List<a>) : Option<a> =
+    fold(list) {
+      | [] => None
+      | x :: @xs => if (p(x)) then Some(x) else xs
+    }
+
 }

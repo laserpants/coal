@@ -722,6 +722,12 @@ char_to_string(uint32_t cp)
 }
 
 char*
+bool_to_string(bool b)
+{
+  return b ? "true" : "false";
+}
+
+char*
 string_concat(const char* a, const char* b)
 {
   if (a == NULL)

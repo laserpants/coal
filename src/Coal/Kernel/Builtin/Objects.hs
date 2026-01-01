@@ -260,6 +260,13 @@ objects =
                   #(char_to_string : char/string, c : char) (fn(r : string) => r : string)
               |]
         , OFunction
+            "Builtin$.string$_bool_to_string"
+            [ Label Kernel.bool "b"
+            ]
+            [r| 
+                  #(bool_to_string : bool/string, b : bool) (fn(r : string) => r : string)
+              |]
+        , OFunction
             "Builtin$.nat$_unpack"
             [ Label (Kernel.TCon "$Nat" []) "nat"
             ]
