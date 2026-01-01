@@ -230,6 +230,10 @@ module List {
       | x :: @xs => if(! p(x)) then false else xs
     }
 
+  /**
+   * Return the first element of the list that satisfies the given predicate, 
+   * or `None`, if there is no such element.
+   */
   fun find(p : a -> bool, list : List<a>) : Option<a> =
     fold(list) {
       | [] => None
