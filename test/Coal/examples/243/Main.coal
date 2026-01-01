@@ -61,9 +61,9 @@ module Main {
         | [] =>
             fn(_, _) => None
         | _ :: @cont =>
-            fn((xs, hot)) => 
-              match(p(hot)) {
-                | None => fn(_) => Some((xs, hot))
+            fn((xs, str)) => 
+              match(p(str)) {
+                | None => fn(_) => Some((xs, str))
                 | Some((x, rest)) => cont((x :: xs, rest))
               }
       })(input)
