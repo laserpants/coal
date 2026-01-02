@@ -227,29 +227,33 @@ emitERecursiveLetConstraints loc p e1 e2 = do
   t1 = typeOf p
   t2 = typeOf e1
 
+normalizeBinding :: (Data a) => Binding Expression a IndexedType -> Binding Expression a IndexedType
+normalizeBinding =
+  \case
+    b@BPattern{} ->
+      b
+    BFunction loc name ps e ->
+      BPattern loc (PVariable loc (Label (foldTypeOf e ps) name)) (ELambda loc ps e)
+
 emitELetConstraints :: (Show a, Data a) => a -> NonEmpty (Binding Expression a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELetConstraints loc gs e1 = do
+  let gs' = normalizeBinding <$> gs
   ms1 <- emitConstraints e1
-  ms2 <- concatForM gs $
+  ms2 <- concatForM gs' $
     \case
       BPattern _ p e -> do
         let t1 = typeOf p
             t2 = typeOf e
         tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
         emitConstraints e
-      BFunction _ _ ps e -> do
-        ms <- withMonomorphic ps (emitConstraints e)
-        names <- concatForM ps (emitPatternConstraints (assertEqualityAssumptions loc) ms)
-        pure (filter (assumptionNameIsNotOneOf names) ms)
-  names <- concatForM gs $
+      BFunction{} ->
+        error "Implementation error"
+  names <- concatForM gs' $
     \case
       BPattern _ p _ ->
         emitPatternConstraints (assertImplicitAssumptions loc) ms1 p
-      BFunction _ name ps e -> do
-        let t1 = foldTypeOf e ps
-        assertImplicitAssumptions loc t1 (filter (assumptionNameIs name) ms1)
-        names <- concatMapM (emitPatternConstraints (assertEqualityAssumptions loc) ms1) ps
-        pure (name : names)
+      BFunction{} ->
+        error "Implementation error"
   pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
 
 emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
