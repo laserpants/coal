@@ -58,15 +58,11 @@ module Main {
   fun many(p : Parser<a>) : Parser<List<a>> =
     let 
       go(input) =
-        fold(to_list(input), ([], input)) {
+        fold([], ([], input)) {
           | [] =>
               fn(_, _) => None
           | _ :: @cont =>
-              fn((xs, hot)) => 
-                match(p(hot)) {
-                  | None => fn(_) => Some((xs, hot))
-                  | Some((x, rest)) => cont((x :: xs, rest))
-                }
+              fn((xs, hot)) => fn(_) => None
         }
       in go(input)
 

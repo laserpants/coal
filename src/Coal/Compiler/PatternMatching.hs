@@ -110,7 +110,7 @@ translatePattern =
     PTuple a t (p :| ps) ->
       translatePattern (PConstructor a (Label t ("$Tuple" <> showt (length ps + 1))) (p : ps))
     -- TODO: Fix
-    PRecord _ t _ _->
+    PRecord _ t _ _ ->
       MVariable (Label t "-")
     _ ->
       error "Implementation error"
