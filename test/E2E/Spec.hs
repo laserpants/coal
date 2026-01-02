@@ -1323,6 +1323,11 @@ e2eSpec = do
       , "Containers/Map.coal"
       ]
 
+  describe "250" $ do
+    it "is NoSuchIdentifier" $ do
+      res <- runSpec "test/Coal/examples/250" ["Main.coal"]
+      res `shouldBe` Left NoSuchIdentifier
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
