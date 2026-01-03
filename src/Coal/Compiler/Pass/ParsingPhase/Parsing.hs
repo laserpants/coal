@@ -64,7 +64,7 @@ parseEmbedded (p, src) = do
         Just mb | not configNoCache -> do
           insertModuleC name mb
           pure $ Right (BCached mb)
-        Nothing -> do
+        _ -> do
           insertFreshModule name
           pure $ Right (BSource module_)
  where
@@ -97,7 +97,7 @@ parseFile file = do
         Just mb | not configNoCache -> do
           insertModuleC name mb
           pure $ Right (BCached mb)
-        Nothing -> do
+        _ ->
           fromSource name file src
     Left err -> do
       pure $ Left (BadFilename file err)
