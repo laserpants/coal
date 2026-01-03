@@ -21,7 +21,7 @@ import Control.Monad.Except (MonadError (throwError), void)
 import Control.Monad.State (gets)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (descendM, transform, transformM)
+import Data.Generics.Uniplate.Data (descendM, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary, Name, const2, foldrM, traverse_)
 
@@ -51,10 +51,7 @@ instance (Monoid a, Data a) => FoldContext a (Clause a ()) where
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause a p cs ->
-        EClause
-          a
-          (transform eliminateAtPatterns p)
-          <$> expandFolds name (atLabels p) cs
+        EClause a <$> transformM eliminateAtPatterns p <*> expandFolds name (atLabels p) cs
   expandMatch =
     \case
       EClause _ p cs -> do
@@ -95,15 +92,17 @@ updateName name label =
           )
       )
 
-eliminateAtPatterns :: Pattern a () -> Pattern a ()
+eliminateAtPatterns :: (Monad m) => Pattern a () -> CompilerT a m (Pattern a ())
 eliminateAtPatterns =
   \case
-    PNamedFold a _ ll ->
-      PVariable a ll
+    PNamedFold loc _ _ -> do
+      path <- gets compilerCurrentModule
+      tellErrors [NamedFoldNotAllowed (ErrorLocation (principalPath path) loc)]
+      throwError PatternAnomaly
     PAtVariable a ll ->
-      PVariable a ll
+      pure (PVariable a ll)
     p ->
-      p
+      pure p
 
 atLabels :: (Data a, Data t) => Pattern a t -> [Label t]
 atLabels = execWriter . go

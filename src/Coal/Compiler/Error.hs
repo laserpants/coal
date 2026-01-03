@@ -34,6 +34,7 @@ data CompilerError a
   | NameNotInScope Name (ErrorLocation a)
   | FoldPatternInRegularMatch (ErrorLocation a)
   | FoldPatternOutsideConstructor (ErrorLocation a)
+  | NamedFoldNotAllowed (ErrorLocation a)
   | Shadowing Name (ErrorLocation a)
   | MissingInstance (Trait IndexedType) (ErrorLocation a)
   | NameAlreadyDefined Name (ErrorLocation a)
@@ -123,4 +124,6 @@ errorLocation =
     KindError _ erl ->
       Just erl
     OrPatternVariableMismatch _ _ erl ->
+      Just erl
+    NamedFoldNotAllowed erl ->
       Just erl
