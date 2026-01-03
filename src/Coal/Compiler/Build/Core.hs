@@ -309,7 +309,7 @@ collectTypeConstructors =
      where
       -- TODO: Support higher-kinded type parameters
       kind = foldr KArrow KType (replicate (length params) KType)
-      entry = CotypeConstructorEntry loc name kind (for xsors codataAccessorName)
+      entry = CotypeConstructorEntry loc name kind (for xsors accessorName)
     DTypeAlias loc name (AliasDefinition ps t) -> do
       modify $
         insertAlias name entry
@@ -390,9 +390,9 @@ collectDataConstructors aliases env =
       forM_ (codataAccessorEntries env loc def') $
         \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
           modify $
-            addName (NCodataAccessor codataAccessorName codataAccessorScheme)
-              . insertCodataAccessor codataAccessorName info
-              . addExport codataAccessorName
+            addName (NCodataAccessor accessorName accessorScheme)
+              . insertCodataAccessor accessorName info
+              . addExport accessorName
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport a path imports -> do

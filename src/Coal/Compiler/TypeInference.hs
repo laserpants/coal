@@ -124,7 +124,7 @@ instance GenerateConstraints a (Definition a Kind IndexedType) where
                         pure [Equality (RuleUnfoldEquality loc name tl tr) [tl, tr]]
                       else do
                         let tl = t2 `TArrow` typeOf elem1
-                        pure [Explicit (RuleUnfoldExplicit loc tl codataAccessorScheme) tl codataAccessorScheme]
+                        pure [Explicit (RuleUnfoldExplicit loc tl accessorScheme) tl accessorScheme]
                   Nothing ->
                     pure []
             if length cs == length fields

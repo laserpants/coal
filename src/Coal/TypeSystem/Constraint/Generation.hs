@@ -383,7 +383,7 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
           assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
           t0 <- supplied (TVariable . TypeIndex KType)
           let t1 = t0 `TArrow` typeOf e3
-          tellRight [Explicit (RuleCodataRecordExplicit loc t1 codataAccessorScheme) t1 codataAccessorScheme]
+          tellRight [Explicit (RuleCodataRecordExplicit loc t1 accessorScheme) t1 accessorScheme]
           tellRight [Equality (RuleCodataRecordEquality loc t (typeOf e3)) [t, typeOf e3]]
           pure (ms2 <> filter (not . assumptionNameIs n) ms3)
         _ ->
@@ -466,7 +466,7 @@ emitConstraints =
               case typeOf e of
                 TArrow _ t2 -> do
                   t1 <- supplied (TVariable . TypeIndex KType)
-                  tellRight [Explicit (RuleCodataRecordExplicit loc (t1 `TArrow` t2) codataAccessorScheme) (t1 `TArrow` t2) codataAccessorScheme]
+                  tellRight [Explicit (RuleCodataRecordExplicit loc (t1 `TArrow` t2) accessorScheme) (t1 `TArrow` t2) accessorScheme]
                 _ ->
                   error "Implementation error"
           emitConstraints e

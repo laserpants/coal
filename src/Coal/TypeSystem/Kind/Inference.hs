@@ -3,6 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -15,6 +16,8 @@ module Coal.TypeSystem.Kind.Inference (
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
+import Coal.Language.Codata.Accessor (CodataAccessor (..))
+import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (Parameter), Type (..))
@@ -125,6 +128,18 @@ instance
   where
   lowerKinds (Forall vs ts t) =
     Forall (lowerKinds vs) (fmap lowerKinds ts) (lowerKinds t)
+
+instance LowerKinds (DataConstructor Parameter KindNode (Type Parameter KindNode)) (DataConstructor Parameter Kind (Type Parameter Kind)) where
+  lowerKinds =
+    \case
+      DataConstructor{..} ->
+        DataConstructor{constructorScheme = lowerKinds constructorScheme, ..}
+
+instance LowerKinds (CodataAccessor Parameter KindNode (Type Parameter KindNode)) (CodataAccessor Parameter Kind (Type Parameter Kind)) where
+  lowerKinds =
+    \case
+      CodataAccessor{..} ->
+        CodataAccessor{accessorScheme = lowerKinds accessorScheme, ..}
 
 nodeKind :: Type Parameter KindNode -> KindNode
 nodeKind =
@@ -241,6 +256,18 @@ instance (EmitKinds k) => EmitKinds (Scheme Parameter KindNode k) where
         emitKindConstraints ts
         emitKindConstraints t
 
+instance (EmitKinds t) => EmitKinds (DataConstructor Parameter KindNode t) where
+  emitKindConstraints =
+    \case
+      DataConstructor _ _ s ->
+        emitKindConstraints s
+
+instance (EmitKinds t) => EmitKinds (CodataAccessor Parameter KindNode t) where
+  emitKindConstraints =
+    \case
+      CodataAccessor _ s ->
+        emitKindConstraints s
+
 next :: State Int KindNode
 next = do
   modify (+ 1)
@@ -322,6 +349,18 @@ instance IndexKinds (Set (Parameter ())) where
     let xs = Set.toList s
     ys <- traverse indexKinds xs
     pure $ Set.fromList ys
+
+instance IndexKinds (DataConstructor Parameter () (Type Parameter ())) where
+  type Indexed (DataConstructor Parameter () (Type Parameter ())) = DataConstructor Parameter KindNode (Type Parameter KindNode)
+  indexKinds DataConstructor{..} = do
+    s' <- indexKinds constructorScheme
+    pure DataConstructor{constructorScheme = s', ..}
+
+instance IndexKinds (CodataAccessor Parameter () (Type Parameter ())) where
+  type Indexed (CodataAccessor Parameter () (Type Parameter ())) = CodataAccessor Parameter KindNode (Type Parameter KindNode)
+  indexKinds CodataAccessor{..} = do
+    s' <- indexKinds accessorScheme
+    pure CodataAccessor{accessorScheme = s', ..}
 
 instance IndexKinds (Scheme Parameter () (Type Parameter ())) where
   type
@@ -421,6 +460,14 @@ instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (Row Pa
         RVariable (Parameter (applyKinds sub k) name)
       RNil ->
         RNil
+
+instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (DataConstructor Parameter k t) where
+  applyKinds sub DataConstructor{..} =
+    DataConstructor{constructorScheme = applyKinds sub constructorScheme, ..}
+
+instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (CodataAccessor Parameter k t) where
+  applyKinds sub CodataAccessor{..} =
+    CodataAccessor{accessorScheme = applyKinds sub accessorScheme, ..}
 
 newtype KindUnifier a = KindUnifier (Either KindInferenceError a)
   deriving
