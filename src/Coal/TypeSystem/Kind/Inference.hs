@@ -133,13 +133,21 @@ instance LowerKinds (DataConstructor Parameter KindNode (Type Parameter KindNode
   lowerKinds =
     \case
       DataConstructor{..} ->
-        DataConstructor{constructorScheme = lowerKinds constructorScheme, ..}
+        DataConstructor
+          { constructorScheme =
+              lowerKinds constructorScheme
+          , ..
+          }
 
 instance LowerKinds (CodataAccessor Parameter KindNode (Type Parameter KindNode)) (CodataAccessor Parameter Kind (Type Parameter Kind)) where
   lowerKinds =
     \case
       CodataAccessor{..} ->
-        CodataAccessor{accessorScheme = lowerKinds accessorScheme, ..}
+        CodataAccessor
+          { accessorScheme =
+              lowerKinds accessorScheme
+          , ..
+          }
 
 nodeKind :: Type Parameter KindNode -> KindNode
 nodeKind =
