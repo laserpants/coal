@@ -50,7 +50,8 @@ pass files = do
           error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
 
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildUnit (Module Metadata Kind ())))
-parseEmbedded (p, src) =
+parseEmbedded (p, src) = do
+  CompilerConfig{..} <- gets compilerConfig
   case runParser (parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
@@ -60,7 +61,7 @@ parseEmbedded (p, src) =
       cached <- cachedBuild name encodedSrc
       setVerbatimSourceForC module_ encodedSrc
       case cached of
-        Just mb -> do
+        Just mb | not configNoCache -> do
           insertModuleC name mb
           pure $ Right (BCached mb)
         Nothing -> do
@@ -93,7 +94,7 @@ parseFile file = do
       cached <- cachedBuild name src
       setVerbatimSourceC name src
       case cached of
-        Just mb -> do
+        Just mb | not configNoCache -> do
           insertModuleC name mb
           pure $ Right (BCached mb)
         Nothing -> do

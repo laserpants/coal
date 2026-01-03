@@ -19,4 +19,5 @@ compileCommand CompileCmdOptions{..} = do
       , configSourcePaths = nub ("src" : srcPaths)
       , configCFiles = extraSourceFiles
       , configSilent = silent
+      , configNoCache = noCache
       }

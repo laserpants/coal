@@ -6,6 +6,7 @@ module Coal.Compiler.Config (
   CompilerConfig (..),
   defaultConfig,
   silentConfig,
+  debugConfig,
   setConfigExecutableName,
   setConfigGenerateDotFiles,
   setConfigGenerateLLVMOutput,
@@ -18,6 +19,7 @@ data CompilerConfig = CompilerConfig
   , configSourcePaths :: [FilePath]
   , configCFiles :: [FilePath]
   , configSilent :: Bool
+  , configNoCache :: Bool
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -31,11 +33,16 @@ defaultConfig =
     , configSourcePaths = ["src"]
     , configCFiles = []
     , configSilent = False
+    , configNoCache = False
     }
 
 {-# INLINE silentConfig #-}
 silentConfig :: CompilerConfig
 silentConfig = defaultConfig{configSilent = True}
+
+{-# INLINE debugConfig #-}
+debugConfig :: CompilerConfig
+debugConfig = defaultConfig{configNoCache = True}
 
 {-# INLINE setConfigExecutableName #-}
 setConfigExecutableName :: FilePath -> CompilerConfig -> CompilerConfig
