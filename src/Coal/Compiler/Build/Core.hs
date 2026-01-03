@@ -182,7 +182,7 @@ prepareBuild module_@(Module path exports defs) = do
       , "Option"
       , "Result"
       , "Ok"
-      , "Error"
+      , "Err"
       , "Ordered"
       , "Ordering"
       , "Semigroup"
