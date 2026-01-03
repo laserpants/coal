@@ -578,11 +578,12 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
   go =
     forM defs $
       \(n, s) -> do
-        let (r, outs) = runKindConstraintsGen (mapEnvironment liftKind env) $ do
-              forM_ qs (modify . uncurry Environment.insert)
-              let indexed = evalState (indexKinds s) (length qs)
-              emitKindConstraints indexed
-              pure indexed
+        let (r, outs) =
+              runKindConstraintsGen (mapEnvironment liftKind env) $ do
+                forM_ qs (modify . uncurry Environment.insert)
+                let indexed = evalState (indexKinds s) (length qs)
+                emitKindConstraints indexed
+                pure indexed
         let (errs, cs) = partitionEithers outs
             KindUnifier res = solveKindConstraints cs
         unless (null errs) $
@@ -597,10 +598,11 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
 inferTypeKinds :: Type Parameter () -> Either [KindInferenceError] (Type Parameter Kind)
 inferTypeKinds t = do
   -- TODO: DRY
-  let (r, outs) = runKindConstraintsGen mempty $ do
-        let indexed = evalState (indexKinds t) 0
-        emitKindConstraints indexed
-        pure indexed
+  let (r, outs) =
+        runKindConstraintsGen mempty $ do
+          let indexed = evalState (indexKinds t) 0
+          emitKindConstraints indexed
+          pure indexed
   let (errs, cs) = partitionEithers outs
       KindUnifier res = solveKindConstraints cs
   unless (null errs) $
