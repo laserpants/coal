@@ -134,5 +134,11 @@ instance Typed (Op a) where
         Type.float
       ODivDouble{} ->
         Type.double
-      _ ->
-        error "TODO"
+      OEqChar{} ->
+        Type.bool
+      OEqBool{} ->
+        Type.bool
+      ONeChar{} ->
+        Type.bool
+      ONeBool{} ->
+        Type.bool
