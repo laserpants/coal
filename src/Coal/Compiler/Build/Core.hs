@@ -81,7 +81,7 @@ replacePlaceholders store =
         modify $ addName (info name s)
 
 prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind (), ModuleBuild a)
-prepareBuild module_@(Module path exports defs) = do
+prepareBuild module_@(Module path exports defs) =
   flip runStateT emptyModuleBuild $ do
     modify (setPath path)
 
