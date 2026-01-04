@@ -228,24 +228,26 @@ instance (Monoid a, Data a) => TraitContext a (Expression a IndexedType) where
         as <- censorDictionaryTraits (const []) (traverse transformBinding bs)
         let xs = concat (toList (snd <$> as))
         ELet a (fst <$> as) <$> local (overCompilerDictionaryNameEnvironment (Environment.insertMultiple xs)) (expandTraits e)
+      var@(EVariable _ (Label t name))
+        | "$fold" `isPrefixOf` name -> do
+            traits <- collectTraits t name
+            tellDictionaryTraits traits
+            pure var
       EVariable loc (Label t name) -> do
         traits <- collectTraits t name
         applyTraits loc (Label t name) (nub traits)
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
-      EFold a t es cs (Just e) -> do
-        e1 <- descendM expandTraits e
-        pure (EFold a t es cs (Just e1))
       e ->
         descendM expandTraits e
 
 transformBinding :: (Monoid a, Data a, Monad m) => Binding Expression a IndexedType -> CompilerT a m (Binding Expression a IndexedType, [(Name, IndexedScheme)])
 transformBinding =
   \case
-    BPattern a var@(PVariable _ (Label _ name)) e
+    BPattern a var@(PVariable _ (Label t name)) e
       | "$fold" `isPrefixOf` name -> do
-          body <- expandTraits e
-          pure (BPattern a var body, [])
+          (body, traits) <- listenDictionaryTraits (expandTraits e)
+          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) (nub traits) t)])
     BPattern _ (PVariable a (Label t name)) e -> do
       (e1, traits) <- transformScope e
       let ll = Label (foldTypeOf t (nub traits)) name

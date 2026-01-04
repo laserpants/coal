@@ -161,15 +161,11 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
         EMatch a t
           <$> patternExhaustiveCheck name e
           <*> (checkExhaustive name a cs >> traverse (patternExhaustiveCheck name) cs)
-      ELambdaMatch a t cs me ->
+      ELambdaMatch a t cs ->
         ELambdaMatch a t
           <$> (checkExhaustive name a cs >> traverse (patternExhaustiveCheck name) cs)
-          <*> traverse (patternExhaustiveCheck name) me
       ECompiledMatch{} ->
         error "Implementation error"
-      EFold a t es cs me ->
-        EFold a t es cs
-          <$> traverse (patternExhaustiveCheck name) me
       ESelect a ll e ->
         ESelect a ll <$> patternExhaustiveCheck name e
       ECodataSelect a ll e1 e2 ->
@@ -190,6 +186,8 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
       e@ETraitDictionary{} ->
         pure e
       e@EDoBlock{} ->
+        pure e
+      e@EFold{} ->
         pure e
 
 checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata t) -> CompilerT Metadata m (NonEmpty (Clause Metadata t))

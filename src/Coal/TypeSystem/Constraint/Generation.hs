@@ -434,10 +434,6 @@ emitConstraints =
       emitEListLiteralConstraints loc t es
     EMatch loc t e cs ->
       emitClauseConstraints loc t e [] cs
-    ELambdaMatch _ _ _ (Just e) ->
-      emitConstraints e
-    ECompiledMatch{} ->
-      error "Not implemented"
     EUnaryOperator loc t op -> do
       tellRight [Explicit (RuleUnaryOperator loc) t (unaryOperatorTypeScheme op)]
       pure []
@@ -446,15 +442,6 @@ emitConstraints =
       pure []
     ESelect loc ll e ->
       emitESelectConstraints loc ll e
-    EFold loc t (e :| es) _ e1 -> do
-      ms2 <- concatMapM emitConstraints es
-      ms3 <- concatMapM emitConstraints e1
-      case e1 of
-        Just (ERecursiveLet _ (PVariable _ (Label t1 _)) _ _) ->
-          tellRight [Equality (RuleFoldType loc) [foldTypeOf t (e :| es), t1]]
-        _ ->
-          pure ()
-      pure (ms2 <> ms3)
     ECodataRecord loc _ d -> do
       concatForM (Map.toList d) $
         \(field, e) -> do
@@ -479,12 +466,16 @@ emitConstraints =
     EFFICall loc t ll es e ->
       emitEFFICallConstraints loc t ll es e
     ECodataSelect{} ->
-      error "Not implemented"
+      error "Implementation error"
     EFocus{} ->
-      error "Not implemented"
+      error "Implementation error"
     ETraitDictionary{} ->
-      error "Not implemented"
+      error "Implementation error"
     ELambdaMatch{} ->
-      error "Not implemented"
+      error "Implementation error"
     EDoBlock{} ->
-      error "Not implemented"
+      error "Implementation error"
+    ECompiledMatch{} ->
+      error "Implementation error"
+    EFold{} ->
+      error "Implementation error"

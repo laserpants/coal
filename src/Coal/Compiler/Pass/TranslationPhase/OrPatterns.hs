@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TranslationPhase.OrPatterns (passOrPatterns) where
@@ -35,8 +34,8 @@ expandExpression =
   \case
     EMatch a t e cs ->
       EMatch a t e . sconcat <$> traverse expandOrPatterns cs
-    EFold a t es cs e ->
-      EFold a t es . sconcat <$> traverse expandOrPatterns cs <*> pure e
+    EFold a t es cs ->
+      EFold a t es . sconcat <$> traverse expandOrPatterns cs
     e ->
       pure e
 

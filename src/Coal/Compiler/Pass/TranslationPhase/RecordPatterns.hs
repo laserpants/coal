@@ -61,8 +61,6 @@ instance (Data a, Monoid a) => RecordDesugarable a (Expression a IndexedType) wh
             _ ->
               error "Not implemented"
         pure (EMatch a t e (NonEmpty.fromList es))
-      EFold a t es cs e ->
-        EFold a t es cs <$> desugarRecordPatterns e
       e ->
         pure e
 

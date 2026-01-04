@@ -148,9 +148,8 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Expression a ()) where
    where
     go =
       \case
-        EFold a t es cs Nothing -> do
-          e1 <- expandFoldExpr es cs
-          pure (EFold a t es cs (Just e1))
+        EFold _ _ es cs ->
+          expandFoldExpr es cs
         e@(EMatch _ _ _ cs) -> do
           expandMatch cs
           pure e

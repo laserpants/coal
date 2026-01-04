@@ -177,7 +177,7 @@ parseFoldExpression = do
     lexeme_ "fold"
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
-    pure (\loc -> EFold loc () es cs Nothing)
+    pure (\loc -> EFold loc () es cs)
 
 parseSpecialNameExpression :: Parser (Expression Metadata ())
 parseSpecialNameExpression =
@@ -245,7 +245,7 @@ parseLambdaMatchExpression = do
   withMetadata $ do
     lexeme_ "match"
     cs <- braces (nonEmpty (some parseMatchClause))
-    pure (\loc -> ELambdaMatch loc () cs Nothing)
+    pure (\loc -> ELambdaMatch loc () cs)
 
 parseMatchExpression :: Parser (Expression Metadata ())
 parseMatchExpression = do

@@ -35,14 +35,11 @@ instance (TransformContext a) => TransformContext (Dictionary a) where
 instance (Monoid a, Data a) => TransformContext (Expression a ()) where
   expandLambdaMatchExprs = transformM $
     \case
-      ELambdaMatch a t cs Nothing ->
-        ELambdaMatch a t cs . Just <$> expandLambdaMatch
-       where
-        expandLambdaMatch =
-          pure $
-            lambdaE
-              (varP "$lambda_match" :| [])
-              (matchE (varE "$lambda_match") cs)
+      ELambdaMatch _ _ cs ->
+        pure $
+          lambdaE
+            (varP "$lambda_match" :| [])
+            (matchE (varE "$lambda_match") cs)
       e ->
         pure e
 
