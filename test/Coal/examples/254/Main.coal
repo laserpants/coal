@@ -9,12 +9,6 @@ module Main {
 
   type Tree<a> = Node(TreeFields<a>)
 
-  fun leaf(x) =
-    Node({ value = x, children = [] })
-
-  fun node(x, children) =
-    Node({ value = x, children = children })
-
   fold sum : List<Tree<a>> -> int32 {
 
     // TODO: This should be a type error !!!
@@ -26,18 +20,6 @@ module Main {
   fold tree_size: Tree<a> -> int32 {
     | Node({ children = sum(@children) | _ }) => 1 + children
   }
-
-  fun size(tree) =
-    tree_size(tree)
-
-
-  //
-
-  //        1
-  //      /   \
-  //     2     3
-  //    / \     \
-  //   4   5     6
 
   let example_tree =
     Node({
@@ -59,7 +41,6 @@ module Main {
     })
 
   fun main() =
-    // 6
-    println_int32(size(example_tree))
+    println_int32(tree_size(example_tree))
 
 }
