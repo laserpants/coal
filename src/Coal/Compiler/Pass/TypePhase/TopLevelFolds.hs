@@ -22,7 +22,7 @@ import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extras (Name, const2, foldrM)
+import Extras (Name, foldrM)
 
 passTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passTopLevelFolds = Pass{runPass = pass}
@@ -70,8 +70,10 @@ updateName _ (name, label) =
   pure
     . replace
       (labelName label)
-      ( const2 $
-          applicationE (varE ("!" <> name)) (EVariable mempty label :| [])
+      ( \loc _ ->
+          applicationE
+            (EVariable loc (Label () ("!" <> name)))
+            (EVariable loc label :| [])
       )
 
 eliminateAtPatterns :: Pattern a () -> Pattern a ()

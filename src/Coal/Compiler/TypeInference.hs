@@ -157,7 +157,7 @@ assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Eit
 assumptionConstraints Assumption{..} = do
   names <- gets compilerNameStore
   pure $
-    case Environment.lookup assumptionName names of
+    case Environment.lookup (normalizedName assumptionName) names of
       Nothing ->
         Left Assumption{..}
       Just s ->
@@ -194,7 +194,7 @@ typeDefinitionsC ds = do
     (n1, s) <- Map.toList env
     Assumption loc n2 t <- ams
     let t1 = apply sub t
-    [Explicit (RuleAssumptionExplicit loc t1 s) t1 s | n1 == n2]
+    [Explicit (RuleAssumptionExplicit loc t1 s) t1 s | n1 == normalizedName n2]
   sub1 <- solveC
   pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)
 
