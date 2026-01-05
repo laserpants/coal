@@ -41,7 +41,7 @@ module Main {
         fn(f) => Node({ value = f(value), children = children(f) }) :: trees(f)
   }
 
-  fun tree_map(f, tree) =
+  fun tree_map(f : a -> b, tree : Tree<a>) : Tree<b> =
     match(tree) {
       | Node({ value = value, children = children }) =>
           Node({ value = f(value), children = tree_list_map(children, f) })
