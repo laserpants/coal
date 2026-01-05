@@ -8,10 +8,17 @@ module Option {
     | _, Some(value) = value
     | value, _       = value
 
+  /**
+   * Return `true` if the given value is constructed with `Some`, and `false` 
+   * otherwise.
+   */
   fun is_some 
     | Some(_) = true
     | None    = false
-    
+
+  /**
+   * Return `true` if the given value is `None`, and `false` otherwise.
+   */
   fun is_none
     | None    = true
     | Some(_) = false
@@ -28,6 +35,10 @@ module Option {
       | None => default
     }
 
+  /**
+   * Collect all values contained in `Some` constructors from a list of
+   * `Option<a>` values, discarding occurrences of `None`.
+   */
   fun cat_options(options : List<Option<a>>) : List<a> =
     fold(options) {
       | [] => []
@@ -35,12 +46,20 @@ module Option {
       | _ :: @rest => rest
     }
 
+  /**
+   * Convert a list to an `Option<a>` by returning `Some` applied to the first
+   * element of the list, or `None` if the list is empty.
+   */
   fun list_to_option(list : List<a>) : Option<a> =
     match(list) {
       | [] => None
       | head :: _ => Some(head)
     }
-  
+
+  /**
+   * Convert an `Option<a>` value to a list by returning a singleton list
+   * containing the value if it is `Some`, or the empty list if it is `None`.
+   */
   fun option_to_list(option: Option<a>) : List<a> =
     match(option) {
       | Some(value) => [value]
