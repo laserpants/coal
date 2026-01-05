@@ -85,7 +85,7 @@ instance (RuleContext (d a k t)) => RuleContext (InstanceDefinition d a k t) whe
 instance RuleContext (FoldDefinition Metadata t) where
   detectDuplicateParams =
     \case
-      FoldDefinition _ cs _ ->
+      FoldDefinition _ cs ->
         detectDuplicateParams cs
 
 instance RuleContext (UnfoldDefinition Metadata t) where

@@ -14,7 +14,7 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..))
+import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), With (..))
 import Coal.Language.Module
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.State (gets)
@@ -100,9 +100,9 @@ atLabels = execWriter . transformM go
 compileTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a k () -> CompilerT a m (Definition a k ())
 compileTopLevelFolds =
   \case
-    DFold loc name (FoldDefinition with cs _) -> do
+    DFold loc name (FoldDefinition w cs) -> do
       e1 <- expandTopLevelFold cs
-      pure $ DFold loc name (FoldDefinition with cs (Just e1))
+      pure (DConstant loc name (ConstantDefinition loc (Just w) (With [] ()) e1) [])
     o ->
       pure o
 

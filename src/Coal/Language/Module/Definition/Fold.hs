@@ -4,7 +4,7 @@
 
 module Coal.Language.Module.Definition.Fold (FoldDefinition (..)) where
 
-import Coal.Language.Expression (Clause (..), Expression (..))
+import Coal.Language.Expression (Clause (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (ParameterizedType)
 import Data.Data (Data, Typeable)
@@ -13,6 +13,5 @@ import Data.List.NonEmpty (NonEmpty)
 data FoldDefinition a t = FoldDefinition
   { foldDefinitionType :: With ParameterizedType
   , foldDefinitionClauses :: NonEmpty (Clause a t)
-  , foldDefinitionExpression :: Maybe (Expression a t)
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

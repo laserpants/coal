@@ -193,12 +193,6 @@ instance (Monoid a, Data a) => CompileFoldsContext a (ConstantDefinition a ()) w
       ConstantDefinition a u w e ->
         ConstantDefinition a u w <$> compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext a (FoldDefinition a ()) where
-  compileFolds =
-    \case
-      FoldDefinition with cs e ->
-        FoldDefinition with <$> traverse compileFolds cs <*> traverse compileFolds e
-
 instance (Monoid a, Data a) => CompileFoldsContext a (UnfoldDefinition a ()) where
   compileFolds =
     \case
@@ -214,8 +208,6 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Definition a k ()) where
         DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
       DInstance loc name (InstanceDefinition ps t ds) ->
         DInstance loc name . InstanceDefinition ps t <$> compileFolds ds
-      DFold loc name d ->
-        DFold loc name <$> compileFolds d
       DUnfold loc name d ->
         DUnfold loc name <$> compileFolds d
       o ->

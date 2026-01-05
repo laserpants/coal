@@ -277,8 +277,6 @@ instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) wh
     \case
       DConstant loc name c fs ->
         DConstant loc name <$> expandConstantDefinitionTraits name c <*> traverse expandTraits fs
-      DFold loc name (FoldDefinition with cs (Just e)) ->
-        DFold loc name . FoldDefinition with cs . Just <$> expandTraits e
       DUnfold loc name (UnfoldDefinition with ps d (Just e)) ->
         DUnfold loc name . UnfoldDefinition with ps d . Just <$> expandTraits e
       d ->
