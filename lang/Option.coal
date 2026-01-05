@@ -16,10 +16,35 @@ module Option {
     | None    = true
     | Some(_) = false
 
-  fun option(fallback : b, f : a -> b, value : Option<a>) : b =
+  /**
+   * From a default value of type `b`, a function of type `a -> b`, and an 
+   * `Option<a>` value, apply the function to the value inside the `Some` 
+   * constructor and return the result, or if the value is `None`, return
+   * the default value.
+   */
+  fun option(default : b, f : a -> b, value : Option<a>) : b =
     match(value) {
       | Some(x) => f(x)
-      | None => fallback
+      | None => default
+    }
+
+  fun cat_options(options : List<Option<a>>) : List<a> =
+    fold(options) {
+      | [] => []
+      | Some(value) :: @rest => value :: rest
+      | _ :: @rest => rest
+    }
+
+  fun list_to_option(list : List<a>) : Option<a> =
+    match(list) {
+      | [] => None
+      | head :: _ => Some(head)
+    }
+  
+  fun option_to_list(option: Option<a>) : List<a> =
+    match(option) {
+      | Some(value) => [value]
+      | None => []
     }
 
 }
