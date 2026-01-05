@@ -8,4 +8,18 @@ module Option {
     | _, Some(value) = value
     | value, _       = value
 
+  fun is_some 
+    | Some(_) = true
+    | None    = false
+    
+  fun is_none
+    | None    = true
+    | Some(_) = false
+
+  fun option(fallback : b, f : a -> b, value : Option<a>) : b =
+    match(value) {
+      | Some(x) => f(x)
+      | None => fallback
+    }
+
 }
