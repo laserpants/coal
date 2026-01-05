@@ -230,6 +230,24 @@ module List {
       | x :: @xs => if(! p(x)) then false else xs
     }
 
+  /** 
+   * The conjunction of a list of bools.
+   */
+  fun all_true(list : List<bool>) : bool =
+    fold(list) {
+      | [] => true
+      | x :: @xs => x && xs
+    }
+
+  /** 
+   * The disjunction of a list of bools.
+   */
+  fun any_true(list : List<bool>) : bool =
+    fold(list) {
+      | [] => false
+      | x :: @xs => x || xs
+    }
+
   /**
    * Return the first element of the list that satisfies the given predicate, 
    * or `None`, if there is no such element.
