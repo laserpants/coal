@@ -43,8 +43,6 @@ instance PatternExhaustiveCheckContext (Definition Metadata k t) where
         DFunction loc n <$> traverse (patternExhaustiveCheck name) f <*> traverse (patternExhaustiveCheck name) ws
       DConstant loc n c ws ->
         DConstant loc n <$> patternExhaustiveCheck name c <*> traverse (patternExhaustiveCheck name) ws
-      DFold loc n d ->
-        DFold loc n <$> patternExhaustiveCheck name d
       DUnfold loc n d ->
         DUnfold loc n <$> patternExhaustiveCheck name d
       DInstance loc n d ->
@@ -57,12 +55,6 @@ instance PatternExhaustiveCheckContext (InstanceDefinition Definition Metadata k
     \case
       InstanceDefinition ts t ds ->
         InstanceDefinition ts t <$> traverse (patternExhaustiveCheck name) ds
-
-instance PatternExhaustiveCheckContext (FoldDefinition Metadata t) where
-  patternExhaustiveCheck name =
-    \case
-      FoldDefinition w t e ->
-        FoldDefinition w t <$> traverse (patternExhaustiveCheck name) e
 
 instance PatternExhaustiveCheckContext (UnfoldDefinition Metadata t) where
   patternExhaustiveCheck name =

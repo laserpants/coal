@@ -1,0 +1,86 @@
+module Main {
+
+  import IO(println_int32, println_string)
+  import Number(max, maximum)
+  import Option(with_default)
+
+  type alias TreeFields<a> =
+    { value    : a
+    , children : List<Tree<a>>
+    }
+
+  type Tree<a> = Node(TreeFields<a>)
+
+  fun leaf(value) =
+    Node({ value = value, children = [] })
+
+  fun node(value, children) =
+    Node({ value = value, children = children })
+
+  fold tree_list_size : List<Tree<a>> -> int32 {
+    | size(@tree) :: tree_list_size(@trees) => tree + trees
+    | [] => 0
+  }
+
+  fold size : Tree<a> -> int32 {
+    | Node({ children = tree_list_size(@children) | _ }) => 1 + children
+  }
+
+  fold tree_list_height : List<Tree<a>> -> int32 {
+    | [] => 0
+    | height(@h) :: tree_list_height(@g) => max(h, g)
+  }
+
+  fold height : Tree<a> -> int32 {
+    | Node({ children = tree_list_height(@h) | _ }) => 1 + h
+  }
+
+  fold tree_list_map : List<Tree<a>> -> (a -> b) -> List<Tree<b>> {
+    | [] => fn(_) => []
+    | Node({ value = value, children = tree_list_map(@children) }) :: tree_list_map(@trees) => 
+        fn(f) => Node({ value = f(value), children = children(f) }) :: trees(f)
+  }
+
+  fun tree_map(f, tree) =
+    match(tree) {
+      | Node({ value = value, children = children }) =>
+          Node({ value = f(value), children = tree_list_map(children, f) })
+    }
+
+
+  //
+
+  //        1
+  //      /   \
+  //     2     3
+  //    / \     \
+  //   4   5     6
+
+  let example_tree =
+    Node({
+      value = 1,
+      children =
+        [ Node({
+            value = 2,
+            children =
+              [ Node({ value = 4, children = [] })
+              , Node({ value = 5, children = [] })
+              ]
+          })
+        , Node({
+            value = 3,
+            children =
+              [ Node({ value = 6, children = [] }) ]
+          })
+        ]
+    })
+
+  fun main() =
+    // println_int32(height(tree_map(fn(x) => x + 1, example_tree)))
+
+    match(tree_map(fn(x) => x + 1, example_tree)) {
+      | Node({ value = v | _ }) =>
+          println_int32(v)
+    }
+
+}

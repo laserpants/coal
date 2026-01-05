@@ -92,16 +92,6 @@ instance GenerateConstraints a (Definition a Kind IndexedType) where
         void (generateConstraints f)
       DConstant _ _ c _ ->
         void (generateConstraints c)
-      DFold loc _ (FoldDefinition (With _ t) _ (Just e)) -> do
-        generateConstraints e
-        (r, _, _) <- runConstraintsGen (instantiateAnnotation loc t)
-        case r of
-          Left err ->
-            compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-          Right t2 -> do
-            insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-       where
-        t1 = typeOf e
       DUnfold loc _ (UnfoldDefinition (With _ t) ps d (Just e)) -> do
         generateConstraints e
         (r, _, _) <- runConstraintsGen (instantiateAnnotation loc t)

@@ -63,10 +63,9 @@ instance (TransformContext (d a k ())) => TransformContext (InstanceDefinition d
 instance (Data a, Monoid a) => TransformContext (FoldDefinition a ()) where
   desugarDoNotation =
     \case
-      FoldDefinition a cs me ->
+      FoldDefinition a cs ->
         FoldDefinition a
           <$> traverse desugarDoNotation cs
-          <*> traverse desugarDoNotation me
 
 instance (Data a, Monoid a) => TransformContext (UnfoldDefinition a ()) where
   desugarDoNotation =
