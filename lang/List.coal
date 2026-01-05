@@ -231,7 +231,7 @@ module List {
     }
 
   /** 
-   * The conjunction of a list of bools.
+   * Return the conjunction of a list of bools.
    */
   fun all_true(list : List<bool>) : bool =
     fold(list) {
@@ -240,7 +240,7 @@ module List {
     }
 
   /** 
-   * The disjunction of a list of bools.
+   * Return the disjunction of a list of bools.
    */
   fun any_true(list : List<bool>) : bool =
     fold(list) {
