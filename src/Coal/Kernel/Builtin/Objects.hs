@@ -1368,6 +1368,23 @@ objects =
             [r| 
                   v : IO(*)
               |]
+        , OFunction
+            "Builtin$.(!=)"
+            [ Label (Kernel.TCon "Comparable" [opaque]) "$c"
+            , Label Kernel.TOpq "a"
+            , Label Kernel.TOpq "b"
+            ]
+            [r| 
+                  @<bool>
+                    ( `Builtin$.operator$__not` : bool/bool
+                    , @<bool>
+                        ( `Builtin$.(==)` : Comparable(*)/*/*/bool
+                        , $c : Comparable(*)
+                        , a : *
+                        , b : *
+                        )
+                    )
+              |]
         ]
     }
 

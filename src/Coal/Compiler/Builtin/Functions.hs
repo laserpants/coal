@@ -212,4 +212,8 @@ builtinFunctions =
     ( "(^)"
     , forall1' (\t0 -> ([Trait "Numeric" t0], t0 ~> TIntrinsic INat ~> t0))
     )
+  ,
+    ( "(!=)"
+    , forall1' (\t0 -> ([Trait "Comparable" t0], t0 ~> t0 ~> TIntrinsic IBool))
+    )
   ]

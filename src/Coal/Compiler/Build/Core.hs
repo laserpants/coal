@@ -170,6 +170,7 @@ prepareBuild module_@(Module path exports defs) =
       , "(/)"
       , "(<>)"
       , "(==)"
+      , "(!=)"
       , "Comparable"
       , "Divisible"
       , "EqualTo"

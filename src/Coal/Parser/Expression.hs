@@ -435,6 +435,18 @@ parseEqualityOperator =
             (lhs :| [rhs])
       )
 
+parseInequalityOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseInequalityOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(!=)"))
+            (lhs :| [rhs])
+      )
+
 parseLessThanOrEqualOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
 parseLessThanOrEqualOperator =
   withMetadata $
@@ -503,7 +515,7 @@ negationOperator =
 fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1 :: [Operator Parser (Expression Metadata ())]
 fixity8 =
   [ Prefix negationOperator
-  , Prefix (unaryOperator OLogicalNot <$ symbol "!")
+  , Prefix (unaryOperator OLogicalNot <$ (symbol "!" <* notFollowedBy (char '=')))
   , InfixR (parseExponentiationOperator <* symbol "^")
   ]
 fixity7 =
@@ -523,6 +535,7 @@ fixity5 =
   ]
 fixity4 =
   [ InfixN (parseEqualityOperator <* symbol "==")
+  , InfixN (parseInequalityOperator <* symbol "!=")
   , InfixN (parseLessThanOrEqualOperator <* symbol "<=")
   , InfixN (parseGreaterThanOrEqualOperator <* symbol ">=")
   , InfixN (parseLessThanOperator <* (symbol "<" <* notFollowedBy (char '=')))
