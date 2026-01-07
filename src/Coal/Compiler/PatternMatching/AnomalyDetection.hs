@@ -166,6 +166,8 @@ translatePattern =
       Any
     PVariable{} ->
       Any
+    PShorthand{} ->
+      Any
     PConstructor _ (Label _ name) ps ->
       Con name (translatePattern <$> ps)
     PLiteral _ p ->

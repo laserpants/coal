@@ -40,6 +40,8 @@ instance TransformContext (IndexedPattern Metadata) where
         pure p
       p@(PAnnotation _ _ PVariable{}) ->
         pure p
+      PShorthand loc (Label t name) ->
+        desugarPatterns (PVariable loc (Label t name))
       p -> do
         name <- supplied (freshName "v")
         tellPatterns1 (name, p)

@@ -1392,6 +1392,14 @@ e2eSpec = do
       , "Containers/Map.coal"
       ]
 
+  describe "262" $ do
+    expectOutput
+      "4"
+      "test/Coal/examples/262"
+      [ "Main.coal"
+      , "Containers/Tree.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
