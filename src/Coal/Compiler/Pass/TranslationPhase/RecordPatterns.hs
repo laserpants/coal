@@ -61,8 +61,6 @@ instance (Data a, Monoid a) => RecordDesugarable a (Expression a IndexedType) wh
             _ ->
               error "Not implemented"
         pure (EMatch a t e (NonEmpty.fromList es))
-      EFold a t es cs e ->
-        EFold a t es cs <$> desugarRecordPatterns e
       e ->
         pure e
 
@@ -71,6 +69,14 @@ instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a IndexedTy
     \case
       CGuard e ->
         CGuard <$> desugarRecordPatterns e
+
+desugarShorthandPatterns :: Pattern a IndexedType -> Pattern a IndexedType
+desugarShorthandPatterns =
+  \case
+    PShorthand loc (Label t name) ->
+      PVariable loc (Label t name)
+    p ->
+      p
 
 instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
   desugarRecordPatterns =
@@ -81,7 +87,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
         PConstructor a ll <$> desugarRecordPatterns ps
       PRecord _ t@(TRecord r) d p -> do
         name <- supplied (freshName "row")
-        tellRecordEntry [(name, d, p)]
+        tellRecordEntry [(name, fmap desugarShorthandPatterns d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
       PListCons a t p1 p2 ->
         PListCons a t <$> desugarRecordPatterns p1 <*> desugarRecordPatterns p2

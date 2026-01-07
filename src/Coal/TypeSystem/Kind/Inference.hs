@@ -3,6 +3,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -15,6 +16,8 @@ module Coal.TypeSystem.Kind.Inference (
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
+import Coal.Language.Codata.Accessor (CodataAccessor (..))
+import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (Parameter), Type (..))
@@ -61,12 +64,13 @@ class LowerKinds a b where
   lowerKinds :: a -> b
 
 instance LowerKinds KindNode Kind where
-  lowerKinds = \case
-    IsKType -> KType
-    IsKRow -> KRow
-    IsKTrait -> KTrait
-    IsKArrow a b -> KArrow (lowerKinds a) (lowerKinds b)
-    IsKVar _ -> KType
+  lowerKinds =
+    \case
+      IsKType -> KType
+      IsKRow -> KRow
+      IsKTrait -> KTrait
+      IsKArrow a b -> KArrow (lowerKinds a) (lowerKinds b)
+      IsKVar _ -> KType
 
 instance LowerKinds (Parameter KindNode) (Parameter Kind) where
   lowerKinds (Parameter k name) = Parameter (lowerKinds k) name
@@ -76,31 +80,33 @@ instance
     (Row Parameter KindNode (Type Parameter KindNode))
     (Row Parameter Kind (Type Parameter Kind))
   where
-  lowerKinds = \case
-    RExtend name t row ->
-      RExtend name (lowerKinds t) (lowerKinds row)
-    RVariable (Parameter _ name) ->
-      RVariable (Parameter KRow name)
-    RNil -> RNil
+  lowerKinds =
+    \case
+      RExtend name t row ->
+        RExtend name (lowerKinds t) (lowerKinds row)
+      RVariable (Parameter _ name) ->
+        RVariable (Parameter KRow name)
+      RNil -> RNil
 
 instance LowerKinds (Type Parameter KindNode) (Type Parameter Kind) where
-  lowerKinds = \case
-    TApplication k t1 t2 ->
-      TApplication (lowerKinds k) (lowerKinds t1) (lowerKinds t2)
-    TArrow t1 t2 ->
-      TArrow (lowerKinds t1) (lowerKinds t2)
-    TConstructor k name ->
-      TConstructor (lowerKinds k) name
-    TIntrinsic i ->
-      TIntrinsic i
-    TRecord t ->
-      TRecord (lowerKinds t)
-    TRow row ->
-      TRow (lowerKinds row)
-    TVariable param ->
-      TVariable (lowerKinds param)
-    TAlias name ts t ->
-      TAlias name (fmap lowerKinds ts) (lowerKinds t)
+  lowerKinds =
+    \case
+      TApplication k t1 t2 ->
+        TApplication (lowerKinds k) (lowerKinds t1) (lowerKinds t2)
+      TArrow t1 t2 ->
+        TArrow (lowerKinds t1) (lowerKinds t2)
+      TConstructor k name ->
+        TConstructor (lowerKinds k) name
+      TIntrinsic i ->
+        TIntrinsic i
+      TRecord t ->
+        TRecord (lowerKinds t)
+      TRow row ->
+        TRow (lowerKinds row)
+      TVariable param ->
+        TVariable (lowerKinds param)
+      TAlias name ts t ->
+        TAlias name (fmap lowerKinds ts) (lowerKinds t)
 
 instance LowerKinds (Trait (Parameter KindNode)) (Trait (Parameter Kind)) where
   lowerKinds (Trait n p) = Trait n (lowerKinds p)
@@ -122,6 +128,26 @@ instance
   where
   lowerKinds (Forall vs ts t) =
     Forall (lowerKinds vs) (fmap lowerKinds ts) (lowerKinds t)
+
+instance LowerKinds (DataConstructor Parameter KindNode (Type Parameter KindNode)) (DataConstructor Parameter Kind (Type Parameter Kind)) where
+  lowerKinds =
+    \case
+      DataConstructor{..} ->
+        DataConstructor
+          { constructorScheme =
+              lowerKinds constructorScheme
+          , ..
+          }
+
+instance LowerKinds (CodataAccessor Parameter KindNode (Type Parameter KindNode)) (CodataAccessor Parameter Kind (Type Parameter Kind)) where
+  lowerKinds =
+    \case
+      CodataAccessor{..} ->
+        CodataAccessor
+          { accessorScheme =
+              lowerKinds accessorScheme
+          , ..
+          }
 
 nodeKind :: Type Parameter KindNode -> KindNode
 nodeKind =
@@ -238,6 +264,18 @@ instance (EmitKinds k) => EmitKinds (Scheme Parameter KindNode k) where
         emitKindConstraints ts
         emitKindConstraints t
 
+instance (EmitKinds t) => EmitKinds (DataConstructor Parameter KindNode t) where
+  emitKindConstraints =
+    \case
+      DataConstructor _ _ s ->
+        emitKindConstraints s
+
+instance (EmitKinds t) => EmitKinds (CodataAccessor Parameter KindNode t) where
+  emitKindConstraints =
+    \case
+      CodataAccessor _ s ->
+        emitKindConstraints s
+
 next :: State Int KindNode
 next = do
   modify (+ 1)
@@ -249,54 +287,57 @@ class IndexKinds a where
 
 instance IndexKinds (Parameter ()) where
   type Indexed (Parameter ()) = Parameter KindNode
-  indexKinds = \case
-    Parameter () name -> do
-      k <- next
-      pure (Parameter k name)
+  indexKinds =
+    \case
+      Parameter () name -> do
+        k <- next
+        pure (Parameter k name)
 
 instance IndexKinds (Type Parameter ()) where
   type Indexed (Type Parameter ()) = Type Parameter KindNode
-  indexKinds = \case
-    TApplication () t1 t2 -> do
-      k <- next
-      t1' <- indexKinds t1
-      t2' <- indexKinds t2
-      pure $ TApplication k t1' t2'
-    TArrow t1 t2 -> do
-      t1' <- indexKinds t1
-      t2' <- indexKinds t2
-      pure $ TArrow t1' t2'
-    TConstructor () name -> do
-      k <- next
-      pure $ TConstructor k name
-    TIntrinsic i ->
-      pure $ TIntrinsic i
-    TRecord t -> do
-      t' <- indexKinds t
-      pure $ TRecord t'
-    TRow row -> do
-      row' <- indexKinds row
-      pure $ TRow row'
-    TVariable p -> do
-      p' <- indexKinds p
-      pure $ TVariable p'
-    TAlias name ts t -> do
-      ts' <- traverse indexKinds ts
-      t' <- indexKinds t
-      pure $ TAlias name ts' t'
+  indexKinds =
+    \case
+      TApplication () t1 t2 -> do
+        k <- next
+        t1' <- indexKinds t1
+        t2' <- indexKinds t2
+        pure $ TApplication k t1' t2'
+      TArrow t1 t2 -> do
+        t1' <- indexKinds t1
+        t2' <- indexKinds t2
+        pure $ TArrow t1' t2'
+      TConstructor () name -> do
+        k <- next
+        pure $ TConstructor k name
+      TIntrinsic i ->
+        pure $ TIntrinsic i
+      TRecord t -> do
+        t' <- indexKinds t
+        pure $ TRecord t'
+      TRow row -> do
+        row' <- indexKinds row
+        pure $ TRow row'
+      TVariable p -> do
+        p' <- indexKinds p
+        pure $ TVariable p'
+      TAlias name ts t -> do
+        ts' <- traverse indexKinds ts
+        t' <- indexKinds t
+        pure $ TAlias name ts' t'
 
 instance IndexKinds (Row Parameter () (Type Parameter ())) where
   type
     Indexed (Row Parameter () (Type Parameter ())) =
       Row Parameter KindNode (Type Parameter KindNode)
-  indexKinds = \case
-    RExtend name t row -> do
-      t' <- indexKinds t
-      row' <- indexKinds row
-      pure $ RExtend name t' row'
-    RVariable (Parameter () name) ->
-      pure $ RVariable (Parameter IsKRow name)
-    RNil -> pure RNil
+  indexKinds =
+    \case
+      RExtend name t row -> do
+        t' <- indexKinds t
+        row' <- indexKinds row
+        pure $ RExtend name t' row'
+      RVariable (Parameter () name) ->
+        pure $ RVariable (Parameter IsKRow name)
+      RNil -> pure RNil
 
 instance IndexKinds (Trait (Type Parameter ())) where
   type Indexed (Trait (Type Parameter ())) = Trait (Type Parameter KindNode)
@@ -317,16 +358,29 @@ instance IndexKinds (Set (Parameter ())) where
     ys <- traverse indexKinds xs
     pure $ Set.fromList ys
 
+instance IndexKinds (DataConstructor Parameter () (Type Parameter ())) where
+  type Indexed (DataConstructor Parameter () (Type Parameter ())) = DataConstructor Parameter KindNode (Type Parameter KindNode)
+  indexKinds DataConstructor{..} = do
+    s' <- indexKinds constructorScheme
+    pure DataConstructor{constructorScheme = s', ..}
+
+instance IndexKinds (CodataAccessor Parameter () (Type Parameter ())) where
+  type Indexed (CodataAccessor Parameter () (Type Parameter ())) = CodataAccessor Parameter KindNode (Type Parameter KindNode)
+  indexKinds CodataAccessor{..} = do
+    s' <- indexKinds accessorScheme
+    pure CodataAccessor{accessorScheme = s', ..}
+
 instance IndexKinds (Scheme Parameter () (Type Parameter ())) where
   type
     Indexed (Scheme Parameter () (Type Parameter ())) =
       Scheme Parameter KindNode (Type Parameter KindNode)
-  indexKinds = \case
-    Forall vs ts t -> do
-      vs' <- indexKinds vs
-      ts' <- traverse indexKinds ts
-      t' <- indexKinds t
-      pure $ Forall vs' ts' t'
+  indexKinds =
+    \case
+      Forall vs ts t -> do
+        vs' <- indexKinds vs
+        ts' <- traverse indexKinds ts
+        t' <- indexKinds t
+        pure $ Forall vs' ts' t'
 
 newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: Map Int KindNode}
   deriving (Show, Eq, Ord)
@@ -414,6 +468,14 @@ instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (Row Pa
         RVariable (Parameter (applyKinds sub k) name)
       RNil ->
         RNil
+
+instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (DataConstructor Parameter k t) where
+  applyKinds sub DataConstructor{..} =
+    DataConstructor{constructorScheme = applyKinds sub constructorScheme, ..}
+
+instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (CodataAccessor Parameter k t) where
+  applyKinds sub CodataAccessor{..} =
+    CodataAccessor{accessorScheme = applyKinds sub accessorScheme, ..}
 
 newtype KindUnifier a = KindUnifier (Either KindInferenceError a)
   deriving
@@ -516,11 +578,12 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
   go =
     forM defs $
       \(n, s) -> do
-        let (r, outs) = runKindConstraintsGen (mapEnvironment liftKind env) $ do
-              forM_ qs (modify . uncurry Environment.insert)
-              let indexed = evalState (indexKinds s) (length qs)
-              emitKindConstraints indexed
-              pure indexed
+        let (r, outs) =
+              runKindConstraintsGen (mapEnvironment liftKind env) $ do
+                forM_ qs (modify . uncurry Environment.insert)
+                let indexed = evalState (indexKinds s) (length qs)
+                emitKindConstraints indexed
+                pure indexed
         let (errs, cs) = partitionEithers outs
             KindUnifier res = solveKindConstraints cs
         unless (null errs) $
@@ -535,10 +598,11 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
 inferTypeKinds :: Type Parameter () -> Either [KindInferenceError] (Type Parameter Kind)
 inferTypeKinds t = do
   -- TODO: DRY
-  let (r, outs) = runKindConstraintsGen mempty $ do
-        let indexed = evalState (indexKinds t) 0
-        emitKindConstraints indexed
-        pure indexed
+  let (r, outs) =
+        runKindConstraintsGen mempty $ do
+          let indexed = evalState (indexKinds t) 0
+          emitKindConstraints indexed
+          pure indexed
   let (errs, cs) = partitionEithers outs
       KindUnifier res = solveKindConstraints cs
   unless (null errs) $

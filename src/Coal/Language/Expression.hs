@@ -59,11 +59,11 @@ data Expression a t
   | -- | Pattern matching expression
     EMatch a t (Expression a t) (NonEmpty (Clause a t))
   | -- | Lambda-style match expression
-    ELambdaMatch a t (NonEmpty (Clause a t)) (Maybe (Expression a t))
+    ELambdaMatch a t (NonEmpty (Clause a t))
   | -- | Compiled match expression
     ECompiledMatch a t (Expression a t) (NonEmpty (CompiledClause a t))
   | -- | Fold expression
-    EFold a t (NonEmpty (Expression a t)) (NonEmpty (Clause a t)) (Maybe (Expression a t))
+    EFold a t (NonEmpty (Expression a t)) (NonEmpty (Clause a t))
   | -- | Record field selector
     ESelect a (Label t) (Expression a t)
   | -- | Codata field selector

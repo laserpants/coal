@@ -227,29 +227,33 @@ emitERecursiveLetConstraints loc p e1 e2 = do
   t1 = typeOf p
   t2 = typeOf e1
 
+normalizeBinding :: (Data a) => Binding Expression a IndexedType -> Binding Expression a IndexedType
+normalizeBinding =
+  \case
+    b@BPattern{} ->
+      b
+    BFunction loc name ps e ->
+      BPattern loc (PVariable loc (Label (foldTypeOf e ps) name)) (ELambda loc ps e)
+
 emitELetConstraints :: (Show a, Data a) => a -> NonEmpty (Binding Expression a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELetConstraints loc gs e1 = do
+  let gs' = normalizeBinding <$> gs
   ms1 <- emitConstraints e1
-  ms2 <- concatForM gs $
+  ms2 <- concatForM gs' $
     \case
       BPattern _ p e -> do
         let t1 = typeOf p
             t2 = typeOf e
         tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
         emitConstraints e
-      BFunction _ _ ps e -> do
-        ms <- withMonomorphic ps (emitConstraints e)
-        names <- concatForM ps (emitPatternConstraints (assertEqualityAssumptions loc) ms)
-        pure (filter (assumptionNameIsNotOneOf names) ms)
-  names <- concatForM gs $
+      BFunction{} ->
+        error "Implementation error"
+  names <- concatForM gs' $
     \case
       BPattern _ p _ ->
         emitPatternConstraints (assertImplicitAssumptions loc) ms1 p
-      BFunction _ name ps e -> do
-        let t1 = foldTypeOf e ps
-        assertImplicitAssumptions loc t1 (filter (assumptionNameIs name) ms1)
-        names <- concatMapM (emitPatternConstraints (assertEqualityAssumptions loc) ms1) ps
-        pure (name : names)
+      BFunction{} ->
+        error "Implementation error"
   pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
 
 emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
@@ -379,7 +383,7 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
           assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
           t0 <- supplied (TVariable . TypeIndex KType)
           let t1 = t0 `TArrow` typeOf e3
-          tellRight [Explicit (RuleCodataRecordExplicit loc t1 codataAccessorScheme) t1 codataAccessorScheme]
+          tellRight [Explicit (RuleCodataRecordExplicit loc t1 accessorScheme) t1 accessorScheme]
           tellRight [Equality (RuleCodataRecordEquality loc t (typeOf e3)) [t, typeOf e3]]
           pure (ms2 <> filter (not . assumptionNameIs n) ms3)
         _ ->
@@ -430,10 +434,6 @@ emitConstraints =
       emitEListLiteralConstraints loc t es
     EMatch loc t e cs ->
       emitClauseConstraints loc t e [] cs
-    ELambdaMatch _ _ _ (Just e) ->
-      emitConstraints e
-    ECompiledMatch{} ->
-      error "Not implemented"
     EUnaryOperator loc t op -> do
       tellRight [Explicit (RuleUnaryOperator loc) t (unaryOperatorTypeScheme op)]
       pure []
@@ -442,15 +442,6 @@ emitConstraints =
       pure []
     ESelect loc ll e ->
       emitESelectConstraints loc ll e
-    EFold loc t (e :| es) _ e1 -> do
-      ms2 <- concatMapM emitConstraints es
-      ms3 <- concatMapM emitConstraints e1
-      case e1 of
-        Just (ERecursiveLet _ (PVariable _ (Label t1 _)) _ _) ->
-          tellRight [Equality (RuleFoldType loc) [foldTypeOf t (e :| es), t1]]
-        _ ->
-          pure ()
-      pure (ms2 <> ms3)
     ECodataRecord loc _ d -> do
       concatForM (Map.toList d) $
         \(field, e) -> do
@@ -462,7 +453,7 @@ emitConstraints =
               case typeOf e of
                 TArrow _ t2 -> do
                   t1 <- supplied (TVariable . TypeIndex KType)
-                  tellRight [Explicit (RuleCodataRecordExplicit loc (t1 `TArrow` t2) codataAccessorScheme) (t1 `TArrow` t2) codataAccessorScheme]
+                  tellRight [Explicit (RuleCodataRecordExplicit loc (t1 `TArrow` t2) accessorScheme) (t1 `TArrow` t2) accessorScheme]
                 _ ->
                   error "Implementation error"
           emitConstraints e
@@ -475,12 +466,16 @@ emitConstraints =
     EFFICall loc t ll es e ->
       emitEFFICallConstraints loc t ll es e
     ECodataSelect{} ->
-      error "Not implemented"
+      error "Implementation error"
     EFocus{} ->
-      error "Not implemented"
+      error "Implementation error"
     ETraitDictionary{} ->
-      error "Not implemented"
+      error "Implementation error"
     ELambdaMatch{} ->
-      error "Not implemented"
+      error "Implementation error"
     EDoBlock{} ->
-      error "Not implemented"
+      error "Implementation error"
+    ECompiledMatch{} ->
+      error "Implementation error"
+    EFold{} ->
+      error "Implementation error"

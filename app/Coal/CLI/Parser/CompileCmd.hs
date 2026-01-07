@@ -56,4 +56,10 @@ compileCmdParser = do
           <> help "Supress terminal output"
       )
 
+  noCache <-
+    switch
+      ( long "no-cache"
+          <> help "Disable caching"
+      )
+
   pure CompileCmdOptions{..}

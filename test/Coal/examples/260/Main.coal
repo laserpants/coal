@@ -1,0 +1,13 @@
+module Main {
+
+  import IO(println_nat)
+  import Containers.NonEmpty.List(type NonEmptyList)
+  import namespace Containers.NonEmpty.List
+
+  fun main() =
+    let xs = Cons(1, [2,3,4])
+    in
+    // 4
+    println_nat(Containers.NonEmpty.List.length(xs))
+
+}

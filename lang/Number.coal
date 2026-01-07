@@ -35,6 +35,16 @@ module Number {
 
   fun max(a, b) = if (a > b) then a else b
 
+  fun maximum(elems : List<a>) : Option<a> =
+    fold(elems) {
+      | [] => None
+      | a :: @rest =>
+          match(rest) {
+            | None => Some(a)
+            | Some(b) => Some(max(a, b))
+          }
+    }
+
   fun is_even(n) = 
     n % 2 == 0
 

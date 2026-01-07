@@ -337,10 +337,10 @@ println_bignum(mpz_t* big_int)
   gmp_printf("%Zd\n", *big_int);
 }
 
-#define COAL_OK 0
-#define COAL_FILE_NOTFOUND 1
-#define COAL_IO_ERROR 2
-#define COAL_OUT_OF_MEMORY 3
+#define READ_STATUS_OK 0
+#define READ_STATUS_FILE_NOT_FOUND 1
+#define READ_STATUS_IO_ERROR 2
+#define READ_STATUS_OUT_OF_MEMORY 3
 
 typedef struct
 {
@@ -373,9 +373,9 @@ read_file(const char* filename)
   if (!file) {
     res->value = NULL;
     if (errno == ENOENT) {
-      res->status = COAL_FILE_NOTFOUND;
+      res->status = READ_STATUS_FILE_NOT_FOUND;
     } else {
-      res->status = COAL_IO_ERROR;
+      res->status = READ_STATUS_IO_ERROR;
     }
     return res;
   }
@@ -383,7 +383,7 @@ read_file(const char* filename)
   /* Move to end to determine file size */
   if (fseek(file, 0, SEEK_END) != 0) {
     fclose(file);
-    res->status = COAL_IO_ERROR;
+    res->status = READ_STATUS_IO_ERROR;
     res->value = NULL;
     return res;
   }
@@ -391,7 +391,7 @@ read_file(const char* filename)
   long length = ftell(file);
   if (length < 0) {
     fclose(file);
-    res->status = COAL_IO_ERROR;
+    res->status = READ_STATUS_IO_ERROR;
     res->value = NULL;
     return res;
   }
@@ -402,7 +402,7 @@ read_file(const char* filename)
   char* buffer = gc_malloc((size_t)length + 1);
   if (!buffer) {
     fclose(file);
-    res->status = COAL_OUT_OF_MEMORY;
+    res->status = READ_STATUS_OUT_OF_MEMORY;
     res->value = NULL;
     return res;
   }
@@ -412,7 +412,7 @@ read_file(const char* filename)
   fclose(file);
 
   if (read_size != (size_t)length) {
-    res->status = COAL_IO_ERROR;
+    res->status = READ_STATUS_IO_ERROR;
     res->value = NULL;
     return res;
   }
@@ -420,7 +420,7 @@ read_file(const char* filename)
   buffer[length] = '\0';
 
   /* Success */
-  res->status = COAL_OK;
+  res->status = READ_STATUS_OK;
   res->value = buffer;
   return res;
 }
@@ -719,6 +719,12 @@ char_to_string(uint32_t cp)
   }
 
   return out;
+}
+
+char*
+bool_to_string(bool b)
+{
+  return b ? "true" : "false";
 }
 
 char*

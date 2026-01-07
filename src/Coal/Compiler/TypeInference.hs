@@ -92,16 +92,6 @@ instance GenerateConstraints a (Definition a Kind IndexedType) where
         void (generateConstraints f)
       DConstant _ _ c _ ->
         void (generateConstraints c)
-      DFold loc _ (FoldDefinition (With _ t) _ (Just e)) -> do
-        generateConstraints e
-        (r, _, _) <- runConstraintsGen (instantiateAnnotation loc t)
-        case r of
-          Left err ->
-            compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-          Right t2 -> do
-            insertConstraintsC [Equality (RuleAnnotation loc t1 t2) [t1, t2]]
-       where
-        t1 = typeOf e
       DUnfold loc _ (UnfoldDefinition (With _ t) ps d (Just e)) -> do
         generateConstraints e
         (r, _, _) <- runConstraintsGen (instantiateAnnotation loc t)
@@ -124,7 +114,7 @@ instance GenerateConstraints a (Definition a Kind IndexedType) where
                         pure [Equality (RuleUnfoldEquality loc name tl tr) [tl, tr]]
                       else do
                         let tl = t2 `TArrow` typeOf elem1
-                        pure [Explicit (RuleUnfoldExplicit loc tl codataAccessorScheme) tl codataAccessorScheme]
+                        pure [Explicit (RuleUnfoldExplicit loc tl accessorScheme) tl accessorScheme]
                   Nothing ->
                     pure []
             if length cs == length fields
@@ -157,7 +147,7 @@ assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Eit
 assumptionConstraints Assumption{..} = do
   names <- gets compilerNameStore
   pure $
-    case Environment.lookup assumptionName names of
+    case Environment.lookup (normalizedName assumptionName) names of
       Nothing ->
         Left Assumption{..}
       Just s ->
@@ -194,7 +184,7 @@ typeDefinitionsC ds = do
     (n1, s) <- Map.toList env
     Assumption loc n2 t <- ams
     let t1 = apply sub t
-    [Explicit (RuleAssumptionExplicit loc t1 s) t1 s | n1 == n2]
+    [Explicit (RuleAssumptionExplicit loc t1 s) t1 s | n1 == normalizedName n2]
   sub1 <- solveC
   pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)
 

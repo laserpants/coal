@@ -10,5 +10,6 @@ data CompileCmdOptions = CompileCmdOptions
   , debugLLVMOutput :: Bool
   , extraSourceFiles :: [FilePath]
   , silent :: Bool
+  , noCache :: Bool
   }
   deriving (Show)

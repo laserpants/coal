@@ -226,11 +226,10 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
         fromNode (emitRectangle "ECompiledMatch" (Just t)) $ do
           emitEdgeTo e
           emitEdgesTo cs
-      EFold _ t es cs me -> do
+      EFold _ t es cs -> do
         fromNode (emitRectangle "EFold" (Just t)) $ do
           emitEdgesTo es
           emitEdgesTo cs
-          emitEdgeTo me
       ESelect _ (Label t name) e -> do
         fromNode (emitRectangle ("ESelect\\n" <> name) (Just t)) $ do
           emitEdgeTo e
@@ -249,10 +248,9 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
           emitEdgeTo e2
       ETraitDictionary _ t _ ->
         emitRectangle "ETraitDictionary" (Just t)
-      ELambdaMatch _ t cs me ->
+      ELambdaMatch _ t cs ->
         fromNode (emitRectangle "ELambdaMatch" (Just t)) $ do
           emitEdgesTo cs
-          emitEdgesTo me
       EFFICall _ _ (Label _ name) es e ->
         fromNode (emitRectangle ("EFFICall\\n" <> name) Nothing) $ do
           emitEdgesTo es
@@ -403,10 +401,9 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgesTo ds
-      DFold _ name (FoldDefinition (With _ t) cs me) ->
+      DFold _ name (FoldDefinition (With _ t) cs) ->
         fromNode (emitParallelogram ("DFold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           emitEdgesTo cs
-          emitEdgeTo me
       DUnfold _ name (UnfoldDefinition (With _ t) ps d me) ->
         fromNode (emitParallelogram ("DUnfold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           emitEdgesTo ps

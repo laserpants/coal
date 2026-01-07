@@ -12,12 +12,12 @@ import Coal.Parser.Metadata (withMetadata)
 import qualified Coal.Parser.Primitive as Primitive
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
-import Coal.Parser.Utils (fieldList)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
+import Extras (Name)
 import Text.Megaparsec (option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
@@ -140,11 +140,24 @@ parseQualifiedConstructor = do
   n <- constructor
   pure (Label () (Text.intercalate "." ns <> "." <> n))
 
+recordFields :: Parser [(Name, Pattern Metadata ())]
+recordFields = commaSep1 (try normalField <|> shorthand)
+ where
+  normalField = do
+    n <- name
+    symbol_ "="
+    p <- parsePattern
+    pure (n, p)
+  shorthand = do
+    withMetadata $ do
+      n <- name
+      pure (\loc -> (n, PShorthand loc (Label () n)))
+
 parseRecordPattern :: Parser (Pattern Metadata ())
 parseRecordPattern =
   withMetadata $ do
     braces $ do
-      fields <- fieldList parsePattern "="
+      fields <- recordFields
       tail_ <- optional rest
       pure (\loc -> PRecord loc () (Map.fromList fields) tail_)
  where

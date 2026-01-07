@@ -1294,6 +1294,112 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "246" $ do
+    expectOutput
+      "true,false"
+      "test/Coal/examples/246"
+      [ "Main.coal"
+      ]
+
+  describe "247" $ do
+    expectOutput
+      "true;false"
+      "test/Coal/examples/247"
+      [ "Main.coal"
+      ]
+
+  describe "248" $ do
+    expectOutput
+      "22"
+      "test/Coal/examples/248"
+      [ "Main.coal"
+      ]
+
+  describe "249" $ do
+    expectOutput
+      "3"
+      "test/Coal/examples/249"
+      [ "Main.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "250" $ do
+    it "is NoSuchIdentifier" $ do
+      res <- runSpec "test/Coal/examples/250" ["Main.coal"]
+      res `shouldBe` Left NoSuchIdentifier
+
+  describe "252" $ do
+    it "is PatternAnomaly" $ do
+      res <- runSpec "test/Coal/examples/252" ["Main.coal"]
+      res `shouldBe` Left PatternAnomaly
+
+  describe "253" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/253"
+      [ "Main.coal"
+      ]
+
+  describe "254" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/254" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  describe "255" $ do
+    expectOutput
+      "2"
+      "test/Coal/examples/255"
+      [ "Main.coal"
+      ]
+
+  describe "257" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/257"
+      [ "Main.coal"
+      ]
+
+  describe "258" $ do
+    expectOutput
+      "1"
+      "test/Coal/examples/258"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "259" $ do
+    expectOutput
+      "LT\nGT\nEQ"
+      "test/Coal/examples/259"
+      [ "Main.coal"
+      ]
+
+  describe "260" $ do
+    expectOutput
+      "4"
+      "test/Coal/examples/260"
+      [ "Main.coal"
+      , "Containers/NonEmpty/List.coal"
+      ]
+
+  describe "261" $ do
+    expectOutput
+      "123"
+      "test/Coal/examples/261"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "262" $ do
+    expectOutput
+      "4"
+      "test/Coal/examples/262"
+      [ "Main.coal"
+      , "Containers/Tree.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

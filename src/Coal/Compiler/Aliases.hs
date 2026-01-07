@@ -109,8 +109,8 @@ instance (AliasContext t) => AliasContext (CodataAccessor o k t) where
   expandAliases =
     \case
       CodataAccessor{..} -> do
-        s <- expandAliases codataAccessorScheme
-        pure CodataAccessor{codataAccessorScheme = s, ..}
+        s <- expandAliases accessorScheme
+        pure CodataAccessor{accessorScheme = s, ..}
 
 instance (AliasContext t) => AliasContext (DataConstructor o k t) where
   expandAliases =

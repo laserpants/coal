@@ -11,7 +11,6 @@ import Coal.Language.Expression (Expression (..))
 import Coal.Language.Expression.Choice (Guard (..))
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
-import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Coal.Language.Pattern (Pattern (..))
@@ -78,6 +77,8 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
         foldTypeOf t ts
       ELet _ _ t ->
         typeOf t
+      ERecursiveLet _ _ _ t ->
+        typeOf t
       EFocus _ _ _ _ t ->
         typeOf t
       ESelect _ t _ ->
@@ -95,8 +96,6 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k
       DFunction _ _ (FunctionDefinition _ _ _ ps e :| _) _ ->
         foldTypeOf e ps
       DConstant _ _ (ConstantDefinition _ _ _ e) _ ->
-        typeOf e
-      DFold _ _ (FoldDefinition _ _ (Just e)) ->
         typeOf e
       DUnfold _ _ (UnfoldDefinition _ _ _ (Just e)) ->
         typeOf e

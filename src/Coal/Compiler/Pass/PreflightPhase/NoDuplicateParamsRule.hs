@@ -85,7 +85,7 @@ instance (RuleContext (d a k t)) => RuleContext (InstanceDefinition d a k t) whe
 instance RuleContext (FoldDefinition Metadata t) where
   detectDuplicateParams =
     \case
-      FoldDefinition _ cs _ ->
+      FoldDefinition _ cs ->
         detectDuplicateParams cs
 
 instance RuleContext (UnfoldDefinition Metadata t) where
@@ -150,13 +150,11 @@ instance RuleContext (Expression Metadata t) where
       EMatch _ _ e cs -> do
         detectDuplicateParams e
         detectDuplicateParams cs
-      ELambdaMatch _ _ cs me -> do
+      ELambdaMatch _ _ cs ->
         detectDuplicateParams cs
-        detectDuplicateParams me
-      EFold _ _ es cs me -> do
+      EFold _ _ es cs -> do
         detectDuplicateParams es
         detectDuplicateParams cs
-        detectDuplicateParams me
       ESelect _ _ e ->
         detectDuplicateParams e
       ECodataSelect _ _ me1 me2 -> do

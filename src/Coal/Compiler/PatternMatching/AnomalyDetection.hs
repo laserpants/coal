@@ -22,7 +22,6 @@ import Data.Function ((&))
 import Data.List (sortOn)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
-import Data.Maybe (isJust)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
@@ -36,7 +35,6 @@ data Pat
   = Con Name [Pat]
   | Lit Primitive
   | Or Pat Pat
-  | Rec [(Name, Pat)] (Maybe Pat)
   | Any
   deriving (Show, Eq, Ord, Read)
 
@@ -50,8 +48,6 @@ specialized name a = concatMap go
     error "Implementation error"
   go (p : ps) =
     case p of
-      Rec{} ->
-        []
       Con name' rs
         | name' == name -> [rs <> ps]
         | otherwise -> []
@@ -67,8 +63,6 @@ defaultMatrix = concatMap go
  where
   go (p : ps) =
     case p of
-      Rec{} ->
-        []
       Con{} ->
         []
       Lit{} ->
@@ -86,8 +80,6 @@ headCons = concatMap go
   go [] = error "Implementation error"
   go ps =
     case head ps of
-      Rec{} ->
-        []
       Lit p ->
         [(prim p, 0)]
       Con name rs ->
@@ -130,10 +122,6 @@ isUseful px@(ps : _) qs =
     ([], _) ->
       error "Implementation error in pattern anomalies check"
     -- Pattern q_1 is a constructed pattern
-    (Any : _, _)
-      | all isRecRow px -> isUsefulRecord px [] Nothing
-    (Rec fs rest : _, _) ->
-      isUsefulRecord px fs rest
     (Con name rs : _, _) ->
       go name (length rs)
     (Or r1 r2 : _, _) ->
@@ -146,54 +134,6 @@ isUseful px@(ps : _) qs =
  where
   cs = headCons px
   go name n = isUseful (specialized name n px) (head (specialized name n [qs]))
-
-isRecRow :: [Pat] -> Bool
-isRecRow (Rec{} : _) = True
-isRecRow _ = False
-
-hasOpenRecord :: [[Pat]] -> Bool
-hasOpenRecord =
-  any $
-    \case
-      (Rec _ (Just _) : _) -> True
-      _ -> False
-
-normalizeRec :: Bool -> [Name] -> [(Name, Pat)] -> Maybe Pat -> [Pat]
-normalizeRec includeRest allFields fs rest =
-  fields ++ restCol
- where
-  m = Map.fromList fs
-  fields = [Map.findWithDefault Any f m | f <- allFields]
-  restCol
-    | includeRest =
-        case rest of
-          Just p -> [p]
-          Nothing -> [Lit LUnit] -- closed record marker
-    | otherwise = []
-
-isUsefulRecord :: (Monad m) => [[Pat]] -> [(Name, Pat)] -> Maybe Pat -> CompilerT a m Bool
-isUsefulRecord px fs rest = do
-  isUseful pMatrix qRow
- where
-  includeRest = hasOpenRecord px || isJust rest
-
-  allFields =
-    Set.toList $
-      Set.unions
-        [ Set.fromList (map fst fs)
-        , Set.unions
-            [ Set.fromList (map fst fs')
-            | (Rec fs' _ : _) <- px
-            ]
-        ]
-
-  qRow =
-    normalizeRec includeRest allFields fs rest
-
-  pMatrix =
-    [ normalizeRec includeRest allFields fs' rest' ++ ps
-    | (Rec fs' rest' : ps) <- px
-    ]
 
 isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
@@ -226,6 +166,8 @@ translatePattern =
       Any
     PVariable{} ->
       Any
+    PShorthand{} ->
+      Any
     PConstructor _ (Label _ name) ps ->
       Con name (translatePattern <$> ps)
     PLiteral _ p ->
@@ -245,9 +187,14 @@ translatePattern =
     PAtVariable{} ->
       Any
     PRecord _ _ fields rest ->
-      Rec
-        (sortOn fst (Map.toList (translatePattern <$> fields)))
-        (translatePattern <$> rest)
+      Con "$Record" (fieldPats ++ [restPat])
+     where
+      sorted = sortOn fst (Map.toList fields)
+      fieldPats = map (translatePattern . snd) sorted
+      restPat =
+        case rest of
+          Just p -> translatePattern p
+          Nothing -> Lit LUnit -- closed record marker
     _ ->
       error "Not implemented"
 

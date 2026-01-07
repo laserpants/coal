@@ -1,12 +1,19 @@
 module String {
 
   import List(reduce)
+  import Nat(pack)
 
   /**
    * Convert a character to a one-character string.
    */
   fun char_to_string(c : char) : string =
     string$_char_to_string(c)
+
+  /**
+   * Convert a boolean to a string, i.e., either "true" or "false".
+   */
+  fun bool_to_string(b : bool) : string =
+    string$_bool_to_string(b)
 
   /**
    * Convert an int32 value to its string representation.
@@ -41,8 +48,8 @@ module String {
   /**
    * Return the number of characters in the string.
    */
-  fun length(s : string) : int32 =
-    string$_length(s)
+  fun length(s : string) : nat =
+    pack(string$_length(s))
 
   /**
    * Determine whether the string is empty.
@@ -90,5 +97,11 @@ module String {
       | [] => ""
       | head :: tail => head +++ reduce(fn(t, s) => s +++ sep +++ t, "", tail)
     }
+
+  /**
+   * Take a list of strings and concatenate them into a single string. 
+   */ 
+  fun concat(strs : List<string>) : string =
+    intercalate("", strs)
 
 }

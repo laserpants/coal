@@ -29,7 +29,7 @@ cachedBuild name src = do
   case res of
     Left{} ->
       pure Nothing
-    Right bs -> do
+    Right bs ->
       case decodeOrFail (fromStrict bs) of
         Left{} ->
           pure Nothing

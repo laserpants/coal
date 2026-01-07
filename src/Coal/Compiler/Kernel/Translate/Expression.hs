@@ -75,10 +75,6 @@ translateExpression =
       translateExpression (foldr (EListCons a t) (EListLiteral a t []) (e : es))
     ETuple _ _ es ->
       Kernel.tupleExpr <$> traverse translateExpression es
-    EMatch{} ->
-      error "Implementation error"
-    ELambdaMatch _ _ _ (Just e) ->
-      translateExpression e
     ECompiledMatch _ t e cs ->
       Kernel.match (translateType t) <$> translateExpression e <*> traverse translateClause cs
     ESelect _ ll@(Label t field) e -> do
@@ -125,8 +121,6 @@ translateExpression =
       r = extractRow (translateLabel ll2)
     ETraitDictionary _ t trait ->
       pure (Kernel.var (Label (translateType t) (dictionaryLabel trait)))
-    EFold _ _ _ _ (Just e) ->
-      translateExpression e
     ECodataRecord _ _ fields -> do
       exprs <- traverse translateExpression fields
       let r = foldr (uncurry Kernel.ext) Kernel.nil (Map.toList exprs)
@@ -135,6 +129,10 @@ translateExpression =
       Kernel.call (Label (translateType t) name)
         <$> traverse translateExpression es
         <*> translateExpression e
+    EMatch{} ->
+      error "Implementation error"
+    ELambdaMatch{} ->
+      error "Implementation error"
     _ ->
       error "Not implemented"
 
