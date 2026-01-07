@@ -24,8 +24,5 @@ translatePattern =
       pure (Label (translateType (typeOf p)) "_")
     PTraitDictionary _ t trait ->
       pure (Label (translateType t) (dictionaryLabel trait))
-    -- TODO: Fix
-    PTuple _ t _ ->
-      pure (Label (translateType t) "-")
     _ ->
       error "Not implemented"
