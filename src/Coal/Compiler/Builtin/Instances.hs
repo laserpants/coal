@@ -354,6 +354,21 @@ builtinInstances =
     )
   ,
     ( "Ordered"
+    , TIntrinsic IString
+    , InstanceEntry
+        mempty
+        (TIntrinsic IString)
+        (TIntrinsic IString)
+        ( Map.fromList
+            [
+              ( "compare"
+              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TConstructor KType "Ordering")
+              )
+            ]
+        )
+    )
+  ,
+    ( "Ordered"
     , TIntrinsic IBignum
     , InstanceEntry
         mempty

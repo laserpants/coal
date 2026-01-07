@@ -1062,6 +1062,77 @@ objects =
                     )
               |]
         , OFunction
+            "Builtin$.compare__$impl_Ordered(Intrinsic(String))"
+            [ Label Kernel.string "s1"
+            , Label Kernel.string "s2"
+            ]
+            [r| 
+                  let
+                    fst : list(char) = 
+                      @<list(char)>
+                        ( `Builtin$.string$_to_list` : string/list(char)
+                        , s1 : string )
+                  in let
+                    snd : list(char) = 
+                      @<list(char)>
+                        ( `Builtin$.string$_to_list` : string/list(char)
+                        , s2 : string )
+                  in let
+                    f : list(char)/list(char)/Ordering =
+                      fn(xs : list(char), ys : list(char)) =>
+                        match<Ordering>(xs : list(char)) {
+                          | ( $Nil : list(char)
+                            ) =>
+                              match<Ordering>(ys : list(char)) {
+                                | ( $Nil : list(char)
+                                  ) =>
+                                    EqualTo : Ordering
+                                | ( $Cons : char/list(char)/list(char)
+                                  , _ : char
+                                  , _ : list(char)
+                                  ) =>
+                                    LessThan : Ordering
+                              }
+                          | ( $Cons : char/list(char)/list(char)
+                            , x : char
+                            , xs1 : list(char)
+                            ) =>
+                              match<Ordering>(ys : list(char)) {
+                                | ( $Nil : list(char)
+                                  ) =>
+                                    GreaterThan : Ordering
+                                | ( $Cons : char/list(char)/list(char)
+                                  , y : char
+                                  , ys1 : list(char)
+                                  ) =>
+                                    match<Ordering>(
+                                      @<Ordering>
+                                        ( `Builtin$.compare__$impl_Ordered(Intrinsic(Char))` : char/char/Ordering
+                                        , x : char
+                                        , y : char
+                                        )
+                                    ) {
+                                      | (LessThan : Ordering) => 
+                                          LessThan : Ordering
+                                      | (GreaterThan : Ordering) => 
+                                          GreaterThan : Ordering 
+                                      | (EqualTo : Ordering) => 
+                                          @<Ordering>
+                                            ( f : list(char)/list(char)/Ordering
+                                            , xs1 : list(char)
+                                            , ys1 : list(char) 
+                                            )
+                                    }
+                              }
+                        }
+                  in 
+                    @<Ordering>
+                      ( f : list(char)/list(char)/Ordering
+                      , fst : list(char)
+                      , snd : list(char)
+                      )
+              |]
+        , OFunction
             "Builtin$.compare__$impl_Ordered(Intrinsic(Bignum))"
             [ Label Kernel.bignum "x"
             , Label Kernel.bignum "y"

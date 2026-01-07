@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_int32)
+  import Containers.Set(type Set)
+  import namespace Containers.Set
+
+  // Semigroup instances
+
+  fun main() =
+    println_int32(Containers.Set.size(Containers.Set.insert("key", Containers.Set.empty)))
+
+}
