@@ -1,0 +1,17 @@
+module Main {
+
+  import Containers.Set(type Set, insert, empty, to_list)
+  import IO(println_string)
+  import String(int32_to_string)
+
+  fun main() =
+    let xs = to_list(insert(3, insert(2, insert(1, empty)))) in
+    let str =
+        fold(xs) {
+          | [] => ""
+          | s :: @ss => int32_to_string(s) <> ss
+        }
+    in
+    println_string(str)
+
+}
