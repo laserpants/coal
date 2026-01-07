@@ -161,12 +161,12 @@ module Main {
         }
     }
 
-  //
+  // --------------
 
   fun always_map(f, a) =
     map(always(a), f)
 
-  let parser_bool = or_parser(
+  let parser_bool : Parser<JsonValue> = or_parser(
     always_map(string_parser("true"), JsonBool(true)), 
     always_map(string_parser("false"), JsonBool(false))
   )
@@ -187,12 +187,15 @@ module Main {
       )
     )
 
+  fun char_literal() : Parser<char> =
+    or_parser(normal_char(), escape_char())
 
-//  let parser_number = do {
-//    _ <- char_parser('"')
-//    s <- many_till(char_parser('"'))
-//    pure(s)
-//  }
+  let parser_json_string = do {
+    _ <- char_parser('"');
+    chars <- many_till(char_literal(), char_parser('"'));
+    pure(from_list(chars));
+  }
+
 
 
 
@@ -270,6 +273,12 @@ module Main {
 //          println_string("None")
 //    }
 
-      println_string("-")
+      let
+        rs = parser_json_string |. parse("\"hello\"")
+      in
+      match(rs) {
+        | Some((s, _)) => println_string(s)
+        | None => println_string("!")
+      }
 
 }
