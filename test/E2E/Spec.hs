@@ -1364,6 +1364,8 @@ e2eSpec = do
       "1"
       "test/Coal/examples/258"
       [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
       ]
 
   describe "259" $ do
