@@ -13,7 +13,7 @@ import Coal.Compiler.Pass (BuildUnit, Pass (..), tickBar)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
-import Coal.Language.Module
+import Coal.Language.Module (Module (..), principalPath)
 import Control.Monad.IO.Class (MonadIO)
 import Extras (Name)
 
