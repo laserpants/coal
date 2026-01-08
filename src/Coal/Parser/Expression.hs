@@ -17,7 +17,6 @@ import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr
 import qualified Data.ByteString.Char8 as ByteString
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Extras (Name, isConstructor)
