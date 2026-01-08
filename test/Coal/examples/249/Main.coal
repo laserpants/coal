@@ -1,0 +1,43 @@
+module Main {
+
+  import namespace IO
+  import namespace Containers.Map
+  import Containers.Map(type Map)
+
+  type Set<a> = Set(Map<a, unit>)
+
+  fun insert(element : a, set : Set<a>) : Set<a> =
+    match(set) {
+      | Set(map) => Set(Containers.Map.insert(element, (), map))
+    }
+
+  fun delete(element : a, set : Set<a>) : Set<a> =
+    match(set) {
+      | Set(map) => Set(Containers.Map.delete(element, map))
+    }
+
+  fun singleton(element : a) : Set<a> =
+    Set(Containers.Map.singleton(element, ()))
+
+  let empty : Set<a> = Set(Containers.Map.empty)
+
+  fun is_member(element : a, set : Set<a>) : bool =
+    match(set) {
+      | Set(map) =>
+          match(Containers.Map.lookup(element, map)) {
+            | Some(_) => true
+            | _ => false
+          }
+    }
+
+  fun size(set : Set<a>) =
+    match(set) {
+      | Set(map) => Containers.Map.size(map)
+    }
+
+  //
+
+  fun main() = 
+    IO.println_int32(size(insert(1, insert(2, singleton(3)))))
+
+}

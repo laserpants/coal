@@ -249,7 +249,7 @@ parseTopLevelFold = do
   ann <- parseAnnotation
   end <- getSourcePos
   cs <- braces (nonEmpty (some parseMatchClause))
-  pure (DFold (Metadata start end) n (FoldDefinition (With [] ann) cs Nothing))
+  pure (DFold (Metadata start end) n (FoldDefinition (With [] ann) cs))
 
 parseTopLevelUnfold :: Parser (Definition Metadata o ())
 parseTopLevelUnfold = do

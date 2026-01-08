@@ -19,7 +19,9 @@ import Coal.Language.Primitive (Primitive (..))
 import Control.Monad.Extra (anyM, (||^))
 import Control.Monad.Reader (asks)
 import Data.Function ((&))
+import Data.List (sortOn)
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
@@ -164,6 +166,8 @@ translatePattern =
       Any
     PVariable{} ->
       Any
+    PShorthand{} ->
+      Any
     PConstructor _ (Label _ name) ps ->
       Con name (translatePattern <$> ps)
     PLiteral _ p ->
@@ -182,6 +186,15 @@ translatePattern =
       translatePattern p
     PAtVariable{} ->
       Any
+    PRecord _ _ fields rest ->
+      Con "$Record" (fieldPats ++ [restPat])
+     where
+      sorted = sortOn fst (Map.toList fields)
+      fieldPats = map (translatePattern . snd) sorted
+      restPat =
+        case rest of
+          Just p -> translatePattern p
+          Nothing -> Lit LUnit -- closed record marker
     _ ->
       error "Not implemented"
 

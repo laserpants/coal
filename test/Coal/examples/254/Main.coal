@@ -1,0 +1,46 @@
+module Main {
+
+  import IO(println_int32, println_string)
+
+  type alias TreeFields<a> =
+    { value    : a
+    , children : List<Tree<a>>
+    }
+
+  type Tree<a> = Node(TreeFields<a>)
+
+  fold sum : List<Tree<a>> -> int32 {
+
+    // TODO: This should be a type error !!!
+
+    | tree_size(@tree) :: tree_size(@trees) => tree + trees
+    | [] => 0
+  }
+
+  fold tree_size: Tree<a> -> int32 {
+    | Node({ children = sum(@children) | _ }) => 1 + children
+  }
+
+  let example_tree =
+    Node({
+      value = 1,
+      children =
+        [ Node({
+            value = 2,
+            children =
+              [ Node({ value = 4, children = [] })
+              , Node({ value = 5, children = [] })
+              ]
+          })
+        , Node({
+            value = 3,
+            children =
+              [ Node({ value = 6, children = [] }) ]
+          })
+        ]
+    })
+
+  fun main() =
+    println_int32(tree_size(example_tree))
+
+}

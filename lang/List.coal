@@ -49,6 +49,15 @@ module List {
     }
 
   /**
+   * Left-associative fold.
+   */
+  fun reduce_left(f : b -> a -> b, init : b, list : List<a>) : b =
+    let
+      step(x, g, a) = g(f(a, x))
+    in
+      reduce(step, identity, list, init)
+
+  /**
    * Return a list containing exactly one element.
    */
   fun singleton(elem : a) : List<a> = 
@@ -200,5 +209,53 @@ module List {
       }
     in
     reduce(step, always([]), xs, ys)
+
+  /**
+   * Return `true` if and only if any element of the list satisfies the given 
+   * predicate.
+   */
+  fun any(p : a -> bool, list : List<a>) : bool =
+    fold(list) {
+      | [] => false
+      | x :: @xs => if (p(x)) then true else xs
+    }
+
+  /**
+   * Return `true` if and only if all element of the list satisfy the given 
+   * predicate.
+   */
+  fun all(p : a -> bool, list : List<a>) : bool =
+    fold(list) {
+      | [] => true
+      | x :: @xs => if(! p(x)) then false else xs
+    }
+
+  /** 
+   * Return the conjunction of a list of bools.
+   */
+  fun all_true(list : List<bool>) : bool =
+    fold(list) {
+      | [] => true
+      | x :: @xs => x && xs
+    }
+
+  /** 
+   * Return the disjunction of a list of bools.
+   */
+  fun any_true(list : List<bool>) : bool =
+    fold(list) {
+      | [] => false
+      | x :: @xs => x || xs
+    }
+
+  /**
+   * Return the first element of the list that satisfies the given predicate, 
+   * or `None`, if there is no such element.
+   */
+  fun find(p : a -> bool, list : List<a>) : Option<a> =
+    fold(list) {
+      | [] => None
+      | x :: @xs => if (p(x)) then Some(x) else xs
+    }
 
 }

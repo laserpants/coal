@@ -116,19 +116,17 @@ instance Transformable Expression where
         EMatch a t
           <$> rewrite name f e
           <*> traverse (rewrite name f) cs
-      ELambdaMatch a t cs me ->
+      ELambdaMatch a t cs ->
         ELambdaMatch a t
           <$> traverse (rewrite name f) cs
-          <*> traverse (rewrite name f) me
       ECompiledMatch a t e cs ->
         ECompiledMatch a t
           <$> rewrite name f e
           <*> traverse (rewrite name f) cs
-      EFold a t es cs me ->
+      EFold a t es cs ->
         EFold a t
           <$> traverse (rewrite name f) es
           <*> traverse (rewrite name f) cs
-          <*> traverse (rewrite name f) me
       ECodataSelect a ll e1 e2 ->
         ECodataSelect a ll
           <$> traverse (rewrite name f) e1

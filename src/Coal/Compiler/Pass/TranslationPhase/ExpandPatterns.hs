@@ -19,7 +19,6 @@ import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
-import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Module.Definition.Instance (InstanceDefinition (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
@@ -41,6 +40,8 @@ instance TransformContext (IndexedPattern Metadata) where
         pure p
       p@(PAnnotation _ _ PVariable{}) ->
         pure p
+      PShorthand loc (Label t name) ->
+        desugarPatterns (PVariable loc (Label t name))
       p -> do
         name <- supplied (freshName "v")
         tellPatterns1 (name, p)
@@ -109,8 +110,6 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
         DFunction loc name <$> traverse desugarPatterns f <*> traverse desugarPatterns fs
       DConstant loc name g fs ->
         DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
-      DFold loc n (FoldDefinition with cs e) ->
-        DFold loc n . FoldDefinition with cs <$> traverse desugarPatterns e
       DUnfold loc n (UnfoldDefinition with ps d e) ->
         DUnfold loc n . UnfoldDefinition with ps d <$> traverse desugarPatterns e
       DInstance loc n (InstanceDefinition ts pt ds) ->

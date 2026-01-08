@@ -1,0 +1,21 @@
+module Main {
+
+  import Number(max)
+  import namespace IO
+
+  type Map = Empty | Map({ foo : int32 })
+
+  fun example(map) =
+    match(map) {
+      | Map({ foo = 5 }) => 
+          5
+      | Map({ foo = n }) => 
+          1
+      | Empty => 
+          0
+    }
+
+  fun main() = 
+    IO.println_int32(example(Map({ foo = 4 })))
+
+}

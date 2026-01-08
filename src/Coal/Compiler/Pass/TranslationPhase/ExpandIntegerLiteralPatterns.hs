@@ -16,7 +16,6 @@ import Coal.Language
 import Coal.Language.Module (Module (..), principalPath)
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
-import Coal.Language.Module.Definition.Fold (FoldDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Control.Monad.Except (throwError)
@@ -143,8 +142,6 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
         DFunction loc name
           <$> expandIntegerLiteralPatterns f
           <*> traverse expandIntegerLiteralPatterns fs
-      DFold loc n (FoldDefinition with cs e) ->
-        DFold loc n . FoldDefinition with cs <$> traverse expandIntegerLiteralPatterns e
       DUnfold loc n (UnfoldDefinition with ps d me) ->
         DUnfold loc n . UnfoldDefinition with ps d <$> traverse expandIntegerLiteralPatterns me
       d ->

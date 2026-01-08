@@ -177,7 +177,7 @@ parseFoldExpression = do
     lexeme_ "fold"
     es <- parens (nonEmpty (commaSep1 parseExpression))
     cs <- braces (nonEmpty (some parseClause))
-    pure (\loc -> EFold loc () es cs Nothing)
+    pure (\loc -> EFold loc () es cs)
 
 parseSpecialNameExpression :: Parser (Expression Metadata ())
 parseSpecialNameExpression =
@@ -204,6 +204,7 @@ parseSpecialNameExpression =
         <|> "io$_eval"
         <|> "io$_return"
         <|> "string$_char_to_string"
+        <|> "string$_bool_to_string"
         <|> "string$_int32_to_string"
         <|> "string$_float_to_string"
         <|> "string$_double_to_string"
@@ -244,7 +245,7 @@ parseLambdaMatchExpression = do
   withMetadata $ do
     lexeme_ "match"
     cs <- braces (nonEmpty (some parseMatchClause))
-    pure (\loc -> ELambdaMatch loc () cs Nothing)
+    pure (\loc -> ELambdaMatch loc () cs)
 
 parseMatchExpression :: Parser (Expression Metadata ())
 parseMatchExpression = do
@@ -434,6 +435,18 @@ parseEqualityOperator =
             (lhs :| [rhs])
       )
 
+parseInequalityOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseInequalityOperator =
+  withMetadata $
+    pure
+      ( \loc lhs rhs ->
+          EApplication
+            loc
+            ()
+            (EVariable loc (Label () "(!=)"))
+            (lhs :| [rhs])
+      )
+
 parseLessThanOrEqualOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
 parseLessThanOrEqualOperator =
   withMetadata $
@@ -502,7 +515,7 @@ negationOperator =
 fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1 :: [Operator Parser (Expression Metadata ())]
 fixity8 =
   [ Prefix negationOperator
-  , Prefix (unaryOperator OLogicalNot <$ symbol "!")
+  , Prefix (unaryOperator OLogicalNot <$ (symbol "!" <* notFollowedBy (char '=')))
   , InfixR (parseExponentiationOperator <* symbol "^")
   ]
 fixity7 =
@@ -522,6 +535,7 @@ fixity5 =
   ]
 fixity4 =
   [ InfixN (parseEqualityOperator <* symbol "==")
+  , InfixN (parseInequalityOperator <* symbol "!=")
   , InfixN (parseLessThanOrEqualOperator <* symbol "<=")
   , InfixN (parseGreaterThanOrEqualOperator <* symbol ">=")
   , InfixN (parseLessThanOperator <* (symbol "<" <* notFollowedBy (char '=')))

@@ -1,0 +1,50 @@
+module Containers.NonEmpty.List {
+
+  import namespace List
+
+  type NonEmptyList<a> = Cons(a, List<a>)
+
+  fun to_list(Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    x :: xs
+
+  fun from_list(list : List<a>) : Option<NonEmptyList<a>> =
+    match(list) {
+      | [] => None
+      | x :: xs => Some(Cons(x, xs))
+    }
+
+  fun head(Cons(x, _) : NonEmptyList<a>) : a = x
+
+  fun tail(Cons(_, xs) : NonEmptyList<a>) : List<a> = xs
+
+  fun uncons(Cons(x, xs) : NonEmptyList<a>) : (a, List<a>) = (x, xs)
+
+  fun length(Cons(_, xs) : NonEmptyList<a>) : nat =
+    Succ(List.length(xs))
+
+  fun singleton(elem : a) : NonEmptyList<a> = Cons(elem, [])
+
+  fun map(f : a -> b, Cons(x, xs) : NonEmptyList<a>) : NonEmptyList<b> =
+    Cons(f(x), List.map(f, xs))
+
+  fun take(n : nat, Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    List.take(n, x :: xs)
+
+  fun drop(n : nat, Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    List.drop(n, x :: xs)
+
+  fun filter(p : a -> bool, Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    List.filter(p, x :: xs)
+
+  fun append(Cons(x, xs) : NonEmptyList<a>, Cons(y, ys) : NonEmptyList<a>) : NonEmptyList<a> =
+    Cons(x, xs <> (y :: ys))
+
+  fun reverse(Cons(x, xs) : NonEmptyList<a>) : NonEmptyList<a> =
+    let q = singleton(x)
+    in
+    match(List.reverse(xs)) {
+      | [] => q
+      | r :: rs => append(Cons(r, rs), q)
+    }
+
+}

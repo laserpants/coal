@@ -1,0 +1,66 @@
+module Main {
+
+  import IO(println_int32, println_string)
+  import Number(max)
+
+  type alias TreeFields<a> =
+    { value    : a
+    , children : List<Tree<a>>
+    }
+
+  type Tree<a> = Node(TreeFields<a>)
+
+  fun leaf(value) =
+    Node({ value = value, children = [] })
+
+  fun node(value, children) =
+    Node({ value = value, children = children })
+
+  fold tree_list_size : List<Tree<a>> -> int32 {
+    | size(@tree) :: tree_list_size(@trees) => tree + trees
+    | [] => 0
+  }
+
+  fold size : Tree<a> -> int32 {
+    | Node({ children = tree_list_size(@children) | _ }) => 1 + children
+  }
+
+//  fun height(tree) =
+//    fold(tree) {
+//      | Node({ children = @children | _ }) =>
+//          1 + max(0, maximum(children))
+//    }
+
+
+  //
+
+  //        1
+  //      /   \
+  //     2     3
+  //    / \     \
+  //   4   5     6
+
+  let example_tree =
+    Node({
+      value = 1,
+      children =
+        [ Node({
+            value = 2,
+            children =
+              [ Node({ value = 4, children = [] })
+              , Node({ value = 5, children = [] })
+              ]
+          })
+        , Node({
+            value = 3,
+            children =
+              [ Node({ value = 6, children = [] }) ]
+          })
+        ]
+    })
+
+  fun main() =
+    // 6
+    println_int32(size(example_tree))
+
+}

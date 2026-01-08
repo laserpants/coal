@@ -37,12 +37,12 @@ instance HasMetadata (Expression Metadata t) where
       ETuple a _ _ -> a
       EMatch a _ _ _ -> a
       ECompiledMatch a _ _ _ -> a
-      EFold a _ _ _ _ -> a
+      EFold a _ _ _ -> a
       ESelect a _ _ -> a
       ECodataSelect a _ _ _ -> a
       ECodataRecord a _ _ -> a
       ETraitDictionary a _ _ -> a
-      ELambdaMatch a _ _ _ -> a
+      ELambdaMatch a _ _ -> a
       EFFICall a _ _ _ _ -> a
       EDoBlock a _ -> a
       EFocus{} -> error "Not implemented"

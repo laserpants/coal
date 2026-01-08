@@ -15,8 +15,8 @@ import GHC.Generics (Generic)
 e.g., Head : Stream<a> -> a
 -}
 data CodataAccessor o k t = CodataAccessor
-  { codataAccessorName :: Name
-  , codataAccessorScheme :: Scheme o k t
+  { accessorName :: Name
+  , accessorScheme :: Scheme o k t
   }
   deriving
     ( Show

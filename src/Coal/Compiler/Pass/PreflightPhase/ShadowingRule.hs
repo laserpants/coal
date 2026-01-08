@@ -85,15 +85,13 @@ instance (Data t) => RuleContext (Expression Metadata t) where
         EMatch a t
           <$> detectShadowing names e
           <*> traverse (detectShadowing names) cs
-      ELambdaMatch a t cs me ->
+      ELambdaMatch a t cs ->
         ELambdaMatch a t
           <$> traverse (detectShadowing names) cs
-          <*> traverse (detectShadowing names) me
-      EFold a t es cs me ->
+      EFold a t es cs ->
         EFold a t
           <$> traverse (detectShadowing names) es
           <*> traverse (detectShadowing names) cs
-          <*> traverse (detectShadowing names) me
       ECodataSelect a ll e1 e2 ->
         ECodataSelect a ll
           <$> traverse (detectShadowing names) e1

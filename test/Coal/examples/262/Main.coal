@@ -1,0 +1,34 @@
+module Main {
+
+  import IO(println_int32, println_string)
+  import Number(max, maximum)
+  import Option(with_default)
+  import Containers.Tree (type Tree, tree_map)
+
+  let example_tree =
+    Node({
+      value = 1,
+      children =
+        [ Node({
+            value = 2,
+            children =
+              [ Node({ value = 4, children = [] })
+              , Node({ value = 5, children = [] })
+              ]
+          })
+        , Node({
+            value = 3,
+            children =
+              [ Node({ value = 6, children = [] }) ]
+          })
+        ]
+    })
+
+
+  fun main() =
+    match(tree_map(fn(x) => x + 3, example_tree)) {
+      | Node({ value = v | _ }) =>
+          println_int32(v)
+    }
+
+}

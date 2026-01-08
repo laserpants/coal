@@ -1,0 +1,34 @@
+module Containers.Set {
+
+  import namespace Containers.Map
+  import Containers.Map(type Map)
+
+  type Set<a> = Set(Map<a, unit>)
+
+  fun insert(element : a, Set(map) : Set<a>) : Set<a> =
+    Set(Containers.Map.insert(element, (), map))
+
+  fun delete(element : a, Set(map) : Set<a>) : Set<a> =
+    Set(Containers.Map.delete(element, map))
+
+  fun singleton(element : a) : Set<a> =
+    Set(Containers.Map.singleton(element, ()))
+
+  let empty : Set<a> = Set(Containers.Map.empty)
+
+  fun is_member(element : a, Set(map) : Set<a>) : bool =
+    match(Containers.Map.lookup(element, map)) {
+      | Some(_) => true
+      | _ => false
+    }
+
+  fun size(Set(map) : Set<a>) = Containers.Map.size(map)
+
+  fun to_list(Set(map) : Set<a>) : List<a> =
+    fold(map) {
+      | Empty => []
+      | Map({ key = key, left = @left, right = @right | _ }) => 
+          left <> (key :: right)
+    }
+
+}

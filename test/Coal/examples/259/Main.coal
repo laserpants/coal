@@ -1,0 +1,23 @@
+module Main {
+
+  import IO(println_string)
+
+  fun main() = do {
+    match(compare("a", "bc")) {
+      | LessThan => println_string("LT")
+      | GreaterThan => println_string("GT")
+      | _ => println_string("EQ")
+    };
+    match(compare("c", "bc")) {
+      | LessThan => println_string("LT")
+      | GreaterThan => println_string("GT")
+      | _ => println_string("EQ")
+    };
+    match(compare("bc", "bc")) {
+      | LessThan => println_string("LT")
+      | GreaterThan => println_string("GT")
+      | _ => println_string("EQ")
+    };
+  }
+
+}

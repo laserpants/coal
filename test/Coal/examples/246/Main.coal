@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_string)
+  import String(bool_to_string)
+  import List(any)
+
+  fun main() =
+    let a = bool_to_string(any(fn(x) => x > 5, [1, 7, 2, 0])) in
+    let b = bool_to_string(any(fn(x) => x > 5, [1, 1, 2, 0])) in
+    println_string(a <> "," <> b)
+
+}

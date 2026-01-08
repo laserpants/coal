@@ -1,0 +1,12 @@
+module Main {
+
+  import IO(println_int32, println_string)
+  import List(find)
+
+  fun main() =
+    match(find(fn(x) => x > 5, [5, 3, 22, 30])) {
+      | None => println_string("none")
+      | Some(v) => println_int32(v)
+    }
+
+}

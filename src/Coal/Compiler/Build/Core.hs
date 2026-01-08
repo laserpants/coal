@@ -81,7 +81,7 @@ replacePlaceholders store =
         modify $ addName (info name s)
 
 prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind (), ModuleBuild a)
-prepareBuild module_@(Module path exports defs) = do
+prepareBuild module_@(Module path exports defs) =
   flip runStateT emptyModuleBuild $ do
     modify (setPath path)
 
@@ -170,6 +170,7 @@ prepareBuild module_@(Module path exports defs) = do
       , "(/)"
       , "(<>)"
       , "(==)"
+      , "(!=)"
       , "Comparable"
       , "Divisible"
       , "EqualTo"
@@ -182,7 +183,7 @@ prepareBuild module_@(Module path exports defs) = do
       , "Option"
       , "Result"
       , "Ok"
-      , "Error"
+      , "Err"
       , "Ordered"
       , "Ordering"
       , "Semigroup"
@@ -309,7 +310,7 @@ collectTypeConstructors =
      where
       -- TODO: Support higher-kinded type parameters
       kind = foldr KArrow KType (replicate (length params) KType)
-      entry = CotypeConstructorEntry loc name kind (for xsors codataAccessorName)
+      entry = CotypeConstructorEntry loc name kind (for xsors accessorName)
     DTypeAlias loc name (AliasDefinition ps t) -> do
       modify $
         insertAlias name entry
@@ -390,9 +391,9 @@ collectDataConstructors aliases env =
       forM_ (codataAccessorEntries env loc def') $
         \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
           modify $
-            addName (NCodataAccessor codataAccessorName codataAccessorScheme)
-              . insertCodataAccessor codataAccessorName info
-              . addExport codataAccessorName
+            addName (NCodataAccessor accessorName accessorScheme)
+              . insertCodataAccessor accessorName info
+              . addExport accessorName
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport a path imports -> do
