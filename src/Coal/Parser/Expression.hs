@@ -22,7 +22,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Extras (Name, isConstructor)
 import GHC.Int (Int32, Int64)
-import Text.Megaparsec (getSourcePos, notFollowedBy, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -160,16 +160,29 @@ parseLetExpression =
 parseChoice :: Parser (Choice Expression Metadata ())
 parseChoice =
   withMetadata $ do
+    gs <- option [] (parseOtherwise <|> parseGuard)
+    symbol_ "=>"
     e <- parseExpression
-    pure (\loc -> CPlain loc [] e)
+    pure (\loc -> CPlain loc gs e)
+
+parseOtherwise :: Parser [Guard Expression Metadata ()]
+parseOtherwise = do
+  withMetadata $ do
+    lexeme_ "otherwise"
+    pure (\loc -> [CGuard (ELiteral loc (LBool True))])
+
+parseGuard :: Parser [Guard Expression Metadata ()]
+parseGuard = do
+  lexeme_ "when"
+  g <- CGuard <$> parens parseExpression
+  pure [g]
 
 parseClause :: Parser (Clause Metadata ())
 parseClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
-    symbol_ "=>"
-    c <- parseChoice
-    pure (\loc -> EClause loc p (NonEmpty.singleton c))
+    cs <- nonEmpty (some parseChoice)
+    pure (\loc -> EClause loc p cs)
 
 parseFoldExpression :: Parser (Expression Metadata ())
 parseFoldExpression = do
@@ -236,9 +249,8 @@ parseMatchClause :: Parser (Clause Metadata ())
 parseMatchClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
-    symbol_ "=>"
-    c <- parseChoice
-    pure (\loc -> EClause loc p (NonEmpty.singleton c))
+    cs <- nonEmpty (some parseChoice)
+    pure (\loc -> EClause loc p cs)
 
 parseLambdaMatchExpression :: Parser (Expression Metadata ())
 parseLambdaMatchExpression = do

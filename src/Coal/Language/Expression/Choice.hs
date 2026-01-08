@@ -14,7 +14,7 @@ import Data.Generics.Uniplate.Data (universeBi)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
 
-newtype Guard e a t = CGuard (e a t)
+newtype Guard e a t = CGuard {guardExpression :: e a t}
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
 
 instance (Ord t, Data a, Data t, Data (e a t), Typeable e) => FreeVars (Guard e a t) t where

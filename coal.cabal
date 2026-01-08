@@ -81,6 +81,7 @@ library
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
+      Coal.Compiler.Pass.TranslationPhase.ExpandGuards
       Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandPatterns
       Coal.Compiler.Pass.TranslationPhase.MatchExpressions

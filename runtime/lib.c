@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stddef.h> // for ptrdiff_t
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <wchar.h>
@@ -1014,6 +1015,6 @@ double_random(void)
 void
 init(void)
 {
-  gc_init();
   srand((unsigned)time(NULL));
+  gc_init();
 }

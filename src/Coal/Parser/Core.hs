@@ -58,6 +58,7 @@ reserved =
   , "when"
   , "where"
   , "or"
+  , "otherwise"
   , "type"
   , "cotype"
   , "alias"

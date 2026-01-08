@@ -1,0 +1,16 @@
+module Main {
+
+  import IO(println_int32)
+
+  fun main() =
+    println_int32(
+      match(Some(5)) {
+        | Some(n) 
+            when (n == 3) => 3
+            when (n == 4) => 4
+        | Some(_) => 2
+        | None    => 1
+      } 
+    )
+
+}

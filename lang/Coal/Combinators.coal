@@ -24,6 +24,11 @@ module Coal.Combinators {
   fun snd((_, b)) = b
 
   /**
+   * Swap the components of a pair.
+   */
+  fun swap((a, b)) = (b, a)
+
+  /**
    * Extract the first element of a triple.
    */
   fun fst3((a, _, _)) = a
