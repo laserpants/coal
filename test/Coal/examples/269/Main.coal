@@ -1,0 +1,326 @@
+module Main {
+
+  import Containers.Set(type Set)
+  import List(map, reduce)
+  import namespace Containers.Set
+  import IO(println_string)
+
+  fun main() =
+    println_string("!")
+
+  type Shape 
+    = ShapeI
+    | ShapeO
+    | ShapeT
+    | ShapeS
+    | ShapeZ
+    | ShapeJ
+    | ShapeL
+
+  type Rotation
+    = Rot0
+    | Rot90
+    | Rot180
+    | Rot270
+
+  instance Ordered<(a, b)> with Ordered<a>, Ordered<b> {
+    fun compare((a1, a2), (b1, b2)) =
+      match (compare(a1, b1)) {
+        | LessThan => LessThan
+        | GreaterThan => GreaterThan
+        | EqualTo => compare(a2, b2)
+      }
+  }
+
+  instance Comparable<(a, b)> with Comparable<a>, Comparable<b> {
+    fun `==`((a1, a2), (b1, b2)) =
+      a1 == b1 && a2 == b2
+  }
+
+  type Board = Board(Set<(int32, int32)>)
+
+  fun set_square(x : int32, y : int32, Board(set) : Board) : Board =
+    Board(set |. Containers.Set.insert((x, y)))
+
+  fun shape_squares(shape : Shape, rotation : Rotation) : List<(int32, int32)> =
+    match(shape) {
+      | ShapeO =>
+          //          
+          //   - - - -
+          //   - # # -
+          //   - # # -
+          //   - - - -
+          [ (1, 1)
+          , (2, 1)
+          , (1, 2)
+          , (2, 2)
+          ]
+      | ShapeI =>
+          match(rotation) {
+            | Rot0 =>
+                //   - # - -
+                //   - # - -
+                //   - # - -
+                //   - # - -
+                [ (1, 0)
+                , (1, 1)
+                , (1, 2)
+                , (1, 3)
+                ]
+            | Rot90 =>
+                //   - - - -
+                //   # # # #
+                //   - - - -
+                //   - - - -
+                [ (0, 1)
+                , (1, 1)
+                , (2, 1)
+                , (3, 1)
+                ]
+            | Rot180 =>
+                //   - - # -
+                //   - - # -
+                //   - - # -
+                //   - - # -
+                [ (2, 0)
+                , (2, 1)
+                , (2, 2)
+                , (2, 3)
+                ]
+            | Rot270 =>
+                //   - - - -
+                //   - - - -
+                //   # # # #
+                //   - - - -
+                [ (0, 2)
+                , (1, 2)
+                , (2, 2)
+                , (3, 2)
+                ]
+          }
+      | ShapeT =>
+          match(rotation) {
+            | Rot0 =>
+                //   - # - -
+                //   # # # -
+                //   - - - -
+                //   - - - -
+                [ (1, 0)
+                , (0, 1)
+                , (1, 1)
+                , (2, 1)
+                ]
+            | Rot90 =>
+                //   - - # -
+                //   - - # #
+                //   - - # -
+                //   - - - -
+                [ (2, 0)
+                , (2, 1)
+                , (3, 1)
+                , (2, 2)
+                ]
+            | Rot180 =>
+                //   - - - -
+                //   - - - -
+                //   - # # #
+                //   - - # -
+                [ (1, 2)
+                , (2, 2)
+                , (3, 2)
+                , (2, 3)
+                ]
+            | Rot270 =>
+                //   - - - -
+                //   - # - -
+                //   # # - -
+                //   - # - -
+                [ (1, 1)
+                , (0, 2)
+                , (1, 2)
+                , (1, 3)
+                ]
+          }
+      | ShapeS =>
+          match(rotation) {
+            | Rot0 =>
+                //   # - - -
+                //   # # - -
+                //   - # - -
+                //   - - - -
+                [ (0, 0)
+                , (0, 1)
+                , (1, 1)
+                , (1, 2)
+                ]
+            | Rot90 =>
+                //   - - # #
+                //   - # # -
+                //   - - - -
+                //   - - - -
+                [ (2, 0)
+                , (3, 0)
+                , (1, 1)
+                , (2, 1)
+                ]
+            | Rot180 =>
+                //   - - - -
+                //   - - # -
+                //   - - # #
+                //   - - - #
+                [ (2, 1)
+                , (2, 2)
+                , (3, 2)
+                , (3, 3)
+                ]
+            | Rot270 =>
+                //   - - - -
+                //   - - - -
+                //   - # # -
+                //   # # - -
+                [ (1, 2)
+                , (2, 2)
+                , (0, 3)
+                , (1, 3)
+                ]
+          }
+      | ShapeZ =>
+          match(rotation) {
+            | Rot0 =>
+                //   - # - -
+                //   # # - -
+                //   # - - -
+                //   - - - -
+                [ (1, 0)
+                , (0, 1)
+                , (1, 1)
+                , (0, 2)
+                ]
+            | Rot90 =>
+                //   - # # -
+                //   - - # #
+                //   - - - -
+                //   - - - -
+                [ (1, 0)
+                , (2, 0)
+                , (2, 1)
+                , (3, 1)
+                ]
+            | Rot180 =>
+                //   - - - -
+                //   - - - #
+                //   - - # #
+                //   - - # -
+                [ (3, 1)
+                , (2, 2)
+                , (3, 2)
+                , (2, 3)
+                ]
+            | Rot270 =>
+                //   - - - -
+                //   - - - -
+                //   # # - -
+                //   - # # -
+                [ (0, 2)
+                , (1, 2)
+                , (1, 3)
+                , (2, 3)
+                ]
+          }
+      | ShapeJ =>
+          match(rotation) {
+            | Rot0 =>
+                //   - # # -
+                //   - # - -
+                //   - # - -
+                //   - - - -
+                [ (1, 0)
+                , (2, 0)
+                , (1, 1)
+                , (1, 2)
+                ]
+            | Rot90 =>
+                //   - - - -
+                //   - # # #
+                //   - - - #
+                //   - - - -
+                [ (1, 1)
+                , (2, 1)
+                , (3, 1)
+                , (3, 2)
+                ]
+            | Rot180 =>
+                //   - - - -
+                //   - - # -
+                //   - - # -
+                //   - # # -
+                [ (2, 1)
+                , (2, 2)
+                , (1, 3)
+                , (2, 3)
+                ]
+            | Rot270 =>
+                //   - - - -
+                //   # - - -
+                //   # # # -
+                //   - - - -
+                [ (0, 1)
+                , (0, 2)
+                , (1, 2)
+                , (2, 2)
+                ]
+          }
+      | ShapeL =>
+          match(rotation) {
+            | Rot0 =>
+                //   # # - -
+                //   - # - -
+                //   - # - -
+                //   - - - -
+                [ (0, 0)
+                , (1, 0)
+                , (1, 1)
+                , (1, 2)
+                ]
+            | Rot90 =>
+                //   - - - #
+                //   - # # #
+                //   - - - -
+                //   - - - -
+                [ (3, 0)
+                , (1, 1)
+                , (2, 1)
+                , (3, 1)
+                ]
+            | Rot180 =>
+                //   - - - -
+                //   - - # -
+                //   - - # -
+                //   - - # #
+                [ (2, 1)
+                , (2, 2)
+                , (2, 3)
+                , (3, 3)
+                ]
+            | Rot270 =>
+                //   - - - -
+                //   - - - -
+                //   # # # -
+                //   # - - -
+                [ (0, 2)
+                , (1, 2)
+                , (2, 2)
+                , (0, 3)
+                ]
+          }
+    }
+
+  fun offset_squares(x_offset : int32, y_offset : int32, squares : List<(int32, int32)>) : List<(int32, int32)> =
+    squares 
+      |. map(fn((x, y)) => (x + x_offset, y + y_offset))
+
+  fun board_from_squares(squares : List<(int32, int32)>) : Board =
+    Board(Containers.Set.from_list(squares))
+
+}
+
