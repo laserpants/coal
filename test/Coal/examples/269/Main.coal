@@ -329,5 +329,16 @@ module Main {
       |. Containers.Set.from_list
       |. Containers.Set.is_empty
 
+  fun incorporate_block({ board = Board(board_squares), current_block } : GameState) : GameState =
+    let
+      xx = 
+        shape_squares(current_block.shape, current_block.rotation)
+          |. Containers.Set.from_list
+    in
+    let
+      new_board = Containers.Set.union(xx, board_squares)
+    in
+      { board = Board(new_board), current_block = current_block } 
+
 }
 
