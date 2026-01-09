@@ -17,6 +17,9 @@ module Containers.Set {
 
   let empty : Set<a> = Set(Containers.Map.empty)
 
+  fun is_empty(Set(map) : Set<a>) : bool =
+    Containers.Map.is_empty(map)
+
   fun is_member(element : a, Set(map) : Set<a>) : bool =
     match(Containers.Map.lookup(element, map)) {
       | Some(_) => true

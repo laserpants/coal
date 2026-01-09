@@ -123,6 +123,10 @@ module Containers.Map {
 
   // Lookup
 
+  fun is_empty
+    | Empty = true
+    | _ = false
+
   fun lookup(key, map) =
     fold(map) {
       | Empty =>
