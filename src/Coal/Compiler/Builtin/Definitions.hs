@@ -85,6 +85,7 @@ builtinTraitInstances =
   , "compare__$impl_Ordered(Intrinsic(Char))"
   , "compare__$impl_Ordered(Intrinsic(Bignum))"
   , "compare__$impl_Ordered(Intrinsic(String))"
+  , "compare__$impl_Ordered(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
   , --
     "(==)__$impl_Comparable(Intrinsic(Int32))"
   , "(==)__$impl_Comparable(Intrinsic(Int64))"
@@ -95,6 +96,7 @@ builtinTraitInstances =
   , "(==)__$impl_Comparable(Intrinsic(Char))"
   , "(==)__$impl_Comparable(Intrinsic(Bignum))"
   , "(==)__$impl_Comparable(Intrinsic(String))"
+  , "(==)__$impl_Comparable(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
   , --
     "(/)__$impl_Divisible(Intrinsic(Float))"
   , "(/)__$impl_Divisible(Intrinsic(Double))"

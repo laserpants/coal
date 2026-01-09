@@ -23,19 +23,19 @@ module Main {
     | Rot180
     | Rot270
 
-  instance Ordered<(a, b)> with Ordered<a>, Ordered<b> {
-    fun compare((a1, a2), (b1, b2)) =
-      match (compare(a1, b1)) {
-        | LessThan => LessThan
-        | GreaterThan => GreaterThan
-        | EqualTo => compare(a2, b2)
-      }
-  }
-
-  instance Comparable<(a, b)> with Comparable<a>, Comparable<b> {
-    fun `==`((a1, a2), (b1, b2)) =
-      a1 == b1 && a2 == b2
-  }
+//  instance Ordered<(a, b)> with Ordered<a>, Ordered<b> {
+//    fun compare((a1, a2), (b1, b2)) =
+//      match (compare(a1, b1)) {
+//        | LessThan => LessThan
+//        | GreaterThan => GreaterThan
+//        | EqualTo => compare(a2, b2)
+//      }
+//  }
+//
+//  instance Comparable<(a, b)> with Comparable<a>, Comparable<b> {
+//    fun `==`((a1, a2), (b1, b2)) =
+//      a1 == b1 && a2 == b2
+//  }
 
   type Board = Board(Set<(int32, int32)>)
 

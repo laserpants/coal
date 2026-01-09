@@ -3,7 +3,7 @@
 module Coal.Compiler.Builtin.Instances (builtinInstances) where
 
 import Coal.Compiler.Build (InstanceEntry (InstanceEntry))
-import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs)
+import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs, tupleType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
 import Coal.Language.Type.Scheme (Scheme (Forall))
@@ -383,6 +383,21 @@ builtinInstances =
         )
     )
   ,
+    ( "Ordered"
+    , tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
+    , InstanceEntry
+        mempty
+        (applyTypeArgs () (TConstructor () "#Tuple2") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")]))
+        (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]))
+        ( Map.fromList
+            [
+              ( "compare"
+              , Forall mempty [] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
+              )
+            ]
+        )
+    )
+  ,
     ( "Comparable"
     , TIntrinsic IInt32
     , InstanceEntry
@@ -513,6 +528,21 @@ builtinInstances =
             [
               ( "(==)"
               , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IBool)
+              )
+            ]
+        )
+    )
+  ,
+    ( "Comparable"
+    , tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
+    , InstanceEntry
+        mempty
+        (applyTypeArgs () (TConstructor () "#Tuple2") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")]))
+        (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]))
+        ( Map.fromList
+            [
+              ( "(==)"
+              , Forall mempty [] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
               )
             ]
         )

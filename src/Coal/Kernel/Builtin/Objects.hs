@@ -1456,6 +1456,81 @@ objects =
                         )
                     )
               |]
+        , OFunction
+            "Builtin$.(==)__$impl_Comparable(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
+            [ Label (Kernel.TCon "Comparable" [opaque]) "$a"
+            , Label (Kernel.TCon "Comparable" [opaque]) "$b"
+            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t1"
+            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t2"
+            ]
+            [r| 
+                  match<bool>(t1 : tuple2(*,*)) {
+                    | ( $Tuple2 : */*/tuple2(*,*)
+                      , a1 : *
+                      , b1 : *
+                      ) =>
+                        match<bool>(t2 : tuple2(*,*)) {
+                          | ( $Tuple2 : */*/tuple2(*,*)
+                            , a2 : *
+                            , b2 : *
+                            ) =>
+                              ([&&]
+                                ( @<bool>
+                                    ( `Builtin$.(==)` : Comparable(*)/*/*/bool
+                                    , $a : Comparable(*)
+                                    , a1 : *
+                                    , a2 : * 
+                                    )
+                                , @<bool>
+                                    ( `Builtin$.(==)` : Comparable(*)/*/*/bool
+                                    , $b : Comparable(*)
+                                    , b1 : *
+                                    , b2 : * 
+                                    )
+                                )
+                              )
+                        }
+                  }
+              |]
+        , OFunction
+            "Builtin$.compare__$impl_Ordered(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
+            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
+            , Label (Kernel.TCon "Ordered" [opaque]) "$b"
+            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t1"
+            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t2"
+            ]
+            [r| 
+                  match<Ordering>(t1 : tuple2(*,*)) {
+                    | ( $Tuple2 : */*/tuple2(*,*)
+                      , a1 : *
+                      , b1 : *
+                      ) =>
+                        match<Ordering>(t2 : tuple2(*,*)) {
+                          | ( $Tuple2 : */*/tuple2(*,*)
+                            , a2 : *
+                            , b2 : *
+                            ) =>
+                              match<Ordering>(
+                                @<Ordering>
+                                  ( Builtin$.compare : Ordered(*)/*/*/Ordering
+                                  , $a : Ordered(*)
+                                  , a1 : *
+                                  , a2 : *
+                                  )
+                              ) {
+                                | ( LessThan : Ordering ) => LessThan : Ordering
+                                | ( GreaterThan : Ordering ) => GreaterThan : Ordering
+                                | ( EqualTo : Ordering ) =>
+                                    @<Ordering>
+                                      ( Builtin$.compare : Ordered(*)/*/*/Ordering
+                                      , $b : Ordered(*)
+                                      , b1 : *
+                                      , b2 : *
+                                      )
+                              }
+                        }
+                  }
+              |]
         ]
     }
 
