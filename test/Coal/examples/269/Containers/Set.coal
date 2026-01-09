@@ -38,6 +38,9 @@ module Containers.Set {
   fun from_list(list : List<a>) : Set<a> =
     List.reduce(insert, empty, list)
 
+  fun map(f : a -> b, set : Set<a>) : Set<b> =
+    from_list(List.map(f, to_list(set)))
+
   fun filter(predicate : a -> bool, set : Set<a>) : Set<a> =
     from_list(List.filter(predicate, to_list(set)))
 
