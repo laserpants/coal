@@ -130,6 +130,8 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) whe
         DInstance loc name . InstanceDefinition ts t <$> traverse expandAliases ds
       DType loc name (TypeDefinition params ctors) ->
         DType loc name . TypeDefinition params <$> traverse expandAliases ctors
+      DTypeAlias loc name (AliasDefinition params t) ->
+        DTypeAlias loc name . AliasDefinition params <$> expandAliases t
       DCotype loc name (CotypeDefinition params xsors) ->
         DCotype loc name . CotypeDefinition params <$> traverse expandAliases xsors
       o ->
@@ -169,8 +171,9 @@ lookupAlias t ts name = do
   case Environment.lookup name env of
     Nothing ->
       pure t
-    Just AliasEntry{..} ->
-      pure (TAlias name ts (foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)))
+    Just AliasEntry{..} -> do
+      let t1 = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
+      TAlias name ts <$> expandAliases t1
 
 substituteAlias :: Name -> Type Parameter k -> Type Parameter k -> Type Parameter k
 substituteAlias name s =

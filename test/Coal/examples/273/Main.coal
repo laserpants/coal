@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_string)
+
+  type alias Foo = { c : int32 }
+
+  type alias Rec = { b : Foo }
+
+  fun hello({ b = b } : Rec) : bool =
+    false
+
+  fun main() = 
+    println_string("!")
+
+}
