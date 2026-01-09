@@ -117,7 +117,7 @@ prepareBuild module_@(Module path exports defs) =
     inEachDef collectImportedNames
     inEachDef collectPlaceholders
 
-    exps <- gets (Set.filter (`notElem` builtin) . moduleExports)
+    exps <- gets (Set.filter (`notElem` builtin) . moduleExportedNames)
     typeExps <- gets (Set.filter (`notElem` builtin) . moduleTypeExports)
 
     extra <- nub . concat <$> forM defs collectImportedInstances

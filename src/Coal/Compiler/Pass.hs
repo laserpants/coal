@@ -40,7 +40,7 @@ unitPathName =
     BSource m ->
       modulePathName m
     BCached b ->
-      principalPath (modulePath b)
+      principalPath (moduleCurrentPath b)
 
 partitionBuildUnits :: [BuildUnit a] -> ([a], [ModuleBuild Metadata])
 partitionBuildUnits = foldr (flip go) ([], [])

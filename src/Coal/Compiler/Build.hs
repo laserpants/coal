@@ -69,7 +69,7 @@ import Extras (Name, Set)
 import GHC.Generics (Generic)
 
 data ModuleBuild a = ModuleBuild
-  { modulePath :: Path
+  { moduleCurrentPath :: Path
   , moduleFilePath :: Text
   , moduleDataConstructors :: Environment (DataConstructorEntry a)
   , moduleCodataAccessors :: Environment (CodataAccessorEntry a)
@@ -81,7 +81,7 @@ data ModuleBuild a = ModuleBuild
   , moduleNames :: [NameEntry]
   , moduleDependencies :: [Path]
   , moduleQualifiedNames :: Environment Name
-  , moduleExports :: Set Name
+  , moduleExportedNames :: Set Name
   , moduleTypeExports :: Set Name
   , moduleBitcode :: Maybe ByteString
   , moduleHash :: Maybe Hash256
@@ -97,7 +97,7 @@ memberOf :: (HasName a) => Set Name -> a -> Bool
 memberOf s info = nameOf info `Set.member` s
 
 exportedNames :: ModuleBuild a -> [NameEntry]
-exportedNames ModuleBuild{..} = filter (memberOf moduleExports) moduleNames
+exportedNames ModuleBuild{..} = filter (memberOf moduleExportedNames) moduleNames
 
 exportedTypeNames :: ModuleBuild a -> [NameEntry]
 exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNames
@@ -109,10 +109,10 @@ exportedCotypeConstructors :: ModuleBuild a -> Environment (CotypeConstructorEnt
 exportedCotypeConstructors ModuleBuild{..} = Environment.filter (memberOf moduleTypeExports) moduleCotypeConstructors
 
 exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorEntry a)
-exportedDataConstructors ModuleBuild{..} = Environment.filter (memberOf moduleExports) moduleDataConstructors
+exportedDataConstructors ModuleBuild{..} = Environment.filter (memberOf moduleExportedNames) moduleDataConstructors
 
 exportedCodataAccessors :: ModuleBuild a -> Environment (CodataAccessorEntry a)
-exportedCodataAccessors ModuleBuild{..} = Environment.filter (memberOf moduleExports) moduleCodataAccessors
+exportedCodataAccessors ModuleBuild{..} = Environment.filter (memberOf moduleExportedNames) moduleCodataAccessors
 
 exportedTraits :: ModuleBuild a -> [TraitEntry a]
 exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTraits)
@@ -120,7 +120,7 @@ exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (En
 emptyModuleBuild :: ModuleBuild a
 emptyModuleBuild =
   ModuleBuild
-    { modulePath = Path []
+    { moduleCurrentPath = Path []
     , moduleFilePath = mempty
     , moduleDataConstructors = mempty
     , moduleCodataAccessors = mempty
@@ -132,7 +132,7 @@ emptyModuleBuild =
     , moduleNames = mempty
     , moduleDependencies = mempty
     , moduleQualifiedNames = mempty
-    , moduleExports = mempty
+    , moduleExportedNames = mempty
     , moduleTypeExports = mempty
     , moduleBitcode = Nothing
     , moduleHash = Nothing
@@ -218,7 +218,7 @@ addName info ModuleBuild{..} =
 addExport :: Name -> ModuleBuild a -> ModuleBuild a
 addExport name ModuleBuild{..} =
   ModuleBuild
-    { moduleExports = Set.insert name moduleExports
+    { moduleExportedNames = Set.insert name moduleExportedNames
     , ..
     }
 
@@ -232,7 +232,7 @@ addTypeExport name ModuleBuild{..} =
 setExports :: [Name] -> ModuleBuild a -> ModuleBuild a
 setExports names ModuleBuild{..} =
   ModuleBuild
-    { moduleExports = Set.fromList names
+    { moduleExportedNames = Set.fromList names
     , ..
     }
 
@@ -246,7 +246,7 @@ setTypeExports names ModuleBuild{..} =
 setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} =
   ModuleBuild
-    { modulePath = path
+    { moduleCurrentPath = path
     , ..
     }
 

@@ -96,7 +96,7 @@ irOutput pb CompilerConfig{..} tmpDir = do
       bs <- runLLVM tmpDir file
       pure (fmap (name,) bs)
     BCached ModuleBuild{..} ->
-      pure (Right (principalPath modulePath, fromJust moduleBitcode))
+      pure (Right (principalPath moduleCurrentPath, fromJust moduleBitcode))
 
 runLLVM :: FilePath -> FilePath -> IO (Either SomeException ByteString)
 runLLVM dir src =

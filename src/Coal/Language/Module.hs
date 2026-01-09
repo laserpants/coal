@@ -44,7 +44,11 @@ import Data.Data (Data, Typeable)
 import Data.Maybe (mapMaybe)
 import Extras (Name, Over)
 
-data Module a k t = Module Path [Export a] [Definition a k t]
+data Module a k t = Module
+  { modulePath :: Path
+  , moduleExports :: [Export a]
+  , moduleDefinitions :: [Definition a k t]
+  }
   deriving
     ( Show
     , Eq
@@ -73,10 +77,6 @@ insertDefinition def = overModuleDefinitions (def :)
 fromDefinitionList :: Path -> [Export a] -> [Definition a k t] -> Module a k t
 fromDefinitionList path exports = foldr insertDefinition (Module path exports mempty)
 
-{-# INLINE modulePath #-}
-modulePath :: Module a k t -> Path
-modulePath (Module path _ _) = path
-
 {-# INLINE modulePathName #-}
 modulePathName :: Module a k t -> Name
 modulePathName = principalPath . modulePath
@@ -85,4 +85,4 @@ qualified :: Name -> Path -> Name
 qualified name path = principalPath path <> "." <> name
 
 importedPaths :: Module a k t -> [(a, Path)]
-importedPaths (Module _ _ ds) = mapMaybe importPath ds
+importedPaths = mapMaybe importPath . moduleDefinitions

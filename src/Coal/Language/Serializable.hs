@@ -26,6 +26,7 @@ instance Serializable Text where
 instance Serializable Int where
   serialize = showt
 
+{-# INLINE parenthesized #-}
 parenthesized :: (Serializable s) => s -> Text
 parenthesized s = "(" <> serialize s <> ")"
 
