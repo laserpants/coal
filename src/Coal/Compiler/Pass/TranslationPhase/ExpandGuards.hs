@@ -32,8 +32,9 @@ trivial _ = False
 expandExpression :: (Monad m) => Expression Metadata IndexedType -> CompilerT Metadata m (Expression Metadata IndexedType)
 expandExpression =
   \case
-    e@(EMatch _ _ _ cs) | all trivial cs ->
-      pure e
+    e@(EMatch _ _ _ cs)
+      | all trivial cs ->
+          pure e
     EMatch a t e cs -> do
       e' <- expandExpression e
       name <- supplied (freshName "scr")

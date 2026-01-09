@@ -158,8 +158,7 @@ emitPatternConstraints assertF ms =
       forM_ (Map.toList fields) $
         \(name, p1) ->
           assertF (typeOf p1) (filter (assumptionNameIs name) ms)
-      ms1 <- concatForM (Map.elems fields <> maybeToList p) (emitPatternConstraints assertF ms)
-      pure (ms1 <> Map.keys fields)
+      concatForM (Map.elems fields <> maybeToList p) (emitPatternConstraints assertF ms)
     PAny{} ->
       pure []
     PListCons loc t p1 p2 -> do

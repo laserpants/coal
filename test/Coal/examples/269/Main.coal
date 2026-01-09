@@ -320,14 +320,14 @@ module Main {
     , current_block : BlockState
     }
 
-  fun can_move_down({ board = b, current_block = cb } : GameState) : bool =
-    // let
-    //   squares = offset_squares(
-    //     current_block.pos_x,
-    //     current_block.pos_y + 1,
-    //     shape_squares(current_block.shape, current_block.rotation)
-    //   )
-    // in
+  fun can_move_down({ board, current_block = cb } : GameState) : bool =
+    let
+      squares = offset_squares(
+        current_block.pos_x,
+        current_block.pos_y + 1,
+        shape_squares(current_block.shape, current_block.rotation)
+      )
+    in
     false
 
 

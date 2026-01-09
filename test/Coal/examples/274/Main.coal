@@ -1,0 +1,11 @@
+module Main {
+
+  import IO(println_string)
+
+  fun foo({ baz = var }) =
+    baz
+
+  fun main() =
+    println_string(foo({ baz = "fffff" }))
+
+}
