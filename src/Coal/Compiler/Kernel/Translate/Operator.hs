@@ -42,6 +42,10 @@ translateBinaryOperator translate t ot =
       reverseCompositionOperator translate t
     OReverseApplication ->
       reverseApplicationOperator translate t
+    OForwardApplication ->
+      forwardApplicationOperator translate t
+    OForwardComposition ->
+      forwardCompositionOperator translate t
     OListConcatenation ->
       listConcatenationOperator translate t
     OLessThan ->
@@ -162,6 +166,16 @@ reverseCompositionOperator translate t es = do
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
       args
 
+forwardCompositionOperator :: (Monad m) => (Expression a IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr
+forwardCompositionOperator translate t es = do
+  args <- traverse translate es
+  let t1 = translateType t
+  pure $
+    Kernel.app
+      t1
+      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
+      args
+
 reverseApplicationOperator :: (Monad m) => (Expression a IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr
 reverseApplicationOperator translate t es = do
   args <- traverse translate es
@@ -170,6 +184,16 @@ reverseApplicationOperator translate t es = do
     Kernel.app
       t1
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
+      args
+
+forwardApplicationOperator :: (Monad m) => (Expression a IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr
+forwardApplicationOperator translate t es = do
+  args <- traverse translate es
+  let t1 = translateType t
+  pure $
+    Kernel.app
+      t1
+      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_application"))
       args
 
 binop :: (Monad m, Data a) => (Expression a IndexedType -> CompilerT a m KernelExpr) -> (KernelExpr -> KernelExpr -> Kernel.Op KernelExpr) -> (IndexedType, IndexedType) -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr

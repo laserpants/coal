@@ -69,7 +69,7 @@ parseVoidDoExpression = do
 parseSelectorOp :: Parser (Expression Metadata () -> Expression Metadata ())
 parseSelectorOp = do
   start <- getSourcePos
-  field <- (symbol_ "." <* notFollowedBy (char '|')) *> (name <|> constructor)
+  field <- try (symbol_ "." <* notFollowedBy (char '|')) *> (name <|> constructor)
   end <- getSourcePos
   pure (\expr -> selector expr (Metadata start end) field)
 
@@ -240,7 +240,7 @@ parseVariableExpression =
 
 parseQualifiedName :: Parser (Label ())
 parseQualifiedName = do
-  ns <- some (identifier upperChar <* symbol ".")
+  ns <- some (identifier upperChar <* symbol "." <* notFollowedBy (char '|'))
   n <- name
   pure (Label () (Text.intercalate "." ns <> "." <> n))
 
@@ -523,7 +523,7 @@ negationOperator =
           (EVariable loc (Label () "negate"))
           (e :| [])
 
-fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1 :: [Operator Parser (Expression Metadata ())]
+fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1, fixity0 :: [Operator Parser (Expression Metadata ())]
 fixity8 =
   [ Prefix negationOperator
   , Prefix (unaryOperator OLogicalNot <$ (symbol "!" <* notFollowedBy (char '=')))
@@ -545,12 +545,36 @@ fixity5 =
   , InfixR (listCons <$ symbol "::")
   ]
 fixity4 =
-  [ InfixN (parseEqualityOperator <* symbol "==")
-  , InfixN (parseInequalityOperator <* symbol "!=")
-  , InfixN (parseLessThanOrEqualOperator <* symbol "<=")
-  , InfixN (parseGreaterThanOrEqualOperator <* symbol ">=")
-  , InfixN (parseLessThanOperator <* (symbol "<" <* notFollowedBy (char '=')))
-  , InfixN (parseGreaterThanOperator <* (symbol ">" <* notFollowedBy (char '=')))
+  [ InfixN
+      ( parseEqualityOperator
+          <* symbol "=="
+      )
+  , InfixN
+      ( parseInequalityOperator
+          <* symbol "!="
+      )
+  , InfixN
+      ( parseLessThanOrEqualOperator
+          <* symbol "<="
+      )
+  , InfixN
+      ( parseGreaterThanOrEqualOperator
+          <* symbol ">="
+      )
+  , InfixN
+      ( try
+          ( parseLessThanOperator
+              <* symbol "<"
+              <* notFollowedBy (char '=' <|> char '<')
+          )
+      )
+  , InfixN
+      ( try
+          ( parseGreaterThanOperator
+              <* symbol ">"
+              <* notFollowedBy (char '=' <|> char '>')
+          )
+      )
   ]
 fixity3 =
   [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
@@ -561,6 +585,10 @@ fixity2 =
 fixity1 =
   [ InfixL (binaryOperator OReverseApplication <$ symbol "|.")
   , InfixL (binaryOperator OForwardApplication <$ symbol ".|")
+  ]
+fixity0 =
+  [ InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+  , InfixR (binaryOperator OForwardComposition <$ symbol ">>")
   ]
 
 annotation :: Parser (Expression Metadata () -> Expression Metadata ())
@@ -583,5 +611,6 @@ operator =
   , fixity3
   , fixity2
   , fixity1
+  , fixity0
   , [Postfix annotation]
   ]

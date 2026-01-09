@@ -71,9 +71,26 @@ objects =
                   @<*>(f : */*, @<*>(g : */*, x : *))
               |]
         , OFunction
+            "Builtin$.operator$__forward_composition"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "g"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label Kernel.opaque "x"
+            ]
+            [r| 
+                  @<*>(f : */*, @<*>(g : */*, x : *))
+              |]
+        , OFunction
             "Builtin$.operator$__reverse_application"
             [ Label Kernel.opaque "x"
             , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            ]
+            [r| 
+                  @<*>(f : */*, x : *)
+              |]
+        , OFunction
+            "Builtin$.operator$__forward_application"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label Kernel.opaque "x"
             ]
             [r| 
                   @<*>(f : */*, x : *)

@@ -1470,6 +1470,20 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/274" ["Main.coal"]
       res `shouldBe` Left NoSuchIdentifier
 
+  describe "275" $ do
+    expectOutput
+      "8"
+      "test/Coal/examples/275"
+      [ "Main.coal"
+      ]
+
+  describe "276" $ do
+    expectOutput
+      "2"
+      "test/Coal/examples/276"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

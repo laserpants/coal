@@ -28,317 +28,320 @@ module Main {
   fun set_square(x : int32, y : int32, Board(set) : Board) : Board =
     Board(set |. Containers.Set.insert((x, y)))
 
-  fun shape_squares(shape : Shape, rotation : Rotation) : List<(int32, int32)> =
-    match(shape) {
-      | ShapeO =>
-          //          
-          //   - - - -
-          //   - # # -
-          //   - # # -
-          //   - - - -
-          [ (1, 1)
-          , (2, 1)
-          , (1, 2)
-          , (2, 2)
-          ]
-      | ShapeI =>
-          match(rotation) {
-            | Rot0 =>
-                //   - # - -
-                //   - # - -
-                //   - # - -
-                //   - # - -
-                [ (1, 0)
-                , (1, 1)
-                , (1, 2)
-                , (1, 3)
-                ]
-            | Rot90 =>
-                //   - - - -
-                //   # # # #
-                //   - - - -
-                //   - - - -
-                [ (0, 1)
-                , (1, 1)
-                , (2, 1)
-                , (3, 1)
-                ]
-            | Rot180 =>
-                //   - - # -
-                //   - - # -
-                //   - - # -
-                //   - - # -
-                [ (2, 0)
-                , (2, 1)
-                , (2, 2)
-                , (2, 3)
-                ]
-            | Rot270 =>
-                //   - - - -
-                //   - - - -
-                //   # # # #
-                //   - - - -
-                [ (0, 2)
-                , (1, 2)
-                , (2, 2)
-                , (3, 2)
-                ]
-          }
-      | ShapeT =>
-          match(rotation) {
-            | Rot0 =>
-                //   - # - -
-                //   # # # -
-                //   - - - -
-                //   - - - -
-                [ (1, 0)
-                , (0, 1)
-                , (1, 1)
-                , (2, 1)
-                ]
-            | Rot90 =>
-                //   - - # -
-                //   - - # #
-                //   - - # -
-                //   - - - -
-                [ (2, 0)
-                , (2, 1)
-                , (3, 1)
-                , (2, 2)
-                ]
-            | Rot180 =>
-                //   - - - -
-                //   - - - -
-                //   - # # #
-                //   - - # -
-                [ (1, 2)
-                , (2, 2)
-                , (3, 2)
-                , (2, 3)
-                ]
-            | Rot270 =>
-                //   - - - -
-                //   - # - -
-                //   # # - -
-                //   - # - -
-                [ (1, 1)
-                , (0, 2)
-                , (1, 2)
-                , (1, 3)
-                ]
-          }
-      | ShapeS =>
-          match(rotation) {
-            | Rot0 =>
-                //   # - - -
-                //   # # - -
-                //   - # - -
-                //   - - - -
-                [ (0, 0)
-                , (0, 1)
-                , (1, 1)
-                , (1, 2)
-                ]
-            | Rot90 =>
-                //   - - # #
-                //   - # # -
-                //   - - - -
-                //   - - - -
-                [ (2, 0)
-                , (3, 0)
-                , (1, 1)
-                , (2, 1)
-                ]
-            | Rot180 =>
-                //   - - - -
-                //   - - # -
-                //   - - # #
-                //   - - - #
-                [ (2, 1)
-                , (2, 2)
-                , (3, 2)
-                , (3, 3)
-                ]
-            | Rot270 =>
-                //   - - - -
-                //   - - - -
-                //   - # # -
-                //   # # - -
-                [ (1, 2)
-                , (2, 2)
-                , (0, 3)
-                , (1, 3)
-                ]
-          }
-      | ShapeZ =>
-          match(rotation) {
-            | Rot0 =>
-                //   - # - -
-                //   # # - -
-                //   # - - -
-                //   - - - -
-                [ (1, 0)
-                , (0, 1)
-                , (1, 1)
-                , (0, 2)
-                ]
-            | Rot90 =>
-                //   - # # -
-                //   - - # #
-                //   - - - -
-                //   - - - -
-                [ (1, 0)
-                , (2, 0)
-                , (2, 1)
-                , (3, 1)
-                ]
-            | Rot180 =>
-                //   - - - -
-                //   - - - #
-                //   - - # #
-                //   - - # -
-                [ (3, 1)
-                , (2, 2)
-                , (3, 2)
-                , (2, 3)
-                ]
-            | Rot270 =>
-                //   - - - -
-                //   - - - -
-                //   # # - -
-                //   - # # -
-                [ (0, 2)
-                , (1, 2)
-                , (1, 3)
-                , (2, 3)
-                ]
-          }
-      | ShapeJ =>
-          match(rotation) {
-            | Rot0 =>
-                //   - # # -
-                //   - # - -
-                //   - # - -
-                //   - - - -
-                [ (1, 0)
-                , (2, 0)
-                , (1, 1)
-                , (1, 2)
-                ]
-            | Rot90 =>
-                //   - - - -
-                //   - # # #
-                //   - - - #
-                //   - - - -
-                [ (1, 1)
-                , (2, 1)
-                , (3, 1)
-                , (3, 2)
-                ]
-            | Rot180 =>
-                //   - - - -
-                //   - - # -
-                //   - - # -
-                //   - # # -
-                [ (2, 1)
-                , (2, 2)
-                , (1, 3)
-                , (2, 3)
-                ]
-            | Rot270 =>
-                //   - - - -
-                //   # - - -
-                //   # # # -
-                //   - - - -
-                [ (0, 1)
-                , (0, 2)
-                , (1, 2)
-                , (2, 2)
-                ]
-          }
-      | ShapeL =>
-          match(rotation) {
-            | Rot0 =>
-                //   # # - -
-                //   - # - -
-                //   - # - -
-                //   - - - -
-                [ (0, 0)
-                , (1, 0)
-                , (1, 1)
-                , (1, 2)
-                ]
-            | Rot90 =>
-                //   - - - #
-                //   - # # #
-                //   - - - -
-                //   - - - -
-                [ (3, 0)
-                , (1, 1)
-                , (2, 1)
-                , (3, 1)
-                ]
-            | Rot180 =>
-                //   - - - -
-                //   - - # -
-                //   - - # -
-                //   - - # #
-                [ (2, 1)
-                , (2, 2)
-                , (2, 3)
-                , (3, 3)
-                ]
-            | Rot270 =>
-                //   - - - -
-                //   - - - -
-                //   # # # -
-                //   # - - -
-                [ (0, 2)
-                , (1, 2)
-                , (2, 2)
-                , (0, 3)
-                ]
-          }
-    }
+  fun shape_squares(shape : Shape, rotation : Rotation) : Set<(int32, int32)> =
+    Containers.Set.from_list >>
+      (
+      match(shape) {
+        | ShapeO =>
+            //          
+            //   - - - -
+            //   - # # -
+            //   - # # -
+            //   - - - -
+            [ (1, 1)
+            , (2, 1)
+            , (1, 2)
+            , (2, 2)
+            ]
+        | ShapeI =>
+            match(rotation) {
+              | Rot0 =>
+                  //   - # - -
+                  //   - # - -
+                  //   - # - -
+                  //   - # - -
+                  [ (1, 0)
+                  , (1, 1)
+                  , (1, 2)
+                  , (1, 3)
+                  ]
+              | Rot90 =>
+                  //   - - - -
+                  //   # # # #
+                  //   - - - -
+                  //   - - - -
+                  [ (0, 1)
+                  , (1, 1)
+                  , (2, 1)
+                  , (3, 1)
+                  ]
+              | Rot180 =>
+                  //   - - # -
+                  //   - - # -
+                  //   - - # -
+                  //   - - # -
+                  [ (2, 0)
+                  , (2, 1)
+                  , (2, 2)
+                  , (2, 3)
+                  ]
+              | Rot270 =>
+                  //   - - - -
+                  //   - - - -
+                  //   # # # #
+                  //   - - - -
+                  [ (0, 2)
+                  , (1, 2)
+                  , (2, 2)
+                  , (3, 2)
+                  ]
+            }
+        | ShapeT =>
+            match(rotation) {
+              | Rot0 =>
+                  //   - # - -
+                  //   # # # -
+                  //   - - - -
+                  //   - - - -
+                  [ (1, 0)
+                  , (0, 1)
+                  , (1, 1)
+                  , (2, 1)
+                  ]
+              | Rot90 =>
+                  //   - - # -
+                  //   - - # #
+                  //   - - # -
+                  //   - - - -
+                  [ (2, 0)
+                  , (2, 1)
+                  , (3, 1)
+                  , (2, 2)
+                  ]
+              | Rot180 =>
+                  //   - - - -
+                  //   - - - -
+                  //   - # # #
+                  //   - - # -
+                  [ (1, 2)
+                  , (2, 2)
+                  , (3, 2)
+                  , (2, 3)
+                  ]
+              | Rot270 =>
+                  //   - - - -
+                  //   - # - -
+                  //   # # - -
+                  //   - # - -
+                  [ (1, 1)
+                  , (0, 2)
+                  , (1, 2)
+                  , (1, 3)
+                  ]
+            }
+        | ShapeS =>
+            match(rotation) {
+              | Rot0 =>
+                  //   # - - -
+                  //   # # - -
+                  //   - # - -
+                  //   - - - -
+                  [ (0, 0)
+                  , (0, 1)
+                  , (1, 1)
+                  , (1, 2)
+                  ]
+              | Rot90 =>
+                  //   - - # #
+                  //   - # # -
+                  //   - - - -
+                  //   - - - -
+                  [ (2, 0)
+                  , (3, 0)
+                  , (1, 1)
+                  , (2, 1)
+                  ]
+              | Rot180 =>
+                  //   - - - -
+                  //   - - # -
+                  //   - - # #
+                  //   - - - #
+                  [ (2, 1)
+                  , (2, 2)
+                  , (3, 2)
+                  , (3, 3)
+                  ]
+              | Rot270 =>
+                  //   - - - -
+                  //   - - - -
+                  //   - # # -
+                  //   # # - -
+                  [ (1, 2)
+                  , (2, 2)
+                  , (0, 3)
+                  , (1, 3)
+                  ]
+            }
+        | ShapeZ =>
+            match(rotation) {
+              | Rot0 =>
+                  //   - # - -
+                  //   # # - -
+                  //   # - - -
+                  //   - - - -
+                  [ (1, 0)
+                  , (0, 1)
+                  , (1, 1)
+                  , (0, 2)
+                  ]
+              | Rot90 =>
+                  //   - # # -
+                  //   - - # #
+                  //   - - - -
+                  //   - - - -
+                  [ (1, 0)
+                  , (2, 0)
+                  , (2, 1)
+                  , (3, 1)
+                  ]
+              | Rot180 =>
+                  //   - - - -
+                  //   - - - #
+                  //   - - # #
+                  //   - - # -
+                  [ (3, 1)
+                  , (2, 2)
+                  , (3, 2)
+                  , (2, 3)
+                  ]
+              | Rot270 =>
+                  //   - - - -
+                  //   - - - -
+                  //   # # - -
+                  //   - # # -
+                  [ (0, 2)
+                  , (1, 2)
+                  , (1, 3)
+                  , (2, 3)
+                  ]
+            }
+        | ShapeJ =>
+            match(rotation) {
+              | Rot0 =>
+                  //   - # # -
+                  //   - # - -
+                  //   - # - -
+                  //   - - - -
+                  [ (1, 0)
+                  , (2, 0)
+                  , (1, 1)
+                  , (1, 2)
+                  ]
+              | Rot90 =>
+                  //   - - - -
+                  //   - # # #
+                  //   - - - #
+                  //   - - - -
+                  [ (1, 1)
+                  , (2, 1)
+                  , (3, 1)
+                  , (3, 2)
+                  ]
+              | Rot180 =>
+                  //   - - - -
+                  //   - - # -
+                  //   - - # -
+                  //   - # # -
+                  [ (2, 1)
+                  , (2, 2)
+                  , (1, 3)
+                  , (2, 3)
+                  ]
+              | Rot270 =>
+                  //   - - - -
+                  //   # - - -
+                  //   # # # -
+                  //   - - - -
+                  [ (0, 1)
+                  , (0, 2)
+                  , (1, 2)
+                  , (2, 2)
+                  ]
+            }
+        | ShapeL =>
+            match(rotation) {
+              | Rot0 =>
+                  //   # # - -
+                  //   - # - -
+                  //   - # - -
+                  //   - - - -
+                  [ (0, 0)
+                  , (1, 0)
+                  , (1, 1)
+                  , (1, 2)
+                  ]
+              | Rot90 =>
+                  //   - - - #
+                  //   - # # #
+                  //   - - - -
+                  //   - - - -
+                  [ (3, 0)
+                  , (1, 1)
+                  , (2, 1)
+                  , (3, 1)
+                  ]
+              | Rot180 =>
+                  //   - - - -
+                  //   - - # -
+                  //   - - # -
+                  //   - - # #
+                  [ (2, 1)
+                  , (2, 2)
+                  , (2, 3)
+                  , (3, 3)
+                  ]
+              | Rot270 =>
+                  //   - - - -
+                  //   - - - -
+                  //   # # # -
+                  //   # - - -
+                  [ (0, 2)
+                  , (1, 2)
+                  , (2, 2)
+                  , (0, 3)
+                  ]
+            }
+      }
+      )
 
-  fun offset_squares(x_offset : int32, y_offset : int32, squares : List<(int32, int32)>) : List<(int32, int32)> =
-    squares 
-      |. map(fn((x, y)) => (x + x_offset, y + y_offset))
-
-  fun board_from_squares(squares : List<(int32, int32)>) : Board =
-    Board(Containers.Set.from_list(squares))
-
-  type alias BlockState =
-    { shape : Shape
-    , rotation : Rotation
-    , pos_x : int32
-    , pos_y : int32
-    }
-
-  type alias GameState = 
-    { board : Board
-    , current_block : BlockState
-    }
-
-  fun can_move_down({ board = Board(board_squares), current_block } : GameState) : bool =
-    offset_squares(
-      current_block.pos_x,
-      current_block.pos_y + 1,
-      shape_squares(current_block.shape, current_block.rotation)
-    ) 
-      |. Containers.Set.from_list
-      |. Containers.Set.is_empty
-
-  fun incorporate_block({ board = Board(board_squares), current_block } : GameState) : GameState =
-    let
-      xx = 
-        shape_squares(current_block.shape, current_block.rotation)
-          |. Containers.Set.from_list
-    in
-    let
-      new_board = Containers.Set.union(xx, board_squares)
-    in
-      { board = Board(new_board), current_block = current_block } 
+//  fun offset_squares(x_offset : int32, y_offset : int32, squares : List<(int32, int32)>) : List<(int32, int32)> =
+//    squares 
+//      |. map(fn((x, y)) => (x + x_offset, y + y_offset))
+//
+//  fun board_from_squares(squares : List<(int32, int32)>) : Board =
+//    Board(Containers.Set.from_list(squares))
+//
+//  type alias BlockState =
+//    { shape : Shape
+//    , rotation : Rotation
+//    , pos_x : int32
+//    , pos_y : int32
+//    }
+//
+//  type alias GameState = 
+//    { board : Board
+//    , current_block : BlockState
+//    }
+//
+//  fun can_move_down({ board = Board(board_squares), current_block } : GameState) : bool =
+//    offset_squares(
+//      current_block.pos_x,
+//      current_block.pos_y + 1,
+//      shape_squares(current_block.shape, current_block.rotation)
+//    ) 
+//      |. Containers.Set.from_list
+//      |. Containers.Set.is_empty
+//
+//  fun incorporate_block({ board = Board(board_squares), current_block } : GameState) : GameState =
+//    let
+//      xx = 
+//        shape_squares(current_block.shape, current_block.rotation)
+//          |. Containers.Set.from_list
+//    in
+//    let
+//      new_board = Containers.Set.union(xx, board_squares)
+//    in
+//      { board = Board(new_board), current_block = current_block } 
 
 }
 

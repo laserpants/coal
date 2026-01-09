@@ -17,8 +17,16 @@ builtinFunctions =
     , forall3 $ \t0 t1 t2 -> (t1 ~> t2) ~> (t0 ~> t1) ~> t0 ~> t2
     )
   ,
+    ( "operator$__forward_composition"
+    , forall3 $ \t0 t1 t2 -> (t0 ~> t1) ~> (t1 ~> t2) ~> t0 ~> t2
+    )
+  ,
     ( "operator$__reverse_application"
     , forall2 $ \t0 t1 -> t0 ~> (t0 ~> t1) ~> t1
+    )
+  ,
+    ( "operator$__forward_application"
+    , forall2 $ \t0 t1 -> (t0 ~> t1) ~> t0 ~> t1
     )
   ,
     ( "operator$__list_concatenation"

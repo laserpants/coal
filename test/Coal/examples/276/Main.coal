@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_int32)
+  import namespace List
+
+  fun main() =
+    match(
+      List.map(fn(x) => x + 1)
+        .| [1, 2, 3]
+    ) {
+      | x :: _ => println_int32(x)
+      | [] => println_int32(0)
+    }
+
+}

@@ -65,7 +65,7 @@ data BinaryOperator
     OForwardComposition
   | -- | Reverse composition (<<)
     OReverseComposition
-  | -- | String concatenation (...)
+  | -- | String concatenation (+++)
     OStringConcatenation
   | -- | List concatenation (++)
     OListConcatenation
