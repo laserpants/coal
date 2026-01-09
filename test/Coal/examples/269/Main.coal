@@ -318,10 +318,22 @@ module Main {
     , current_block : BlockState
     }
 
-  fun can_move_down({ board = Board(board_squares), current_block } : GameState) : bool =
+  fun move_block(x : int32, y : int32, { shape, rotation, pos_x, pos_y }) : BlockState =
+    { shape = shape
+    , rotation = rotation
+    , pos_x = pos_x + x
+    , pos_y = pos_y + y
+    }
+
+  fun move_current_block(x : int32, y : int32, { board, current_block }) : GameState =
+    { board = board
+    , current_block = move_block(x, y, current_block)
+    }
+
+  fun can_move_current_block(x : int32, y : int32, { board = Board(board_squares), current_block } : GameState) : bool =
     offset_squares(
-      current_block.pos_x,
-      current_block.pos_y + 1,
+      current_block.pos_x + x,
+      current_block.pos_y + y,
       shape_squares(current_block.shape, current_block.rotation)
     ) 
       |. Containers.Set.is_empty
@@ -331,6 +343,13 @@ module Main {
     let new_board = Containers.Set.union(shape, board_squares)
     in
       { board = Board(new_board), current_block = current_block } 
+
+  fun tick({ board, current_block } as game) : GameState =
+    if (game |. can_move_current_block(0, 1)) 
+      then
+        game |. move_current_block(0, 1)
+      else
+        game |. incorporate_block
 
 }
 
