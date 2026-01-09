@@ -1,0 +1,15 @@
+module Main {
+
+  import Containers.Set(type Set)
+  import namespace Containers.Set
+  import IO(println_int32)
+
+  let set1 = Containers.Set.from_list(["a", "b", "c"])
+
+  let set2 = Containers.Set.from_list(["b", "c"])
+
+  fun main() =
+    println_int32(Containers.Set.size(Containers.Set.intersection(set1, set2)))
+
+}
+

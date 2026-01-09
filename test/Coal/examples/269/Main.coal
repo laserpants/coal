@@ -322,5 +322,9 @@ module Main {
   fun board_from_squares(squares : List<(int32, int32)>) : Board =
     Board(Containers.Set.from_list(squares))
 
+
+
+
+
 }
 
