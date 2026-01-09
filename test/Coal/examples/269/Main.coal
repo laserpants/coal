@@ -308,8 +308,27 @@ module Main {
   fun board_from_squares(squares : List<(int32, int32)>) : Board =
     Board(Containers.Set.from_list(squares))
 
+  type alias BlockState =
+    { shape : Shape
+    , rotation : Rotation
+    , pos_x : int32
+    , pos_y : int32
+    }
 
+  type alias GameState = 
+    { board : Board
+    , current_block : BlockState
+    }
 
+  fun can_move_down({ board = b, current_block = cb } : GameState) : bool =
+    // let
+    //   squares = offset_squares(
+    //     current_block.pos_x,
+    //     current_block.pos_y + 1,
+    //     shape_squares(current_block.shape, current_block.rotation)
+    //   )
+    // in
+    false
 
 
 }
