@@ -1,0 +1,18 @@
+module Main {
+  
+  import IO(println_int32)
+ 
+  cotype SomeType = { X : int32, Y : int32 -> SomeType }
+
+  unfold baz(x : int32, y : int32) : SomeType {
+    X = x
+  , @Y = 2
+  }
+
+  fun main() =
+    let
+      st = baz(5, 3)
+    in
+    println_int32(((st.Y)(123).Y)(456).X)
+
+}
