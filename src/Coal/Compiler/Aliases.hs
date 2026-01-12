@@ -138,8 +138,6 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) whe
         pure o
 
 expandAliasesTypeApplication :: (Monad m) => ParameterizedType -> ParameterizedType -> NonEmpty ParameterizedType -> CompilerT a m ParameterizedType
-expandAliasesTypeApplication t (TVariable (Parameter _ name)) ts =
-  lookupAlias t (toList ts) name
 expandAliasesTypeApplication t (TConstructor _ name) ts =
   lookupAlias t (toList ts) name
 expandAliasesTypeApplication _ t ts =
@@ -160,10 +158,10 @@ instance AliasContext ParameterizedType where
         TRecord <$> expandAliases t
       TRow row ->
         TRow <$> traverse expandAliases row
-      t@(TVariable (Parameter _ name)) ->
-        lookupAlias t [] name
       t@(TConstructor _ name) ->
         lookupAlias t [] name
+      t ->
+        pure t
 
 lookupAlias :: (Monad m) => ParameterizedType -> [ParameterizedType] -> Name -> CompilerT a m ParameterizedType
 lookupAlias t ts name = do
