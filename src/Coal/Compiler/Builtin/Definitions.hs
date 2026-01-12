@@ -26,87 +26,106 @@ insertExtraDefinitions = (extraDefinitions <>)
 builtinFunctionNames :: [Name]
 builtinFunctionNames = for builtinFunctions fst
 
+numericTrait :: ParameterizedType -> Trait ParameterizedType
+numericTrait = Trait "Numeric"
+
+orderedTrait :: ParameterizedType -> Trait ParameterizedType
+orderedTrait = Trait "Ordered"
+
+comparableTrait :: ParameterizedType -> Trait ParameterizedType
+comparableTrait = Trait "Comparable"
+
+divisibleTrait :: ParameterizedType -> Trait ParameterizedType
+divisibleTrait = Trait "Divisible"
+
+moduloTrait :: ParameterizedType -> Trait ParameterizedType
+moduloTrait = Trait "Modulo"
+
+semigroupTrait :: ParameterizedType -> Trait ParameterizedType
+semigroupTrait = Trait "Semigroup"
+
 builtinTraitInstances :: [Name]
 builtinTraitInstances =
-  [ "from_bignum__$impl_Numeric(Intrinsic(Int32))"
-  , "from_int32__$impl_Numeric(Intrinsic(Int32))"
-  , "from_int64__$impl_Numeric(Intrinsic(Int32))"
-  , "(+)__$impl_Numeric(Intrinsic(Int32))"
-  , "(-)__$impl_Numeric(Intrinsic(Int32))"
-  , "(*)__$impl_Numeric(Intrinsic(Int32))"
-  , "negate__$impl_Numeric(Intrinsic(Int32))"
+  [ -- Numeric
+    instanceLabel (numericTrait (TIntrinsic IInt32)) "from_bignum"
+  , instanceLabel (numericTrait (TIntrinsic IInt32)) "from_int32"
+  , instanceLabel (numericTrait (TIntrinsic IInt32)) "from_int64"
+  , instanceLabel (numericTrait (TIntrinsic IInt32)) "(+)"
+  , instanceLabel (numericTrait (TIntrinsic IInt32)) "(-)"
+  , instanceLabel (numericTrait (TIntrinsic IInt32)) "(*)"
+  , instanceLabel (numericTrait (TIntrinsic IInt32)) "negate"
   , --
-    "from_bignum__$impl_Numeric(Intrinsic(Int64))"
-  , "from_int32__$impl_Numeric(Intrinsic(Int64))"
-  , "from_int64__$impl_Numeric(Intrinsic(Int64))"
-  , "(+)__$impl_Numeric(Intrinsic(Int64))"
-  , "(-)__$impl_Numeric(Intrinsic(Int64))"
-  , "(*)__$impl_Numeric(Intrinsic(Int64))"
-  , "negate__$impl_Numeric(Intrinsic(Int64))"
+    instanceLabel (numericTrait (TIntrinsic IInt64)) "from_bignum"
+  , instanceLabel (numericTrait (TIntrinsic IInt64)) "from_int32"
+  , instanceLabel (numericTrait (TIntrinsic IInt64)) "from_int64"
+  , instanceLabel (numericTrait (TIntrinsic IInt64)) "(+)"
+  , instanceLabel (numericTrait (TIntrinsic IInt64)) "(-)"
+  , instanceLabel (numericTrait (TIntrinsic IInt64)) "(*)"
+  , instanceLabel (numericTrait (TIntrinsic IInt64)) "negate"
   , --
-    "from_bignum__$impl_Numeric(Intrinsic(Float))"
-  , "from_int32__$impl_Numeric(Intrinsic(Float))"
-  , "from_int64__$impl_Numeric(Intrinsic(Float))"
-  , "(+)__$impl_Numeric(Intrinsic(Float))"
-  , "(-)__$impl_Numeric(Intrinsic(Float))"
-  , "(*)__$impl_Numeric(Intrinsic(Float))"
-  , "negate__$impl_Numeric(Intrinsic(Float))"
+    instanceLabel (numericTrait (TIntrinsic IFloat)) "from_bignum"
+  , instanceLabel (numericTrait (TIntrinsic IFloat)) "from_int32"
+  , instanceLabel (numericTrait (TIntrinsic IFloat)) "from_int64"
+  , instanceLabel (numericTrait (TIntrinsic IFloat)) "(+)"
+  , instanceLabel (numericTrait (TIntrinsic IFloat)) "(-)"
+  , instanceLabel (numericTrait (TIntrinsic IFloat)) "(*)"
+  , instanceLabel (numericTrait (TIntrinsic IFloat)) "negate"
   , --
-    "from_bignum__$impl_Numeric(Intrinsic(Double))"
-  , "from_int32__$impl_Numeric(Intrinsic(Double))"
-  , "from_int64__$impl_Numeric(Intrinsic(Double))"
-  , "(+)__$impl_Numeric(Intrinsic(Double))"
-  , "(-)__$impl_Numeric(Intrinsic(Double))"
-  , "(*)__$impl_Numeric(Intrinsic(Double))"
-  , "negate__$impl_Numeric(Intrinsic(Double))"
+    instanceLabel (numericTrait (TIntrinsic IDouble)) "from_bignum"
+  , instanceLabel (numericTrait (TIntrinsic IDouble)) "from_int32"
+  , instanceLabel (numericTrait (TIntrinsic IDouble)) "from_int64"
+  , instanceLabel (numericTrait (TIntrinsic IDouble)) "(+)"
+  , instanceLabel (numericTrait (TIntrinsic IDouble)) "(-)"
+  , instanceLabel (numericTrait (TIntrinsic IDouble)) "(*)"
+  , instanceLabel (numericTrait (TIntrinsic IDouble)) "negate"
   , --
-    "from_bignum__$impl_Numeric(Intrinsic(Nat))"
-  , "from_int32__$impl_Numeric(Intrinsic(Nat))"
-  , "from_int64__$impl_Numeric(Intrinsic(Nat))"
-  , "(+)__$impl_Numeric(Intrinsic(Nat))"
-  , "(-)__$impl_Numeric(Intrinsic(Nat))"
-  , "(*)__$impl_Numeric(Intrinsic(Nat))"
-  , "negate__$impl_Numeric(Intrinsic(Nat))"
+    instanceLabel (numericTrait (TIntrinsic INat)) "from_bignum"
+  , instanceLabel (numericTrait (TIntrinsic INat)) "from_int32"
+  , instanceLabel (numericTrait (TIntrinsic INat)) "from_int64"
+  , instanceLabel (numericTrait (TIntrinsic INat)) "(+)"
+  , instanceLabel (numericTrait (TIntrinsic INat)) "(-)"
+  , instanceLabel (numericTrait (TIntrinsic INat)) "(*)"
+  , instanceLabel (numericTrait (TIntrinsic INat)) "negate"
   , --
-    "from_bignum__$impl_Numeric(Intrinsic(Bignum))"
-  , "from_int32__$impl_Numeric(Intrinsic(Bignum))"
-  , "from_int64__$impl_Numeric(Intrinsic(Bignum))"
-  , "(+)__$impl_Numeric(Intrinsic(Bignum))"
-  , "(-)__$impl_Numeric(Intrinsic(Bignum))"
-  , "(*)__$impl_Numeric(Intrinsic(Bignum))"
-  , "negate__$impl_Numeric(Intrinsic(Bignum))"
-  , --
-    "compare__$impl_Ordered(Intrinsic(Int32))"
-  , "compare__$impl_Ordered(Intrinsic(Int64))"
-  , "compare__$impl_Ordered(Intrinsic(Nat))"
-  , "compare__$impl_Ordered(Intrinsic(Float))"
-  , "compare__$impl_Ordered(Intrinsic(Double))"
-  , "compare__$impl_Ordered(Intrinsic(Bool))"
-  , "compare__$impl_Ordered(Intrinsic(Char))"
-  , "compare__$impl_Ordered(Intrinsic(Bignum))"
-  , "compare__$impl_Ordered(Intrinsic(String))"
-  , "compare__$impl_Ordered(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
-  , --
-    "(==)__$impl_Comparable(Intrinsic(Int32))"
-  , "(==)__$impl_Comparable(Intrinsic(Int64))"
-  , "(==)__$impl_Comparable(Intrinsic(Nat))"
-  , "(==)__$impl_Comparable(Intrinsic(Float))"
-  , "(==)__$impl_Comparable(Intrinsic(Double))"
-  , "(==)__$impl_Comparable(Intrinsic(Bool))"
-  , "(==)__$impl_Comparable(Intrinsic(Char))"
-  , "(==)__$impl_Comparable(Intrinsic(Bignum))"
-  , "(==)__$impl_Comparable(Intrinsic(String))"
-  , "(==)__$impl_Comparable(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
-  , --
-    "(/)__$impl_Divisible(Intrinsic(Float))"
-  , "(/)__$impl_Divisible(Intrinsic(Double))"
-  , --
-    "(%)__$impl_Modulo(Intrinsic(Int32))"
-  , "(%)__$impl_Modulo(Intrinsic(Int64))"
-  , "(%)__$impl_Modulo(Intrinsic(Bignum))"
-  , --
-    "(<>)__$impl_Semigroup(Intrinsic(String))"
-  , "(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
+    instanceLabel (numericTrait (TIntrinsic IBignum)) "from_bignum"
+  , instanceLabel (numericTrait (TIntrinsic IBignum)) "from_int32"
+  , instanceLabel (numericTrait (TIntrinsic IBignum)) "from_int64"
+  , instanceLabel (numericTrait (TIntrinsic IBignum)) "(+)"
+  , instanceLabel (numericTrait (TIntrinsic IBignum)) "(-)"
+  , instanceLabel (numericTrait (TIntrinsic IBignum)) "(*)"
+  , instanceLabel (numericTrait (TIntrinsic IBignum)) "negate"
+  , -- Ordered
+    instanceLabel (orderedTrait (TIntrinsic IInt32)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic IInt64)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic INat)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic IFloat)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic IDouble)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic IBool)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic IChar)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic IBignum)) "compare"
+  , instanceLabel (orderedTrait (TIntrinsic IString)) "compare"
+  , instanceLabel (orderedTrait (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare"
+  , -- Comparable
+    instanceLabel (comparableTrait (TIntrinsic IInt32)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic IInt64)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic INat)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic IFloat)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic IDouble)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic IBool)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic IChar)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic IBignum)) "(==)"
+  , instanceLabel (comparableTrait (TIntrinsic IString)) "(==)"
+  , instanceLabel (comparableTrait (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
+  , -- Divisible
+    instanceLabel (divisibleTrait (TIntrinsic IFloat)) "(/)"
+  , instanceLabel (divisibleTrait (TIntrinsic IDouble)) "(/)"
+  , -- Modulo
+    instanceLabel (moduloTrait (TIntrinsic IInt32)) "(%)"
+  , instanceLabel (moduloTrait (TIntrinsic IInt64)) "(%)"
+  , instanceLabel (moduloTrait (TIntrinsic IBignum)) "(%)"
+  , -- Semigroup
+    instanceLabel (semigroupTrait (TIntrinsic IString)) "(<>)"
+  , instanceLabel (semigroupTrait (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)"
   ]
 
 -- Needed to support do-notation
