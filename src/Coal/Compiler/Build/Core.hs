@@ -265,7 +265,7 @@ nameImports ModuleBuild{..} imports =
           Nothing ->
             error "Implementation error"
           Just CotypeConstructorEntry{..} ->
-            cotypeConstructorEntryDataAccessors
+            accessorName <$> cotypeConstructorEntryDataAccessors
       ImportCotype _ _ names ->
         names
       ImportTrait _ name ["*"] ->
@@ -310,7 +310,7 @@ collectTypeConstructors =
      where
       -- TODO: Support higher-kinded type parameters
       kind = foldr KArrow KType (replicate (length params) KType)
-      entry = CotypeConstructorEntry loc name kind (for xsors accessorName)
+      entry = CotypeConstructorEntry loc name kind params xsors
     DTypeAlias loc name (AliasDefinition ps t) -> do
       modify $
         insertAlias name entry
@@ -373,7 +373,7 @@ typeConstructorEnv = do
   insertTypeInfo (TypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
 
   insertCotypeInfo :: CotypeConstructorEntry a -> Environment Kind -> Environment Kind
-  insertCotypeInfo (CotypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
+  insertCotypeInfo (CotypeConstructorEntry _ name kind_ _ _) = Environment.insert name kind_
 
 collectDataConstructors :: (Monad m) => Environment (AliasEntry a) -> Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectDataConstructors aliases env =
@@ -427,14 +427,14 @@ collectDataConstructors aliases env =
                 tellErrors [MissingCotype name path (ErrorLocation this loc)]
                 throwError PreflightFailure
               Just CotypeConstructorEntry{..} -> do
-                let missing = xsors \\ cotypeConstructorEntryDataAccessors
+                let missing = xsors \\ (accessorName <$> cotypeConstructorEntryDataAccessors)
                     importAll = ["*"] == xsors
                 unless (importAll || null missing) $
                   forM_ missing $
                     \xsor -> do
                       tellErrors [NoCodataAccessorForCotype xsor name path (ErrorLocation this loc)]
                       throwError PreflightFailure
-                forM_ (if importAll then cotypeConstructorEntryDataAccessors else xsors) $
+                forM_ (if importAll then accessorName <$> cotypeConstructorEntryDataAccessors else xsors) $
                   \xsor ->
                     case Environment.lookup xsor (exportedCodataAccessors build) of
                       Nothing ->
@@ -732,31 +732,31 @@ qualImports ModuleBuild{..} =
     DImport _ path names_ ->
       concatForM names_ $
         \case
-          (ImportName _ name) ->
+          ImportName _ name ->
             pure [(name, principalPath path <.> name)]
-          (ImportType _ name ["*"]) ->
+          ImportType _ name ["*"] ->
             case Environment.lookup name moduleTypeConstructors of
               Nothing ->
                 error "Not implemented"
               Just TypeConstructorEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
-          (ImportType _ _ ctors) ->
+          ImportType _ _ ctors ->
             pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
-          (ImportCotype _ name ["*"]) ->
+          ImportCotype _ name ["*"] ->
             case Environment.lookup name moduleCotypeConstructors of
               Nothing ->
                 error "Not implemented"
               Just CotypeConstructorEntry{..} ->
-                pure [(name_, principalPath path <.> name_) | name_ <- cotypeConstructorEntryDataAccessors]
-          (ImportCotype _ _ xsors) ->
+                pure [(accessorName, principalPath path <.> accessorName) | CodataAccessor{..} <- cotypeConstructorEntryDataAccessors]
+          ImportCotype _ _ xsors ->
             pure [(xsor, principalPath path <.> xsor) | xsor <- xsors]
-          (ImportTrait _ name ["*"]) ->
+          ImportTrait _ name ["*"] ->
             case Environment.lookup name moduleTraits of
               Nothing ->
                 error "Not implemented"
               Just TraitEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
-          (ImportTrait _ _ entries) ->
+          ImportTrait _ _ entries ->
             pure [(entry, principalPath path <.> entry) | entry <- entries]
     DQualifiedImport loc path -> do
       build <- importedModule loc path

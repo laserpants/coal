@@ -260,8 +260,25 @@ emitESelectConstraints loc (Label t name) e = do
   row <- supplied (RVariable . TypeIndex KRow)
   let t1 = recordType (RExtend name t row)
       t2 = typeOf e
-  tellRight [Equality (RuleSelectEquality loc t1 t2) [t1, t2]]
-  emitConstraints e
+
+  if "$_" `Text.isPrefixOf` name
+    then do
+      r <- lookupCodataAccessor (Text.drop 2 name)
+      case r of
+        Nothing ->
+          error "Implementation error"
+        Just CodataAccessor{..} -> do
+          t0 <- supplied (TVariable . TypeIndex KType)
+          t6 <- supplied (TVariable . TypeIndex KType)
+          let t3 = t2 `TArrow` t0
+          let t5 = t6 `TArrow` t0
+
+          tellRight [Equality (RuleSelectEquality loc t5 t) [t5, t]]
+          tellRight [Explicit (RuleCodataRecordExplicit loc t3 accessorScheme) t3 accessorScheme]
+          emitConstraints e
+    else do
+      tellRight [Equality (RuleSelectEquality loc t1 t2) [t1, t2]]
+      emitConstraints e
 
 emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitERecordConstraints loc t fields expr = do
@@ -376,15 +393,14 @@ emitECodataSelectConstraints loc (Label t name) e1 = do
       pure []
     Just CodataAccessor{..} -> do
       case e1 of
-        ERecursiveLet _ (PVariable _ (Label t2 n)) e2 e3 -> do
-          ms2 <- emitConstraints e2
+        ERecursiveLet _ (PVariable _ (Label t2 n)) _ e3 -> do
           ms3 <- emitConstraints e3
           assertEqualityAssumptions loc t2 (filter (assumptionNameIs n) ms3)
           t0 <- supplied (TVariable . TypeIndex KType)
           let t1 = t0 `TArrow` typeOf e3
           tellRight [Explicit (RuleCodataRecordExplicit loc t1 accessorScheme) t1 accessorScheme]
           tellRight [Equality (RuleCodataRecordEquality loc t (typeOf e3)) [t, typeOf e3]]
-          pure (ms2 <> filter (not . assumptionNameIs n) ms3)
+          pure (filter (not . assumptionNameIs n) ms3)
         _ ->
           pure []
 
@@ -458,8 +474,10 @@ emitConstraints =
           emitConstraints e
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
-    ECodataSelect loc ll _ (Just e1) ->
-      emitECodataSelectConstraints loc ll e1
+    ECodataSelect loc ll _ (Just e1) -> do
+      ms1 <- emitConstraints e1
+      ms2 <- emitECodataSelectConstraints loc ll e1
+      pure (ms1 <> ms2)
     ETuple loc t es ->
       emitETupleConstraints loc t es
     EFFICall loc t ll es e ->

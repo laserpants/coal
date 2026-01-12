@@ -1,0 +1,17 @@
+module Main {
+
+  import IO(println_int32)
+
+  cotype SomeType = { X : int32 }
+
+  unfold foo(a : int32) : SomeType {
+    X = a
+  }
+
+  fun main() =
+    let st = foo(5) // "A"
+    in
+    println_int32(st.X)
+
+}
+

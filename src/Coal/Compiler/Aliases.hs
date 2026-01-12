@@ -78,6 +78,7 @@ instance (AliasContext t, Data a, Data t) => AliasContext (FunctionDefinition a 
           <*> expandAliases w
           <*> expandAliases ps
           <*> expandAliases e
+
 instance (AliasContext t, Data a, Data t) => AliasContext (ConstantDefinition a t) where
   expandAliases =
     \case

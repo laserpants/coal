@@ -1484,6 +1484,32 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "277" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/277" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  describe "278" $ do
+    expectOutput
+      "2"
+      "test/Coal/examples/278"
+      [ "Main.coal"
+      ]
+
+  describe "279" $ do
+    expectOutput
+      "5"
+      "test/Coal/examples/279"
+      [ "Main.coal"
+      ]
+
+  describe "280" $ do
+    expectOutput
+      "1"
+      "test/Coal/examples/280"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

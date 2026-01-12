@@ -7,6 +7,7 @@ import Coal.Compiler.Pass (Pass (..), overlayEnvironment, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors)
 import Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases)
+import Coal.Compiler.Pass.TypePhase.ExpandCotypes (passExpandCotypes)
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGroups)
 import Coal.Compiler.Pass.TypePhase.ExpressionFolds (passExpressionFolds)
 import Coal.Compiler.Pass.TypePhase.ExpressionUnfolds (passExpressionUnfolds)
@@ -35,3 +36,5 @@ typePhasePasses =
     >-> overlayEnvironment passTypeInference
     >-> generateDebugArtifacts "TypeInference"
     >-> passTypePhaseErrors
+    >-> passExpandCotypes
+    >-> generateDebugArtifacts "ExpandCotypes"

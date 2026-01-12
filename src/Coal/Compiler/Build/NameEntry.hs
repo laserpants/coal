@@ -65,7 +65,8 @@ data CotypeConstructorEntry a = CotypeConstructorEntry
   { cotypeConstructorEntryMetadata :: a
   , cotypeConstructorEntryName :: Name
   , cotypeConstructorEntryKind :: Kind
-  , cotypeConstructorEntryDataAccessors :: [Name]
+  , cotypeConstructorEntryParams :: [Parameter ()]
+  , cotypeConstructorEntryDataAccessors :: [CodataAccessor Parameter () ParameterizedType]
   }
   deriving (Show, Eq, Ord, Read, Generic)
 

@@ -9,6 +9,9 @@ module Main {
   fun main() =
     let st = baz(5)
     in
-    println_int32(st.X.X.X)
+    println_int32(st.X.X)
 
 }
+
+
+//    let a : int32 = st.X

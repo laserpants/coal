@@ -94,6 +94,7 @@ library
       Coal.Compiler.Pass.TypePhase
       Coal.Compiler.Pass.TypePhase.Errors
       Coal.Compiler.Pass.TypePhase.ExpandAliases
+      Coal.Compiler.Pass.TypePhase.ExpandCotypes
       Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
       Coal.Compiler.Pass.TypePhase.ExpressionFolds
       Coal.Compiler.Pass.TypePhase.ExpressionUnfolds

@@ -25,10 +25,10 @@ module Main {
 
   type Board = Board(Set<(int32, int32)>)
 
-  fun set_square(x : int32, y : int32, Board(set) : Board) : Board =
+  fun set_cell(x : int32, y : int32, Board(set) : Board) : Board =
     Board(set |. Containers.Set.insert((x, y)))
 
-  fun shape_squares(shape : Shape, rotation : Rotation) : Set<(int32, int32)> =
+  fun shape_cells(shape : Shape, rotation : Rotation) : Set<(int32, int32)> =
     Containers.Set.from_list 
       .| match(shape) {
            | ShapeO =>
@@ -302,8 +302,8 @@ module Main {
                }
       }
 
-  fun offset_squares(x_offset : int32, y_offset : int32, squares : Set<(int32, int32)>) : Set<(int32, int32)> =
-    squares 
+  fun offset_cells(x_offset : int32, y_offset : int32, cells : Set<(int32, int32)>) : Set<(int32, int32)> =
+    cells 
       |. Containers.Set.map(fn((x, y)) => (x + x_offset, y + y_offset))
 
   type alias BlockState =
@@ -330,17 +330,17 @@ module Main {
     , current_block = move_block(x, y, current_block)
     }
 
-  fun can_move_current_block(x : int32, y : int32, { board = Board(board_squares), current_block } : GameState) : bool =
-    offset_squares(
+  fun can_move_current_block(x : int32, y : int32, { board = Board(board_cells), current_block } : GameState) : bool =
+    offset_cells(
       current_block.pos_x + x,
       current_block.pos_y + y,
-      shape_squares(current_block.shape, current_block.rotation)
+      shape_cells(current_block.shape, current_block.rotation)
     ) 
       |. Containers.Set.is_empty
 
-  fun incorporate_block({ board = Board(board_squares), current_block } : GameState) : GameState =
-    let shape = shape_squares(current_block.shape, current_block.rotation) in 
-    let new_board = Containers.Set.union(shape, board_squares)
+  fun incorporate_block({ board = Board(board_cells), current_block } : GameState) : GameState =
+    let shape = shape_cells(current_block.shape, current_block.rotation) in 
+    let new_board = Containers.Set.union(shape, board_cells)
     in
       { board = Board(new_board), current_block = current_block } 
 

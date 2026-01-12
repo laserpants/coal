@@ -37,7 +37,7 @@ lookupTypeConstructor name = do
       case Environment.lookup name moduleCotypeConstructors of
         Nothing ->
           pure Nothing
-        Just (CotypeConstructorEntry _ _ kind _) ->
+        Just (CotypeConstructorEntry _ _ kind _ _) ->
           pure (Just kind)
     Just (TypeConstructorEntry _ _ kind _) ->
       pure (Just kind)
