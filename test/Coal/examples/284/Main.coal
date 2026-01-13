@@ -1,0 +1,11 @@
+module Main {
+
+  import List(zip)
+  import IO(println_bool, println_int32, println_string)
+  import String(int32_to_string)
+  import List(is_prefix_of)
+
+  fun main() =
+    println_bool(is_prefix_of([1,2,3], [1,2,3,4,5]))
+
+}

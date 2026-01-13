@@ -202,13 +202,13 @@ module List {
    * [(1, "one"), (2, "two")]
    */
   fun zip(xs : List<a>, ys : List<b>) : List<(a, b)> =
-    let step(x, f) =
+    let step(f, x) =
       match {
         | [] => []
         | y :: ys_ => (x, y) :: f(ys_)
       }
     in
-    reduce(step, always([]), xs, ys)
+    reduce_left(step, always([]), xs, ys)
 
   /**
    * Return `true` if and only if any element of the list satisfies the given 
@@ -256,6 +256,15 @@ module List {
     fold(list) {
       | [] => None
       | x :: @xs => if (p(x)) then Some(x) else xs
+    }
+
+  fun is_prefix_of(part : List<a>, whole : List<a>) : bool =
+    fold(zip(part, whole)) {
+      | ((x, y) :: @rest) 
+          when (x == y) => rest
+          otherwise => false
+      | [] => 
+          true
     }
 
 }

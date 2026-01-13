@@ -2,6 +2,7 @@ module String {
 
   import List(reduce)
   import Nat(pack)
+  import namespace List
 
   /**
    * Convert a character to a one-character string.
@@ -103,5 +104,8 @@ module String {
    */ 
   fun concat(strs : List<string>) : string =
     intercalate("", strs)
+
+  fun is_prefix_of(part : string, whole : string) : bool =
+    List.is_prefix_of(to_list(part), to_list(whole))
 
 }
