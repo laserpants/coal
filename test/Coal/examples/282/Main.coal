@@ -1,0 +1,20 @@
+module Main {
+
+  import IO(println_int32)
+
+  cotype Parser<p> = { Parser : string -> ParserResult<p> }
+
+  type ParserResult<p>
+    = Fail
+    | Done(p)
+    | Continue(p, Parser<p>)
+
+//  unfold foo(a : int32) : SomeType {
+//    X = a
+//  }
+
+  fun main() =
+    println_int32(99)
+
+}
+
