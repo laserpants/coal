@@ -7,7 +7,7 @@ module Main {
 
 
 
-  type alias Machine<a, v> =
+  type alias Automaton<a, v> =
     { state : a
     , step : v -> a -> a
     }
@@ -19,7 +19,7 @@ module Main {
 
   // ---
 
-  type alias Stream<a> = Machine<a, unit>
+  type alias Stream<a> = Automaton<a, unit>
 
   let nats : Stream<int32> = 
     { state = 0
@@ -38,9 +38,9 @@ module Main {
 
   // ---
 
-  type alias Parser = Machine<(Option<string>, string), string>
+  type alias Parser = Automaton<(Option<string>, string), string>
 
-  fun foo(r, s, q) =
+  fun next(r, s, q) =
     ( Some(r <> s)  
     , String.drop(String.length(s), q)
     )
@@ -48,8 +48,8 @@ module Main {
   fun step_fn(inp, (res, rem)) =
     match(res) {
       | Some(r)
-          when (is_prefix_of(inp, rem)) => foo(r, inp, rem)
-          when (is_prefix_of(rem, inp)) => foo(r, rem, inp)
+          when (is_prefix_of(inp, rem)) => next(r, inp, rem)
+          when (is_prefix_of(rem, inp)) => next(r, rem, inp)
           otherwise => (None, rem)
       | None =>
           (None, rem)
