@@ -66,11 +66,14 @@ module Main {
       |. poke("hellobob")
       |. peek
 
+  let parse = poke
+  let get_result = peek
+
   let example3 =
     parse_hello
-      |. poke("he")
-      |. poke("ll")
-      |. peek
+      |. parse("he")
+      |. parse("ll")
+      |. get_result
 
 
 
