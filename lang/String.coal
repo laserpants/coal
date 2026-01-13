@@ -108,4 +108,7 @@ module String {
   fun is_prefix_of(part : string, whole : string) : bool =
     List.is_prefix_of(to_list(part), to_list(whole))
 
+  fun drop(n : nat, str : string) : string =
+    from_list(List.drop(n, to_list(str)))
+
 }

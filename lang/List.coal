@@ -259,12 +259,16 @@ module List {
     }
 
   fun is_prefix_of(part : List<a>, whole : List<a>) : bool =
-    fold(zip(part, whole)) {
-      | ((x, y) :: @rest) 
-          when (x == y) => rest
-          otherwise => false
-      | [] => 
-          true
-    }
+    if (length(part) > length(whole)) 
+      then 
+        false
+      else
+        fold(zip(part, whole)) {
+          | ((x, y) :: @rest) 
+              when (x == y) => rest
+              otherwise => false
+          | [] => 
+              true
+        }
 
 }

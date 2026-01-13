@@ -1510,10 +1510,24 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "283" $ do
+    expectOutput
+      "3"
+      "test/Coal/examples/283"
+      [ "Main.coal"
+      ]
+
   describe "284" $ do
     expectOutput
       "true"
       "test/Coal/examples/284"
+      [ "Main.coal"
+      ]
+
+  describe "285" $ do
+    expectOutput
+      "hello,bob"
+      "test/Coal/examples/285"
       [ "Main.coal"
       ]
 
