@@ -1,0 +1,99 @@
+module Main {
+
+  import IO(println_int32, println_string, println_bool, println_nat)
+  import String(is_prefix_of)
+  import namespace List
+  import namespace String
+
+
+
+  type alias Automaton<a, v> =
+    { state : a
+    , step : v -> a -> a
+    }
+
+  fun peek({ state | _ }) = state
+
+  fun poke(v, { state, step }) = 
+    { state = step(v, state), step = step }
+
+  // ---
+
+  type alias Stream<a> = Automaton<a, unit>
+
+  fun enum_from(n : int32) : Stream<int32> =
+    { state = n
+    , step = fn(_, m) => m + 1
+    }
+
+  fun enum_from(n : int32) = 
+    proc(_, m) => m + 1
+
+  let tail = poke()
+  let head = peek
+
+  let example1 =
+    enum_from(0)
+      |. tail
+      |. tail
+      |. tail
+      |. head
+
+  // ---
+
+  type alias Parser = Automaton<(Option<string>, string), string>
+
+  fun step_fn(inp, (res, rem)) =
+    let 
+      next(r, s, q) =
+        ( Some(r <> s)  
+        , String.drop(String.length(s), q)
+        )
+    in
+    match(res) {
+      | Some(r)
+          when (is_prefix_of(inp, rem)) => next(r, inp, rem)
+          when (is_prefix_of(rem, inp)) => next(r, rem, inp)
+          otherwise => (None, rem)
+      | None =>
+          (None, rem)
+    }
+
+  let parse_hello : Parser =
+    { state = (Some(""), "hello")
+    , step = step_fn
+    }
+
+  codata parse_hello : Parser =
+    (Some(""), "hello") >< step_fn
+    
+
+  let example2 =
+    parse_hello
+      |. poke("hellobob")
+      |. peek
+
+  let parse = poke
+  let get_result = peek
+
+  let example3 =
+    parse_hello
+      |. parse("he")
+      |. parse("ll")
+      |. get_result
+
+
+
+  fun main() =
+    println_int32(example1)
+
+    //println_nat(String.length("hello"))
+
+    //match(example2) {
+    //  | (Some(s), q) =>
+    //      println_string(s <> "," <> q)
+    //  | _ =>
+    //      println_string("-")
+    //}
+
+}
