@@ -61,4 +61,8 @@ module Coal.Combinators {
   fun flip(f : a -> b -> c, y : b, x : a) : c =
     f(x, y)
 
+  fun apply_fst(f, (a, b)) = (f(a), b)
+
+  fun apply_snd(f, (a, b)) = (a, f(b))
+
 }
