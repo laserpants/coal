@@ -26,8 +26,6 @@ module Main {
     , step = fn(_, m) => m + 1
     }
 
-  fun enum_from(n : int32) = 
-    proc(_, m) => m + 1
 
   let tail = poke()
   let head = peek
@@ -64,9 +62,6 @@ module Main {
     , step = step_fn
     }
 
-  codata parse_hello : Parser =
-    (Some(""), "hello") >< step_fn
-    
 
   let example2 =
     parse_hello
