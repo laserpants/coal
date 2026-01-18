@@ -103,11 +103,16 @@ emitPListConsConstraints loc t p1 p2 = do
 
 emitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a IndexedType] -> ConstraintsGen a ()
 emitPListLiteralConstraints loc t ps =
-  tellRight
-    [ Equality (RuleListLiteral loc ts) ts
-    ]
+  case ts of
+    t1 : _ ->
+      tellRight
+        [ Equality (RuleListLiteral loc ts) ts
+        , Equality (RuleAssumption loc t t1) [t, t1]
+        ]
+    _ ->
+      pure ()
  where
-  ts = t : (listType . typeOf <$> ps)
+  ts = listType . typeOf <$> ps
 
 emitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a IndexedType) -> ConstraintsGen a ()
 emitPTupleConstraints loc t ps =
@@ -343,12 +348,17 @@ emitEListConsConstraints loc t e1 e2 = do
 
 emitEListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
 emitEListLiteralConstraints loc t es = do
-  tellRight
-    [ Equality (RuleListLiteral loc ts) ts
-    ]
+  case ts of
+    t1 : _ ->
+      tellRight
+        [ Equality (RuleListLiteral loc ts) ts
+        , Equality (RuleAssumption loc t t1) [t, t1]
+        ]
+    _ ->
+      pure ()
   concatMapM emitConstraints es
  where
-  ts = t : (listType . typeOf <$> es)
+  ts = listType . typeOf <$> es
 
 emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> NonEmpty (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitETupleConstraints loc t es = do

@@ -4,6 +4,7 @@
 module Coal.Common.Environment (
   Environment (..),
   mapEnvironment,
+  mapMEnvironment,
   new,
   insert,
   insertWith,
@@ -47,6 +48,10 @@ overEnvironment fn (Environment e) = Environment (fn e)
 {-# INLINE mapEnvironment #-}
 mapEnvironment :: (a -> b) -> Environment a -> Environment b
 mapEnvironment f (Environment e) = Environment (fmap f e)
+
+{-# INLINE mapMEnvironment #-}
+mapMEnvironment :: (Monad m) => (a -> m b) -> Environment a -> m (Environment b)
+mapMEnvironment f (Environment e) = Environment <$> traverse f e
 
 {-# INLINE new #-}
 new :: Environment a

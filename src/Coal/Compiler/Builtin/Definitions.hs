@@ -9,6 +9,7 @@ module Coal.Compiler.Builtin.Definitions (
 
 import Coal.Compiler.Builtin.Functions (builtinFunctions)
 import Coal.Compiler.Builtin.Traits (builtinTraits)
+import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Language
 import Coal.Language.Module
 import Data.List.NonEmpty (NonEmpty (..))
@@ -26,106 +27,88 @@ insertExtraDefinitions = (extraDefinitions <>)
 builtinFunctionNames :: [Name]
 builtinFunctionNames = for builtinFunctions fst
 
-numericTrait :: ParameterizedType -> Trait ParameterizedType
-numericTrait = Trait "Numeric"
-
-orderedTrait :: ParameterizedType -> Trait ParameterizedType
-orderedTrait = Trait "Ordered"
-
-comparableTrait :: ParameterizedType -> Trait ParameterizedType
-comparableTrait = Trait "Comparable"
-
-divisibleTrait :: ParameterizedType -> Trait ParameterizedType
-divisibleTrait = Trait "Divisible"
-
-moduloTrait :: ParameterizedType -> Trait ParameterizedType
-moduloTrait = Trait "Modulo"
-
-semigroupTrait :: ParameterizedType -> Trait ParameterizedType
-semigroupTrait = Trait "Semigroup"
-
 builtinTraitInstances :: [Name]
 builtinTraitInstances =
   [ -- Numeric
-    instanceLabel (numericTrait (TIntrinsic IInt32)) "from_bignum"
-  , instanceLabel (numericTrait (TIntrinsic IInt32)) "from_int32"
-  , instanceLabel (numericTrait (TIntrinsic IInt32)) "from_int64"
-  , instanceLabel (numericTrait (TIntrinsic IInt32)) "(+)"
-  , instanceLabel (numericTrait (TIntrinsic IInt32)) "(-)"
-  , instanceLabel (numericTrait (TIntrinsic IInt32)) "(*)"
-  , instanceLabel (numericTrait (TIntrinsic IInt32)) "negate"
+    instanceLabel (Trait.numeric (TIntrinsic IInt32)) "from_bignum"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "from_int32"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "from_int64"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "(+)"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "(-)"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "(*)"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "negate"
   , --
-    instanceLabel (numericTrait (TIntrinsic IInt64)) "from_bignum"
-  , instanceLabel (numericTrait (TIntrinsic IInt64)) "from_int32"
-  , instanceLabel (numericTrait (TIntrinsic IInt64)) "from_int64"
-  , instanceLabel (numericTrait (TIntrinsic IInt64)) "(+)"
-  , instanceLabel (numericTrait (TIntrinsic IInt64)) "(-)"
-  , instanceLabel (numericTrait (TIntrinsic IInt64)) "(*)"
-  , instanceLabel (numericTrait (TIntrinsic IInt64)) "negate"
+    instanceLabel (Trait.numeric (TIntrinsic IInt64)) "from_bignum"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "from_int32"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "from_int64"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "(+)"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "(-)"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "(*)"
+  , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "negate"
   , --
-    instanceLabel (numericTrait (TIntrinsic IFloat)) "from_bignum"
-  , instanceLabel (numericTrait (TIntrinsic IFloat)) "from_int32"
-  , instanceLabel (numericTrait (TIntrinsic IFloat)) "from_int64"
-  , instanceLabel (numericTrait (TIntrinsic IFloat)) "(+)"
-  , instanceLabel (numericTrait (TIntrinsic IFloat)) "(-)"
-  , instanceLabel (numericTrait (TIntrinsic IFloat)) "(*)"
-  , instanceLabel (numericTrait (TIntrinsic IFloat)) "negate"
+    instanceLabel (Trait.numeric (TIntrinsic IFloat)) "from_bignum"
+  , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "from_int32"
+  , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "from_int64"
+  , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "(+)"
+  , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "(-)"
+  , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "(*)"
+  , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "negate"
   , --
-    instanceLabel (numericTrait (TIntrinsic IDouble)) "from_bignum"
-  , instanceLabel (numericTrait (TIntrinsic IDouble)) "from_int32"
-  , instanceLabel (numericTrait (TIntrinsic IDouble)) "from_int64"
-  , instanceLabel (numericTrait (TIntrinsic IDouble)) "(+)"
-  , instanceLabel (numericTrait (TIntrinsic IDouble)) "(-)"
-  , instanceLabel (numericTrait (TIntrinsic IDouble)) "(*)"
-  , instanceLabel (numericTrait (TIntrinsic IDouble)) "negate"
+    instanceLabel (Trait.numeric (TIntrinsic IDouble)) "from_bignum"
+  , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "from_int32"
+  , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "from_int64"
+  , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "(+)"
+  , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "(-)"
+  , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "(*)"
+  , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "negate"
   , --
-    instanceLabel (numericTrait (TIntrinsic INat)) "from_bignum"
-  , instanceLabel (numericTrait (TIntrinsic INat)) "from_int32"
-  , instanceLabel (numericTrait (TIntrinsic INat)) "from_int64"
-  , instanceLabel (numericTrait (TIntrinsic INat)) "(+)"
-  , instanceLabel (numericTrait (TIntrinsic INat)) "(-)"
-  , instanceLabel (numericTrait (TIntrinsic INat)) "(*)"
-  , instanceLabel (numericTrait (TIntrinsic INat)) "negate"
+    instanceLabel (Trait.numeric (TIntrinsic INat)) "from_bignum"
+  , instanceLabel (Trait.numeric (TIntrinsic INat)) "from_int32"
+  , instanceLabel (Trait.numeric (TIntrinsic INat)) "from_int64"
+  , instanceLabel (Trait.numeric (TIntrinsic INat)) "(+)"
+  , instanceLabel (Trait.numeric (TIntrinsic INat)) "(-)"
+  , instanceLabel (Trait.numeric (TIntrinsic INat)) "(*)"
+  , instanceLabel (Trait.numeric (TIntrinsic INat)) "negate"
   , --
-    instanceLabel (numericTrait (TIntrinsic IBignum)) "from_bignum"
-  , instanceLabel (numericTrait (TIntrinsic IBignum)) "from_int32"
-  , instanceLabel (numericTrait (TIntrinsic IBignum)) "from_int64"
-  , instanceLabel (numericTrait (TIntrinsic IBignum)) "(+)"
-  , instanceLabel (numericTrait (TIntrinsic IBignum)) "(-)"
-  , instanceLabel (numericTrait (TIntrinsic IBignum)) "(*)"
-  , instanceLabel (numericTrait (TIntrinsic IBignum)) "negate"
+    instanceLabel (Trait.numeric (TIntrinsic IBignum)) "from_bignum"
+  , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "from_int32"
+  , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "from_int64"
+  , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "(+)"
+  , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "(-)"
+  , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "(*)"
+  , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "negate"
   , -- Ordered
-    instanceLabel (orderedTrait (TIntrinsic IInt32)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic IInt64)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic INat)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic IFloat)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic IDouble)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic IBool)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic IChar)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic IBignum)) "compare"
-  , instanceLabel (orderedTrait (TIntrinsic IString)) "compare"
-  , instanceLabel (orderedTrait (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare"
+    instanceLabel (Trait.ordered (TIntrinsic IInt32)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IInt64)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic INat)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IFloat)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IDouble)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IBool)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IChar)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IBignum)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IString)) "compare"
+  , instanceLabel (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare"
   , -- Comparable
-    instanceLabel (comparableTrait (TIntrinsic IInt32)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic IInt64)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic INat)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic IFloat)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic IDouble)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic IBool)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic IChar)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic IBignum)) "(==)"
-  , instanceLabel (comparableTrait (TIntrinsic IString)) "(==)"
-  , instanceLabel (comparableTrait (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
+    instanceLabel (Trait.comparable (TIntrinsic IInt32)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IInt64)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic INat)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IFloat)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IDouble)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IBool)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IChar)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IBignum)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IString)) "(==)"
+  , instanceLabel (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
   , -- Divisible
-    instanceLabel (divisibleTrait (TIntrinsic IFloat)) "(/)"
-  , instanceLabel (divisibleTrait (TIntrinsic IDouble)) "(/)"
+    instanceLabel (Trait.divisible (TIntrinsic IFloat)) "(/)"
+  , instanceLabel (Trait.divisible (TIntrinsic IDouble)) "(/)"
   , -- Modulo
-    instanceLabel (moduloTrait (TIntrinsic IInt32)) "(%)"
-  , instanceLabel (moduloTrait (TIntrinsic IInt64)) "(%)"
-  , instanceLabel (moduloTrait (TIntrinsic IBignum)) "(%)"
+    instanceLabel (Trait.modulo (TIntrinsic IInt32)) "(%)"
+  , instanceLabel (Trait.modulo (TIntrinsic IInt64)) "(%)"
+  , instanceLabel (Trait.modulo (TIntrinsic IBignum)) "(%)"
   , -- Semigroup
-    instanceLabel (semigroupTrait (TIntrinsic IString)) "(<>)"
-  , instanceLabel (semigroupTrait (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)"
+    instanceLabel (Trait.semigroup (TIntrinsic IString)) "(<>)"
+  , instanceLabel (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)"
   ]
 
 -- Needed to support do-notation
@@ -173,5 +156,42 @@ builtinDefinitions =
       mempty
       "IO"
       (TypeDefinition [Parameter () "a"] [])
+  , DType
+      mempty
+      "Process"
+      ( TypeDefinition
+          [Parameter () "a", Parameter () "v"]
+          [ DataConstructor
+              "Process"
+              1
+              ( Forall
+                  (Set.fromList [Parameter () "a", Parameter () "v"])
+                  []
+                  ( TRecord
+                      ( TRow
+                          ( RExtend
+                              "state"
+                              (TVariable (Parameter () "a"))
+                              ( RExtend
+                                  "step"
+                                  ( TVariable (Parameter () "v")
+                                      `TArrow` TVariable (Parameter () "a")
+                                      `TArrow` applyTypeArgs
+                                        ()
+                                        (TConstructor () "Process")
+                                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
+                                  )
+                                  RNil
+                              )
+                          )
+                      )
+                      `TArrow` applyTypeArgs
+                        ()
+                        (TConstructor () "Process")
+                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
+                  )
+              )
+          ]
+      )
   ]
     <> builtinTraits

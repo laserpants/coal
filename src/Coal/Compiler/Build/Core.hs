@@ -10,11 +10,11 @@ module Coal.Compiler.Build.Core (
   dependencies,
 ) where
 
+import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Aliases
 import Coal.Compiler.Build
-import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Embedded (embeddedPaths)
@@ -28,7 +28,7 @@ import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo
 import Coal.TypeSystem.Unification (Unifiable (match), evalUnifier)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.Reader
-import Control.Monad.State (StateT, execStateT, get, gets, modify, runStateT)
+import Control.Monad.State (StateT, evalState, execStateT, get, gets, modify, runStateT)
 import Data.Either (rights)
 import Data.List (intersect, nub, (\\))
 import qualified Data.Map.Strict as Map
@@ -188,6 +188,7 @@ prepareBuild module_@(Module path exports defs) =
       , "Ordering"
       , "Semigroup"
       , "Some"
+      , "Process"
       , "compare"
       , "from_int32"
       , "negate"
@@ -254,26 +255,23 @@ nameImports ModuleBuild{..} imports =
         [name]
       ImportType _ name ["*"] ->
         case Environment.lookup name moduleTypeConstructors of
-          Nothing ->
-            error "Implementation error"
           Just TypeConstructorEntry{..} ->
             typeConstructorEntryDataConstructors
+          _ -> []
       ImportType _ _ names ->
         names
       ImportCotype _ name ["*"] ->
         case Environment.lookup name moduleCotypeConstructors of
-          Nothing ->
-            error "Implementation error"
           Just CotypeConstructorEntry{..} ->
             accessorName <$> cotypeConstructorEntryDataAccessors
+          _ -> []
       ImportCotype _ _ names ->
         names
       ImportTrait _ name ["*"] ->
         case Environment.lookup name moduleTraits of
-          Nothing ->
-            error "Implementation error"
           Just TraitEntry{..} ->
             Environment.names traitEntryEntries
+          _ -> []
       ImportTrait _ _ names ->
         names
 
@@ -328,8 +326,12 @@ collectTypeConstructors =
           ImportType loc name _ ->
             case Environment.lookup name (exportedTypeConstructors build) of
               Nothing -> do
-                tellErrors [MissingType name path (ErrorLocation this loc)]
-                throwError PreflightFailure
+                case Environment.lookup name (moduleAliases build) of
+                  Nothing -> do
+                    tellErrors [MissingType name path (ErrorLocation this loc)]
+                    throwError PreflightFailure
+                  Just entry ->
+                    modify $ insertAlias name entry
               Just entry ->
                 modify $ insertTypeConstructor name entry
           ImportCotype loc name _ ->
@@ -379,16 +381,20 @@ collectDataConstructors :: (Monad m) => Environment (AliasEntry a) -> Environmen
 collectDataConstructors aliases env =
   \case
     DType loc _ def -> do
-      def' <- lift $ local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
-      forM_ (dataConstructorEntries env loc def') $
+      entries <- lift $ do
+        def' <- local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
+        dataConstructorEntries env loc def'
+      forM_ entries $
         \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do
           modify $
             addName (NDataConstructor constructorName constructorScheme)
               . insertDataConstructor constructorName info
               . addExport constructorName
     DCotype loc _ def -> do
-      def' <- lift $ local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
-      forM_ (codataAccessorEntries env loc def') $
+      entries <- lift $ do
+        def' <- local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
+        codataAccessorEntries env loc def'
+      forM_ entries $
         \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
           modify $
             addName (NCodataAccessor accessorName accessorScheme)
@@ -404,8 +410,12 @@ collectDataConstructors aliases env =
           ImportType loc name ctors ->
             case Environment.lookup name (exportedTypeConstructors build) of
               Nothing -> do
-                tellErrors [MissingType name path (ErrorLocation this loc)]
-                throwError PreflightFailure
+                case Environment.lookup name (moduleAliases build) of
+                  Nothing -> do
+                    tellErrors [MissingType name path (ErrorLocation this loc)]
+                    throwError PreflightFailure
+                  Just{} ->
+                    pure ()
               Just TypeConstructorEntry{..} -> do
                 let missing = ctors \\ typeConstructorEntryDataConstructors
                     importAll = ["*"] == ctors
@@ -464,7 +474,7 @@ collectTraits env =
           tellErrors [KindError err (ErrorLocation this loc) | err <- nub errs]
           throwError PreflightFailure
         Right def'@(TraitDefinition ts p ds) -> do
-          addTraitEntries env name def'
+          addTraitEntries loc env name def'
           modify $
             addName (NTrait name)
               . insertTrait name entry
@@ -495,12 +505,13 @@ collectTraits env =
     _ ->
       pure ()
 
-addTraitEntries :: (Monad m) => Environment Kind -> Name -> TraitDefinition Kind -> StateT (ModuleBuild a) (CompilerT a m) ()
-addTraitEntries env trait (TraitDefinition _ p entries) =
+addTraitEntries :: (Monad m) => a -> Environment Kind -> Name -> TraitDefinition Kind -> StateT (ModuleBuild a) (CompilerT a m) ()
+addTraitEntries loc env trait (TraitDefinition _ p entries) =
   forM_ entries $
-    \(name, Forall _ _ t) ->
+    \(name, Forall _ _ t) -> do
+      tt <- lift $ toIndexedType loc env p t
       modify $
-        addName (NFunction name $ scheme [Trait trait tvar] (toIndexedType env p t))
+        addName (NFunction name $ scheme [Trait trait tvar] tt)
           . addExport name
  where
   tvar = TVariable (TypeIndex (parameterKind p) 0)
@@ -519,6 +530,14 @@ collectInstances kinds traits =
               tnames = Environment.names dict
               extra = inames \\ tnames
               missing = tnames \\ inames
+
+          t1 <- lift $ toIndexedType loc kinds p q
+
+          Environment env <- flip Environment.mapMEnvironment dict $
+            \x -> do
+              y <- lift $ toIndexedScheme loc kinds p x
+              pure $ substituteInScheme (0 `mapsTo` t1) y
+
           unless (null extra && null missing) $ do
             forM_ missing $
               \name -> do
@@ -528,12 +547,14 @@ collectInstances kinds traits =
               \name -> do
                 tellErrors [UnexpectedTraitDefinition name trait (ErrorLocation this loc)]
                 throwError PreflightFailure
-          modify $ insertInstance trait t1 (InstanceEntry loc q (toIndexedType kinds p q) env)
+
+          tt <- lift $ toIndexedType loc kinds p q
+          modify $ insertInstance trait t1 (InstanceEntry loc q tt env)
 
           instances <- gets moduleInstances
           forM_ deps $
             \(Trait n t) -> do
-              let tx = toIndexedType kinds t q
+              tx <- lift $ toIndexedType loc kinds t q
               case Environment.lookup n instances of
                 Nothing -> do
                   tellErrors [MissingRequiredInstance n tx (ErrorLocation this loc)]
@@ -546,9 +567,6 @@ collectInstances kinds traits =
                   when (null (rights res)) $ do
                     tellErrors [MissingRequiredInstance n tx (ErrorLocation this loc)]
                     throwError PreflightFailure
-         where
-          t1 = toIndexedType kinds p q
-          Environment env = Environment.mapEnvironment (substituteInScheme (0 `mapsTo` t1) . toIndexedScheme kinds p) dict
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport loc path imports -> do
@@ -736,26 +754,26 @@ qualImports ModuleBuild{..} =
             pure [(name, principalPath path <.> name)]
           ImportType _ name ["*"] ->
             case Environment.lookup name moduleTypeConstructors of
-              Nothing ->
-                error "Not implemented"
               Just TypeConstructorEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
+              _ ->
+                pure []
           ImportType _ _ ctors ->
             pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
           ImportCotype _ name ["*"] ->
             case Environment.lookup name moduleCotypeConstructors of
-              Nothing ->
-                error "Not implemented"
               Just CotypeConstructorEntry{..} ->
                 pure [(accessorName, principalPath path <.> accessorName) | CodataAccessor{..} <- cotypeConstructorEntryDataAccessors]
+              _ ->
+                pure []
           ImportCotype _ _ xsors ->
             pure [(xsor, principalPath path <.> xsor) | xsor <- xsors]
           ImportTrait _ name ["*"] ->
             case Environment.lookup name moduleTraits of
-              Nothing ->
-                error "Not implemented"
               Just TraitEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
+              _ ->
+                pure []
           ImportTrait _ _ entries ->
             pure [(entry, principalPath path <.> entry) | entry <- entries]
     DQualifiedImport loc path -> do
@@ -778,3 +796,43 @@ qualImports ModuleBuild{..} =
             pure []
     _ ->
       pure []
+
+dataConstructorEntries :: (Monad m) => Environment Kind -> a -> TypeDefinition -> CompilerT a m [DataConstructorEntry a]
+dataConstructorEntries env loc (TypeDefinition _ ctors) = traverse getEntry ctors
+ where
+  getEntry DataConstructor{constructorName = name, ..} = do
+    sch <- translateScheme loc env constructorScheme
+    pure $
+      DataConstructorEntry
+        loc
+        name
+        DataConstructor
+          { constructorName = name
+          , constructorScheme = sch
+          , ..
+          }
+        (Set.fromList (constructorName <$> ctors))
+
+codataAccessorEntries :: (Monad m) => Environment Kind -> a -> CotypeDefinition -> CompilerT a m [CodataAccessorEntry a]
+codataAccessorEntries env loc (CotypeDefinition _ xsors) = traverse getEntry xsors
+ where
+  getEntry CodataAccessor{..} = do
+    sch <- translateScheme loc env accessorScheme
+    pure $
+      CodataAccessorEntry
+        loc
+        accessorName
+        (CodataAccessor accessorName sch)
+
+translateScheme :: (Monad m) => a -> Environment Kind -> Scheme Parameter () ParameterizedType -> CompilerT a m IndexedScheme
+translateScheme loc env (Forall _ _ s) = do
+  case r of
+    Left err -> do
+      path <- gets compilerCurrentModule
+      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
+      throwError PreflightFailure
+    Right t -> do
+      let vs = typeIndexesIn t
+      pure $ Forall vs [] t
+ where
+  r = evalState (instantiateVars [] env s) (0 :: Int)

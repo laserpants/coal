@@ -252,6 +252,8 @@ transformBinding =
       (e1, traits) <- transformScope e
       let ll = Label (foldTypeOf t (nub traits)) name
       pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) (nub traits) t)])
+    BPattern a (PAnnotation _ _ p) e ->
+      transformBinding (BPattern a p e)
     _ ->
       error "Not implemented"
 

@@ -12,13 +12,15 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Core (typeConstructorEnv)
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.TypeSystem.Substitution (apply)
 import qualified Coal.TypeSystem.Substitution as Substitution
-import Control.Monad.State (evalStateT, replicateM)
+import Control.Monad.Except (throwError)
+import Control.Monad.State (evalStateT, gets, replicateM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name, forM)
@@ -114,11 +116,17 @@ lookupCotype t ts name = do
       txs <- replicateM (length ps) (supplied (TypeIndex KType))
       fields <- forM cotypeConstructorEntryDataAccessors $
         \CodataAccessor{accessorScheme = Forall _ _ o, ..} -> do
-          t1 <- instantiateVars (zip ps txs) kinds o
-          let sub = Substitution.fromList (zip (typeIndexId <$> txs) ts)
-          case apply sub t1 of
-            TArrow _ t2 ->
-              pure ("$_" <> accessorName, TIntrinsic IUnit `TArrow` t2)
-            _ ->
-              error "Implementation error"
+          r <- instantiateVars (zip ps txs) kinds o
+          case r of
+            Left err -> do
+              path <- gets compilerCurrentModule
+              tellErrors [KindError err (ErrorLocation (principalPath path) cotypeConstructorEntryMetadata)]
+              throwError PreflightFailure
+            Right t1 -> do
+              let sub = Substitution.fromList (zip (typeIndexId <$> txs) ts)
+              case apply sub t1 of
+                TArrow _ t2 ->
+                  pure ("$_" <> accessorName, TIntrinsic IUnit `TArrow` t2)
+                _ ->
+                  error "Implementation error"
       pure (fieldsRecordType (Map.fromList fields) RNil)

@@ -43,6 +43,14 @@ embedded =
     , $(embedFile "lang/Option.coal")
     )
   ,
+    ( "Process"
+    , $(embedFile "lang/Process.coal")
+    )
+  ,
+    ( "Stream"
+    , $(embedFile "lang/Stream.coal")
+    )
+  ,
     ( "Coal.Combinators"
     , $(embedFile "lang/Coal/Combinators.coal")
     )

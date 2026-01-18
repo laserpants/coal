@@ -47,27 +47,39 @@ instance GenerateConstraints a (Expression a IndexedType) where
     insertConstraintsC (cs1 <> cs2)
 
 instance GenerateConstraints a (FunctionDefinition a IndexedType) where
-  generateConstraints (FunctionDefinition loc _ (With _ t) ps e) = do
+  generateConstraints (FunctionDefinition loc ann (With _ t) ps e) = do
     insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
     t1 <- supplied (TVariable . TypeIndex KType)
     generateConstraints $
       ELet
         loc
-        (BFunction loc placeholder ps e :| [])
+        (BFunction loc placeholder ps expr :| [])
         (EVariable loc (Label t1 placeholder))
    where
     placeholder = "###.function"
+    expr =
+      case ann of
+        Nothing ->
+          e
+        Just (With _ t1) ->
+          EAnnotation loc t1 e
 
 instance GenerateConstraints a (ConstantDefinition a IndexedType) where
-  generateConstraints (ConstantDefinition loc _ (With _ t) e) = do
+  generateConstraints (ConstantDefinition loc ann (With _ t) e) = do
     insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
     generateConstraints $
       ELet
         loc
-        (BPattern loc (PVariable loc (Label t placeholder)) e :| [])
+        (BPattern loc (PVariable loc (Label t placeholder)) expr :| [])
         (EVariable loc (Label t placeholder))
    where
     placeholder = "###.constant"
+    expr =
+      case ann of
+        Nothing ->
+          e
+        Just (With _ t1) ->
+          EAnnotation loc t1 e
 
 instance GenerateConstraints a (Definition a Kind IndexedType) where
   generateConstraints =
@@ -202,22 +214,31 @@ typeDefinitionC =
             \(n, Forall _ _ s) -> do
               env <- asks compilerTypeConstructorEnvironment
               let s1 = evalState (instantiateVars [(q, TypeIndex k 0)] env s) (1 :: Int)
-              insertNameC n (Forall (typeIndexesIn s1) [Trait name (TVariable (TypeIndex k 0))] s1)
+              case s1 of
+                Left err -> do
+                  path <- gets compilerCurrentModule
+                  tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
+                  throwError PreflightFailure
+                Right sch ->
+                  insertNameC n (Forall (typeIndexesIn sch) [Trait name (TVariable (TypeIndex k 0))] sch)
     DInstance loc trait (InstanceDefinition _ t0 ds) -> do
       env <- asks compilerTraitEnvironment
       kinds <- asks compilerTypeConstructorEnvironment
       case Environment.lookup trait env of
         Nothing ->
+          -- TODO: Handle error
           error ("Missing trait: " <> Text.unpack trait)
         Just (TraitEntry _ _ p@(Parameter k _) _ traitInfoEntries) ->
           forM_ ds $
             \d -> do
               case Environment.lookup (definitionName d) traitInfoEntries of
                 Nothing ->
+                  -- TODO: Handle error
                   error ("Missing method: " <> Text.unpack (definitionName d))
                 Just s0 -> do
-                  t1 <- instantiateVarsC t0
-                  let s1 = instantiateTemplate (TypeIndex k 0) t1 (toIndexedScheme kinds p s0)
+                  t1 <- instantiateVarsC loc t0
+                  sch <- toIndexedScheme loc kinds p s0
+                  let s1 = instantiateTemplate (TypeIndex k 0) t1 sch
                   insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s1) (typeOf d) s1]
                   generateConstraints d
     d@(DFunction loc name (FunctionDefinition _ _ (With _ t) ps _ :| _) _) -> do
@@ -241,11 +262,18 @@ typeDefinitionC =
       sub <- solveC
       define (definitionName d) (typeOf (apply sub d))
 
-toIndexedScheme :: Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> IndexedScheme
-toIndexedScheme env p (Forall _ _ t) = scheme [] (toIndexedType env p t)
+toIndexedScheme :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> CompilerT a m IndexedScheme
+toIndexedScheme loc env p (Forall _ _ t) = scheme [] <$> toIndexedType loc env p t
 
-toIndexedType :: Environment Kind -> Parameter Kind -> Type Parameter k -> IndexedType
-toIndexedType env (Parameter k n) t = evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int)
+toIndexedType :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Type Parameter k -> CompilerT a m IndexedType
+toIndexedType loc env (Parameter k n) t =
+  case evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int) of
+    Left err -> do
+      path <- gets compilerCurrentModule
+      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
+      throwError PreflightFailure
+    Right r ->
+      pure r
 
 checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a IndexedType) -> Name -> CompilerT a m ()
 checkMain loc t ps name = do
@@ -271,10 +299,17 @@ checkIfNameExists loc name = do
 instantiateTemplate :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
 instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
-instantiateVarsC :: (Monad m) => Type Parameter () -> CompilerT a m IndexedType
-instantiateVarsC t = do
+instantiateVarsC :: (Monad m) => a -> Type Parameter () -> CompilerT a m IndexedType
+instantiateVarsC loc t = do
   env <- asks compilerTypeConstructorEnvironment
-  instantiateVars [] env t
+  r <- instantiateVars [] env t
+  case r of
+    Left err -> do
+      path <- gets compilerCurrentModule
+      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
+      throwError PreflightFailure
+    Right t1 ->
+      pure t1
 
 define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
 define name t = insertNameC name (Forall (typeIndexesIn s) [] s)

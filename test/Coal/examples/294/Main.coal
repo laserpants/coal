@@ -1,0 +1,11 @@
+module Main {
+
+  import IO(println_string)
+
+  fun hello(x : int32) : a =
+    x
+
+  fun main() =
+    println_string("!")
+
+}

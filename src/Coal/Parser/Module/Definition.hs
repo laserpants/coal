@@ -248,7 +248,7 @@ parseTopLevelFold = do
   n <- lexeme_ "fold" *> name
   ann <- parseAnnotation
   end <- getSourcePos
-  cs <- braces (nonEmpty (some parseMatchClause))
+  cs <- try (nonEmpty (some parseMatchClause)) <|> braces (nonEmpty (some parseMatchClause))
   pure (DFold (Metadata start end) n (FoldDefinition (With [] ann) cs))
 
 parseTopLevelUnfold :: Parser (Definition Metadata o ())

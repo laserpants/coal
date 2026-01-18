@@ -24,6 +24,16 @@ module Coal.Combinators {
   fun snd((_, b)) = b
 
   /**
+   * Apply a function to the first element of a pair.
+   */
+  fun apply_fst(f, (a, b)) = (f(a), b)
+
+  /**
+   * Apply a function to the second element of a pair.
+   */
+  fun apply_snd(f, (a, b)) = (a, f(b))
+
+  /**
    * Swap the components of a pair.
    */
   fun swap((a, b)) = (b, a)

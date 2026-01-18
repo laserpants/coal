@@ -5,6 +5,7 @@ module Coal.Compiler.Pass.PreflightPhase (preflightPhase) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass (BuildUnit, Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
+import Coal.Compiler.Pass.PreflightPhase.AliasCycles (passAliasCycles)
 import Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation)
 import Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule)
 import Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointRule)
@@ -22,6 +23,7 @@ preflightPhase =
     >-> passSetup
     >-> mapPass passWhereClauses
     >-> passDoNotation
+    >-> passAliasCycles
     >-> mapPass (liftPass (generateDebugArtifacts "DoNotation"))
     >-> passShadowingRule
     >-> passMainEntrypointRule

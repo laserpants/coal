@@ -134,6 +134,8 @@ checkTypeAnnotationParameters ps (Substitution sub) = do
     case Map.lookup index sub of
       Just (TVariable (TypeIndex _ n)) ->
         pure [(n, (name, loc))]
+      Just (TRow (RVariable (TypeIndex _ n))) ->
+        pure [(n, (name, loc))]
       Just t -> do
         tell [EAnnotationMonomorphicType loc name t]
         pure []

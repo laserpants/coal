@@ -1,10 +1,42 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Builtin.Traits (builtinTraits) where
+module Coal.Compiler.Builtin.Traits (
+  builtinTraits,
+  numeric,
+  ordered,
+  comparable,
+  divisible,
+  modulo,
+  semigroup,
+) where
 
 import Coal.Language
 import Coal.Language.Module
 import qualified Data.Set as Set
+
+{-# INLINE numeric #-}
+numeric :: ParameterizedType -> Trait ParameterizedType
+numeric = Trait "Numeric"
+
+{-# INLINE ordered #-}
+ordered :: ParameterizedType -> Trait ParameterizedType
+ordered = Trait "Ordered"
+
+{-# INLINE comparable #-}
+comparable :: ParameterizedType -> Trait ParameterizedType
+comparable = Trait "Comparable"
+
+{-# INLINE divisible #-}
+divisible :: ParameterizedType -> Trait ParameterizedType
+divisible = Trait "Divisible"
+
+{-# INLINE modulo #-}
+modulo :: ParameterizedType -> Trait ParameterizedType
+modulo = Trait "Modulo"
+
+{-# INLINE semigroup #-}
+semigroup :: ParameterizedType -> Trait ParameterizedType
+semigroup = Trait "Semigroup"
 
 builtinTraits :: (Monoid a) => [Definition a k ()]
 builtinTraits =

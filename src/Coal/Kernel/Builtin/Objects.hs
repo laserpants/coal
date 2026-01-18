@@ -4,9 +4,11 @@
 module Coal.Kernel.Builtin.Objects (builtinObjects) where
 
 import Coal.Common.Label (Label (..))
+import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Kernel.Language
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Parser.Expr (expr)
+import Coal.Language
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name)
@@ -15,6 +17,9 @@ import Text.RawString.QQ (r)
 
 builtinObjects :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
 builtinObjects = unsafeParseKernelExpr <$> objects
+
+builtinInstance :: (Serializable t) => Trait t -> Name -> Name
+builtinInstance trait name = instanceLabel trait ("Builtin$." <> name)
 
 objects :: Kernel.Module Kernel.Type Name Text
 objects =
@@ -426,28 +431,28 @@ objects =
               |]
         , -- Numeric(int32)
           OFunction
-            "Builtin$.from_int32__$impl_Numeric(Intrinsic(Int32))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int32")
             [ Label Kernel.int32 "n"
             ]
             [r|
                   n : int32
               |]
         , OFunction
-            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Int32))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
                   n : int64
               |]
         , OFunction
-            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Int32))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_bignum")
             [ Label Kernel.bignum "n"
             ]
             [r| 
                   #(bignum_to_int32 : bignum/int32, n : bignum)(fn(m : int32) => m : int32)
               |]
         , OFunction
-            "Builtin$.(+)__$impl_Numeric(Intrinsic(Int32))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(+)")
             [ Label Kernel.int32 "lhs"
             , Label Kernel.int32 "rhs"
             ]
@@ -455,7 +460,7 @@ objects =
                   [+ int32](lhs : int32, rhs : int32)
               |]
         , OFunction
-            "Builtin$.(-)__$impl_Numeric(Intrinsic(Int32))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")
             [ Label Kernel.int32 "lhs"
             , Label Kernel.int32 "rhs"
             ]
@@ -463,7 +468,7 @@ objects =
                   [- int32](lhs : int32, rhs : int32)
               |]
         , OFunction
-            "Builtin$.(*)__$impl_Numeric(Intrinsic(Int32))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(*)")
             [ Label Kernel.int32 "lhs"
             , Label Kernel.int32 "rhs"
             ]
@@ -471,7 +476,7 @@ objects =
                   [* int32](lhs : int32, rhs : int32)
               |]
         , OFunction
-            "Builtin$.negate__$impl_Numeric(Intrinsic(Int32))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "negate")
             [ Label Kernel.int32 "n"
             ]
             [r| 
@@ -479,28 +484,28 @@ objects =
               |]
         , -- Numeric(int64)
           OFunction
-            "Builtin$.from_int32__$impl_Numeric(Intrinsic(Int64))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int32")
             [ Label Kernel.int32 "n"
             ]
             [r|
                   n : int32
               |]
         , OFunction
-            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Int64))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
                   n : int64
               |]
         , OFunction
-            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Int64))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_bignum")
             [ Label Kernel.bignum "n"
             ]
             [r| 
                   #(bignum_to_int64 : bignum/int64, n : bignum)(fn(m : int64) => m : int64)
               |]
         , OFunction
-            "Builtin$.(+)__$impl_Numeric(Intrinsic(Int64))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(+)")
             [ Label Kernel.int64 "lhs"
             , Label Kernel.int64 "rhs"
             ]
@@ -508,7 +513,7 @@ objects =
                   [+ int64](lhs : int64, rhs : int64)
               |]
         , OFunction
-            "Builtin$.(-)__$impl_Numeric(Intrinsic(Int64))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(-)")
             [ Label Kernel.int64 "lhs"
             , Label Kernel.int64 "rhs"
             ]
@@ -516,7 +521,7 @@ objects =
                   [- int64](lhs : int64, rhs : int64)
               |]
         , OFunction
-            "Builtin$.(*)__$impl_Numeric(Intrinsic(Int64))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(*)")
             [ Label Kernel.int64 "lhs"
             , Label Kernel.int64 "rhs"
             ]
@@ -524,7 +529,7 @@ objects =
                   [* int64](lhs : int64, rhs : int64)
               |]
         , OFunction
-            "Builtin$.negate__$impl_Numeric(Intrinsic(Int64))"
+            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "negate")
             [ Label Kernel.int64 "n"
             ]
             [r| 
@@ -532,28 +537,28 @@ objects =
               |]
         , -- Numeric(float)
           OFunction
-            "Builtin$.from_int32__$impl_Numeric(Intrinsic(Float))"
+            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int32")
             [ Label Kernel.int32 "n"
             ]
             [r|
                   #(int32_to_float : int32/float, n : int32) (fn(f : float) => f : float)
               |]
         , OFunction
-            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Float))"
+            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
                   #(int64_to_float : int64/float, n : int64) (fn(f : float) => f : float)
               |]
         , OFunction
-            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Float))"
+            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_bignum")
             [ Label Kernel.bignum "n"
             ]
             [r| 
                   #(bignum_to_float : bignum/float, n : bignum) (fn(m : float) => m : float)
               |]
         , OFunction
-            "Builtin$.(+)__$impl_Numeric(Intrinsic(Float))"
+            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(+)")
             [ Label Kernel.float "lhs"
             , Label Kernel.float "rhs"
             ]
@@ -561,7 +566,7 @@ objects =
                   [+ float](lhs : float, rhs : float)
               |]
         , OFunction
-            "Builtin$.(-)__$impl_Numeric(Intrinsic(Float))"
+            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(-)")
             [ Label Kernel.float "lhs"
             , Label Kernel.float "rhs"
             ]
@@ -569,7 +574,7 @@ objects =
                   [- float](lhs : float, rhs : float)
               |]
         , OFunction
-            "Builtin$.(*)__$impl_Numeric(Intrinsic(Float))"
+            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(*)")
             [ Label Kernel.float "lhs"
             , Label Kernel.float "rhs"
             ]
@@ -577,7 +582,7 @@ objects =
                   [* float](lhs : float, rhs : float)
               |]
         , OFunction
-            "Builtin$.negate__$impl_Numeric(Intrinsic(Float))"
+            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "negate")
             [ Label Kernel.float "f"
             ]
             [r| 
@@ -585,28 +590,28 @@ objects =
               |]
         , -- Numeric(double)
           OFunction
-            "Builtin$.from_int32__$impl_Numeric(Intrinsic(Double))"
+            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int32")
             [ Label Kernel.int32 "n"
             ]
             [r|
                   #(int32_to_double : int32/double, n : int32) (fn(d : double) => d : double)
               |]
         , OFunction
-            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Double))"
+            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
                   #(int64_to_double : int64/double, n : int64) (fn(d : double) => d : double)
               |]
         , OFunction
-            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Double))"
+            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_bignum")
             [ Label Kernel.bignum "n"
             ]
             [r| 
                   #(bignum_to_double : bignum/double, n : bignum)(fn(m : double) => m : double)
               |]
         , OFunction
-            "Builtin$.(+)__$impl_Numeric(Intrinsic(Double))"
+            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(+)")
             [ Label Kernel.double "lhs"
             , Label Kernel.double "rhs"
             ]
@@ -614,7 +619,7 @@ objects =
                   [+ double](lhs : double, rhs : double)
               |]
         , OFunction
-            "Builtin$.(-)__$impl_Numeric(Intrinsic(Double))"
+            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(-)")
             [ Label Kernel.double "lhs"
             , Label Kernel.double "rhs"
             ]
@@ -622,7 +627,7 @@ objects =
                   [- double](lhs : double, rhs : double)
               |]
         , OFunction
-            "Builtin$.(*)__$impl_Numeric(Intrinsic(Double))"
+            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(*)")
             [ Label Kernel.double "lhs"
             , Label Kernel.double "rhs"
             ]
@@ -630,7 +635,7 @@ objects =
                   [* double](lhs : double, rhs : double)
               |]
         , OFunction
-            "Builtin$.negate__$impl_Numeric(Intrinsic(Double))"
+            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "negate")
             [ Label Kernel.double "d"
             ]
             [r| 
@@ -638,7 +643,7 @@ objects =
               |]
         , -- Numeric(nat)
           OFunction
-            "Builtin$.from_int32__$impl_Numeric(Intrinsic(Nat))"
+            (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int32")
             [ Label Kernel.int32 "m"
             ]
             [r| 
@@ -649,7 +654,7 @@ objects =
               |]
         , OFunction
             -- NOTE: Numbers larger than INT32_MAX are truncated
-            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Nat))"
+            (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int64")
             [ Label Kernel.int64 "m"
             ]
             [r| 
@@ -659,7 +664,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Nat))"
+            (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_bignum")
             [ Label Kernel.bignum "n"
             ]
             [r| 
@@ -670,7 +675,7 @@ objects =
                       ))
               |]
         , OFunction
-            "Builtin$.(+)__$impl_Numeric(Intrinsic(Nat))"
+            (builtinInstance (Trait.numeric (TIntrinsic INat)) "(+)")
             [ Label (Kernel.TCon "$Nat" []) "lhs"
             , Label (Kernel.TCon "$Nat" []) "rhs"
             ]
@@ -690,7 +695,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.(-)__$impl_Numeric(Intrinsic(Nat))"
+            (builtinInstance (Trait.numeric (TIntrinsic INat)) "(-)")
             [ Label (Kernel.TCon "$Nat" []) "lhs"
             , Label (Kernel.TCon "$Nat" []) "rhs"
             ]
@@ -716,7 +721,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.(*)__$impl_Numeric(Intrinsic(Nat))"
+            (builtinInstance (Trait.numeric (TIntrinsic INat)) "(*)")
             [ Label (Kernel.TCon "$Nat" []) "lhs"
             , Label (Kernel.TCon "$Nat" []) "rhs"
             ]
@@ -736,7 +741,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.negate__$impl_Numeric(Intrinsic(Nat))"
+            (builtinInstance (Trait.numeric (TIntrinsic INat)) "negate")
             [ Label (Kernel.TCon "$Nat" []) "_"
             ]
             [r| 
@@ -744,28 +749,28 @@ objects =
               |]
         , -- Numeric(bignum)
           OFunction
-            "Builtin$.from_int32__$impl_Numeric(Intrinsic(Bignum))"
+            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int32")
             [ Label Kernel.int32 "n"
             ]
             [r|
                   #(int32_to_bignum : int32/bignum, n : int32) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.from_int64__$impl_Numeric(Intrinsic(Bignum))"
+            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
                   #(int64_to_bignum : int64/bignum, n : int64) (fn(a : *) => a : *)
               |]
         , OFunction
-            "Builtin$.from_bignum__$impl_Numeric(Intrinsic(Bignum))"
+            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_bignum")
             [ Label Kernel.bignum "n"
             ]
             [r| 
                   n : bignum
               |]
         , OFunction
-            "Builtin$.(+)__$impl_Numeric(Intrinsic(Bignum))"
+            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(+)")
             [ Label Kernel.bignum "p"
             , Label Kernel.bignum "q"
             ]
@@ -773,7 +778,7 @@ objects =
                   #(bignum_add : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
               |]
         , OFunction
-            "Builtin$.(-)__$impl_Numeric(Intrinsic(Bignum))"
+            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(-)")
             [ Label Kernel.bignum "p"
             , Label Kernel.bignum "q"
             ]
@@ -781,7 +786,7 @@ objects =
                   #(bignum_sub : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
               |]
         , OFunction
-            "Builtin$.(*)__$impl_Numeric(Intrinsic(Bignum))"
+            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(*)")
             [ Label Kernel.bignum "p"
             , Label Kernel.bignum "q"
             ]
@@ -789,7 +794,7 @@ objects =
                   #(bignum_mul : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
               |]
         , OFunction
-            "Builtin$.negate__$impl_Numeric(Intrinsic(Bignum))"
+            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "negate")
             [ Label Kernel.bignum "p"
             ]
             [r| 
@@ -958,7 +963,7 @@ objects =
                   }
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Int32))"
+            (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
             [ Label Kernel.int32 "x"
             , Label Kernel.int32 "y"
             ]
@@ -974,7 +979,7 @@ objects =
                           EqualTo : Ordering
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Int64))"
+            (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
             [ Label Kernel.int64 "x"
             , Label Kernel.int64 "y"
             ]
@@ -990,7 +995,7 @@ objects =
                           EqualTo : Ordering
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Float))"
+            (builtinInstance (Trait.ordered (TIntrinsic IFloat)) "compare")
             [ Label Kernel.float "x"
             , Label Kernel.float "y"
             ]
@@ -1006,7 +1011,7 @@ objects =
                           EqualTo : Ordering
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Double))"
+            (builtinInstance (Trait.ordered (TIntrinsic IDouble)) "compare")
             [ Label Kernel.double "x"
             , Label Kernel.double "y"
             ]
@@ -1022,7 +1027,7 @@ objects =
                           EqualTo : Ordering
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Nat))"
+            (builtinInstance (Trait.ordered (TIntrinsic INat)) "compare")
             [ Label (Kernel.TCon "$Nat" []) "x"
             , Label (Kernel.TCon "$Nat" []) "y"
             ]
@@ -1045,7 +1050,7 @@ objects =
                               , b : int32 )
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Bool))"
+            (builtinInstance (Trait.ordered (TIntrinsic IBool)) "compare")
             [ Label Kernel.bool "x"
             , Label Kernel.bool "y"
             ]
@@ -1067,7 +1072,7 @@ objects =
                        else EqualTo : Ordering
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Char))"
+            (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
             [ Label Kernel.char "x"
             , Label Kernel.char "y"
             ]
@@ -1079,7 +1084,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(String))"
+            (builtinInstance (Trait.ordered (TIntrinsic IString)) "compare")
             [ Label Kernel.string "s1"
             , Label Kernel.string "s2"
             ]
@@ -1150,7 +1155,7 @@ objects =
                       )
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Intrinsic(Bignum))"
+            (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
             [ Label Kernel.bignum "x"
             , Label Kernel.bignum "y"
             ]
@@ -1295,7 +1300,7 @@ objects =
                   }
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Int32))"
+            (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")
             [ Label Kernel.int32 "x"
             , Label Kernel.int32 "y"
             ]
@@ -1303,7 +1308,7 @@ objects =
                   if ([== int32](x : int32, y : int32)) then true else false 
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Int64))"
+            (builtinInstance (Trait.comparable (TIntrinsic IInt64)) "(==)")
             [ Label Kernel.int64 "x"
             , Label Kernel.int64 "y"
             ]
@@ -1311,7 +1316,7 @@ objects =
                   if ([== int64](x : int64, y : int64)) then true else false 
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Float))"
+            (builtinInstance (Trait.comparable (TIntrinsic IFloat)) "(==)")
             [ Label Kernel.float "x"
             , Label Kernel.float "y"
             ]
@@ -1319,7 +1324,7 @@ objects =
                   if ([== float](x : float, y : float)) then true else false 
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Double))"
+            (builtinInstance (Trait.comparable (TIntrinsic IDouble)) "(==)")
             [ Label Kernel.double "x"
             , Label Kernel.double "y"
             ]
@@ -1327,7 +1332,7 @@ objects =
                   if ([== double](x : double, y : double)) then true else false 
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Bool))"
+            (builtinInstance (Trait.comparable (TIntrinsic IBool)) "(==)")
             [ Label Kernel.bool "x"
             , Label Kernel.bool "y"
             ]
@@ -1335,7 +1340,7 @@ objects =
                   if ([== bool](x : bool, y : bool)) then true else false 
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Char))"
+            (builtinInstance (Trait.comparable (TIntrinsic IChar)) "(==)")
             [ Label Kernel.char "x"
             , Label Kernel.char "y"
             ]
@@ -1343,7 +1348,7 @@ objects =
                   if ([== char](x : char, y : char)) then true else false 
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Nat))"
+            (builtinInstance (Trait.comparable (TIntrinsic INat)) "(==)")
             [ Label (Kernel.TCon "$Nat" []) "x"
             , Label (Kernel.TCon "$Nat" []) "y"
             ]
@@ -1363,7 +1368,7 @@ objects =
                             if ([== int32](a : int32, b : int32)) then true else false 
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(String))"
+            (builtinInstance (Trait.comparable (TIntrinsic IString)) "(==)")
             [ Label Kernel.string "str1"
             , Label Kernel.string "str2"
             ]
@@ -1371,7 +1376,7 @@ objects =
                   #(string_compare : string/string/bool, str1 : string, str2 : string) (fn(r : bool) => r : bool)
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Intrinsic(Bignum))"
+            (builtinInstance (Trait.comparable (TIntrinsic IBignum)) "(==)")
             [ Label Kernel.bignum "m"
             , Label Kernel.bignum "n"
             ]
@@ -1379,7 +1384,7 @@ objects =
                   #(bignum_eq : bignum/bignum/bool, m : bignum, n : bignum) (fn(r : bool) => r : bool)
               |]
         , OFunction
-            "Builtin$.(/)__$impl_Divisible(Intrinsic(Float))"
+            (builtinInstance (Trait.divisible (TIntrinsic IFloat)) "(/)")
             [ Label Kernel.float "q"
             , Label Kernel.float "r"
             ]
@@ -1387,7 +1392,7 @@ objects =
                   [/ float](q : float, r : float)
               |]
         , OFunction
-            "Builtin$.(/)__$impl_Divisible(Intrinsic(Double))"
+            (builtinInstance (Trait.divisible (TIntrinsic IDouble)) "(/)")
             [ Label Kernel.double "q"
             , Label Kernel.double "r"
             ]
@@ -1395,7 +1400,7 @@ objects =
                   [/ double](q : double, r : double)
               |]
         , OFunction
-            "Builtin$.(%)__$impl_Modulo(Intrinsic(Int32))"
+            (builtinInstance (Trait.modulo (TIntrinsic IInt32)) "(%)")
             [ Label Kernel.int32 "q"
             , Label Kernel.int32 "r"
             ]
@@ -1403,7 +1408,7 @@ objects =
                   #(int32_mod : int32/int32/int32, q : int32, r : int32) (fn(s : int32) => s : int32)
               |]
         , OFunction
-            "Builtin$.(%)__$impl_Modulo(Intrinsic(Int64))"
+            (builtinInstance (Trait.modulo (TIntrinsic IInt64)) "(%)")
             [ Label Kernel.int64 "q"
             , Label Kernel.int64 "r"
             ]
@@ -1411,7 +1416,7 @@ objects =
                   #(int64_mod : int64/int64/int64, q : int64, r : int64) (fn(s : int64) => s : int64)
               |]
         , OFunction
-            "Builtin$.(%)__$impl_Modulo(Intrinsic(Bignum))"
+            (builtinInstance (Trait.modulo (TIntrinsic IBignum)) "(%)")
             [ Label Kernel.bignum "q"
             , Label Kernel.bignum "r"
             ]
@@ -1419,7 +1424,7 @@ objects =
                   #(bignum_mod : bignum/bignum/bignum, q : bignum, r : bignum) (fn(s : bignum) => s : bignum)
               |]
         , OFunction
-            "Builtin$.(<>)__$impl_Semigroup(Intrinsic(String))"
+            (builtinInstance (Trait.semigroup (TIntrinsic IString)) "(<>)")
             [ Label Kernel.string "s"
             , Label Kernel.string "t"
             ]
@@ -1431,7 +1436,7 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.(<>)__$impl_Semigroup(Application(Constructor(List))(Variable(Parameter(a))))"
+            (builtinInstance (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)")
             [ Label (Kernel.TCon "List" [Kernel.TOpq]) "xs"
             , Label (Kernel.TCon "List" [Kernel.TOpq]) "ys"
             ]
@@ -1474,7 +1479,8 @@ objects =
                     )
               |]
         , OFunction
-            "Builtin$.(==)__$impl_Comparable(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
+            ( builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
+            )
             [ Label (Kernel.TCon "Comparable" [opaque]) "$a"
             , Label (Kernel.TCon "Comparable" [opaque]) "$b"
             , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t1"
@@ -1510,7 +1516,7 @@ objects =
                   }
               |]
         , OFunction
-            "Builtin$.compare__$impl_Ordered(Application(Application(Constructor(#Tuple2))(Variable(Parameter(a))))(Variable(Parameter(b))))"
+            (builtinInstance (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare")
             [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
             , Label (Kernel.TCon "Ordered" [opaque]) "$b"
             , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t1"
@@ -1547,6 +1553,181 @@ objects =
                               }
                         }
                   }
+              |]
+        , OFunction
+            "Builtin$.process$_process"
+            [ Label Kernel.opaque "seed"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            ]
+            [r| 
+                  let
+                    step : */*/Process(*,*) =
+                      fn(v : *, a2 : *) =>
+                        @<Process(*,*)>
+                          ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                          , @<record({ state : * | step : */*/Process(*,*) | {} })>
+                              ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                              , { state = 
+                                    @<*>
+                                      ( f : */*/*
+                                      , v : *
+                                      , a2 : *
+                                      )
+                                | step = step : */*/Process(*,*)
+                                | {}
+                                }
+                              )
+                          )
+                  in
+                  @<Process(*,*)>
+                    ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                    , @<record({ state : * | step : */*/Process(*,*) | {} })>
+                        ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                        , { state = seed : *
+                          | step = step : */*/Process(*,*)
+                          | {}
+                          }
+                        )
+                    )
+              |]
+        , OFunction
+            "Builtin$.process$_map_process"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label (Kernel.TCon "Process" [opaque, opaque]) "p"
+            ]
+            [r| 
+                  match<Process(*,*)>(p : Process(*,*)) {
+                    | ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                      , $r : record({ state : * | step : */*/Process(*,*) | {} })
+                      ) =>
+                        match<Process(*,*)>($r : record({ state : * | step : */*/Process(*,*) | {} })) {
+                          | ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                            , $row : { state : * | step : */*/Process(*,*) | {} }
+                            ) =>
+                              select
+                                { state = $state : * | q : { step : */*/Process(*,*) | {} } } =
+                                  $row : { state : * | step : */*/Process(*,*) | {} }
+                                in
+                                  select
+                                    { step = $step : */*/Process(*,*) | _ : {} } = 
+                                      q : { step : */*/Process(*,*) | {} }
+                                    in
+                                    @<Process(*,*)>
+                                      ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                                      , @<record({ state : * | step : */*/Process(*,*) | {} })>
+                                          ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                                          , { state = 
+                                                @<*>
+                                                  ( f : */*
+                                                  , $state : *
+                                                  )
+                                            | step = 
+                                                fn(v : *, _ : *) =>
+                                                  @<Process(*,*)>
+                                                    ( `Builtin$.process$_map_process` : (*/*)/Process(*,*)/Process(*,*)
+                                                    , f : */*
+                                                    , @<Process(*,*)>
+                                                        ( $step : */*/Process(*,*)
+                                                        , v : *
+                                                        , $state : *
+                                                        )
+                                                    )
+                                            | {}
+                                            }
+                                          )
+                                      )
+                        }
+                  }
+              |]
+        , OFunction
+            "Builtin$.process$_contramap_input"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label (Kernel.TCon "Process" [opaque, opaque]) "p"
+            ]
+            [r| 
+                  match<Process(*,*)>(p : Process(*,*)) {
+                    | ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                      , $r : record({ state : * | step : */*/Process(*,*) | {} })
+                      ) =>
+                        match<Process(*,*)>($r : record({ state : * | step : */*/Process(*,*) | {} })) {
+                          | ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                            , $row : { state : * | step : */*/Process(*,*) | {} }
+                            ) =>
+                              select
+                                { state = $state : * | q : { step : */*/Process(*,*) | {} } } =
+                                  $row : { state : * | step : */*/Process(*,*) | {} }
+                                in
+                                  select
+                                    { step = $step : */*/Process(*,*) | _ : {} } = 
+                                      q : { step : */*/Process(*,*) | {} }
+                                    in
+                                    @<Process(*,*)>
+                                      ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                                      , @<record({ state : * | step : */*/Process(*,*) | {} })>
+                                          ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                                          , { state = $state : *
+                                            | step = 
+                                                fn(v : *, a : *) =>
+                                                  @<Process(*,*)>
+                                                    ( `Builtin$.process$_contramap_input` : (*/*)/Process(*,*)/Process(*,*)
+                                                    , f : */*
+                                                    , @<Process(*,*)>
+                                                        ( $step : */*/Process(*,*)
+                                                        , @<*>
+                                                            ( f : */*
+                                                            , v : *
+                                                            )
+                                                        , a : *
+                                                        )
+                                                    )
+                                            | {}
+                                            }
+                                          )
+                                      )
+                        }
+                  }
+              |]
+        , OFunction
+            "Builtin$.process$_duplicate"
+            [ Label (Kernel.TCon "Process" [opaque, opaque]) "p"
+            ]
+            [r| 
+                  let
+                    step : */Process(*,*)/Process(Process(*,*),*) =
+                      fn(v : *, p2 : Process(*,*)) =>
+                        match<Process(*,*)>(p2 : Process(*,*)) {
+                          | ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                            , $r : record({ state : * | step : */*/Process(*,*) | {} })
+                            ) =>
+                              match<Process(*,*)>($r : record({ state : * | step : */*/Process(*,*) | {} })) {
+                                | ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                                  , $row : { state : * | step : */*/Process(*,*) | {} }
+                                  ) =>
+                                    select
+                                      { step = $step : */*/Process(*,*) | _ : { state : * | {} } } = 
+                                        $row : { state : * | step : */*/Process(*,*) | {} }
+                                      in
+                                      @<Process(Process(*,*),*)>
+                                        ( `Builtin$.process$_duplicate` : Process(*,*)/Process(Process(*,*),*)
+                                        , @<Process(Process(*,*),*)>
+                                            ( $step : */*/Process(*,*)
+                                            , v : *
+                                            , p2 : Process(*,*)
+                                            )
+                                        )
+                              }
+                        }
+                  in
+                  @<Process(Process(*,*),*)>
+                    ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
+                    , @<record({ state : * | step : */*/Process(*,*) | {} })>
+                        ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                        , { state = p : Process(*,*)
+                          | step = step : */Process(*,*)/Process(Process(*,*),*)
+                          | {}
+                          }
+                        )
+                    )
               |]
         ]
     }

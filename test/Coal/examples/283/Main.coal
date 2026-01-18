@@ -1,0 +1,90 @@
+module Main {
+
+  import IO(println_int32, println_string, println_bool, println_nat)
+  import String(is_prefix_of)
+  import namespace List
+  import namespace String
+
+
+
+  type alias Automaton<a, v> =
+    { state : a
+    , step : v -> a -> a
+    }
+
+  fun peek({ state | _ }) = state
+
+  fun poke(v, { state, step }) = 
+    { state = step(v, state), step = step }
+
+  // ---
+
+  type alias Stream<a> = Automaton<a, unit>
+
+  let nats : Stream<int32> = 
+    { state = 0
+    , step = fn(_, n) => n + 1
+    }
+
+  let tail = poke()
+  let head = peek
+
+  let example1 =
+    nats
+      |. tail
+      |. tail
+      |. tail
+      |. head
+
+  // ---
+
+  type alias Parser = Automaton<(Option<string>, string), string>
+
+  fun next(r, s, q) =
+    ( Some(r <> s)  
+    , String.drop(String.length(s), q)
+    )
+
+  fun step_fn(inp, (res, rem)) =
+    match(res) {
+      | Some(r)
+          when (is_prefix_of(inp, rem)) => next(r, inp, rem)
+          when (is_prefix_of(rem, inp)) => next(r, rem, inp)
+          otherwise => (None, rem)
+      | None =>
+          (None, rem)
+    }
+
+//  let parse_hello : Parser =
+
+  let parse_hello : Automaton<(Option<string>, string), string> =
+    { state = (Some(""), "hello")
+    , step = step_fn
+    }
+
+
+  let example2 =
+    parse_hello
+      |. poke("hellobob")
+      |. peek
+
+  let example3 =
+    parse_hello
+      |. poke("he")
+      |. poke("ll")
+      |. peek
+
+
+
+  fun main() =
+    println_int32(example1)
+
+    //println_nat(String.length("hello"))
+
+    //match(example3) {
+    //  | (Some(s), q) =>
+    //      println_string(s <> "," <> q)
+    //  | _ =>
+    //      println_string("-")
+    //}
+}

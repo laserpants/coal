@@ -61,11 +61,9 @@ data Module a k t = Module
     , Typeable
     )
 
-{-# INLINE overModuleDefinitions #-}
 overModuleDefinitions :: Over (Module a k t) [Definition a k t]
 overModuleDefinitions fn (Module path names defs) = Module path names (fn defs)
 
-{-# INLINE overModuleDefinitionsM #-}
 overModuleDefinitionsM :: (Monad m) => ([Definition a k t] -> m [Definition a k t]) -> Module a k t -> m (Module a k t)
 overModuleDefinitionsM fn (Module path names defs) = Module path names <$> fn defs
 
@@ -73,7 +71,6 @@ overModuleDefinitionsM fn (Module path names defs) = Module path names <$> fn de
 insertDefinition :: Definition a k t -> Module a k t -> Module a k t
 insertDefinition def = overModuleDefinitions (def :)
 
-{-# INLINE fromDefinitionList #-}
 fromDefinitionList :: Path -> [Export a] -> [Definition a k t] -> Module a k t
 fromDefinitionList path exports = foldr insertDefinition (Module path exports mempty)
 

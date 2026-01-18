@@ -1510,6 +1510,116 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "283" $ do
+    expectOutput
+      "3"
+      "test/Coal/examples/283"
+      [ "Main.coal"
+      ]
+
+  describe "284" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/284"
+      [ "Main.coal"
+      ]
+
+  describe "285" $ do
+    expectOutput
+      "hello,bob"
+      "test/Coal/examples/285"
+      [ "Main.coal"
+      ]
+
+  describe "287" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/287" ["Main.coal"]
+      res `shouldBe` Left PreflightFailure
+
+  describe "289" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/289" ["Main.coal"]
+      res `shouldBe` Left PreflightFailure
+
+  describe "290" $ do
+    expectOutput
+      "x"
+      "test/Coal/examples/290"
+      [ "Main.coal"
+      ]
+
+  describe "291" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/291" ["Main.coal"]
+      res `shouldBe` Left PreflightFailure
+
+  describe "294" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/294" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  describe "295" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/295" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  describe "296" $ do
+    expectOutput
+      "!"
+      "test/Coal/examples/296"
+      [ "Main.coal"
+      ]
+
+  describe "298" $ do
+    expectOutput
+      "!"
+      "test/Coal/examples/298"
+      [ "Main.coal"
+      ]
+
+  describe "299" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/299"
+      [ "Main.coal"
+      ]
+
+  describe "300" $ do
+    expectOutput
+      "1"
+      "test/Coal/examples/300"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "301" $ do
+    expectOutput
+      "1"
+      "test/Coal/examples/301"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "293" $ do
+    expectOutput
+      "hell,o"
+      "test/Coal/examples/293"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "302" $ do
+    expectOutput
+      "5"
+      "test/Coal/examples/302"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

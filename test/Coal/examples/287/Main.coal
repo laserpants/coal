@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_string)
+
+  // Cycles should not be allowed in type aliases
+  type alias Process<a, v> =
+    { state : a
+    , step : v -> a -> Process<a, v>
+    }
+
+
+  fun main() =
+    println_string("")
+
+}

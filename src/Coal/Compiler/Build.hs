@@ -69,7 +69,7 @@ import Extras (Name, Set)
 import GHC.Generics (Generic)
 
 data ModuleBuild a = ModuleBuild
-  { moduleCurrentPath :: Path
+  { moduleBuildPath :: Path
   , moduleFilePath :: Text
   , moduleDataConstructors :: Environment (DataConstructorEntry a)
   , moduleCodataAccessors :: Environment (CodataAccessorEntry a)
@@ -120,7 +120,7 @@ exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (En
 emptyModuleBuild :: ModuleBuild a
 emptyModuleBuild =
   ModuleBuild
-    { moduleCurrentPath = Path []
+    { moduleBuildPath = Path []
     , moduleFilePath = mempty
     , moduleDataConstructors = mempty
     , moduleCodataAccessors = mempty
@@ -246,7 +246,7 @@ setTypeExports names ModuleBuild{..} =
 setPath :: Path -> ModuleBuild a -> ModuleBuild a
 setPath path ModuleBuild{..} =
   ModuleBuild
-    { moduleCurrentPath = path
+    { moduleBuildPath = path
     , ..
     }
 

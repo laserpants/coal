@@ -1,0 +1,70 @@
+module Main {
+
+  import IO(println_int32)
+
+//  Builtin type:
+//
+//  type Process<a, v> =
+//    Process(
+//      { state : a
+//      , step : v -> a -> Process<a, v>
+//      })
+
+  fun observe(Process({ state | _ }) : Process<a, v>) : a = state
+
+  fun receive(input : v, Process({ state, step }) : Process<a, v>) : Process<a, v> =
+    step(input, state)
+
+  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
+    process$_process(seed, f)
+
+  fun map_process(f : a -> b, process : Process<a, v>) : Process<b, v> = 
+    process$_map_process(f, process)
+
+  fun contramap_input(f : w -> v, process : Process<a, v>) : Process<a, w> = 
+    process$_contramap_input(f, process)
+
+  fun zip_processes(a : Process<b, a>, b : Process<c, b>) : Process<(Process<b, a>, Process<c, b>), a> =
+    let
+      // BUG: 
+      go(v, (src, sink)) = 
+        ( src |. receive(v)
+        , sink |. receive(src |. observe)
+        )
+      in
+      process((a, b), go)
+
+//  fun compose() =
+//    ?
+
+  fun cons(state : a, p : Process<a, v>) : Process<a, v> =
+    Process(
+      { state = state
+      , step = fn(_, _) => p
+      })
+
+  type alias Stream<a> = Process<a, unit>
+
+  fun repeat(state : a) : Stream<a> =
+    process(state, fn(_, _) => state)
+
+  fun enum_from(n : int32) : Stream<int32> =
+    process(n, fn(_, m) => m + 1)
+
+  let nats : Stream<int32> = enum_from(0)
+
+
+  
+  let 
+    xx =
+      cons(5, cons(4, repeat(1)))
+
+  let
+    yy =
+      map_process(fn(x) => x + 2, xx)
+
+
+  fun main() =
+    println_int32(observe(yy |.receive()))
+
+}
