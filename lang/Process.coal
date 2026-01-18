@@ -1,0 +1,42 @@
+module Process {
+
+  import Coal.Combinators(snd)
+
+  fun observe(Process({ state | _ }) : Process<a, v>) : a = 
+    state
+
+  fun receive(input : v, Process({ state, step }) : Process<a, v>) : Process<a, v> =
+    step(input, state)
+
+  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
+    process$_process(seed, f)
+
+  fun map_process(f : a -> b, process : Process<a, v>) : Process<b, v> = 
+    process$_map_process(f, process)
+
+  fun contramap_input(f : w -> v, process : Process<a, v>) : Process<a, w> = 
+    process$_contramap_input(f, process)
+
+  fun duplicate(process : Process<a, v>) : Process<Process<a, v>, v> = 
+    process$_duplicate(process)
+
+  fun zip_processes(p : Process<b, a>, q : Process<c, b>) : Process<(Process<b, a>, Process<c, b>), a> =
+    let
+      step(v, (source, sink)) =
+        ( source 
+            |.receive(v)
+        , sink 
+            |.receive(source |.observe) )
+      in
+        process((p, q), step)
+
+  fun compose(p : Process<b, a>, q : Process<c, b>) : Process<c, a> =
+    map_process(observe << snd, zip_processes(p, q))
+
+  fun cons(state : a, process : Process<a, v>) : Process<a, v> =
+    Process(
+      { state = state
+      , step = fn(_, _) => process
+      })
+
+}

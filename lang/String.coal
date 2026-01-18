@@ -105,9 +105,18 @@ module String {
   fun concat(strs : List<string>) : string =
     intercalate("", strs)
 
+  /**
+   * Return a boolean indicating whether the first string is a prefix of the 
+   * second.
+   */
   fun is_prefix_of(part : string, whole : string) : bool =
     List.is_prefix_of(to_list(part), to_list(whole))
 
+  /**
+   * Remove the first `n` characters from the string.
+   *
+   * If the string is shorter than `n`, return an empty string.
+   */
   fun drop(n : nat, str : string) : string =
     from_list(List.drop(n, to_list(str)))
 

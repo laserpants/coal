@@ -230,6 +230,10 @@ parseSpecialNameExpression =
         <|> "number$_unsafe_parse_bignum"
         <|> "char$_ord"
         <|> "char$_chr"
+        <|> "process$_process"
+        <|> "process$_map_process"
+        <|> "process$_contramap_input"
+        <|> "process$_duplicate"
     pure (\ll -> EVariable ll (Label () spec))
 
 parseVariableExpression :: Parser (Expression Metadata ())

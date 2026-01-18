@@ -53,7 +53,7 @@ instance TransformContext (Binding Expression Metadata IndexedType) where
       BPattern a p e ->
         BPattern a <$> desugarPatterns p <*> desugarPatterns e
       BFunction a name ps e ->
-        pure
+        desugarPatterns
           ( BPattern
               a
               (PVariable mempty (Label (foldTypeOf e ps) name))

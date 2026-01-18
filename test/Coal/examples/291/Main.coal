@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(println_string)
+
+  type alias X<a> = X<a, X<a>>
+
+  fun main() =
+    println_string("!")
+
+}

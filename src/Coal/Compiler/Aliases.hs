@@ -60,8 +60,18 @@ instance (AliasContext t, Data t, Data a) => AliasContext (Expression a t) where
       \case
         EAnnotation a t e ->
           EAnnotation a <$> expandAliases t <*> expandAliases e
+        ELet a bs e ->
+          ELet a <$> expandAliases bs <*> expandAliases e
         e ->
           pure e
+
+instance (AliasContext t, Data t, Data a) => AliasContext (Binding Expression a t) where
+  expandAliases =
+    \case
+      BPattern a p e ->
+        BPattern a <$> expandAliases p <*> expandAliases e
+      BFunction a n ps e ->
+        BFunction a n <$> expandAliases ps <*> expandAliases e
 
 instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
   expandAliases =
@@ -169,7 +179,11 @@ lookupAlias t ts name = do
   env <- asks compilerAliasEnvironment
   case Environment.lookup name env of
     Nothing ->
-      pure t
+      case t of
+        TApplication _ t1 t2 ->
+          TApplication () <$> expandAliases t1 <*> expandAliases t2
+        _ ->
+          pure t
     Just AliasEntry{..} -> do
       let t1 = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
       TAlias name ts <$> expandAliases t1
@@ -188,5 +202,7 @@ substituteAlias name s =
       TArrow (substituteAlias name s t1) (substituteAlias name s t2)
     TRow row ->
       TRow (substituteAlias name s <$> row)
+    TRecord t ->
+      TRecord (substituteAlias name s t)
     t ->
       t

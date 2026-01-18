@@ -1,0 +1,20 @@
+module Main {
+
+  import IO(println_string)
+
+  type alias Automaton<a> = { state : a }
+
+//  let parse_hello : Automaton<string> = { state = "" }
+
+  let parse_hello : Automaton<string> = { state = "" }
+
+//  type alias X<t> = List<t>
+
+  fun main() =
+    let
+      foo = // : X<int32> =
+        [5]
+    in
+    println_string("!")
+
+}

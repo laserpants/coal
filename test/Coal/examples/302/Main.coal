@@ -1,0 +1,193 @@
+module Main {
+
+  import IO(println_int32, println_string)
+  import String(is_prefix_of, length, drop)
+  import Containers.Set(type Set)
+  import namespace Containers.Set
+  import Stream(type Stream, nats, head, tail, repeat)
+  import Process(receive, cons, observe, duplicate, process, map_process)
+
+  type alias Parser = Process<(Option<string>, string), string>
+
+  fun parse_string(str : string) : Parser =
+    let
+      step(input, state) =
+        match(state) {
+          | (Some(res), remain) 
+              when (is_prefix_of(input, remain)) =>
+                ( Some(res <> input)
+                , drop(length(input), remain)
+                )
+              when (is_prefix_of(remain, input)) =>
+                ( Some(res <> remain)
+                , drop(length(remain), input)
+                )
+              otherwise =>
+                state
+          | _ =>
+            state
+        }
+    in
+    process((Some(""), str), step)
+
+  // Game
+
+  type Shape 
+    = ShapeI
+    | ShapeO
+    | ShapeT
+    | ShapeS
+    | ShapeZ
+    | ShapeJ
+    | ShapeL
+
+  type Rotation
+    = R0
+    | R90
+    | R180
+    | R270
+
+  fun spin
+    | R0 = R90
+    | R90 = R180
+    | R180 = R270
+    | R270 = R0
+
+  type Board = Board(Set<(int32, int32)>)
+
+  type Move
+    = MoveLeft
+    | MoveRight
+    | MoveDown
+    | Rotate
+
+  type Event
+    = KeyLeft
+    | KeyRight
+    | KeyDown
+    | KeyUp
+//    | KeySpace
+//    | KeyEsc
+    | Tick
+
+  type alias Block =
+    { shape : Shape
+    , rotation : Rotation
+    , pos_x : int32
+    , pos_y : int32
+    }
+
+  fun spin_block({ shape, rotation, pos_x, pos_y } : Block) =
+    { shape = shape
+    , rotation = spin(rotation)
+    , pos_x = pos_x
+    , pos_y = pos_y
+    }
+
+  type alias GameState = 
+    { board : Board
+    , current_block : Block
+    }
+
+  let initial_game_state : GameState=
+    { board = Board(Containers.Set.empty)
+    , current_block = { shape = ShapeI, rotation = R0, pos_x = 0, pos_y = 0 }
+    }
+
+  fun move_block(x : int32, y : int32, { shape, rotation, pos_x, pos_y }) : Block =
+    { shape = shape
+    , rotation = rotation
+    , pos_x = pos_x + x
+    , pos_y = pos_y + y
+    }
+
+  fun move_current_block(x : int32, y : int32, { board, current_block }) : GameState =
+    { board = board
+    , current_block = move_block(x, y, current_block)
+    }
+
+  fun interpret_event : Event -> Move 
+    | KeyLeft         = MoveLeft
+    | KeyRight        = MoveRight
+    | KeyUp           = Rotate
+    | KeyDown or Tick = MoveDown
+
+  let game : Process<GameState, Move> =
+    let
+      step(move, { board, current_block }) =
+        match(move) {
+          | MoveLeft =>
+              { board = board
+              , current_block = current_block
+              }
+          | MoveRight =>
+              { board = board
+              , current_block = current_block
+              }
+          | Rotate =>
+              { board = board
+              , current_block = current_block
+              }
+          | MoveDown =>
+              { board = board
+              , current_block = current_block
+              }
+        }
+    in
+    process(initial_game_state, step)
+
+
+  //
+
+  let 
+    xx =
+      cons(5, cons(4, repeat(1)))
+
+  let
+    yy =
+      map_process(fn(x) => x + 2, xx)
+
+  let
+    example1 =
+      nats
+        |.tail
+        |.tail
+        |.tail
+        |.tail
+        |.head // 4
+
+  let
+    example7 =
+      (cons(3, cons(5, nats)))
+        |.tail
+        |.head // 5
+
+  let
+    example2 =
+      parse_string("hello")
+        |.receive("hellobob")
+        |.observe // (Just "hello", "bob")
+
+  let
+    example5 =
+      parse_string("hello")
+        |.receive("he")
+        |.receive("ll")
+        |.observe // (Just "hell", "o")
+
+  let
+    example8 =
+      (cons(3, cons(5, nats)))
+        |.tail
+
+  let
+    zz =
+      duplicate(example8)
+        |.observe
+        |.observe
+
+
+  fun main() =
+    println_int32(zz)
+
+}

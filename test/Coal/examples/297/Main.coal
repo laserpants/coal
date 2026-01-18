@@ -1,0 +1,11 @@
+module Main {
+
+  import IO(println_string)
+
+  // Error is misleading
+  let zapp : List<Option<string>> = [false]
+
+  fun main() =
+    println_string("!")
+
+}

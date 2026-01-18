@@ -1,0 +1,32 @@
+module Main {
+
+  import IO(println_int32, println_string)
+  import String(is_prefix_of, length, drop)
+  import Containers.Set(type Set)
+  import namespace Containers.Set
+  import Coal.Combinators(snd)
+
+  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
+     process$_process(seed, f)
+ 
+  type alias GameState = { a : int32 }
+
+//  let 
+//    aaa : List<GameState> =
+//      [5]
+  
+  //
+
+  let
+    foo : Process<GameState, unit> = 
+     let
+       step(_, x) = x
+     in
+       process({ a = 0 }, step)
+
+//
+
+  fun main() =
+    println_int32(1)
+
+}

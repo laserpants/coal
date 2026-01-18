@@ -223,6 +223,8 @@ prettyError env =
       errorMessage ["Name already defined: '" <> name <> "'"] env erl
     ConflictingParameter name erl ->
       errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
+    TypeAliasCycle name erl ->
+      errorMessage ["Cyclic definition in type alias: '" <> name <> "'"] env erl
     ImportNotInModule name path erl ->
       errorMessage ["The module '" <> principalPath path <> "' doesn't export '" <> name <> "'."] env erl
     ExportNotInModule name _ erl ->

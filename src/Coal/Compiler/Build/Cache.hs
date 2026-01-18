@@ -34,9 +34,10 @@ cachedBuild name src = do
         Left{} ->
           pure Nothing
         Right (_, _, ModuleBuild{..}) ->
-          if (unHash256 <$> moduleHash) == Just (hash (Text.encodeUtf8 src))
-            then pure (Just ModuleBuild{..})
-            else pure Nothing
+          pure $
+            if (unHash256 <$> moduleHash) == Just (hash (Text.encodeUtf8 src))
+              then Just ModuleBuild{..}
+              else Nothing
 
 writeBuildFile :: (MonadIO m) => FilePath -> Name -> ModuleBuild Metadata -> CompilerT Metadata m ()
 writeBuildFile buildDir name build = do

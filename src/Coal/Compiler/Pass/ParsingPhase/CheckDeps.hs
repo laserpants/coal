@@ -46,7 +46,7 @@ check =
       CompilerState{..} <- get
       if any (\dep -> principalPath dep `elem` compilerFreshModules) moduleDependencies
         then do
-          let name = principalPath moduleCurrentPath
+          let name = principalPath moduleBuildPath
           src <- getVerbatimSourceC name
           res <- fromSource name src
           case res of

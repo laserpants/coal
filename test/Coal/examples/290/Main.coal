@@ -1,0 +1,11 @@
+module Main {
+
+  import IO(println_string)
+
+  fun main() =
+    let
+      bob((a, b)) = a
+    in
+    println_string(bob(("x", "y")))
+
+}

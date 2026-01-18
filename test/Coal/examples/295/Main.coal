@@ -1,0 +1,10 @@
+module Main {
+
+  import IO(println_string)
+
+  let thing : a = "foo"
+
+  fun main() =
+    println_string("!")
+
+}

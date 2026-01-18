@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Build.NameEntry (
@@ -14,17 +13,11 @@ module Coal.Compiler.Build.NameEntry (
   AliasEntry (..),
   NameEntry (..),
   HasName (..),
-  dataConstructorEntries,
-  codataAccessorEntries,
 ) where
 
-import Coal.AST.Type.Parameterized (instantiateVars)
 import Coal.Common.Environment (Environment (..))
 import Coal.Language
-import Coal.Language.Module (CotypeDefinition (..), TypeDefinition (..))
-import Control.Monad.State (evalState)
 import Data.Binary (Binary)
-import qualified Data.Set as Set
 import Extras (Dictionary, Name, Set)
 import GHC.Generics (Generic)
 
@@ -174,32 +167,3 @@ instance HasName (TraitEntry a) where
 
 instance HasName (Name, a) where
   nameOf = fst
-
-dataConstructorEntries :: Environment Kind -> a -> TypeDefinition -> [DataConstructorEntry a]
-dataConstructorEntries env loc (TypeDefinition _ ctors) = getEntry <$> ctors
- where
-  getEntry DataConstructor{constructorName = name, ..} =
-    DataConstructorEntry
-      loc
-      name
-      DataConstructor
-        { constructorName = name
-        , constructorScheme = translateScheme env constructorScheme
-        , ..
-        }
-      (Set.fromList (constructorName <$> ctors))
-
-codataAccessorEntries :: Environment Kind -> a -> CotypeDefinition -> [CodataAccessorEntry a]
-codataAccessorEntries env loc (CotypeDefinition _ xsors) = getEntry <$> xsors
- where
-  getEntry CodataAccessor{..} =
-    CodataAccessorEntry
-      loc
-      accessorName
-      (CodataAccessor accessorName (translateScheme env accessorScheme))
-
-translateScheme :: Environment Kind -> Scheme Parameter () ParameterizedType -> IndexedScheme
-translateScheme env (Forall _ _ s) = Forall vs [] t
- where
-  vs = typeIndexesIn t
-  t = evalState (instantiateVars [] env s) (0 :: Int)

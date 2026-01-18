@@ -224,4 +224,20 @@ builtinFunctions =
     ( "(!=)"
     , forall1' (\t0 -> ([Trait "Comparable" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
+  ,
+    ( "process$_process"
+    , forall2 $ \t0 t1 -> t0 ~> (t1 ~> t0 ~> t0) ~> applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (t0 :| [t1])
+    )
+  ,
+    ( "process$_map_process"
+    , forall3 $ \t0 t1 t2 -> (t0 ~> t1) ~> applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (t0 :| [t2]) ~> applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (t1 :| [t2])
+    )
+  ,
+    ( "process$_contramap_input"
+    , forall3 $ \t0 t1 t2 -> (t2 ~> t1) ~> applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (t0 :| [t1]) ~> applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (t0 :| [t2])
+    )
+  ,
+    ( "process$_duplicate"
+    , forall2 $ \t0 t1 -> applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (t0 :| [t1]) ~> applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (t0 :| [t1]) :| [t1])
+    )
   ]

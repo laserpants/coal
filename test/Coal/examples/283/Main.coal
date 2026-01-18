@@ -55,7 +55,9 @@ module Main {
           (None, rem)
     }
 
-  let parse_hello : Parser =
+//  let parse_hello : Parser =
+
+  let parse_hello : Automaton<(Option<string>, string), string> =
     { state = (Some(""), "hello")
     , step = step_fn
     }
