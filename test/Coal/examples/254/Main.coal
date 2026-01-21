@@ -9,17 +9,15 @@ module Main {
 
   type Tree<a> = Node(TreeFields<a>)
 
-  fold sum : List<Tree<a>> -> int32 {
+  fold sum : List<Tree<a>> -> int32 
 
-    // TODO: This should be a type error !!!
+    // This should be a type error !!!
 
-    | tree_size(@tree) :: tree_size(@trees) => tree + trees
-    | [] => 0
-  }
+    | tree_size(@tree) :: tree_size(@trees) = tree + trees
+    | [] = 0
 
-  fold tree_size: Tree<a> -> int32 {
-    | Node({ children = sum(@children) | _ }) => 1 + children
-  }
+  fold tree_size: Tree<a> -> int32 
+    | Node({ children = sum(@children) | _ }) = 1 + children
 
   let example_tree =
     Node({

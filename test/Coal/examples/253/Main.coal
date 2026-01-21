@@ -16,14 +16,13 @@ module Main {
   fun node(value, children) =
     Node({ value = value, children = children })
 
-  fold tree_list_size : List<Tree<a>> -> int32 {
-    | size(@tree) :: tree_list_size(@trees) => tree + trees
-    | [] => 0
-  }
+  fold tree_list_size : List<Tree<a>> -> int32 
+    | size(@tree) :: tree_list_size(@trees) = tree + trees
+    | [] = 0
 
-  fold size : Tree<a> -> int32 {
-    | Node({ children = tree_list_size(@children) | _ }) => 1 + children
-  }
+  fold size : Tree<a> -> int32 
+    | Node({ children = tree_list_size(@children) | _ }) = 1 + children
+ 
 
 //  fun height(tree) =
 //    fold(tree) {

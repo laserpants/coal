@@ -8,8 +8,9 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module
 import Coal.Parser.Core
-import Coal.Parser.Expression (parseExpression, parseMatchClause)
+import Coal.Parser.Expression (parseExpression)
 import Coal.Parser.Identifier
+import Coal.Parser.Metadata (withMetadata)
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
@@ -210,8 +211,21 @@ parseTopLevelFold = do
   n <- lexeme_ "fold" *> name
   ann <- parseAnnotation
   end <- getSourcePos
-  cs <- try (nonEmpty (some parseMatchClause)) <|> braces (nonEmpty (some parseMatchClause))
+  cs <- try (nonEmpty (some parseTopLevelFoldClause)) <|> braces (nonEmpty (some parseTopLevelFoldClause))
   pure (DFold (Metadata start end) n (FoldDefinition (With [] ann) cs))
+
+parseTopLevelFoldClause :: Parser (Clause Metadata ())
+parseTopLevelFoldClause =
+  withMetadata $ do
+    p <- symbol_ "|" *> parsePattern
+    cs <- nonEmpty (some parseChoice)
+    pure (\loc -> EClause loc p cs)
+ where
+  parseChoice =
+    withMetadata $ do
+      symbol_ "="
+      e <- parseExpression
+      pure (\loc -> CPlain loc [] e)
 
 {-# INLINE parseAnnotation #-}
 parseAnnotation :: Parser (Type Parameter ())
