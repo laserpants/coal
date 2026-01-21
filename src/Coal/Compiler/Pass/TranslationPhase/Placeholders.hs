@@ -82,8 +82,6 @@ insertPlaceholders =
     DInstance loc name (InstanceDefinition ts t ds) -> do
       es <- forM ds (insertPlaceholdersInDef (Trait name t))
       pure (DInstance loc name (InstanceDefinition ts t es))
-    d@DFold{} ->
-      expandInLocalEnv d
     d ->
       pure d
 
