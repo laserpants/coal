@@ -9,8 +9,9 @@ module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (BuildUnit, Pass (..), mapPass)
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kind (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -92,10 +93,6 @@ instance (Data t) => RuleContext (Expression Metadata t) where
         EFold a t
           <$> traverse (detectShadowing names) es
           <*> traverse (detectShadowing names) cs
-      ECodataSelect a ll e1 e2 ->
-        ECodataSelect a ll
-          <$> traverse (detectShadowing names) e1
-          <*> traverse (detectShadowing names) e2
       expr@EUnaryOperator{} ->
         pure expr
       expr@EBinaryOperator{} ->

@@ -127,10 +127,6 @@ instance Transformable Expression where
         EFold a t
           <$> traverse (rewrite name f) es
           <*> traverse (rewrite name f) cs
-      ECodataSelect a ll e1 e2 ->
-        ECodataSelect a ll
-          <$> traverse (rewrite name f) e1
-          <*> traverse (rewrite name f) e2
       expr@EUnaryOperator{} ->
         pure expr
       expr@EBinaryOperator{} ->
@@ -139,8 +135,6 @@ instance Transformable Expression where
         EListLiteral a t <$> traverse (rewrite name f) es
       ETuple a t es ->
         ETuple a t <$> traverse (rewrite name f) es
-      ECodataRecord a t d ->
-        ECodataRecord a t <$> traverse (rewrite name f) d
       EFFICall a t ll es e ->
         EFFICall a t ll
           <$> traverse (rewrite name f) es

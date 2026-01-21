@@ -11,7 +11,7 @@ module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
 import Coal.Common.Supply (Supply (..), supplied)
-import Coal.DebugIO (writeDebugFile)
+import Coal.Debugging (writeDebugFile)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -233,13 +233,6 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
       ESelect _ (Label t name) e -> do
         fromNode (emitRectangle ("ESelect\\n" <> name) (Just t)) $ do
           emitEdgeTo e
-      ECodataSelect _ (Label t name) e me -> do
-        fromNode (emitRectangle ("ECodataSelect\\n" <> name) (Just t)) $ do
-          emitEdgeTo e
-          emitEdgeTo me
-      ECodataRecord _ t d -> do
-        fromNode (emitRectangle "ECodataRecord" (Just t)) $
-          void (emitEdgeToFields (Map.toList d))
       EFocus name ll1 ll2 e1 e2 -> do
         fromNode (emitRectangle ("EFocus\\n" <> name) Nothing) $ do
           emitEdgeTo ll1
@@ -377,8 +370,8 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
         emitParallelogram "DImport" Nothing
       DType _ name _ ->
         emitParallelogram ("DType\\n" <> name) Nothing
-      DCotype _ name _ ->
-        emitParallelogram ("DCotype\\n" <> name) Nothing
+      DTypeAlias _ name (AliasDefinition ps t) ->
+        emitParallelogram ("DTypeAlias\\n" <> name <> "\\n" <> prettyType t) Nothing
       DTrait _ name (TraitDefinition _ ps ds) ->
         fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
           nid <- ask
@@ -404,11 +397,6 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
       DFold _ name (FoldDefinition (With _ t) cs) ->
         fromNode (emitParallelogram ("DFold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
           emitEdgesTo cs
-      DUnfold _ name (UnfoldDefinition (With _ t) ps d me) ->
-        fromNode (emitParallelogram ("DUnfold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
-          emitEdgesTo ps
-          void (emitEdgeToFields (Map.toList d))
-          emitEdgeTo me
       _ ->
         emitParallelogram "TODO" Nothing
 

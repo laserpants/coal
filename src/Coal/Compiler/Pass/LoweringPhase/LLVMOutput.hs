@@ -12,10 +12,11 @@ import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (ModuleBuild (..))
 import Coal.Compiler.Build.Cache (writeBuildFile)
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..))
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.DebugIO (writeDebugFile)
+import Coal.Debugging (writeDebugFile)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)

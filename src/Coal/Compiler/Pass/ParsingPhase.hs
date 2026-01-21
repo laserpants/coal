@@ -3,7 +3,8 @@
 module Coal.Compiler.Pass.ParsingPhase (parsingPhase) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass (BuildUnit, Pass (..), liftPass, mapPass, (>->))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps)
 import Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing)

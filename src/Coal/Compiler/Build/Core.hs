@@ -49,8 +49,6 @@ buildEnv = do
           modify (Environment.insert name s)
         NFold name s ->
           modify (Environment.insert name s)
-        NUnfold name s ->
-          modify (Environment.insert name s)
         _ ->
           pure ()
 
@@ -67,8 +65,6 @@ replacePlaceholders store =
               go name NConstant
             NFoldPlaceholder name ->
               go name NFold
-            NUnfoldPlaceholder name ->
-              go name NUnfold
             _ ->
               pure ()
  where
@@ -260,13 +256,6 @@ nameImports ModuleBuild{..} imports =
           _ -> []
       ImportType _ _ names ->
         names
-      ImportCotype _ name ["*"] ->
-        case Environment.lookup name moduleCotypeConstructors of
-          Just CotypeConstructorEntry{..} ->
-            accessorName <$> cotypeConstructorEntryDataAccessors
-          _ -> []
-      ImportCotype _ _ names ->
-        names
       ImportTrait _ name ["*"] ->
         case Environment.lookup name moduleTraits of
           Just TraitEntry{..} ->
@@ -280,8 +269,6 @@ typeImports imports =
   flip concatMap imports $
     \case
       ImportType _ name _ ->
-        [name]
-      ImportCotype _ name _ ->
         [name]
       ImportTrait _ name _ ->
         [name]
@@ -300,15 +287,6 @@ collectTypeConstructors =
       -- TODO: Support higher-kinded type parameters
       kind = foldr KArrow KType (replicate (length params) KType)
       entry = TypeConstructorEntry loc name kind (for ctors constructorName)
-    DCotype loc name (CotypeDefinition params xsors) -> do
-      modify $
-        insertCotypeConstructor name entry
-          . addName (NCotype name kind)
-          . addTypeExport name
-     where
-      -- TODO: Support higher-kinded type parameters
-      kind = foldr KArrow KType (replicate (length params) KType)
-      entry = CotypeConstructorEntry loc name kind params xsors
     DTypeAlias loc name (AliasDefinition ps t) -> do
       modify $
         insertAlias name entry
@@ -318,29 +296,15 @@ collectTypeConstructors =
       entry = AliasEntry loc name (parameterName <$> ps) t
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
-    DImport a path imports -> do
-      build <- lift $ importedModule a path
+    DImport _ path imports -> do
       this <- lift $ gets (principalPath . compilerCurrentModule)
       forM_ imports $
         \case
-          ImportType loc name _ ->
-            case Environment.lookup name (exportedTypeConstructors build) of
-              Nothing -> do
-                case Environment.lookup name (moduleAliases build) of
-                  Nothing -> do
-                    tellErrors [MissingType name path (ErrorLocation this loc)]
-                    throwError PreflightFailure
-                  Just entry ->
-                    modify $ insertAlias name entry
-              Just entry ->
-                modify $ insertTypeConstructor name entry
-          ImportCotype loc name _ ->
-            case Environment.lookup name (exportedCotypeConstructors build) of
-              Nothing -> do
-                tellErrors [MissingCotype name path (ErrorLocation this loc)]
-                throwError PreflightFailure
-              Just entry ->
-                modify $ insertCotypeConstructor name entry
+          ImportType loc name _ -> do
+            found <- insertTypeName path loc name
+            unless found $ do
+              tellErrors [MissingType name path (ErrorLocation this loc)]
+              throwError PreflightFailure
           _ ->
             pure ()
     DQualifiedImport a path -> do
@@ -348,11 +312,25 @@ collectTypeConstructors =
       forM_ (Environment.toList (exportedTypeConstructors build)) $
         \(n, entry) ->
           modify $ insertTypeConstructor (principalPath path <> "." <> n) entry
-      forM_ (Environment.toList (exportedCotypeConstructors build)) $
-        \(n, entry) ->
-          modify $ insertCotypeConstructor (principalPath path <> "." <> n) entry
     _ ->
       pure ()
+
+insertTypeName :: (Monad m) => Path -> a -> Name -> StateT (ModuleBuild a) (CompilerT a m) Bool
+insertTypeName path loc name = do
+  build <- lift $ importedModule loc path
+  case Environment.lookup name (exportedTypeConstructors build) of
+    Nothing -> do
+      case Environment.lookup name (moduleAliases build) of
+        Nothing -> do
+          pure False
+        Just AliasEntry{..} -> do
+          modify $ insertAlias name AliasEntry{..}
+          let ts = constructors aliasEntryType
+          forM_ ts $ insertTypeName path loc
+          pure True
+    Just entry -> do
+      modify $ insertTypeConstructor name entry
+      pure True
 
 {-# INLINE foldElems #-}
 foldElems :: (Monoid m) => (a -> m -> m) -> Environment a -> m
@@ -367,15 +345,10 @@ traitEnv = do
 
 typeConstructorEnv :: (Monad m) => StateT (ModuleBuild a) (CompilerT a m) (Environment Kind)
 typeConstructorEnv = do
-  env1 <- gets (foldElems insertTypeInfo . moduleTypeConstructors)
-  env2 <- gets (foldElems insertCotypeInfo . moduleCotypeConstructors)
-  pure (env1 <> env2)
+  gets (foldElems insertTypeInfo . moduleTypeConstructors)
  where
   insertTypeInfo :: TypeConstructorEntry a -> Environment Kind -> Environment Kind
   insertTypeInfo (TypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
-
-  insertCotypeInfo :: CotypeConstructorEntry a -> Environment Kind -> Environment Kind
-  insertCotypeInfo (CotypeConstructorEntry _ name kind_ _ _) = Environment.insert name kind_
 
 collectDataConstructors :: (Monad m) => Environment (AliasEntry a) -> Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectDataConstructors aliases env =
@@ -390,16 +363,6 @@ collectDataConstructors aliases env =
             addName (NDataConstructor constructorName constructorScheme)
               . insertDataConstructor constructorName info
               . addExport constructorName
-    DCotype loc _ def -> do
-      entries <- lift $ do
-        def' <- local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
-        codataAccessorEntries env loc def'
-      forM_ entries $
-        \info@(CodataAccessorEntry _ _ CodataAccessor{..}) -> do
-          modify $
-            addName (NCodataAccessor accessorName accessorScheme)
-              . insertCodataAccessor accessorName info
-              . addExport accessorName
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport a path imports -> do
@@ -431,26 +394,6 @@ collectDataConstructors aliases env =
                         error "Implementation error"
                       Just entry ->
                         modify $ insertDataConstructor ctor entry
-          ImportCotype loc name xsors ->
-            case Environment.lookup name (exportedCotypeConstructors build) of
-              Nothing -> do
-                tellErrors [MissingCotype name path (ErrorLocation this loc)]
-                throwError PreflightFailure
-              Just CotypeConstructorEntry{..} -> do
-                let missing = xsors \\ (accessorName <$> cotypeConstructorEntryDataAccessors)
-                    importAll = ["*"] == xsors
-                unless (importAll || null missing) $
-                  forM_ missing $
-                    \xsor -> do
-                      tellErrors [NoCodataAccessorForCotype xsor name path (ErrorLocation this loc)]
-                      throwError PreflightFailure
-                forM_ (if importAll then accessorName <$> cotypeConstructorEntryDataAccessors else xsors) $
-                  \xsor ->
-                    case Environment.lookup xsor (exportedCodataAccessors build) of
-                      Nothing ->
-                        error "Implementation error"
-                      Just entry ->
-                        modify $ insertCodataAccessor xsor entry
           _ ->
             pure ()
     DQualifiedImport a path -> do
@@ -458,9 +401,6 @@ collectDataConstructors aliases env =
       forM_ (Environment.toList (exportedDataConstructors build)) $
         \(n, entry) ->
           modify $ insertDataConstructor (principalPath path <> "." <> n) entry
-      forM_ (Environment.toList (exportedCodataAccessors build)) $
-        \(n, entry) ->
-          modify $ insertCodataAccessor (principalPath path <> "." <> n) entry
     _ ->
       pure ()
 
@@ -642,10 +582,6 @@ collectImportedNames =
               unless (name `elem` fmap nameOf names2) $ do
                 tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
-            ImportCotype loc name _ ->
-              unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
-                throwError PreflightFailure
             ImportTrait loc name _ ->
               unless (name `elem` fmap nameOf names2) $ do
                 tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
@@ -659,8 +595,6 @@ collectImportedNames =
             pure ()
           NFoldPlaceholder _ ->
             pure ()
-          NUnfoldPlaceholder _ ->
-            pure ()
           info ->
             modify $ addName info
     DQualifiedImport a path -> do
@@ -673,24 +607,16 @@ collectImportedNames =
             pure ()
           NFoldPlaceholder _ ->
             pure ()
-          NUnfoldPlaceholder _ ->
-            pure ()
           NFunction name s ->
             modify $ addName (NFunction (qualified name path) s)
           NConstant name s ->
             modify $ addName (NConstant (qualified name path) s)
           NFold name s ->
             modify $ addName (NFold (qualified name path) s)
-          NUnfold name s ->
-            modify $ addName (NUnfold (qualified name path) s)
           NDataConstructor name s ->
             modify $ addName (NDataConstructor (qualified name path) s)
-          NCodataAccessor name s ->
-            modify $ addName (NCodataAccessor (qualified name path) s)
           NType name k ->
             modify $ addName (NType (qualified name path) k)
-          NCotype name k ->
-            modify $ addName (NCotype (qualified name path) k)
           NTrait name ->
             modify $ addName (NTrait (qualified name path))
           NAlias name ->
@@ -710,10 +636,6 @@ exportConstant name = modify $ addName (NConstantPlaceholder name) . addExport n
 exportFold :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
 exportFold name = modify $ addName (NFoldPlaceholder name) . addExport name
 
-{-# INLINE exportUnfold #-}
-exportUnfold :: (Monad m) => Name -> StateT (ModuleBuild a) (CompilerT a m) ()
-exportUnfold name = modify $ addName (NUnfoldPlaceholder name) . addExport name
-
 collectPlaceholders :: (Monad m) => Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
 collectPlaceholders =
   \case
@@ -723,8 +645,6 @@ collectPlaceholders =
       exportConstant name
     DFold _ name _ ->
       exportFold name
-    DUnfold _ name _ ->
-      exportUnfold name
     _ ->
       pure ()
 
@@ -760,14 +680,6 @@ qualImports ModuleBuild{..} =
                 pure []
           ImportType _ _ ctors ->
             pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
-          ImportCotype _ name ["*"] ->
-            case Environment.lookup name moduleCotypeConstructors of
-              Just CotypeConstructorEntry{..} ->
-                pure [(accessorName, principalPath path <.> accessorName) | CodataAccessor{..} <- cotypeConstructorEntryDataAccessors]
-              _ ->
-                pure []
-          ImportCotype _ _ xsors ->
-            pure [(xsor, principalPath path <.> xsor) | xsor <- xsors]
           ImportTrait _ name ["*"] ->
             case Environment.lookup name moduleTraits of
               Just TraitEntry{..} ->
@@ -786,11 +698,7 @@ qualImports ModuleBuild{..} =
             pure [(qualified name path, qualified name path)]
           NFold name _ ->
             pure [(qualified name path, qualified name path)]
-          NUnfold name _ ->
-            pure [(qualified name path, qualified name path)]
           NDataConstructor name _ ->
-            pure [(qualified name path, qualified name path)]
-          NCodataAccessor name _ ->
             pure [(qualified name path, qualified name path)]
           _ ->
             pure []
@@ -812,17 +720,6 @@ dataConstructorEntries env loc (TypeDefinition _ ctors) = traverse getEntry ctor
           , ..
           }
         (Set.fromList (constructorName <$> ctors))
-
-codataAccessorEntries :: (Monad m) => Environment Kind -> a -> CotypeDefinition -> CompilerT a m [CodataAccessorEntry a]
-codataAccessorEntries env loc (CotypeDefinition _ xsors) = traverse getEntry xsors
- where
-  getEntry CodataAccessor{..} = do
-    sch <- translateScheme loc env accessorScheme
-    pure $
-      CodataAccessorEntry
-        loc
-        accessorName
-        (CodataAccessor accessorName sch)
 
 translateScheme :: (Monad m) => a -> Environment Kind -> Scheme Parameter () ParameterizedType -> CompilerT a m IndexedScheme
 translateScheme loc env (Forall _ _ s) = do

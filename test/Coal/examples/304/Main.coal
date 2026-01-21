@@ -1,0 +1,22 @@
+module Main {
+
+  import IO(println_string, return)
+  import Test(type Test, assert, check, suite, run)
+  import namespace List
+
+  fun test_addition() =
+    assert(1 + 1 == 2)
+
+  let
+    test : Test =
+      suite([
+        check(1 + 1 == 2),
+        check(List.length([]) == 0)
+      ])
+
+  fun main() = do {
+    run(test);
+    return();
+  }
+
+}

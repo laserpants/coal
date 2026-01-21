@@ -4,8 +4,9 @@ module Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule) whe
 
 import Coal.AST.HasMetadata (HasMetadata (..))
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
-import Coal.Compiler.Pass (BuildUnit, Pass (..))
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Definition (isImport)

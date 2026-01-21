@@ -15,11 +15,12 @@ module Coal.Compiler.Pipeline (
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..), tickBar, (>->))
+import Coal.Compiler.Pass (Pass (..), tickBar, (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
 import Coal.Compiler.Pass.MainPhase (mainPhase)
@@ -115,14 +116,6 @@ prettyRule =
       "Cannot unify the type of `" <> name <> "`\n\n  " <> prettyType s <> "\n\nwith type\n\n  " <> prettyType u1
      where
       u1 = normalizeTypeIndexes t1
-    RuleUnfoldExplicit _ t1 s ->
-      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1 <> "."
-     where
-      u1 = normalizeTypeIndexes t1
-    RuleCodataRecordExplicit _ t1 s ->
-      "Cannot unify " <> prettyType s <> " with expected type " <> prettyType u1 <> "."
-     where
-      u1 = normalizeTypeIndexes t1
     RuleTuple _ t1 t2 ->
       "Cannot unify tuple type " <> prettyType u1 <> " with " <> prettyType u2 <> "."
      where
@@ -130,17 +123,6 @@ prettyRule =
       u2 = normalizeTypeIndexes t2
     RuleListLiteral _ _ ->
       "List elements must all have the same type."
-    RuleUnfoldEquality _ field t1 t2 ->
-      "In this unfold expression, the field "
-        <> field
-        <> " is expected have type "
-        <> prettyType u1
-        <> ", but was given type "
-        <> prettyType u2
-        <> "."
-     where
-      u1 = normalizeTypeIndexes t1
-      u2 = normalizeTypeIndexes t2
     RuleRecordEquality _ t1 t2 ->
       "Expected a record of the form " <> prettyType u1 <> ", but got " <> prettyType u2 <> "."
      where
@@ -167,8 +149,6 @@ prettyConstraintsGenError =
   \case
     EIllFormedTypeAnnotation (EAnnotationNonDistinctParameter _ name) ->
       "Type annotation is too general: error in the parameter '" <> name <> "'."
-    ECodataFieldMismatch _ ->
-      "Codata type field mismatch."
     EFoldPatternInRegularMatch _ ->
       "Fold patterns are not supported in regular match expression clauses. Perhaps you intended to use a 'fold'?"
     ENoDataConstructor _ name ->
@@ -231,12 +211,8 @@ prettyError env =
       errorMessage ["A definition '" <> name <> "' doesn't exist in this module."] env erl
     MissingType name path erl ->
       errorMessage ["The module '" <> principalPath path <> "' doesn't export a type '" <> name <> "'."] env erl
-    MissingCotype name path erl ->
-      errorMessage ["The module '" <> principalPath path <> "' doesn't export a codata type '" <> name <> "'."] env erl
     NoDataConstructorForType ctor name _ erl ->
       errorMessage ["No constructor '" <> ctor <> "' for type '" <> name <> "' in scope"] env erl
-    NoCodataAccessorForCotype xsor name _ erl ->
-      errorMessage ["No field '" <> xsor <> "' for codata type '" <> name <> "' in scope"] env erl
     TraitNotInScope trait erl ->
       errorMessage ["No trait '" <> trait <> "' in scope"] env erl
     MissingTraitDefinition name trait erl ->

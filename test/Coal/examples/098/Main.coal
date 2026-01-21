@@ -1,26 +1,41 @@
 module Main {
 
   import IO(println_string, println_int32, println_bool)
+  import Process(process, receive, observe, map_process)
 
-  cotype Counter = { Current : int32, Next : Counter }
+  type alias Counter = Process<int32, int32>
 
-  // bug when removing type annotation
-  unfold count_from(n) : Counter {
-    , Current = n
-    , @Next = n + 1
-  }
+  fun counter() : Counter =
+    process(1, fn(s, n) => s + n)
 
-  unfold counter_map(f : int32 -> int32, c : Counter) : Counter {
-    , Current = f(c.Current)
-    , @Next = (f, c.Next)
-  }
+  let counter_2 = map_process(fn(x) => x * 1103515245 + 12345, counter())
 
-  let counter : Counter = count_from(1)
+  let increment = receive
 
-  let counter_2 = counter_map(fn(x) => x * 1103515245 + 12345, counter)
-  //let counter_2 = counter_map(fn(x) => x + 1000, counter)
+  let next = increment(1)
+
+  let current = observe
+
+  let 
+    example = 
+      counter_2
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.next
+        |.current
 
   fun main() =
-    println_int32(counter_2.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next.Current)
+    println_int32(example)
 
 }

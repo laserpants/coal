@@ -16,7 +16,6 @@ module Coal.TypeSystem.Kind.Inference (
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
-import Coal.Language.Codata.Accessor (CodataAccessor (..))
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Trait (Trait (..))
@@ -136,16 +135,6 @@ instance LowerKinds (DataConstructor Parameter KindNode (Type Parameter KindNode
         DataConstructor
           { constructorScheme =
               lowerKinds constructorScheme
-          , ..
-          }
-
-instance LowerKinds (CodataAccessor Parameter KindNode (Type Parameter KindNode)) (CodataAccessor Parameter Kind (Type Parameter Kind)) where
-  lowerKinds =
-    \case
-      CodataAccessor{..} ->
-        CodataAccessor
-          { accessorScheme =
-              lowerKinds accessorScheme
           , ..
           }
 
@@ -270,12 +259,6 @@ instance (EmitKinds t) => EmitKinds (DataConstructor Parameter KindNode t) where
       DataConstructor _ _ s ->
         emitKindConstraints s
 
-instance (EmitKinds t) => EmitKinds (CodataAccessor Parameter KindNode t) where
-  emitKindConstraints =
-    \case
-      CodataAccessor _ s ->
-        emitKindConstraints s
-
 next :: State Int KindNode
 next = do
   modify (+ 1)
@@ -363,12 +346,6 @@ instance IndexKinds (DataConstructor Parameter () (Type Parameter ())) where
   indexKinds DataConstructor{..} = do
     s' <- indexKinds constructorScheme
     pure DataConstructor{constructorScheme = s', ..}
-
-instance IndexKinds (CodataAccessor Parameter () (Type Parameter ())) where
-  type Indexed (CodataAccessor Parameter () (Type Parameter ())) = CodataAccessor Parameter KindNode (Type Parameter KindNode)
-  indexKinds CodataAccessor{..} = do
-    s' <- indexKinds accessorScheme
-    pure CodataAccessor{accessorScheme = s', ..}
 
 instance IndexKinds (Scheme Parameter () (Type Parameter ())) where
   type
@@ -472,10 +449,6 @@ instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (Row Pa
 instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (DataConstructor Parameter k t) where
   applyKinds sub DataConstructor{..} =
     DataConstructor{constructorScheme = applyKinds sub constructorScheme, ..}
-
-instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (CodataAccessor Parameter k t) where
-  applyKinds sub CodataAccessor{..} =
-    CodataAccessor{accessorScheme = applyKinds sub accessorScheme, ..}
 
 newtype KindUnifier a = KindUnifier (Either KindInferenceError a)
   deriving

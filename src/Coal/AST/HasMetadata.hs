@@ -39,8 +39,6 @@ instance HasMetadata (Expression Metadata t) where
       ECompiledMatch a _ _ _ -> a
       EFold a _ _ _ -> a
       ESelect a _ _ -> a
-      ECodataSelect a _ _ _ -> a
-      ECodataRecord a _ _ -> a
       ETraitDictionary a _ _ -> a
       ELambdaMatch a _ _ -> a
       EFFICall a _ _ _ _ -> a
@@ -85,10 +83,6 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleTopLevelConstant a -> a
       RuleTypeConstraint a _ _ _ -> a
       RuleDataConstructor a _ _ _ -> a
-      RuleCodataRecordExplicit a _ _ -> a
-      RuleCodataRecordEquality a _ _ -> a
-      RuleUnfoldEquality a _ _ _ -> a
-      RuleUnfoldExplicit a _ _ -> a
       RuleEntrypoint a _ -> a
       RuleTuple a _ _ -> a
       RuleListLiteral a _ -> a
@@ -109,9 +103,7 @@ instance HasMetadata (ConstraintsGenError Metadata) where
   getMetadata =
     \case
       ENoDataConstructor a _ -> a
-      ENoCodataAccessor a _ -> a
       EDataConstructorArityMismatch a _ _ _ -> a
-      ECodataFieldMismatch a -> a
       EIllFormedTypeAnnotation err -> getMetadata err
       EFoldPatternInRegularMatch a -> a
 
@@ -132,7 +124,6 @@ instance HasMetadata (Definition Metadata k ()) where
   getMetadata =
     \case
       DType a _ _ -> a
-      DCotype a _ _ -> a
       DFunction a _ _ _ -> a
       DConstant a _ _ _ -> a
       DImport a _ _ -> a
@@ -141,7 +132,6 @@ instance HasMetadata (Definition Metadata k ()) where
       DInstance a _ _ -> a
       DTypeAlias a _ _ -> a
       DFold a _ _ -> a
-      DUnfold a _ _ -> a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs =

@@ -6,10 +6,11 @@ module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, fromSource) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Cache (cachedBuild)
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
 import Coal.Compiler.Stack
 import Coal.Language (Kind)

@@ -6,8 +6,9 @@ module Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Transform
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Journal
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language.Module
 import Data.Data (Data)

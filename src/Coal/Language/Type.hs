@@ -30,6 +30,7 @@ module Coal.Language.Type (
   fieldsRecordType,
   recordType,
   headConstructor,
+  constructors,
   (~>),
 ) where
 
@@ -210,6 +211,36 @@ recordType = TRecord . TRow
 
 fieldsRecordType :: Dictionary (Type o k) -> Row o k (Type o k) -> Type o k
 fieldsRecordType fields row = recordType (fromDictionary fields row)
+
+constructors :: Type o k -> [Name]
+constructors =
+  \case
+    TApplication _ t1 t2 ->
+      constructors t1 <> constructors t2
+    TArrow t1 t2 ->
+      constructors t1 <> constructors t2
+    TConstructor _ name ->
+      [name]
+    TIntrinsic{} ->
+      []
+    TRecord r ->
+      constructors r
+    TRow r ->
+      constructorsRow r
+    TVariable{} ->
+      []
+    TAlias name _ t ->
+      name : constructors t
+
+constructorsRow :: Row o k (Type o k) -> [Name]
+constructorsRow =
+  \case
+    RExtend _ t r ->
+      constructors t <> constructorsRow r
+    RVariable{} ->
+      []
+    RNil ->
+      []
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b

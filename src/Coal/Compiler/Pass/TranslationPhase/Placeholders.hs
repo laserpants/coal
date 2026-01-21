@@ -61,12 +61,8 @@ updateNames store =
               go name NConstant
             NFold name _ ->
               go name NFold
-            NUnfold name _ ->
-              go name NUnfold
             NDataConstructor name _ ->
               go name NDataConstructor
-            NCodataAccessor name _ ->
-              go name NCodataAccessor
             _ ->
               pure ()
  where
@@ -87,8 +83,6 @@ insertPlaceholders =
       es <- forM ds (insertPlaceholdersInDef (Trait name t))
       pure (DInstance loc name (InstanceDefinition ts t es))
     d@DFold{} ->
-      expandInLocalEnv d
-    d@DUnfold{} ->
       expandInLocalEnv d
     d ->
       pure d
@@ -279,8 +273,6 @@ instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) wh
     \case
       DConstant loc name c fs ->
         DConstant loc name <$> expandConstantDefinitionTraits name c <*> traverse expandTraits fs
-      DUnfold loc name (UnfoldDefinition with ps d (Just e)) ->
-        DUnfold loc name . UnfoldDefinition with ps d . Just <$> expandTraits e
       d ->
         pure d
 

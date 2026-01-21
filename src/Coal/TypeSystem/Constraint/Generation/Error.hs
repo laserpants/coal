@@ -7,8 +7,6 @@ import Extras (Name)
 
 data ConstraintsGenError a
   = ENoDataConstructor a Name
-  | ENoCodataAccessor a Name
-  | ECodataFieldMismatch a
   | EDataConstructorArityMismatch a Name Int Int
   | EIllFormedTypeAnnotation (TypeAnnotationError a)
   | EFoldPatternInRegularMatch a

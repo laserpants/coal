@@ -355,16 +355,6 @@ e2eSpec = do
   describe "072" $
     expectOutput "2" "test/Coal/examples/072" ["Main.coal"]
 
-  describe "073" $ do
-    it "is TypeError" $ do
-      res <- runSpec "test/Coal/examples/073" ["Main.coal"]
-      res `shouldBe` Left TypeError
-
-  describe "074" $ do
-    it "is TypeError" $ do
-      res <- runSpec "test/Coal/examples/074" ["Main.coal"]
-      res `shouldBe` Left TypeError
-
   describe "075" $ do
     it "is PatternAnomaly" $ do
       res <- runSpec "test/Coal/examples/075" ["Main.coal"]
@@ -439,14 +429,8 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/094" ["Main.coal"]
       res `shouldBe` Left PatternAnomaly
 
-  describe "095" $ do
-    expectOutput "3" "test/Coal/examples/095" ["Main.coal"]
-
   describe "096" $ do
     expectOutput "Hello Space" "test/Coal/examples/096" ["Main.coal"]
-
-  describe "097" $ do
-    expectOutput "2" "test/Coal/examples/097" ["Main.coal"]
 
   describe "098" $ do
     expectOutput "-627128164" "test/Coal/examples/098" ["Main.coal"]
@@ -1484,32 +1468,6 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  describe "277" $ do
-    it "is TypeError" $ do
-      res <- runSpec "test/Coal/examples/277" ["Main.coal"]
-      res `shouldBe` Left TypeError
-
-  describe "278" $ do
-    expectOutput
-      "2"
-      "test/Coal/examples/278"
-      [ "Main.coal"
-      ]
-
-  describe "279" $ do
-    expectOutput
-      "5"
-      "test/Coal/examples/279"
-      [ "Main.coal"
-      ]
-
-  describe "280" $ do
-    expectOutput
-      "1"
-      "test/Coal/examples/280"
-      [ "Main.coal"
-      ]
-
   describe "283" $ do
     expectOutput
       "3"
@@ -1552,6 +1510,15 @@ e2eSpec = do
     it "is PreflightFailure" $ do
       res <- runSpec "test/Coal/examples/291" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
+
+  describe "293" $ do
+    expectOutput
+      "hell,o"
+      "test/Coal/examples/293"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
 
   describe "294" $ do
     it "is TypeError" $ do
@@ -1602,15 +1569,6 @@ e2eSpec = do
       , "Containers/Map.coal"
       ]
 
-  describe "293" $ do
-    expectOutput
-      "hell,o"
-      "test/Coal/examples/293"
-      [ "Main.coal"
-      , "Containers/Set.coal"
-      , "Containers/Map.coal"
-      ]
-
   describe "302" $ do
     expectOutput
       "5"
@@ -1618,6 +1576,22 @@ e2eSpec = do
       [ "Main.coal"
       , "Containers/Set.coal"
       , "Containers/Map.coal"
+      ]
+
+  describe "303" $ do
+    expectOutput
+      "!"
+      "test/Coal/examples/303"
+      [ "Main.coal"
+      , "Stuff.coal"
+      ]
+
+  describe "304" $ do
+    expectOutput
+      "✓ All 2 tests passed"
+      "test/Coal/examples/304"
+      [ "Main.coal"
+      , "Test.coal"
       ]
 
 expectOutput :: String -> String -> [FilePath] -> Spec

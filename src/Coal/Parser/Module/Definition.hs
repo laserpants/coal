@@ -13,10 +13,8 @@ import Coal.Parser.Identifier
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
-import Coal.Parser.Utils (fieldListWithKey)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name, (<$$>))
 import Text.Megaparsec
@@ -30,11 +28,9 @@ parseDefinition =
     <|> parseLetDefinition name
     <|> try parseTypeAlias
     <|> parseTypeDefinition
-    <|> parseCodataDefinition
     <|> parseTraitDefinition
     <|> parseTraitInstance
     <|> parseTopLevelFold
-    <|> parseTopLevelUnfold
 
 parseTypeAlias :: Parser (Definition Metadata o ())
 parseTypeAlias = do
@@ -111,36 +107,11 @@ parseConstructor tn qs = do
           (TConstructor () tn)
           (TVariable <$> (a :| as))
 
-parseCodataDefinition :: Parser (Definition Metadata o ())
-parseCodataDefinition = do
-  start <- getSourcePos
-  lexeme_ "cotype"
-  n <- constructor
-  ps <- option [] parseParameterList
-  end <- getSourcePos
-  symbol_ "="
-  let
-    t0 =
-      case ps of
-        [] ->
-          TConstructor () n
-        a : as ->
-          applyTypeArgs
-            ()
-            (TConstructor () n)
-            (TVariable <$> (a :| as))
-  ts <- braces (fieldListWithKey constructor parseType ":")
-  pure (DCotype (Metadata start end) n (CotypeDefinition ps (toAccessor ps t0 <$> ts)))
-
-toAccessor :: [Parameter ()] -> Type Parameter () -> (Name, Type Parameter ()) -> CodataAccessor Parameter () (Type Parameter ())
-toAccessor ps t0 (n, t) = CodataAccessor n (Forall (Set.fromList ps) [] (t0 `TArrow` t))
-
 parseImportAtom :: Parser (Import Metadata)
 parseImportAtom =
   do
     parseImportType
     <|> parseImportType
-    <|> parseImportCotype
     <|> parseImportTrait
     <|> parseImportName
 
@@ -152,15 +123,6 @@ parseImportType = do
   names <- option ["*"] (parens (commaSep1 constructor))
   end <- getSourcePos
   pure (ImportType (Metadata start end) name_ names)
-
-parseImportCotype :: Parser (Import Metadata)
-parseImportCotype = do
-  start <- getSourcePos
-  lexeme_ "cotype"
-  name_ <- constructor
-  names <- option ["*"] (parens (commaSep1 constructor))
-  end <- getSourcePos
-  pure (ImportCotype (Metadata start end) name_ names)
 
 parseImportTrait :: Parser (Import Metadata)
 parseImportTrait = do
@@ -250,18 +212,6 @@ parseTopLevelFold = do
   end <- getSourcePos
   cs <- try (nonEmpty (some parseMatchClause)) <|> braces (nonEmpty (some parseMatchClause))
   pure (DFold (Metadata start end) n (FoldDefinition (With [] ann) cs))
-
-parseTopLevelUnfold :: Parser (Definition Metadata o ())
-parseTopLevelUnfold = do
-  start <- getSourcePos
-  n <- lexeme_ "unfold" *> name
-  ps <- parens (nonEmpty (commaSep1 parsePattern))
-  ann <- parseAnnotation
-  fields <- braces $ do
-    void $ optional (symbol ",")
-    fieldListWithKey (magicConstructor <|> constructor) parseExpression "="
-  end <- getSourcePos
-  pure (DUnfold (Metadata start end) n (UnfoldDefinition (With [] ann) ps (Map.fromList fields) Nothing))
 
 {-# INLINE parseAnnotation #-}
 parseAnnotation :: Parser (Type Parameter ())

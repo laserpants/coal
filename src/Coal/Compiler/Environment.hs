@@ -53,7 +53,6 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
 
 data CompilerEnvironment a = CompilerEnvironment
   { compilerDataConstructorEnvironment :: Environment (DataConstructorEntry a)
-  , compilerCodataAccessorEnvironment :: Environment (CodataAccessorEntry a)
   , compilerTypeConstructorEnvironment :: Environment Kind
   , compilerTraitEnvironment :: Environment (TraitEntry a)
   , compilerInstanceEnvironment :: Environment (Map IndexedType (InstanceEntry a))
@@ -67,7 +66,6 @@ emptyCompilerEnvironment :: Maybe ProgressBar -> CompilerEnvironment a
 emptyCompilerEnvironment pb =
   CompilerEnvironment
     { compilerDataConstructorEnvironment = mempty
-    , compilerCodataAccessorEnvironment = mempty
     , compilerTypeConstructorEnvironment = mempty
     , compilerTraitEnvironment = mempty
     , compilerInstanceEnvironment = mempty

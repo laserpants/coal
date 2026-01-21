@@ -7,8 +7,9 @@
 module Coal.Compiler.Pass.PreflightPhase.AliasCycles (passAliasCycles) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..), mapPass)
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
@@ -64,18 +65,18 @@ detectCycles loc name =
     TRecord t ->
       detectCycles loc name t
     TRow r ->
-      detectRowCycles loc name r
+      detectCyclesInRow loc name r
     TAlias _ ts t -> do
       traverse_ (detectCycles loc name) ts
       detectCycles loc name t
     _ ->
       pure ()
 
-detectRowCycles :: (Monad m) => Metadata -> Name -> Row Parameter () ParameterizedType -> CompilerT Metadata m ()
-detectRowCycles loc name =
+detectCyclesInRow :: (Monad m) => Metadata -> Name -> Row Parameter () ParameterizedType -> CompilerT Metadata m ()
+detectCyclesInRow loc name =
   \case
     RExtend _ t r -> do
       detectCycles loc name t
-      detectRowCycles loc name r
+      detectCyclesInRow loc name r
     _ ->
       pure ()

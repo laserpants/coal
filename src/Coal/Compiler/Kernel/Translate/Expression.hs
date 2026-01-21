@@ -12,7 +12,7 @@ import Coal.Compiler.Kernel.Environment (qualifyName, withLocalName, withLocalNa
 import Coal.Compiler.Kernel.Translate.Operator (translateBinaryOperator, translateUnaryOperator)
 import Coal.Compiler.Kernel.Translate.Pattern (translatePattern)
 import Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive)
-import Coal.Compiler.Kernel.Translate.Record (extractRow, makeRecord, translateRecord)
+import Coal.Compiler.Kernel.Translate.Record (extractRow, translateRecord)
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Compiler (KernelExpr)
@@ -20,7 +20,6 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 
 translateExpression :: (Monad m, Data a) => Expression a IndexedType -> CompilerT a m KernelExpr
@@ -95,8 +94,6 @@ translateExpression =
               )
               :| []
           )
-    ECodataSelect _ _ _ (Just e1) -> do
-      translateExpression e1
     EFocus name0 ll1 ll2@(Label t1 _) e1 e2 -> do
       d1 <- translateExpression e1
       d2 <- withLocalNames [labelName ll1, labelName ll2] (translateExpression e2)
@@ -121,10 +118,6 @@ translateExpression =
       r = extractRow (translateLabel ll2)
     ETraitDictionary _ t trait ->
       pure (Kernel.var (Label (translateType t) (dictionaryLabel trait)))
-    ECodataRecord _ _ fields -> do
-      exprs <- traverse translateExpression fields
-      let r = foldr (uncurry Kernel.ext) Kernel.nil (Map.toList exprs)
-      pure $ makeRecord (Kernel.TCon "record" [Kernel.typeOf r]) r
     EFFICall _ _ (Label t name) es e ->
       Kernel.call (Label (translateType t) name)
         <$> traverse translateExpression es

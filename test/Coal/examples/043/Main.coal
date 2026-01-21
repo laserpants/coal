@@ -1,6 +1,7 @@
 module Main {
 
   import IO(println_int32, println_bool, println_string, println_char)
+  import Stream(type Stream, head)
 
   type List<a> 
     = Nil 
@@ -12,10 +13,8 @@ module Main {
       | Cons(_, @next) => next + 1
     }
 
-  cotype Stream = { Head : int32, Tail : Stream }
-
-  fun take_head(s) = 
-    s.Head
+  fun take_head(s : Stream<int32>) : int32= 
+    s |.head
 
   fun main() = 
     println_int32(1)

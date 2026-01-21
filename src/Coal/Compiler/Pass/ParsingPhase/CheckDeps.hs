@@ -7,8 +7,9 @@ module Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (ModuleBuild (..))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..))

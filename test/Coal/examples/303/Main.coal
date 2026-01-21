@@ -1,0 +1,13 @@
+module Main {
+
+  import IO(println_string)
+  import Stuff(type Foo)
+
+  let 
+    z : Foo =
+      [1,2,3]
+
+  fun main() =
+    println_string("!")
+
+}

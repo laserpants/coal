@@ -3,9 +3,10 @@
 module Coal.Compiler.Pass.PreflightPhase.Setup (passSetup) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions, insertExtraDefinitions)
 import Coal.Compiler.Embedded (embeddedPaths)
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..))
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), overModuleDefinitions, principalPath)

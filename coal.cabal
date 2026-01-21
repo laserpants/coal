@@ -40,6 +40,7 @@ library
       Coal.Compiler.Build.Core
       Coal.Compiler.Build.Hash256
       Coal.Compiler.Build.NameEntry
+      Coal.Compiler.Build.Unit
       Coal.Compiler.Builtin.DataConstructors
       Coal.Compiler.Builtin.Definitions
       Coal.Compiler.Builtin.Functions
@@ -95,14 +96,11 @@ library
       Coal.Compiler.Pass.TypePhase
       Coal.Compiler.Pass.TypePhase.Errors
       Coal.Compiler.Pass.TypePhase.ExpandAliases
-      Coal.Compiler.Pass.TypePhase.ExpandCotypes
       Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
       Coal.Compiler.Pass.TypePhase.ExpressionFolds
-      Coal.Compiler.Pass.TypePhase.ExpressionUnfolds
       Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion
       Coal.Compiler.Pass.TypePhase.Prep
       Coal.Compiler.Pass.TypePhase.TopLevelFolds
-      Coal.Compiler.Pass.TypePhase.TopLevelUnfolds
       Coal.Compiler.Pass.TypePhase.TypeInference
       Coal.Compiler.Path.Resolve
       Coal.Compiler.PatternMatching
@@ -116,7 +114,7 @@ library
       Coal.Compiler.State
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
-      Coal.DebugIO
+      Coal.Debugging
       Coal.Graphviz.Dot
       Coal.Kernel.Builtin.Constructors
       Coal.Kernel.Builtin.Objects
@@ -184,7 +182,6 @@ library
       Coal.Kernel.Parser.Symbol
       Coal.Kernel.Parser.Type
       Coal.Language
-      Coal.Language.Codata.Accessor
       Coal.Language.Data.Constructor
       Coal.Language.Expression
       Coal.Language.Expression.Binding
@@ -196,13 +193,11 @@ library
       Coal.Language.Module.Definition
       Coal.Language.Module.Definition.Alias
       Coal.Language.Module.Definition.Constant
-      Coal.Language.Module.Definition.Cotype
       Coal.Language.Module.Definition.Fold
       Coal.Language.Module.Definition.Function
       Coal.Language.Module.Definition.Instance
       Coal.Language.Module.Definition.Trait
       Coal.Language.Module.Definition.Type
-      Coal.Language.Module.Definition.Unfold
       Coal.Language.Module.Export
       Coal.Language.Module.Import
       Coal.Language.Module.Path

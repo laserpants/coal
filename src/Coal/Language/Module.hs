@@ -18,10 +18,8 @@ module Coal.Language.Module (
   module Coal.Language.Module.Definition.Constant,
   module Coal.Language.Module.Definition.Fold,
   module Coal.Language.Module.Definition.Alias,
-  module Coal.Language.Module.Definition.Unfold,
   module Coal.Language.Module.Definition.Trait,
   module Coal.Language.Module.Definition.Type,
-  module Coal.Language.Module.Definition.Cotype,
   module Coal.Language.Module.Definition.Instance,
   module Coal.Language.Module.Import,
   module Coal.Language.Module.Export,
@@ -30,13 +28,11 @@ module Coal.Language.Module (
 import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName, importPath)
 import Coal.Language.Module.Definition.Alias
 import Coal.Language.Module.Definition.Constant
-import Coal.Language.Module.Definition.Cotype
 import Coal.Language.Module.Definition.Fold
 import Coal.Language.Module.Definition.Function
 import Coal.Language.Module.Definition.Instance
 import Coal.Language.Module.Definition.Trait
 import Coal.Language.Module.Definition.Type
-import Coal.Language.Module.Definition.Unfold
 import Coal.Language.Module.Export
 import Coal.Language.Module.Import
 import Coal.Language.Module.Path (principalPath)

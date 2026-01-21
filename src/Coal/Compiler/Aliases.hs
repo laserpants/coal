@@ -104,24 +104,11 @@ instance (AliasContext t) => AliasContext (Scheme o k t) where
       Forall vs ts t ->
         Forall vs ts <$> expandAliases t
 
-instance AliasContext CotypeDefinition where
-  expandAliases =
-    \case
-      CotypeDefinition ps xsors ->
-        CotypeDefinition ps <$> traverse expandAliases xsors
-
 instance AliasContext TypeDefinition where
   expandAliases =
     \case
       TypeDefinition ps ctors ->
         TypeDefinition ps <$> traverse expandAliases ctors
-
-instance (AliasContext t) => AliasContext (CodataAccessor o k t) where
-  expandAliases =
-    \case
-      CodataAccessor{..} -> do
-        s <- expandAliases accessorScheme
-        pure CodataAccessor{accessorScheme = s, ..}
 
 instance (AliasContext t) => AliasContext (DataConstructor o k t) where
   expandAliases =
@@ -143,8 +130,6 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) whe
         DType loc name . TypeDefinition params <$> traverse expandAliases ctors
       DTypeAlias loc name (AliasDefinition params t) ->
         DTypeAlias loc name . AliasDefinition params <$> expandAliases t
-      DCotype loc name (CotypeDefinition params xsors) ->
-        DCotype loc name . CotypeDefinition params <$> traverse expandAliases xsors
       o ->
         pure o
 

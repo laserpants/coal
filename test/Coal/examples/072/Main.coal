@@ -1,22 +1,9 @@
 module Main {
 
   import IO(println_string, println_int32, println_bool)
-
-  cotype Stream<a> = { Head : a, Tail : Stream<a> }
-
-  unfold enum_from(n : int32) : Stream<int32> { 
-    , Head = n
-    , @Tail = n + 1
-  }
-
-//  cotype OStream<a> = { Head : a, Tail : Option<OStream<a>> }
-//
-//  unfold enum_from(n : int32) : OStream<int32> { 
-//    , Head = n
-//    , @Tail = @Some(n + 1)
-//  }
+  import Stream(type Stream, head, tail, enum_from)
 
   fun main() = 
-    println_int32(enum_from(0).Tail.Tail.Head)
+    println_int32(enum_from(0) |.tail |.tail |.head)
 
 }

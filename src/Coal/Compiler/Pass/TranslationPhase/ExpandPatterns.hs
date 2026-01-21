@@ -21,7 +21,6 @@ import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Module.Definition.Instance (InstanceDefinition (..))
-import Coal.Language.Module.Definition.Unfold (UnfoldDefinition (..))
 import Coal.Language.Pattern (IndexedPattern, Pattern (..))
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -110,8 +109,6 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
         DFunction loc name <$> traverse desugarPatterns f <*> traverse desugarPatterns fs
       DConstant loc name g fs ->
         DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
-      DUnfold loc n (UnfoldDefinition with ps d e) ->
-        DUnfold loc n . UnfoldDefinition with ps d <$> traverse desugarPatterns e
       DInstance loc n (InstanceDefinition ts pt ds) ->
         DInstance loc n . InstanceDefinition ts pt <$> traverse desugarPatterns ds
       d ->

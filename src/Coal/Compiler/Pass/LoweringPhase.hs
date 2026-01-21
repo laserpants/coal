@@ -5,8 +5,9 @@
 module Coal.Compiler.Pass.LoweringPhase (loweringPhase) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..))
-import Coal.Compiler.Pass (BuildUnit, Pass (..), liftPass, mapPass, (>->))
+import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode)
 import Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate)
 import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (passLLVMOutput)

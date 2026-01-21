@@ -7,7 +7,8 @@
 module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointRule) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass (BuildUnit, Pass (..), mapPass)
+import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language (Kind (..))
 import Coal.Language.Module

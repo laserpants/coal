@@ -8,15 +8,17 @@ module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) whe
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (moduleDependencies)
 import Coal.Compiler.Build.Core (dependencies)
+import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..), unitPathName)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language (Kind)
 import Coal.Language.Module
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (SCC (..), stronglyConnComp)
+import Data.List.Extra (notNull)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (second)
@@ -37,7 +39,7 @@ pass units = do
   forM_ cyclicSCCs $
     \scc ->
       tellErrors [ModuleCycle (unitPathName <$> getModulesFromSCC scc)]
-  if not (null cyclicSCCs)
+  if notNull cyclicSCCs
     then throwError PreflightFailure
     else pure $ concatMap getModulesFromSCC sccs
  where
@@ -46,8 +48,10 @@ pass units = do
 isCyclicSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> Bool
 isCyclicSCC =
   \case
-    CyclicSCC _ -> True
-    _ -> False
+    CyclicSCC _ ->
+      True
+    _ ->
+      False
 
 getModulesFromSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> [BuildUnit (Module Metadata Kind ())]
 getModulesFromSCC =

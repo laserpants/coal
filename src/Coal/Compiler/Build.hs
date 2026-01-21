@@ -7,10 +7,8 @@
 module Coal.Compiler.Build (
   Hash256 (..),
   ModuleBuild (..),
-  CotypeConstructorEntry (..),
   DataConstructorEntry (..),
   TypeConstructorEntry (..),
-  CodataAccessorEntry (..),
   TraitEntry (..),
   InstanceEntry (..),
   AliasEntry (..),
@@ -22,14 +20,9 @@ module Coal.Compiler.Build (
   addTypeExport,
   insertInstance,
   insertTrait,
-  insertCodataAccessor,
   insertAlias,
   insertDataConstructor,
-  insertCotypeConstructor,
   insertTypeConstructor,
-  insertManyCodataAccessors,
-  exportedCotypeConstructors,
-  exportedCodataAccessors,
   exportedDataConstructors,
   exportedTypeConstructors,
   exportedTraits,
@@ -72,9 +65,7 @@ data ModuleBuild a = ModuleBuild
   { moduleBuildPath :: Path
   , moduleFilePath :: Text
   , moduleDataConstructors :: Environment (DataConstructorEntry a)
-  , moduleCodataAccessors :: Environment (CodataAccessorEntry a)
   , moduleTypeConstructors :: Environment (TypeConstructorEntry a)
-  , moduleCotypeConstructors :: Environment (CotypeConstructorEntry a)
   , moduleTraits :: Environment (TraitEntry a)
   , moduleInstances :: Environment (Map IndexedType (InstanceEntry a))
   , moduleAliases :: Environment (AliasEntry a)
@@ -105,14 +96,8 @@ exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNa
 exportedTypeConstructors :: ModuleBuild a -> Environment (TypeConstructorEntry a)
 exportedTypeConstructors ModuleBuild{..} = Environment.filter (memberOf moduleTypeExports) moduleTypeConstructors
 
-exportedCotypeConstructors :: ModuleBuild a -> Environment (CotypeConstructorEntry a)
-exportedCotypeConstructors ModuleBuild{..} = Environment.filter (memberOf moduleTypeExports) moduleCotypeConstructors
-
 exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorEntry a)
 exportedDataConstructors ModuleBuild{..} = Environment.filter (memberOf moduleExportedNames) moduleDataConstructors
-
-exportedCodataAccessors :: ModuleBuild a -> Environment (CodataAccessorEntry a)
-exportedCodataAccessors ModuleBuild{..} = Environment.filter (memberOf moduleExportedNames) moduleCodataAccessors
 
 exportedTraits :: ModuleBuild a -> [TraitEntry a]
 exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTraits)
@@ -123,9 +108,7 @@ emptyModuleBuild =
     { moduleBuildPath = Path []
     , moduleFilePath = mempty
     , moduleDataConstructors = mempty
-    , moduleCodataAccessors = mempty
     , moduleTypeConstructors = mempty
-    , moduleCotypeConstructors = mempty
     , moduleTraits = mempty
     , moduleInstances = mempty
     , moduleAliases = mempty
@@ -149,37 +132,11 @@ insertDataConstructor name info ModuleBuild{..} =
     , ..
     }
 
-insertCodataAccessor :: Name -> CodataAccessorEntry a -> ModuleBuild a -> ModuleBuild a
-insertCodataAccessor name info ModuleBuild{..} =
-  ModuleBuild
-    { moduleCodataAccessors =
-        Environment.insert name info moduleCodataAccessors
-    , ..
-    }
-
-insertManyCodataAccessors :: [CodataAccessorEntry a] -> ModuleBuild a -> ModuleBuild a
-insertManyCodataAccessors infos ModuleBuild{..} =
-  ModuleBuild
-    { moduleCodataAccessors =
-        Environment.insertMultiple
-          [(name, info) | info@(CodataAccessorEntry _ name _) <- infos]
-          moduleCodataAccessors
-    , ..
-    }
-
 insertTypeConstructor :: Name -> TypeConstructorEntry a -> ModuleBuild a -> ModuleBuild a
 insertTypeConstructor name info ModuleBuild{..} =
   ModuleBuild
     { moduleTypeConstructors =
         Environment.insert name info moduleTypeConstructors
-    , ..
-    }
-
-insertCotypeConstructor :: Name -> CotypeConstructorEntry a -> ModuleBuild a -> ModuleBuild a
-insertCotypeConstructor name info ModuleBuild{..} =
-  ModuleBuild
-    { moduleCotypeConstructors =
-        Environment.insert name info moduleCotypeConstructors
     , ..
     }
 

@@ -8,7 +8,8 @@ module Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Pass (BuildUnit (..), Pass (..), mapPass)
+import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module
@@ -48,8 +49,6 @@ instance (Data a, Monoid a) => TransformContext (Definition a k ()) where
         DInstance a n <$> desugarDoNotation d
       DFold a n d -> do
         DFold a n <$> desugarDoNotation d
-      DUnfold a n d -> do
-        DUnfold a n <$> desugarDoNotation d
       o ->
         pure o
 
@@ -66,14 +65,6 @@ instance (Data a, Monoid a) => TransformContext (FoldDefinition a ()) where
       FoldDefinition a cs ->
         FoldDefinition a
           <$> traverse desugarDoNotation cs
-
-instance (Data a, Monoid a) => TransformContext (UnfoldDefinition a ()) where
-  desugarDoNotation =
-    \case
-      UnfoldDefinition a ps fs e ->
-        UnfoldDefinition a ps
-          <$> traverse desugarDoNotation fs
-          <*> desugarDoNotation e
 
 instance (Data a, Monoid a) => TransformContext (FunctionDefinition a ()) where
   desugarDoNotation =

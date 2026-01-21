@@ -21,7 +21,6 @@ import Coal.Language.Module
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
-import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (asks)
 import Control.Monad.State (evalState, gets)
 import Control.Monad.Writer (execWriter)
@@ -29,7 +28,6 @@ import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
@@ -104,36 +102,6 @@ instance GenerateConstraints a (Definition a Kind IndexedType) where
         void (generateConstraints f)
       DConstant _ _ c _ ->
         void (generateConstraints c)
-      DUnfold loc _ (UnfoldDefinition (With _ t) ps d (Just e)) -> do
-        generateConstraints e
-        (r, _, _) <- runConstraintsGen (instantiateAnnotation loc t)
-        case r of
-          Left err ->
-            compilerReportConstraintsGenErrors [EIllFormedTypeAnnotation err]
-          Right t2 -> do
-            let t3 = foldTypeOf t2 ps
-                fields = Map.toList d
-            insertConstraintsC [Equality (RuleAnnotation loc t1 t3) [t1, t3]]
-            cs <- concatForM fields $
-              \(name, elem1) -> do
-                env <- asks compilerCodataAccessorEnvironment
-                case Environment.lookup (Text.replace "@" "" name) env of
-                  Just (CodataAccessorEntry _ _ CodataAccessor{..}) -> do
-                    if "@" `Text.isPrefixOf` name
-                      then do
-                        let tl = typeOf (NonEmpty.head ps)
-                            tr = typeOf elem1
-                        pure [Equality (RuleUnfoldEquality loc name tl tr) [tl, tr]]
-                      else do
-                        let tl = t2 `TArrow` typeOf elem1
-                        pure [Explicit (RuleUnfoldExplicit loc tl accessorScheme) tl accessorScheme]
-                  Nothing ->
-                    pure []
-            if length cs == length fields
-              then insertConstraintsC cs
-              else compilerReportConstraintsGenErrors [ECodataFieldMismatch loc]
-       where
-        t1 = typeOf e
       _ ->
         error "Not implemented"
 
@@ -252,11 +220,14 @@ typeDefinitionC =
       generateConstraints d
       sub <- solveC
       define name (typeOf (apply sub d))
-    DImport{} -> pure ()
-    DQualifiedImport{} -> pure ()
-    DTypeAlias{} -> pure ()
-    DType{} -> pure ()
-    DCotype{} -> pure ()
+    DImport{} ->
+      pure ()
+    DQualifiedImport{} ->
+      pure ()
+    DTypeAlias{} ->
+      pure ()
+    DType{} ->
+      pure ()
     d -> do
       generateConstraints d
       sub <- solveC

@@ -1,17 +1,24 @@
-/** 
- * Numeric utilities and conversions.
- */
 module Number {
 
   /**
    * Maximum value representable by a 32-bit signed integer.
    */
-  let _INT32_MAX = 2147483647
+  let _INT32_MAX : int32 = 2147483647
 
   /**
    * Maximum value representable by a 64-bit signed integer.
    */
-  let _INT64_MAX = 9223372036854775807
+  let _INT64_MAX : int64 = 9223372036854775807
+
+  /**
+   * Minimum value representable by a 32-bit signed integer.
+   */
+  let _INT32_MIN : int32 = -2147483648
+
+  /**
+   * Minimum value representable by a 64-bit signed integer.
+   */
+  let _INT64_MIN : int64 = -9223372036854775808
 
   /**
    * Convert a 32-bit integer to a float.

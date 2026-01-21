@@ -19,7 +19,7 @@ import qualified Data.ByteString.Char8 as ByteString
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
-import Extras (Name, isConstructor)
+import Extras (Name)
 import GHC.Int (Int32, Int64)
 import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char, upperChar)
@@ -80,11 +80,7 @@ parseExpression :: Parser (Expression Metadata ())
 parseExpression = makeExprParser parseAtom operator
 
 selector :: Expression Metadata () -> Metadata -> Name -> Expression Metadata ()
-selector expr loc lname
-  | isConstructor lname = ECodataSelect loc ll (Just expr) Nothing
-  | otherwise = ESelect loc ll expr
- where
-  ll = Label () lname
+selector expr loc lname = ESelect loc (Label () lname) expr
 
 parseUnit :: Parser (NonEmpty (Expression Metadata ()))
 parseUnit =

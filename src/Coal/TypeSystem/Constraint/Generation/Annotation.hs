@@ -11,7 +11,7 @@ module Coal.TypeSystem.Constraint.Generation.Annotation (
 ) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build (CotypeConstructorEntry (..), ModuleBuild (..), TypeConstructorEntry (..))
+import Coal.Compiler.Build (ModuleBuild (..), TypeConstructorEntry (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
@@ -34,11 +34,7 @@ lookupTypeConstructor name = do
   ModuleBuild{..} <- asks constraintsGenContextModules
   case Environment.lookup name moduleTypeConstructors of
     Nothing ->
-      case Environment.lookup name moduleCotypeConstructors of
-        Nothing ->
-          pure Nothing
-        Just (CotypeConstructorEntry _ _ kind _ _) ->
-          pure (Just kind)
+      pure Nothing
     Just (TypeConstructorEntry _ _ kind _) ->
       pure (Just kind)
 

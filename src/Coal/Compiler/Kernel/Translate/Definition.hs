@@ -35,10 +35,6 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    DUnfold _ name (UnfoldDefinition _ _ _ (Just e)) -> do
-      c <- translateExpression e
-      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [Kernel.OConstant (moduleName <.> name) c]
     DTrait _ name (TraitDefinition _ _ ds) ->
       forM ds $
         \(n, Forall _ _ t) ->

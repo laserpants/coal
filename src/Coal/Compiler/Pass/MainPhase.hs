@@ -1,7 +1,8 @@
 module Coal.Compiler.Pass.MainPhase (mainPhase) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass (BuildUnit, Pass (..), liftPass, mapPass, overlayEnvironment, (>->))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, overlayEnvironment, (>->))
 import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Pass.TypePhase (typePhasePasses)
 import Coal.Language (IndexedType, Kind)

@@ -1,0 +1,7 @@
+module Stuff {
+
+  type alias Baz = int32
+
+  type alias Foo = List<Baz>
+
+}

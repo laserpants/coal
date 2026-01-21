@@ -10,8 +10,9 @@ module Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Journal (tellErrors)
-import Coal.Compiler.Pass (BuildUnit, Pass (..), mapPass)
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
@@ -58,8 +59,6 @@ instance (Data t) => RuleContext (Definition Metadata k t) where
         detectDuplicateParams d
       DFold _ _ d ->
         detectDuplicateParams d
-      DUnfold _ _ d ->
-        detectDuplicateParams d
       _ ->
         pure ()
 
@@ -87,13 +86,6 @@ instance RuleContext (FoldDefinition Metadata t) where
     \case
       FoldDefinition _ cs ->
         detectDuplicateParams cs
-
-instance RuleContext (UnfoldDefinition Metadata t) where
-  detectDuplicateParams =
-    \case
-      UnfoldDefinition _ ps fields _ -> do
-        checkPatterns ps
-        traverse_ detectDuplicateParams fields
 
 instance RuleContext (Clause Metadata t) where
   detectDuplicateParams =
@@ -157,11 +149,6 @@ instance RuleContext (Expression Metadata t) where
         detectDuplicateParams cs
       ESelect _ _ e ->
         detectDuplicateParams e
-      ECodataSelect _ _ me1 me2 -> do
-        detectDuplicateParams me1
-        detectDuplicateParams me2
-      ECodataRecord _ _ d ->
-        traverse_ detectDuplicateParams d
       EFocus _ _ _ e1 e2 -> do
         detectDuplicateParams e1
         detectDuplicateParams e2

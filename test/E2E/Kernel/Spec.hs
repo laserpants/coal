@@ -4,9 +4,9 @@ module E2E.Kernel.Spec (e2eKernelSpec) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Name (Name)
+import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
-import Coal.Compiler.Pass (BuildUnit (..))
 import Coal.Compiler.Pass.LoweringPhase.KernelCode (compileUnits)
 import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (generateLLOutput)
 import Coal.Compiler.Pass.LoweringPhase.Linking (compileBitcode)

@@ -43,8 +43,6 @@ instance PatternExhaustiveCheckContext (Definition Metadata k t) where
         DFunction loc n <$> traverse (patternExhaustiveCheck name) f <*> traverse (patternExhaustiveCheck name) ws
       DConstant loc n c ws ->
         DConstant loc n <$> patternExhaustiveCheck name c <*> traverse (patternExhaustiveCheck name) ws
-      DUnfold loc n d ->
-        DUnfold loc n <$> patternExhaustiveCheck name d
       DInstance loc n d ->
         DInstance loc n <$> patternExhaustiveCheck name d
       d ->
@@ -55,12 +53,6 @@ instance PatternExhaustiveCheckContext (InstanceDefinition Definition Metadata k
     \case
       InstanceDefinition ts t ds ->
         InstanceDefinition ts t <$> traverse (patternExhaustiveCheck name) ds
-
-instance PatternExhaustiveCheckContext (UnfoldDefinition Metadata t) where
-  patternExhaustiveCheck name =
-    \case
-      UnfoldDefinition w t ps e ->
-        UnfoldDefinition w t ps <$> traverse (patternExhaustiveCheck name) e
 
 instance PatternExhaustiveCheckContext (FunctionDefinition Metadata t) where
   patternExhaustiveCheck name =
@@ -160,13 +152,6 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
         error "Implementation error"
       ESelect a ll e ->
         ESelect a ll <$> patternExhaustiveCheck name e
-      ECodataSelect a ll e1 e2 ->
-        ECodataSelect a ll
-          <$> traverse (patternExhaustiveCheck name) e1
-          <*> traverse (patternExhaustiveCheck name) e2
-      ECodataRecord a t d ->
-        ECodataRecord a t
-          <$> traverse (patternExhaustiveCheck name) d
       EFocus n ll1 ll2 e1 e2 ->
         EFocus n ll1 ll2
           <$> patternExhaustiveCheck name e1

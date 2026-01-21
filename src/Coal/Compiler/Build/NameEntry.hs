@@ -5,9 +5,7 @@
 
 module Coal.Compiler.Build.NameEntry (
   DataConstructorEntry (..),
-  CodataAccessorEntry (..),
   TypeConstructorEntry (..),
-  CotypeConstructorEntry (..),
   TraitEntry (..),
   InstanceEntry (..),
   AliasEntry (..),
@@ -33,17 +31,6 @@ data DataConstructorEntry a = DataConstructorEntry
 
 instance (Binary a) => Binary (DataConstructorEntry a)
 
-type IndexedCodataAccessor = CodataAccessor TypeIndex Kind IndexedType
-
-data CodataAccessorEntry a = CodataAccessorEntry
-  { codataAccessorEntryMetadata :: a
-  , codataAccessorEntryName :: Name
-  , codataAccessorEntryAccessor :: IndexedCodataAccessor
-  }
-  deriving (Show, Eq, Ord, Read, Generic)
-
-instance (Binary a) => Binary (CodataAccessorEntry a)
-
 data TypeConstructorEntry a = TypeConstructorEntry
   { typeConstructorEntryMetadata :: a
   , typeConstructorEntryName :: Name
@@ -53,17 +40,6 @@ data TypeConstructorEntry a = TypeConstructorEntry
   deriving (Show, Eq, Ord, Read, Generic)
 
 instance (Binary a) => Binary (TypeConstructorEntry a)
-
-data CotypeConstructorEntry a = CotypeConstructorEntry
-  { cotypeConstructorEntryMetadata :: a
-  , cotypeConstructorEntryName :: Name
-  , cotypeConstructorEntryKind :: Kind
-  , cotypeConstructorEntryParams :: [Parameter ()]
-  , cotypeConstructorEntryDataAccessors :: [CodataAccessor Parameter () ParameterizedType]
-  }
-  deriving (Show, Eq, Ord, Read, Generic)
-
-instance (Binary a) => Binary (CotypeConstructorEntry a)
 
 data TraitEntry a = TraitEntry
   { traitEntryMetadata :: a
@@ -100,17 +76,13 @@ data NameEntry
   = NFunction Name IndexedScheme
   | NConstant Name IndexedScheme
   | NFold Name IndexedScheme
-  | NUnfold Name IndexedScheme
   | NDataConstructor Name IndexedScheme
-  | NCodataAccessor Name IndexedScheme
   | NType Name Kind
-  | NCotype Name Kind
   | NTrait Name
   | NAlias Name
   | NFunctionPlaceholder Name
   | NConstantPlaceholder Name
   | NFoldPlaceholder Name
-  | NUnfoldPlaceholder Name
   deriving (Show, Eq, Ord, Read, Generic)
 
 instance Binary NameEntry
@@ -127,15 +99,9 @@ instance HasName NameEntry where
         name
       NFold name _ ->
         name
-      NUnfold name _ ->
-        name
       NDataConstructor name _ ->
         name
-      NCodataAccessor name _ ->
-        name
       NType name _ ->
-        name
-      NCotype name _ ->
         name
       NTrait name ->
         name
@@ -147,20 +113,12 @@ instance HasName NameEntry where
         name
       NFoldPlaceholder name ->
         name
-      NUnfoldPlaceholder name ->
-        name
 
 instance HasName (DataConstructorEntry a) where
   nameOf = dataConstructorEntryName
 
-instance HasName (CodataAccessorEntry a) where
-  nameOf = codataAccessorEntryName
-
 instance HasName (TypeConstructorEntry a) where
   nameOf = typeConstructorEntryName
-
-instance HasName (CotypeConstructorEntry a) where
-  nameOf = cotypeConstructorEntryName
 
 instance HasName (TraitEntry a) where
   nameOf = traitEntryName

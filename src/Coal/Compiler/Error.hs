@@ -43,9 +43,7 @@ data CompilerError a
   | ImportNotInModule Name Path (ErrorLocation a)
   | ExportNotInModule Name Path (ErrorLocation a)
   | MissingType Name Path (ErrorLocation a)
-  | MissingCotype Name Path (ErrorLocation a)
   | NoDataConstructorForType Name Name Path (ErrorLocation a)
-  | NoCodataAccessorForCotype Name Name Path (ErrorLocation a)
   | TraitNotInScope Name (ErrorLocation a)
   | MissingTraitDefinition Name Name (ErrorLocation a)
   | UnexpectedTraitDefinition Name Name (ErrorLocation a)
@@ -110,11 +108,7 @@ errorLocation =
       Just erl
     MissingType _ _ erl ->
       Just erl
-    MissingCotype _ _ erl ->
-      Just erl
     NoDataConstructorForType _ _ _ erl ->
-      Just erl
-    NoCodataAccessorForCotype _ _ _ erl ->
       Just erl
     TraitNotInScope _ erl ->
       Just erl

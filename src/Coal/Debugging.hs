@@ -1,4 +1,4 @@
-module Coal.DebugIO (writeDebugFile) where
+module Coal.Debugging (writeDebugFile) where
 
 import Data.Text (Text)
 import qualified Data.Text.IO as Text
