@@ -53,7 +53,7 @@ pass files = do
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildUnit (Module Metadata Kind ())))
 parseEmbedded (p, src) = do
   CompilerConfig{..} <- gets compilerConfig
-  case runParser (parseModule <* eof) "" encodedSrc of
+  case runParser (spaces *> parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
     Right module_ -> do
