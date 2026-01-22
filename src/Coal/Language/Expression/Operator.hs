@@ -69,7 +69,7 @@ data BinaryOperator
     OStringConcatenation
   | -- | List concatenation (++)
     OListConcatenation
-  | -- | Semmigroup operation (<>)
+  | -- | Semigroup operation (<>)
     OSemigroupOp
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
