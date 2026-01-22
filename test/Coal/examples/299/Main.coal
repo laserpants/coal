@@ -3,24 +3,27 @@ module Main {
   import IO(println_int32, println_string)
   import Number(max)
 
+
   type alias TreeFields<a> =
     { value    : a
     , children : List<Tree<a>>
     }
+
 
   type Tree<a> = Node(TreeFields<a>)
 
   fun leaf(value) =
     Node({ value = value, children = [] })
 
+
   fun node(value, children) =
     Node({ value = value, children = children })
 
-  fold tree_list_size : List<Tree<a>> -> int32 
+  fold tree_list_size 
     | size(@tree) :: tree_list_size(@trees) = tree + trees
     | [] = 0
 
-  fold size : Tree<a> -> int32 
+  fold size 
     | Node({ children = tree_list_size(@children) | _ }) = 1 + children
 
 //  fun height(tree) =

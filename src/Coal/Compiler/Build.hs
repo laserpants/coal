@@ -16,6 +16,7 @@ module Coal.Compiler.Build (
   HasName (..),
   emptyModuleBuild,
   addName,
+  replaceName,
   addExport,
   addTypeExport,
   insertInstance,
@@ -169,6 +170,13 @@ addName :: NameEntry -> ModuleBuild a -> ModuleBuild a
 addName info ModuleBuild{..} =
   ModuleBuild
     { moduleNames = info : moduleNames
+    , ..
+    }
+
+replaceName :: NameEntry -> ModuleBuild a -> ModuleBuild a
+replaceName info ModuleBuild{..} =
+  ModuleBuild
+    { moduleNames = info : filter (\e -> nameOf e /= nameOf info) moduleNames
     , ..
     }
 

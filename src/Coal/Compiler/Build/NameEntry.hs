@@ -46,7 +46,8 @@ data TraitEntry a = TraitEntry
   , traitEntryName :: Name
   , traitEntryParameter :: Parameter Kind
   , traitEntryRequiredInstances :: [Trait (Parameter Kind)]
-  , traitEntryEntries :: Environment (Scheme Parameter Kind (Type Parameter Kind))
+  , -- TODO: methods?
+    traitEntryEntries :: Environment (Scheme Parameter Kind (Type Parameter Kind))
   }
   deriving (Show, Eq, Ord, Read, Generic)
 
@@ -56,7 +57,8 @@ data InstanceEntry a = InstanceEntry
   { instanceEntryMetadata :: a
   , instanceEntryType :: ParameterizedType
   , instanceEntryIndexedType :: IndexedType
-  , instanceEntryEntries :: Dictionary IndexedScheme
+  , -- TODO: methods?
+    instanceEntryEntries :: Dictionary IndexedScheme
   }
   deriving (Show, Eq, Ord, Read, Generic)
 

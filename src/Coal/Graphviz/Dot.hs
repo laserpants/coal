@@ -394,8 +394,11 @@ instance (Show t, Pretty t) => Dot t (Definition a k t) where
                 id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
                 emitEdge nid id1
           emitEdgesTo ds
-      DFold _ name (FoldDefinition (With _ t) cs) ->
+      DFold _ name (FoldDefinition (Just (With _ t)) cs) ->
         fromNode (emitParallelogram ("DFold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
+          emitEdgesTo cs
+      DFold _ name (FoldDefinition _ cs) ->
+        fromNode (emitParallelogram ("DFold\\n" <> name) Nothing) $ do
           emitEdgesTo cs
       _ ->
         emitParallelogram "TODO" Nothing

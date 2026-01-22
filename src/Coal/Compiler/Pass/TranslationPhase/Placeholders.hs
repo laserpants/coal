@@ -21,6 +21,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.TypeSystem.Constraint.Assumption (normalizedName)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
 import Control.Monad.Except (MonadError (throwError), forM)
@@ -43,10 +44,18 @@ pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (M
 pass =
   withCurrentModuleC $
     \m -> do
-      m1 <- overModuleDefinitionsM (traverse insertPlaceholders) m
+      -- TODO: This needs some cleanup. We are effectively running the same
+      -- steps twice...
+
+      _ <- overModuleDefinitionsM (traverse insertPlaceholders) m
       names <- gets compilerNameStore
       updateNames names
-      pure m1
+
+      m2 <- overModuleDefinitionsM (traverse insertPlaceholders) m
+      names2 <- gets compilerNameStore
+      updateNames names2
+
+      pure m2
 
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 updateNames store =
@@ -68,17 +77,18 @@ updateNames store =
  where
   go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
   go name info =
-    case Environment.lookup name store of
+    case Environment.lookup (normalizedName name) store of
       Nothing ->
         pure ()
       Just s ->
-        modify $ addName (info name s)
+        modify $ replaceName (info name s)
 
 insertPlaceholders :: (Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
 insertPlaceholders =
   \case
-    d@(DConstant _ name _ _) ->
-      insertTypeInfo name =<< expandInLocalEnv d
+    d@(DConstant _ name _ _) -> do
+      r <- expandInLocalEnv d
+      insertTypeInfo name r
     DInstance loc name (InstanceDefinition ts t ds) -> do
       es <- forM ds (insertPlaceholdersInDef (Trait name t))
       pure (DInstance loc name (InstanceDefinition ts t es))
@@ -88,8 +98,9 @@ insertPlaceholders =
 insertPlaceholdersInDef :: (Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
 insertPlaceholdersInDef trait =
   \case
-    c@DConstant{} ->
-      insertTypeInfo (instanceLabel trait (definitionName c)) =<< expandInLocalEnv c
+    c@DConstant{} -> do
+      r <- expandInLocalEnv c
+      insertTypeInfo (instanceLabel trait (definitionName c)) r
     _ ->
       error "Not implemented"
 
@@ -110,7 +121,7 @@ insertName _ _ = error "Implementation error"
 collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
 collectTraits u name = do
   env <- asks compilerDictionaryNameEnvironment
-  case Environment.lookup name env of
+  case Environment.lookup (normalizedName name) env of
     Nothing ->
       pure []
     Just (Forall _ [] _) ->

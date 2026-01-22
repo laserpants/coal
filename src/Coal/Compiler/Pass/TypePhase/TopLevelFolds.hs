@@ -102,7 +102,7 @@ compileTopLevelFolds =
   \case
     DFold loc name (FoldDefinition w cs) -> do
       e1 <- expandTopLevelFold cs
-      pure (DConstant loc name (ConstantDefinition loc (Just w) (With [] ()) e1) [])
+      pure (DConstant loc name (ConstantDefinition loc w (With [] ()) e1) [])
     o ->
       pure o
 

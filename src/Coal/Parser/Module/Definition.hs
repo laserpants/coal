@@ -209,10 +209,10 @@ parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do
   start <- getSourcePos
   n <- lexeme_ "fold" *> name
-  ann <- parseAnnotation
+  ann <- optional parseAnnotation
   end <- getSourcePos
   cs <- try (nonEmpty (some parseTopLevelFoldClause)) <|> braces (nonEmpty (some parseTopLevelFoldClause))
-  pure (DFold (Metadata start end) n (FoldDefinition (With [] ann) cs))
+  pure (DFold (Metadata start end) n (FoldDefinition (With [] <$> ann) cs))
 
 parseTopLevelFoldClause :: Parser (Clause Metadata ())
 parseTopLevelFoldClause =
