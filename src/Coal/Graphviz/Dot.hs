@@ -11,7 +11,7 @@ module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)
 import Coal.Common.Supply (Supply (..), supplied)
-import Coal.Debugging (writeDebugFile)
+import Coal.Debug (writeDebugFile)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))

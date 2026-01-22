@@ -114,7 +114,7 @@ library
       Coal.Compiler.State
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
-      Coal.Debugging
+      Coal.Debug
       Coal.Graphviz.Dot
       Coal.Kernel.Builtin.Constructors
       Coal.Kernel.Builtin.Objects
