@@ -1,0 +1,21 @@
+module Main {
+
+  import IO(println_bool)
+
+  instance Comparable<List<a>> with Comparable<a> {
+    fun `==`(xs, ys) =
+      match((xs, ys)) {
+        | (a :: _, b :: _) => 
+           a == b
+        | _ => false
+      }
+  }
+
+  fun main() =
+
+    // println_bool(["a", "b"] == ["a", "b"])
+    // println_bool(["a"] == ["a"])
+    println_bool(["a"] == ["a"])
+    //println_bool(("a", "b") == ("a", "b"))
+
+}
