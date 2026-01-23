@@ -210,8 +210,7 @@ typeDefinitionC =
                   insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s1) (typeOf d) s1]
                   generateConstraints d
                   sub <- solveC
-                  define (instanceLabel (Trait trait p) (definitionName d)) (typeOf (apply sub d))
-
+                  define (instanceLabel (Trait trait t0) (definitionName d)) (typeOf (apply sub d))
     d@(DFunction loc name (FunctionDefinition _ _ (With _ t) ps _ :| _) _) -> do
       checkIfNameExists loc name
       checkMain loc t ps name

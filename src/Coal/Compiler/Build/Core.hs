@@ -55,7 +55,7 @@ buildEnv = do
 replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 replacePlaceholders store =
   updateCurrentBuildC $
-    \build@ModuleBuild{..} ->
+    \build@ModuleBuild{..} -> do
       flip execStateT build $
         forM_ moduleNames $
           \case
@@ -460,6 +460,17 @@ collectInstances :: (Monad m) => Environment Kind -> Environment (TraitEntry a) 
 collectInstances kinds traits =
   \case
     DInstance loc trait (InstanceDefinition _ q entries) -> do
+      forM_ entries $
+        \case
+          (DConstant _ name _ _) -> do
+            let ll = instanceLabel (Trait trait q) name
+            modify $ addName (NFunctionPlaceholder ll)
+          (DFunction _ name _ _) -> do
+            let ll = instanceLabel (Trait trait q) name
+            modify $ addName (NFunctionPlaceholder ll)
+          _ ->
+            pure ()
+
       this <- lift $ gets (principalPath . compilerCurrentModule)
       case Environment.lookup trait traits of
         Nothing -> do
@@ -555,8 +566,14 @@ collectImportedInstances =
                   \(_, InstanceEntry{..}) -> do
                     if headConstructor instanceEntryIndexedType == Just name
                       then forM (Map.toList instanceEntryEntries) $
-                        \(f, _) ->
-                          pure (path, instanceLabel (Trait trait instanceEntryType) f)
+                        \(f, _) -> do
+                          let ll = instanceLabel (Trait trait instanceEntryType) f
+
+                          let infos = pick [ll] moduleNames
+                          forM_ infos $
+                            \info -> modify $ addName info
+
+                          pure (path, ll)
                       else pure []
           _ ->
             pure []
