@@ -7,52 +7,10 @@ module Writer {
 
   type Writer<w, a> = Writer(a, w)
 
-  fun run_writer(writer) =
-    match(writer) {
-      | Writer(a, w) => (a, w)
-    }
-
   instance Functor<Writer<w>> {
     fun map(f, Writer(a, w)) =
       Writer(f(a), w)
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   instance Applicative<Writer<w>> with Monoid<w> {
     fun pure(w) = 
@@ -61,7 +19,6 @@ module Writer {
     fun ap(Writer(f, w1), Writer(a, w2)) =
       Writer(f(a), w1 <> w2)
   }
-
 
   instance Monad<Writer<w>> {
     fun bind(writer, k) : Writer<w, b> =
@@ -74,6 +31,17 @@ module Writer {
       }
   }
 
+  fun tell(w) : Writer<w, unit> =
+    Writer((), w)
 
+  fun listen(m) : Writer<w,(a, w)> =
+    match(m) {
+      | Writer(a, w) => Writer((a, w), w)
+    }
+
+  fun run_writer(writer) =
+    match(writer) {
+      | Writer(a, w) => (a, w)
+    }
 
 }

@@ -2,21 +2,10 @@ module Main {
 
   import namespace IO
   import namespace List
-//  import Coal.Monad(trait Monad, and_then, and_eval)
   import Coal.Monad(and_eval)
-//  import Coal.Functor(trait Functor)
-//  import Coal.Applicative(trait Applicative)
   import Coal.Monoid(trait Monoid)
-  import Writer(type Writer, run_writer)
+  import Writer(type Writer, run_writer, tell)
   import IO(return)
-
-  fun tell(w) : Writer<w, unit> =
-    Writer((), w)
-
-  fun listen(m) : Writer<w,(a, w)> =
-    match(m) {
-      | Writer(a, w) => Writer((a, w), w)
-    }
 
   // Example use:
 
