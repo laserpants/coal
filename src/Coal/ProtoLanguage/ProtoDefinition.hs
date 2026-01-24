@@ -15,6 +15,8 @@ data ProtoDefinition
     ProtoDTypeAlias
   | -- | Function definition
     ProtoDFunction
+  | -- | Function group
+    ProtoDFunctionGroup
   | -- | Top-level fold
     ProtoDFold
   | -- | Top-level let-binding
