@@ -20,10 +20,31 @@ testModule0 =
             "println_int32"
             ( ProtoFunctionDefinition
                 { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation = Nothing
+                , protoOunctionDefinitionAnnotation =
+                    Just
+                      ( With
+                          []
+                          ( TApplication
+                              KType
+                              (TConstructor (KArrow KType KType) "IO")
+                              (TIntrinsic IUnit)
+                          )
+                      )
                 , protoOunctionDefinitionType = With [] ()
-                , protoOunctionDefinitionPatterns = undefined
-                , protoOfunctionDefinitionExpression = undefined
+                , protoOunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "n"))
+                      :| []
+                , protoOfunctionDefinitionExpression =
+                    EApplication
+                      mempty
+                      ()
+                      (EVariable mempty (Label () "io$_println_int32"))
+                      ( EVariable mempty (Label () "n")
+                          :| []
+                      )
                 }
             )
         ]
@@ -117,13 +138,59 @@ testModule2 =
                           :| []
                       )
                       ( EClause
-                          undefined
-                          undefined
-                          undefined
+                          mempty
+                          (PConstructor mempty (Label () "Zero") [])
+                          ( CPlain
+                              mempty
+                              []
+                              ( EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "from_int32"))
+                                  ( ELiteral mempty (LInt32 1)
+                                      :| []
+                                  )
+                              )
+                              :| []
+                          )
                           <| EClause
-                            undefined
-                            undefined
-                            undefined
+                            mempty
+                            ( PAs
+                                mempty
+                                (Label () "m")
+                                ( PConstructor
+                                    mempty
+                                    (Label () "Succ")
+                                    [ PAtVariable
+                                        mempty
+                                        (Label () "f")
+                                    ]
+                                )
+                            )
+                            ( CPlain
+                                mempty
+                                []
+                                ( EApplication
+                                    mempty
+                                    ()
+                                    ( EBinaryOperator
+                                        mempty
+                                        ()
+                                        OMultiplication
+                                    )
+                                    ( EApplication
+                                        mempty
+                                        ()
+                                        (EVariable mempty (Label () "unpack"))
+                                        ( EVariable mempty (Label () "m")
+                                            :| []
+                                        )
+                                        <| EVariable mempty (Label () "f")
+                                        :| []
+                                    )
+                                )
+                                :| []
+                            )
                           :| []
                       )
                 }
@@ -141,15 +208,28 @@ testModule3 =
             "pack"
             ( ProtoFunctionDefinition
                 { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation = Nothing
-                , protoOunctionDefinitionType = With [] ()
-                , protoOunctionDefinitionPatterns = undefined
+                , protoOunctionDefinitionAnnotation =
+                    Just
+                      ( With
+                          []
+                          (TIntrinsic INat)
+                      )
+                , protoOunctionDefinitionType =
+                    With [] ()
+                , protoOunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "m"))
+                      :| []
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
-                      undefined
-                      undefined
+                      (EVariable mempty (Label () "nat$_pack"))
+                      ( EVariable mempty (Label () "m")
+                          :| []
+                      )
                 }
             )
         , ProtoDFunction
@@ -157,15 +237,28 @@ testModule3 =
             "unpack"
             ( ProtoFunctionDefinition
                 { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation = Nothing
-                , protoOunctionDefinitionType = With [] ()
-                , protoOunctionDefinitionPatterns = undefined
+                , protoOunctionDefinitionAnnotation =
+                    Just
+                      ( With
+                          []
+                          (TIntrinsic IInt32)
+                      )
+                , protoOunctionDefinitionType =
+                    With [] ()
+                , protoOunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic INat)
+                      (PVariable mempty (Label () "n"))
+                      :| []
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
-                      undefined
-                      undefined
+                      (EVariable mempty (Label () "nat$_unpack"))
+                      ( EVariable mempty (Label () "n")
+                          :| []
+                      )
                 }
             )
         ]
