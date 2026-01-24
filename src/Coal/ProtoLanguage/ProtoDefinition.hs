@@ -33,11 +33,29 @@ data ProtoTypeDefinition a k t = ProtoTypeDefinition
     )
 
 data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
-  { protoOunctionDefinitionMetadata :: a
-  , protoOunctionDefinitionAnnotation :: Maybe (With (Type Parameter k))
-  , protoOunctionDefinitionType :: With t
-  , protoOunctionDefinitionPatterns :: NonEmpty (Pattern a t)
+  { protoOfunctionDefinitionMetadata :: a
+  , protoOfunctionDefinitionAnnotation :: Maybe (With (Type Parameter k))
+  , protoOfunctionDefinitionType :: With t
+  , protoOfunctionDefinitionPatterns :: NonEmpty (Pattern a t)
   , protoOfunctionDefinitionExpression :: Expression a t
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    )
+
+data ProtoLetDefinition a k t = ProtoLetDefinition
+  { protoOletDefinitionMetadata :: a
+  , protoOletDefinitionAnnotation :: Maybe (With (Type Parameter k))
+  , protoOletDefinitionType :: With t
+  , protoOletDefinitionExpression :: Expression a t
   }
   deriving
     ( Show
