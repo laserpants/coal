@@ -19,8 +19,8 @@ testModule0 =
             mempty
             "println_int32"
             ( ProtoFunctionDefinition
-                { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation =
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
                           []
@@ -30,8 +30,8 @@ testModule0 =
                               (TIntrinsic IUnit)
                           )
                       )
-                , protoOunctionDefinitionType = With [] ()
-                , protoOunctionDefinitionPatterns =
+                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
@@ -69,10 +69,10 @@ testModule1 =
             mempty
             "main"
             ( ProtoFunctionDefinition
-                { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation = Nothing
-                , protoOunctionDefinitionType = With [] ()
-                , protoOunctionDefinitionPatterns =
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation = Nothing
+                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionPatterns =
                     PLiteral mempty LUnit :| []
                 , protoOfunctionDefinitionExpression =
                     EApplication
@@ -114,13 +114,13 @@ testModule2 =
             mempty
             "factorial"
             ( ProtoFunctionDefinition
-                { protoOunctionDefinitionMetadata =
+                { protoOfunctionDefinitionMetadata =
                     mempty
-                , protoOunctionDefinitionAnnotation =
+                , protoOfunctionDefinitionAnnotation =
                     Just (With [] (TIntrinsic IInt32))
-                , protoOunctionDefinitionType =
+                , protoOfunctionDefinitionType =
                     With [] ()
-                , protoOunctionDefinitionPatterns =
+                , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
@@ -207,16 +207,16 @@ testModule3 =
             mempty
             "pack"
             ( ProtoFunctionDefinition
-                { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation =
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
                           []
                           (TIntrinsic INat)
                       )
-                , protoOunctionDefinitionType =
+                , protoOfunctionDefinitionType =
                     With [] ()
-                , protoOunctionDefinitionPatterns =
+                , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
@@ -236,16 +236,16 @@ testModule3 =
             mempty
             "unpack"
             ( ProtoFunctionDefinition
-                { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation =
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
                           []
                           (TIntrinsic IInt32)
                       )
-                , protoOunctionDefinitionType =
+                , protoOfunctionDefinitionType =
                     With [] ()
-                , protoOunctionDefinitionPatterns =
+                , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic INat)
@@ -258,6 +258,129 @@ testModule3 =
                       (EVariable mempty (Label () "nat$_unpack"))
                       ( EVariable mempty (Label () "n")
                           :| []
+                      )
+                }
+            )
+        ]
+    }
+
+--
+
+testModule2B :: (Monoid a) => ProtoModule a Kind ()
+testModule2B =
+  ProtoModule
+    { protoOmodulePath = Path ["Math"]
+    , protoOmoduleDefinitions =
+        [ ProtoDImport
+            mempty
+            (Path ["Nat"])
+            [ NameImport mempty "pack"
+            , NameImport mempty "unpack"
+            ]
+        , ProtoDFunction
+            mempty
+            "factorial"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata =
+                    mempty
+                , protoOfunctionDefinitionAnnotation =
+                    Just (With [] (TIntrinsic IInt32))
+                , protoOfunctionDefinitionType =
+                    With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "n"))
+                      :| []
+                , protoOfunctionDefinitionExpression =
+                    ERecursiveLet
+                      mempty
+                      (PVariable mempty (Label () "$fold-70cdac64"))
+                      ( ELambda
+                          mempty
+                          (PVariable mempty (Label () "$variable-185c7b8df7b0") :| [])
+                          ( EMatch
+                              mempty
+                              ()
+                              (EVariable mempty (Label () "$variable-185c7b8df7b0"))
+                              ( EClause
+                                  mempty
+                                  (PConstructor mempty (Label () "Zero") [])
+                                  ( CPlain
+                                      mempty
+                                      []
+                                      ( EApplication
+                                          mempty
+                                          ()
+                                          (EVariable mempty (Label () "from_int32"))
+                                          ( ELiteral mempty (LInt32 1)
+                                              :| []
+                                          )
+                                      )
+                                      :| []
+                                  )
+                                  <| EClause
+                                    mempty
+                                    ( PAs
+                                        mempty
+                                        (Label () "m")
+                                        ( PConstructor
+                                            mempty
+                                            (Label () "Succ")
+                                            [ PVariable
+                                                mempty
+                                                (Label () "f")
+                                            ]
+                                        )
+                                    )
+                                    ( CPlain
+                                        mempty
+                                        []
+                                        ( EApplication
+                                            mempty
+                                            ()
+                                            ( EBinaryOperator
+                                                mempty
+                                                ()
+                                                OMultiplication
+                                            )
+                                            ( EApplication
+                                                mempty
+                                                ()
+                                                (EVariable mempty (Label () "unpack"))
+                                                ( EVariable mempty (Label () "m")
+                                                    :| []
+                                                )
+                                                <| EApplication
+                                                  mempty
+                                                  ()
+                                                  (EVariable mempty (Label () "$fold-70cdac64"))
+                                                  ( EVariable mempty (Label () "f")
+                                                      :| []
+                                                  )
+                                                :| []
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                  :| []
+                              )
+                          )
+                      )
+                      ( EApplication
+                          mempty
+                          ()
+                          (EVariable mempty (Label () "$fold-70cdac64"))
+                          ( EApplication
+                              mempty
+                              ()
+                              (EVariable mempty (Label () "pack"))
+                              ( EVariable mempty (Label () "n")
+                                  :| []
+                              )
+                              :| []
+                          )
                       )
                 }
             )
