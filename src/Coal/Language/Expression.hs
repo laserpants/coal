@@ -74,16 +74,49 @@ data Expression a t
     EFFICall a t (Label (Type Parameter ())) [Expression a t] (Expression a t)
   | -- | Do-notation block
     EDoBlock a (NonEmpty (Pattern a t, Expression a t))
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance (Binary a, Binary t) => Binary (Expression a t)
 
 data Clause a t = EClause a (Pattern a t) (NonEmpty (Choice Expression a t))
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance (Binary a, Binary t) => Binary (Clause a t)
 
 data CompiledClause a t = ECompiledClause a (NonEmpty (Label t)) (Expression a t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance (Binary a, Binary t) => Binary (CompiledClause a t)
