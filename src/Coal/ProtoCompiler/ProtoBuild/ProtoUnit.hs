@@ -19,8 +19,9 @@ data ProtoBuildUnit a
 
 unitPrincipalPath :: ProtoBuildUnit ProtoModule -> Name
 unitPrincipalPath =
-  \case
-    UInput ProtoModule{..} ->
-      principalPath proto_modulePath
-    UCached ProtoBuild{..} ->
-      principalPath proto_buildPath
+  principalPath
+    . \case
+      UInput ProtoModule{..} ->
+        proto_modulePath
+      UCached ProtoBuild{..} ->
+        proto_buildPath
