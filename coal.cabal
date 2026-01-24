@@ -225,9 +225,11 @@ library
       Coal.Parser.Type.Intrinsic
       Coal.Parser.Utils
       Coal.ProtoCompiler.ProtoBuild
+      Coal.ProtoCompiler.ProtoBuild.ProtoPrep
       Coal.ProtoCompiler.ProtoBuild.ProtoUnit
       Coal.ProtoCompiler.ProtoConfig
       Coal.ProtoCompiler.ProtoError
+      Coal.ProtoLanguage.ProtoModule
       Coal.TypeSystem
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption
