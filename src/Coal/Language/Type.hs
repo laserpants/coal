@@ -210,7 +210,9 @@ listType :: IndexedType -> IndexedType
 listType t = applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (t :| [])
 
 tupleType :: NonEmpty IndexedType -> IndexedType
-tupleType ts = applyTypeArgs KType (TConstructor (tupleKind (length ts)) (tupleTypeConstructor (length ts))) ts
+tupleType ts = applyTypeArgs KType (TConstructor (tupleKind n) (tupleTypeConstructor n)) ts
+ where
+  n = length ts
 
 isTupleType :: Type o k -> Bool
 isTupleType t =
