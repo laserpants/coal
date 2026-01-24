@@ -41,7 +41,7 @@ parseTypeConstructor = TConstructor () <$> constructor
 parseTupleType :: Parser (Type Parameter ())
 parseTupleType = do
   ts <- parens (nonEmpty (commaSep2 parseType))
-  pure $ applyTypeArgs () (TConstructor () (tupleTypeCons (length ts))) ts
+  pure $ applyTypeArgs () (TConstructor () (tupleTypeConstructor (length ts))) ts
 
 parseRecordType :: Parser (Type Parameter ())
 parseRecordType =

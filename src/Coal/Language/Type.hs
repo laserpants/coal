@@ -25,7 +25,7 @@ module Coal.Language.Type (
   listTypeArgs,
   listType,
   tupleType,
-  tupleTypeCons,
+  tupleTypeConstructor,
   isTupleType,
   fieldsRecordType,
   recordType,
@@ -190,7 +190,7 @@ listType :: IndexedType -> IndexedType
 listType t = applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (t :| [])
 
 tupleType :: NonEmpty IndexedType -> IndexedType
-tupleType ts = applyTypeArgs KType (TConstructor (tupleKind (length ts)) (tupleTypeCons (length ts))) ts
+tupleType ts = applyTypeArgs KType (TConstructor (tupleKind (length ts)) (tupleTypeConstructor (length ts))) ts
 
 isTupleType :: Type o k -> Bool
 isTupleType t =
@@ -201,9 +201,9 @@ isTupleType t =
     _ ->
       False
 
-{-# INLINE tupleTypeCons #-}
-tupleTypeCons :: Int -> Name
-tupleTypeCons n = "#Tuple" <> showt n
+{-# INLINE tupleTypeConstructor #-}
+tupleTypeConstructor :: Int -> Name
+tupleTypeConstructor n = "#Tuple" <> showt n
 
 {-# INLINE recordType #-}
 recordType :: Row o k (Type o k) -> Type o k
