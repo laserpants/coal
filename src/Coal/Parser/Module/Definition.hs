@@ -111,35 +111,35 @@ parseConstructor tn qs = do
 parseImportAtom :: Parser (Import Metadata)
 parseImportAtom =
   do
-    parseImportType
-    <|> parseImportType
-    <|> parseImportTrait
-    <|> parseImportName
+    parseTypeImport
+    <|> parseTypeImport
+    <|> parseTraitImport
+    <|> parseNameImport
 
-parseImportType :: Parser (Import Metadata)
-parseImportType = do
+parseTypeImport :: Parser (Import Metadata)
+parseTypeImport = do
   start <- getSourcePos
   lexeme_ "type"
   name_ <- constructor
   names <- option ["*"] (parens (commaSep1 constructor))
   end <- getSourcePos
-  pure (ImportType (Metadata start end) name_ names)
+  pure (TypeImport (Metadata start end) name_ names)
 
-parseImportTrait :: Parser (Import Metadata)
-parseImportTrait = do
+parseTraitImport :: Parser (Import Metadata)
+parseTraitImport = do
   start <- getSourcePos
   lexeme_ "trait"
   name_ <- constructor
   names <- option ["*"] (parens (commaSep1 name))
   end <- getSourcePos
-  pure (ImportTrait (Metadata start end) name_ names)
+  pure (TraitImport (Metadata start end) name_ names)
 
-parseImportName :: Parser (Import Metadata)
-parseImportName = do
+parseNameImport :: Parser (Import Metadata)
+parseNameImport = do
   start <- getSourcePos
   n <- backtickString <|> name <|> identifier upperChar
   end <- getSourcePos
-  pure (ImportName (Metadata start end) n)
+  pure (NameImport (Metadata start end) n)
 
 parseImport :: Parser (Definition Metadata o ())
 parseImport = do

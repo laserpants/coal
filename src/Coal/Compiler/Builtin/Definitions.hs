@@ -114,8 +114,8 @@ builtinTraitInstances =
 -- Needed to support do-notation
 extraDefinitions :: (Monoid a) => [Definition a k ()]
 extraDefinitions =
-  [ DImport mempty (Path ["Coal", "Monad"]) [ImportTrait mempty "Monad" ["bind"]]
-  , DImport mempty (Path ["Coal", "Applicative"]) [ImportTrait mempty "Applicative" ["pure"]]
+  [ DImport mempty (Path ["Coal", "Monad"]) [TraitImport mempty "Monad" ["bind"]]
+  , DImport mempty (Path ["Coal", "Applicative"]) [TraitImport mempty "Applicative" ["pure"]]
   ]
 
 builtinDefinitions :: (Monoid a) => [Definition a k ()]
@@ -123,7 +123,7 @@ builtinDefinitions =
   [ DImport
       mempty
       (Path ["Builtin$"])
-      (for (builtinFunctionNames <> builtinTraitInstances) (ImportName mempty))
+      (for (builtinFunctionNames <> builtinTraitInstances) (NameImport mempty))
   , DType
       mempty
       "Ordering"

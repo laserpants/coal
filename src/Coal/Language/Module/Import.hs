@@ -7,7 +7,7 @@ import Data.Data (Data, Typeable)
 import Extras (Name)
 
 data Import a
-  = ImportName a Name
-  | ImportType a Name [Name]
-  | ImportTrait a Name [Name]
+  = NameImport a Name
+  | TypeImport a Name [Name]
+  | TraitImport a Name [Name]
   deriving (Show, Eq, Ord, Read, Data, Typeable)

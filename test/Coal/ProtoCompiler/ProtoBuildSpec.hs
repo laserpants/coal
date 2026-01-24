@@ -17,12 +17,12 @@ testModule1 =
         [ ProtoDImport
             mempty
             (Path ["Math"])
-            [ ImportName mempty "factorial"
+            [ NameImport mempty "factorial"
             ]
         , ProtoDImport
             mempty
             (Path ["IO"])
-            [ ImportName mempty "println_int32"
+            [ NameImport mempty "println_int32"
             ]
         , ProtoDFunction
             mempty
@@ -47,8 +47,8 @@ testModule2 =
         [ ProtoDImport
             mempty
             (Path ["Nat"])
-            [ ImportName mempty "pack"
-            , ImportName mempty "unpack"
+            [ NameImport mempty "pack"
+            , NameImport mempty "unpack"
             ]
         , ProtoDFunction
             mempty
