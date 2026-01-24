@@ -2,7 +2,14 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), proto_emptyBuild) where
+module Coal.ProtoCompiler.ProtoBuild (
+  ProtoBuild (..),
+  proto_emptyBuild,
+  setBuildPath,
+  setBuildFile,
+  setBuildBitcode,
+  setBuildHash,
+) where
 
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Language.Module.Path (Path (..))
