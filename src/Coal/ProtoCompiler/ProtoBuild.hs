@@ -4,7 +4,7 @@
 
 module Coal.ProtoCompiler.ProtoBuild (
   ProtoBuild (..),
-  proto_emptyBuild,
+  protoOemptyBuild,
   setBuildPath,
   setBuildFile,
   setBuildBitcode,
@@ -24,75 +24,75 @@ import Data.ByteString (ByteString)
 import GHC.Generics (Generic)
 
 data ProtoBuild = ProtoBuild
-  { proto_buildPath :: Path
-  , proto_buildFile :: FilePath
-  , proto_buildBitcode :: Maybe ByteString
-  , proto_buildHash :: Maybe Hash256
-  , proto_buildKernelNames :: Environment Kernel.Type
-  , proto_buildKernelIRTypes :: Environment IRType
-  , proto_buildKernelConstructors :: Environment Int
+  { protoObuildPath :: Path
+  , protoObuildFile :: FilePath
+  , protoObuildBitcode :: Maybe ByteString
+  , protoObuildHash :: Maybe Hash256
+  , protoObuildKernelNames :: Environment Kernel.Type
+  , protoObuildKernelIRTypes :: Environment IRType
+  , protoObuildKernelConstructors :: Environment Int
   }
   deriving (Show, Eq, Ord, Generic)
 
 instance Binary ProtoBuild
 
-proto_emptyBuild :: ProtoBuild
-proto_emptyBuild =
+protoOemptyBuild :: ProtoBuild
+protoOemptyBuild =
   ProtoBuild
-    { proto_buildPath = Path []
-    , proto_buildFile = mempty
-    , proto_buildBitcode = Nothing
-    , proto_buildHash = Nothing
-    , proto_buildKernelNames = mempty
-    , proto_buildKernelIRTypes = mempty
-    , proto_buildKernelConstructors = mempty
+    { protoObuildPath = Path []
+    , protoObuildFile = mempty
+    , protoObuildBitcode = Nothing
+    , protoObuildHash = Nothing
+    , protoObuildKernelNames = mempty
+    , protoObuildKernelIRTypes = mempty
+    , protoObuildKernelConstructors = mempty
     }
 
 setBuildPath :: Path -> ProtoBuild -> ProtoBuild
 setBuildPath newBuildPath ProtoBuild{..} =
   ProtoBuild
-    { proto_buildPath = newBuildPath
+    { protoObuildPath = newBuildPath
     , ..
     }
 
 setBuildFile :: FilePath -> ProtoBuild -> ProtoBuild
 setBuildFile newBuildFile ProtoBuild{..} =
   ProtoBuild
-    { proto_buildFile = newBuildFile
+    { protoObuildFile = newBuildFile
     , ..
     }
 
 setBuildBitcode :: ByteString -> ProtoBuild -> ProtoBuild
 setBuildBitcode newBuildBitcode ProtoBuild{..} =
   ProtoBuild
-    { proto_buildBitcode = Just newBuildBitcode
+    { protoObuildBitcode = Just newBuildBitcode
     , ..
     }
 
 setBuildHash :: Hash256 -> ProtoBuild -> ProtoBuild
 setBuildHash newBuildHash ProtoBuild{..} =
   ProtoBuild
-    { proto_buildHash = Just newBuildHash
+    { protoObuildHash = Just newBuildHash
     , ..
     }
 
 setBuildKernelNames :: Environment Kernel.Type -> ProtoBuild -> ProtoBuild
 setBuildKernelNames env ProtoBuild{..} =
   ProtoBuild
-    { proto_buildKernelNames = env
+    { protoObuildKernelNames = env
     , ..
     }
 
 setBuildKernelIRTypes :: Environment IRType -> ProtoBuild -> ProtoBuild
 setBuildKernelIRTypes env ProtoBuild{..} =
   ProtoBuild
-    { proto_buildKernelIRTypes = env
+    { protoObuildKernelIRTypes = env
     , ..
     }
 
 setBuildKernelConstructors :: Environment Int -> ProtoBuild -> ProtoBuild
 setBuildKernelConstructors env ProtoBuild{..} =
   ProtoBuild
-    { proto_buildKernelConstructors = env
+    { protoObuildKernelConstructors = env
     , ..
     }

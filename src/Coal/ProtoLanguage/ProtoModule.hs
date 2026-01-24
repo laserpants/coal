@@ -9,7 +9,7 @@ import Coal.Language.Module.Path (Path)
 import Data.Data (Data, Typeable)
 
 data ProtoModule = ProtoModule
-  { proto_modulePath :: Path
+  { protoOmodulePath :: Path
   --    , moduleExports :: [Export a]
   --    , moduleDefinitions :: [Definition a k t]
   }

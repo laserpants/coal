@@ -22,6 +22,6 @@ unitPrincipalPath =
   principalPath
     . \case
       UInput ProtoModule{..} ->
-        proto_modulePath
+        protoOmodulePath
       UCached ProtoBuild{..} ->
-        proto_buildPath
+        protoObuildPath

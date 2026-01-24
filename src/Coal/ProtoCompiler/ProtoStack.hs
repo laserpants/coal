@@ -10,7 +10,7 @@ import Control.Monad.RWS (RWST)
 
 type ProtoCompilerStack m o = ExceptT () (RWST () () () m) o
 
-newtype ProtoCompilerT m o = Compiler {proto_compilerStack :: ProtoCompilerStack m o}
+newtype ProtoCompilerT m o = Compiler {protoOcompilerStack :: ProtoCompilerStack m o}
   deriving
     ( Functor
     , Applicative
