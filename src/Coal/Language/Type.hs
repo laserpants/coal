@@ -76,7 +76,17 @@ data TypeIndex k = TypeIndex
   { typeIndexKind :: k
   , typeIndexId :: Int
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance (Binary k) => Binary (TypeIndex k)
 
@@ -87,7 +97,17 @@ data Parameter k = Parameter
   { parameterKind :: k
   , parameterName :: Name
   }
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance Pretty (Parameter k) where
   pretty (Parameter _ name) = pretty name
