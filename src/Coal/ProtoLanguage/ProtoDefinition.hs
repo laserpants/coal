@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoLanguage.ProtoDefinition where
+module Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..)) where
 
 import Coal.Language.Module.Path (Path (..))
 import Data.Data (Data, Typeable)

@@ -6,12 +6,13 @@
 module Coal.ProtoLanguage.ProtoModule (ProtoModule (..)) where
 
 import Coal.Language.Module.Path (Path)
+import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Data.Data (Data, Typeable)
 
-data ProtoModule = ProtoModule
+data ProtoModule a = ProtoModule
   { protoOmodulePath :: Path
   --    , moduleExports :: [Export a]
-  --    , moduleDefinitions :: [Definition a k t]
+  , protoOmoduleDefinitions :: [ProtoDefinition a]
   }
   deriving
     ( Show

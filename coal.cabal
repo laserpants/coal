@@ -372,6 +372,7 @@ test-suite coal-test
       Coal.Compiler.BuildSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
       Coal.Language.TypeSpec
+      Coal.ProtoCompiler.ProtoBuildSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec
