@@ -277,6 +277,7 @@ library
     , data-fix
     , deriving-compat
     , directory
+    , exceptions >=0.10.5
     , extra
     , file-embed
     , filepath
@@ -339,6 +340,7 @@ executable coal
     , data-fix
     , deriving-compat
     , directory
+    , exceptions >=0.10.5
     , extra
     , file-embed
     , filepath
@@ -395,6 +397,7 @@ test-suite coal-test
     , data-fix
     , deriving-compat
     , directory
+    , exceptions >=0.10.5
     , extra
     , file-embed
     , filepath

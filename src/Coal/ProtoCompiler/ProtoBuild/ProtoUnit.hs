@@ -1,9 +1,14 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
-module Coal.ProtoCompiler.ProtoBuild.ProtoUnit where
+module Coal.ProtoCompiler.ProtoBuild.ProtoUnit (
+  ProtoBuildUnit (..),
+  unitPrincipalPath,
+) where
 
-import Coal.ProtoCompiler.ProtoBuild (ProtoBuild)
+import Coal.Language.Module.Path (principalPath)
+import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Extras (Name)
 
@@ -12,11 +17,10 @@ data ProtoBuildUnit a
   | UCached ProtoBuild
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
-unitPathName :: ProtoBuildUnit ProtoModule -> Name
-unitPathName =
+unitPrincipalPath :: ProtoBuildUnit ProtoModule -> Name
+unitPrincipalPath =
   \case
-    UInput m ->
-      modulePathName m
-    UCached b ->
-      principalPath (moduleBuildPath b)
-
+    UInput ProtoModule{..} ->
+      principalPath proto_modulePath
+    UCached ProtoBuild{..} ->
+      principalPath proto_buildPath

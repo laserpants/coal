@@ -18,6 +18,7 @@ import Coal.Kernel.Language (moduleName)
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module)
 import Control.Monad (when)
+import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Data.ByteString (ByteString)
@@ -34,7 +35,7 @@ generateDebugArtifacts ll = Pass{runPass = run}
         writeDotFile (ll <> "_" <> moduleName m) m
     pure m
 
-loweringPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind IndexedType)] [(Name, ByteString)]
+loweringPhase :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildUnit (Module Metadata Kind IndexedType)] [(Name, ByteString)]
 loweringPhase =
   mapPass passKernelTranslate
     >-> mapPass (liftPass (generateDebugArtifacts "Kernel"))

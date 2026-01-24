@@ -161,7 +161,7 @@ expectOutput expt files =
 runKernelSpec :: [FilePath] -> CompilerT Metadata IO String -- (Either CompilerFailureMode String)
 runKernelSpec files = do
   ir <- evalPipelineT (compileUnits (BSource builtinObjects : mods))
-  res <- liftIO $ generateLLOutput Nothing config ir
+  res <- generateLLOutput Nothing config ir
   case res of
     Left err ->
       throwError err

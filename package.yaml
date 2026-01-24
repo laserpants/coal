@@ -48,6 +48,7 @@ dependencies:
 - cryptonite
 - memory
 - process-extras
+- exceptions >= 0.10.5
 
 ghc-options:
 - -Wall

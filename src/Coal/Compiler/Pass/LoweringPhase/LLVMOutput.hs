@@ -22,6 +22,7 @@ import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
 import Coal.Language.Module
 import Control.Exception (SomeException, try)
+import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except
 import Control.Monad.Reader (asks)
 import Control.Monad.State (gets)
@@ -42,14 +43,14 @@ import System.IO.Temp (withSystemTempDirectory)
 import System.Process
 import qualified System.Process.ByteString as ByteString
 
-passLLVMOutput :: (MonadIO m) => Pass Metadata m [BuildUnit (Name, [IRConstruct [IRLine]])] [(Name, ByteString)]
+passLLVMOutput :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildUnit (Name, [IRConstruct [IRLine]])] [(Name, ByteString)]
 passLLVMOutput = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m [(Name, ByteString)]
+pass :: (MonadIO m, MonadMask m) => [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m [(Name, ByteString)]
 pass ir = do
   config <- gets compilerConfig
   pb <- asks compilerProgressBar
-  res <- liftIO $ generateLLOutput pb config ir
+  res <- generateLLOutput pb config ir
   case res of
     Left err ->
       throwError err
@@ -67,7 +68,7 @@ pass ir = do
 
       pure results
 
-generateLLOutput :: Maybe ProgressBar -> CompilerConfig -> [BuildUnit (Name, [IRConstruct [IRLine]])] -> IO (Either CompilerFailureMode [(Name, ByteString)])
+generateLLOutput :: (MonadIO m, MonadMask m) => Maybe ProgressBar -> CompilerConfig -> [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m (Either CompilerFailureMode [(Name, ByteString)])
 generateLLOutput pb CompilerConfig{..} mods = do
   withSystemTempDirectory "coal-build" $
     \tmpDir -> do
@@ -77,39 +78,41 @@ generateLLOutput pb CompilerConfig{..} mods = do
         [] -> do
           pure (Right rights)
         errs -> do
-          putStrLn "llvm-as failed: "
-          forM_ errs print
+          liftIO $ putStrLn "llvm-as failed: "
+          forM_ errs $ liftIO . print
           pure (Left CompilerError)
 
-irOutput :: Maybe ProgressBar -> CompilerConfig -> FilePath -> BuildUnit (Name, [IRConstruct [IRLine]]) -> IO (Either SomeException (Name, ByteString))
+irOutput :: (MonadIO m) => Maybe ProgressBar -> CompilerConfig -> FilePath -> BuildUnit (Name, [IRConstruct [IRLine]]) -> CompilerT Metadata m (Either SomeException (Name, ByteString))
 irOutput pb CompilerConfig{..} tmpDir = do
   \case
     BSource (name, code) -> do
-      for_ pb tick
+      for_ pb $ liftIO . tick
 
       let file = tmpDir </> Text.unpack name <.> "ll"
           llCode = irEncode code
 
-      Text.writeFile file llCode
+      liftIO $ Text.writeFile file llCode
       when configGenerateLLVMOutput $
-        writeDebugFile ("./.debug" </> Text.unpack name <.> "ll") llCode
+        liftIO $
+          writeDebugFile ("./.debug" </> Text.unpack name <.> "ll") llCode
 
       bs <- runLLVM tmpDir file
       pure (fmap (name,) bs)
     BCached ModuleBuild{..} ->
       pure (Right (principalPath moduleBuildPath, fromJust moduleBitcode))
 
-runLLVM :: FilePath -> FilePath -> IO (Either SomeException ByteString)
+runLLVM :: (MonadIO m) => FilePath -> FilePath -> CompilerT Metadata m (Either SomeException ByteString)
 runLLVM dir src =
-  try $ do
-    (exit, out, err) <- ByteString.readCreateProcessWithExitCode process ""
-    case exit of
-      ExitSuccess ->
-        pure out
-      ExitFailure _ ->
-        error $
-          "llvm-as failed:\n"
-            ++ (if ByteString.null err then "<no stderr>" else show err)
+  liftIO $
+    try $ do
+      (exit, out, err) <- ByteString.readCreateProcessWithExitCode process ""
+      case exit of
+        ExitSuccess ->
+          pure out
+        ExitFailure _ ->
+          error $
+            "llvm-as failed:\n"
+              ++ (if ByteString.null err then "<no stderr>" else show err)
  where
   process =
     (proc "llvm-as" [src, "-o", "-"])

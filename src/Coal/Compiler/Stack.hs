@@ -64,6 +64,7 @@ import Coal.Language (IndexedScheme, Kind, TypeIndex)
 import Coal.Language.Module (Module (..), modulePathName, principalPath)
 import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
+import Control.Monad.Catch
 import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT)
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
@@ -87,6 +88,9 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , MonadState (CompilerState a)
     , MonadError CompilerFailureMode
     , MonadIO
+    , MonadThrow
+    , MonadCatch
+    , MonadMask
     )
 
 runCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])

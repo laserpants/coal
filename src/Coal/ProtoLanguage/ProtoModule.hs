@@ -5,24 +5,22 @@
 
 module Coal.ProtoLanguage.ProtoModule (ProtoModule (..)) where
 
-import Data.Data (Data, Typeable)
 import Coal.Language.Module.Path (Path)
+import Data.Data (Data, Typeable)
 
-data ProtoModule
-  = ProtoModule
-    { modulePath :: Path
---    , moduleExports :: [Export a]
---    , moduleDefinitions :: [Definition a k t]
-    }
+data ProtoModule = ProtoModule
+  { proto_modulePath :: Path
+  --    , moduleExports :: [Export a]
+  --    , moduleDefinitions :: [Definition a k t]
+  }
   deriving
     ( Show
     , Eq
     , Ord
     , Read
---    , Functor
---    , Foldable
---    , Traversable
-    , Data
+    , --    , Functor
+      --    , Foldable
+      --    , Traversable
+      Data
     , Typeable
     )
-
