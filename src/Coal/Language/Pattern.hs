@@ -54,7 +54,18 @@ data Pattern a t
     PNamedFold a Name (Label t)
   | -- | Trait instance dictionary
     PTraitInstance a t (Trait t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance (Binary a, Binary t) => Binary (Pattern a t)
 
