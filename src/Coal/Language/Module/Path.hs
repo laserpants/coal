@@ -16,6 +16,7 @@ import Data.Data (Data, Typeable)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name)
+import Extras.Operators ((<.>))
 import GHC.Generics (Generic)
 
 newtype Path = Path {pathComponents :: [Name]}
@@ -46,4 +47,6 @@ validateComponent t = do
   validChar c = isAlphaNum c || c == '_'
 
 toFilePath :: Path -> FilePath
-toFilePath Path{..} = Text.unpack (Text.intercalate "/" pathComponents) <> ".coal"
+toFilePath Path{..} = Text.unpack (parts <.> "coal")
+ where
+  parts = Text.intercalate "/" pathComponents
