@@ -28,6 +28,8 @@
   - Expand expression folds
   - Expand lambda match expressions
 
+---------
+
   + Expand instances (?)
   + Topologically sort names
 
