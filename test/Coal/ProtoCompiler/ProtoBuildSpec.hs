@@ -3,12 +3,13 @@
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
 import Coal.Language.Expression
+import Coal.Language.Type.Kind (Kind)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..), ProtoFunctionDefinition (..))
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 
-testModule1 :: (Monoid a) => ProtoModule a ()
+testModule1 :: (Monoid a) => ProtoModule a Kind ()
 testModule1 =
   ProtoModule
     { protoOmodulePath = Path ["Main"]
@@ -38,7 +39,7 @@ testModule1 =
         ]
     }
 
-testModule2 :: (Monoid a) => ProtoModule a ()
+testModule2 :: (Monoid a) => ProtoModule a Kind ()
 testModule2 =
   ProtoModule
     { protoOmodulePath = Path ["Math"]
@@ -64,7 +65,7 @@ testModule2 =
         ]
     }
 
-testModule3 :: (Monoid a) => ProtoModule a ()
+testModule3 :: (Monoid a) => ProtoModule a Kind ()
 testModule3 =
   ProtoModule
     { protoOmodulePath = Path ["Nat"]

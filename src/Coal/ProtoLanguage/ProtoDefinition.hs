@@ -10,10 +10,28 @@ module Coal.ProtoLanguage.ProtoDefinition (
 ) where
 
 import Coal.Language
+import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Data.Data (Data, Typeable)
 import Extras (Name)
-import Coal.Language.Module.Import (Import (..))
+
+data ProtoTypeDefinition a k t = ProtoTypeDefinition
+  { protoOtypeDefinitionParameters ::
+      [Parameter k]
+  , protoOtypeDefinitionConstructors ::
+      [DataConstructor Parameter k (Type Parameter k)]
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    )
 
 data ProtoFunctionDefinition a t = ProtoFunctionDefinition
   { protoOfunctionDefinitionExpression :: Expression a t
@@ -30,9 +48,9 @@ data ProtoFunctionDefinition a t = ProtoFunctionDefinition
     , Typeable
     )
 
-data ProtoDefinition a t
+data ProtoDefinition a k t
   = -- | Type definition
-    ProtoDType a Name
+    ProtoDType a Name (ProtoTypeDefinition a k t)
   | -- | Type alias
     ProtoDTypeAlias a Name
   | -- | Function definition

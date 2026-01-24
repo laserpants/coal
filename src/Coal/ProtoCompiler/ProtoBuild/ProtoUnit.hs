@@ -13,15 +13,15 @@ import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Extras (Name)
 
 data ProtoBuildUnit a
-  = UInput a
-  | UCached ProtoBuild
+  = UnitSource a
+  | UnitCached ProtoBuild
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
-unitPrincipalPath :: ProtoBuildUnit (ProtoModule a t) -> Name
+unitPrincipalPath :: ProtoBuildUnit (ProtoModule a k t) -> Name
 unitPrincipalPath =
   principalPath
     . \case
-      UInput ProtoModule{..} ->
+      UnitSource ProtoModule{..} ->
         protoOmodulePath
-      UCached ProtoBuild{..} ->
+      UnitCached ProtoBuild{..} ->
         protoObuildPath
