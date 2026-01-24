@@ -229,6 +229,7 @@ library
       Coal.ProtoCompiler.ProtoBuild.ProtoUnit
       Coal.ProtoCompiler.ProtoConfig
       Coal.ProtoCompiler.ProtoError
+      Coal.ProtoLanguage.ProtoDefinition
       Coal.ProtoLanguage.ProtoModule
       Coal.TypeSystem
       Coal.TypeSystem.Constraint
