@@ -232,7 +232,7 @@ recordType = TRecord . TRow
 fieldsRecordType :: Dictionary (Type o k) -> Row o k (Type o k) -> Type o k
 fieldsRecordType fields row = recordType (fromDictionary fields row)
 
-constructors :: Type o k -> [Name]
+constructors :: Type o k -> Set Name
 constructors =
   \case
     TApplication _ t1 t2 ->
@@ -240,27 +240,27 @@ constructors =
     TArrow t1 t2 ->
       constructors t1 <> constructors t2
     TConstructor _ name ->
-      [name]
+      Set.singleton name
     TIntrinsic{} ->
-      []
+      mempty
     TRecord r ->
       constructors r
     TRow r ->
       constructorsRow r
     TVariable{} ->
-      []
+      mempty
     TAlias name _ t ->
-      name : constructors t
+      Set.insert name (constructors t)
 
-constructorsRow :: Row o k (Type o k) -> [Name]
+constructorsRow :: Row o k (Type o k) -> Set Name
 constructorsRow =
   \case
     RExtend _ t r ->
       constructors t <> constructorsRow r
     RVariable{} ->
-      []
+      mempty
     RNil ->
-      []
+      mempty
 
 precArrow, precApp, precAtom :: Int
 precArrow = 1 -- e.g., a -> b
