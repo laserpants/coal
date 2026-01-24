@@ -10,8 +10,22 @@ import Data.Data (Data, Typeable)
 import Extras (Name)
 import GHC.Generics (Generic)
 
-data Label t = Label {labelTag :: t, labelName :: Name}
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+data Label t = Label
+  { labelTag :: t
+  , labelName :: Name
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance (Binary t) => Binary (Label t)
 
