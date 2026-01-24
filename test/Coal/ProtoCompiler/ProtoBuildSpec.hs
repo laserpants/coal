@@ -15,7 +15,18 @@ testModule0 =
   ProtoModule
     { protoOmodulePath = Path ["IO"]
     , protoOmoduleDefinitions =
-        []
+        [ ProtoDFunction
+            mempty
+            "println_int32"
+            ( ProtoFunctionDefinition
+                { protoOunctionDefinitionMetadata = mempty
+                , protoOunctionDefinitionAnnotation = Nothing
+                , protoOunctionDefinitionType = With [] ()
+                , protoOunctionDefinitionPatterns = undefined
+                , protoOfunctionDefinitionExpression = undefined
+                }
+            )
+        ]
     }
 
 testModule1 :: (Monoid a) => ProtoModule a Kind ()
