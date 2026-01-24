@@ -10,6 +10,17 @@ import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..), ProtoFunctionDe
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 
+testModuleBuiltins :: (Monoid a) => ProtoModule a Kind ()
+testModuleBuiltins =
+  ProtoModule
+    { protoOmodulePath = Path ["Builtin"]
+    , protoOmoduleDefinitions =
+        [
+        ]
+    }
+
+--
+
 testModule0 :: (Monoid a) => ProtoModule a Kind ()
 testModule0 =
   ProtoModule
@@ -173,11 +184,7 @@ testModule2 =
                                 ( EApplication
                                     mempty
                                     ()
-                                    ( EBinaryOperator
-                                        mempty
-                                        ()
-                                        OMultiplication
-                                    )
+                                    (EVariable mempty (Label () "(*)"))
                                     ( EApplication
                                         mempty
                                         ()
@@ -340,11 +347,7 @@ testModule2B =
                                         ( EApplication
                                             mempty
                                             ()
-                                            ( EBinaryOperator
-                                                mempty
-                                                ()
-                                                OMultiplication
-                                            )
+                                            (EVariable mempty (Label () "(*)"))
                                             ( EApplication
                                                 mempty
                                                 ()
