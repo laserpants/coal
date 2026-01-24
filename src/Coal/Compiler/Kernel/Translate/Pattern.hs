@@ -22,7 +22,7 @@ translatePattern =
       translatePattern p
     PLiteral _ p ->
       pure (Label (translateType (typeOf p)) "_")
-    PTraitDictionary _ t trait ->
+    PTraitInstance _ t trait ->
       pure (Label (translateType t) (dictionaryLabel trait))
     _ ->
       error "Not implemented"

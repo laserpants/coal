@@ -160,7 +160,7 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
         EFFICall a t ll
           <$> traverse (patternExhaustiveCheck name) es
           <*> patternExhaustiveCheck name e
-      e@ETraitDictionary{} ->
+      e@ETraitInstance{} ->
         pure e
       e@EDoBlock{} ->
         pure e

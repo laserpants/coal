@@ -116,7 +116,7 @@ translateExpression =
      where
       t = translateType t1
       r = extractRow (translateLabel ll2)
-    ETraitDictionary _ t trait ->
+    ETraitInstance _ t trait ->
       pure (Kernel.var (Label (translateType t) (dictionaryLabel trait)))
     EFFICall _ _ (Label t name) es e ->
       Kernel.call (Label (translateType t) name)

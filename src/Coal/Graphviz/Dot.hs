@@ -239,8 +239,8 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
           emitEdgeTo ll2
           emitEdgeTo e1
           emitEdgeTo e2
-      ETraitDictionary _ t _ ->
-        emitRectangle "ETraitDictionary" (Just t)
+      ETraitInstance _ t _ ->
+        emitRectangle "ETraitInstance" (Just t)
       ELambdaMatch _ t cs ->
         fromNode (emitRectangle "ELambdaMatch" (Just t)) $ do
           emitEdgesTo cs
@@ -299,8 +299,8 @@ instance (Pretty t, Show t) => Dot t (Pattern a t) where
       PNamedFold _ name ll ->
         fromNode (emitEllipse ("PNamedFold\\n" <> name) Nothing) $
           emitEdgeTo ll
-      PTraitDictionary _ t _ ->
-        emitEllipse "PTraitDictionary" (Just t)
+      PTraitInstance _ t _ ->
+        emitEllipse "PTraitInstance" (Just t)
 
 instance (Pretty t, Show t) => Dot t (Clause a t) where
   toDot =

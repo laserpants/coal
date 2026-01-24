@@ -141,7 +141,7 @@ instance Transformable Expression where
           <*> rewrite name f e
       EDoBlock a es ->
         EDoBlock a <$> traverse (secondM (rewrite name f)) es
-      expr@ETraitDictionary{} ->
+      expr@ETraitInstance{} ->
         pure expr
 
 {-# INLINE isNotBoundIn #-}

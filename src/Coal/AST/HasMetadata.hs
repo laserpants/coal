@@ -39,7 +39,7 @@ instance HasMetadata (Expression Metadata t) where
       ECompiledMatch a _ _ _ -> a
       EFold a _ _ _ -> a
       ESelect a _ _ -> a
-      ETraitDictionary a _ _ -> a
+      ETraitInstance a _ _ -> a
       ELambdaMatch a _ _ -> a
       EFFICall a _ _ _ _ -> a
       EDoBlock a _ -> a
@@ -63,7 +63,7 @@ instance HasMetadata (Pattern Metadata t) where
       PShorthand a _ -> a
       PAtVariable a _ -> a
       PNamedFold a _ _ -> a
-      PTraitDictionary a _ _ -> a
+      PTraitInstance a _ _ -> a
 
 instance HasMetadata (InferenceRule k Metadata) where
   getMetadata =

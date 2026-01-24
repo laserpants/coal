@@ -428,7 +428,7 @@ emitConstraints =
       emitEFFICallConstraints loc t ll es e
     EFocus{} ->
       error "Implementation error"
-    ETraitDictionary{} ->
+    ETraitInstance{} ->
       error "Implementation error"
     ELambdaMatch{} ->
       error "Implementation error"

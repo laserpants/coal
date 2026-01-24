@@ -211,7 +211,7 @@ applyTraits loc (Label t name) =
             throwError TraitError
           Nothing -> do
             tellDictionaryTraits [trait]
-            pure (ETraitDictionary mempty (typeOf trait) trait)
+            pure (ETraitInstance mempty (typeOf trait) trait)
           Just r ->
             pure (ERecord mempty (typeOf trait) r Nothing)
 
@@ -334,4 +334,4 @@ dictionaryLambda ::
   Expression a (Type o k)
 dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
  where
-  dict t = PTraitDictionary mempty (typeOf t) t
+  dict t = PTraitInstance mempty (typeOf t) t
