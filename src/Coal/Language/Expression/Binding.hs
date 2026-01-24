@@ -21,7 +21,18 @@ import GHC.Generics (Generic)
 data Binding e a t
   = BPattern a (Pattern a t) (e a t)
   | BFunction a Name (NonEmpty (Pattern a t)) (e a t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance (Binary a, Binary t, Binary (e a t)) => Binary (Binding e a t)
 
