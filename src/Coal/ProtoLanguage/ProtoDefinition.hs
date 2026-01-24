@@ -13,6 +13,7 @@ import Coal.Language
 import Coal.Language.Module.Path (Path (..))
 import Data.Data (Data, Typeable)
 import Extras (Name)
+import Coal.Language.Module.Import (Import (..))
 
 data ProtoFunctionDefinition a t = ProtoFunctionDefinition
   { protoOfunctionDefinitionExpression :: Expression a t
@@ -43,7 +44,7 @@ data ProtoDefinition a t
   | -- | Top-level let-binding
     ProtoDLet a Name
   | -- | Import statement
-    ProtoDImport a Path
+    ProtoDImport a Path [Import a]
   | -- | Namespace (qualified) import
     ProtoDQualifiedImport a Path
   | -- | Trait
