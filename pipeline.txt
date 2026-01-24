@@ -3,7 +3,7 @@
   
   :: [FilePath] -> [BuildUnit]
 
-  - Parse modules into list of build units
+  - Parse or load modules into list of build units
   - Sort modules topologically
     - Check for cached modules that need to be recompiled 
 
