@@ -13,13 +13,12 @@ import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Data.Data (Data, Typeable)
+import Data.List.NonEmpty (NonEmpty)
 import Extras (Name)
 
 data ProtoTypeDefinition a k t = ProtoTypeDefinition
-  { protoOtypeDefinitionParameters ::
-      [Parameter k]
-  , protoOtypeDefinitionConstructors ::
-      [DataConstructor Parameter k (Type Parameter k)]
+  { protoOtypeDefinitionParameters :: [Parameter k]
+  , protoOtypeDefinitionConstructors :: [DataConstructor Parameter k (Type Parameter k)]
   }
   deriving
     ( Show
@@ -33,8 +32,12 @@ data ProtoTypeDefinition a k t = ProtoTypeDefinition
     , Typeable
     )
 
-data ProtoFunctionDefinition a t = ProtoFunctionDefinition
-  { protoOfunctionDefinitionExpression :: Expression a t
+data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
+  { protoOunctionDefinitionMetadata :: a
+  , protoOunctionDefinitionAnnotation :: Maybe (With (Type Parameter k))
+  , protoOunctionDefinitionType :: With t
+  , protoOunctionDefinitionPatterns :: NonEmpty (Pattern a t)
+  , protoOfunctionDefinitionExpression :: Expression a t
   }
   deriving
     ( Show
@@ -54,7 +57,7 @@ data ProtoDefinition a k t
   | -- | Type alias
     ProtoDTypeAlias a Name
   | -- | Function definition
-    ProtoDFunction a Name (ProtoFunctionDefinition a t)
+    ProtoDFunction a Name (ProtoFunctionDefinition a k t)
   | -- | Function
     ProtoDFunctionGroup a Name
   | -- | Top-level fold

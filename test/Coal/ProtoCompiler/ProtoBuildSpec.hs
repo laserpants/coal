@@ -2,12 +2,13 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Coal.Language.Expression
-import Coal.Language.Type.Kind (Kind)
+import Coal.Common.Label (Label (..))
+import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..), ProtoFunctionDefinition (..))
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
+import Data.List.NonEmpty (NonEmpty (..))
 
 testModule1 :: (Monoid a) => ProtoModule a Kind ()
 testModule1 =
@@ -28,12 +29,30 @@ testModule1 =
             mempty
             "main"
             ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionExpression =
+                { protoOunctionDefinitionMetadata = mempty
+                , protoOunctionDefinitionAnnotation = Nothing
+                , protoOunctionDefinitionType = With [] ()
+                , protoOunctionDefinitionPatterns = undefined
+                , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
-                      undefined
-                      undefined
+                      (EVariable mempty (Label () "println_int32"))
+                      ( EApplication
+                          mempty
+                          ()
+                          (EVariable mempty (Label () "factorial"))
+                          ( EApplication
+                              mempty
+                              ()
+                              (EVariable mempty (Label () "from_int32"))
+                              ( ELiteral mempty (LInt32 8)
+                                  :| []
+                              )
+                              :| []
+                          )
+                          :| []
+                      )
                 }
             )
         ]
@@ -54,7 +73,11 @@ testModule2 =
             mempty
             "factorial"
             ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionExpression =
+                { protoOunctionDefinitionMetadata = mempty
+                , protoOunctionDefinitionAnnotation = Nothing
+                , protoOunctionDefinitionType = With [] ()
+                , protoOunctionDefinitionPatterns = undefined
+                , protoOfunctionDefinitionExpression =
                     EFold
                       mempty
                       ()
@@ -74,7 +97,11 @@ testModule3 =
             mempty
             "pack"
             ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionExpression =
+                { protoOunctionDefinitionMetadata = mempty
+                , protoOunctionDefinitionAnnotation = Nothing
+                , protoOunctionDefinitionType = With [] ()
+                , protoOunctionDefinitionPatterns = undefined
+                , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
@@ -86,7 +113,11 @@ testModule3 =
             mempty
             "unpack"
             ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionExpression =
+                { protoOunctionDefinitionMetadata = mempty
+                , protoOunctionDefinitionAnnotation = Nothing
+                , protoOunctionDefinitionType = With [] ()
+                , protoOunctionDefinitionPatterns = undefined
+                , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()

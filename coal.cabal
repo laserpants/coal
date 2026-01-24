@@ -227,7 +227,6 @@ library
       Coal.ProtoCompiler.ProtoBuild
       Coal.ProtoCompiler.ProtoBuild.ProtoPrep
       Coal.ProtoCompiler.ProtoBuild.ProtoUnit
-      Coal.ProtoCompiler.ProtoConfig
       Coal.ProtoCompiler.ProtoError
       Coal.ProtoCompiler.ProtoPipeline
       Coal.ProtoCompiler.ProtoStack
