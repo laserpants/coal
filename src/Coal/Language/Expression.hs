@@ -67,7 +67,7 @@ data Expression a t
   | -- | Record field selector
     ESelect a (Label t) (Expression a t)
   | -- | Row restriction
-    EFocus Name (Label t) (Label t) (Expression a t) (Expression a t)
+    EFocus a Name (Label t) (Label t) (Expression a t) (Expression a t)
   | -- | Trait instance dictionary
     ETraitDictionary a t (Trait t)
   | -- | FFI function call

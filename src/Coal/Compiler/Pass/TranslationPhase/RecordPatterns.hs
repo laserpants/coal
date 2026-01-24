@@ -133,7 +133,7 @@ desugar t0 e0 rest (name, dict, p1) expr = do
         ll2 = Label (TRecord (TRow row)) (prefix <> ".tail")
         match = EMatch mempty (typeOf expr2)
         clause q e = EClause mempty q (CPlain mempty [] e :| [])
-        focus = EFocus fname ll1 ll2 (EVariable mempty (Label (TRow (RExtend fname t2 row)) prefix))
+        focus = EFocus mempty fname ll1 ll2 (EVariable mempty (Label (TRow (RExtend fname t2 row)) prefix))
     e3 <-
       desugarRecordPatterns
         ( match

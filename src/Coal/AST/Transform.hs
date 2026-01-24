@@ -90,8 +90,8 @@ instance Transformable Expression where
           <*> traverse (rewrite name f) e
       ESelect a ll e ->
         ESelect a ll <$> rewrite name f e
-      EFocus field ll1 ll2 e1 e2 -> do
-        EFocus field ll1 ll2 <$> rewrite name f e1 <*> rewrite name f e2
+      EFocus a field ll1 ll2 e1 e2 -> do
+        EFocus a field ll1 ll2 <$> rewrite name f e1 <*> rewrite name f e2
       EIf a t e1 e2 e3 ->
         EIf a t
           <$> rewrite name f e1

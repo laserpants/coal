@@ -233,7 +233,7 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
       ESelect _ (Label t name) e -> do
         fromNode (emitRectangle ("ESelect\\n" <> name) (Just t)) $ do
           emitEdgeTo e
-      EFocus name ll1 ll2 e1 e2 -> do
+      EFocus _ name ll1 ll2 e1 e2 -> do
         fromNode (emitRectangle ("EFocus\\n" <> name) Nothing) $ do
           emitEdgeTo ll1
           emitEdgeTo ll2

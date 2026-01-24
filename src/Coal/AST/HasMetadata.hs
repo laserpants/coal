@@ -43,7 +43,7 @@ instance HasMetadata (Expression Metadata t) where
       ELambdaMatch a _ _ -> a
       EFFICall a _ _ _ _ -> a
       EDoBlock a _ -> a
-      EFocus{} -> error "Not implemented"
+      EFocus a _ _ _ _ _ -> a
 
 instance HasMetadata (Pattern Metadata t) where
   getMetadata =

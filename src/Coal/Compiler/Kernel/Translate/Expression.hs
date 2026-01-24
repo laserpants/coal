@@ -94,7 +94,7 @@ translateExpression =
               )
               :| []
           )
-    EFocus name0 ll1 ll2@(Label t1 _) e1 e2 -> do
+    EFocus _ name0 ll1 ll2@(Label t1 _) e1 e2 -> do
       d1 <- translateExpression e1
       d2 <- withLocalNames [labelName ll1, labelName ll2] (translateExpression e2)
       pure $

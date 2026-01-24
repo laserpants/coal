@@ -78,7 +78,7 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (
         typeOf t
       ERecursiveLet _ _ _ t ->
         typeOf t
-      EFocus _ _ _ _ t ->
+      EFocus _ _ _ _ _ t ->
         typeOf t
       ESelect _ t _ ->
         typeOf t

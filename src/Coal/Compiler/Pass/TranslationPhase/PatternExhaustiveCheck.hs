@@ -152,8 +152,8 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
         error "Implementation error"
       ESelect a ll e ->
         ESelect a ll <$> patternExhaustiveCheck name e
-      EFocus n ll1 ll2 e1 e2 ->
-        EFocus n ll1 ll2
+      EFocus a n ll1 ll2 e1 e2 ->
+        EFocus a n ll1 ll2
           <$> patternExhaustiveCheck name e1
           <*> patternExhaustiveCheck name e2
       EFFICall a t ll es e ->

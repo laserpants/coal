@@ -63,8 +63,8 @@ instance (Data t) => RuleContext (Expression Metadata t) where
           <*> traverse (detectShadowing names) e
       ESelect a ll e ->
         ESelect a ll <$> detectShadowing names e
-      EFocus field ll1 ll2 e1 e2 -> do
-        EFocus field ll1 ll2 <$> detectShadowing names e1 <*> detectShadowing names e2
+      EFocus a field ll1 ll2 e1 e2 -> do
+        EFocus a field ll1 ll2 <$> detectShadowing names e1 <*> detectShadowing names e2
       EIf a t e1 e2 e3 ->
         EIf a t
           <$> detectShadowing names e1
