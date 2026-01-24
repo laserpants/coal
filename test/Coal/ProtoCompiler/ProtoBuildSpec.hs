@@ -8,7 +8,15 @@ import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..), ProtoFunctionDefinition (..))
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
-import Data.List.NonEmpty (NonEmpty (..))
+import Data.List.NonEmpty (NonEmpty (..), (<|))
+
+testModule0 :: (Monoid a) => ProtoModule a Kind ()
+testModule0 =
+  ProtoModule
+    { protoOmodulePath = Path ["IO"]
+    , protoOmoduleDefinitions =
+        []
+    }
 
 testModule1 :: (Monoid a) => ProtoModule a Kind ()
 testModule1 =
@@ -32,7 +40,8 @@ testModule1 =
                 { protoOunctionDefinitionMetadata = mempty
                 , protoOunctionDefinitionAnnotation = Nothing
                 , protoOunctionDefinitionType = With [] ()
-                , protoOunctionDefinitionPatterns = undefined
+                , protoOunctionDefinitionPatterns =
+                    PLiteral mempty LUnit :| []
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
@@ -73,16 +82,39 @@ testModule2 =
             mempty
             "factorial"
             ( ProtoFunctionDefinition
-                { protoOunctionDefinitionMetadata = mempty
-                , protoOunctionDefinitionAnnotation = Nothing
-                , protoOunctionDefinitionType = With [] ()
-                , protoOunctionDefinitionPatterns = undefined
+                { protoOunctionDefinitionMetadata =
+                    mempty
+                , protoOunctionDefinitionAnnotation =
+                    Just (With [] (TIntrinsic IInt32))
+                , protoOunctionDefinitionType =
+                    With [] ()
+                , protoOunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "n"))
+                      :| []
                 , protoOfunctionDefinitionExpression =
                     EFold
                       mempty
                       ()
-                      undefined
-                      undefined
+                      ( EApplication
+                          mempty
+                          ()
+                          (EVariable mempty (Label () "pack"))
+                          (EVariable mempty (Label () "n") :| [])
+                          :| []
+                      )
+                      ( EClause
+                          undefined
+                          undefined
+                          undefined
+                          <| EClause
+                            undefined
+                            undefined
+                            undefined
+                          :| []
+                      )
                 }
             )
         ]
