@@ -6,27 +6,29 @@
 
 module Coal.ProtoLanguage.ProtoDefinition where
 
+import Coal.Language.Module.Path (Path (..))
 import Data.Data (Data, Typeable)
+import Extras (Name)
 
 data ProtoDefinition a
   = -- | Type definition
-    ProtoDType a
+    ProtoDType a Name
   | -- | Type alias
-    ProtoDTypeAlias a
+    ProtoDTypeAlias a Name
   | -- | Function definition
-    ProtoDFunction a
+    ProtoDFunction a Name
   | -- | Function
-    ProtoDFunctionGroup a
+    ProtoDFunctionGroup a Name
   | -- | Top-level fold
-    ProtoDFold a
+    ProtoDFold a Name
   | -- | Top-level let-binding
-    ProtoDLet a
+    ProtoDLet a Name
   | -- | Import statement
-    ProtoDImport a
+    ProtoDImport a Path
   | -- | Namespace (qualified) import
-    ProtoDQualifiedImport a
+    ProtoDQualifiedImport a Path
   | -- | Trait
-    ProtoDTrait a
+    ProtoDTrait a Name
   | -- | Trait instance
     ProtoDInstance a
   deriving
