@@ -3,10 +3,10 @@
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
 import Coal.Language.Module.Path (Path (..))
-import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
+import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..), ProtoFunctionDefinition (..))
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 
-testModule1 :: (Monoid a) => ProtoModule a
+testModule1 :: (Monoid a) => ProtoModule a t
 testModule1 =
   ProtoModule
     { protoOmodulePath = Path ["Main"]
@@ -14,10 +14,14 @@ testModule1 =
         [ ProtoDFunction
             mempty
             "main"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionExpression = undefined
+                }
+            )
         ]
     }
 
-testModule2 :: (Monoid a) => ProtoModule a
+testModule2 :: (Monoid a) => ProtoModule a t
 testModule2 =
   ProtoModule
     { protoOmodulePath = Path ["Math"]
@@ -25,10 +29,14 @@ testModule2 =
         [ ProtoDFunction
             mempty
             "factorial"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionExpression = undefined
+                }
+            )
         ]
     }
 
-testModule3 :: (Monoid a) => ProtoModule a
+testModule3 :: (Monoid a) => ProtoModule a t
 testModule3 =
   ProtoModule
     { protoOmodulePath = Path ["Nat"]
@@ -36,8 +44,16 @@ testModule3 =
         [ ProtoDFunction
             mempty
             "pack"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionExpression = undefined
+                }
+            )
         , ProtoDFunction
             mempty
             "unpack"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionExpression = undefined
+                }
+            )
         ]
     }

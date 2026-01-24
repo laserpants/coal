@@ -17,7 +17,7 @@ data ProtoBuildUnit a
   | UCached ProtoBuild
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
-unitPrincipalPath :: ProtoBuildUnit (ProtoModule a) -> Name
+unitPrincipalPath :: ProtoBuildUnit (ProtoModule a t) -> Name
 unitPrincipalPath =
   principalPath
     . \case

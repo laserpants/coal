@@ -9,19 +9,19 @@ import Coal.Language.Module.Path (Path)
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Data.Data (Data, Typeable)
 
-data ProtoModule a = ProtoModule
+data ProtoModule a t = ProtoModule
   { protoOmodulePath :: Path
-  --    , moduleExports :: [Export a]
-  , protoOmoduleDefinitions :: [ProtoDefinition a]
+  , --    , moduleExports :: [Export a]
+    protoOmoduleDefinitions :: [ProtoDefinition a t]
   }
   deriving
     ( Show
     , Eq
     , Ord
     , Read
-    , --    , Functor
-      --    , Foldable
-      --    , Traversable
-      Data
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
     , Typeable
     )
