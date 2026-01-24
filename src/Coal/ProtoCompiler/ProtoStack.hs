@@ -15,14 +15,12 @@ newtype ProtoCompilerT m o = Compiler {proto_compilerStack :: ProtoCompilerStack
     ( Functor
     , Applicative
     , Monad
---    , MonadReader (CompilerEnvironment a)
---    , MonadWriter (CompilerJournal a)
---    , MonadState (CompilerState a)
---    , MonadError CompilerFailureMode
---    , MonadIO
---    , MonadThrow
---    , MonadCatch
---    , MonadMask
+    --    , MonadReader (CompilerEnvironment a)
+    --    , MonadWriter (CompilerJournal a)
+    --    , MonadState (CompilerState a)
+    --    , MonadError CompilerFailureMode
+    --    , MonadIO
+    --    , MonadThrow
+    --    , MonadCatch
+    --    , MonadMask
     )
-
-
