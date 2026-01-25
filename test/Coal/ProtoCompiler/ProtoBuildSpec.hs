@@ -22,11 +22,11 @@ testModuleBuiltins =
             ( TraitDefinition
                 { protoOtraitDefinitionMetadata =
                     mempty
-                , protoOtraitDefinitionRequired =
+                , protoOtraitDefinitionConstraints =
                     []
                 , protoOtraitDefinitionParameter =
                     Parameter KType "a"
-                , protoOtraitDefinitionMethods =
+                , protoOtraitDefinitionInterface =
                     [
                       ( "from_int32"
                       , Forall
@@ -81,6 +81,118 @@ testModuleBuiltins =
             )
         , ProtoDInstance
             mempty
+            ( ProtoInstanceDefinition
+                { protoOinstanceDefinitionMetadata =
+                    mempty
+                , protoOinstanceDefinitionConstraints =
+                    []
+                , protoOinstanceDefinitionType =
+                    TIntrinsic IInt32
+                , protoOinstanceDefinitionImplementations =
+                    [ ProtoDFunction
+                        mempty
+                        "from_int32"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EVariable mempty (Label () "n")
+                            }
+                        )
+                        --                    , ProtoDFunction
+                        --                        mempty
+                        --                        "from_int64"
+                        --                        ( ProtoFunctionDefinition
+                        --                            { protoOfunctionDefinitionMetadata =
+                        --                                mempty
+                        --                            , protoOfunctionDefinitionAnnotation =
+                        --                                Nothing
+                        --                            , protoOfunctionDefinitionType =
+                        --                                With [] ()
+                        --                            , protoOfunctionDefinitionPatterns =
+                        --                                PVariable mempty (Label () "n") :| []
+                        --                            , protoOfunctionDefinitionExpression =
+                        --                                EVariable mempty (Label () "n")
+                        --                            }
+                        --                        )
+                        --                    , ProtoDFunction
+                        --                        mempty
+                        --                        "from_bignum"
+                        --                        ( ProtoFunctionDefinition
+                        --                            { protoOfunctionDefinitionMetadata =
+                        --                                mempty
+                        --                            , protoOfunctionDefinitionAnnotation =
+                        --                                Nothing
+                        --                            , protoOfunctionDefinitionType =
+                        --                                With [] ()
+                        --                            , protoOfunctionDefinitionPatterns =
+                        --                                PVariable mempty (Label () "n") :| []
+                        --                            , protoOfunctionDefinitionExpression =
+                        --                                EFFICall
+                        --                                  mempty
+                        --                                  undefined
+                        --                                  undefined
+                        --                                  undefined
+                        --                                  undefined
+                        --                            }
+                        --                        )
+                        --                    , ProtoDFunction
+                        --                        mempty
+                        --                        "negate"
+                        --                        ( ProtoFunctionDefinition
+                        --                            { protoOfunctionDefinitionMetadata =
+                        --                                mempty
+                        --                            , protoOfunctionDefinitionAnnotation =
+                        --                                Nothing
+                        --                            , protoOfunctionDefinitionType =
+                        --                                With [] ()
+                        --                            , protoOfunctionDefinitionPatterns =
+                        --                                PVariable mempty (Label () "n") :| []
+                        --                            , protoOfunctionDefinitionExpression =
+                        --                                undefined
+                        --                            }
+                        --                        )
+                        --                    , ProtoDFunction
+                        --                        mempty
+                        --                        "(+)"
+                        --                        ( ProtoFunctionDefinition
+                        --                            { protoOfunctionDefinitionMetadata =
+                        --                                mempty
+                        --                            , protoOfunctionDefinitionAnnotation =
+                        --                                Nothing
+                        --                            , protoOfunctionDefinitionType =
+                        --                                With [] ()
+                        --                            , protoOfunctionDefinitionPatterns =
+                        --                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                        --                            , protoOfunctionDefinitionExpression =
+                        --                                undefined
+                        --                            }
+                        --                        )
+                        --                    , ProtoDFunction
+                        --                        mempty
+                        --                        "(-)"
+                        --                        ( ProtoFunctionDefinition
+                        --                            { protoOfunctionDefinitionMetadata =
+                        --                                mempty
+                        --                            , protoOfunctionDefinitionAnnotation =
+                        --                                Nothing
+                        --                            , protoOfunctionDefinitionType =
+                        --                                With [] ()
+                        --                            , protoOfunctionDefinitionPatterns =
+                        --                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                        --                            , protoOfunctionDefinitionExpression =
+                        --                                undefined
+                        --                            }
+                        --                        )
+                    ]
+                }
+            )
         ]
     }
 
