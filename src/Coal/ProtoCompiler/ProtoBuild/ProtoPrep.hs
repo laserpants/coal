@@ -92,11 +92,11 @@ collectInstances =
 collectPlaceholders :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
 collectPlaceholders =
   \case
-    ProtoDFunction _ _ _ ->
+    ProtoDFunction loc name ProtoFunctionDefinition{..} ->
       undefined
-    ProtoDLet _ _ ->
+    ProtoDLet loc name ProtoLetDefinition{..} ->
       undefined
-    ProtoDFold _ _ ->
+    ProtoDFold loc name ->
       undefined
     _ ->
       undefined

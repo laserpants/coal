@@ -6,6 +6,7 @@ module Coal.ProtoLanguage.ProtoDefinition (
   ProtoDefinition (..),
   ProtoTypeDefinition (..),
   ProtoFunctionDefinition (..),
+  ProtoLetDefinition (..),
   ProtoTraitDefinition (..),
   ProtoInstanceDefinition (..),
 ) where
@@ -115,7 +116,7 @@ data ProtoDefinition a k t
   | -- | Top-level fold
     ProtoDFold a Name
   | -- | Top-level let-binding
-    ProtoDLet a Name
+    ProtoDLet a Name (ProtoLetDefinition a k t)
   | -- | Import statement
     ProtoDImport a Path [Import a]
   | -- | Namespace (qualified) import
