@@ -21,8 +21,6 @@ import GHC.Generics (Generic)
 data UnaryOperator
   = -- | Logical NOT (!)
     OLogicalNot
-  | -- | Negation (-)
-    ONegate
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
 instance Binary UnaryOperator
@@ -54,8 +52,6 @@ unaryOperatorTypeScheme =
   \case
     OLogicalNot ->
       forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
-    ONegate ->
-      forall1 (\a -> a ~> a)
 
 binaryOperatorTypeScheme :: BinaryOperator -> IndexedScheme
 binaryOperatorTypeScheme =

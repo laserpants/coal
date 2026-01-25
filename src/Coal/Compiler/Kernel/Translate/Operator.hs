@@ -21,8 +21,6 @@ translateUnaryOperator translate _ =
   \case
     OLogicalNot ->
       logicalNotOperator translate
-    ONegate{} ->
-      error "Not implemented"
 
 logicalNotOperator :: (Monad m) => (Expression a IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a IndexedType) -> CompilerT a m KernelExpr
 logicalNotOperator translate es = do
