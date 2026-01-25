@@ -113,7 +113,7 @@ parseImportAtom =
   do
     parseTypeImport
     <|> parseTypeImport
-    <|> parseTraitImport
+--    <|> parseTraitImport
     <|> parseNameImport
 
 parseTypeImport :: Parser (Import Metadata)
@@ -125,14 +125,14 @@ parseTypeImport = do
   end <- getSourcePos
   pure (TypeImport (Metadata start end) name_ names)
 
-parseTraitImport :: Parser (Import Metadata)
-parseTraitImport = do
-  start <- getSourcePos
-  lexeme_ "trait"
-  name_ <- constructor
-  names <- option ["*"] (parens (commaSep1 name))
-  end <- getSourcePos
-  pure (TraitImport (Metadata start end) name_ names)
+--parseTraitImport :: Parser (Import Metadata)
+--parseTraitImport = do
+--  start <- getSourcePos
+--  lexeme_ "trait"
+--  name_ <- constructor
+--  names <- option ["*"] (parens (commaSep1 name))
+--  end <- getSourcePos
+--  pure (TypeImport (Metadata start end) name_ names)
 
 parseNameImport :: Parser (Import Metadata)
 parseNameImport = do

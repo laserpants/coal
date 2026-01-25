@@ -253,16 +253,20 @@ nameImports ModuleBuild{..} imports =
         case Environment.lookup name moduleTypeConstructors of
           Just TypeConstructorEntry{..} ->
             typeConstructorEntryDataConstructors
-          _ -> []
+          _ -> 
+            case Environment.lookup name moduleTraits of
+              Just TraitEntry{..} ->
+                Environment.names traitEntryEntries
+              _ -> []
       TypeImport _ _ names ->
         names
-      TraitImport _ name ["*"] ->
-        case Environment.lookup name moduleTraits of
-          Just TraitEntry{..} ->
-            Environment.names traitEntryEntries
-          _ -> []
-      TraitImport _ _ names ->
-        names
+--      TraitImport _ name ["*"] ->
+--        case Environment.lookup name moduleTraits of
+--          Just TraitEntry{..} ->
+--            Environment.names traitEntryEntries
+--          _ -> []
+--      TraitImport _ _ names ->
+--        names
 
 typeImports :: [Import a] -> [Name]
 typeImports imports =
@@ -270,8 +274,8 @@ typeImports imports =
     \case
       TypeImport _ name _ ->
         [name]
-      TraitImport _ name _ ->
-        [name]
+--      TraitImport _ name _ ->
+--        [name]
       _ ->
         []
 
@@ -322,7 +326,12 @@ insertTypeName path loc name = do
     Nothing -> do
       case Environment.lookup name (moduleAliases build) of
         Nothing -> do
-          pure False
+          case Environment.lookup name (moduleTraits build) of
+            Just TraitEntry{..} -> do
+              modify $ insertTrait name TraitEntry{..}
+              pure True
+            _ ->
+              pure False
         Just AliasEntry{..} -> do
           modify $ insertAlias name AliasEntry{..}
           let ts = constructors aliasEntryType
@@ -375,8 +384,12 @@ collectDataConstructors aliases env =
               Nothing -> do
                 case Environment.lookup name (moduleAliases build) of
                   Nothing -> do
-                    tellErrors [MissingType name path (ErrorLocation this loc)]
-                    throwError PreflightFailure
+                    case Environment.lookup name (moduleTraits build) of
+                      Nothing -> do
+                        tellErrors [MissingType name path (ErrorLocation this loc)]
+                        throwError PreflightFailure
+                      Just{} ->
+                        pure ()
                   Just{} ->
                     pure ()
               Just TypeConstructorEntry{..} -> do
@@ -549,7 +562,7 @@ collectImportedInstances =
       ModuleBuild{..} <- lift $ importedModule loc path
       concatForM imports $
         \case
-          TraitImport _ name _ ->
+          TypeImport _ name _ ->
             concatForM (Environment.toList moduleInstances) $
               \(trait, is) -> do
                 if trait == name
@@ -558,23 +571,22 @@ collectImportedInstances =
                       forM (Map.toList instanceEntryEntries) $
                         \(f, _) ->
                           pure (path, instanceLabel (Trait trait instanceEntryType) f)
-                  else pure []
-          TypeImport _ name _ ->
-            concatForM (Environment.toList moduleInstances) $
-              \(trait, is) -> do
-                concatForM (Map.toList is) $
-                  \(_, InstanceEntry{..}) -> do
-                    if headConstructor instanceEntryIndexedType == Just name
-                      then forM (Map.toList instanceEntryEntries) $
-                        \(f, _) -> do
-                          let ll = instanceLabel (Trait trait instanceEntryType) f
+                  else 
+                    concatForM (Environment.toList moduleInstances) $
+                      \(trait, is) -> do
+                        concatForM (Map.toList is) $
+                          \(_, InstanceEntry{..}) -> do
+                            if headConstructor instanceEntryIndexedType == Just name
+                              then forM (Map.toList instanceEntryEntries) $
+                                \(f, _) -> do
+                                  let ll = instanceLabel (Trait trait instanceEntryType) f
 
-                          let infos = pick [ll] moduleNames
-                          forM_ infos $
-                            \info -> modify $ addName info
+                                  let infos = pick [ll] moduleNames
+                                  forM_ infos $
+                                    \info -> modify $ addName info
 
-                          pure (path, ll)
-                      else pure []
+                                  pure (path, ll)
+                              else pure []
           _ ->
             pure []
     _ ->
@@ -599,10 +611,10 @@ collectImportedNames =
               unless (name `elem` fmap nameOf names2) $ do
                 tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
                 throwError PreflightFailure
-            TraitImport loc name _ ->
-              unless (name `elem` fmap nameOf names2) $ do
-                tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
-                throwError PreflightFailure
+--            TraitImport loc name _ ->
+--              unless (name `elem` fmap nameOf names2) $ do
+--                tellErrors [ImportNotInModule name path (ErrorLocation this loc)]
+--                throwError PreflightFailure
 
       forM_ (names1 <> names2) $
         \case
@@ -694,17 +706,21 @@ qualImports ModuleBuild{..} =
               Just TypeConstructorEntry{..} ->
                 pure [(name_, principalPath path <.> name_) | name_ <- typeConstructorEntryDataConstructors]
               _ ->
-                pure []
+                case Environment.lookup name moduleTraits of
+                  Just TraitEntry{..} ->
+                    pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
+                  _ ->
+                    pure []
           TypeImport _ _ ctors ->
             pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
-          TraitImport _ name ["*"] ->
-            case Environment.lookup name moduleTraits of
-              Just TraitEntry{..} ->
-                pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
-              _ ->
-                pure []
-          TraitImport _ _ entries ->
-            pure [(entry, principalPath path <.> entry) | entry <- entries]
+          -- TraitImport _ name ["*"] ->
+          --   case Environment.lookup name moduleTraits of
+          --     Just TraitEntry{..} ->
+          --       pure [(name_, principalPath path <.> name_) | name_ <- Environment.names traitEntryEntries]
+          --     _ ->
+          --       pure []
+          -- TraitImport _ _ entries ->
+          --   pure [(entry, principalPath path <.> entry) | entry <- entries]
     DQualifiedImport loc path -> do
       build <- importedModule loc path
       concatForM (exportedNames build) $
