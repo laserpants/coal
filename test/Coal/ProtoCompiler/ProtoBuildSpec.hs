@@ -29,31 +29,52 @@ testModuleBuiltins =
                 , protoOtraitDefinitionMethods =
                     [
                       ( "from_int32"
-                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TIntrinsic IInt32 `TArrow` TVariable (Parameter KType "a")
+                      , Forall
+                          (Set.fromList [Parameter KType "a"])
+                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                          (TIntrinsic IInt32 `TArrow` TVariable (Parameter KType "a"))
                       )
                     ,
                       ( "from_int64"
-                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TIntrinsic IInt64 `TArrow` TVariable (Parameter KType "a")
+                      , Forall
+                          (Set.fromList [Parameter KType "a"])
+                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                          (TIntrinsic IInt64 `TArrow` TVariable (Parameter KType "a"))
                       )
                     ,
                       ( "from_bignum"
-                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TIntrinsic IBignum `TArrow` TVariable (Parameter KType "a")
+                      , Forall
+                          (Set.fromList [Parameter KType "a"])
+                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                          (TIntrinsic IBignum `TArrow` TVariable (Parameter KType "a"))
                       )
                     ,
                       ( "negate"
-                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      , Forall
+                          (Set.fromList [Parameter KType "a"])
+                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                       )
                     ,
                       ( "(+)"
-                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      , Forall
+                          (Set.fromList [Parameter KType "a"])
+                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                       )
                     ,
                       ( "(-)"
-                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      , Forall
+                          (Set.fromList [Parameter KType "a"])
+                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                       )
                     ,
                       ( "(*)"
-                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      , Forall
+                          (Set.fromList [Parameter KType "a"])
+                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                       )
                     ]
                 }
