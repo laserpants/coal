@@ -3,7 +3,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry where
+module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..)) where
 
 import Coal.Language
 import Data.Binary (Binary)
@@ -12,6 +12,10 @@ import GHC.Generics (Generic)
 
 data ProtoNameEntry
   = ProtoNName Name IndexedScheme
+  | ProtoNType Name IndexedScheme
+  | ProtoNTrait Name
+  | ProtoNTypeAlias Name
+  | PRotoNPlaceholder Name
   deriving (Show, Eq, Ord, Read, Generic)
 
 instance Binary ProtoNameEntry

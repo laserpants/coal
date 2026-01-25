@@ -14,6 +14,7 @@ module Coal.ProtoCompiler.ProtoBuild (
   setBuildKernelConstructors,
 ) where
 
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..))
 import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Kernel.LLVM.IRType (IRType)
@@ -26,6 +27,7 @@ import GHC.Generics (Generic)
 data ProtoBuild = ProtoBuild
   { protoObuildPath :: Path
   , protoObuildFile :: FilePath
+  , protoObuildNames :: Environment [ProtoNameEntry]
   , protoObuildBitcode :: Maybe ByteString
   , protoObuildHash :: Maybe Hash256
   , protoObuildKernelNames :: Environment Kernel.Type
@@ -41,6 +43,7 @@ protoOemptyBuild =
   ProtoBuild
     { protoObuildPath = Path []
     , protoObuildFile = mempty
+    , protoObuildNames = mempty
     , protoObuildBitcode = Nothing
     , protoObuildHash = Nothing
     , protoObuildKernelNames = mempty
