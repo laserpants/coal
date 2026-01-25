@@ -1079,19 +1079,22 @@ objects =
             [ Label Kernel.char "x"
             , Label Kernel.char "y"
             ]
-            [r| 
+            ( [r| 
                   @<Ordering>
-                    ( `Builtin$.compare__$impl_Ordered(Intrinsic(Int32))` : int32/int32/Ordering
+                    ( `|]
+                <> builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare"
+                <> [r|` : int32/int32/Ordering
                     , @<int32>(`Builtin$.char$_ord` : char/int32, x : char) 
                     , @<int32>(`Builtin$.char$_ord` : char/int32, y : char)
                     )
               |]
+            )
         , OFunction
             (builtinInstance (Trait.ordered (TIntrinsic IString)) "compare")
             [ Label Kernel.string "s1"
             , Label Kernel.string "s2"
             ]
-            [r| 
+            ( [r| 
                   let
                     fst : list(char) = 
                       @<list(char)>
@@ -1132,7 +1135,7 @@ objects =
                                   ) =>
                                     match<Ordering>(
                                       @<Ordering>
-                                        ( `Builtin$.compare__$impl_Ordered(Intrinsic(Char))` : char/char/Ordering
+                                        ( `|] <> builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare" <> [r|` : char/char/Ordering
                                         , x : char
                                         , y : char
                                         )
@@ -1157,6 +1160,7 @@ objects =
                       , snd : list(char)
                       )
               |]
+              )
         , OFunction
             (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
             [ Label Kernel.bignum "x"
