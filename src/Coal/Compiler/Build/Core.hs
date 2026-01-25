@@ -126,9 +126,9 @@ prepareBuild module_@(Module path exports defs) =
         let errs =
               flip concatMap exports $
                 \case
-                  ExportName loc name ->
+                  NameExport loc name ->
                     [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` exps]
-                  ExportType loc name _ ->
+                  TypeExport loc name _ ->
                     [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
                   _ ->
                     []
@@ -206,9 +206,9 @@ nameExports :: [Export a] -> [Name]
 nameExports exports =
   flip concatMap exports $
     \case
-      ExportName _ name ->
+      NameExport _ name ->
         [name]
-      ExportType _ _ names ->
+      TypeExport _ _ names ->
         names
       _ ->
         []
@@ -217,7 +217,7 @@ typeExports :: [Export a] -> [Name]
 typeExports exports =
   flip concatMap exports $
     \case
-      ExportType _ name _ ->
+      TypeExport _ name _ ->
         [name]
       _ ->
         []
