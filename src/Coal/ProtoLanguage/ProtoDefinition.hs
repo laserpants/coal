@@ -86,11 +86,11 @@ data ProtoTraitDefinition a k = TraitDefinition
     , Typeable
     )
 
-data ProtoInstanceDefinition d a k t = ProtoInstanceDefinition
+data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
   { protoOinstanceDefinitionMetadata :: a
   , protoOinstanceDefinitionConstraints :: [Trait (Parameter k)]
   , protoOinstanceDefinitionType :: Type Parameter k
-  , protoOinstanceDefinitionImplementations :: [d a k t]
+  , protoOinstanceDefinitionImplementations :: [ProtoDefinition a k t]
   }
   deriving
     ( Show
@@ -124,7 +124,7 @@ data ProtoDefinition a k t
   | -- | Trait
     ProtoDTrait a Name (ProtoTraitDefinition a k)
   | -- | Trait instance
-    ProtoDInstance a (ProtoInstanceDefinition ProtoDefinition a k t)
+    ProtoDInstance a (ProtoInstanceDefinition a k t)
   deriving
     ( Show
     , Eq
