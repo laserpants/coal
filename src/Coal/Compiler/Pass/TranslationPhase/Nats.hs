@@ -8,8 +8,10 @@ module Coal.Compiler.Pass.TranslationPhase.Nats (passCompileNats) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
+import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
 import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
 import Control.Monad ((<=<))
@@ -95,11 +97,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
                   ( EApplication
                       mempty
                       (TIntrinsic IBool)
-                      ( EBinaryOperator
-                          mempty
-                          (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
-                          OEqualTo
-                      )
+                      (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")))
                       ( EVariable mempty (Label (TIntrinsic IInt32) name)
                           <| ELiteral mempty (LInt32 0)
                           :| []
@@ -113,11 +111,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
                       ( EApplication
                           mempty
                           (TIntrinsic IInt32)
-                          ( EBinaryOperator
-                              mempty
-                              (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-                              OSubtraction
-                          )
+                          (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")))
                           ( EVariable mempty (Label (TIntrinsic IInt32) name)
                               <| ELiteral mempty (LInt32 1)
                               :| []

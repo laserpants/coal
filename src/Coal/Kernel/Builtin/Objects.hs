@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module Coal.Kernel.Builtin.Objects (builtinObjects) where
+module Coal.Kernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
 import Coal.Common.Label (Label (..))
 import qualified Coal.Compiler.Builtin.Traits as Trait

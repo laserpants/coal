@@ -29,31 +29,7 @@ instance Binary UnaryOperator
 
 -- | Binary operators
 data BinaryOperator
-  = -- | Equality (==)
-    OEqualTo
-  | -- | Inequality (!=)
-    ONotEqualTo
-  | -- | Less than (<)
-    OLessThan
-  | -- | Greater than (>)
-    OGreaterThan
-  | -- | Less than or equal (<=)
-    OLessThanOrEqual
-  | -- | Greater than or equal (>=)
-    OGreaterThanOrEqual
-  | -- | Addition (+)
-    OAddition
-  | -- | Subtraction (-)
-    OSubtraction
-  | -- | Multiplication (*)
-    OMultiplication
-  | -- | Exponentiation (^)
-    OExponentiation
-  | -- | Modulus (%)
-    OModulus
-  | -- | Division (/)
-    ODivision
-  | -- | Logical OR (||)
+  = -- | Logical OR (||)
     OLogicalOr
   | -- | Logical AND (&&)
     OLogicalAnd
@@ -69,8 +45,6 @@ data BinaryOperator
     OStringConcatenation
   | -- | List concatenation (++)
     OListConcatenation
-  | -- | Semigroup operation (<>)
-    OSemigroupOp
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
 instance Binary BinaryOperator
@@ -98,33 +72,7 @@ binaryOperatorTypeScheme =
       forall0 (TIntrinsic IBool ~> TIntrinsic IBool ~> TIntrinsic IBool)
     OLogicalAnd ->
       forall0 (TIntrinsic IBool ~> TIntrinsic IBool ~> TIntrinsic IBool)
-    OEqualTo ->
-      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
-    ONotEqualTo ->
-      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
     OListConcatenation ->
       forall1 (\a -> listType a ~> listType a ~> listType a)
     OStringConcatenation ->
       Forall mempty [] (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
-    OAddition ->
-      forall1 (\a -> a ~> a ~> a)
-    OSubtraction ->
-      forall1 (\a -> a ~> a ~> a)
-    OMultiplication ->
-      forall1 (\a -> a ~> a ~> a)
-    OLessThan ->
-      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
-    OGreaterThan ->
-      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
-    OLessThanOrEqual ->
-      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
-    OGreaterThanOrEqual ->
-      forall1 (\a -> a ~> a ~> TIntrinsic IBool)
-    OExponentiation{} ->
-      forall1 (\a -> a ~> a ~> a)
-    OModulus{} ->
-      forall1 (\a -> a ~> a ~> a)
-    ODivision{} ->
-      forall1 (\a -> a ~> a ~> a)
-    OSemigroupOp{} ->
-      forall1 (\a -> a ~> a ~> a)

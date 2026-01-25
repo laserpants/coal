@@ -17,7 +17,6 @@ module Coal.AST.Shorthand (
   literalBoolE,
   plainClauseE,
   opAndE,
-  opEqualToE,
   varP,
   constructorP,
   anyP,
@@ -94,10 +93,6 @@ tupleE = ETuple mempty ()
 {-# INLINE literalBoolE #-}
 literalBoolE :: (Monoid a) => Bool -> Expression a ()
 literalBoolE = ELiteral mempty . LBool
-
-{-# INLINE opEqualToE #-}
-opEqualToE :: (Monoid a) => Expression a ()
-opEqualToE = EBinaryOperator mempty () OEqualTo
 
 {-# INLINE opAndE #-}
 opAndE :: (Monoid a) => Expression a ()
