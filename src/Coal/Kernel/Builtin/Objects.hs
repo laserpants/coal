@@ -1135,7 +1135,9 @@ objects =
                                   ) =>
                                     match<Ordering>(
                                       @<Ordering>
-                                        ( `|] <> builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare" <> [r|` : char/char/Ordering
+                                        ( `|]
+                <> builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare"
+                <> [r|` : char/char/Ordering
                                         , x : char
                                         , y : char
                                         )
@@ -1160,7 +1162,7 @@ objects =
                       , snd : list(char)
                       )
               |]
-              )
+            )
         , OFunction
             (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
             [ Label Kernel.bignum "x"

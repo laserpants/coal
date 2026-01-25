@@ -64,57 +64,57 @@ instance Serializable Intrinsic where
   serialize =
     \case
       IBool ->
-        "Bool"
+        "IBool"
       IChar ->
-        "Char"
+        "IChar"
       IDouble ->
-        "Double"
+        "IDouble"
       IFloat ->
-        "Float"
+        "IFloat"
       IInt32 ->
-        "Int32"
+        "IInt32"
       IInt64 ->
-        "Int64"
+        "IInt64"
       IBignum ->
-        "Bignum"
+        "IBignum"
       IString ->
-        "String"
+        "IString"
       INat ->
-        "Nat"
+        "INat"
       IUnit ->
-        "Unit"
+        "IUnit"
       IVoid ->
-        "Void"
+        "IVoid"
 
 instance (Serializable (s k)) => Serializable (Type s k) where
   serialize =
     \case
       TApplication _ t1 ts ->
-        "Application" <> parenthesized t1 <> parenthesized ts
+        "TApplication" <> parenthesized t1 <> parenthesized ts
       TArrow t1 t2 ->
-        "Arrow" <> parenthesized [t1, t2]
+        "TArrow" <> parenthesized [t1, t2]
       TConstructor _ name ->
-        "Constructor" <> parenthesized name
+        "TConstructor" <> parenthesized name
       TIntrinsic t ->
-        "Intrinsic" <> parenthesized t
+        "TIntrinsic" <> parenthesized t
       TRecord t ->
-        "Record" <> parenthesized t
+        "TRecord" <> parenthesized t
       TRow r ->
-        "Row" <> parenthesized r
+        "TRow" <> parenthesized r
       TVariable t ->
-        "Variable" <> parenthesized t
+        "TVariable" <> parenthesized t
       TAlias name ts t ->
-        "Alias" <> parenthesized (name, ts, t)
+        "TAlias" <> parenthesized (name, ts, t)
 
 instance (Serializable (o k), Serializable t) => Serializable (Row o k t) where
   serialize =
     \case
       RNil ->
-        "RowNil"
+        "RNil"
       RVariable r ->
-        "RowVariable" <> parenthesized r
+        "RVariable" <> parenthesized r
       RExtend n t r ->
-        "RowExtend" <> parenthesized (n, t, r)
+        "RExtend" <> parenthesized (n, t, r)
 
 instance (Serializable s) => Serializable (Trait s) where
   serialize =
