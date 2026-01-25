@@ -6,6 +6,7 @@
 
 module Coal.ProtoLanguage.ProtoDefinition (
   ProtoDefinition (..),
+  ProtoTypeDefinition (..),
   ProtoFunctionDefinition (..),
   ProtoTraitDefinition (..),
   ProtoInstanceDefinition (..),
@@ -71,7 +72,7 @@ data ProtoLetDefinition a k t = ProtoLetDefinition
     , Typeable
     )
 
-data ProtoTraitDefinition a k = TraitDefinition
+data ProtoTraitDefinition a k = ProtoTraitDefinition
   { protoOtraitDefinitionMetadata :: a
   , protoOtraitDefinitionConstraints :: [Trait (Parameter k)]
   , protoOtraitDefinitionParameter :: Parameter k
