@@ -7,6 +7,7 @@
 module Coal.ProtoLanguage.ProtoDefinition (
   ProtoDefinition (..),
   ProtoFunctionDefinition (..),
+  ProtoTraitDefinition (..),
 ) where
 
 import Coal.Language
@@ -69,6 +70,21 @@ data ProtoLetDefinition a k t = ProtoLetDefinition
     , Typeable
     )
 
+data ProtoTraitDefinition a k = TraitDefinition
+  { protoOtraitDefinitionMetadata :: a
+  , protoOtraitDefinitionRequired :: [Trait (Parameter k)]
+  , protoOtraitDefinitionParameter :: Parameter k
+  , protoOtraitDefinitionMethods :: [(Name, Scheme Parameter k (Type Parameter k))]
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Data
+    , Typeable
+    )
+
 data ProtoDefinition a k t
   = -- | Type definition
     ProtoDType a Name (ProtoTypeDefinition a k t)
@@ -87,7 +103,7 @@ data ProtoDefinition a k t
   | -- | Namespace (qualified) import
     ProtoDQualifiedImport a Path
   | -- | Trait
-    ProtoDTrait a Name
+    ProtoDTrait a Name (ProtoTraitDefinition a k)
   | -- | Trait instance
     ProtoDInstance a
   deriving

@@ -6,16 +6,60 @@ import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
-import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..), ProtoFunctionDefinition (..))
+import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Data.List.NonEmpty (NonEmpty (..), (<|))
+import qualified Data.Set as Set
 
 testModuleBuiltins :: (Monoid a) => ProtoModule a Kind ()
 testModuleBuiltins =
   ProtoModule
     { protoOmodulePath = Path ["Builtin"]
     , protoOmoduleDefinitions =
-        [
+        [ ProtoDTrait
+            mempty
+            "Numeric"
+            ( TraitDefinition
+                { protoOtraitDefinitionMetadata =
+                    mempty
+                , protoOtraitDefinitionRequired =
+                    []
+                , protoOtraitDefinitionParameter =
+                    Parameter KType "a"
+                , protoOtraitDefinitionMethods =
+                    [
+                      ( "from_int32"
+                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TIntrinsic IInt32 `TArrow` TVariable (Parameter KType "a")
+                      )
+                    ,
+                      ( "from_int64"
+                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TIntrinsic IInt64 `TArrow` TVariable (Parameter KType "a")
+                      )
+                    ,
+                      ( "from_bignum"
+                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TIntrinsic IBignum `TArrow` TVariable (Parameter KType "a")
+                      )
+                    ,
+                      ( "negate"
+                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      )
+                    ,
+                      ( "(+)"
+                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      )
+                    ,
+                      ( "(-)"
+                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      )
+                    ,
+                      ( "(*)"
+                      , Forall (Set.fromList [Parameter KType "a"]) [] $ TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a")
+                      )
+                    ]
+                }
+            )
+        , ProtoDInstance
+            mempty
         ]
     }
 
