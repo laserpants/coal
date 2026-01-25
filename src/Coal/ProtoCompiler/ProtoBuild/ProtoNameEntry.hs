@@ -12,7 +12,7 @@ import GHC.Generics (Generic)
 
 data ProtoNameEntry
   = ProtoNName Name IndexedScheme
-  | ProtoNType Name IndexedScheme
+  | ProtoNType Name Kind
   | ProtoNTrait Name
   | ProtoNTypeAlias Name
   | PRotoNPlaceholder Name

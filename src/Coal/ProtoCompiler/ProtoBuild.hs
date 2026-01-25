@@ -12,16 +12,20 @@ module Coal.ProtoCompiler.ProtoBuild (
   setBuildKernelNames,
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
+  overBuildNames,
+  insertBuildNameEntry,
 ) where
 
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..))
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Kernel.LLVM.IRType (IRType)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Module.Path (Path (..))
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..))
 import Data.Binary
 import Data.ByteString (ByteString)
+import Extras (Name)
 import GHC.Generics (Generic)
 
 data ProtoBuild = ProtoBuild
@@ -64,6 +68,16 @@ setBuildFile newBuildFile ProtoBuild{..} =
     { protoObuildFile = newBuildFile
     , ..
     }
+
+overBuildNames :: (Environment [ProtoNameEntry] -> Environment [ProtoNameEntry]) -> ProtoBuild -> ProtoBuild
+overBuildNames f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildNames = f protoObuildNames
+    , ..
+    }
+
+insertBuildNameEntry :: Name -> ProtoNameEntry -> ProtoBuild -> ProtoBuild
+insertBuildNameEntry name entry = overBuildNames (Environment.insertWith (<>) name [entry])
 
 setBuildBitcode :: ByteString -> ProtoBuild -> ProtoBuild
 setBuildBitcode newBuildBitcode ProtoBuild{..} =

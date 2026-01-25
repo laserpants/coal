@@ -3,10 +3,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.HasKind (HasKind (..)) where
+module Coal.Language.HasKind (HasKind (..), foldKindOf) where
 
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
-import Coal.Language.Type.Kind (Kind (..))
+import Coal.Language.Type.Kind (Kind (..), foldKind)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 
@@ -35,3 +35,7 @@ instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
         KType
       k ->
         head (universeBi k)
+
+{-# INLINE foldKindOf #-}
+foldKindOf :: (HasKind k, HasKind l, Functor f, Foldable f) => l -> f k -> Kind
+foldKindOf a as = foldKind (kindOf a) (kindOf <$> as)
