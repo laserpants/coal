@@ -81,8 +81,10 @@ instance Serializable Intrinsic where
         "String"
       INat ->
         "Nat"
-      _ ->
-        error "Not implemented"
+      IUnit ->
+        "Unit"
+      IVoid ->
+        "Void"
 
 instance (Serializable (s k)) => Serializable (Type s k) where
   serialize =
@@ -101,8 +103,8 @@ instance (Serializable (s k)) => Serializable (Type s k) where
         "Row" <> parenthesized r
       TVariable t ->
         "Variable" <> parenthesized t
-      _ ->
-        error "Not implemented"
+      TAlias name ts t ->
+        "Alias" <> parenthesized (name, ts, t)
 
 instance (Serializable (o k), Serializable t) => Serializable (Row o k t) where
   serialize =
