@@ -1031,7 +1031,7 @@ objects =
             [ Label (Kernel.TCon "$Nat" []) "x"
             , Label (Kernel.TCon "$Nat" []) "y"
             ]
-            [r| 
+            ( [r| 
                   let 
                     a : int32 = 
                       @<int32>
@@ -1045,10 +1045,13 @@ objects =
                               , y : $Nat )
                           in
                             @<Ordering>
-                              ( `Builtin$.compare__$impl_Ordered(Intrinsic(Int32))` : int32/int32/Ordering
+                              ( `|]
+                <> builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare"
+                <> [r|` : int32/int32/Ordering
                               , a : int32
                               , b : int32 )
               |]
+            )
         , OFunction
             (builtinInstance (Trait.ordered (TIntrinsic IBool)) "compare")
             [ Label Kernel.bool "x"
