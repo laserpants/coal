@@ -3,7 +3,7 @@ module Main {
   import IO(println_string, println_int32)
   import Char(digit_to_int32)
   import String(from_list, to_list, cons)
-  import Coal.Functor(trait Functor)
+  import Coal.Functor(Functor)
 
   type alias Parser<a> = string -> Option<(a, string)>
 

@@ -1,7 +1,7 @@
 module Containers.Set {
 
   import namespace Containers.Map
-  import Containers.Map(type Map)
+  import Containers.Map(Map)
 
   type Set<a> = Set(Map<a, unit>)
 

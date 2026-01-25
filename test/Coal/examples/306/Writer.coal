@@ -1,9 +1,9 @@
 module Writer {
 
-  import Coal.Functor(trait Functor)
-  import Coal.Applicative(trait Applicative)
-  import Coal.Monad(trait Monad)
-  import Coal.Monoid(trait Monoid)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad)
+  import Coal.Monoid(Monoid)
 
   type Writer<w, a> = Writer(a, w)
 

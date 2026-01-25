@@ -1,9 +1,9 @@
 module Main {
 
   import namespace IO
-  import Coal.Functor(trait Functor)
-  import Coal.Monad(trait Monad, and_then)
-  import Coal.Applicative(trait Applicative)
+  import Coal.Functor(Functor)
+  import Coal.Monad(Monad, and_then)
+  import Coal.Applicative(Applicative)
   import Coal.Combinators(fst)
 
   type State<s, a> = State(s -> (a, s))

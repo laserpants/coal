@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_nat)
-  import Containers.NonEmpty.List(type NonEmptyList)
+  import Containers.NonEmpty.List(NonEmptyList)
   import namespace Containers.NonEmpty.List
 
   fun main() =

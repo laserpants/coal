@@ -3,7 +3,7 @@ module Main {
   import IO(println_int32, println_string)
   import Number(max, maximum)
   import Option(with_default)
-  import Containers.Tree (type Tree, tree_map)
+  import Containers.Tree (Tree, tree_map)
 
   let example_tree =
     Node({

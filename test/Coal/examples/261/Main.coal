@@ -1,6 +1,6 @@
 module Main {
 
-  import Containers.Set(type Set, insert, empty, to_list)
+  import Containers.Set(Set, insert, empty, to_list)
   import IO(println_string)
   import String(int32_to_string)
 

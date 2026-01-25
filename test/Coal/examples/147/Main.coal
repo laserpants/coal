@@ -1,9 +1,9 @@
 module Main {
 
   import IO(println_int32)
-  import Eq(equalalias, type Answer(Yes, No))
+  import Eq(equalalias, Answer(Yes, No))
 
-  //import Eq(equal2, type Answer(Yes, No))
+  //import Eq(equal2, Answer(Yes, No))
 
   fun main() =
     if (equalalias(Yes, No)) 

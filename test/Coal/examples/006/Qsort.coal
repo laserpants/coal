@@ -1,6 +1,6 @@
 module Qsort {
 
-  import Tree(type Tree(Node, Leaf), flatten)
+  import Tree(Tree(Node, Leaf), flatten)
   import Coal.Combinators(always)
 
   fun binary_search_tree(list : List<int32>) : Tree<int32> =

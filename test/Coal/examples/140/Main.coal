@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_int32)
-  import Eq(trait Equality)
+  import Eq(Equality)
 
   fun main() =
     if (equal(Yes, No)) 

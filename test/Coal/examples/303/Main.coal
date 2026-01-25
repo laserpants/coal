@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_string)
-  import Stuff(type Foo)
+  import Stuff(Foo)
 
   let 
     z : Foo =

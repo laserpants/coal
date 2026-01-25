@@ -5,7 +5,6 @@
 module Coal.ProtoCompiler.ProtoBuild.ProtoPrep where
 
 import Coal.Language
-import Coal.Language.HasKind (foldKindOf)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..))

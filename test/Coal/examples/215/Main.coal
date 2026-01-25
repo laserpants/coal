@@ -1,6 +1,6 @@
 module Main {
 
-  import Coal.Functor(trait Functor)
+  import Coal.Functor(Functor)
   import Coal.Applicative(ap)
   import namespace IO
 

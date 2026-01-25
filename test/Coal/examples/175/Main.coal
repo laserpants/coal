@@ -1,9 +1,9 @@
 module Main {
 
   import namespace IO
-  import Coal.Monad(trait Monad, and_then)
-  import Coal.Functor(trait Functor)
-  import Coal.Applicative(trait Applicative)
+  import Coal.Monad(Monad, and_then)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
 
   type Reader<r, a> = Reader(r -> a)
 

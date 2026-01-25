@@ -1,8 +1,8 @@
 module Main {
 
   import IO(println_int32)
-  import Eq(trait Equality)
-  import Stuff(type Answer)
+  import Eq(Equality)
+  import Stuff(Answer)
 
   fun main() =
     if (equal(Yes, No)) 

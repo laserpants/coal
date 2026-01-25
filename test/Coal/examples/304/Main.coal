@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_string, return)
-  import Test(type Test, assert, check, suite, run)
+  import Test(Test, assert, check, suite, run)
   import namespace List
 
   fun test_addition() =

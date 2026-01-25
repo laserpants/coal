@@ -2,9 +2,9 @@ module Main {
 
   import IO(println_int32, println_string)
   import String(is_prefix_of, length, drop)
-  import Containers.Set(type Set)
+  import Containers.Set(Set)
   import namespace Containers.Set
-  import Stream(type Stream, nats, head, tail, repeat)
+  import Stream(Stream, nats, head, tail, repeat)
   import Process(receive, cons, observe, duplicate, process, map_process)
 
   type alias Parser = Process<(Option<string>, string), string>

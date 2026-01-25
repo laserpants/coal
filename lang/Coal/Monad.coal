@@ -1,7 +1,7 @@
 module Coal.Monad {
 
   import Coal.Combinators(flip, always)
-  import Coal.Applicative(trait Applicative)
+  import Coal.Applicative(Applicative)
   import IO(__eval_io)
   import namespace List
 

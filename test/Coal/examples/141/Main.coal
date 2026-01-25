@@ -1,7 +1,7 @@
 module Main {
 
-  import IO(println_int32, type Fez)
-  import Eq(trait Equality, type Answer(Yes, No, Foo))
+  import IO(println_int32, Fez)
+  import Eq(Equality, Answer(Yes, No, Foo))
 
   fun main() =
     if (equal(Yes, No)) 

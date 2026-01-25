@@ -1,7 +1,7 @@
 module Main {
 
   import Qsort(sort)
-  import Coal.Monad(trait Monad, and_eval)
+  import Coal.Monad(Monad, and_eval)
   import IO(return)
 
   import namespace IO

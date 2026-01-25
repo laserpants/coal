@@ -1,6 +1,6 @@
 module Stuff {
 
-  import Eq(trait Equality(banan))
+  import Eq(Equality(banan))
 
   type Answer = Yes | No
 

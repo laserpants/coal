@@ -3,8 +3,8 @@ module Main {
   import namespace IO
   import namespace List
   import Coal.Monad(and_eval)
-  import Coal.Monoid(trait Monoid)
-  import Writer(type Writer, run_writer, tell)
+  import Coal.Monoid(Monoid)
+  import Writer(Writer, run_writer, tell)
   import IO(return)
 
   // Example use:

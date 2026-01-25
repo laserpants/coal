@@ -2,10 +2,10 @@ module Main {
 
   import namespace IO
   import namespace List
-  import Coal.Monad(trait Monad, and_then, and_eval)
-  import Coal.Functor(trait Functor)
-  import Coal.Applicative(trait Applicative)
-  import Coal.Monoid(trait Monoid)
+  import Coal.Monad(Monad, and_then, and_eval)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monoid(Monoid)
   import IO(return)
 
   type Writer<w, a> = Writer(a, w)

@@ -1,6 +1,6 @@
 module Coal.Applicative {
   
-  import Coal.Functor(trait Functor)
+  import Coal.Functor(Functor)
   import IO(return, __eval_io)
   import namespace List
 

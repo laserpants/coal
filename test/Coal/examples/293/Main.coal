@@ -2,7 +2,7 @@ module Main {
 
   import IO(println_int32, println_string)
   import String(is_prefix_of, length, drop)
-  import Containers.Set(type Set)
+  import Containers.Set(Set)
   import namespace Containers.Set
   import Coal.Combinators(snd)
 

@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_int32)
-  import Containers.Set(type Set)
+  import Containers.Set(Set)
   import namespace Containers.Set
 
   fun main() =

@@ -1,6 +1,6 @@
 module Stuff {
 
-  import Eq(trait Equality(equal))
+  import Eq(Equality(equal))
 
   type Answer = Yes | No
 

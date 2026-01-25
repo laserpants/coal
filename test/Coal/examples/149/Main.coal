@@ -1,9 +1,9 @@
 module Main {
 
   import IO(println_int32)
-  import Eq(trait Equality(banan), type Answer(Yes, No))
+  import Eq(Equality(banan), Answer(Yes, No))
 
-  //import Eq(equal2, type Answer(Yes, No))
+  //import Eq(equal2, Answer(Yes, No))
 
   fun main() =
     if (equal(Yes, No)) 

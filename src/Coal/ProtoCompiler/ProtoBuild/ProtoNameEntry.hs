@@ -26,5 +26,13 @@ class ProtoHasName a where
 instance ProtoHasName ProtoNameEntry where
   protoOnameOf =
     \case
-      _ ->
-        undefined
+      ProtoNName name _ ->
+        name
+      ProtoNType name _ ->
+        name
+      ProtoNTrait name ->
+        name
+      ProtoNTypeAlias name ->
+        name
+      PRotoNPlaceholder name ->
+        name
