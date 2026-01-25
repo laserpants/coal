@@ -36,6 +36,9 @@ protoOprepareDefinitions defs = do
   -- collect instances
   traverse_ collectInstances defs
 
+  -- collect placeholders
+  traverse_ collectPlaceholders defs
+
 collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
 collectTypeConstructors =
   \case
@@ -82,6 +85,18 @@ collectInstances =
     ProtoDImport loc path items ->
       undefined
     ProtoDQualifiedImport loc path ->
+      undefined
+    _ ->
+      undefined
+
+collectPlaceholders :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
+collectPlaceholders =
+  \case
+    ProtoDFunction _ _ _ ->
+      undefined
+    ProtoDLet _ _ ->
+      undefined
+    ProtoDFold _ _ ->
       undefined
     _ ->
       undefined
