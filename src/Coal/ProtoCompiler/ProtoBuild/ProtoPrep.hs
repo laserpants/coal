@@ -4,17 +4,18 @@
 
 module Coal.ProtoCompiler.ProtoBuild.ProtoPrep where
 
+import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Extras (traverse_)
 
-protoOprepareBuild :: (Monad m) => ProtoModule a k t -> ProtoCompilerT m ProtoBuild
+protoOprepareBuild :: (Monad m) => ProtoModule a Kind t -> ProtoCompilerT m ProtoBuild
 protoOprepareBuild ProtoModule{..} = do
   undefined
 
-protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a k t] -> ProtoCompilerT m ()
+protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind t] -> ProtoCompilerT m ()
 protoOprepareDefinitions defs = do
   -- collect type constructors
   traverse_ collectTypeConstructors defs
@@ -28,7 +29,7 @@ protoOprepareDefinitions defs = do
   -- collect instances
   traverse_ collectInstances defs
 
-collectTypeConstructors :: ProtoDefinition a k t -> ProtoCompilerT m ()
+collectTypeConstructors :: ProtoDefinition a Kind t -> ProtoCompilerT m ()
 collectTypeConstructors =
   \case
     ProtoDType a name ProtoTypeDefinition{..} ->

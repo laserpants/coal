@@ -19,7 +19,7 @@ testModuleBuiltins =
         [ ProtoDTrait
             mempty
             "Numeric"
-            ( TraitDefinition
+            ( ProtoTraitDefinition
                 { protoOtraitDefinitionMetadata =
                     mempty
                 , protoOtraitDefinitionConstraints =
