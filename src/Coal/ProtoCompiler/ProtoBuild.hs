@@ -23,13 +23,17 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Kernel.LLVM.IRType (IRType)
 import qualified Coal.Kernel.Language as Kernel
+import Coal.Language
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Data.Binary
 import Data.ByteString (ByteString)
+import Data.Map.Strict (Map)
 import qualified Data.Set as Set
 import Extras (Name, Set)
 import GHC.Generics (Generic)
+
+type InstanceMap a = Map IndexedType a
 
 data ProtoBuild a = ProtoBuild
   { protoObuildPath :: Path
@@ -38,6 +42,9 @@ data ProtoBuild a = ProtoBuild
   , protoObuildExportedNames :: Set Name
   , protoObuildDataConstructors :: Environment (ProtoDataConstructorEntry a)
   , protoObuildTypeConstructors :: Environment (ProtoTypeConstructorEntry a)
+  , protoObuildTraits :: Environment (ProtoTraitEntry a)
+  , protoObuildInstances :: InstanceMap (ProtoInstanceEntry a)
+  , protoObuildAliases :: Environment (ProtoAliasEntry a)
   , protoObuildBitcode :: Maybe ByteString
   , protoObuildHash :: Maybe Hash256
   , protoObuildKernelNames :: Environment Kernel.Type
@@ -57,6 +64,9 @@ protoOemptyBuild =
     , protoObuildExportedNames = mempty
     , protoObuildDataConstructors = mempty
     , protoObuildTypeConstructors = mempty
+    , protoObuildTraits = mempty
+    , protoObuildInstances = mempty
+    , protoObuildAliases = mempty
     , protoObuildBitcode = Nothing
     , protoObuildHash = Nothing
     , protoObuildKernelNames = mempty
