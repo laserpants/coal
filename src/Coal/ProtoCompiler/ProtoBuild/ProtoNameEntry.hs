@@ -47,8 +47,8 @@ data ProtoTraitEntry a = ProtoTraitEntry
   { protoOtraitEntryMetadata :: a
   , protoOtraitEntryName :: Name
   , protoOtraitEntryParameter :: Parameter Kind
-  , protoOtraitEntryRequiredInstances :: [Trait (Parameter Kind)]
-  , protoOtraitEntryInterface :: Environment (Scheme Parameter Kind ParameterizedType)
+  , protoOtraitEntryConstraints :: [Trait (Parameter Kind)]
+  , protoOtraitEntryInterface :: Environment (Scheme Parameter Kind (Type Parameter Kind))
   }
   deriving (Show, Eq, Ord, Read, Generic)
 

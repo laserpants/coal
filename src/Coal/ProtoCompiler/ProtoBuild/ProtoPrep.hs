@@ -16,6 +16,7 @@ import Control.Monad.State (StateT, modify)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, for, forM_, traverse_)
+import qualified Coal.Common.Environment as Environment 
 
 insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry name entry = modify (Build.insertBuildNameEntry name entry)
@@ -61,6 +62,9 @@ protoOprepareDefinitions defs = do
   -- collect traits
   traverse_ collectTraits defs
 
+  -- collect trait interfaces 
+  traverse_ collectTraitsInterface defs
+
   -- collect instances
   traverse_ collectInstances defs
 
@@ -84,10 +88,11 @@ collectTypeConstructors =
           , protoOtypeConstructorEntryDataConstructors =
               for protoOtypeDefinitionConstructors constructorName
           }
-    ProtoDImport loc path items ->
-      undefined
-    ProtoDQualifiedImport loc path ->
-      undefined
+-- TODO
+--    ProtoDImport loc path items ->
+--      undefined
+--    ProtoDQualifiedImport loc path ->
+--      undefined
     _ ->
       pure ()
 
@@ -107,12 +112,13 @@ collectDataConstructors =
                 insertDataConstructor constructorName entry
      where
       ctorSet = Set.fromList (for protoOtypeDefinitionConstructors constructorName)
-    ProtoDImport loc path items ->
-      undefined
-    ProtoDQualifiedImport loc path ->
-      undefined
+-- TODO
+--    ProtoDImport loc path items ->
+--      undefined
+--    ProtoDQualifiedImport loc path ->
+--      undefined
     _ ->
-      undefined
+      pure ()
 
 dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
@@ -143,17 +149,22 @@ collectTraits =
       entry =
         ProtoTraitEntry
           { protoOtraitEntryMetadata = loc
-          , protoOtraitEntryName = undefined
-          , protoOtraitEntryParameter = undefined
-          , protoOtraitEntryRequiredInstances = undefined
-          , protoOtraitEntryInterface = undefined
+          , protoOtraitEntryName = name
+          , protoOtraitEntryParameter = protoOtraitDefinitionParameter
+          , protoOtraitEntryConstraints = protoOtraitDefinitionConstraints
+          , protoOtraitEntryInterface = Environment.fromList protoOtraitDefinitionInterface
           }
-    ProtoDImport loc path items ->
-      undefined
-    ProtoDQualifiedImport loc path ->
-      undefined
+-- TODO
+--    ProtoDImport loc path items ->
+--      undefined
+--    ProtoDQualifiedImport loc path ->
+--      undefined
     _ ->
       pure ()
+
+collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectTraitsInterface =
+  undefined
 
 collectInstances :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectInstances =
@@ -173,10 +184,11 @@ collectInstances =
             instanceName = instanceLabel (instanceDefinitionTrait ProtoInstanceDefinition{..}) name
           _ ->
             pure ()
-    ProtoDImport loc path items ->
-      undefined
-    ProtoDQualifiedImport loc path ->
-      undefined
+-- TODO
+--    ProtoDImport loc path items ->
+--      undefined
+--    ProtoDQualifiedImport loc path ->
+--      undefined
     _ ->
       pure ()
 
