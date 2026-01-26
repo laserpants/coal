@@ -3,9 +3,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..)) where
+module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (
+  ProtoNameEntry (..),
+  ProtoHasName (..),
+) where
 
 import Coal.Language
+import Coal.Language.Module.Export (Export (..))
+import Coal.Language.Module.Import (Import (..))
 import Data.Binary (Binary)
 import Extras (Name)
 import GHC.Generics (Generic)
@@ -35,4 +40,20 @@ instance ProtoHasName ProtoNameEntry where
       ProtoNTypeAlias name ->
         name
       PRotoNPlaceholder name ->
+        name
+
+instance ProtoHasName (Import a) where
+  protoOnameOf =
+    \case
+      NameImport _ name ->
+        name
+      TypeImport _ name _ ->
+        name
+
+instance ProtoHasName (Export a) where
+  protoOnameOf =
+    \case
+      NameExport _ name ->
+        name
+      TypeExport _ name _ ->
         name

@@ -14,6 +14,8 @@ module Coal.ProtoCompiler.ProtoBuild (
   setBuildKernelConstructors,
   overBuildNames,
   insertBuildNameEntry,
+  overBuildExportedNames,
+  insertBuildExportedName,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -25,6 +27,7 @@ import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..))
 import Data.Binary
 import Data.ByteString (ByteString)
+import qualified Data.Set as Set
 import Extras (Name, Set)
 import GHC.Generics (Generic)
 
@@ -80,6 +83,16 @@ overBuildNames f ProtoBuild{..} =
 
 insertBuildNameEntry :: Name -> ProtoNameEntry -> ProtoBuild -> ProtoBuild
 insertBuildNameEntry name entry = overBuildNames (Environment.insertWith (<>) name [entry])
+
+overBuildExportedNames :: (Set Name -> Set Name) -> ProtoBuild -> ProtoBuild
+overBuildExportedNames f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildExportedNames = f protoObuildExportedNames
+    , ..
+    }
+
+insertBuildExportedName :: Name -> ProtoBuild -> ProtoBuild
+insertBuildExportedName name = overBuildExportedNames (Set.insert name)
 
 setBuildBitcode :: ByteString -> ProtoBuild -> ProtoBuild
 setBuildBitcode newBuildBitcode ProtoBuild{..} =
