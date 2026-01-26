@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoBuild.ProtoPrep where
+module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild) where
 
 import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild
