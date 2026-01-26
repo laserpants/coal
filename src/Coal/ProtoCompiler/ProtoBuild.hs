@@ -24,7 +24,7 @@ import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Kernel.LLVM.IRType (IRType)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Module.Path (Path (..))
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoDataConstructorEntry (..), ProtoNameEntry (..))
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Data.Binary
 import Data.ByteString (ByteString)
 import qualified Data.Set as Set
@@ -37,6 +37,7 @@ data ProtoBuild a = ProtoBuild
   , protoObuildNames :: Environment [ProtoNameEntry]
   , protoObuildExportedNames :: Set Name
   , protoObuildDataConstructors :: Environment (ProtoDataConstructorEntry a)
+  , protoObuildTypeConstructors :: Environment (ProtoTypeConstructorEntry a)
   , protoObuildBitcode :: Maybe ByteString
   , protoObuildHash :: Maybe Hash256
   , protoObuildKernelNames :: Environment Kernel.Type
@@ -55,6 +56,7 @@ protoOemptyBuild =
     , protoObuildNames = mempty
     , protoObuildExportedNames = mempty
     , protoObuildDataConstructors = mempty
+    , protoObuildTypeConstructors = mempty
     , protoObuildBitcode = Nothing
     , protoObuildHash = Nothing
     , protoObuildKernelNames = mempty

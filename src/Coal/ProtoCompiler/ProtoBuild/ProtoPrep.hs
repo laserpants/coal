@@ -13,7 +13,9 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.State (StateT, modify)
-import Extras (Name, forM_, traverse_)
+import Data.Set (Set)
+import qualified Data.Set as Set
+import Extras (Name, for, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry name entry = modify (Build.insertBuildNameEntry name entry)
@@ -71,16 +73,18 @@ collectTypeConstructors =
 collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectDataConstructors =
   \case
-    ProtoDType _ _ ProtoTypeDefinition{..} ->
+    ProtoDType loc _ ProtoTypeDefinition{..} ->
       forM_ protoOtypeDefinitionConstructors $
         \ctor -> do
           ProtoDataConstructorEntry
             { protoOdataConstructorEntryConstructor = DataConstructor{..}
             , ..
             } <-
-            dataConstructorEntry ctor
+            dataConstructorEntry loc ctorSet ctor
           insertNameEntry constructorName (ProtoNName constructorName constructorScheme)
           insertExportedName constructorName
+     where
+      ctorSet = Set.fromList (for protoOtypeDefinitionConstructors constructorName)
     ProtoDImport loc path items ->
       undefined
     ProtoDQualifiedImport loc path ->
@@ -88,8 +92,19 @@ collectDataConstructors =
     _ ->
       undefined
 
-dataConstructorEntry :: DataConstructor o Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
-dataConstructorEntry = undefined
+dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor o Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
+dataConstructorEntry loc constructorSet DataConstructor{..} =
+  pure $
+    ProtoDataConstructorEntry
+      { protoOdataConstructorEntryMetaData =
+          loc
+      , protoOdataConstructorEntryName =
+          constructorName
+      , protoOdataConstructorEntryConstructor =
+          DataConstructor{constructorScheme = undefined, ..}
+      , protoOdataConstructorEntryConstructorSet =
+          constructorSet
+      }
 
 collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTraits =

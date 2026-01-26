@@ -5,6 +5,7 @@
 
 module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (
   ProtoDataConstructorEntry (..),
+  ProtoTypeConstructorEntry (..),
   ProtoNameEntry (..),
   ProtoHasName (..),
 ) where
@@ -27,6 +28,16 @@ data ProtoDataConstructorEntry a = ProtoDataConstructorEntry
   deriving (Show, Eq, Ord, Read, Generic)
 
 instance (Binary a) => Binary (ProtoDataConstructorEntry a)
+
+data ProtoTypeConstructorEntry a = ProtoTypeConstructorEntry
+  { protoOtypeConstructorEntryMetadata :: a
+  , protoOtypeConstructorEntryName :: Name
+  , protoOtypeConstructorEntryKind :: Kind
+  , protoOtypeConstructorEntryDataConstructors :: [Name]
+  }
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (ProtoTypeConstructorEntry a)
 
 data ProtoNameEntry
   = ProtoNName Name IndexedScheme
