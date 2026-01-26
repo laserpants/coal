@@ -5,23 +5,25 @@
 module Coal.ProtoCompiler.ProtoBuild.ProtoPrep where
 
 import Coal.Language
+import Coal.Language.Module.Export (Export (..))
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
+import Control.Monad.Reader (ReaderT)
 import Control.Monad.State (StateT, modify)
 import Extras (Name, traverse_)
 
-insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> StateT ProtoBuild m ()
+insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT [Export a] (StateT ProtoBuild m) ()
 insertNameEntry name entry = modify (Build.insertBuildNameEntry name entry)
 
 protoOprepareBuild :: (Monad m) => ProtoModule a Kind t -> ProtoCompilerT m ProtoBuild
 protoOprepareBuild ProtoModule{..} = do
   undefined
 
-protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind t] -> StateT ProtoBuild (ProtoCompilerT m) ()
+protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind t] -> ReaderT [Export a] (StateT ProtoBuild (ProtoCompilerT m)) ()
 protoOprepareDefinitions defs = do
   -- collect type constructors
   traverse_ collectTypeConstructors defs
@@ -38,7 +40,7 @@ protoOprepareDefinitions defs = do
   -- collect placeholders
   traverse_ collectPlaceholders defs
 
-collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
+collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT [Export a] (StateT ProtoBuild (ProtoCompilerT m)) ()
 collectTypeConstructors =
   \case
     ProtoDType a name ProtoTypeDefinition{..} -> do
@@ -52,7 +54,7 @@ collectTypeConstructors =
     _ ->
       undefined
 
-collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
+collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT [Export a] (StateT ProtoBuild (ProtoCompilerT m)) ()
 collectDataConstructors =
   \case
     ProtoDType a name ProtoTypeDefinition{..} ->
@@ -64,7 +66,7 @@ collectDataConstructors =
     _ ->
       undefined
 
-collectTraits :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
+collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT [Export a] (StateT ProtoBuild (ProtoCompilerT m)) ()
 collectTraits =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} ->
@@ -76,7 +78,7 @@ collectTraits =
     _ ->
       undefined
 
-collectInstances :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
+collectInstances :: (Monad m) => ProtoDefinition a Kind t -> ReaderT [Export a] (StateT ProtoBuild (ProtoCompilerT m)) ()
 collectInstances =
   \case
     ProtoDInstance loc ProtoInstanceDefinition{..} ->
@@ -88,7 +90,7 @@ collectInstances =
     _ ->
       undefined
 
-collectPlaceholders :: (Monad m) => ProtoDefinition a Kind t -> StateT ProtoBuild (ProtoCompilerT m) ()
+collectPlaceholders :: (Monad m) => ProtoDefinition a Kind t -> ReaderT [Export a] (StateT ProtoBuild (ProtoCompilerT m)) ()
 collectPlaceholders =
   \case
     ProtoDFunction loc name ProtoFunctionDefinition{..} ->

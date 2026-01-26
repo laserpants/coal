@@ -4,10 +4,11 @@ module Coal.ProtoCompiler.ProtoBuildSpec where
 
 import Coal.Common.Label (Label (..))
 import Coal.Language
+import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
+import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
 
@@ -15,6 +16,7 @@ testModuleBuiltins :: (Monoid a) => ProtoModule a Kind ()
 testModuleBuiltins =
   ProtoModule
     { protoOmodulePath = Path ["Builtin"]
+    , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
         [ ProtoDTrait
             mempty
@@ -202,6 +204,7 @@ testModule0 :: (Monoid a) => ProtoModule a Kind ()
 testModule0 =
   ProtoModule
     { protoOmodulePath = Path ["IO"]
+    , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
         [ ProtoDFunction
             mempty
@@ -242,6 +245,7 @@ testModule1 :: (Monoid a) => ProtoModule a Kind ()
 testModule1 =
   ProtoModule
     { protoOmodulePath = Path ["Main"]
+    , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
         [ ProtoDImport
             mempty
@@ -291,6 +295,7 @@ testModule2 :: (Monoid a) => ProtoModule a Kind ()
 testModule2 =
   ProtoModule
     { protoOmodulePath = Path ["Math"]
+    , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
         [ ProtoDImport
             mempty
@@ -386,6 +391,7 @@ testModule3 :: (Monoid a) => ProtoModule a Kind ()
 testModule3 =
   ProtoModule
     { protoOmodulePath = Path ["Nat"]
+    , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
         [ ProtoDFunction
             mempty
@@ -454,6 +460,7 @@ testModule2B :: (Monoid a) => ProtoModule a Kind ()
 testModule2B =
   ProtoModule
     { protoOmodulePath = Path ["Math"]
+    , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
         [ ProtoDImport
             mempty

@@ -38,7 +38,7 @@ parseNameExport = do
 
 {-# INLINE parseModuleExports #-}
 parseModuleExports :: Parser [Export Metadata]
-parseModuleExports = option [ExportAll] (parens (commaSep parseExportAtom))
+parseModuleExports = option [] (parens (commaSep parseExportAtom))
 
 parseModule :: Parser (Module Metadata o ())
 parseModule = do

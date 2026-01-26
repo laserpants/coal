@@ -120,7 +120,7 @@ prepareBuild module_@(Module path exports defs) =
 
     let defs1 = [DImport mempty p (NameImport mempty <$> names) | (p, names) <- groupByKey extra]
 
-    if [ExportAll] == exports
+    if null exports
       then modify $ setExports (Set.toList exps) . setTypeExports (Set.toList typeExps)
       else do
         let errs =
