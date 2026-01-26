@@ -24,18 +24,19 @@ import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Kernel.LLVM.IRType (IRType)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language.Module.Path (Path (..))
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..))
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoDataConstructorEntry (..), ProtoNameEntry (..))
 import Data.Binary
 import Data.ByteString (ByteString)
 import qualified Data.Set as Set
 import Extras (Name, Set)
 import GHC.Generics (Generic)
 
-data ProtoBuild = ProtoBuild
+data ProtoBuild a = ProtoBuild
   { protoObuildPath :: Path
   , protoObuildFile :: FilePath
   , protoObuildNames :: Environment [ProtoNameEntry]
   , protoObuildExportedNames :: Set Name
+  , protoObuildDataConstructors :: Environment (ProtoDataConstructorEntry a)
   , protoObuildBitcode :: Maybe ByteString
   , protoObuildHash :: Maybe Hash256
   , protoObuildKernelNames :: Environment Kernel.Type
@@ -44,15 +45,16 @@ data ProtoBuild = ProtoBuild
   }
   deriving (Show, Eq, Ord, Generic)
 
-instance Binary ProtoBuild
+instance (Binary a) => Binary (ProtoBuild a)
 
-protoOemptyBuild :: ProtoBuild
+protoOemptyBuild :: ProtoBuild a
 protoOemptyBuild =
   ProtoBuild
     { protoObuildPath = Path []
     , protoObuildFile = mempty
     , protoObuildNames = mempty
     , protoObuildExportedNames = mempty
+    , protoObuildDataConstructors = mempty
     , protoObuildBitcode = Nothing
     , protoObuildHash = Nothing
     , protoObuildKernelNames = mempty
@@ -60,69 +62,69 @@ protoOemptyBuild =
     , protoObuildKernelConstructors = mempty
     }
 
-setBuildPath :: Path -> ProtoBuild -> ProtoBuild
+setBuildPath :: Path -> ProtoBuild a -> ProtoBuild a
 setBuildPath newBuildPath ProtoBuild{..} =
   ProtoBuild
     { protoObuildPath = newBuildPath
     , ..
     }
 
-setBuildFile :: FilePath -> ProtoBuild -> ProtoBuild
+setBuildFile :: FilePath -> ProtoBuild a -> ProtoBuild a
 setBuildFile newBuildFile ProtoBuild{..} =
   ProtoBuild
     { protoObuildFile = newBuildFile
     , ..
     }
 
-overBuildNames :: (Environment [ProtoNameEntry] -> Environment [ProtoNameEntry]) -> ProtoBuild -> ProtoBuild
+overBuildNames :: (Environment [ProtoNameEntry] -> Environment [ProtoNameEntry]) -> ProtoBuild a -> ProtoBuild a
 overBuildNames f ProtoBuild{..} =
   ProtoBuild
     { protoObuildNames = f protoObuildNames
     , ..
     }
 
-insertBuildNameEntry :: Name -> ProtoNameEntry -> ProtoBuild -> ProtoBuild
+insertBuildNameEntry :: Name -> ProtoNameEntry -> ProtoBuild a -> ProtoBuild a
 insertBuildNameEntry name entry = overBuildNames (Environment.insertWith (<>) name [entry])
 
-overBuildExportedNames :: (Set Name -> Set Name) -> ProtoBuild -> ProtoBuild
+overBuildExportedNames :: (Set Name -> Set Name) -> ProtoBuild a -> ProtoBuild a
 overBuildExportedNames f ProtoBuild{..} =
   ProtoBuild
     { protoObuildExportedNames = f protoObuildExportedNames
     , ..
     }
 
-insertBuildExportedName :: Name -> ProtoBuild -> ProtoBuild
+insertBuildExportedName :: Name -> ProtoBuild a -> ProtoBuild a
 insertBuildExportedName name = overBuildExportedNames (Set.insert name)
 
-setBuildBitcode :: ByteString -> ProtoBuild -> ProtoBuild
+setBuildBitcode :: ByteString -> ProtoBuild a -> ProtoBuild a
 setBuildBitcode newBuildBitcode ProtoBuild{..} =
   ProtoBuild
     { protoObuildBitcode = Just newBuildBitcode
     , ..
     }
 
-setBuildHash :: Hash256 -> ProtoBuild -> ProtoBuild
+setBuildHash :: Hash256 -> ProtoBuild a -> ProtoBuild a
 setBuildHash newBuildHash ProtoBuild{..} =
   ProtoBuild
     { protoObuildHash = Just newBuildHash
     , ..
     }
 
-setBuildKernelNames :: Environment Kernel.Type -> ProtoBuild -> ProtoBuild
+setBuildKernelNames :: Environment Kernel.Type -> ProtoBuild a -> ProtoBuild a
 setBuildKernelNames env ProtoBuild{..} =
   ProtoBuild
     { protoObuildKernelNames = env
     , ..
     }
 
-setBuildKernelIRTypes :: Environment IRType -> ProtoBuild -> ProtoBuild
+setBuildKernelIRTypes :: Environment IRType -> ProtoBuild a -> ProtoBuild a
 setBuildKernelIRTypes env ProtoBuild{..} =
   ProtoBuild
     { protoObuildKernelIRTypes = env
     , ..
     }
 
-setBuildKernelConstructors :: Environment Int -> ProtoBuild -> ProtoBuild
+setBuildKernelConstructors :: Environment Int -> ProtoBuild a -> ProtoBuild a
 setBuildKernelConstructors env ProtoBuild{..} =
   ProtoBuild
     { protoObuildKernelConstructors = env

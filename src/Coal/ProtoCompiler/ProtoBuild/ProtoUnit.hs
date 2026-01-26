@@ -14,8 +14,8 @@ import Extras (Name)
 
 data ProtoBuildUnit a
   = UnitSource a
-  | UnitCached ProtoBuild
-  deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
+  | UnitCached (ProtoBuild a)
+  deriving (Show, Eq, Ord)
 
 unitPrincipalPath :: ProtoBuildUnit (ProtoModule a k t) -> Name
 unitPrincipalPath =

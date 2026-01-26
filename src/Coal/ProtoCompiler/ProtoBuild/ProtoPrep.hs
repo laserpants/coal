@@ -7,18 +7,18 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep where
 import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (ProtoNameEntry (..), protoOnameOf)
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.State (StateT, modify)
-import Extras (Name, traverse_)
+import Extras (Name, forM_, traverse_)
 
-insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT ProtoBuild m) ()
+insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry name entry = modify (Build.insertBuildNameEntry name entry)
 
-insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT ProtoBuild m) ()
+insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertExportedName name = do
   exportList <- ask
   case exportList of
@@ -32,11 +32,11 @@ insertExportedName name = do
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m) => ProtoModule a Kind t -> ProtoCompilerT m ProtoBuild
+protoOprepareBuild :: (Monad m) => ProtoModule a Kind t -> ProtoCompilerT m (ProtoBuild a)
 protoOprepareBuild ProtoModule{..} = do
   undefined
 
-protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind t] -> ReaderT (ModuleExportList a) (StateT ProtoBuild (ProtoCompilerT m)) ()
+protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind t] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 protoOprepareDefinitions defs = do
   -- collect type constructors
   traverse_ collectTypeConstructors defs
@@ -53,10 +53,10 @@ protoOprepareDefinitions defs = do
   -- collect placeholders
   traverse_ collectPlaceholders defs
 
-collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT ProtoBuild (ProtoCompilerT m)) ()
+collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTypeConstructors =
   \case
-    ProtoDType a name ProtoTypeDefinition{..} -> do
+    ProtoDType _ name ProtoTypeDefinition{..} -> do
       insertNameEntry name (ProtoNType name kind)
       insertExportedName name
      where
@@ -68,11 +68,19 @@ collectTypeConstructors =
     _ ->
       undefined
 
-collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT ProtoBuild (ProtoCompilerT m)) ()
+collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectDataConstructors =
   \case
-    ProtoDType a name ProtoTypeDefinition{..} ->
-      undefined
+    ProtoDType _ _ ProtoTypeDefinition{..} ->
+      forM_ protoOtypeDefinitionConstructors $
+        \ctor -> do
+          ProtoDataConstructorEntry
+            { protoOdataConstructorEntryConstructor = DataConstructor{..}
+            , ..
+            } <-
+            dataConstructorEntry ctor
+          insertNameEntry constructorName (ProtoNName constructorName constructorScheme)
+          insertExportedName constructorName
     ProtoDImport loc path items ->
       undefined
     ProtoDQualifiedImport loc path ->
@@ -80,11 +88,15 @@ collectDataConstructors =
     _ ->
       undefined
 
-collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT ProtoBuild (ProtoCompilerT m)) ()
+dataConstructorEntry :: DataConstructor o Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
+dataConstructorEntry = undefined
+
+collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTraits =
   \case
-    ProtoDTrait loc name ProtoTraitDefinition{..} ->
-      undefined
+    ProtoDTrait _ name ProtoTraitDefinition{..} -> do
+      insertNameEntry name (ProtoNTrait name)
+      insertExportedName name
     ProtoDImport loc path items ->
       undefined
     ProtoDQualifiedImport loc path ->
@@ -92,7 +104,7 @@ collectTraits =
     _ ->
       undefined
 
-collectInstances :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT ProtoBuild (ProtoCompilerT m)) ()
+collectInstances :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectInstances =
   \case
     ProtoDInstance loc ProtoInstanceDefinition{..} ->
@@ -104,14 +116,17 @@ collectInstances =
     _ ->
       undefined
 
-collectPlaceholders :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT ProtoBuild (ProtoCompilerT m)) ()
+collectPlaceholders :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectPlaceholders =
   \case
-    ProtoDFunction loc name ProtoFunctionDefinition{..} ->
-      undefined
-    ProtoDLet loc name ProtoLetDefinition{..} ->
-      undefined
-    ProtoDFold loc name ->
-      undefined
+    ProtoDFunction _ name ProtoFunctionDefinition{..} -> do
+      insertNameEntry name (PRotoNPlaceholder name)
+      insertExportedName name
+    ProtoDLet _ name ProtoLetDefinition{..} -> do
+      insertNameEntry name (PRotoNPlaceholder name)
+      insertExportedName name
+    ProtoDFold _ name -> do
+      insertNameEntry name (PRotoNPlaceholder name)
+      insertExportedName name
     _ ->
       undefined

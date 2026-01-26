@@ -4,6 +4,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (
+  ProtoDataConstructorEntry (..),
   ProtoNameEntry (..),
   ProtoHasName (..),
 ) where
@@ -12,8 +13,20 @@ import Coal.Language
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Data.Binary (Binary)
-import Extras (Name)
+import Extras (Name, Set)
 import GHC.Generics (Generic)
+
+type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
+
+data ProtoDataConstructorEntry a = ProtoDataConstructorEntry
+  { protoOdataConstructorEntryMetaData :: a
+  , protoOdataConstructorEntryName :: Name
+  , protoOdataConstructorEntryConstructor :: IndexedConstructor
+  , protoOdataConstructorEntryConstructorSet :: Set Name
+  }
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance (Binary a) => Binary (ProtoDataConstructorEntry a)
 
 data ProtoNameEntry
   = ProtoNName Name IndexedScheme
@@ -57,3 +70,7 @@ instance ProtoHasName (Export a) where
         name
       TypeExport _ name _ ->
         name
+
+instance ProtoHasName (ProtoDataConstructorEntry a) where
+  protoOnameOf =
+    protoOdataConstructorEntryName
