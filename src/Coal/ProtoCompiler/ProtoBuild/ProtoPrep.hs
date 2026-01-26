@@ -93,18 +93,22 @@ collectDataConstructors =
       undefined
 
 dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor o Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
-dataConstructorEntry loc constructorSet DataConstructor{..} =
+dataConstructorEntry loc constructorSet DataConstructor{..} = do
+  s <- instantiateScheme loc constructorScheme
   pure $
     ProtoDataConstructorEntry
-      { protoOdataConstructorEntryMetaData =
-          loc
-      , protoOdataConstructorEntryName =
-          constructorName
+      { protoOdataConstructorEntryMetaData = loc
+      , protoOdataConstructorEntryName = constructorName
       , protoOdataConstructorEntryConstructor =
-          DataConstructor{constructorScheme = undefined, ..}
-      , protoOdataConstructorEntryConstructorSet =
-          constructorSet
+          DataConstructor
+            { constructorScheme = s
+            , ..
+            }
+      , protoOdataConstructorEntryConstructorSet = constructorSet
       }
+
+instantiateScheme :: (Monad m) => a -> Scheme o Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) IndexedScheme
+instantiateScheme = undefined
 
 collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTraits =
