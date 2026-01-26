@@ -162,11 +162,15 @@ collectInstances =
       forM_ protoOinstanceDefinitionImplementations $
         \case
           ProtoDLet _ name _ -> do
-            insertNameEntry name undefined
-            insertExportedName name
+            insertNameEntry instanceName (PRotoNPlaceholder instanceName)
+            insertExportedName instanceName
+           where
+            instanceName = instanceLabel (instanceDefinitionTrait ProtoInstanceDefinition{..}) name
           ProtoDFunction _ name _ -> do
-            insertNameEntry name undefined
-            insertExportedName name
+            insertNameEntry instanceName (PRotoNPlaceholder instanceName)
+            insertExportedName instanceName
+           where
+            instanceName = instanceLabel (instanceDefinitionTrait ProtoInstanceDefinition{..}) name
           _ ->
             pure ()
     ProtoDImport loc path items ->

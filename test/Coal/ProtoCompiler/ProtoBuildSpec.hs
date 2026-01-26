@@ -88,6 +88,8 @@ testModuleBuiltins =
                     mempty
                 , protoOinstanceDefinitionConstraints =
                     []
+                , protoOinstanceDefinitionTraitName =
+                    "Numeric"
                 , protoOinstanceDefinitionType =
                     TIntrinsic IInt32
                 , protoOinstanceDefinitionImplementations =

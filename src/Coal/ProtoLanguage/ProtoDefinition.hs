@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.ProtoLanguage.ProtoDefinition (
@@ -9,6 +10,7 @@ module Coal.ProtoLanguage.ProtoDefinition (
   ProtoLetDefinition (..),
   ProtoTraitDefinition (..),
   ProtoInstanceDefinition (..),
+  instanceDefinitionTrait,
 ) where
 
 import Coal.Language
@@ -88,6 +90,7 @@ data ProtoTraitDefinition a k = ProtoTraitDefinition
 
 data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
   { protoOinstanceDefinitionMetadata :: a
+  , protoOinstanceDefinitionTraitName :: Name
   , protoOinstanceDefinitionConstraints :: [Trait (Parameter k)]
   , protoOinstanceDefinitionType :: Type Parameter k
   , protoOinstanceDefinitionImplementations :: [ProtoDefinition a k t]
@@ -103,6 +106,10 @@ data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
     , Data
     , Typeable
     )
+
+instanceDefinitionTrait :: ProtoInstanceDefinition a Kind (Type Parameter Kind) -> Trait (Type Parameter Kind)
+instanceDefinitionTrait ProtoInstanceDefinition{..} =
+  Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
 
 data ProtoDefinition a k t
   = -- | Type definition
