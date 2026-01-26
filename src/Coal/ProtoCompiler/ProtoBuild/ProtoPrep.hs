@@ -40,11 +40,11 @@ insertExportedName name = do
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m) => ProtoModule a Kind t -> ProtoCompilerT m (ProtoBuild a)
+protoOprepareBuild :: (Monad m) => ProtoModule a Kind (Type Parameter Kind) -> ProtoCompilerT m (ProtoBuild a)
 protoOprepareBuild ProtoModule{..} = do
   undefined
 
-protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind t] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind (Type Parameter Kind)] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 protoOprepareDefinitions defs = do
   -- collect type constructors
   traverse_ collectTypeConstructors defs
@@ -61,7 +61,7 @@ protoOprepareDefinitions defs = do
   -- collect placeholders
   traverse_ collectPlaceholders defs
 
-collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTypeConstructors =
   \case
     ProtoDType loc name ProtoTypeDefinition{..} -> do
@@ -85,7 +85,7 @@ collectTypeConstructors =
     _ ->
       undefined
 
-collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectDataConstructors :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectDataConstructors =
   \case
     ProtoDType loc _ ProtoTypeDefinition{..} ->
@@ -108,7 +108,7 @@ collectDataConstructors =
     _ ->
       undefined
 
-dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor o Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
+dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
   s <- instantiateScheme loc constructorScheme
   pure $
@@ -123,7 +123,7 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
 
-instantiateScheme :: (Monad m) => a -> Scheme o Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) IndexedScheme
+instantiateScheme :: (Monad m) => a -> Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) IndexedScheme
 instantiateScheme = undefined
 
 collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
@@ -139,7 +139,7 @@ collectTraits =
     _ ->
       undefined
 
-collectInstances :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectInstances :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectInstances =
   \case
     ProtoDInstance loc ProtoInstanceDefinition{..} ->
@@ -151,7 +151,7 @@ collectInstances =
     _ ->
       undefined
 
-collectPlaceholders :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectPlaceholders :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectPlaceholders =
   \case
     ProtoDFunction _ name ProtoFunctionDefinition{..} -> do
