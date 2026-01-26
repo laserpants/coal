@@ -158,8 +158,17 @@ collectTraits =
 collectInstances :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectInstances =
   \case
-    ProtoDInstance loc ProtoInstanceDefinition{..} ->
-      undefined
+    ProtoDInstance _ ProtoInstanceDefinition{..} ->
+      forM_ protoOinstanceDefinitionImplementations $
+        \case
+          ProtoDLet _ name _ -> do
+            insertNameEntry name undefined
+            insertExportedName name
+          ProtoDFunction _ name _ -> do
+            insertNameEntry name undefined
+            insertExportedName name
+          _ ->
+            pure ()
     ProtoDImport loc path items ->
       undefined
     ProtoDQualifiedImport loc path ->
