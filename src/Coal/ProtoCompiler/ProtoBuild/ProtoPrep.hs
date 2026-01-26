@@ -65,28 +65,25 @@ collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (Mod
 collectTypeConstructors =
   \case
     ProtoDType loc name ProtoTypeDefinition{..} -> do
-      entry <- typeConstructorEntry loc name kind (for protoOtypeDefinitionConstructors constructorName)
       insertNameEntry name (ProtoNType name kind)
       insertExportedName name
       insertTypeConstructor name entry
      where
       kind = foldKindOf KType protoOtypeDefinitionParameters
+      entry =
+        ProtoTypeConstructorEntry
+          { protoOtypeConstructorEntryMetadata = loc
+          , protoOtypeConstructorEntryName = name
+          , protoOtypeConstructorEntryKind = kind
+          , protoOtypeConstructorEntryDataConstructors =
+              for protoOtypeDefinitionConstructors constructorName
+          }
     ProtoDImport loc path items ->
       undefined
     ProtoDQualifiedImport loc path ->
       undefined
     _ ->
       undefined
-
-typeConstructorEntry :: (Monad m) => a -> Name -> Kind -> [Name] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoTypeConstructorEntry a)
-typeConstructorEntry loc name kind ctors =
-  pure $
-    ProtoTypeConstructorEntry
-      { protoOtypeConstructorEntryMetadata = loc
-      , protoOtypeConstructorEntryName = name
-      , protoOtypeConstructorEntryKind = kind
-      , protoOtypeConstructorEntryDataConstructors = ctors
-      }
 
 collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectDataConstructors =
