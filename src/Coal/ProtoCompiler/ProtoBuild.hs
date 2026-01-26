@@ -12,10 +12,10 @@ module Coal.ProtoCompiler.ProtoBuild (
   setBuildKernelNames,
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
-  overBuildNames,
   insertBuildNameEntry,
-  overBuildExportedNames,
   insertBuildExportedName,
+  insertBuildDataConstructor,
+  insertBuildTypeConstructor,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -97,6 +97,26 @@ overBuildExportedNames f ProtoBuild{..} =
 
 insertBuildExportedName :: Name -> ProtoBuild a -> ProtoBuild a
 insertBuildExportedName name = overBuildExportedNames (Set.insert name)
+
+overBuildDataConstructors :: (Environment (ProtoDataConstructorEntry a) -> Environment (ProtoDataConstructorEntry a)) -> ProtoBuild a -> ProtoBuild a
+overBuildDataConstructors f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildDataConstructors = f protoObuildDataConstructors
+    , ..
+    }
+
+insertBuildDataConstructor :: Name -> ProtoDataConstructorEntry a -> ProtoBuild a -> ProtoBuild a
+insertBuildDataConstructor name = overBuildDataConstructors . Environment.insert name
+
+overBuildTypeConstructors :: (Environment (ProtoTypeConstructorEntry a) -> Environment (ProtoTypeConstructorEntry a)) -> ProtoBuild a -> ProtoBuild a
+overBuildTypeConstructors f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildTypeConstructors = f protoObuildTypeConstructors
+    , ..
+    }
+
+insertBuildTypeConstructor :: Name -> ProtoTypeConstructorEntry a -> ProtoBuild a -> ProtoBuild a
+insertBuildTypeConstructor name = overBuildTypeConstructors . Environment.insert name
 
 setBuildBitcode :: ByteString -> ProtoBuild a -> ProtoBuild a
 setBuildBitcode newBuildBitcode ProtoBuild{..} =

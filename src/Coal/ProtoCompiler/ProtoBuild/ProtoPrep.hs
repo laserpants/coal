@@ -5,7 +5,7 @@
 module Coal.ProtoCompiler.ProtoBuild.ProtoPrep where
 
 import Coal.Language
-import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
+import Coal.ProtoCompiler.ProtoBuild
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
@@ -19,6 +19,12 @@ import Extras (Name, for, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry name entry = modify (Build.insertBuildNameEntry name entry)
+
+insertDataConstructor :: (Monad m) => Name -> ProtoDataConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertDataConstructor name entry = modify (Build.insertBuildDataConstructor name entry)
+
+insertTypeConstructor :: (Monad m) => Name -> ProtoTypeConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertTypeConstructor name entry = modify (Build.insertBuildTypeConstructor name entry)
 
 insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertExportedName name = do
@@ -58,9 +64,11 @@ protoOprepareDefinitions defs = do
 collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTypeConstructors =
   \case
-    ProtoDType _ name ProtoTypeDefinition{..} -> do
+    ProtoDType loc name ProtoTypeDefinition{..} -> do
+      entry <- typeConstructorEntry loc name kind (for protoOtypeDefinitionConstructors constructorName)
       insertNameEntry name (ProtoNType name kind)
       insertExportedName name
+      insertTypeConstructor name entry
      where
       kind = foldKindOf KType protoOtypeDefinitionParameters
     ProtoDImport loc path items ->
@@ -70,19 +78,30 @@ collectTypeConstructors =
     _ ->
       undefined
 
+typeConstructorEntry :: (Monad m) => a -> Name -> Kind -> [Name] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoTypeConstructorEntry a)
+typeConstructorEntry loc name kind ctors =
+  pure $
+    ProtoTypeConstructorEntry
+      { protoOtypeConstructorEntryMetadata = loc
+      , protoOtypeConstructorEntryName = name
+      , protoOtypeConstructorEntryKind = kind
+      , protoOtypeConstructorEntryDataConstructors = ctors
+      }
+
 collectDataConstructors :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectDataConstructors =
   \case
     ProtoDType loc _ ProtoTypeDefinition{..} ->
       forM_ protoOtypeDefinitionConstructors $
         \ctor -> do
-          ProtoDataConstructorEntry
-            { protoOdataConstructorEntryConstructor = DataConstructor{..}
-            , ..
-            } <-
-            dataConstructorEntry loc ctorSet ctor
-          insertNameEntry constructorName (ProtoNName constructorName constructorScheme)
-          insertExportedName constructorName
+          entry <- dataConstructorEntry loc ctorSet ctor
+          case entry of
+            ProtoDataConstructorEntry
+              { protoOdataConstructorEntryConstructor = DataConstructor{..}
+              } -> do
+                insertNameEntry constructorName (ProtoNName constructorName constructorScheme)
+                insertExportedName constructorName
+                insertDataConstructor constructorName entry
      where
       ctorSet = Set.fromList (for protoOtypeDefinitionConstructors constructorName)
     ProtoDImport loc path items ->
