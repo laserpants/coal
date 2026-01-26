@@ -89,7 +89,7 @@ collectTypeConstructors =
     ProtoDQualifiedImport loc path ->
       undefined
     _ ->
-      undefined
+      pure ()
 
 collectDataConstructors :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectDataConstructors =
@@ -153,7 +153,7 @@ collectTraits =
     ProtoDQualifiedImport loc path ->
       undefined
     _ ->
-      undefined
+      pure ()
 
 collectInstances :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectInstances =
@@ -165,7 +165,7 @@ collectInstances =
     ProtoDQualifiedImport loc path ->
       undefined
     _ ->
-      undefined
+      pure ()
 
 collectPlaceholders :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectPlaceholders =
@@ -180,4 +180,4 @@ collectPlaceholders =
       insertNameEntry name (PRotoNPlaceholder name)
       insertExportedName name
     _ ->
-      undefined
+      pure ()
