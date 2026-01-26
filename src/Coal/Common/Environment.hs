@@ -20,6 +20,7 @@ module Coal.Common.Environment (
   filterNames,
   names,
   union,
+  adjust,
 ) where
 
 import Data.Binary (Binary)
@@ -60,6 +61,10 @@ new = mempty
 {-# INLINE insert #-}
 insert :: Name -> a -> Environment a -> Environment a
 insert name = overEnvironment . Map.insert name
+
+{-# INLINE adjust #-}
+adjust :: (a -> a) -> Name -> Environment a -> Environment a
+adjust f name = overEnvironment (Map.adjust f name)
 
 {-# INLINE insertWith #-}
 insertWith :: (a -> a -> a) -> Name -> a -> Environment a -> Environment a

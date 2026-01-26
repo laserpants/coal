@@ -13,11 +13,12 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (
   ProtoHasName (..),
 ) where
 
+import Coal.Common.Environment (Environment (..))
 import Coal.Language
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Data.Binary (Binary)
-import Extras (Name, Set)
+import Extras (Dictionary, Name, Set)
 import GHC.Generics (Generic)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
@@ -45,6 +46,9 @@ instance (Binary a) => Binary (ProtoTypeConstructorEntry a)
 data ProtoTraitEntry a = ProtoTraitEntry
   { protoOtraitEntryMetadata :: a
   , protoOtraitEntryName :: Name
+  , protoOtraitEntryParameter :: Parameter Kind
+  , protoOtraitEntryRequiredInstances :: [Trait (Parameter Kind)]
+  , protoOtraitEntryInterface :: Environment (Scheme Parameter Kind ParameterizedType)
   }
   deriving (Show, Eq, Ord, Read, Generic)
 
@@ -52,6 +56,9 @@ instance (Binary a) => Binary (ProtoTraitEntry a)
 
 data ProtoInstanceEntry a = ProtoInstanceEntry
   { protoOinstanceEntryMetadata :: a
+  , protoOinstanceEntryType :: ParameterizedType
+  , protoOinstanceEntryIndexedType :: IndexedType
+  , protoOinstanceEntryTypeSchemes :: Dictionary IndexedScheme
   }
   deriving (Show, Eq, Ord, Read, Generic)
 
@@ -59,6 +66,9 @@ instance (Binary a) => Binary (ProtoInstanceEntry a)
 
 data ProtoAliasEntry a = ProtoAliasEntry
   { protoOaliasEntryMetadata :: a
+  , protoOaliasEntryName :: Name
+  , protoOaliasEntryParams :: [Name]
+  , protoOaliasEntryType :: ParameterizedType
   }
   deriving (Show, Eq, Ord, Read, Generic)
 

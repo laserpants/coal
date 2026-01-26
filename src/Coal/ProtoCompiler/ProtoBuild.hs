@@ -16,6 +16,9 @@ module Coal.ProtoCompiler.ProtoBuild (
   insertBuildExportedName,
   insertBuildDataConstructor,
   insertBuildTypeConstructor,
+  insertBuildTrait,
+  insertBuildInstance,
+  insertBuildAlias,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -29,6 +32,7 @@ import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Data.Binary
 import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name, Set)
 import GHC.Generics (Generic)
@@ -43,7 +47,7 @@ data ProtoBuild a = ProtoBuild
   , protoObuildDataConstructors :: Environment (ProtoDataConstructorEntry a)
   , protoObuildTypeConstructors :: Environment (ProtoTypeConstructorEntry a)
   , protoObuildTraits :: Environment (ProtoTraitEntry a)
-  , protoObuildInstances :: InstanceMap (ProtoInstanceEntry a)
+  , protoObuildInstances :: Environment (InstanceMap (ProtoInstanceEntry a))
   , protoObuildAliases :: Environment (ProtoAliasEntry a)
   , protoObuildBitcode :: Maybe ByteString
   , protoObuildHash :: Maybe Hash256
@@ -127,6 +131,36 @@ overBuildTypeConstructors f ProtoBuild{..} =
 
 insertBuildTypeConstructor :: Name -> ProtoTypeConstructorEntry a -> ProtoBuild a -> ProtoBuild a
 insertBuildTypeConstructor name = overBuildTypeConstructors . Environment.insert name
+
+overBuildTraits :: (Environment (ProtoTraitEntry a) -> Environment (ProtoTraitEntry a)) -> ProtoBuild a -> ProtoBuild a
+overBuildTraits f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildTraits = f protoObuildTraits
+    , ..
+    }
+
+insertBuildTrait :: Name -> ProtoTraitEntry a -> ProtoBuild a -> ProtoBuild a
+insertBuildTrait name = overBuildTraits . Environment.insert name
+
+overBuildInstances :: (Environment (InstanceMap (ProtoInstanceEntry a)) -> Environment (InstanceMap (ProtoInstanceEntry a))) -> ProtoBuild a -> ProtoBuild a
+overBuildInstances f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildInstances = f protoObuildInstances
+    , ..
+    }
+
+insertBuildInstance :: Name -> IndexedType -> ProtoInstanceEntry a -> ProtoBuild a -> ProtoBuild a
+insertBuildInstance name t entry = overBuildInstances (Environment.adjust (Map.insert t entry) name)
+
+overBuildAliases :: (Environment (ProtoAliasEntry a) -> Environment (ProtoAliasEntry a)) -> ProtoBuild a -> ProtoBuild a
+overBuildAliases f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildAliases = f protoObuildAliases
+    , ..
+    }
+
+insertBuildAlias :: Name -> ProtoAliasEntry a -> ProtoBuild a -> ProtoBuild a
+insertBuildAlias name = overBuildAliases . Environment.insert name
 
 setBuildBitcode :: ByteString -> ProtoBuild a -> ProtoBuild a
 setBuildBitcode newBuildBitcode ProtoBuild{..} =

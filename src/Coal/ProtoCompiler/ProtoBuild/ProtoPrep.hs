@@ -26,6 +26,12 @@ insertDataConstructor name entry = modify (Build.insertBuildDataConstructor name
 insertTypeConstructor :: (Monad m) => Name -> ProtoTypeConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertTypeConstructor name entry = modify (Build.insertBuildTypeConstructor name entry)
 
+insertTrait :: (Monad m) => Name -> ProtoTraitEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertTrait name entry = modify (Build.insertBuildTrait name entry)
+
+insertInstance :: (Monad m) => Name -> IndexedType -> ProtoInstanceEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertInstance name t entry = modify (Build.insertBuildInstance name t entry)
+
 insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertExportedName name = do
   exportList <- ask
@@ -129,9 +135,19 @@ instantiateScheme = undefined
 collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTraits =
   \case
-    ProtoDTrait _ name ProtoTraitDefinition{..} -> do
+    ProtoDTrait loc name ProtoTraitDefinition{..} -> do
       insertNameEntry name (ProtoNTrait name)
       insertExportedName name
+      insertTrait name entry
+     where
+      entry =
+        ProtoTraitEntry
+          { protoOtraitEntryMetadata = loc
+          , protoOtraitEntryName = undefined
+          , protoOtraitEntryParameter = undefined
+          , protoOtraitEntryRequiredInstances = undefined
+          , protoOtraitEntryInterface = undefined
+          }
     ProtoDImport loc path items ->
       undefined
     ProtoDQualifiedImport loc path ->
