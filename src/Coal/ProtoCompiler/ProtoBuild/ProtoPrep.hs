@@ -193,7 +193,7 @@ collectTraits =
 collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraitsInterface =
   \case
-    ProtoDTrait loc name ProtoTraitDefinition{..} -> do
+    ProtoDTrait _ name ProtoTraitDefinition{..} -> do
       forM_ protoOtraitDefinitionInterface $
         \(entryName, entryScheme) -> do
           s <- instantiateScheme entryScheme
