@@ -580,6 +580,5 @@ testModule2B =
         ]
     }
 
-
 testA :: (Monoid a) => IO (Either () (ProtoBuild a))
 testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)

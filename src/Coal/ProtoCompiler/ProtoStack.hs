@@ -10,9 +10,9 @@ module Coal.ProtoCompiler.ProtoStack (
 ) where
 
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
-import Control.Monad.Except (ExceptT (..), runExceptT)
+import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.RWS (RWST, runRWST)
+import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
 
 type ProtoCompilerStack m o = ExceptT () (RWST () () () m) o
 
@@ -21,6 +21,10 @@ newtype ProtoCompilerT m o = ProtoCompiler {protoOcompilerStack :: ProtoCompiler
     ( Functor
     , Applicative
     , Monad
+    , MonadReader ()
+    , MonadWriter ()
+    , MonadState ()
+    , MonadError ()
     , --    , MonadReader (CompilerEnvironment a)
       --    , MonadWriter (CompilerJournal a)
       --    , MonadState (CompilerState a)
