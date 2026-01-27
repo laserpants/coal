@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -6,18 +7,18 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
-import Coal.Language.Module.Export (includesName)
+import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.ProtoCompiler.ProtoBuild
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
-import Control.Monad.Reader (ReaderT, ask)
-import Control.Monad.State (StateT, modify)
+import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
+import Control.Monad.State (StateT, execStateT, get, modify)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extras (Name, for, forM_, traverse_)
+import Extras (Name, for, forM, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry name entry = modify (Build.insertBuildNameEntry name entry)
@@ -49,8 +50,10 @@ insertExportedName name = do
   insertName = modify (Build.insertBuildExportedName name)
 
 protoOprepareBuild :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m (ProtoBuild a)
-protoOprepareBuild ProtoModule{..} = do
-  undefined
+protoOprepareBuild ProtoModule{..} =
+  execStateT
+    (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
+    protoOemptyBuild
 
 protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 protoOprepareDefinitions defs = do
@@ -60,19 +63,41 @@ protoOprepareDefinitions defs = do
   -- collect data constructors
   traverse_ collectDataConstructors defs
 
-  -- collect traits
-  traverse_ collectTraits defs
+  -- expand exports
+  exports <- expandExports
+  local (const exports) $ do
+    -- collect traits
+    traverse_ collectTraits defs
 
-  -- collect trait interfaces
-  traverse_ collectTraitsInterface defs
+    -- collect trait interfaces
+    traverse_ collectTraitsInterface defs
 
-  -- collect instances
-  traverse_ collectInstances defs
+    -- collect instances
+    traverse_ collectInstances defs
 
-  -- collect placeholders
-  traverse_ collectPlaceholders defs
+    -- collect placeholders
+    traverse_ collectPlaceholders defs
 
--- expand exports
+expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ModuleExportList a)
+expandExports = do
+  exportList <- ask
+  ProtoBuild{protoObuildDataConstructors} <- get
+  case exportList of
+    ExportAll ->
+      return ExportAll
+    Exports exports -> do
+      newExports <-
+        forM exports $
+          \case
+            TypeExport loc name [] ->
+              case Environment.lookup name protoObuildDataConstructors of
+                Nothing ->
+                  error "TODO"
+                Just ProtoDataConstructorEntry{..} ->
+                  return (TypeExport loc name (Set.toList protoOdataConstructorEntryConstructorSet))
+            e ->
+              return e
+      return (Exports newExports)
 
 collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTypeConstructors =
@@ -180,7 +205,7 @@ collectTraitsInterface =
             ExportAll ->
               insertName
             Exports exports
-              | exports `includesName` methodName || exports `includesName` methodName ->
+              | exports `includesName` methodName || exports `includesName` name ->
                   insertName
             _ ->
               pure ()
