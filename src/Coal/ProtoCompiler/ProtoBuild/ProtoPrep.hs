@@ -152,7 +152,7 @@ collectDataConstructors =
 
 dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ProtoDataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
-  s <- instantiateScheme loc constructorScheme
+  s <- instantiateScheme constructorScheme
   pure $
     ProtoDataConstructorEntry
       { protoOdataConstructorEntryMetaData = loc
@@ -164,16 +164,6 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
             }
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
-
-instantiateScheme :: (Monad m) => a -> Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedScheme
-instantiateScheme _ Forall{..} = do
-  lift $ lift $ do
-    env <- protoOinstantiateTypeIndexes schemeTypeVariables
-    flip runReaderT (Environment.fromList env) $
-      Forall
-        <$> toIndexed schemeTypeVariables
-        <*> toIndexed schemeTraits
-        <*> toIndexed schemeTypeBody
 
 collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraits =
@@ -205,14 +195,16 @@ collectTraitsInterface =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} -> do
       forM_ protoOtraitDefinitionInterface $
-        \(methodName, scheme) -> do
+        \(entryName, entryScheme) -> do
+          s <- instantiateScheme entryScheme
+          insertNameEntry entryName (ProtoNName entryName s)
           exportList <- ask
-          let insertName = modify (Build.insertBuildExportedName methodName)
+          let insertName = modify (Build.insertBuildExportedName entryName)
           case exportList of
             ExportAll ->
               insertName
             Exports exports
-              | exports `includesName` methodName || exports `includesName` name ->
+              | exports `includesName` entryName || exports `includesName` name ->
                   insertName
             _ ->
               pure ()
@@ -266,3 +258,13 @@ collectPlaceholders =
       insertExportedName name
     _ ->
       pure ()
+
+instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedScheme
+instantiateScheme Forall{..} = do
+  lift $ lift $ do
+    env <- protoOinstantiateTypeIndexes schemeTypeVariables
+    flip runReaderT (Environment.fromList env) $
+      Forall
+        <$> toIndexed schemeTypeVariables
+        <*> toIndexed schemeTraits
+        <*> toIndexed schemeTypeBody
