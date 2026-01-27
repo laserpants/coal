@@ -2,6 +2,8 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Control.Monad.Identity
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module.Export (Export (..))
@@ -11,6 +13,8 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
+import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
+import Coal.ProtoCompiler.ProtoStack  (evalProtoCompilerT)
 
 testModuleBuiltins :: (Monoid a) => ProtoModule a Kind ()
 testModuleBuiltins =
@@ -575,3 +579,7 @@ testModule2B =
             )
         ]
     }
+
+
+testA :: (Monoid a) => IO (Either () (ProtoBuild a))
+testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)

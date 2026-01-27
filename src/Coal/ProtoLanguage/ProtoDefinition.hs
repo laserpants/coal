@@ -22,7 +22,7 @@ import Extras (Name)
 
 data ProtoTypeDefinition a k t = ProtoTypeDefinition
   { protoOtypeDefinitionParameters :: [Parameter k]
-  , protoOtypeDefinitionConstructors :: [DataConstructor Parameter k (Type Parameter k)]
+  , protoOtypeDefinitionConstructors :: [DataConstructor Parameter k t]
   }
   deriving
     ( Show
@@ -107,7 +107,7 @@ data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
     , Typeable
     )
 
-instanceDefinitionTrait :: ProtoInstanceDefinition a Kind (Type Parameter Kind) -> Trait (Type Parameter Kind)
+instanceDefinitionTrait :: ProtoInstanceDefinition a Kind t -> Trait (Type Parameter Kind)
 instanceDefinitionTrait ProtoInstanceDefinition{..} =
   Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
 

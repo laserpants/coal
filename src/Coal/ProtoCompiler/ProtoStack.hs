@@ -3,16 +3,20 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoStack where
+module Coal.ProtoCompiler.ProtoStack (
+  ProtoCompilerT (..),
+  runProtoCompilerT,
+  evalProtoCompilerT,
+) where
 
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
-import Control.Monad.Except (ExceptT (..))
+import Control.Monad.Except (ExceptT (..), runExceptT)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.RWS (RWST)
+import Control.Monad.RWS (RWST, runRWST)
 
 type ProtoCompilerStack m o = ExceptT () (RWST () () () m) o
 
-newtype ProtoCompilerT m o = Compiler {protoOcompilerStack :: ProtoCompilerStack m o}
+newtype ProtoCompilerT m o = ProtoCompiler {protoOcompilerStack :: ProtoCompilerStack m o}
   deriving
     ( Functor
     , Applicative
@@ -26,3 +30,15 @@ newtype ProtoCompilerT m o = Compiler {protoOcompilerStack :: ProtoCompilerStack
     , MonadCatch
     , MonadMask
     )
+
+-- TODO
+runProtoCompilerT :: (Monad m) => ProtoCompilerT m o -> m (Either () o, (), [()])
+runProtoCompilerT com = do
+  (c, s, w) <- runRWST (runExceptT (protoOcompilerStack com)) () ()
+  pure (c, s, [])
+
+-- TODO
+evalProtoCompilerT :: (Monad m) => ProtoCompilerT m o -> m (Either () o)
+evalProtoCompilerT com = do
+  (c, _, _) <- runProtoCompilerT com
+  pure c
