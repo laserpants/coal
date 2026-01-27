@@ -56,7 +56,7 @@ instance (Binary a) => Binary (ProtoTraitEntry a)
 
 data ProtoInstanceEntry a = ProtoInstanceEntry
   { protoOinstanceEntryMetadata :: a
-  , protoOinstanceEntryType :: ParameterizedType
+  , protoOinstanceEntryType :: Type Parameter Kind
   , protoOinstanceEntryIndexedType :: IndexedType
   , protoOinstanceEntryTypeSchemes :: Dictionary IndexedScheme
   }

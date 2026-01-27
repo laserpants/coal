@@ -21,6 +21,7 @@ module Coal.Common.Environment (
   names,
   union,
   adjust,
+  alter,
 ) where
 
 import Data.Binary (Binary)
@@ -65,6 +66,10 @@ insert name = overEnvironment . Map.insert name
 {-# INLINE adjust #-}
 adjust :: (a -> a) -> Name -> Environment a -> Environment a
 adjust f name = overEnvironment (Map.adjust f name)
+
+{-# INLINE alter #-}
+alter :: (Maybe a -> Maybe a) -> Name -> Environment a -> Environment a
+alter f name = overEnvironment (Map.alter f name)
 
 {-# INLINE insertWith #-}
 insertWith :: (a -> a -> a) -> Name -> a -> Environment a -> Environment a

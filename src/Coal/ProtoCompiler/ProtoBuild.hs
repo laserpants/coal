@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -150,7 +151,14 @@ overBuildInstances f ProtoBuild{..} =
     }
 
 insertBuildInstance :: Name -> IndexedType -> ProtoInstanceEntry a -> ProtoBuild a -> ProtoBuild a
-insertBuildInstance name t entry = overBuildInstances (Environment.adjust (Map.insert t entry) name)
+insertBuildInstance name t entry = overBuildInstances (Environment.alter (Just . f) name)
+ where
+  f =
+    \case
+      Nothing ->
+        Map.singleton t entry
+      Just m ->
+        Map.insert t entry m
 
 overBuildAliases :: (Environment (ProtoAliasEntry a) -> Environment (ProtoAliasEntry a)) -> ProtoBuild a -> ProtoBuild a
 overBuildAliases f ProtoBuild{..} =
