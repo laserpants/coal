@@ -28,4 +28,4 @@ exportsName name export
           name `elem` names
 
 includesName :: [Export a] -> Name -> Bool
-includesName exports name = any (exportsName name) exports
+includesName exports = flip any exports . exportsName
