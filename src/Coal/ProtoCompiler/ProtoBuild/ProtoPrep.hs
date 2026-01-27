@@ -4,7 +4,9 @@
 
 module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild) where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Language
+import Coal.Language.Module.Export (includesName)
 import Coal.ProtoCompiler.ProtoBuild
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
@@ -16,7 +18,6 @@ import Control.Monad.State (StateT, modify)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, for, forM_, traverse_)
-import qualified Coal.Common.Environment as Environment 
 
 insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry name entry = modify (Build.insertBuildNameEntry name entry)
@@ -62,7 +63,7 @@ protoOprepareDefinitions defs = do
   -- collect traits
   traverse_ collectTraits defs
 
-  -- collect trait interfaces 
+  -- collect trait interfaces
   traverse_ collectTraitsInterface defs
 
   -- collect instances
@@ -70,6 +71,8 @@ protoOprepareDefinitions defs = do
 
   -- collect placeholders
   traverse_ collectPlaceholders defs
+
+-- expand exports
 
 collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTypeConstructors =
@@ -88,11 +91,12 @@ collectTypeConstructors =
           , protoOtypeConstructorEntryDataConstructors =
               for protoOtypeDefinitionConstructors constructorName
           }
--- TODO
---    ProtoDImport loc path items ->
---      undefined
---    ProtoDQualifiedImport loc path ->
---      undefined
+    -- TODO
+    ProtoDImport loc path items ->
+      pure ()
+    -- TODO
+    ProtoDQualifiedImport loc path ->
+      pure ()
     _ ->
       pure ()
 
@@ -112,11 +116,12 @@ collectDataConstructors =
                 insertDataConstructor constructorName entry
      where
       ctorSet = Set.fromList (for protoOtypeDefinitionConstructors constructorName)
--- TODO
---    ProtoDImport loc path items ->
---      undefined
---    ProtoDQualifiedImport loc path ->
---      undefined
+    -- TODO
+    ProtoDImport loc path items ->
+      pure ()
+    -- TODO
+    ProtoDQualifiedImport loc path ->
+      pure ()
     _ ->
       pure ()
 
@@ -154,17 +159,39 @@ collectTraits =
           , protoOtraitEntryConstraints = protoOtraitDefinitionConstraints
           , protoOtraitEntryInterface = Environment.fromList protoOtraitDefinitionInterface
           }
--- TODO
---    ProtoDImport loc path items ->
---      undefined
---    ProtoDQualifiedImport loc path ->
---      undefined
+    -- TODO
+    ProtoDImport loc path items ->
+      pure ()
+    -- TODO
+    ProtoDQualifiedImport loc path ->
+      pure ()
     _ ->
       pure ()
 
 collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectTraitsInterface =
-  undefined
+  \case
+    ProtoDTrait loc name ProtoTraitDefinition{..} -> do
+      forM_ protoOtraitDefinitionInterface $
+        \(methodName, scheme) -> do
+          exportList <- ask
+          let insertName = modify (Build.insertBuildExportedName methodName)
+          case exportList of
+            ExportAll ->
+              insertName
+            Exports exports
+              | exports `includesName` methodName || exports `includesName` methodName ->
+                  insertName
+            _ ->
+              pure ()
+    -- TODO
+    ProtoDImport loc path items ->
+      pure ()
+    -- TODO
+    ProtoDQualifiedImport loc path ->
+      pure ()
+    _ ->
+      pure ()
 
 collectInstances :: (Monad m) => ProtoDefinition a Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 collectInstances =
@@ -184,11 +211,12 @@ collectInstances =
             instanceName = instanceLabel (instanceDefinitionTrait ProtoInstanceDefinition{..}) name
           _ ->
             pure ()
--- TODO
---    ProtoDImport loc path items ->
---      undefined
---    ProtoDQualifiedImport loc path ->
---      undefined
+    -- TODO
+    ProtoDImport loc path items ->
+      pure ()
+    -- TODO
+    ProtoDQualifiedImport loc path ->
+      pure ()
     _ ->
       pure ()
 
