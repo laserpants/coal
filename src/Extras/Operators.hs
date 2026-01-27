@@ -3,6 +3,7 @@
 module Extras.Operators (
   (&&.),
   (||.),
+  (<>^),
   (<.>),
 ) where
 
@@ -19,6 +20,15 @@ infixr 3 &&.
 f ||. g = h where h e = f e || g e
 
 infixr 2 ||.
+
+{-# INLINE (<>^) #-}
+(<>^) :: (Monad m, Semigroup a) => m a -> m a -> m a
+f <>^ g = do
+  x <- f
+  y <- g
+  pure (x <> y)
+
+infixr 6 <>^
 
 {-# INLINE (<.>) #-}
 (<.>) :: Text -> Text -> Text

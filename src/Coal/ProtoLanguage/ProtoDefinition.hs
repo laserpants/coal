@@ -22,7 +22,7 @@ import Extras (Name)
 
 data ProtoTypeDefinition a k t = ProtoTypeDefinition
   { protoOtypeDefinitionParameters :: [Parameter k]
-  , protoOtypeDefinitionConstructors :: [DataConstructor Parameter k t]
+  , protoOtypeDefinitionConstructors :: [DataConstructor Parameter k (Type Parameter k)]
   }
   deriving
     ( Show

@@ -8,15 +8,16 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild) where
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
 import Coal.Language.Module.Export (Export (..), includesName)
-import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoCompiler.ProtoBuild
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
+import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, modify)
+import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, for, forM, forM_, traverse_)
@@ -50,7 +51,7 @@ insertExportedName name = do
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m (ProtoBuild a)
+protoOprepareBuild :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoBuild a)
 protoOprepareBuild ProtoModule{..} =
   execStateT
     (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
@@ -58,30 +59,25 @@ protoOprepareBuild ProtoModule{..} =
       { protoObuildPath = protoOmodulePath
       }
 
-protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
   -- collect type constructors
   traverse_ collectTypeConstructors defs
-
   -- collect data constructors
   traverse_ collectDataConstructors defs
-
   -- expand exports
   exports <- expandExports
   local (const exports) $ do
     -- collect traits
     traverse_ collectTraits defs
-
     -- collect trait interfaces
     traverse_ collectTraitsInterface defs
-
     -- collect instances
     traverse_ collectInstances defs
-
     -- collect placeholders
     traverse_ collectPlaceholders defs
 
-expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ModuleExportList a)
+expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
 expandExports = do
   exportList <- ask
   ProtoBuild{protoObuildDataConstructors} <- get
@@ -100,9 +96,10 @@ expandExports = do
                   return (TypeExport loc name (Set.toList protoOdataConstructorEntryConstructorSet))
             e ->
               return e
-      return (Exports newExports)
+      return
+        (Exports newExports)
 
-collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTypeConstructors =
   \case
     ProtoDType loc name ProtoTypeDefinition{..} -> do
@@ -128,7 +125,7 @@ collectTypeConstructors =
     _ ->
       pure ()
 
-collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectDataConstructors =
   \case
     ProtoDType loc _ ProtoTypeDefinition{..} ->
@@ -153,7 +150,7 @@ collectDataConstructors =
     _ ->
       pure ()
 
-dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) (ProtoDataConstructorEntry a)
+dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ProtoDataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
   s <- instantiateScheme loc constructorScheme
   pure $
@@ -168,10 +165,17 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
 
-instantiateScheme :: (Monad m) => a -> Scheme Parameter Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) IndexedScheme
-instantiateScheme = undefined
+instantiateScheme :: (Monad m) => a -> Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedScheme
+instantiateScheme _ Forall{..} = do
+  lift $ lift $ do
+    env <- protoOinstantiateTypeIndexes schemeTypeVariables
+    flip runReaderT (Environment.fromList env) $
+      Forall
+        <$> toIndexed schemeTypeVariables
+        <*> toIndexed schemeTraits
+        <*> toIndexed schemeTypeBody
 
-collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraits =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} -> do
@@ -196,7 +200,7 @@ collectTraits =
     _ ->
       pure ()
 
-collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraitsInterface =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} -> do
@@ -221,7 +225,7 @@ collectTraitsInterface =
     _ ->
       pure ()
 
-collectInstances :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectInstances :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectInstances =
   \case
     ProtoDInstance _ ProtoInstanceDefinition{..} ->
@@ -248,7 +252,7 @@ collectInstances =
     _ ->
       pure ()
 
-collectPlaceholders :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
+collectPlaceholders :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectPlaceholders =
   \case
     ProtoDFunction _ name ProtoFunctionDefinition{..} -> do

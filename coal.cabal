@@ -231,8 +231,10 @@ library
       Coal.ProtoCompiler.ProtoError
       Coal.ProtoCompiler.ProtoPipeline
       Coal.ProtoCompiler.ProtoStack
+      Coal.ProtoCompiler.ProtoState
       Coal.ProtoLanguage.ProtoDefinition
       Coal.ProtoLanguage.ProtoModule
+      Coal.ProtoTypeSystem.Parameterized
       Coal.TypeSystem
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption
