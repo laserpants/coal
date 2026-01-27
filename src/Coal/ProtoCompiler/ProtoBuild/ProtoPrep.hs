@@ -295,7 +295,7 @@ collectPlaceholders =
       pure ()
 
 instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (IndexedScheme, [(Name, TypeIndex Kind)])
-instantiateScheme Forall{..} = do
+instantiateScheme Forall{..} =
   lift $ lift $ do
     env <- protoOinstantiateTypeIndexes schemeTypeVariables
     s <-
