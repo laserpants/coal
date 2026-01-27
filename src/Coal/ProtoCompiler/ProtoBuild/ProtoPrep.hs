@@ -8,6 +8,7 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild) where
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
 import Coal.Language.Module.Export (Export (..), includesName)
+import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoCompiler.ProtoBuild
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
@@ -54,6 +55,8 @@ protoOprepareBuild ProtoModule{..} =
   execStateT
     (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
     protoOemptyBuild
+      { protoObuildPath = protoOmodulePath
+      }
 
 protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m)) ()
 protoOprepareDefinitions defs = do
