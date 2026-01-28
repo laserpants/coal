@@ -116,13 +116,16 @@ instance (ToKindIndexed t u) => ToKindIndexed (Trait t) (Trait u) where
   toKindIndexed =
     \case
       Trait{..} ->
-        Trait traitName <$> toKindIndexed traitType
+        Trait traitName
+          <$> toKindIndexed traitType
 
 instance (ToKindIndexed t u) => ToKindIndexed (With t) (With u) where
   toKindIndexed =
     \case
       With traits t ->
-        With <$> toKindIndexed traits <*> toKindIndexed t
+        With
+          <$> toKindIndexed traits
+          <*> toKindIndexed t
 
 instance (ToKindIndexed t u) => ToKindIndexed (Expression a t) (Expression a u) where
   toKindIndexed = traverse toKindIndexed
