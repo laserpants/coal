@@ -109,7 +109,7 @@ instance ProtoParameterized (Row Parameter Kind (Type Parameter Kind)) where
     \case
       RVariable p ->
         protoOinstantiateTypeIndexes p
-      RExtend _ t r -> do
+      RExtend _ t r ->
         protoOinstantiateTypeIndexes t <>^ protoOinstantiateTypeIndexes r
       RNil ->
         pure []
