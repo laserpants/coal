@@ -2,11 +2,9 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Control.Monad.Identity
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoLanguage.ProtoDefinition
