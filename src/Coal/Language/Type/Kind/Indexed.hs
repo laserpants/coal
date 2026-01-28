@@ -9,10 +9,46 @@ import Coal.Common.Supply (supply)
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.State (State)
 
 class ToKindIndexed a b where
   toKindIndexed :: a -> State Int b
+
+instance (ToKindIndexed a b) => ToKindIndexed [a] [b] where
+  toKindIndexed = traverse toKindIndexed
+
+instance ToKindIndexed (ProtoDefinition a k t) (ProtoDefinition a Kind t) where
+  toKindIndexed =
+    \case
+      ProtoDType loc name def ->
+        undefined
+      ProtoDTypeAlias loc name ->
+        undefined
+      ProtoDFunction loc name def ->
+        undefined
+      ProtoDFunctionGroup loc name ->
+        undefined
+      ProtoDFold loc name ->
+        undefined
+      ProtoDLet loc name def ->
+        undefined
+      ProtoDImport loc path imports ->
+        undefined
+      ProtoDQualifiedImport loc path ->
+        undefined
+      ProtoDTrait loc name def ->
+        undefined
+      ProtoDInstance loc def ->
+        undefined
+
+instance ToKindIndexed (ProtoModule a k t) (ProtoModule a Kind t) where
+  toKindIndexed =
+    \case
+      ProtoModule{..} -> do
+        newProtoOmoduleDefinitions <- traverse toKindIndexed protoOmoduleDefinitions
+        pure ProtoModule{protoOmoduleDefinitions = newProtoOmoduleDefinitions, ..}
 
 instance ToKindIndexed (TypeIndex k) (TypeIndex Kind) where
   toKindIndexed =

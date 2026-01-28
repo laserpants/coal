@@ -2,17 +2,255 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Coal.ProtoCompiler.ProtoBuild
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
+import Coal.ProtoCompiler.ProtoBuild
+import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
+import Coal.ProtoCompiler.ProtoStack (evalProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
-import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
-import Coal.ProtoCompiler.ProtoStack  (evalProtoCompilerT)
+
+testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
+testModuleBuiltinsPreKinds =
+  ProtoModule
+    { protoOmodulePath = Path ["Builtin"]
+    , protoOmoduleExportList = ExportAll
+    , protoOmoduleDefinitions =
+        [ ProtoDTrait
+            mempty
+            "Numeric"
+            ( ProtoTraitDefinition
+                { protoOtraitDefinitionMetadata =
+                    mempty
+                , protoOtraitDefinitionConstraints =
+                    []
+                , protoOtraitDefinitionParameter =
+                    Parameter () "a"
+                , protoOtraitDefinitionInterface =
+                    [
+                      ( "from_int32"
+                      , Forall
+                          (Set.fromList [Parameter () "a"])
+                          [Trait "Numeric" (TVariable (Parameter () "a"))]
+                          (TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a"))
+                      )
+                    ,
+                      ( "from_int64"
+                      , Forall
+                          (Set.fromList [Parameter () "a"])
+                          [Trait "Numeric" (TVariable (Parameter () "a"))]
+                          (TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
+                      )
+                    ,
+                      ( "from_bignum"
+                      , Forall
+                          (Set.fromList [Parameter () "a"])
+                          [Trait "Numeric" (TVariable (Parameter () "a"))]
+                          (TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
+                      )
+                    ,
+                      ( "negate"
+                      , Forall
+                          (Set.fromList [Parameter () "a"])
+                          [Trait "Numeric" (TVariable (Parameter () "a"))]
+                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                      )
+                    ,
+                      ( "(+)"
+                      , Forall
+                          (Set.fromList [Parameter () "a"])
+                          [Trait "Numeric" (TVariable (Parameter () "a"))]
+                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                      )
+                    ,
+                      ( "(-)"
+                      , Forall
+                          (Set.fromList [Parameter () "a"])
+                          [Trait "Numeric" (TVariable (Parameter () "a"))]
+                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                      )
+                    ,
+                      ( "(*)"
+                      , Forall
+                          (Set.fromList [Parameter () "a"])
+                          [Trait "Numeric" (TVariable (Parameter () "a"))]
+                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                      )
+                    ]
+                }
+            )
+        , ProtoDInstance
+            mempty
+            ( ProtoInstanceDefinition
+                { protoOinstanceDefinitionMetadata =
+                    mempty
+                , protoOinstanceDefinitionConstraints =
+                    []
+                , protoOinstanceDefinitionTraitName =
+                    "Numeric"
+                , protoOinstanceDefinitionType =
+                    TIntrinsic IInt32
+                , protoOinstanceDefinitionImplementations =
+                    [ ProtoDFunction
+                        mempty
+                        "from_int32"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EVariable mempty (Label () "n")
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "from_int64"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int64_to_int32"))
+                                  ( EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "from_bignum"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_bignum_to_int32"))
+                                  ( EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "negate"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_neg"))
+                                  ( EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "(+)"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_add"))
+                                  ( EVariable mempty (Label () "m")
+                                      <| EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "(-)"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_sub"))
+                                  ( EVariable mempty (Label () "m")
+                                      <| EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "(*)"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_mul"))
+                                  ( EVariable mempty (Label () "m")
+                                      <| EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    ]
+                }
+            )
+        ]
+    }
 
 testModuleBuiltins :: (Monoid a) => ProtoModule a Kind ()
 testModuleBuiltins =
@@ -111,91 +349,141 @@ testModuleBuiltins =
                                 EVariable mempty (Label () "n")
                             }
                         )
-                        --                    , ProtoDFunction
-                        --                        mempty
-                        --                        "from_int64"
-                        --                        ( ProtoFunctionDefinition
-                        --                            { protoOfunctionDefinitionMetadata =
-                        --                                mempty
-                        --                            , protoOfunctionDefinitionAnnotation =
-                        --                                Nothing
-                        --                            , protoOfunctionDefinitionType =
-                        --                                With [] ()
-                        --                            , protoOfunctionDefinitionPatterns =
-                        --                                PVariable mempty (Label () "n") :| []
-                        --                            , protoOfunctionDefinitionExpression =
-                        --                                EVariable mempty (Label () "n")
-                        --                            }
-                        --                        )
-                        --                    , ProtoDFunction
-                        --                        mempty
-                        --                        "from_bignum"
-                        --                        ( ProtoFunctionDefinition
-                        --                            { protoOfunctionDefinitionMetadata =
-                        --                                mempty
-                        --                            , protoOfunctionDefinitionAnnotation =
-                        --                                Nothing
-                        --                            , protoOfunctionDefinitionType =
-                        --                                With [] ()
-                        --                            , protoOfunctionDefinitionPatterns =
-                        --                                PVariable mempty (Label () "n") :| []
-                        --                            , protoOfunctionDefinitionExpression =
-                        --                                EFFICall
-                        --                                  mempty
-                        --                                  undefined
-                        --                                  undefined
-                        --                                  undefined
-                        --                                  undefined
-                        --                            }
-                        --                        )
-                        --                    , ProtoDFunction
-                        --                        mempty
-                        --                        "negate"
-                        --                        ( ProtoFunctionDefinition
-                        --                            { protoOfunctionDefinitionMetadata =
-                        --                                mempty
-                        --                            , protoOfunctionDefinitionAnnotation =
-                        --                                Nothing
-                        --                            , protoOfunctionDefinitionType =
-                        --                                With [] ()
-                        --                            , protoOfunctionDefinitionPatterns =
-                        --                                PVariable mempty (Label () "n") :| []
-                        --                            , protoOfunctionDefinitionExpression =
-                        --                                undefined
-                        --                            }
-                        --                        )
-                        --                    , ProtoDFunction
-                        --                        mempty
-                        --                        "(+)"
-                        --                        ( ProtoFunctionDefinition
-                        --                            { protoOfunctionDefinitionMetadata =
-                        --                                mempty
-                        --                            , protoOfunctionDefinitionAnnotation =
-                        --                                Nothing
-                        --                            , protoOfunctionDefinitionType =
-                        --                                With [] ()
-                        --                            , protoOfunctionDefinitionPatterns =
-                        --                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
-                        --                            , protoOfunctionDefinitionExpression =
-                        --                                undefined
-                        --                            }
-                        --                        )
-                        --                    , ProtoDFunction
-                        --                        mempty
-                        --                        "(-)"
-                        --                        ( ProtoFunctionDefinition
-                        --                            { protoOfunctionDefinitionMetadata =
-                        --                                mempty
-                        --                            , protoOfunctionDefinitionAnnotation =
-                        --                                Nothing
-                        --                            , protoOfunctionDefinitionType =
-                        --                                With [] ()
-                        --                            , protoOfunctionDefinitionPatterns =
-                        --                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
-                        --                            , protoOfunctionDefinitionExpression =
-                        --                                undefined
-                        --                            }
-                        --                        )
+                    , ProtoDFunction
+                        mempty
+                        "from_int64"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int64_to_int32"))
+                                  ( EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "from_bignum"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_bignum_to_int32"))
+                                  ( EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "negate"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_neg"))
+                                  ( EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "(+)"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_add"))
+                                  ( EVariable mempty (Label () "m")
+                                      <| EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "(-)"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_sub"))
+                                  ( EVariable mempty (Label () "m")
+                                      <| EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
+                    , ProtoDFunction
+                        mempty
+                        "(*)"
+                        ( ProtoFunctionDefinition
+                            { protoOfunctionDefinitionMetadata =
+                                mempty
+                            , protoOfunctionDefinitionAnnotation =
+                                Nothing
+                            , protoOfunctionDefinitionType =
+                                With [] ()
+                            , protoOfunctionDefinitionPatterns =
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                            , protoOfunctionDefinitionExpression =
+                                EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "bultin$_int32_mul"))
+                                  ( EVariable mempty (Label () "m")
+                                      <| EVariable mempty (Label () "n")
+                                      :| []
+                                  )
+                            }
+                        )
                     ]
                 }
             )
