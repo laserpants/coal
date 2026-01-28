@@ -58,6 +58,8 @@ liftKind =
       IsKArrow (liftKind k1) (liftKind k2)
     KTrait ->
       IsKTrait
+    KVar v ->
+      IsKVar v
 
 class LowerKinds a b where
   lowerKinds :: a -> b

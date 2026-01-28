@@ -34,7 +34,6 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
 import Extras.Data.Set (unionMap)
-
 import qualified Data.Set as Set
 
 class TypeIndexed k t where
