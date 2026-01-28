@@ -13,6 +13,8 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
+import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
+import Control.Monad.State (evalState)
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -868,3 +870,6 @@ testModule2B =
 
 testA :: (Monoid a) => IO (Either () (ProtoBuild a))
 testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
+
+testB :: ProtoModule () Kind ()
+testB = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0

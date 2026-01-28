@@ -25,6 +25,9 @@ import Data.Tuple.Extra (secondM)
 class ToKindIndexed t u where
   toKindIndexed :: t -> State Int u
 
+instance ToKindIndexed () () where
+  toKindIndexed _ = pure ()
+
 instance (ToKindIndexed t u) => ToKindIndexed (Maybe t) (Maybe u) where
   toKindIndexed = traverse toKindIndexed
 
