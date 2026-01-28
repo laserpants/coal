@@ -41,7 +41,7 @@ instance ToIndexed (Type Parameter Kind) (Type TypeIndex Kind) where
         TVariable <$> toIndexed p
       TApplication k t1 t2 ->
         TApplication k <$> toIndexed t1 <*> toIndexed t2
-      TArrow t1 t2 -> do
+      TArrow t1 t2 ->
         TArrow <$> toIndexed t1 <*> toIndexed t2
       TRecord t ->
         TRecord <$> toIndexed t
@@ -91,7 +91,7 @@ instance ProtoParameterized (Type Parameter Kind) where
         protoOinstantiateTypeIndexes p
       TApplication _ t1 t2 ->
         protoOinstantiateTypeIndexes t1 <>^ protoOinstantiateTypeIndexes t2
-      TArrow t1 t2 -> do
+      TArrow t1 t2 ->
         protoOinstantiateTypeIndexes t1 <>^ protoOinstantiateTypeIndexes t2
       TRecord t ->
         protoOinstantiateTypeIndexes t
