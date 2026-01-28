@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Coal.AST.Normalization (NormalizationContext (..)) where
 
@@ -37,12 +38,12 @@ instance (NormalizationContext a) => NormalizationContext (Map k a) where
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Module a k (Type o k)) where
   normalizeObject =
     \case
-      Module p ns d ->
-        Module p ns (normalizeObject d)
+      Module{..} ->
+        Module modulePath moduleExports (normalizeObject moduleDefinitions)
   denormalizeObject =
     \case
-      Module p ns d ->
-        Module p ns (denormalizeObject d)
+      Module{..} ->
+        Module modulePath moduleExports (denormalizeObject moduleDefinitions)
 
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Definition a k (Type o k)) where
   normalizeObject =
