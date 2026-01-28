@@ -33,8 +33,8 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set, singleton)
-import Extras.Data.Set (unionMap)
 import qualified Data.Set as Set
+import Extras.Data.Set (unionMap)
 
 class TypeIndexed k t where
   typeIndexesIn :: t -> Set (TypeIndex k)
