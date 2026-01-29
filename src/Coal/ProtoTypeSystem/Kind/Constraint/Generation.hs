@@ -9,7 +9,6 @@ module Coal.ProtoTypeSystem.Kind.Constraint.Generation (
   ProtoKindConstraintsGen (..),
 ) where
 
-import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language.Data.Constructor (DataConstructor (..))
@@ -17,6 +16,7 @@ import Coal.Language.HasKind (HasKind (..))
 import Coal.Language.Type (Parameter (..), Type (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
+import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
@@ -32,7 +32,9 @@ data ProtoKindInferenceError
 
 type ProtoKindConstraintsGenOutput = Either ProtoKindInferenceError ProtoKindConstraint
 
-newtype ProtoKindConstraintsGen a = ProtoKindConstraintsGen {protoOkindConstraintsGenMonad :: RWS (Environment Kind) [ProtoKindConstraintsGenOutput] () a}
+newtype ProtoKindConstraintsGen a = ProtoKindConstraintsGen
+  { protoOkindConstraintsGenMonad :: RWS (Environment Kind) [ProtoKindConstraintsGenOutput] () a
+  }
   deriving
     ( Functor
     , Applicative
@@ -78,7 +80,7 @@ instance ProtoEmitKinds (Type Parameter Kind) where
         protoOemitKindConstraints t
       TRow row ->
         protoOemitKindConstraints row
-      TVariable param ->
+      TVariable Parameter{..} ->
         undefined
       TAlias _ ts t -> do
         protoOemitKindConstraints ts
@@ -90,7 +92,7 @@ instance ProtoEmitKinds (Row Parameter Kind (Type Parameter Kind)) where
       RExtend _ t row -> do
         protoOemitKindConstraints t
         protoOemitKindConstraints row
-      RVariable param ->
+      RVariable Parameter{..} ->
         undefined
       RNil ->
         pure ()
@@ -101,7 +103,7 @@ instance ProtoEmitKinds (Scheme Parameter Kind (Type Parameter Kind)) where
       Forall{..} -> do
         forM_ schemeTypeVariables $
           \Parameter{..} ->
-              undefined
+            undefined
 
 instance ProtoEmitKinds (ProtoModule a Kind t) where
   protoOemitKindConstraints =
@@ -151,7 +153,7 @@ instance ProtoEmitKinds (ProtoLetDefinition a Kind t) where
       ProtoLetDefinition{..} ->
         undefined
 
--- 
+--
 --  trait Applicative<f> with Functor<f> {
 --    pure : a -> f<a>
 --    ap : f<a -> b> -> f<a> -> f<b>
