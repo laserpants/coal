@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.ProtoTypeSystem.Kind.Constraint.Generation (
@@ -8,16 +9,19 @@ module Coal.ProtoTypeSystem.Kind.Constraint.Generation (
   ProtoKindConstraintsGen (..),
 ) where
 
+import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.HasKind (HasKind (..))
-import Coal.Language.Type (Type (..))
+import Coal.Language.Type (Parameter (..), Type (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
 import Control.Monad.RWS
-import Data.Data (Data, Typeable)
-import Extras (Name)
+import Extras (Name, traverse_)
 import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
 data ProtoKindInferenceError
@@ -42,7 +46,16 @@ newtype ProtoKindConstraintsGen a = ProtoKindConstraintsGen {protoOkindConstrain
 class ProtoEmitKinds k where
   protoOemitKindConstraints :: k -> ProtoKindConstraintsGen ()
 
-instance (ProtoEmitKinds (o Kind), Typeable o, Data (o Kind)) => ProtoEmitKinds (Type o Kind) where
+instance (ProtoEmitKinds k) => ProtoEmitKinds [k] where
+  protoOemitKindConstraints = traverse_ protoOemitKindConstraints
+
+instance ProtoEmitKinds (DataConstructor o Kind t) where
+  protoOemitKindConstraints =
+    \case
+      DataConstructor{..} ->
+        undefined
+
+instance ProtoEmitKinds (Type Parameter Kind) where
   protoOemitKindConstraints =
     \case
       TApplication k t1 t2 -> do
@@ -52,7 +65,6 @@ instance (ProtoEmitKinds (o Kind), Typeable o, Data (o Kind)) => ProtoEmitKinds 
       TArrow t1 t2 -> do
         protoOemitKindConstraints t1
         protoOemitKindConstraints t2
-        pure ()
       TConstructor k name -> do
         env <- ask
         case Environment.lookup name env of
@@ -67,10 +79,93 @@ instance (ProtoEmitKinds (o Kind), Typeable o, Data (o Kind)) => ProtoEmitKinds 
       TRow row ->
         protoOemitKindConstraints row
       TVariable param ->
-        protoOemitKindConstraints param
-      TAlias _ _ _ ->
-        error "TODO"
+        undefined
+      TAlias _ ts t -> do
+        protoOemitKindConstraints ts
+        protoOemitKindConstraints t
 
-instance (ProtoEmitKinds (o Kind), Typeable o, Data (o Kind)) => ProtoEmitKinds (Row o Kind (Type o Kind)) where
+instance ProtoEmitKinds (Row Parameter Kind (Type Parameter Kind)) where
   protoOemitKindConstraints =
-    undefined
+    \case
+      RExtend _ t row -> do
+        protoOemitKindConstraints t
+        protoOemitKindConstraints row
+      RVariable param ->
+        undefined
+      RNil ->
+        pure ()
+
+instance ProtoEmitKinds (Scheme Parameter Kind (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      Forall{..} -> do
+        forM_ schemeTypeVariables $
+          \Parameter{..} ->
+              undefined
+
+instance ProtoEmitKinds (ProtoModule a Kind t) where
+  protoOemitKindConstraints =
+    \case
+      ProtoModule{..} ->
+        protoOemitKindConstraints protoOmoduleDefinitions
+
+instance ProtoEmitKinds (ProtoDefinition a Kind t) where
+  protoOemitKindConstraints =
+    \case
+      ProtoDType _ _ def ->
+        protoOemitKindConstraints def
+      ProtoDTypeAlias _ _ ->
+        pure ()
+      ProtoDFunction _ _ def ->
+        protoOemitKindConstraints def
+      ProtoDFunctionGroup _ _ ->
+        pure ()
+      ProtoDFold _ _ ->
+        pure ()
+      ProtoDLet _ _ def ->
+        protoOemitKindConstraints def
+      ProtoDImport{} ->
+        pure ()
+      ProtoDQualifiedImport{} ->
+        pure ()
+      ProtoDTrait _ _ def ->
+        protoOemitKindConstraints def
+      ProtoDInstance _ def ->
+        protoOemitKindConstraints def
+
+instance ProtoEmitKinds (ProtoTypeDefinition a Kind t) where
+  protoOemitKindConstraints =
+    \case
+      ProtoTypeDefinition{..} -> do
+        undefined
+
+instance ProtoEmitKinds (ProtoFunctionDefinition a Kind t) where
+  protoOemitKindConstraints =
+    \case
+      ProtoFunctionDefinition{..} -> do
+        undefined
+
+instance ProtoEmitKinds (ProtoLetDefinition a Kind t) where
+  protoOemitKindConstraints =
+    \case
+      ProtoLetDefinition{..} ->
+        undefined
+
+-- 
+--  trait Applicative<f> with Functor<f> {
+--    pure : a -> f<a>
+--    ap : f<a -> b> -> f<a> -> f<b>
+--  }
+--
+--
+instance ProtoEmitKinds (ProtoTraitDefinition a Kind) where
+  protoOemitKindConstraints =
+    \case
+      ProtoTraitDefinition{..} ->
+        undefined
+
+instance ProtoEmitKinds (ProtoInstanceDefinition a Kind t) where
+  protoOemitKindConstraints =
+    \case
+      ProtoInstanceDefinition{..} ->
+        undefined
