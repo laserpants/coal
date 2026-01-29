@@ -235,6 +235,8 @@ library
       Coal.ProtoCompiler.ProtoState
       Coal.ProtoLanguage.ProtoDefinition
       Coal.ProtoLanguage.ProtoModule
+      Coal.ProtoTypeSystem.Kind.Constraint
+      Coal.ProtoTypeSystem.Kind.Constraint.Generation
       Coal.ProtoTypeSystem.Parameterized
       Coal.TypeSystem
       Coal.TypeSystem.Constraint
