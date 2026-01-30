@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Common.Label (Label (..), setLabelName) where
@@ -31,4 +32,4 @@ instance (Binary t) => Binary (Label t)
 
 {-# INLINE setLabelName #-}
 setLabelName :: Name -> Label t -> Label t
-setLabelName name (Label t _) = Label t name
+setLabelName newName Label{..} = Label{labelName = newName, ..}

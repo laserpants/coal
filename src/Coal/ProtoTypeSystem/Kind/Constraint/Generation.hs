@@ -11,8 +11,11 @@ module Coal.ProtoTypeSystem.Kind.Constraint.Generation (
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.Label (Label (..))
 import Coal.Language.Data.Constructor (DataConstructor (..))
-import Coal.Language.Expression (Expression (..))
+import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
+import Coal.Language.Expression.Binding (Binding (..))
+import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.HasKind (HasKind (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
@@ -26,10 +29,11 @@ import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
 import Control.Monad.RWS
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
+import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extras (Dictionary, Name, second, (<$$>), (<>^))
+import Extras (Dictionary, Name, concatForM, second, (<$$>), (<>^))
 import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
 data ProtoKindInferenceError
@@ -70,6 +74,9 @@ instance (ProtoEmitKinds k) => ProtoEmitKinds [k] where
   protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
 
 instance (ProtoEmitKinds k) => ProtoEmitKinds (Maybe k) where
+  protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
+
+instance (ProtoEmitKinds k) => ProtoEmitKinds (Map n k) where
   protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
 
 instance (ProtoEmitKinds k) => ProtoEmitKinds (Set k) where
@@ -183,21 +190,173 @@ instance (ProtoEmitKinds t) => ProtoEmitKinds (With t) where
       With traits t ->
         protoOemitKindConstraints traits <>^ protoOemitKindConstraints t
 
-instance ProtoEmitKinds (Expression a s (Type Parameter Kind)) where
+instance ProtoEmitKinds (Label (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      Label{..} ->
+        protoOemitKindConstraints labelTag
+
+instance ProtoEmitKinds (Expression a Kind (Type Parameter Kind)) where
   protoOemitKindConstraints =
     \case
       EAnnotation _ t e ->
-        undefined
+        protoOemitKindConstraints t <>^ protoOemitKindConstraints e
+      EApplication _ t e es ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints e
+          <>^ protoOemitKindConstraints es
+      ELambda _ ps e ->
+        protoOemitKindConstraints ps <>^ protoOemitKindConstraints e
+      ELet _ bs e ->
+        protoOemitKindConstraints bs <>^ protoOemitKindConstraints e
+      ERecursiveLet _ p e1 e2 ->
+        protoOemitKindConstraints p
+          <>^ protoOemitKindConstraints e1
+          <>^ protoOemitKindConstraints e2
+      EVariable _ ll ->
+        protoOemitKindConstraints ll
+      EConstructor _ ll ->
+        protoOemitKindConstraints ll
+      ELiteral{} ->
+        pure []
+      EIf _ t e1 e2 e3 ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints e1
+          <>^ protoOemitKindConstraints e2
+          <>^ protoOemitKindConstraints e3
+      EOperator _ t _ ->
+        protoOemitKindConstraints t
+      ERecord _ t d e ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints d
+          <>^ protoOemitKindConstraints e
+      EListCons _ t e1 e2 ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints e1
+          <>^ protoOemitKindConstraints e2
+      EListLiteral _ t es ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints es
+      ETuple _ t es ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints es
+      EMatch _ t e cs ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints e
+          <>^ protoOemitKindConstraints cs
+      ELambdaMatch _ t cs ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints cs
+      ECompiledMatch _ t e cs ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints e
+          <>^ protoOemitKindConstraints cs
+      EFold _ t es cs ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints es
+          <>^ protoOemitKindConstraints cs
+      ESelect _ ll e ->
+        protoOemitKindConstraints ll
+          <>^ protoOemitKindConstraints e
+      EFocus _ _ ll1 ll2 e1 e2 ->
+        protoOemitKindConstraints ll1
+          <>^ protoOemitKindConstraints ll2
+          <>^ protoOemitKindConstraints e1
+          <>^ protoOemitKindConstraints e2
+      ETraitInstance _ t trait ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints trait
+      EFFICall _ t _ es e ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints es
+          <>^ protoOemitKindConstraints e
+      EDoBlock _ is -> do
+        concatForM is $
+          \(x, y) ->
+            protoOemitKindConstraints x
+              <>^ protoOemitKindConstraints y
 
---        protoOemitKindConstraints t <>^ protoOemitKindConstraints e
---      EApplication _ _ e es ->
---        undefined
-
-instance ProtoEmitKinds (Pattern a s t) where
+instance ProtoEmitKinds (Clause a Kind (Type Parameter Kind)) where
   protoOemitKindConstraints =
     \case
-      _ ->
-        undefined
+      EClause _ p cs ->
+        protoOemitKindConstraints p
+          <>^ protoOemitKindConstraints cs
+
+instance ProtoEmitKinds (Choice Expression a Kind (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      CPlain _ gs e ->
+        protoOemitKindConstraints gs
+          <>^ protoOemitKindConstraints e
+
+instance ProtoEmitKinds (Guard Expression a Kind (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      CGuard e ->
+        protoOemitKindConstraints e
+
+instance ProtoEmitKinds (CompiledClause a Kind (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      ECompiledClause _ lls e ->
+        protoOemitKindConstraints lls
+          <>^ protoOemitKindConstraints e
+
+instance ProtoEmitKinds (Binding Expression a Kind (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      BPattern _ p e ->
+        protoOemitKindConstraints p <>^ protoOemitKindConstraints e
+      BFunction _ _ ps e ->
+        protoOemitKindConstraints ps <>^ protoOemitKindConstraints e
+
+instance ProtoEmitKinds (Pattern a Kind (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      PAnnotation _ t p ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints p
+      PAny _ t ->
+        protoOemitKindConstraints t
+      PVariable _ ll ->
+        protoOemitKindConstraints ll
+      PConstructor _ ll ps ->
+        protoOemitKindConstraints ll
+          <>^ protoOemitKindConstraints ps
+      PInteger _ t _ ->
+        protoOemitKindConstraints t
+      PLiteral{} ->
+        pure []
+      PRecord _ t d p ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints d
+          <>^ protoOemitKindConstraints p
+      PListCons _ t p1 p2 ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints p1
+          <>^ protoOemitKindConstraints p2
+      PListLiteral _ t ps ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints ps
+      PTuple _ t ps ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints ps
+      POr _ t p1 p2 ->
+        protoOemitKindConstraints t
+          <>^ protoOemitKindConstraints p1
+          <>^ protoOemitKindConstraints p2
+      PAs _ ll p ->
+        protoOemitKindConstraints ll
+          <>^ protoOemitKindConstraints p
+      PShorthand _ ll ->
+        protoOemitKindConstraints ll
+      PAtVariable _ ll ->
+        protoOemitKindConstraints ll
+      PNamedFold _ _ ll ->
+        protoOemitKindConstraints ll
+      PTraitInstance _ t trait ->
+        protoOemitKindConstraints t <>^ protoOemitKindConstraints trait
 
 instance ProtoEmitKinds (ProtoTypeDefinition a Kind t) where
   protoOemitKindConstraints =
