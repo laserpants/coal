@@ -7,9 +7,11 @@ module Coal.ProtoLanguage.ProtoDefinition (
   ProtoDefinition (..),
   ProtoTypeDefinition (..),
   ProtoFunctionDefinition (..),
+  ProtoFoldDefinition (..),
   ProtoLetDefinition (..),
   ProtoTraitDefinition (..),
   ProtoInstanceDefinition (..),
+  ProtoAliasDefinition (..),
   instanceDefinitionTrait,
 ) where
 
@@ -73,6 +75,23 @@ data ProtoLetDefinition a k t = ProtoLetDefinition
     , Typeable
     )
 
+data ProtoFoldDefinition a k t = ProtoFoldDefinition
+  { protoOfoldDefinitionMetadata :: a
+  , protoOfoldDefinitionAnnotation :: Maybe (With (Type Parameter k))
+  , protoOfoldDefinitionClauses :: NonEmpty (Clause a k t)
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    )
+
 data ProtoTraitDefinition a k = ProtoTraitDefinition
   { protoOtraitDefinitionMetadata :: a
   , protoOtraitDefinitionConstraints :: [Trait (Parameter k)]
@@ -111,17 +130,30 @@ instanceDefinitionTrait :: ProtoInstanceDefinition a Kind t -> Trait (Type Param
 instanceDefinitionTrait ProtoInstanceDefinition{..} =
   Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
 
+data ProtoAliasDefinition a k = ProtoAliasDefinition
+  { protoOaliasDefinitionParameters :: [Parameter k]
+  , protoOaliasDefinitionType :: Type Parameter k
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Data
+    , Typeable
+    )
+
 data ProtoDefinition a k t
   = -- | Type definition
     ProtoDType a Name (ProtoTypeDefinition a k t)
   | -- | Type alias
-    ProtoDTypeAlias a Name
+    ProtoDTypeAlias a Name (ProtoAliasDefinition a k)
   | -- | Function definition
     ProtoDFunction a Name (ProtoFunctionDefinition a k t)
   | -- | Function
-    ProtoDFunctionGroup a Name
+    ProtoDFunctionGroup a Name [ProtoFunctionDefinition a k t]
   | -- | Top-level fold
-    ProtoDFold a Name
+    ProtoDFold a Name (ProtoFoldDefinition a k t)
   | -- | Top-level let-binding
     ProtoDLet a Name (ProtoLetDefinition a k t)
   | -- | Import statement

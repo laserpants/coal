@@ -288,7 +288,7 @@ collectPlaceholders =
     ProtoDLet _ name ProtoLetDefinition{..} -> do
       insertNameEntry name (PRotoNPlaceholder name)
       insertExportedName name
-    ProtoDFold _ name -> do
+    ProtoDFold _ name ProtoFoldDefinition{..} -> do
       insertNameEntry name (PRotoNPlaceholder name)
       insertExportedName name
     _ ->

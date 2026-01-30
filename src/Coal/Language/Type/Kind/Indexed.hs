@@ -53,14 +53,14 @@ instance ToKindIndexed (ProtoDefinition a k ()) (ProtoDefinition a Kind ()) wher
     \case
       ProtoDType loc name def ->
         ProtoDType loc name <$> toKindIndexed def
-      ProtoDTypeAlias loc name ->
-        pure $ ProtoDTypeAlias loc name
+      ProtoDTypeAlias loc name def ->
+        ProtoDTypeAlias loc name <$> toKindIndexed def
       ProtoDFunction loc name def ->
         ProtoDFunction loc name <$> toKindIndexed def
-      ProtoDFunctionGroup loc name ->
-        pure $ ProtoDFunctionGroup loc name
-      ProtoDFold loc name ->
-        pure $ ProtoDFold loc name
+      ProtoDFunctionGroup loc name defs ->
+        ProtoDFunctionGroup loc name <$> traverse toKindIndexed defs
+      ProtoDFold loc name def ->
+        ProtoDFold loc name <$> toKindIndexed def
       ProtoDLet loc name def ->
         ProtoDLet loc name <$> toKindIndexed def
       ProtoDImport loc path imports ->
@@ -108,6 +108,14 @@ instance ToKindIndexed (ProtoTraitDefinition a k) (ProtoTraitDefinition a Kind) 
           <*> toKindIndexed protoOtraitDefinitionParameter
           <*> traverse (secondM toKindIndexed) protoOtraitDefinitionInterface
 
+instance ToKindIndexed (ProtoFoldDefinition a k ()) (ProtoFoldDefinition a Kind ()) where
+  toKindIndexed =
+    \case
+      ProtoFoldDefinition{..} ->
+        ProtoFoldDefinition protoOfoldDefinitionMetadata
+          <$> toKindIndexed protoOfoldDefinitionAnnotation
+          <*> toKindIndexed protoOfoldDefinitionClauses
+
 instance ToKindIndexed (ProtoInstanceDefinition a k ()) (ProtoInstanceDefinition a Kind ()) where
   toKindIndexed =
     \case
@@ -116,6 +124,14 @@ instance ToKindIndexed (ProtoInstanceDefinition a k ()) (ProtoInstanceDefinition
           <$> toKindIndexed protoOinstanceDefinitionConstraints
           <*> toKindIndexed protoOinstanceDefinitionType
           <*> toKindIndexed protoOinstanceDefinitionImplementations
+
+instance ToKindIndexed (ProtoAliasDefinition a k) (ProtoAliasDefinition a Kind) where
+  toKindIndexed =
+    \case
+      ProtoAliasDefinition{..} ->
+        ProtoAliasDefinition
+          <$> toKindIndexed protoOaliasDefinitionParameters
+          <*> toKindIndexed protoOaliasDefinitionType
 
 instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind)) => ToKindIndexed (DataConstructor o k t) (DataConstructor o Kind u) where
   toKindIndexed =

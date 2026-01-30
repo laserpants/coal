@@ -165,14 +165,14 @@ instance ProtoEmitKinds (ProtoDefinition a Kind (Type Parameter Kind)) where
     \case
       ProtoDType _ _ def ->
         protoOemitKindConstraints def
-      ProtoDTypeAlias _ _ ->
-        pure []
+      ProtoDTypeAlias _ _ def ->
+        protoOemitKindConstraints def
       ProtoDFunction _ _ def ->
         protoOemitKindConstraints def
-      ProtoDFunctionGroup _ _ ->
-        pure []
-      ProtoDFold _ _ ->
-        pure []
+      ProtoDFunctionGroup _ _ defs ->
+        concat <$> traverse protoOemitKindConstraints defs
+      ProtoDFold _ _ def ->
+        protoOemitKindConstraints def
       ProtoDLet _ _ def ->
         protoOemitKindConstraints def
       ProtoDImport{} ->
@@ -426,8 +426,33 @@ instance ProtoEmitKinds (ProtoTraitDefinition a Kind) where
 --     | (True, False) = GreaterThan
 --     | (_, _)        = EqualTo
 -- }
-instance ProtoEmitKinds (ProtoInstanceDefinition a Kind t) where
+instance ProtoEmitKinds (ProtoInstanceDefinition a Kind (Type Parameter Kind)) where
   protoOemitKindConstraints =
     \case
       ProtoInstanceDefinition{..} ->
         undefined
+
+-- E.g.,
+--
+-- fold length
+--   | x :: @xs => 1 + xs
+--   | [] => 0
+instance ProtoEmitKinds (ProtoFoldDefinition a Kind (Type Parameter Kind)) where
+  protoOemitKindConstraints =
+    \case
+      ProtoFoldDefinition{..} -> do
+        ps <-
+          protoOemitKindConstraints protoOfoldDefinitionAnnotation
+            <>^ protoOemitKindConstraints protoOfoldDefinitionClauses
+        tellParameterConstraints ps
+        pure ps
+
+instance ProtoEmitKinds (ProtoAliasDefinition a Kind) where
+  protoOemitKindConstraints =
+    \case
+      ProtoAliasDefinition{..} -> do
+        ps <-
+          protoOemitKindConstraints protoOaliasDefinitionParameters
+            <>^ protoOemitKindConstraints protoOaliasDefinitionType
+        tellParameterConstraints ps
+        pure ps
