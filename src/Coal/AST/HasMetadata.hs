@@ -29,8 +29,7 @@ instance HasMetadata (Expression Metadata () t) where
       EConstructor a _ -> a
       ELiteral a _ -> a
       EIf a _ _ _ _ -> a
-      EUnaryOperator a _ _ -> a
-      EBinaryOperator a _ _ -> a
+      EOperator a _ _ -> a
       ERecord a _ _ _ -> a
       EListCons a _ _ _ -> a
       EListLiteral a _ _ -> a
@@ -77,8 +76,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleMatchClauseGuard a -> a
       RuleMatchClauseExpressions a -> a
       RuleMatchClausePatterns a -> a
-      RuleUnaryOperator a -> a
-      RuleBinaryOperator a -> a
+      RuleOperator a -> a
       RuleTopLevelFunction a -> a
       RuleTopLevelConstant a -> a
       RuleTypeConstraint a _ _ _ -> a

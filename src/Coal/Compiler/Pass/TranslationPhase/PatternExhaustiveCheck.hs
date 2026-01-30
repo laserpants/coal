@@ -124,9 +124,7 @@ instance PatternExhaustiveCheckContext (Expression Metadata () t) where
           <$> patternExhaustiveCheck name e1
           <*> patternExhaustiveCheck name e2
           <*> patternExhaustiveCheck name e3
-      op@EUnaryOperator{} ->
-        pure op
-      op@EBinaryOperator{} ->
+      op@EOperator{} ->
         pure op
       ERecord a t d me ->
         ERecord a t

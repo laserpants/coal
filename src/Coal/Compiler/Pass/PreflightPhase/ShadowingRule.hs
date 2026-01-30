@@ -93,9 +93,7 @@ instance (Data t) => RuleContext (Expression Metadata () t) where
         EFold a t
           <$> traverse (detectShadowing names) es
           <*> traverse (detectShadowing names) cs
-      expr@EUnaryOperator{} ->
-        pure expr
-      expr@EBinaryOperator{} ->
+      expr@EOperator{} ->
         pure expr
       EListLiteral a t es ->
         EListLiteral a t <$> traverse (detectShadowing names) es

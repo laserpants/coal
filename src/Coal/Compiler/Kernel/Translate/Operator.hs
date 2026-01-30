@@ -2,10 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.Translate.Operator (
-  translateUnaryOperator,
-  translateBinaryOperator,
-) where
+module Coal.Compiler.Kernel.Translate.Operator (translateOperator) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Translate.Type (translateType)
@@ -15,12 +12,6 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
-
-translateUnaryOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> UnaryOperator -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
-translateUnaryOperator translate _ =
-  \case
-    OLogicalNot ->
-      logicalNotOperator translate
 
 logicalNotOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
 logicalNotOperator translate es = do
@@ -33,9 +24,11 @@ logicalNotOperator translate es = do
  where
   t1 = translateType (TIntrinsic IBool)
 
-translateBinaryOperator :: (Monad m, Data a) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> IndexedType -> BinaryOperator -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
-translateBinaryOperator translate t ot =
+translateOperator :: (Monad m, Data a) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> Operator -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+translateOperator translate t =
   \case
+    OLogicalNot ->
+      logicalNotOperator translate
     OReverseComposition ->
       reverseCompositionOperator translate t
     OReverseApplication ->
@@ -52,27 +45,6 @@ translateBinaryOperator translate t ot =
       binop translate Kernel.OOr (TIntrinsic IBool, TIntrinsic IBool)
     OStringConcatenation ->
       stringConcatenationOperator translate
-
-equalityOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
-equalityOperator translate ot (e1 :| [e2]) = do
-  o1 <- translate e1
-  o2 <- translate e2
-  case ot of
-    (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) ->
-      pure (Kernel.op (Kernel.OEqInt32 o1 o2))
-    (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool) ->
-      pure (Kernel.op (Kernel.OEqInt64 o1 o2))
-    (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool) ->
-      pure (Kernel.op (Kernel.OEqFloat o1 o2))
-    (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool) ->
-      pure (Kernel.op (Kernel.OEqDouble o1 o2))
-    (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool) ->
-      pure (Kernel.op (Kernel.OEqChar o1 o2))
-    (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) ->
-      pure (Kernel.op (Kernel.OEqBool o1 o2))
-    _ ->
-      error "Not implemented"
-equalityOperator _ _ _ = error "Not implemented"
 
 stringConcatenationOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
 stringConcatenationOperator translate es = do

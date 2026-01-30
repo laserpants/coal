@@ -198,10 +198,8 @@ instance (Pretty t, Show t) => Dot t (Expression a () t) where
           emitEdgeTo e1
           emitEdgeWithLabelTo "then" e2
           emitEdgeWithLabelTo "else" e3
-      EUnaryOperator _ t op ->
-        emitRectangle ("EUnaryOperator\\n" <> Text.pack (show op)) (Just t)
-      EBinaryOperator _ t op ->
-        emitRectangle ("EBinaryOperator\\n" <> Text.pack (show op)) (Just t)
+      EOperator _ t op ->
+        emitRectangle ("EOperator\\n" <> Text.pack (show op)) (Just t)
       ERecord _ t fields mtail -> do
         fromNode (emitRectangle "ERecord" (Just t)) $ do
           id1 <- emitEdgeToFields (Map.toList fields)

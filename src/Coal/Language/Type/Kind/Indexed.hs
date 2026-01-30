@@ -168,10 +168,8 @@ instance ToKindIndexed (Expression a k ()) (Expression a Kind ()) where
         pure (ELiteral a primitive)
       EIf a t e1 e2 e3 ->
         EIf a <$> toKindIndexed t <*> toKindIndexed e1 <*> toKindIndexed e2 <*> toKindIndexed e3
-      EUnaryOperator a t op ->
-        EUnaryOperator a <$> toKindIndexed t <*> pure op
-      EBinaryOperator a t op ->
-        EBinaryOperator a <$> toKindIndexed t <*> pure op
+      EOperator a t op ->
+        EOperator a <$> toKindIndexed t <*> pure op
       ERecord a t d e ->
         ERecord a <$> toKindIndexed t <*> toKindIndexed d <*> toKindIndexed e
       EListCons a t e1 e2 ->

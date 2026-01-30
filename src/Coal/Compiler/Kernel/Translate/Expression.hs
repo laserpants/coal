@@ -9,7 +9,7 @@ module Coal.Compiler.Kernel.Translate.Expression (
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (qualifyName, withLocalName, withLocalNames)
-import Coal.Compiler.Kernel.Translate.Operator (translateBinaryOperator, translateUnaryOperator)
+import Coal.Compiler.Kernel.Translate.Operator (translateOperator)
 import Coal.Compiler.Kernel.Translate.Pattern (translatePattern)
 import Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive)
 import Coal.Compiler.Kernel.Translate.Record (extractRow, translateRecord)
@@ -27,10 +27,8 @@ translateExpression =
   \case
     EAnnotation _ _ e ->
       translateExpression e
-    EApplication _ t (EUnaryOperator _ _ op) es ->
-      translateUnaryOperator translateExpression t op es
-    EApplication _ t (EBinaryOperator _ ot op) es ->
-      translateBinaryOperator translateExpression t ot op es
+    EApplication _ t (EOperator _ _ op) es ->
+      translateOperator translateExpression t op es
     EApplication _ t e es ->
       Kernel.app (translateType t)
         <$> translateExpression e

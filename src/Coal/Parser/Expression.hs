@@ -14,7 +14,7 @@ import Coal.Parser.Primitive (parsePrimitive)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList)
-import Control.Monad.Combinators.Expr
+import qualified Control.Monad.Combinators.Expr as Combinators
 import qualified Data.ByteString.Char8 as ByteString
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
@@ -73,11 +73,11 @@ parseSelectorOp = do
   end <- getSourcePos
   pure (\expr -> selector expr (Metadata start end) field)
 
-selectorPostfix :: Operator Parser (Expression Metadata () ())
-selectorPostfix = Postfix (foldl (flip (.)) id <$> some parseSelectorOp)
+selectorPostfix :: Combinators.Operator Parser (Expression Metadata () ())
+selectorPostfix = Combinators.Postfix (foldl (flip (.)) id <$> some parseSelectorOp)
 
 parseExpression :: Parser (Expression Metadata () ())
-parseExpression = makeExprParser parseAtom operator
+parseExpression = Combinators.makeExprParser parseAtom operator
 
 selector :: Expression Metadata () () -> Metadata -> Name -> Expression Metadata () ()
 selector expr loc lname = ESelect loc (Label () lname) expr
@@ -334,15 +334,15 @@ parseListLiteral =
 parseLiteralExpression :: Parser (Expression Metadata () ())
 parseLiteralExpression = parseListLiteral <|> parsePrimitive <|> parseInt
 
-unaryOperator :: UnaryOperator -> Expression Metadata () () -> Expression Metadata () ()
+unaryOperator :: Operator -> Expression Metadata () () -> Expression Metadata () ()
 unaryOperator op e1 =
-  EApplication meta () (EUnaryOperator meta () op) (e1 :| [])
+  EApplication meta () (EOperator meta () op) (e1 :| [])
  where
   meta = metadataSpan e1 e1
 
-binaryOperator :: BinaryOperator -> Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ()
+binaryOperator :: Operator -> Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ()
 binaryOperator op e1 e2 =
-  EApplication meta () (EBinaryOperator meta () op) (e1 :| [e2])
+  EApplication meta () (EOperator meta () op) (e1 :| [e2])
  where
   meta = metadataSpan e1 e2
 
@@ -506,9 +506,9 @@ parseGreaterThanOperator =
             (lhs :| [rhs])
       )
 
-fixity9 :: [Operator Parser (Expression Metadata () ())]
+fixity9 :: [Combinators.Operator Parser (Expression Metadata () ())]
 fixity9 =
-  [ InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+  [ Combinators.InfixR (binaryOperator OReverseComposition <$ symbol "<<")
   ]
 
 negationOperator :: Parser (Expression Metadata () () -> Expression Metadata () ())
@@ -523,52 +523,52 @@ negationOperator =
           (EVariable loc (Label () "negate"))
           (e :| [])
 
-fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1, fixity0 :: [Operator Parser (Expression Metadata () ())]
+fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1, fixity0 :: [Combinators.Operator Parser (Expression Metadata () ())]
 fixity8 =
-  [ Prefix negationOperator
-  , Prefix (unaryOperator OLogicalNot <$ (symbol "!" <* notFollowedBy (char '=')))
-  , InfixR (parseExponentiationOperator <* symbol "^")
+  [ Combinators.Prefix negationOperator
+  , Combinators.Prefix (unaryOperator OLogicalNot <$ (symbol "!" <* notFollowedBy (char '=')))
+  , Combinators.InfixR (parseExponentiationOperator <* symbol "^")
   ]
 fixity7 =
-  [ InfixL (parseMultiplicationOperator <* symbol "*")
-  , InfixL (parseDivisionOperator <* symbol "/")
-  , InfixL (parseModulusOperator <* symbol "%")
+  [ Combinators.InfixL (parseMultiplicationOperator <* symbol "*")
+  , Combinators.InfixL (parseDivisionOperator <* symbol "/")
+  , Combinators.InfixL (parseModulusOperator <* symbol "%")
   ]
 fixity6 =
-  [ InfixL (parseAdditionOperator <* try (symbol "+" <* notFollowedBy (char '+')))
-  , InfixL (parseSubtractionOperator <* try (symbol "-"))
-  , InfixR (parseSemigroupOperator <* symbol "<>")
+  [ Combinators.InfixL (parseAdditionOperator <* try (symbol "+" <* notFollowedBy (char '+')))
+  , Combinators.InfixL (parseSubtractionOperator <* try (symbol "-"))
+  , Combinators.InfixR (parseSemigroupOperator <* symbol "<>")
   ]
 fixity5 =
-  [ InfixR (binaryOperator OListConcatenation <$ try (symbol "++" <* notFollowedBy (char '+')))
-  , InfixR (binaryOperator OStringConcatenation <$ symbol "+++")
-  , InfixR (listCons <$ symbol "::")
+  [ Combinators.InfixR (binaryOperator OListConcatenation <$ try (symbol "++" <* notFollowedBy (char '+')))
+  , Combinators.InfixR (binaryOperator OStringConcatenation <$ symbol "+++")
+  , Combinators.InfixR (listCons <$ symbol "::")
   ]
 fixity4 =
-  [ InfixN
+  [ Combinators.InfixN
       ( parseEqualityOperator
           <* symbol "=="
       )
-  , InfixN
+  , Combinators.InfixN
       ( parseInequalityOperator
           <* symbol "!="
       )
-  , InfixN
+  , Combinators.InfixN
       ( parseLessThanOrEqualOperator
           <* symbol "<="
       )
-  , InfixN
+  , Combinators.InfixN
       ( parseGreaterThanOrEqualOperator
           <* symbol ">="
       )
-  , InfixN
+  , Combinators.InfixN
       ( try
           ( parseLessThanOperator
               <* symbol "<"
               <* notFollowedBy (char '=' <|> char '<')
           )
       )
-  , InfixN
+  , Combinators.InfixN
       ( try
           ( parseGreaterThanOperator
               <* symbol ">"
@@ -577,18 +577,18 @@ fixity4 =
       )
   ]
 fixity3 =
-  [ InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
+  [ Combinators.InfixR (binaryOperator OLogicalAnd <$ symbol "&&")
   ]
 fixity2 =
-  [ InfixR (binaryOperator OLogicalOr <$ symbol "||")
+  [ Combinators.InfixR (binaryOperator OLogicalOr <$ symbol "||")
   ]
 fixity1 =
-  [ InfixL (binaryOperator OReverseApplication <$ symbol "|.")
-  , InfixL (binaryOperator OForwardApplication <$ symbol ".|")
+  [ Combinators.InfixL (binaryOperator OReverseApplication <$ symbol "|.")
+  , Combinators.InfixL (binaryOperator OForwardApplication <$ symbol ".|")
   ]
 fixity0 =
-  [ InfixR (binaryOperator OReverseComposition <$ symbol "<<")
-  , InfixR (binaryOperator OForwardComposition <$ symbol ">>")
+  [ Combinators.InfixR (binaryOperator OReverseComposition <$ symbol "<<")
+  , Combinators.InfixR (binaryOperator OForwardComposition <$ symbol ">>")
   ]
 
 annotation :: Parser (Expression Metadata () () -> Expression Metadata () ())
@@ -599,7 +599,7 @@ annotation = do
   end <- getSourcePos
   pure (EAnnotation (Metadata start end) t)
 
-operator :: [[Operator Parser (Expression Metadata () ())]]
+operator :: [[Combinators.Operator Parser (Expression Metadata () ())]]
 operator =
   [ [selectorPostfix]
   , fixity9
@@ -612,5 +612,5 @@ operator =
   , fixity2
   , fixity1
   , fixity0
-  , [Postfix annotation]
+  , [Combinators.Postfix annotation]
   ]

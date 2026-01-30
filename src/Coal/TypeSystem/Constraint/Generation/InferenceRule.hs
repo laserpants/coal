@@ -23,8 +23,7 @@ data InferenceRule k a
   | RuleListConstructor a (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | RuleListLiteral a [Type TypeIndex k]
   | RuleMatchClausePatterns a
-  | RuleUnaryOperator a
-  | RuleBinaryOperator a
+  | RuleOperator a
   | RuleTopLevelFunction a
   | RuleTopLevelConstant a
   | RuleAsConstraint a

@@ -10,6 +10,7 @@ import Coal.Parser.Symbol
 import Coal.Parser.Type.Intrinsic (parseIntrinsic)
 import Coal.Parser.Utils (fieldList)
 import Control.Monad.Combinators.Expr (Operator (InfixR), makeExprParser)
+import qualified Control.Monad.Combinators.Expr as Combinators
 import Data.Functor (($>))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
@@ -63,11 +64,11 @@ parseTypeApplication = do
     [] ->
       pure t0
 
-typeOperator :: [[Operator Parser (Type Parameter ())]]
+typeOperator :: [[Combinators.Operator Parser (Type Parameter ())]]
 typeOperator = [[InfixR (TArrow <$ symbol "->")]]
 
 parseKind :: Parser Kind
 parseKind = makeExprParser (symbol "*" $> KType) kindOperator
 
-kindOperator :: [[Operator Parser Kind]]
+kindOperator :: [[Combinators.Operator Parser Kind]]
 kindOperator = [[InfixR (KArrow <$ symbol "->")]]

@@ -96,7 +96,7 @@ literalBoolE = ELiteral mempty . LBool
 
 {-# INLINE opAndE #-}
 opAndE :: (Monoid a) => Expression a () ()
-opAndE = EBinaryOperator mempty () OLogicalAnd
+opAndE = EOperator mempty () OLogicalAnd
 
 {-# INLINE plainClauseE #-}
 plainClauseE :: (Monoid a) => Pattern a () () -> Expression a () () -> Clause a () ()

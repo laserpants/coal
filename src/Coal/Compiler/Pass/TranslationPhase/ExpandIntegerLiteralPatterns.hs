@@ -78,7 +78,7 @@ numericLiteral (ll@(Label t _), int) e1 =
   EApplication
     mempty
     (TIntrinsic IBool)
-    (EBinaryOperator mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
+    (EOperator mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
     ( e1
         :| [ EApplication
               mempty

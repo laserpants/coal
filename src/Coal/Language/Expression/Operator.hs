@@ -4,10 +4,8 @@
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Expression.Operator (
-  BinaryOperator (..),
-  UnaryOperator (..),
-  unaryOperatorTypeScheme,
-  binaryOperatorTypeScheme,
+  Operator (..),
+  operatorTypeScheme,
 ) where
 
 import Coal.Language.Type (Type (..), listType, (~>))
@@ -17,17 +15,11 @@ import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import GHC.Generics (Generic)
 
--- | Unary operators
-data UnaryOperator
+-- | Operators
+data Operator
   = -- | Logical NOT (!)
     OLogicalNot
-  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
-
-instance Binary UnaryOperator
-
--- | Binary operators
-data BinaryOperator
-  = -- | Logical OR (||)
+  | -- | Logical OR (||)
     OLogicalOr
   | -- | Logical AND (&&)
     OLogicalAnd
@@ -45,17 +37,13 @@ data BinaryOperator
     OListConcatenation
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
-instance Binary BinaryOperator
+instance Binary Operator
 
-unaryOperatorTypeScheme :: UnaryOperator -> IndexedScheme
-unaryOperatorTypeScheme =
+operatorTypeScheme :: Operator -> IndexedScheme
+operatorTypeScheme =
   \case
     OLogicalNot ->
       forall0 (TIntrinsic IBool ~> TIntrinsic IBool)
-
-binaryOperatorTypeScheme :: BinaryOperator -> IndexedScheme
-binaryOperatorTypeScheme =
-  \case
     OReverseApplication ->
       forall2 (\a b -> a ~> (a ~> b) ~> b)
     OForwardApplication ->

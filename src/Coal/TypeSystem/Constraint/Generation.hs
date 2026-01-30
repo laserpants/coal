@@ -412,11 +412,8 @@ emitConstraints =
       emitEListLiteralConstraints loc t es
     EMatch loc t e cs ->
       emitClauseConstraints loc t e [] cs
-    EUnaryOperator loc t op -> do
-      tellRight [Explicit (RuleUnaryOperator loc) t (unaryOperatorTypeScheme op)]
-      pure []
-    EBinaryOperator loc t op -> do
-      tellRight [Explicit (RuleBinaryOperator loc) t (binaryOperatorTypeScheme op)]
+    EOperator loc t op -> do
+      tellRight [Explicit (RuleOperator loc) t (operatorTypeScheme op)]
       pure []
     ESelect loc ll e ->
       emitESelectConstraints loc ll e

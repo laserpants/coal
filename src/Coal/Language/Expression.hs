@@ -14,7 +14,7 @@ module Coal.Language.Expression (
 import Coal.Common.Label (Label (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
-import Coal.Language.Expression.Operator (BinaryOperator, UnaryOperator)
+import Coal.Language.Expression.Operator (Operator)
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
@@ -44,10 +44,8 @@ data Expression a s t
     ELiteral a Primitive
   | -- | If-else statement
     EIf a t (Expression a s t) (Expression a s t) (Expression a s t)
-  | -- | Unary operator
-    EUnaryOperator a t UnaryOperator
-  | -- | Binary operator
-    EBinaryOperator a t BinaryOperator
+  | -- | Operator
+    EOperator a t Operator
   | -- | Record
     ERecord a t (Dictionary (Expression a s t)) (Maybe (Expression a s t))
   | -- | List cons-operator

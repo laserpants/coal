@@ -127,9 +127,7 @@ instance Transformable Expression where
         EFold a t
           <$> traverse (rewrite name f) es
           <*> traverse (rewrite name f) cs
-      expr@EUnaryOperator{} ->
-        pure expr
-      expr@EBinaryOperator{} ->
+      expr@EOperator{} ->
         pure expr
       EListLiteral a t es ->
         EListLiteral a t <$> traverse (rewrite name f) es
