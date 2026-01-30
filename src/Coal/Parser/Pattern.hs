@@ -22,7 +22,7 @@ import Text.Megaparsec (option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
-parseAtom :: Parser (Pattern Metadata ())
+parseAtom :: Parser (Pattern Metadata () ())
 parseAtom =
   parseConstructorPattern
     <|> parseAtVariablePattern
@@ -34,23 +34,23 @@ parseAtom =
     <|> try (parens parsePattern)
     <|> parseTuplePattern
 
-parsePattern :: Parser (Pattern Metadata ())
+parsePattern :: Parser (Pattern Metadata () ())
 parsePattern = makeExprParser parseAtom patternOperators
 
-parseUnitPattern :: Parser (NonEmpty (Pattern Metadata ()))
+parseUnitPattern :: Parser (NonEmpty (Pattern Metadata () ()))
 parseUnitPattern = withMetadata $ pure (\loc -> PLiteral loc LUnit :| [])
 
-patternOperator :: (Metadata -> () -> Pattern Metadata () -> Pattern Metadata () -> Pattern Metadata ()) -> Pattern Metadata () -> Pattern Metadata () -> Pattern Metadata ()
+patternOperator :: (Metadata -> () -> Pattern Metadata () () -> Pattern Metadata () () -> Pattern Metadata () ()) -> Pattern Metadata () () -> Pattern Metadata () () -> Pattern Metadata () ()
 patternOperator op p1 p2 = op (metadataSpan p1 p2) () p1 p2
 
-annotation :: Parser (Pattern Metadata () -> Pattern Metadata ())
+annotation :: Parser (Pattern Metadata () () -> Pattern Metadata () ())
 annotation = do
   withMetadata $ do
     symbol_ ":"
     t <- parseType
     pure (`PAnnotation` t)
 
-asPattern :: Parser (Pattern Metadata () -> Pattern Metadata ())
+asPattern :: Parser (Pattern Metadata () () -> Pattern Metadata () ())
 asPattern = do
   withMetadata $ do
     lexeme_ "as"
@@ -61,56 +61,56 @@ asPattern = do
       _ ->
         fail "Expected a variable on the right-hand side of 'as'"
 
-patternOperators :: [[Operator Parser (Pattern Metadata ())]]
+patternOperators :: [[Operator Parser (Pattern Metadata () ())]]
 patternOperators =
   [ [InfixR (patternOperator PListCons <$ symbol_ "::")]
   , [InfixL (patternOperator POr <$ lexeme "or")]
   , [Postfix (foldl (.) id <$> some (asPattern <|> annotation))]
   ]
 
-parseWildcardPattern :: Parser (Pattern Metadata ())
+parseWildcardPattern :: Parser (Pattern Metadata () ())
 parseWildcardPattern =
   withMetadata $ do
     symbol_ "_"
     pure (`PAny` ())
 
-parseVariablePattern :: Parser (Pattern Metadata ())
+parseVariablePattern :: Parser (Pattern Metadata () ())
 parseVariablePattern =
   withMetadata $ do
     ll <- Label () <$> name
     pure (`PVariable` ll)
 
-parseLiteralPattern :: Parser (Pattern Metadata ())
+parseLiteralPattern :: Parser (Pattern Metadata () ())
 parseLiteralPattern =
   parseListLiteralPattern
     <|> parseIntegerLiteral
     <|> parseBasicLiteralPattern
 
-parseIntegerLiteral :: Parser (Pattern Metadata ())
+parseIntegerLiteral :: Parser (Pattern Metadata () ())
 parseIntegerLiteral =
   withMetadata $ do
     n <- Lexer.signed spaces (lexeme Lexer.decimal)
     pure (\loc -> PInteger loc () n)
 
-parseBasicLiteralPattern :: Parser (Pattern Metadata ())
+parseBasicLiteralPattern :: Parser (Pattern Metadata () ())
 parseBasicLiteralPattern = do
   withMetadata $ do
     lit <- Primitive.parseAtom
     pure (`PLiteral` lit)
 
-parseListLiteralPattern :: Parser (Pattern Metadata ())
+parseListLiteralPattern :: Parser (Pattern Metadata () ())
 parseListLiteralPattern =
   withMetadata $ do
     ps <- brackets (commaSep parsePattern)
     pure (\loc -> PListLiteral loc () ps)
 
-parseAtVariablePattern :: Parser (Pattern Metadata ())
+parseAtVariablePattern :: Parser (Pattern Metadata () ())
 parseAtVariablePattern = do
   withMetadata $ do
     p <- parseAtVar
     pure (`PAtVariable` p)
 
-parseAtFunction :: Parser (Pattern Metadata ())
+parseAtFunction :: Parser (Pattern Metadata () ())
 parseAtFunction = do
   withMetadata $ do
     n <- name
@@ -124,7 +124,7 @@ parseAtVar = do
   void (char '@')
   Label () <$> name
 
-parseConstructorPattern :: Parser (Pattern Metadata ())
+parseConstructorPattern :: Parser (Pattern Metadata () ())
 parseConstructorPattern =
   withMetadata $ do
     ll <- try parseQualifiedConstructor <|> parseSimpleConstructor
@@ -140,7 +140,7 @@ parseQualifiedConstructor = do
   n <- constructor
   pure (Label () (Text.intercalate "." ns <> "." <> n))
 
-recordFields :: Parser [(Name, Pattern Metadata ())]
+recordFields :: Parser [(Name, Pattern Metadata () ())]
 recordFields = commaSep1 (try normalField <|> shorthand)
  where
   normalField = do
@@ -153,7 +153,7 @@ recordFields = commaSep1 (try normalField <|> shorthand)
       n <- name
       pure (\loc -> (n, PShorthand loc (Label () n)))
 
-parseRecordPattern :: Parser (Pattern Metadata ())
+parseRecordPattern :: Parser (Pattern Metadata () ())
 parseRecordPattern =
   withMetadata $ do
     braces $ do
@@ -163,7 +163,7 @@ parseRecordPattern =
  where
   rest = pipe >> parsePattern
 
-parseTuplePattern :: Parser (Pattern Metadata ())
+parseTuplePattern :: Parser (Pattern Metadata () ())
 parseTuplePattern = do
   withMetadata $ do
     parens $ do

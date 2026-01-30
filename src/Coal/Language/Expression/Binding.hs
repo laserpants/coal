@@ -18,9 +18,9 @@ import qualified Data.Set as Set
 import Extras (Name)
 import GHC.Generics (Generic)
 
-data Binding e a t
-  = BPattern a (Pattern a t) (e a t)
-  | BFunction a Name (NonEmpty (Pattern a t)) (e a t)
+data Binding e a s t
+  = BPattern a (Pattern a s t) (e a s t)
+  | BFunction a Name (NonEmpty (Pattern a s t)) (e a s t)
   deriving
     ( Show
     , Eq
@@ -34,9 +34,9 @@ data Binding e a t
     , Generic
     )
 
-instance (Binary a, Binary t, Binary (e a t)) => Binary (Binding e a t)
+instance (Binary a, Binary s, Binary t, Binary (e a s t)) => Binary (Binding e a s t)
 
-instance (Data a, Data t) => BoundVars (Binding e a t) where
+instance (Data a, Data s, Data t) => BoundVars (Binding e a s t) where
   boundIn =
     \case
       BPattern _ p _ ->
@@ -44,7 +44,7 @@ instance (Data a, Data t) => BoundVars (Binding e a t) where
       BFunction _ name _ _ ->
         Set.singleton name
 
-instance (Data a, Data t, FreeVars (e a t) t) => FreeVars (Binding e a t) t where
+instance (Data a, Data s, Data t, FreeVars (e a s t) t) => FreeVars (Binding e a s t) t where
   freeIn =
     \case
       BPattern _ _ e ->

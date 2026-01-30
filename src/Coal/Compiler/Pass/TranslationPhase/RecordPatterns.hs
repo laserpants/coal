@@ -30,7 +30,7 @@ passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind Ind
 passRecordPatterns = Pass{runPass = compileRecordPatterns}
 
 compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a (Type TypeIndex Kind)))
+compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a () (Type TypeIndex Kind)))
 
 class RecordDesugarable a p where
   desugarRecordPatterns :: (Monad m) => p -> CompilerT a m p
@@ -44,7 +44,7 @@ instance (RecordDesugarable a p) => RecordDesugarable a [p] where
 instance (RecordDesugarable a p) => RecordDesugarable a (NonEmpty p) where
   desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (Data a, Monoid a) => RecordDesugarable a (Expression a IndexedType) where
+instance (Data a, Monoid a) => RecordDesugarable a (Expression a () IndexedType) where
   desugarRecordPatterns =
     \case
       EMatch a t e ks -> do
@@ -64,13 +64,13 @@ instance (Data a, Monoid a) => RecordDesugarable a (Expression a IndexedType) wh
       e ->
         pure e
 
-instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a IndexedType) where
+instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a () IndexedType) where
   desugarRecordPatterns =
     \case
       CGuard e ->
         CGuard <$> desugarRecordPatterns e
 
-desugarShorthandPatterns :: Pattern a IndexedType -> Pattern a IndexedType
+desugarShorthandPatterns :: Pattern a () IndexedType -> Pattern a () IndexedType
 desugarShorthandPatterns =
   \case
     PShorthand loc (Label t name) ->
@@ -78,7 +78,7 @@ desugarShorthandPatterns =
     p ->
       p
 
-instance (Data a, Monoid a) => RecordDesugarable a (Pattern a IndexedType) where
+instance (Data a, Monoid a) => RecordDesugarable a (Pattern a () IndexedType) where
   desugarRecordPatterns =
     \case
       PAnnotation a t p ->
@@ -108,7 +108,7 @@ extractRow e =
     _ ->
       error "Implementation error"
 
-extractVarName :: Maybe (Pattern a t) -> Name
+extractVarName :: Maybe (Pattern a () t) -> Name
 extractVarName =
   \case
     Just (PVariable _ (Label _ name)) ->
@@ -116,7 +116,7 @@ extractVarName =
     _ ->
       "_"
 
-desugar :: (Data a, Monoid a, Monad m) => IndexedType -> Expression a IndexedType -> [Clause a IndexedType] -> RecordEntry a -> Expression a IndexedType -> CompilerT a m (Expression a IndexedType)
+desugar :: (Data a, Monoid a, Monad m) => IndexedType -> Expression a () IndexedType -> [Clause a () IndexedType] -> RecordEntry a -> Expression a () IndexedType -> CompilerT a m (Expression a () IndexedType)
 desugar t0 e0 rest (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) (supplied (freshName "row"))
   (_, _, e1) <- foldrM go (v1, r1, e2 expr) (zip fields (name : names))

@@ -21,31 +21,31 @@ import Data.Set (unions)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
 
-data Pattern a t
+data Pattern a s t
   = -- | Type-annotated pattern
-    PAnnotation a (Type Parameter ()) (Pattern a t)
+    PAnnotation a (Type Parameter s) (Pattern a s t)
   | -- | Wildcard pattern
     PAny a t
   | -- | Variable pattern
     PVariable a (Label t)
   | -- | Data constructor pattern
-    PConstructor a (Label t) [Pattern a t]
+    PConstructor a (Label t) [Pattern a s t]
   | -- | Integer literal pattern
     PInteger a t Integer
   | -- | Literal pattern
     PLiteral a Primitive
   | -- | Record pattern
-    PRecord a t (Dictionary (Pattern a t)) (Maybe (Pattern a t))
+    PRecord a t (Dictionary (Pattern a s t)) (Maybe (Pattern a s t))
   | -- | List cons-operator
-    PListCons a t (Pattern a t) (Pattern a t)
+    PListCons a t (Pattern a s t) (Pattern a s t)
   | -- | List literal
-    PListLiteral a t [Pattern a t]
+    PListLiteral a t [Pattern a s t]
   | -- | Tuple pattern
-    PTuple a t (NonEmpty (Pattern a t))
+    PTuple a t (NonEmpty (Pattern a s t))
   | -- | Or-pattern
-    POr a t (Pattern a t) (Pattern a t)
+    POr a t (Pattern a s t) (Pattern a s t)
   | -- | As-pattern
-    PAs a (Label t) (Pattern a t)
+    PAs a (Label t) (Pattern a s t)
   | -- | Shorthand variable binding of the form { name }, which desugars to { name = name }
     PShorthand a (Label t)
   | -- | Recursive operator pattern used in fold expressions
@@ -67,9 +67,9 @@ data Pattern a t
     , Generic
     )
 
-instance (Binary a, Binary t) => Binary (Pattern a t)
+instance (Binary a, Binary s, Binary t) => Binary (Pattern a s t)
 
-instance (Data a, Data t) => BoundVars (Pattern a t) where
+instance (Data a, Data s, Data t) => BoundVars (Pattern a s t) where
   boundIn =
     \case
       PRecord _ _ d mp ->
@@ -83,4 +83,4 @@ instance (Data a, Data t) => BoundVars (Pattern a t) where
       p ->
         Set.fromList (universeBi p)
 
-type IndexedPattern a = Pattern a (Type TypeIndex Kind)
+type IndexedPattern a = Pattern a () (Type TypeIndex Kind)

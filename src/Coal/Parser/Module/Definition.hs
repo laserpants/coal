@@ -202,7 +202,7 @@ parseTopLevelFold = do
   cs <- try (nonEmpty (some parseTopLevelFoldClause)) -- <|> braces (nonEmpty (some parseTopLevelFoldClause))
   pure (DFold (Metadata start end) n (FoldDefinition (With [] <$> ann) cs))
 
-parseTopLevelFoldClause :: Parser (Clause Metadata ())
+parseTopLevelFoldClause :: Parser (Clause Metadata () ())
 parseTopLevelFoldClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern

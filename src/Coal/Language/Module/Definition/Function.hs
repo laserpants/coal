@@ -15,7 +15,7 @@ data FunctionDefinition a t = FunctionDefinition
   { functionDefinitionMetadata :: a
   , functionDefinitionAnnotation :: Maybe (With ParameterizedType)
   , functionDefinitionType :: With t
-  , functionDefinitionPatterns :: NonEmpty (Pattern a t)
-  , functionDefinitionExpression :: Expression a t
+  , functionDefinitionPatterns :: NonEmpty (Pattern a () t)
+  , functionDefinitionExpression :: Expression a () t
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

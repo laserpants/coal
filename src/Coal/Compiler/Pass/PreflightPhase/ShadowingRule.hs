@@ -37,7 +37,7 @@ instance (RuleContext e) => RuleContext [e] where
 instance (RuleContext e) => RuleContext (NonEmpty e) where
   detectShadowing = traverse . detectShadowing
 
-instance (Data t) => RuleContext (Expression Metadata t) where
+instance (Data t) => RuleContext (Expression Metadata () t) where
   detectShadowing names =
     \case
       EAnnotation loc t e ->
@@ -106,26 +106,26 @@ instance (Data t) => RuleContext (Expression Metadata t) where
       _ ->
         error "Not implemented"
 
-instance (Data t) => RuleContext (Clause Metadata t) where
+instance (Data t) => RuleContext (Clause Metadata () t) where
   detectShadowing names =
     \case
       EClause a p cs -> do
         names' <- addNames a (boundIn p) names
         EClause a p <$> detectShadowing names' cs
 
-instance (Data t) => RuleContext (Choice Expression Metadata t) where
+instance (Data t) => RuleContext (Choice Expression Metadata () t) where
   detectShadowing names =
     \case
       CPlain a gs e ->
         CPlain a <$> detectShadowing names gs <*> detectShadowing names e
 
-instance (Data t) => RuleContext (Guard Expression Metadata t) where
+instance (Data t) => RuleContext (Guard Expression Metadata () t) where
   detectShadowing names =
     \case
       CGuard e ->
         CGuard <$> detectShadowing names e
 
-instance (Data t) => RuleContext (Binding Expression Metadata t) where
+instance (Data t) => RuleContext (Binding Expression Metadata () t) where
   detectShadowing names =
     \case
       BPattern a p e -> do

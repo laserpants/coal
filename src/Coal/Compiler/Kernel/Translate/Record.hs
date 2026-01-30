@@ -17,7 +17,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary)
 
-translateRecord :: (Monad m) => (Expression a IndexedType -> CompilerT a m KernelExpr) -> Type o k -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> CompilerT a m KernelExpr
+translateRecord :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> Type o k -> Dictionary (Expression a () IndexedType) -> Maybe (Expression a () IndexedType) -> CompilerT a m KernelExpr
 translateRecord translate t d me = do
   exprs <- traverse translate d
   expr0 <- traverse translate me

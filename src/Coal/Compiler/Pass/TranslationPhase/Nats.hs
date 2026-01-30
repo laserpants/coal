@@ -56,7 +56,7 @@ convertConstructor =
     t ->
       pure t
 
-instance (Monoid a, Data a) => CompileNatsContext (Expression a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (Expression a () IndexedType) where
   compileNats = transformM (traverse convertConstructor <=< go)
    where
     go =
@@ -81,7 +81,7 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a IndexedType) whe
         e ->
           pure e
 
-instance (Monoid a) => CompileNatsContext (CompiledClause a IndexedType) where
+instance (Monoid a) => CompileNatsContext (CompiledClause a () IndexedType) where
   compileNats =
     \case
       ECompiledClause loc (Label _ "Succ" :| [Label _ s]) e -> do

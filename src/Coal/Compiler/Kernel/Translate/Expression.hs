@@ -22,7 +22,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Text as Text
 
-translateExpression :: (Monad m, Data a) => Expression a IndexedType -> CompilerT a m KernelExpr
+translateExpression :: (Monad m, Data a) => Expression a () IndexedType -> CompilerT a m KernelExpr
 translateExpression =
   \case
     EAnnotation _ _ e ->
@@ -129,7 +129,7 @@ translateExpression =
     _ ->
       error "Not implemented"
 
-translateBinding :: (Monad m, Data a) => Binding Expression a IndexedType -> CompilerT a m (Kernel.Binding Kernel.Type KernelExpr)
+translateBinding :: (Monad m, Data a) => Binding Expression a () IndexedType -> CompilerT a m (Kernel.Binding Kernel.Type KernelExpr)
 translateBinding =
   \case
     BPattern _ (PVariable _ ll) e -> do
@@ -138,7 +138,7 @@ translateBinding =
     _ ->
       error "Not implemented"
 
-translateClause :: (Monad m, Data a) => CompiledClause a IndexedType -> CompilerT a m (Kernel.Clause Kernel.Type KernelExpr)
+translateClause :: (Monad m, Data a) => CompiledClause a () IndexedType -> CompilerT a m (Kernel.Clause Kernel.Type KernelExpr)
 translateClause =
   \case
     ECompiledClause _ (ll :| lls) e -> do

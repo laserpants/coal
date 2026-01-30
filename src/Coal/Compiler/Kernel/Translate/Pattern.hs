@@ -11,7 +11,7 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Data.Data (Data)
 
-translatePattern :: (Monad m, Data a) => Pattern a IndexedType -> CompilerT a m (Label Kernel.Type)
+translatePattern :: (Monad m, Data a) => Pattern a () IndexedType -> CompilerT a m (Label Kernel.Type)
 translatePattern =
   \case
     PAny a t ->

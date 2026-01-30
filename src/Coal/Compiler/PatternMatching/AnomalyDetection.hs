@@ -157,7 +157,7 @@ isComplete names@(name : _) = do
       , ("$Record", ["$Record"])
       ]
 
-translatePattern :: Pattern a t -> Pat
+translatePattern :: Pattern a () t -> Pat
 translatePattern =
   \case
     PAnnotation _ _ p ->
@@ -202,5 +202,5 @@ translatePattern =
 tupleCons :: Int -> Name
 tupleCons n = "%Tuple" <> showt n
 
-listCons :: Pattern a t -> Pat -> Pat
+listCons :: Pattern a () t -> Pat -> Pat
 listCons p q = Con "::" [translatePattern p, q]

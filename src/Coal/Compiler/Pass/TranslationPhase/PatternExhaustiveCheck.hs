@@ -66,7 +66,7 @@ instance PatternExhaustiveCheckContext (ConstantDefinition Metadata t) where
       ConstantDefinition loc w1 w2 e1 ->
         ConstantDefinition loc w1 w2 <$> patternExhaustiveCheck name e1
 
-instance PatternExhaustiveCheckContext (Binding Expression Metadata t) where
+instance PatternExhaustiveCheckContext (Binding Expression Metadata () t) where
   patternExhaustiveCheck name =
     \case
       BPattern a p e ->
@@ -74,7 +74,7 @@ instance PatternExhaustiveCheckContext (Binding Expression Metadata t) where
       BFunction a n ps e ->
         BFunction a n ps <$> patternExhaustiveCheck name e
 
-instance PatternExhaustiveCheckContext (Choice Expression Metadata t) where
+instance PatternExhaustiveCheckContext (Choice Expression Metadata () t) where
   patternExhaustiveCheck name =
     \case
       CPlain a gs e ->
@@ -82,19 +82,19 @@ instance PatternExhaustiveCheckContext (Choice Expression Metadata t) where
           <$> traverse (patternExhaustiveCheck name) gs
           <*> patternExhaustiveCheck name e
 
-instance PatternExhaustiveCheckContext (Guard Expression Metadata t) where
+instance PatternExhaustiveCheckContext (Guard Expression Metadata () t) where
   patternExhaustiveCheck name =
     \case
       CGuard e ->
         CGuard <$> patternExhaustiveCheck name e
 
-instance PatternExhaustiveCheckContext (Clause Metadata t) where
+instance PatternExhaustiveCheckContext (Clause Metadata () t) where
   patternExhaustiveCheck name =
     \case
       EClause a p cs ->
         EClause a p <$> traverse (patternExhaustiveCheck name) cs
 
-instance PatternExhaustiveCheckContext (Expression Metadata t) where
+instance PatternExhaustiveCheckContext (Expression Metadata () t) where
   patternExhaustiveCheck name =
     \case
       EAnnotation a t e ->
@@ -167,7 +167,7 @@ instance PatternExhaustiveCheckContext (Expression Metadata t) where
       e@EFold{} ->
         pure e
 
-checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata t) -> CompilerT Metadata m (NonEmpty (Clause Metadata t))
+checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata () t) -> CompilerT Metadata m (NonEmpty (Clause Metadata () t))
 checkExhaustive name loc cs = do
   isExhaustive <- exhaustive patterns
   unless isExhaustive $ do
@@ -176,7 +176,7 @@ checkExhaustive name loc cs = do
  where
   patterns = NonEmpty.toList (translatePattern . clausePattern <$> cs)
 
-clausePattern :: Clause a t -> Pattern a t
+clausePattern :: Clause a () t -> Pattern a () t
 clausePattern =
   \case
     EClause _ p _ ->

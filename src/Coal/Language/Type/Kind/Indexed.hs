@@ -130,11 +130,21 @@ instance (ToKindIndexed t u) => ToKindIndexed (With t) (With u) where
           <$> toKindIndexed traits
           <*> toKindIndexed t
 
-instance (ToKindIndexed t u) => ToKindIndexed (Expression a t) (Expression a u) where
-  toKindIndexed = traverse toKindIndexed
+instance (ToKindIndexed t u) => ToKindIndexed (Expression a k t) (Expression a Kind u) where
+  toKindIndexed =
+    \case
+      EAnnotation a t e ->
+        EAnnotation a <$> toKindIndexed t <*> toKindIndexed e
+      EApplication a t e es ->
+        EApplication a <$> toKindIndexed t <*> toKindIndexed e <*> toKindIndexed es
 
-instance (ToKindIndexed t u) => ToKindIndexed (Pattern a t) (Pattern a u) where
-  toKindIndexed = traverse toKindIndexed
+instance (ToKindIndexed t u) => ToKindIndexed (Pattern a k t) (Pattern a Kind u) where
+  toKindIndexed =
+    \case
+      PAnnotation a t p ->
+        PAnnotation a <$> toKindIndexed t <*> toKindIndexed p
+      PAny a p ->
+        PAny a <$> toKindIndexed p
 
 instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind)) => ToKindIndexed (Scheme o k t) (Scheme o Kind u) where
   toKindIndexed =

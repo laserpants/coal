@@ -45,7 +45,7 @@ instance (AliasContext t) => AliasContext (With t) where
 instance (AliasContext t) => AliasContext (Row o k t) where
   expandAliases = traverse expandAliases
 
-instance (AliasContext t, Data a, Data t) => AliasContext (Pattern a t) where
+instance (AliasContext t, Data a, Data t) => AliasContext (Pattern a () t) where
   expandAliases =
     transformM $
       \case
@@ -54,7 +54,7 @@ instance (AliasContext t, Data a, Data t) => AliasContext (Pattern a t) where
         p ->
           pure p
 
-instance (AliasContext t, Data t, Data a) => AliasContext (Expression a t) where
+instance (AliasContext t, Data t, Data a) => AliasContext (Expression a () t) where
   expandAliases =
     transformM $
       \case
@@ -65,7 +65,7 @@ instance (AliasContext t, Data t, Data a) => AliasContext (Expression a t) where
         e ->
           pure e
 
-instance (AliasContext t, Data t, Data a) => AliasContext (Binding Expression a t) where
+instance (AliasContext t, Data t, Data a) => AliasContext (Binding Expression a () t) where
   expandAliases =
     \case
       BPattern a p e ->

@@ -39,7 +39,7 @@ instance (TopLevelFoldContext a e) => TopLevelFoldContext a [e] where
 instance (TopLevelFoldContext a e) => TopLevelFoldContext a (NonEmpty e) where
   expandFolds name = traverse . expandFolds name
 
-instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a ()) where
+instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a () ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
@@ -56,16 +56,16 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a ()) where
           (transform eliminateAtPatterns p)
           <$> expandFolds name (atLabels p) cs
 
-instance (Monoid a, Data a) => TopLevelFoldContext a (Choice Expression a ()) where
+instance (Monoid a, Data a) => TopLevelFoldContext a (Choice Expression a () ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
         CPlain a gs <$> expandFolds name lls e
 
-instance (Monoid a, Data a) => TopLevelFoldContext a (Expression a ()) where
+instance (Monoid a, Data a) => TopLevelFoldContext a (Expression a () ()) where
   expandFolds = flip . foldrM . updateName
 
-updateName :: (Monad m, Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () -> CompilerT a m (Expression a ())
+updateName :: (Monad m, Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a () () -> CompilerT a m (Expression a () ())
 updateName _ (name, label) =
   pure
     . replace
@@ -76,7 +76,7 @@ updateName _ (name, label) =
             (EVariable loc label :| [])
       )
 
-eliminateAtPatterns :: Pattern a () -> Pattern a ()
+eliminateAtPatterns :: Pattern a () () -> Pattern a () ()
 eliminateAtPatterns =
   \case
     PNamedFold a _ ll ->
@@ -86,7 +86,7 @@ eliminateAtPatterns =
     p ->
       p
 
-atLabels :: (Data a, Data t) => Pattern a t -> [(Name, Label t)]
+atLabels :: (Data a, Data t) => Pattern a () t -> [(Name, Label t)]
 atLabels = execWriter . transformM go
  where
   go =
@@ -106,7 +106,7 @@ compileTopLevelFolds =
     o ->
       pure o
 
-expandTopLevelFold :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a ()) -> CompilerT a m (Expression a ())
+expandTopLevelFold :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a () ()) -> CompilerT a m (Expression a () ())
 expandTopLevelFold clauses = do
   name <- supplied (freshName "fold")
   let var = name <> ".expr"

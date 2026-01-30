@@ -32,7 +32,7 @@ collectExampleConstraintsSpec1 = (ms, outs)
 --                print_name(t)
 --          };
 
-fixture1 :: Expression () IndexedType
+fixture1 :: Expression () () IndexedType
 fixture1 =
   ELet
     ()

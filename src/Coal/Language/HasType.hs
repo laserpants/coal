@@ -50,7 +50,7 @@ instance HasType o k Primitive where
       LBignum{} ->
         TIntrinsic IBignum
 
-instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Pattern a (Type o k)) where
+instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Pattern a s (Type o k)) where
   typeOf =
     \case
       PLiteral _ t ->
@@ -60,14 +60,14 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Pattern a (Typ
       p ->
         head (universeBi p)
 
-instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Guard Expression a (Type o k)) where
+instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Guard Expression a s (Type o k)) where
   typeOf = head . universeBi
 
 instance (HasType o k t) => HasType o k (Label t) where
   typeOf (Label t _) =
     typeOf t
 
-instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Expression a (Type o k)) where
+instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Expression a s (Type o k)) where
   typeOf =
     \case
       ELiteral _ t ->

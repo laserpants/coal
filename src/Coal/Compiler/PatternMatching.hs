@@ -47,27 +47,27 @@ instance (MatchExpressionContext a c) => MatchExpressionContext a (Dictionary c)
 type MatchClasses a t = (Show a, Data a, Monoid a, Show t, Data t, TypeProxy t, Ord t)
 
 instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext a (Module a k t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () t -> CompilerT a m (Expression a () t))
 
 instance (Eq a, MatchClasses a t, Data k) => MatchExpressionContext a (Definition a k t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () t -> CompilerT a m (Expression a () t))
 
 instance (Eq a, MatchClasses a t) => MatchExpressionContext a (FunctionDefinition a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () t -> CompilerT a m (Expression a () t))
 
 instance (Eq a, MatchClasses a t) => MatchExpressionContext a (ConstantDefinition a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () t -> CompilerT a m (Expression a () t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Clause a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Clause a () t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () t -> CompilerT a m (Expression a () t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Binding Expression a t) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a t -> CompilerT a m (Expression a t))
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Binding Expression a () t) where
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () t -> CompilerT a m (Expression a () t))
 
-instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Expression a t) where
+instance (Eq a, MatchClasses a t) => MatchExpressionContext a (Expression a () t) where
   compileMatchExprs = transformM compileMatchExprsE
 
-compileMatchExprsE :: (Eq a, MatchClasses a t, Monad m) => Expression a t -> CompilerT a m (Expression a t)
+compileMatchExprsE :: (Eq a, MatchClasses a t, Monad m) => Expression a () t -> CompilerT a m (Expression a () t)
 compileMatchExprsE =
   \case
     EMatch _ _ e cs -> do
@@ -76,19 +76,19 @@ compileMatchExprsE =
     e ->
       pure e
 
-compileClauses :: (Eq a, MatchClasses a t, Monad m) => Label t -> NonEmpty (Clause a t) -> CompilerT a m (Expression a t)
+compileClauses :: (Eq a, MatchClasses a t, Monad m) => Label t -> NonEmpty (Clause a () t) -> CompilerT a m (Expression a () t)
 compileClauses ll cs = compileEnvelope <$> matchPatterns [ll] eqs MFail
  where
   eqs = uncurry patternEquation . translateClause <$> toList cs
 
-type TranslatedClause e a t = ([EnvelopePattern (e a) t], EnvelopeExpression (e a) t)
+type TranslatedClause e a t = ([EnvelopePattern (e a ()) t], EnvelopeExpression (e a ()) t)
 
-translateClause :: (MatchClasses a t) => Clause a t -> TranslatedClause Expression a t
+translateClause :: (MatchClasses a t) => Clause a () t -> TranslatedClause Expression a t
 translateClause (EClause _ p (CPlain _ _ e :| [])) =
   ([translatePattern p], MExpression e)
 translateClause _ = error "Implementation error"
 
-translatePattern :: (MatchClasses a t) => Pattern a t -> EnvelopePattern (Expression a) t
+translatePattern :: (MatchClasses a t) => Pattern a () t -> EnvelopePattern (Expression a ()) t
 translatePattern =
   \case
     PVariable _ ll ->
@@ -112,6 +112,6 @@ translatePattern =
     _ ->
       error "Implementation error"
 
-translateListLiteral :: (MatchClasses a t) => a -> t -> [Pattern a t] -> Pattern a t
+translateListLiteral :: (MatchClasses a t) => a -> t -> [Pattern a () t] -> Pattern a () t
 translateListLiteral a t [] = PConstructor a (Label t "$Nil") []
 translateListLiteral a t (p : ps) = PConstructor a (Label t "$Cons") [p, translateListLiteral a t ps]

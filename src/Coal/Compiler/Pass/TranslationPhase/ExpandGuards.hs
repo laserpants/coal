@@ -25,11 +25,11 @@ passExpandGuards = Pass{runPass = pass}
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass = transformBiM expandExpression
 
-trivial :: Clause a t -> Bool
+trivial :: Clause a () t -> Bool
 trivial (EClause _ _ (CPlain _ [] _ :| [])) = True
 trivial _ = False
 
-expandExpression :: (Monad m) => Expression Metadata IndexedType -> CompilerT Metadata m (Expression Metadata IndexedType)
+expandExpression :: (Monad m) => Expression Metadata () IndexedType -> CompilerT Metadata m (Expression Metadata () IndexedType)
 expandExpression =
   \case
     e@(EMatch _ _ _ cs)
@@ -68,7 +68,7 @@ instance (ExpandGuards a) => ExpandGuards (Map k a) where
 instance (ExpandGuards a) => ExpandGuards (Maybe a) where
   expandGuards = traverseM expandGuards
 
-expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata IndexedType -> [Clause Metadata IndexedType] -> CompilerT Metadata m (Clause Metadata IndexedType)
+expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata () IndexedType -> [Clause Metadata () IndexedType] -> CompilerT Metadata m (Clause Metadata () IndexedType)
 expandClauseGuards _ _ _ (c@(EClause _ _ (CPlain _ [] _ :| [])) : _) =
   pure c
 expandClauseGuards a1 t var (EClause a2 p choices : clauses) = do
@@ -77,11 +77,11 @@ expandClauseGuards a1 t var (EClause a2 p choices : clauses) = do
   pure $ EClause a2 p (CPlain a1 [] e1 :| [])
  where
   EClause a3 q cs2 = last clauses
-  go :: (Monad m) => Choice Expression Metadata IndexedType -> Expression Metadata IndexedType -> CompilerT Metadata m (Expression Metadata IndexedType)
+  go :: (Monad m) => Choice Expression Metadata () IndexedType -> Expression Metadata () IndexedType -> CompilerT Metadata m (Expression Metadata () IndexedType)
   go (CPlain a gs e) e1 =
     pure $ EIf a (typeOf e1) (foldr1 (conjunction a) (guardExpression <$> gs)) e e1
 expandClauseGuards _ _ _ _ =
   error "Implementation error"
 
-conjunction :: Metadata -> Expression Metadata IndexedType -> Expression Metadata IndexedType -> Expression Metadata IndexedType
+conjunction :: Metadata -> Expression Metadata () IndexedType -> Expression Metadata () IndexedType -> Expression Metadata () IndexedType
 conjunction a e1 e2 = EApplication a (TIntrinsic IBool) e1 (e2 :| [])

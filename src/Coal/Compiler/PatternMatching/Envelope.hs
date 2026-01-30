@@ -37,7 +37,7 @@ data EnvelopeExpression e t
 class EnvelopeHost e t where
   replace :: Name -> Name -> e t -> e t
 
-instance (Ord t, Data a, Data t) => EnvelopeHost (Expression a) t where
+instance (Ord t, Data a, Data t) => EnvelopeHost (Expression a ()) t where
   replace = rename
 
 instance (EnvelopeHost a t) => EnvelopeHost (EnvelopeClause a) t where

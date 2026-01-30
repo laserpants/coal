@@ -25,7 +25,7 @@ import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, some, try
 import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
-parseAtom :: Parser (Expression Metadata ())
+parseAtom :: Parser (Expression Metadata () ())
 parseAtom =
   try parseDoBlock
     <|> try parseFunctionApplication
@@ -43,7 +43,7 @@ parseAtom =
     <|> try (parens parseExpression)
     <|> parseTupleExpression
 
-parseDoBlock :: Parser (Expression Metadata ())
+parseDoBlock :: Parser (Expression Metadata () ())
 parseDoBlock = do
   withMetadata $ do
     lexeme_ "do"
@@ -51,7 +51,7 @@ parseDoBlock = do
       nonEmpty $ some (try parseDoExpression <|> parseVoidDoExpression)
     pure (`EDoBlock` exprs)
 
-parseDoExpression :: Parser (Pattern Metadata (), Expression Metadata ())
+parseDoExpression :: Parser (Pattern Metadata () (), Expression Metadata () ())
 parseDoExpression = do
   p <- parsePattern
   symbol_ "<-"
@@ -59,35 +59,35 @@ parseDoExpression = do
   symbol_ ";"
   pure (p, e)
 
-parseVoidDoExpression :: Parser (Pattern Metadata (), Expression Metadata ())
+parseVoidDoExpression :: Parser (Pattern Metadata () (), Expression Metadata () ())
 parseVoidDoExpression = do
   e <- parseExpression
   symbol_ ";"
   withMetadata $
     pure (\loc -> (PAny loc (), e))
 
-parseSelectorOp :: Parser (Expression Metadata () -> Expression Metadata ())
+parseSelectorOp :: Parser (Expression Metadata () () -> Expression Metadata () ())
 parseSelectorOp = do
   start <- getSourcePos
   field <- try (symbol_ "." <* notFollowedBy (char '|')) *> (name <|> constructor)
   end <- getSourcePos
   pure (\expr -> selector expr (Metadata start end) field)
 
-selectorPostfix :: Operator Parser (Expression Metadata ())
+selectorPostfix :: Operator Parser (Expression Metadata () ())
 selectorPostfix = Postfix (foldl (flip (.)) id <$> some parseSelectorOp)
 
-parseExpression :: Parser (Expression Metadata ())
+parseExpression :: Parser (Expression Metadata () ())
 parseExpression = makeExprParser parseAtom operator
 
-selector :: Expression Metadata () -> Metadata -> Name -> Expression Metadata ()
+selector :: Expression Metadata () () -> Metadata -> Name -> Expression Metadata () ()
 selector expr loc lname = ESelect loc (Label () lname) expr
 
-parseUnit :: Parser (NonEmpty (Expression Metadata ()))
+parseUnit :: Parser (NonEmpty (Expression Metadata () ()))
 parseUnit =
   withMetadata $ do
     pure (\loc -> ELiteral loc LUnit :| [])
 
-parseFunctionApplication :: Parser (Expression Metadata ())
+parseFunctionApplication :: Parser (Expression Metadata () ())
 parseFunctionApplication =
   withMetadata $ do
     f <-
@@ -98,7 +98,7 @@ parseFunctionApplication =
     xs <- parens (nonEmptyOr parseUnit (commaSep parseExpression))
     pure (\loc -> EApplication loc () f xs)
 
-parseFFICall :: Parser (Expression Metadata ())
+parseFFICall :: Parser (Expression Metadata () ())
 parseFFICall =
   withMetadata $ do
     symbol_ "#"
@@ -111,7 +111,7 @@ parseFFICall =
     cont <- parens parseExpression
     pure (\loc -> EFFICall loc () (Label t n) args cont)
 
-parseDataConstructor :: Parser (Expression Metadata ())
+parseDataConstructor :: Parser (Expression Metadata () ())
 parseDataConstructor =
   withMetadata $ do
     ll <- try parseQualifiedConstructor <|> parseSimpleConstructor
@@ -126,14 +126,14 @@ parseQualifiedConstructor = do
   n <- constructor
   pure (Label () (Text.intercalate "." ns <> "." <> n))
 
-patternBinding :: Parser (Binding Expression Metadata ())
+patternBinding :: Parser (Binding Expression Metadata () ())
 patternBinding =
   withMetadata $ do
     p <- parsePattern <* symbol "="
     e <- parseExpression
     pure (\loc -> BPattern loc p e)
 
-functionBinding :: Parser (Binding Expression Metadata ())
+functionBinding :: Parser (Binding Expression Metadata () ())
 functionBinding =
   withMetadata $ do
     n <- name
@@ -142,17 +142,17 @@ functionBinding =
     e <- parseExpression
     pure (\loc -> BFunction loc n ps e)
 
-parseBinding :: Parser (Binding Expression Metadata ())
+parseBinding :: Parser (Binding Expression Metadata () ())
 parseBinding = try functionBinding <|> patternBinding
 
-parseLetExpression :: Parser (Expression Metadata ())
+parseLetExpression :: Parser (Expression Metadata () ())
 parseLetExpression =
   withMetadata $ do
     b <- lexeme_ "let" *> nonEmpty (semicolonSep1 parseBinding)
     e <- lexeme_ "in" *> parseExpression
     pure (\loc -> ELet loc b e)
 
-parseChoice :: Parser (Choice Expression Metadata ())
+parseChoice :: Parser (Choice Expression Metadata () ())
 parseChoice =
   withMetadata $ do
     gs <- option [] (parseOtherwise <|> parseGuard)
@@ -160,26 +160,26 @@ parseChoice =
     e <- parseExpression
     pure (\loc -> CPlain loc gs e)
 
-parseOtherwise :: Parser [Guard Expression Metadata ()]
+parseOtherwise :: Parser [Guard Expression Metadata () ()]
 parseOtherwise = do
   withMetadata $ do
     lexeme_ "otherwise"
     pure (\loc -> [CGuard (ELiteral loc (LBool True))])
 
-parseGuard :: Parser [Guard Expression Metadata ()]
+parseGuard :: Parser [Guard Expression Metadata () ()]
 parseGuard = do
   lexeme_ "when"
   g <- CGuard <$> parens parseExpression
   pure [g]
 
-parseClause :: Parser (Clause Metadata ())
+parseClause :: Parser (Clause Metadata () ())
 parseClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
     cs <- nonEmpty (some parseChoice)
     pure (\loc -> EClause loc p cs)
 
-parseFoldExpression :: Parser (Expression Metadata ())
+parseFoldExpression :: Parser (Expression Metadata () ())
 parseFoldExpression = do
   withMetadata $ do
     lexeme_ "fold"
@@ -187,7 +187,7 @@ parseFoldExpression = do
     cs <- braces (nonEmpty (some parseClause))
     pure (\loc -> EFold loc () es cs)
 
-parseSpecialNameExpression :: Parser (Expression Metadata ())
+parseSpecialNameExpression :: Parser (Expression Metadata () ())
 parseSpecialNameExpression =
   withMetadata $ do
     spec <-
@@ -232,7 +232,7 @@ parseSpecialNameExpression =
         <|> "process$_duplicate"
     pure (\ll -> EVariable ll (Label () spec))
 
-parseVariableExpression :: Parser (Expression Metadata ())
+parseVariableExpression :: Parser (Expression Metadata () ())
 parseVariableExpression =
   withMetadata $ do
     ll <- try parseQualifiedName <|> (Label () <$> name)
@@ -244,21 +244,21 @@ parseQualifiedName = do
   n <- name
   pure (Label () (Text.intercalate "." ns <> "." <> n))
 
-parseMatchClause :: Parser (Clause Metadata ())
+parseMatchClause :: Parser (Clause Metadata () ())
 parseMatchClause =
   withMetadata $ do
     p <- symbol_ "|" *> parsePattern
     cs <- nonEmpty (some parseChoice)
     pure (\loc -> EClause loc p cs)
 
-parseLambdaMatchExpression :: Parser (Expression Metadata ())
+parseLambdaMatchExpression :: Parser (Expression Metadata () ())
 parseLambdaMatchExpression = do
   withMetadata $ do
     lexeme_ "match"
     cs <- braces (nonEmpty (some parseMatchClause))
     pure (\loc -> ELambdaMatch loc () cs)
 
-parseMatchExpression :: Parser (Expression Metadata ())
+parseMatchExpression :: Parser (Expression Metadata () ())
 parseMatchExpression = do
   withMetadata $ do
     lexeme_ "match"
@@ -266,7 +266,7 @@ parseMatchExpression = do
     cs <- braces (nonEmpty (some parseMatchClause))
     pure (\loc -> EMatch loc () e cs)
 
-parseIfExpression :: Parser (Expression Metadata ())
+parseIfExpression :: Parser (Expression Metadata () ())
 parseIfExpression =
   withMetadata $ do
     e1 <- lexeme_ "if" *> parseExpression
@@ -274,14 +274,14 @@ parseIfExpression =
     e3 <- lexeme_ "else" *> parseExpression
     pure (\loc -> EIf loc () e1 e2 e3)
 
-parseLambdaExpression :: Parser (Expression Metadata ())
+parseLambdaExpression :: Parser (Expression Metadata () ())
 parseLambdaExpression =
   withMetadata $ do
     ps <- lexeme_ "fn" *> parens (nonEmpty (commaSep1 parsePattern))
     e <- symbol_ "=>" *> parseExpression
     pure (\loc -> ELambda loc ps e)
 
-parseRecordExpression :: Parser (Expression Metadata ())
+parseRecordExpression :: Parser (Expression Metadata () ())
 parseRecordExpression = do
   withMetadata $ do
     braces $ do
@@ -291,7 +291,7 @@ parseRecordExpression = do
  where
   rest = pipe >> parseExpression
 
-parseTupleExpression :: Parser (Expression Metadata ())
+parseTupleExpression :: Parser (Expression Metadata () ())
 parseTupleExpression = do
   withMetadata $ do
     parens $ do
@@ -300,13 +300,13 @@ parseTupleExpression = do
         [] -> pure (`ELiteral` LUnit)
         (e : es) -> pure (\loc -> ETuple loc () (e :| es))
 
-parseInt :: Parser (Expression Metadata ())
+parseInt :: Parser (Expression Metadata () ())
 parseInt = do
   withMetadata $ do
     n <- Lexer.signed spaces (lexeme Lexer.decimal)
     pure (`fromLiteral` n)
 
-fromLiteral :: Metadata -> Integer -> Expression Metadata ()
+fromLiteral :: Metadata -> Integer -> Expression Metadata () ()
 fromLiteral loc n
   | n <= fromIntegral (maxBound :: Int32) =
       EApplication loc () (EVariable loc (Label () "from_int32")) (ELiteral loc (LInt32 (fromIntegral n)) :| [])
@@ -325,32 +325,32 @@ fromLiteral loc n
             :| []
         )
 
-parseListLiteral :: Parser (Expression Metadata ())
+parseListLiteral :: Parser (Expression Metadata () ())
 parseListLiteral =
   withMetadata $ do
     es <- brackets (commaSep parseExpression)
     pure (\loc -> EListLiteral loc () es)
 
-parseLiteralExpression :: Parser (Expression Metadata ())
+parseLiteralExpression :: Parser (Expression Metadata () ())
 parseLiteralExpression = parseListLiteral <|> parsePrimitive <|> parseInt
 
-unaryOperator :: UnaryOperator -> Expression Metadata () -> Expression Metadata ()
+unaryOperator :: UnaryOperator -> Expression Metadata () () -> Expression Metadata () ()
 unaryOperator op e1 =
   EApplication meta () (EUnaryOperator meta () op) (e1 :| [])
  where
   meta = metadataSpan e1 e1
 
-binaryOperator :: BinaryOperator -> Expression Metadata () -> Expression Metadata () -> Expression Metadata ()
+binaryOperator :: BinaryOperator -> Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ()
 binaryOperator op e1 e2 =
   EApplication meta () (EBinaryOperator meta () op) (e1 :| [e2])
  where
   meta = metadataSpan e1 e2
 
-listCons :: Expression Metadata () -> Expression Metadata () -> Expression Metadata ()
+listCons :: Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ()
 listCons e1 e2 = EListCons (metadataSpan e1 e2) () e1 e2
 
 -- TODO: DRY
-parseAdditionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseAdditionOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseAdditionOperator =
   withMetadata $
     pure
@@ -362,7 +362,7 @@ parseAdditionOperator =
             (lhs :| [rhs])
       )
 
-parseSubtractionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseSubtractionOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseSubtractionOperator =
   withMetadata $
     pure
@@ -374,7 +374,7 @@ parseSubtractionOperator =
             (lhs :| [rhs])
       )
 
-parseMultiplicationOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseMultiplicationOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseMultiplicationOperator =
   withMetadata $
     pure
@@ -386,7 +386,7 @@ parseMultiplicationOperator =
             (lhs :| [rhs])
       )
 
-parseDivisionOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseDivisionOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseDivisionOperator =
   withMetadata $
     pure
@@ -398,7 +398,7 @@ parseDivisionOperator =
             (lhs :| [rhs])
       )
 
-parseModulusOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseModulusOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseModulusOperator =
   withMetadata $
     pure
@@ -410,7 +410,7 @@ parseModulusOperator =
             (lhs :| [rhs])
       )
 
-parseExponentiationOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseExponentiationOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseExponentiationOperator =
   withMetadata $
     pure
@@ -422,7 +422,7 @@ parseExponentiationOperator =
             (lhs :| [rhs])
       )
 
-parseSemigroupOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseSemigroupOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseSemigroupOperator =
   withMetadata $
     pure
@@ -434,7 +434,7 @@ parseSemigroupOperator =
             (lhs :| [rhs])
       )
 
-parseEqualityOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseEqualityOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseEqualityOperator =
   withMetadata $
     pure
@@ -446,7 +446,7 @@ parseEqualityOperator =
             (lhs :| [rhs])
       )
 
-parseInequalityOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseInequalityOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseInequalityOperator =
   withMetadata $
     pure
@@ -458,7 +458,7 @@ parseInequalityOperator =
             (lhs :| [rhs])
       )
 
-parseLessThanOrEqualOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseLessThanOrEqualOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseLessThanOrEqualOperator =
   withMetadata $
     pure
@@ -470,7 +470,7 @@ parseLessThanOrEqualOperator =
             (lhs :| [rhs])
       )
 
-parseGreaterThanOrEqualOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseGreaterThanOrEqualOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseGreaterThanOrEqualOperator =
   withMetadata $
     pure
@@ -482,7 +482,7 @@ parseGreaterThanOrEqualOperator =
             (lhs :| [rhs])
       )
 
-parseLessThanOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseLessThanOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseLessThanOperator =
   withMetadata $
     pure
@@ -494,7 +494,7 @@ parseLessThanOperator =
             (lhs :| [rhs])
       )
 
-parseGreaterThanOperator :: Parser (Expression Metadata () -> Expression Metadata () -> Expression Metadata ())
+parseGreaterThanOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
 parseGreaterThanOperator =
   withMetadata $
     pure
@@ -506,12 +506,12 @@ parseGreaterThanOperator =
             (lhs :| [rhs])
       )
 
-fixity9 :: [Operator Parser (Expression Metadata ())]
+fixity9 :: [Operator Parser (Expression Metadata () ())]
 fixity9 =
   [ InfixR (binaryOperator OReverseComposition <$ symbol "<<")
   ]
 
-negationOperator :: Parser (Expression Metadata () -> Expression Metadata ())
+negationOperator :: Parser (Expression Metadata () () -> Expression Metadata () ())
 negationOperator =
   withMetadata $ do
     symbol_ "-"
@@ -523,7 +523,7 @@ negationOperator =
           (EVariable loc (Label () "negate"))
           (e :| [])
 
-fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1, fixity0 :: [Operator Parser (Expression Metadata ())]
+fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1, fixity0 :: [Operator Parser (Expression Metadata () ())]
 fixity8 =
   [ Prefix negationOperator
   , Prefix (unaryOperator OLogicalNot <$ (symbol "!" <* notFollowedBy (char '=')))
@@ -591,7 +591,7 @@ fixity0 =
   , InfixR (binaryOperator OForwardComposition <$ symbol ">>")
   ]
 
-annotation :: Parser (Expression Metadata () -> Expression Metadata ())
+annotation :: Parser (Expression Metadata () () -> Expression Metadata () ())
 annotation = do
   start <- getSourcePos
   symbol_ ":"
@@ -599,7 +599,7 @@ annotation = do
   end <- getSourcePos
   pure (EAnnotation (Metadata start end) t)
 
-operator :: [[Operator Parser (Expression Metadata ())]]
+operator :: [[Operator Parser (Expression Metadata () ())]]
 operator =
   [ [selectorPostfix]
   , fixity9

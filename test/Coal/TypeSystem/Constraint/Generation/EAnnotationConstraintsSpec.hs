@@ -16,7 +16,7 @@ collectEAnnotationConstraintsSpecAll = do
   print collectEAnnotationConstraintsSpec3
   print collectEAnnotationConstraintsSpec4
 
-fixture1 :: Expression () IndexedType
+fixture1 :: Expression () () IndexedType
 fixture1 =
   EAnnotation () (TIntrinsic IInt32) (ELiteral () (LInt32 1))
 
@@ -45,7 +45,7 @@ collectEAnnotationConstraintsSpec2 = null ms && constraint1 `elem` rights outs
       , constraintsGenContextModules = emptyModuleBuild
       }
 
-fixture2 :: Expression () IndexedType
+fixture2 :: Expression () () IndexedType
 fixture2 =
   EAnnotation () (TIntrinsic IBool) (ELiteral () (LInt32 1))
 
@@ -63,7 +63,7 @@ collectEAnnotationConstraintsSpec3 = null ms && constraint2 `elem` rights outs
       , constraintsGenContextModules = emptyModuleBuild
       }
 
-fixture3 :: Expression () IndexedType
+fixture3 :: Expression () () IndexedType
 fixture3 =
   EAnnotation () (TVariable (Parameter () "a")) (ELiteral () (LInt32 1))
 

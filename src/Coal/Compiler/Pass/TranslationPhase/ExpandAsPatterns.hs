@@ -29,7 +29,7 @@ instance (TransformContext e) => TransformContext [e] where
 instance (TransformContext e) => TransformContext (NonEmpty e) where
   expandAsPatterns = fmap expandAsPatterns
 
-instance (Data a, Data t, Monoid a) => TransformContext (Expression a t) where
+instance (Data a, Data t, Monoid a) => TransformContext (Expression a () t) where
   expandAsPatterns =
     \case
       EMatch a t e cs ->
@@ -37,19 +37,19 @@ instance (Data a, Data t, Monoid a) => TransformContext (Expression a t) where
       e ->
         descend expandAsPatterns e
 
-instance (Data a, Data t, Monoid a) => TransformContext (Choice Expression a t) where
+instance (Data a, Data t, Monoid a) => TransformContext (Choice Expression a () t) where
   expandAsPatterns =
     \case
       CPlain a gs e ->
         CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
 
-instance (Data a, Data t, Monoid a) => TransformContext (Guard Expression a t) where
+instance (Data a, Data t, Monoid a) => TransformContext (Guard Expression a () t) where
   expandAsPatterns =
     \case
       CGuard e ->
         CGuard (expandAsPatterns e)
 
-instance (Data a, Data t, Monoid a) => TransformContext (Binding Expression a t) where
+instance (Data a, Data t, Monoid a) => TransformContext (Binding Expression a () t) where
   expandAsPatterns =
     \case
       BPattern a p e ->
@@ -57,7 +57,7 @@ instance (Data a, Data t, Monoid a) => TransformContext (Binding Expression a t)
       BFunction a name ps e ->
         BFunction a name ps (expandAsPatterns e)
 
-expandClause :: (Monoid a, Data a, Data t) => t -> Clause a t -> Clause a t
+expandClause :: (Monoid a, Data a, Data t) => t -> Clause a () t -> Clause a () t
 expandClause t (EClause a p cs) =
   case ps of
     [] ->
@@ -80,7 +80,7 @@ expandClause t (EClause a p cs) =
       )
       :| []
 
-collectAsPatterns :: Pattern a t -> Writer [(Label t, Pattern a t)] (Pattern a t)
+collectAsPatterns :: Pattern a () t -> Writer [(Label t, Pattern a () t)] (Pattern a () t)
 collectAsPatterns =
   \case
     PAs a ll p -> do

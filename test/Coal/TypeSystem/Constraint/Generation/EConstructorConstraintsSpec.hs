@@ -19,7 +19,7 @@ collectEConstructorConstraintsSpecAll = do
   print collectEConstructorConstraintsSpec5
   print collectEConstructorConstraintsSpec6
 
-fixture1 :: Expression () IndexedType
+fixture1 :: Expression () () IndexedType
 fixture1 =
   EConstructor () (Label (TConstructor KType "Color") "Blue")
 
@@ -45,7 +45,7 @@ collectEConstructorConstraintsSpec2 = null ms && null (lefts outs)
       , constraintsGenContextModules = emptyModuleBuild
       }
 
-fixture2 :: Expression () IndexedType
+fixture2 :: Expression () () IndexedType
 fixture2 =
   EConstructor () (Label (TVariable (TypeIndex KType 0)) "Blue")
 

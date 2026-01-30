@@ -12,14 +12,14 @@ import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform)
 
 {-# INLINE deepFlattenApplications #-}
-deepFlattenApplications :: (Data a, Data t) => Expression a t -> Expression a t
+deepFlattenApplications :: (Data a, Data s, Data t) => Expression a s t -> Expression a s t
 deepFlattenApplications = transform flattenApplication
 
 {-# INLINE deepFlattenLambdas #-}
-deepFlattenLambdas :: (Data a, Data t) => Expression a t -> Expression a t
+deepFlattenLambdas :: (Data a, Data s, Data t) => Expression a s t -> Expression a s t
 deepFlattenLambdas = transform flattenLambda
 
-flattenApplication :: Expression a t -> Expression a t
+flattenApplication :: Expression a s t -> Expression a s t
 flattenApplication =
   \case
     EApplication a t (EApplication _ _ e e1) e2 ->
@@ -27,7 +27,7 @@ flattenApplication =
     expr ->
       expr
 
-flattenLambda :: Expression a t -> Expression a t
+flattenLambda :: Expression a s t -> Expression a s t
 flattenLambda =
   \case
     ELambda a ps (ELambda _ qs e) ->

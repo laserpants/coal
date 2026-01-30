@@ -30,7 +30,7 @@ import Data.Tuple.Extra (second)
 type RecordEntry a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
 
 data CompilerJournal a = CompilerJournal
-  { compilerJournalPatterns :: [(Name, Pattern a IndexedType)]
+  { compilerJournalPatterns :: [(Name, Pattern a () IndexedType)]
   , compilerJournalWhereClauses :: [(Name, Name)]
   , compilerJournalRecordEntries :: [RecordEntry a]
   , compilerJournalDictionaryTraits :: [Trait IndexedType]
@@ -51,11 +51,11 @@ instance Monoid (CompilerJournal a) where
   mempty = CompilerJournal [] [] [] [] []
 
 {-# INLINE tellPatterns #-}
-tellPatterns :: (MonadWriter (CompilerJournal a) m) => [(Name, Pattern a IndexedType)] -> m ()
+tellPatterns :: (MonadWriter (CompilerJournal a) m) => [(Name, Pattern a () IndexedType)] -> m ()
 tellPatterns w = tell $ CompilerJournal w [] [] [] []
 
 {-# INLINE tellPatterns1 #-}
-tellPatterns1 :: (MonadWriter (CompilerJournal a) m) => (Name, Pattern a IndexedType) -> m ()
+tellPatterns1 :: (MonadWriter (CompilerJournal a) m) => (Name, Pattern a () IndexedType) -> m ()
 tellPatterns1 w = tellPatterns [w]
 
 {-# INLINE tellWhereClauses #-}
@@ -74,7 +74,7 @@ tellDictionaryTraits w = tell $ CompilerJournal [] [] [] w []
 tellErrors :: (MonadWriter (CompilerJournal a) m) => [CompilerError a] -> m ()
 tellErrors w = tell $ CompilerJournal [] [] [] [] w
 
-listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a IndexedType)])
+listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a () IndexedType)])
 listenPatterns w = second compilerJournalPatterns <$> listen w
 
 listenWhereClauses :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Name)])

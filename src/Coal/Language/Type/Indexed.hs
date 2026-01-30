@@ -72,25 +72,25 @@ instance (Ord k, Data k) => TypeIndexed k Intrinsic where
 instance (Ord k, Data k) => TypeIndexed k (Type TypeIndex k) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data k, Data t, Data a) => TypeIndexed k (Pattern a t) where
+instance (Ord k, Data k, Data t, Data a, Data s) => TypeIndexed k (Pattern a s t) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (Binding Expression a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k, Data s) => TypeIndexed k (Binding Expression a s (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (Guard Expression a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k, Data s) => TypeIndexed k (Guard Expression a s (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (Choice Expression a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k, Data s) => TypeIndexed k (Choice Expression a s (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (Clause a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k, Data s) => TypeIndexed k (Clause a s (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (CompiledClause a (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k, Data s) => TypeIndexed k (CompiledClause a s (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data k, Data a) => TypeIndexed k (Expression a (Type TypeIndex k)) where
+instance (Ord k, Data k, Data a, Data s) => TypeIndexed k (Expression a s (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data a, Data k) => TypeIndexed k (FunctionDefinition a (Type TypeIndex k)) where

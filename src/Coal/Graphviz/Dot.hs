@@ -152,7 +152,7 @@ instance Dot t (Label t) where
       Label t name ->
         emitNote ("Label\\n" <> name) (Just t)
 
-instance (Pretty t, Show t) => Dot t (Binding Expression a t) where
+instance (Pretty t, Show t) => Dot t (Binding Expression a () t) where
   toDot =
     \case
       BPattern _ pat rhs -> do
@@ -164,7 +164,7 @@ instance (Pretty t, Show t) => Dot t (Binding Expression a t) where
           emitEdgesTo ps
           emitEdgeTo e
 
-instance (Pretty t, Show t) => Dot t (Expression a t) where
+instance (Pretty t, Show t) => Dot t (Expression a () t) where
   toDot =
     \case
       EAnnotation _ t inner -> do
@@ -251,7 +251,7 @@ instance (Pretty t, Show t) => Dot t (Expression a t) where
       EDoBlock{} ->
         emitRectangle "EDoBlock" Nothing
 
-instance (Pretty t, Show t) => Dot t (Pattern a t) where
+instance (Pretty t, Show t) => Dot t (Pattern a () t) where
   toDot =
     \case
       PAnnotation _ t inner -> do
@@ -302,7 +302,7 @@ instance (Pretty t, Show t) => Dot t (Pattern a t) where
       PTraitInstance _ t _ ->
         emitEllipse "PTraitInstance" (Just t)
 
-instance (Pretty t, Show t) => Dot t (Clause a t) where
+instance (Pretty t, Show t) => Dot t (Clause a () t) where
   toDot =
     \case
       EClause _ p cs -> do
@@ -310,7 +310,7 @@ instance (Pretty t, Show t) => Dot t (Clause a t) where
           emitEdgeTo p
           emitEdgesTo cs
 
-instance (Pretty t, Show t) => Dot t (Choice Expression a t) where
+instance (Pretty t, Show t) => Dot t (Choice Expression a () t) where
   toDot =
     \case
       CPlain _ gs e -> do
@@ -318,14 +318,14 @@ instance (Pretty t, Show t) => Dot t (Choice Expression a t) where
           emitEdgesTo gs
           emitEdgeTo e
 
-instance (Pretty t, Show t) => Dot t (Guard Expression a t) where
+instance (Pretty t, Show t) => Dot t (Guard Expression a () t) where
   toDot =
     \case
       CGuard e -> do
         fromNode (emitRectangle "CGuard" Nothing) $ do
           emitEdgeTo e
 
-instance (Pretty t, Show t) => Dot t (CompiledClause a t) where
+instance (Pretty t, Show t) => Dot t (CompiledClause a () t) where
   toDot =
     \case
       ECompiledClause _ lls e -> do

@@ -40,7 +40,7 @@ instance (TransformContext e) => TransformContext [e] where
 instance (TransformContext e) => TransformContext (NonEmpty e) where
   expandIntegerLiteralPatterns = traverse expandIntegerLiteralPatterns
 
-instance TransformContext (Expression Metadata IndexedType) where
+instance TransformContext (Expression Metadata () IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       EMatch a t e cs ->
@@ -50,7 +50,7 @@ instance TransformContext (Expression Metadata IndexedType) where
       e ->
         descendM expandIntegerLiteralPatterns e
 
-expandClause :: (Monad m) => Metadata -> Expression Metadata IndexedType -> (Clause Metadata IndexedType, [Clause Metadata IndexedType]) -> CompilerT Metadata m (Clause Metadata IndexedType)
+expandClause :: (Monad m) => Metadata -> Expression Metadata () IndexedType -> (Clause Metadata () IndexedType, [Clause Metadata () IndexedType]) -> CompilerT Metadata m (Clause Metadata () IndexedType)
 expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
   e1' <- expandIntegerLiteralPatterns e1
   (q, ints) <- runWriterT (transformM collectIntegerLiteralPatterns p)
@@ -73,7 +73,7 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
       pure (EClause a q (CPlain a1 gs e2 :| []))
 expandClause _ _ _ = error "Implementation error"
 
-numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata IndexedType -> Expression Metadata IndexedType
+numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata () IndexedType -> Expression Metadata () IndexedType
 numericLiteral (ll@(Label t _), int) e1 =
   EApplication
     mempty
@@ -88,7 +88,7 @@ numericLiteral (ll@(Label t _), int) e1 =
            ]
     )
 
-fromLiteral :: IndexedType -> Integer -> Expression Metadata IndexedType
+fromLiteral :: IndexedType -> Integer -> Expression Metadata () IndexedType
 fromLiteral t int
   | int <= fromIntegral (maxBound :: Int32) =
       EApplication mempty t (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` t) "from_int32")) (ELiteral mempty (LInt32 (fromIntegral int)) :| [])
@@ -107,7 +107,7 @@ fromLiteral t int
             :| []
         )
 
-collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata IndexedType)
+collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata () IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata () IndexedType)
 collectIntegerLiteralPatterns =
   \case
     PInteger a t int -> do

@@ -57,7 +57,7 @@ withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
 type Assertion a = IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 
-emitPAnnotationConstraints :: (Data a) => a -> Type Parameter () -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPAnnotationConstraints :: (Data a) => a -> Type Parameter () -> Pattern a () IndexedType -> ConstraintsGen a ()
 emitPAnnotationConstraints loc t p = do
   r <- instantiateAnnotation loc t
   case r of
@@ -66,7 +66,7 @@ emitPAnnotationConstraints loc t p = do
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
 
-emitPConstructorConstraints :: (Data a) => a -> Label IndexedType -> [Pattern a IndexedType] -> ConstraintsGen a ()
+emitPConstructorConstraints :: (Data a) => a -> Label IndexedType -> [Pattern a () IndexedType] -> ConstraintsGen a ()
 emitPConstructorConstraints loc (Label t name) ps = do
   r <- lookupDataConstructor name
   case r of
@@ -79,19 +79,19 @@ emitPConstructorConstraints loc (Label t name) ps = do
       let t1 = foldTypeOf t ps
       tellRight [Explicit (RuleDataConstructor loc constructorName t1 constructorScheme) t1 constructorScheme]
 
-emitPOrConstraints :: (Data a) => a -> IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPOrConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
 emitPOrConstraints loc t p1 p2 = do
   tellRight [Equality (RuleOrConstraint loc t1 t2) [t, t1, t2]]
  where
   t1 = typeOf p1
   t2 = typeOf p2
 
-emitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
 emitPListConsConstraints loc t p1 p2 = do
   let t1 = foldTypeOf t [p1, p2]
   tellRight [Explicit (RuleListConstructor loc t1 listConstructorScheme) t1 listConstructorScheme]
 
-emitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a IndexedType] -> ConstraintsGen a ()
+emitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a () IndexedType] -> ConstraintsGen a ()
 emitPListLiteralConstraints loc t ps =
   case ts of
     t1 : _ ->
@@ -104,7 +104,7 @@ emitPListLiteralConstraints loc t ps =
  where
   ts = listType . typeOf <$> ps
 
-emitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a IndexedType) -> ConstraintsGen a ()
+emitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a () IndexedType) -> ConstraintsGen a ()
 emitPTupleConstraints loc t ps =
   tellRight
     [ Equality (RuleTuple loc t t1) [t, t1]
@@ -112,10 +112,10 @@ emitPTupleConstraints loc t ps =
  where
   t1 = tupleType (typeOf <$> ps)
 
-emitPAsConstraints :: (Data a) => a -> IndexedType -> Pattern a IndexedType -> ConstraintsGen a ()
+emitPAsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
 emitPAsConstraints loc t p = tellRight [Equality (RuleAsConstraint loc) [t, typeOf p]]
 
-emitPRecordConstraints :: (Data a) => a -> IndexedType -> Dictionary (Pattern a IndexedType) -> Maybe (Pattern a IndexedType) -> ConstraintsGen a ()
+emitPRecordConstraints :: (Data a) => a -> IndexedType -> Dictionary (Pattern a () IndexedType) -> Maybe (Pattern a () IndexedType) -> ConstraintsGen a ()
 emitPRecordConstraints loc t fields p = do
   row <- tailRow loc p
   let t1 = fieldsRecordType (typeOf <$> fields) row
@@ -128,7 +128,7 @@ emitPRecordConstraints loc t fields p = do
     _ ->
       pure ()
 
-emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a IndexedType -> ConstraintsGen a [Name]
+emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a () IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
   \case
     PAnnotation loc t p -> do
@@ -184,7 +184,7 @@ emitPatternConstraints assertF ms =
     _ ->
       error "Not implemented"
 
-emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter () -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEAnnotationConstraints loc t e = do
   r <- instantiateAnnotation loc t
   case r of
@@ -204,13 +204,13 @@ emitEConstructorConstraints loc (Label t name) = do
       tellRight [Explicit (RuleDataConstructor loc name t constructorScheme) t constructorScheme]
   pure []
 
-emitELambdaConstraints :: (Show a, Data a) => a -> NonEmpty (Pattern a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitELambdaConstraints :: (Show a, Data a) => a -> NonEmpty (Pattern a () IndexedType) -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELambdaConstraints loc ps e = do
   ms <- withMonomorphic ps (emitConstraints e)
   names <- concatForM ps (emitPatternConstraints (assertEqualityAssumptions loc) ms)
   pure (filter (assumptionNameIsNotOneOf names) ms)
 
-emitERecursiveLetConstraints :: (Show a, Data a) => a -> Pattern a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitERecursiveLetConstraints :: (Show a, Data a) => a -> Pattern a () IndexedType -> Expression a () IndexedType -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitERecursiveLetConstraints loc p e1 e2 = do
   ms1 <- emitConstraints e2
   tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
@@ -221,7 +221,7 @@ emitERecursiveLetConstraints loc p e1 e2 = do
   t1 = typeOf p
   t2 = typeOf e1
 
-normalizeBinding :: (Data a) => Binding Expression a IndexedType -> Binding Expression a IndexedType
+normalizeBinding :: (Data a) => Binding Expression a () IndexedType -> Binding Expression a () IndexedType
 normalizeBinding =
   \case
     b@BPattern{} ->
@@ -229,7 +229,7 @@ normalizeBinding =
     BFunction loc name ps e ->
       BPattern loc (PVariable loc (Label (foldTypeOf e ps) name)) (ELambda loc ps e)
 
-emitELetConstraints :: (Show a, Data a) => a -> NonEmpty (Binding Expression a IndexedType) -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitELetConstraints :: (Show a, Data a) => a -> NonEmpty (Binding Expression a () IndexedType) -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELetConstraints loc gs e1 = do
   let gs' = normalizeBinding <$> gs
   ms1 <- emitConstraints e1
@@ -250,7 +250,7 @@ emitELetConstraints loc gs e1 = do
         error "Implementation error"
   pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
 
-emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitESelectConstraints :: (Show a, Data a) => a -> Label IndexedType -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitESelectConstraints loc (Label t name) e = do
   row <- supplied (RVariable . TypeIndex KRow)
   let t1 = recordType (RExtend name t row)
@@ -258,7 +258,7 @@ emitESelectConstraints loc (Label t name) e = do
   tellRight [Equality (RuleSelectEquality loc t1 t2) [t1, t2]]
   emitConstraints e
 
-emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a IndexedType) -> Maybe (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitERecordConstraints :: (Show a, Data a) => a -> IndexedType -> Dictionary (Expression a () IndexedType) -> Maybe (Expression a () IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitERecordConstraints loc t fields expr = do
   ms1 <- concatMapM emitConstraints expr
   ms2 <- concatMapM emitConstraints fields
@@ -286,7 +286,7 @@ tailRow loc =
       tellRight [Equality (RuleTailRow loc t1 t2) [t1, t2]]
       pure r
 
-emitEIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEIfConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a () IndexedType -> Expression a () IndexedType -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEIfConstraints loc t e1 e2 e3 = do
   ms1 <- emitConstraints e1
   ms2 <- emitConstraints e2
@@ -299,7 +299,7 @@ emitEIfConstraints loc t e1 e2 e3 = do
   t2 = typeOf e2
   t3 = typeOf e3
 
-emitEApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> NonEmpty (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitEApplicationConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a () IndexedType -> NonEmpty (Expression a () IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitEApplicationConstraints loc t e1 es = do
   ms1 <- emitConstraints e1
   ms2 <- concatMapM emitConstraints es
@@ -310,7 +310,7 @@ emitEApplicationConstraints loc t e1 es = do
   t2 = foldType t ts
   ts = typeOf <$> es
 
-emitEListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEListConsConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a () IndexedType -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEListConsConstraints loc t e1 e2 = do
   ms1 <- emitConstraints e1
   ms2 <- emitConstraints e2
@@ -319,7 +319,7 @@ emitEListConsConstraints loc t e1 e2 = do
  where
   t1 = typeOf e1 `TArrow` typeOf e2 `TArrow` t
 
-emitEListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
+emitEListLiteralConstraints :: (Show a, Data a) => a -> IndexedType -> [Expression a () IndexedType] -> ConstraintsGen a [Assumption a IndexedType]
 emitEListLiteralConstraints loc t es = do
   case ts of
     t1 : _ ->
@@ -333,7 +333,7 @@ emitEListLiteralConstraints loc t es = do
  where
   ts = listType . typeOf <$> es
 
-emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> NonEmpty (Expression a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitETupleConstraints :: (Show a, Data a) => a -> IndexedType -> NonEmpty (Expression a () IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitETupleConstraints loc t es = do
   tellRight
     [ Equality (RuleTuple loc t t1) [t, t1]
@@ -342,7 +342,7 @@ emitETupleConstraints loc t es = do
  where
   t1 = tupleType (typeOf <$> es)
 
-emitClauseConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a IndexedType -> [Expression a IndexedType] -> NonEmpty (Clause a IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitClauseConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a () IndexedType -> [Expression a () IndexedType] -> NonEmpty (Clause a () IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
 emitClauseConstraints loc t e es cs = do
   ms1 <- emitConstraints e
   (ts1, ts2, ms2) <- unzip3 <$> traverse clauseConstraintsImpl (toList cs)
@@ -352,7 +352,7 @@ emitClauseConstraints loc t e es cs = do
   tellRight [Equality (RuleMatchClauseExpressions loc) (foldTypeOf t es : concat ts2)]
   pure (ms1 <> concat ms2)
 
-clauseConstraintsImpl :: (Show a, Data a) => Clause a IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
+clauseConstraintsImpl :: (Show a, Data a) => Clause a () IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
 clauseConstraintsImpl (EClause loc p cs) = do
   (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
     forM (toList cs) $
@@ -367,7 +367,7 @@ clauseConstraintsImpl (EClause loc p cs) = do
   names <- emitPatternConstraints (assertEqualityAssumptions loc) ms p
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
-emitEFFICallConstraints :: (Show a, Data a) => a -> IndexedType -> Label (Type Parameter ()) -> [Expression a IndexedType] -> Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitEFFICallConstraints :: (Show a, Data a) => a -> IndexedType -> Label (Type Parameter ()) -> [Expression a () IndexedType] -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEFFICallConstraints loc u (Label t _) es e = do
   ms1 <- emitConstraints e
   ms2 <- concatMapM emitConstraints es
@@ -385,7 +385,7 @@ emitEFFICallConstraints loc u (Label t _) es e = do
       tellRight [Equality (RuleAnnotation loc t3 t4) [t3, t4]]
       pure (ms1 <> ms2)
 
-emitConstraints :: (Show a, Data a) => Expression a IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+emitConstraints :: (Show a, Data a) => Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =
   \case
     EAnnotation loc t e ->

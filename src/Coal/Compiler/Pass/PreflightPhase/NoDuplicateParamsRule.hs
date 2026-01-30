@@ -87,27 +87,27 @@ instance RuleContext (FoldDefinition Metadata t) where
       FoldDefinition _ cs ->
         detectDuplicateParams cs
 
-instance RuleContext (Clause Metadata t) where
+instance RuleContext (Clause Metadata () t) where
   detectDuplicateParams =
     \case
       EClause _ p c -> do
         checkPatterns (NonEmpty.singleton p)
         detectDuplicateParams c
 
-instance RuleContext (Choice Expression Metadata t) where
+instance RuleContext (Choice Expression Metadata () t) where
   detectDuplicateParams =
     \case
       CPlain _ gs e -> do
         detectDuplicateParams gs
         detectDuplicateParams e
 
-instance RuleContext (Guard Expression Metadata t) where
+instance RuleContext (Guard Expression Metadata () t) where
   detectDuplicateParams =
     \case
       CGuard e ->
         detectDuplicateParams e
 
-instance RuleContext (Expression Metadata t) where
+instance RuleContext (Expression Metadata () t) where
   detectDuplicateParams =
     \case
       EAnnotation _ _ e ->
@@ -158,7 +158,7 @@ instance RuleContext (Expression Metadata t) where
       _ ->
         pure ()
 
-instance RuleContext (Binding Expression Metadata t) where
+instance RuleContext (Binding Expression Metadata () t) where
   detectDuplicateParams =
     \case
       BPattern _ p e -> do
@@ -168,10 +168,10 @@ instance RuleContext (Binding Expression Metadata t) where
         checkPatterns ps
         detectDuplicateParams e
 
-checkPatterns :: (Monad m) => NonEmpty (Pattern Metadata t) -> CompilerT Metadata m ()
+checkPatterns :: (Monad m) => NonEmpty (Pattern Metadata () t) -> CompilerT Metadata m ()
 checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
  where
-  checkPattern :: (Monad m) => Pattern Metadata t -> StateT (Set Name) (CompilerT Metadata m) ()
+  checkPattern :: (Monad m) => Pattern Metadata () t -> StateT (Set Name) (CompilerT Metadata m) ()
   checkPattern =
     \case
       PAnnotation _ _ p ->

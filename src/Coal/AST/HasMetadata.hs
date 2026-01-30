@@ -17,7 +17,7 @@ class HasMetadata a where
 instance HasMetadata Metadata where
   getMetadata = id
 
-instance HasMetadata (Expression Metadata t) where
+instance HasMetadata (Expression Metadata () t) where
   getMetadata =
     \case
       EAnnotation a _ _ -> a
@@ -45,7 +45,7 @@ instance HasMetadata (Expression Metadata t) where
       EDoBlock a _ -> a
       EFocus a _ _ _ _ _ -> a
 
-instance HasMetadata (Pattern Metadata t) where
+instance HasMetadata (Pattern Metadata () t) where
   getMetadata =
     \case
       PAnnotation a _ _ -> a

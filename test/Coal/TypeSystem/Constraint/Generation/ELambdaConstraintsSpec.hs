@@ -13,7 +13,7 @@ import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 
-fixture1 :: Expression () IndexedType
+fixture1 :: Expression () () IndexedType
 fixture1 =
   ELambda
     ()
@@ -39,7 +39,7 @@ collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
       , constraintsGenContextModules = emptyModuleBuild
       }
 
-fixture2 :: Expression () IndexedType
+fixture2 :: Expression () () IndexedType
 fixture2 =
   ELambda
     ()
@@ -60,7 +60,7 @@ collectELambdaConstraintsSpec2 = null outs
 collectELambdaConstraintsSpec3 :: Bool
 collectELambdaConstraintsSpec3 = 2 == freshIdIn fixture2
 
-fixture3 :: Expression () IndexedType
+fixture3 :: Expression () () IndexedType
 fixture3 =
   -- fn(x) => let y = x in y
   ELambda

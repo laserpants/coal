@@ -32,7 +32,7 @@ instance (TransformContext a) => TransformContext (NonEmpty a) where
 instance (TransformContext a) => TransformContext (Dictionary a) where
   expandLambdaMatchExprs = traverse expandLambdaMatchExprs
 
-instance (Monoid a, Data a) => TransformContext (Expression a ()) where
+instance (Monoid a, Data a) => TransformContext (Expression a () ()) where
   expandLambdaMatchExprs = transformM $
     \case
       ELambdaMatch _ _ cs ->

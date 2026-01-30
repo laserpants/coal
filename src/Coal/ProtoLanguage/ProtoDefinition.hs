@@ -40,8 +40,8 @@ data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
   { protoOfunctionDefinitionMetadata :: a
   , protoOfunctionDefinitionAnnotation :: Maybe (With (Type Parameter k))
   , protoOfunctionDefinitionType :: With t
-  , protoOfunctionDefinitionPatterns :: NonEmpty (Pattern a t)
-  , protoOfunctionDefinitionExpression :: Expression a t
+  , protoOfunctionDefinitionPatterns :: NonEmpty (Pattern a k t)
+  , protoOfunctionDefinitionExpression :: Expression a k t
   }
   deriving
     ( Show
@@ -59,7 +59,7 @@ data ProtoLetDefinition a k t = ProtoLetDefinition
   { protoOletDefinitionMetadata :: a
   , protoOletDefinitionAnnotation :: Maybe (With (Type Parameter k))
   , protoOletDefinitionType :: With t
-  , protoOletDefinitionExpression :: Expression a t
+  , protoOletDefinitionExpression :: Expression a k t
   }
   deriving
     ( Show

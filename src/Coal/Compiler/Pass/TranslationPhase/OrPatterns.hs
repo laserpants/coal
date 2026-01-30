@@ -29,7 +29,7 @@ passOrPatterns = Pass{runPass = pass}
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass = transformBiM expandExpression
 
-expandExpression :: (Monad m) => Expression Metadata IndexedType -> CompilerT Metadata m (Expression Metadata IndexedType)
+expandExpression :: (Monad m) => Expression Metadata () IndexedType -> CompilerT Metadata m (Expression Metadata () IndexedType)
 expandExpression =
   \case
     EMatch a t e cs ->
@@ -54,14 +54,14 @@ instance (OrPattern a) => OrPattern (Map k a) where
 instance (OrPattern a) => OrPattern (Maybe a) where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance (Data t) => OrPattern (Clause Metadata t) where
+instance (Data t) => OrPattern (Clause Metadata () t) where
   expandOrPatterns =
     \case
       EClause a p cs -> do
         q1 :| qs <- expandOrPatterns p
         pure (EClause a q1 cs :| [EClause a q cs | q <- qs])
 
-instance (Data t) => OrPattern (Pattern Metadata t) where
+instance (Data t) => OrPattern (Pattern Metadata () t) where
   expandOrPatterns =
     \case
       POr loc _ p1 p2 -> do

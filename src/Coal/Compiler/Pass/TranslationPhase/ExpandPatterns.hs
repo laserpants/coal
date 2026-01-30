@@ -46,7 +46,7 @@ instance TransformContext (IndexedPattern Metadata) where
         tellPatterns1 (name, p)
         pure (PVariable mempty (Label (typeOf p) name))
 
-instance TransformContext (Binding Expression Metadata IndexedType) where
+instance TransformContext (Binding Expression Metadata () IndexedType) where
   desugarPatterns =
     \case
       BPattern a p e ->
@@ -59,7 +59,7 @@ instance TransformContext (Binding Expression Metadata IndexedType) where
               (ELambda mempty ps e)
           )
 
-instance TransformContext (Expression Metadata IndexedType) where
+instance TransformContext (Expression Metadata () IndexedType) where
   desugarPatterns = go
    where
     go =
@@ -80,7 +80,7 @@ instance TransformContext (Expression Metadata IndexedType) where
         e ->
           descendM go e
 
-unrollMatch :: Metadata -> (Name, Pattern Metadata IndexedType) -> Expression Metadata IndexedType -> Expression Metadata IndexedType
+unrollMatch :: Metadata -> (Name, Pattern Metadata () IndexedType) -> Expression Metadata () IndexedType -> Expression Metadata () IndexedType
 unrollMatch loc (name, p) e =
   EMatch
     loc

@@ -36,7 +36,7 @@ import Extras (Dictionary, Name)
 class GenerateConstraints a o where
   generateConstraints :: (Monad m, Data a, Show a) => o -> CompilerT a m ()
 
-instance GenerateConstraints a (Expression a IndexedType) where
+instance GenerateConstraints a (Expression a () IndexedType) where
   generateConstraints expr = do
     (ms1, cs1) <- generateExpressionConstraints expr
     (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
@@ -115,7 +115,7 @@ runConstraintsGen stack = do
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
 
-generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
+generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a () IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
 generateExpressionConstraints e = do
   (assumptions, params, result) <- runConstraintsGen (emitConstraints e)
   let (errors, constraints) = partitionEithers result
@@ -248,7 +248,7 @@ toIndexedType loc env (Parameter k n) t =
     Right r ->
       pure r
 
-checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a IndexedType) -> Name -> CompilerT a m ()
+checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a () IndexedType) -> Name -> CompilerT a m ()
 checkMain loc t ps name = do
   path <- gets compilerCurrentModule
   when (Path ["Main"] == path && "main" == name) $

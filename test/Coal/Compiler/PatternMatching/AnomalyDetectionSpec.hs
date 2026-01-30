@@ -173,26 +173,26 @@ runTest px = res
   Right res = runIdentity (evalCompilerT env (exhaustive px))
   env = (emptyCompilerEnvironment Nothing){compilerDataConstructorEnvironment = testEnv}
 
-example6 :: [Pattern () ()]
+example6 :: [Pattern () () ()]
 example6 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
   , PConstructor () (Label () "Nil") []
   , PConstructor () (Label () "Cons") [PAny () (), PAny () ()]
   ]
 
-example7 :: [Pattern () ()]
+example7 :: [Pattern () () ()]
 example7 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
   , PConstructor () (Label () "Nil") []
   ]
 
-example8 :: [Pattern () ()]
+example8 :: [Pattern () () ()]
 example8 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
   , PConstructor () (Label () "Cons") [PAny () (), PAny () ()]
   ]
 
-example9 :: [Pattern () ()]
+example9 :: [Pattern () () ()]
 example9 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
   , POr
@@ -202,19 +202,19 @@ example9 =
       (PConstructor () (Label () "Cons") [PAny () (), PAny () ()])
   ]
 
-example10 :: [Pattern () ()]
+example10 :: [Pattern () () ()]
 example10 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
   , PConstructor () (Label () "Cons") [PAny () (), PAny () ()]
   , PAny () ()
   ]
 
-example11 :: [Pattern () ()]
+example11 :: [Pattern () () ()]
 example11 =
   [ PAny () ()
   ]
 
-runTest2 :: [Pattern a t] -> Bool
+runTest2 :: [Pattern a () t] -> Bool
 runTest2 px = res
  where
   Right res = runIdentity (evalCompilerT env (exhaustive (translatePattern <$> px)))

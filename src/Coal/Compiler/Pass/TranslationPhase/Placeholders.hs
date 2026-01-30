@@ -170,7 +170,7 @@ findFirstMatch (Trait name t) = do
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-lookupTraitInstance :: (Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a IndexedType)))
+lookupTraitInstance :: (Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a () IndexedType)))
 lookupTraitInstance loc trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
@@ -193,7 +193,7 @@ isConcrete (Trait _ TIntrinsic{}) = True
 isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
-applyTraits :: (Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a IndexedType)
+applyTraits :: (Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a () IndexedType)
 applyTraits loc (Label t name) =
   \case
     [] ->
@@ -218,11 +218,11 @@ applyTraits loc (Label t name) =
 class TraitContext a d where
   expandTraits :: (Monad m) => d -> CompilerT a m d
 
-expandRecursiveLet :: Expression a IndexedType -> Expression a IndexedType
+expandRecursiveLet :: Expression a () IndexedType -> Expression a () IndexedType
 expandRecursiveLet (ELet a (BPattern _ p e1 :| []) e2) = ERecursiveLet a p e1 e2
 expandRecursiveLet _ = error "Implementation error"
 
-instance (Monoid a, Data a) => TraitContext a (Expression a IndexedType) where
+instance (Monoid a, Data a) => TraitContext a (Expression a () IndexedType) where
   expandTraits =
     \case
       ERecursiveLet a p e1 e2 ->
@@ -244,7 +244,7 @@ instance (Monoid a, Data a) => TraitContext a (Expression a IndexedType) where
       e ->
         descendM expandTraits e
 
-transformBinding :: (Monoid a, Data a, Monad m) => Binding Expression a IndexedType -> CompilerT a m (Binding Expression a IndexedType, [(Name, IndexedScheme)])
+transformBinding :: (Monoid a, Data a, Monad m) => Binding Expression a () IndexedType -> CompilerT a m (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
 transformBinding =
   \case
     BPattern a var@(PVariable _ (Label t name)) e
@@ -260,14 +260,14 @@ transformBinding =
     _ ->
       error "Not implemented"
 
-transformScope :: (Monoid a, Data a, Monad m) => Expression a IndexedType -> CompilerT a m (Expression a IndexedType, [Trait IndexedType])
+transformScope :: (Monoid a, Data a, Monad m) => Expression a () IndexedType -> CompilerT a m (Expression a () IndexedType, [Trait IndexedType])
 transformScope e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
   case nub traits of
     [] -> pure (expr, traits)
     tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
-instance (Monoid a, Data a) => TraitContext a (CompiledClause a IndexedType) where
+instance (Monoid a, Data a) => TraitContext a (CompiledClause a () IndexedType) where
   expandTraits =
     \case
       ECompiledClause a lls e ->
@@ -330,8 +330,8 @@ dictionaryLambda ::
   (Monoid a, HasType o k (Trait (Type o k))) =>
   Trait (Type o k) ->
   [Trait (Type o k)] ->
-  Expression a (Type o k) ->
-  Expression a (Type o k)
+  Expression a () (Type o k) ->
+  Expression a () (Type o k)
 dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
  where
   dict t = PTraitInstance mempty (typeOf t) t

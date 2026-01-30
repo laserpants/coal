@@ -43,7 +43,7 @@ instance (FoldContext a e) => FoldContext a (NonEmpty e) where
   expandFolds name = traverse . expandFolds name
   expandMatch = traverse_ expandMatch
 
-instance (Monoid a, Data a) => FoldContext a (Clause a ()) where
+instance (Monoid a, Data a) => FoldContext a (Clause a () ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
@@ -58,7 +58,7 @@ instance (Monoid a, Data a) => FoldContext a (Clause a ()) where
         void (checkPatterns p)
         expandMatch cs
 
-checkPatterns :: (Monoid a, Data a, Data k, Monad m) => Pattern a k -> CompilerT a m (Pattern a k)
+checkPatterns :: (Monoid a, Data a, Data k, Monad m) => Pattern a () k -> CompilerT a m (Pattern a () k)
 checkPatterns =
   \case
     PAtVariable loc _ -> do
@@ -68,7 +68,7 @@ checkPatterns =
     p ->
       descendM checkPatterns p
 
-instance (Monoid a, Data a) => FoldContext a (Choice Expression a ()) where
+instance (Monoid a, Data a) => FoldContext a (Choice Expression a () ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
@@ -78,11 +78,11 @@ instance (Monoid a, Data a) => FoldContext a (Choice Expression a ()) where
       CPlain _ _ e -> do
         expandMatch e
 
-instance (Monoid a, Data a) => FoldContext a (Expression a ()) where
+instance (Monoid a, Data a) => FoldContext a (Expression a () ()) where
   expandFolds = flip . foldrM . updateName
   expandMatch _ = pure ()
 
-updateName :: (Monoid a, Data a, Monad m) => Name -> Label () -> Expression a () -> m (Expression a ())
+updateName :: (Monoid a, Data a, Monad m) => Name -> Label () -> Expression a () () -> m (Expression a () ())
 updateName name label =
   pure
     . replace
@@ -92,7 +92,7 @@ updateName name label =
           )
       )
 
-eliminateAtPatterns :: (Monad m) => Pattern a () -> CompilerT a m (Pattern a ())
+eliminateAtPatterns :: (Monad m) => Pattern a () () -> CompilerT a m (Pattern a () ())
 eliminateAtPatterns =
   \case
     PNamedFold loc _ _ -> do
@@ -104,7 +104,7 @@ eliminateAtPatterns =
     p ->
       pure p
 
-atLabels :: (Data a, Data t) => Pattern a t -> [Label t]
+atLabels :: (Data a, Data t) => Pattern a () t -> [Label t]
 atLabels = execWriter . go
  where
   go =
@@ -116,7 +116,7 @@ atLabels = execWriter . go
         p ->
           pure p
 
-expandFoldExpr :: (Monad m, Monoid a, Data a) => NonEmpty (Expression a ()) -> NonEmpty (Clause a ()) -> CompilerT a m (Expression a ())
+expandFoldExpr :: (Monad m, Monoid a, Data a) => NonEmpty (Expression a () ()) -> NonEmpty (Clause a () ()) -> CompilerT a m (Expression a () ())
 expandFoldExpr args clauses = do
   name <- supplied (freshName "fold")
   let var = name <> ".expr"
@@ -143,7 +143,7 @@ instance (CompileFoldsContext a e) => CompileFoldsContext a (NonEmpty e) where
 instance (CompileFoldsContext a e) => CompileFoldsContext a (Dictionary e) where
   compileFolds = traverse compileFolds
 
-instance (Monoid a, Data a) => CompileFoldsContext a (Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (Expression a () ()) where
   compileFolds = transformM go
    where
     go =
@@ -156,19 +156,19 @@ instance (Monoid a, Data a) => CompileFoldsContext a (Expression a ()) where
         e ->
           pure e
 
-instance (Monoid a, Data a) => CompileFoldsContext a (Clause a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (Clause a () ()) where
   compileFolds =
     \case
       EClause a p cs ->
         EClause a p <$> traverse compileFolds cs
 
-instance (Monoid a, Data a) => CompileFoldsContext a (Choice Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (Choice Expression a () ()) where
   compileFolds =
     \case
       CPlain a gs e ->
         CPlain a <$> traverse compileFolds gs <*> compileFolds e
 
-instance (Monoid a, Data a) => CompileFoldsContext a (Guard Expression a ()) where
+instance (Monoid a, Data a) => CompileFoldsContext a (Guard Expression a () ()) where
   compileFolds =
     \case
       CGuard e ->

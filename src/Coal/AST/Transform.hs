@@ -13,7 +13,7 @@ import Data.Tuple.Extra (secondM)
 import Extras (Name, const2, (<$$>))
 
 class Transformable e where
-  rewrite :: (Monad m, Data a, Data t, Ord t) => Name -> (a -> t -> m (Expression a t)) -> e a t -> m (e a t)
+  rewrite :: (Monad m, Data a, Data s, Data t, Ord t) => Name -> (a -> t -> m (Expression a s t)) -> e a s t -> m (e a s t)
 
 instance Transformable (Binding Expression) where
   rewrite name f =
@@ -148,14 +148,14 @@ instance Transformable Expression where
 isNotBoundIn :: (BoundVars b) => Name -> b -> Bool
 isNotBoundIn name obj = name `notElem` boundIn obj
 
-replace :: (Ord t, Data a, Data t) => Name -> (a -> t -> Expression a t) -> Expression a t -> Expression a t
+replace :: (Ord t, Data a, Data s, Data t) => Name -> (a -> t -> Expression a s t) -> Expression a s t -> Expression a s t
 replace name f = runIdentity . rewrite name (pure <$$> f)
 
-replaceWith :: (Ord t, Data a, Data t) => Name -> Expression a t -> Expression a t -> Expression a t
+replaceWith :: (Ord t, Data a, Data s, Data t) => Name -> Expression a s t -> Expression a s t -> Expression a s t
 replaceWith name = replace name . const2
 
-replaceMultipleWith :: (Ord t, Data a, Data t) => [(Name, Expression a t)] -> Expression a t -> Expression a t
+replaceMultipleWith :: (Ord t, Data a, Data s, Data t) => [(Name, Expression a s t)] -> Expression a s t -> Expression a s t
 replaceMultipleWith = flip $ foldr (uncurry replaceWith)
 
-rename :: (Ord t, Data a, Data t) => Name -> Name -> Expression a t -> Expression a t
+rename :: (Ord t, Data a, Data s, Data t) => Name -> Name -> Expression a s t -> Expression a s t
 rename old new = replace old var where var a t = EVariable a (Label t new)

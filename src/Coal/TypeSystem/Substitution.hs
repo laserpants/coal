@@ -106,10 +106,10 @@ instance (Ord s, Substitutable s) => Substitutable (Set s) where
 instance Substitutable Intrinsic where
   apply _ s = s
 
-instance (Data a) => Substitutable (Pattern a IndexedType) where
+instance (Data a, Data s) => Substitutable (Pattern a s IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (Expression a IndexedType) where
+instance (Data a, Data s) => Substitutable (Expression a s IndexedType) where
   apply = transformBi . applyT
 
 instance (Data a) => Substitutable (FunctionDefinition a IndexedType) where
@@ -121,16 +121,16 @@ instance (Data a) => Substitutable (ConstantDefinition a IndexedType) where
 instance (Data a, Data k) => Substitutable (Definition a k IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (Binding Expression a IndexedType) where
+instance (Data a, Data s) => Substitutable (Binding Expression a s IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (Guard Expression a IndexedType) where
+instance (Data a, Data s) => Substitutable (Guard Expression a s IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (Choice Expression a IndexedType) where
+instance (Data a, Data s) => Substitutable (Choice Expression a s IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (Clause a IndexedType) where
+instance (Data a, Data s) => Substitutable (Clause a s IndexedType) where
   apply = transformBi . applyT
 
 newtype Substitution = Substitution {substitutionMap :: Map Int IndexedType}

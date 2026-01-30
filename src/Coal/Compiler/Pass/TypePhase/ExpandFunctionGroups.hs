@@ -54,7 +54,7 @@ expandGroups =
     d ->
       pure [d]
 
-toExpr :: Int -> Metadata -> [FunctionDefinition Metadata ()] -> Expression Metadata ()
+toExpr :: Int -> Metadata -> [FunctionDefinition Metadata ()] -> Expression Metadata () ()
 toExpr n loc fs = ELambda loc (varP <$> args) (matchE (var args) clauses)
  where
   ns = NonEmpty.fromList [1 .. n]

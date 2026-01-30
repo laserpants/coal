@@ -78,7 +78,7 @@ instance (Data a, Monoid a) => TransformContext (ConstantDefinition a ()) where
       ConstantDefinition a u w e ->
         ConstantDefinition a u w <$> desugarDoNotation e
 
-instance (Data a, Monoid a) => TransformContext (Expression a ()) where
+instance (Data a, Monoid a) => TransformContext (Expression a () ()) where
   desugarDoNotation =
     \case
       EDoBlock _ es ->
@@ -90,7 +90,7 @@ instance (Data a, Monoid a) => TransformContext (Expression a ()) where
       e ->
         descendM desugarDoNotation e
 
-normalize :: (Monoid a) => NonEmpty (Pattern a (), Expression a ()) -> (Expression a (), NonEmpty (Pattern a (), Expression a ()))
+normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), NonEmpty (Pattern a () (), Expression a () ()))
 normalize es =
   case lst of
     (PAny _ (), e) ->
@@ -100,19 +100,19 @@ normalize es =
  where
   lst = NonEmpty.last es
 
-instance (Data a, Monoid a) => TransformContext (Clause a ()) where
+instance (Data a, Monoid a) => TransformContext (Clause a () ()) where
   desugarDoNotation =
     \case
       EClause a p cs ->
         EClause a p <$> traverse desugarDoNotation cs
 
-instance (Data a, Monoid a) => TransformContext (Choice Expression a ()) where
+instance (Data a, Monoid a) => TransformContext (Choice Expression a () ()) where
   desugarDoNotation =
     \case
       CPlain a gs e ->
         CPlain a <$> traverse desugarDoNotation gs <*> desugarDoNotation e
 
-instance (Data a, Monoid a) => TransformContext (Guard Expression a ()) where
+instance (Data a, Monoid a) => TransformContext (Guard Expression a () ()) where
   desugarDoNotation =
     \case
       CGuard e ->

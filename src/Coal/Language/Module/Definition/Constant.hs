@@ -13,6 +13,6 @@ data ConstantDefinition a t = ConstantDefinition
   { constantDefinitionMetadata :: a
   , constantDefinitionAnnotation :: Maybe (With ParameterizedType)
   , constantDefinitionType :: With t
-  , constantDefinitionExpression :: Expression a t
+  , constantDefinitionExpression :: Expression a () t
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)

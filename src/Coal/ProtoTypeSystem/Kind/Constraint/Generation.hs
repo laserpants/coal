@@ -183,7 +183,7 @@ instance (ProtoEmitKinds t) => ProtoEmitKinds (With t) where
       With traits t ->
         protoOemitKindConstraints traits <>^ protoOemitKindConstraints t
 
-instance ProtoEmitKinds (Expression a (Type Parameter Kind)) where
+instance ProtoEmitKinds (Expression a s (Type Parameter Kind)) where
   protoOemitKindConstraints =
     \case
       EAnnotation _ t e ->
@@ -193,7 +193,7 @@ instance ProtoEmitKinds (Expression a (Type Parameter Kind)) where
 --      EApplication _ _ e es ->
 --        undefined
 
-instance ProtoEmitKinds (Pattern a t) where
+instance ProtoEmitKinds (Pattern a s t) where
   protoOemitKindConstraints =
     \case
       _ ->

@@ -14,7 +14,7 @@ import Data.Generics.Uniplate.Data (universeBi)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
 
-newtype Guard e a t = CGuard {guardExpression :: e a t}
+newtype Guard e a s t = CGuard {guardExpression :: e a s t}
   deriving
     ( Show
     , Eq
@@ -28,12 +28,12 @@ newtype Guard e a t = CGuard {guardExpression :: e a t}
     , Generic
     )
 
-instance (Ord t, Data a, Data t, Data (e a t), Typeable e) => FreeVars (Guard e a t) t where
+instance (Ord t, Data a, Data s, Data t, Data (e a s t), Typeable e) => FreeVars (Guard e a s t) t where
   freeIn = Set.fromList . universeBi
 
-instance (Binary (e a t), Binary a, Binary t) => Binary (Guard e a t)
+instance (Binary (e a s t), Binary a, Binary s, Binary t) => Binary (Guard e a s t)
 
-data Choice e a t = CPlain a [Guard e a t] (e a t)
+data Choice e a s t = CPlain a [Guard e a s t] (e a s t)
   deriving
     ( Show
     , Eq
@@ -47,7 +47,7 @@ data Choice e a t = CPlain a [Guard e a t] (e a t)
     , Generic
     )
 
-instance (Ord t, Data a, Data t, Data (e a t), Typeable e) => FreeVars (Choice e a t) t where
+instance (Ord t, Data a, Data s, Data t, Data (e a s t), Typeable e) => FreeVars (Choice e a s t) t where
   freeIn = Set.fromList . universeBi
 
-instance (Binary (e a t), Binary a, Binary t) => Binary (Choice e a t)
+instance (Binary (e a s t), Binary a, Binary s, Binary t) => Binary (Choice e a s t)

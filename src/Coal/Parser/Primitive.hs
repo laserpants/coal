@@ -26,7 +26,7 @@ parseAtom =
     <|> try parseFloat
     <|> try parseDouble
 
-parsePrimitive :: Parser (Expression Metadata ())
+parsePrimitive :: Parser (Expression Metadata () ())
 parsePrimitive =
   withMetadata $ do
     lit <- parseAtom

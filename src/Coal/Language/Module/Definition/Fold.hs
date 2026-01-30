@@ -12,6 +12,6 @@ import Data.List.NonEmpty (NonEmpty)
 
 data FoldDefinition a t = FoldDefinition
   { foldDefinitionType :: Maybe (With ParameterizedType)
-  , foldDefinitionClauses :: NonEmpty (Clause a t)
+  , foldDefinitionClauses :: NonEmpty (Clause a () t)
   }
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
