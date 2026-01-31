@@ -29,7 +29,15 @@ data Kind
   | KArrow Kind Kind
   | KTrait
   | KVar Int
-  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance Binary Kind
 

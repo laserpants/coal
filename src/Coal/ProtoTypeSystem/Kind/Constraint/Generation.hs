@@ -152,6 +152,7 @@ instance (ProtoEmitKinds k) => ProtoEmitKinds (Trait k) where
   protoOemitKindConstraints =
     \case
       Trait{..} ->
+        -- TODO
         protoOemitKindConstraints traitType
 
 instance ProtoEmitKinds (ProtoModule a Kind (Type Parameter Kind)) where
@@ -429,8 +430,9 @@ instance ProtoEmitKinds (ProtoTraitDefinition a Kind) where
 instance ProtoEmitKinds (ProtoInstanceDefinition a Kind (Type Parameter Kind)) where
   protoOemitKindConstraints =
     \case
-      ProtoInstanceDefinition{..} ->
+      ProtoInstanceDefinition{..} -> do
         undefined
+        pure []
 
 -- E.g.,
 --
