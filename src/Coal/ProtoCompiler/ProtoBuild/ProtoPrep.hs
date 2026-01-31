@@ -16,7 +16,7 @@ import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
-import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
+import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, modify)
 import Control.Monad.Trans (lift)
