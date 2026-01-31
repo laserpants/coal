@@ -200,8 +200,8 @@ instance ProtoKindSubstitutable (Expression a Kind ()) where
         ESelect a ll (protoOapplyKinds sub e)
       EFocus a name ll1 ll2 e1 e2 ->
         EFocus a name ll1 ll2 (protoOapplyKinds sub e1) (protoOapplyKinds sub e2)
-      EFFICall a t ll es e ->
-        EFFICall a t ll (protoOapplyKinds sub es) (protoOapplyKinds sub e)
+      EFFICall a () ll es e ->
+        EFFICall a () ll (protoOapplyKinds sub es) (protoOapplyKinds sub e)
       EDoBlock a is ->
         EDoBlock a (protoOapplyKinds sub is)
       e ->
