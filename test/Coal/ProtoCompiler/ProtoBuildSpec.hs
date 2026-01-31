@@ -2,21 +2,23 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
-import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.Language.Type (Parameter (..))
+import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
 import Coal.ProtoCompiler.ProtoStack (evalProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
+import Coal.ProtoTypeSystem.Kind.Constraint.Generation
 import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
-import Coal.ProtoTypeSystem.Kind.Constraint.Generation
+import Extras (Name)
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -880,4 +882,10 @@ testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
 testB :: ProtoModule () Kind ()
 testB = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
 
--- testC = protoOkindConstraintsGenMonad (protoOemitKindConstraints testB)
+testC :: ([(Name, Kind)], [ProtoKindConstraintsGenOutput])
+testC = runProtoKindConstraintsGen env (protoOemitKindConstraints testB)
+ where
+  env =
+    Environment.fromList
+      [ ("Numeric", KArrow KType KTrait)
+      ]

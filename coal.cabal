@@ -237,6 +237,10 @@ library
       Coal.ProtoLanguage.ProtoModule
       Coal.ProtoTypeSystem.Kind.Constraint
       Coal.ProtoTypeSystem.Kind.Constraint.Generation
+      Coal.ProtoTypeSystem.Kind.Constraint.Solver
+      Coal.ProtoTypeSystem.Kind.Error
+      Coal.ProtoTypeSystem.Kind.Substitution
+      Coal.ProtoTypeSystem.Kind.Unification
       Coal.ProtoTypeSystem.Parameterized
       Coal.TypeSystem
       Coal.TypeSystem.Constraint
