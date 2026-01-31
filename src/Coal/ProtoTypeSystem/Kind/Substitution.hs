@@ -67,9 +67,10 @@ instance (Ord k, ProtoKindSubstitutable k, ProtoKindSubstitutable t) => ProtoKin
     \case
       Forall{..} ->
         Forall
-          (protoOapplyKinds sub schemeTypeVariables)
-          (protoOapplyKinds sub schemeTraits)
-          (protoOapplyKinds sub schemeTypeBody)
+          { schemeTypeVariables = protoOapplyKinds sub schemeTypeVariables
+          , schemeTraits = protoOapplyKinds sub schemeTraits
+          , schemeTypeBody = protoOapplyKinds sub schemeTypeBody
+          }
 
 instance (ProtoKindSubstitutable k) => ProtoKindSubstitutable (Trait k) where
   protoOapplyKinds = fmap . protoOapplyKinds
