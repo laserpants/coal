@@ -103,7 +103,7 @@ instance ToKindIndexed (ProtoTraitDefinition a k) (ProtoTraitDefinition a Kind) 
   toKindIndexed =
     \case
       ProtoTraitDefinition{..} ->
-        ProtoTraitDefinition protoOtraitDefinitionMetadata
+        ProtoTraitDefinition protoOtraitDefinitionMetadata protoOtraitDefinitionTraitName
           <$> toKindIndexed protoOtraitDefinitionConstraints
           <*> toKindIndexed protoOtraitDefinitionParameter
           <*> traverse (secondM toKindIndexed) protoOtraitDefinitionInterface

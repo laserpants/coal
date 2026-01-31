@@ -5,6 +5,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Coal.ProtoTypeSystem.Kind.Constraint.Generation (
+  ProtoEmitKinds (..),
   ProtoKindInferenceError (..),
   ProtoKindConstraintsGen (..),
 ) where
@@ -38,6 +39,7 @@ import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
 data ProtoKindInferenceError
   = ProtoENoTypeConstructor Name
+  | ProtoENoTrait Name
   | ProtoECannotUnifyKinds
   | ProtoEInfiniteKind
   deriving (Show, Eq, Ord, Read)
@@ -56,6 +58,10 @@ newtype ProtoKindConstraintsGen a = ProtoKindConstraintsGen
     , MonadState ()
     , MonadRWS (Environment Kind) [ProtoKindConstraintsGenOutput] ()
     )
+
+runProtoKindConstraintsGen env gen = undefined
+ where
+  (s, _, w) = runRWS (protoOkindConstraintsGenMonad gen) env mempty
 
 parameterMap :: [(Name, Kind)] -> Dictionary [Kind]
 parameterMap ps = Map.fromListWith (++) (fmap (second pure) ps)
@@ -148,11 +154,16 @@ instance ProtoEmitKinds (Parameter Kind) where
       Parameter{..} ->
         pure [(parameterName, parameterKind)]
 
-instance (ProtoEmitKinds k) => ProtoEmitKinds (Trait k) where
+instance (ProtoEmitKinds k, HasKind k) => ProtoEmitKinds (Trait k) where
   protoOemitKindConstraints =
     \case
-      Trait{..} ->
-        -- TODO
+      Trait{..} -> do
+        env <- ask
+        case Environment.lookup traitName env of
+          Nothing ->
+            tellLeft [ProtoENoTrait traitName]
+          Just k ->
+            tellRight [ProtoKEquality k (kindOf traitType `KArrow` KTrait)]
         protoOemitKindConstraints traitType
 
 instance ProtoEmitKinds (ProtoModule a Kind (Type Parameter Kind)) where
@@ -185,7 +196,7 @@ instance ProtoEmitKinds (ProtoDefinition a Kind (Type Parameter Kind)) where
       ProtoDInstance _ def ->
         protoOemitKindConstraints def
 
-instance (ProtoEmitKinds t) => ProtoEmitKinds (With t) where
+instance ProtoEmitKinds (With (Type Parameter Kind)) where
   protoOemitKindConstraints =
     \case
       With traits t ->
@@ -410,6 +421,7 @@ instance ProtoEmitKinds (ProtoTraitDefinition a Kind) where
         ps1 <-
           protoOemitKindConstraints protoOtraitDefinitionConstraints
             <>^ protoOemitKindConstraints protoOtraitDefinitionParameter
+            <>^ protoOemitKindConstraints (Trait protoOtraitDefinitionTraitName protoOtraitDefinitionParameter)
         forM_ protoOtraitDefinitionInterface $
           \(_, Forall{..}) -> do
             ps2 <-
@@ -431,7 +443,10 @@ instance ProtoEmitKinds (ProtoInstanceDefinition a Kind (Type Parameter Kind)) w
   protoOemitKindConstraints =
     \case
       ProtoInstanceDefinition{..} -> do
-        undefined
+        ps1 <- protoOemitKindConstraints (Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType)
+        ps2 <- protoOemitKindConstraints protoOinstanceDefinitionConstraints
+        tellParameterConstraints (ps1 <> ps2)
+        forM_ protoOinstanceDefinitionImplementations protoOemitKindConstraints
         pure []
 
 -- E.g.,

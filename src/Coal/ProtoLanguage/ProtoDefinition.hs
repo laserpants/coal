@@ -94,6 +94,7 @@ data ProtoFoldDefinition a k t = ProtoFoldDefinition
 
 data ProtoTraitDefinition a k = ProtoTraitDefinition
   { protoOtraitDefinitionMetadata :: a
+  , protoOtraitDefinitionTraitName :: Name
   , protoOtraitDefinitionConstraints :: [Trait (Parameter k)]
   , protoOtraitDefinitionParameter :: Parameter k
   , protoOtraitDefinitionInterface :: [(Name, Scheme Parameter k (Type Parameter k))]

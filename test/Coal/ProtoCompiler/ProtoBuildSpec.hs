@@ -15,6 +15,7 @@ import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
+import Coal.ProtoTypeSystem.Kind.Constraint.Generation
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -28,6 +29,8 @@ testModuleBuiltinsPreKinds =
             ( ProtoTraitDefinition
                 { protoOtraitDefinitionMetadata =
                     mempty
+                , protoOtraitDefinitionTraitName =
+                    "Numeric"
                 , protoOtraitDefinitionConstraints =
                     []
                 , protoOtraitDefinitionParameter =
@@ -266,6 +269,8 @@ testModuleBuiltins =
             ( ProtoTraitDefinition
                 { protoOtraitDefinitionMetadata =
                     mempty
+                , protoOtraitDefinitionTraitName =
+                    "Numeric"
                 , protoOtraitDefinitionConstraints =
                     []
                 , protoOtraitDefinitionParameter =
@@ -873,3 +878,5 @@ testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
 
 testB :: ProtoModule () Kind ()
 testB = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
+
+testC = protoOkindConstraintsGenMonad (protoOemitKindConstraints testB)
