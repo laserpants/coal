@@ -1,7 +1,11 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.ProtoTypeSystem.Kind.Unification where
+module Coal.ProtoTypeSystem.Kind.Unification (
+  ProtoKindUnifier (..),
+  unifyKinds,
+)
+where
 
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
@@ -11,7 +15,8 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set, member)
 import qualified Data.Set as Set
 
-newtype ProtoKindUnifier a = ProtoKindUnifier (Either ProtoKindError a)
+newtype ProtoKindUnifier a = ProtoKindUnifier
+  {protoOKindUnifierMonad :: Either ProtoKindError a}
   deriving
     ( Functor
     , Applicative

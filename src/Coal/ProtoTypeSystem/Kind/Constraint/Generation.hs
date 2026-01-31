@@ -78,7 +78,7 @@ instance (ProtoEmitKinds k) => ProtoEmitKinds [k] where
 instance (ProtoEmitKinds k) => ProtoEmitKinds (Maybe k) where
   protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
 
-instance (ProtoEmitKinds k) => ProtoEmitKinds (Map n k) where
+instance (ProtoEmitKinds k) => ProtoEmitKinds (Map a k) where
   protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
 
 instance (ProtoEmitKinds k) => ProtoEmitKinds (Set k) where

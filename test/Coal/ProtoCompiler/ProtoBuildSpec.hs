@@ -2,6 +2,7 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Language
@@ -19,6 +20,10 @@ import Control.Monad.State (evalState)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
 import Extras (Name)
+import Data.Either (rights)
+import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
+import Coal.ProtoTypeSystem.Kind.Unification
+import Coal.ProtoTypeSystem.Kind.Substitution
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -889,3 +894,10 @@ testC = runProtoKindConstraintsGen env (protoOemitKindConstraints testB)
     Environment.fromList
       [ ("Numeric", KArrow KType KTrait)
       ]
+
+testD = protoOapplyKinds sub testB
+ where
+  Right sub = res
+  res :: Either ProtoKindError ProtoKindSubstitution
+  res = protoOKindUnifierMonad (protoOsolveKindConstraints constraints)
+  constraints = rights (snd testC)
