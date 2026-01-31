@@ -7,6 +7,7 @@ import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
+import Coal.Language.Type (Parameter (..))
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
 import Coal.ProtoCompiler.ProtoStack (evalProtoCompilerT)
@@ -879,4 +880,4 @@ testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
 testB :: ProtoModule () Kind ()
 testB = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
 
-testC = protoOkindConstraintsGenMonad (protoOemitKindConstraints testB)
+-- testC = protoOkindConstraintsGenMonad (protoOemitKindConstraints testB)
