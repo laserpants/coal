@@ -124,7 +124,6 @@ importedBuild path = do
   ProtoCompilerState{..} <- get
   case Environment.lookup (principalPath path) protoOcompilerModules of
     Nothing ->
-      -- TODO:
-      error "!!"
+      error "TODO"
     Just build ->
       pure build
