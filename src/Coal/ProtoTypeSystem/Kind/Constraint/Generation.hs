@@ -41,8 +41,8 @@ import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
 type ProtoKindConstraintsGenOutput = Either ProtoKindError ProtoKindConstraint
 
-newtype ProtoKindConstraintsGen a = ProtoKindConstraintsGen
-  { protoOkindConstraintsGenMonad :: RWS (Environment Kind) [ProtoKindConstraintsGenOutput] () a
+newtype ProtoKindConstraintsGen m a = ProtoKindConstraintsGen
+  { protoOkindConstraintsGenMonad :: RWST (Environment Kind) [ProtoKindConstraintsGenOutput] () m a
   }
   deriving
     ( Functor
@@ -54,23 +54,23 @@ newtype ProtoKindConstraintsGen a = ProtoKindConstraintsGen
     , MonadRWS (Environment Kind) [ProtoKindConstraintsGenOutput] ()
     )
 
-runProtoKindConstraintsGen :: Environment Kind -> ProtoKindConstraintsGen a -> (a, [ProtoKindConstraintsGenOutput])
-runProtoKindConstraintsGen env gen = (s, w)
- where
-  (s, _, w) = runRWS (protoOkindConstraintsGenMonad gen) env mempty
+runProtoKindConstraintsGen :: (Monad m) => Environment Kind -> ProtoKindConstraintsGen m a -> m (a, [ProtoKindConstraintsGenOutput])
+runProtoKindConstraintsGen env gen = do
+  (s, _, w) <- runRWST (protoOkindConstraintsGenMonad gen) env mempty
+  pure (s, w)
 
 parameterMap :: [(Name, Kind)] -> Dictionary [Kind]
 parameterMap ps = Map.fromListWith (++) (fmap (second pure) ps)
 
-tellTransitive :: [Kind] -> ProtoKindConstraintsGen ()
+tellTransitive :: (Monad m) => [Kind] -> ProtoKindConstraintsGen m ()
 tellTransitive [] = pure ()
 tellTransitive (k : ks) = forM_ ks $ \ki -> tellRight [ProtoKEquality k ki]
 
-tellParameterConstraints :: [(Name, Kind)] -> ProtoKindConstraintsGen ()
+tellParameterConstraints :: (Monad m) => [(Name, Kind)] -> ProtoKindConstraintsGen m ()
 tellParameterConstraints = mapM_ tellTransitive . parameterMap
 
 class ProtoEmitKinds k where
-  protoOemitKindConstraints :: k -> ProtoKindConstraintsGen [(Name, Kind)]
+  protoOemitKindConstraints :: (Monad m) => k -> ProtoKindConstraintsGen m [(Name, Kind)]
 
 instance (ProtoEmitKinds k) => ProtoEmitKinds [k] where
   protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
