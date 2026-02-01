@@ -6,7 +6,7 @@
 module Coal.Language.Type.Kind.Indexed (ToKindIndexed (..)) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (supply)
+import Coal.Common.Supply (Supply (..), supplied, supply)
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -20,7 +20,7 @@ import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (forM)
-import Control.Monad.State (StateT)
+import Control.Monad.State (MonadState, StateT)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
@@ -28,7 +28,7 @@ import qualified Data.Set as Set
 import Data.Tuple.Extra (secondM)
 
 class ToKindIndexed t u where
-  toKindIndexed :: (Monad m) => t -> StateT Int m u
+  toKindIndexed :: (MonadState s m, Supply s) => t -> m u
 
 instance ToKindIndexed () () where
   toKindIndexed = pure
@@ -342,5 +342,5 @@ instance ToKindIndexed (Row Parameter k (Type Parameter k)) (Row Parameter Kind 
       RNil ->
         pure RNil
 
-kVar :: (Monad m) => StateT Int m Kind
-kVar = KVar <$> supply
+kVar :: (MonadState s m, Supply s) => m Kind
+kVar = supplied KVar

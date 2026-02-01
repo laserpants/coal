@@ -880,34 +880,34 @@ testModule2B =
                       )
                 }
             )
-        ]
-    }
+          ]
+      }
 
---testA :: (Monoid a) => IO (Either () (ProtoBuild a))
---testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
+  --testA :: (Monoid a) => IO (Either () (ProtoBuild a))
+  --testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
 
-testB :: ProtoModule () Kind ()
-testB = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
+--  testB :: ProtoModule () Kind ()
+--  testB = evalStateT (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
 
-testC :: ([(Name, Kind)], [ProtoKindConstraintsGenOutput])
-testC = runProtoKindConstraintsGen env (protoOemitKindConstraints testB)
- where
-  env =
-    Environment.fromList
-      [ ("Numeric", KArrow KType KTrait)
-      ]
+--testC :: ([(Name, Kind)], [ProtoKindConstraintsGenOutput])
+--testC = runProtoKindConstraintsGen env (protoOemitKindConstraints testB)
+-- where
+--  env =
+--    Environment.fromList
+--      [ ("Numeric", KArrow KType KTrait)
+--      ]
 
-testD = protoOapplyKinds sub testB
- where
-  Right sub = res
-  res :: Either ProtoKindError ProtoKindSubstitution
-  res = protoOKindUnifierMonad (protoOsolveKindConstraints constraints)
-  constraints = rights (snd testC)
+--testD = protoOapplyKinds sub testB
+-- where
+--  Right sub = res
+--  res :: Either ProtoKindError ProtoKindSubstitution
+--  res = protoOKindUnifierMonad (protoOsolveKindConstraints constraints)
+--  constraints = rights (snd testC)
 
 testE :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
 testE = do
   evalProtoCompilerT $ do
-    indexedModule <- evalStateT (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0 -- :: ProtoModule () Kind ()
+    indexedModule <- toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())
     env <- moduleKindEnvironment indexedModule
     let res1 = runProtoKindConstraintsGen env (protoOemitKindConstraints indexedModule)
     let constraints = rights (snd res1)
