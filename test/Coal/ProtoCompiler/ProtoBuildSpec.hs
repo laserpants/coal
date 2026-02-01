@@ -2,8 +2,8 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
-import qualified Coal.Common.Environment as Environment
+import Debug.Trace
+import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
@@ -12,18 +12,20 @@ import Coal.Language.Type (Parameter (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
-import Coal.ProtoCompiler.ProtoStack (evalProtoCompilerT)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, evalProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Kind.Constraint.Generation
-import Control.Monad.State (evalState)
-import Data.List.NonEmpty (NonEmpty (..), (<|))
-import qualified Data.Set as Set
-import Extras (Name)
-import Data.Either (rights)
+import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
-import Coal.ProtoTypeSystem.Kind.Unification
 import Coal.ProtoTypeSystem.Kind.Substitution
+import Coal.ProtoTypeSystem.Kind.Unification
+import Control.Monad.State (evalState)
+import Data.Either (rights)
+import Data.List.NonEmpty (NonEmpty (..), (<|))
+import Extras (Name)
+import qualified Coal.Common.Environment as Environment
+import qualified Data.Set as Set
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -881,8 +883,8 @@ testModule2B =
         ]
     }
 
-testA :: (Monoid a) => IO (Either () (ProtoBuild a))
-testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
+--testA :: (Monoid a) => IO (Either () (ProtoBuild a))
+--testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
 
 testB :: ProtoModule () Kind ()
 testB = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
@@ -901,3 +903,15 @@ testD = protoOapplyKinds sub testB
   res :: Either ProtoKindError ProtoKindSubstitution
   res = protoOKindUnifierMonad (protoOsolveKindConstraints constraints)
   constraints = rights (snd testC)
+
+testE :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
+testE = do
+  evalProtoCompilerT $ do
+    let indexedModule = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0 :: ProtoModule () Kind ()
+    env <- moduleKindEnvironment indexedModule
+    let res1 = runProtoKindConstraintsGen env (protoOemitKindConstraints indexedModule)
+    let constraints = rights (snd res1)
+    let res2 = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+    let Right sub = res2
+    let res3 = protoOapplyKinds sub indexedModule :: ProtoModule () Kind ()
+    protoOprepareBuild res3

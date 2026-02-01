@@ -7,7 +7,7 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language.HasKind (HasKind (..), foldKindOf)
 import Coal.Language.Module.Import (Import (..))
-import Coal.Language.Module.Path (Path (..))
+import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
@@ -20,7 +20,7 @@ import Control.Monad.State (get)
 import Data.Maybe (fromMaybe)
 import Extras (Name, concatForM, forM)
 
-moduleKindEnvironment :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a (Environment Kind)
+moduleKindEnvironment :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m b (Environment Kind)
 moduleKindEnvironment ProtoModule{..} = do
   res <- forM protoOmoduleDefinitions $
     \case
@@ -60,13 +60,36 @@ moduleKindEnvironment ProtoModule{..} = do
             _ ->
               pure []
       ProtoDQualifiedImport _ path -> do
-        ProtoBuild{protoObuildExportedNames = exportedNames, ..} <- importedBuild path
-        pure
-          []
+        importedModule@ProtoBuild{..} <- importedBuild path
+        ps1 <- concatForM (Environment.names protoObuildTypeConstructors) $
+          \name ->
+            pure $
+              if importedModule `exports` name
+                then nameKindPairs name (typeConstructorKind name importedModule)
+                else []
+        ps2 <- concatForM (Environment.names protoObuildTraits) $
+          \name ->
+            pure $
+              if importedModule `exports` name
+                then nameKindPairs name (traitKind name importedModule)
+                else []
+        ps3 <- concatForM (Environment.names protoObuildAliases) $
+          \name ->
+            pure $
+              if importedModule `exports` name
+                then nameKindPairs name (aliasKind name importedModule)
+                else []
+        pure (ps1 <> ps2 <> ps3)
       _ ->
         pure []
+  pure $
+    Environment.fromList (concat res)
 
-  pure (Environment.fromList (concat res))
+nameKindPairs :: Name -> Maybe Kind -> [(Name, Kind)]
+nameKindPairs name maybeKind =
+  fromMaybe [] $ do
+    kind <- maybeKind
+    pure [(name, kind)]
 
 exports :: ProtoBuild a -> Name -> Bool
 exports ProtoBuild{..} name = name `elem` protoObuildExportedNames
@@ -98,7 +121,9 @@ aliasKind name ProtoBuild{..} =
 importedBuild :: (Monad m) => Path -> ProtoCompilerT m a (ProtoBuild a)
 importedBuild path = do
   ProtoCompilerState{..} <- get
-
-  undefined
-
--- exportedTypes
+  case Environment.lookup (principalPath path) protoOcompilerModules of
+    Nothing ->
+      -- TODO:
+      error "!!"
+    Just build ->
+      pure build
