@@ -20,7 +20,7 @@ import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (With (..))
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
-import Control.Monad.State (MonadTrans (lift), State, foldM, forM_, modify, runState, void)
+import Control.Monad.State (MonadTrans (lift), State, foldM, forM_, modify, runState)
 import Data.Functor.Foldable (cata)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)

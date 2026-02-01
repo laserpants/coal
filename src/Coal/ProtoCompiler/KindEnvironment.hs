@@ -18,7 +18,7 @@ import Coal.ProtoLanguage.ProtoModule
 import Control.Applicative ((<|>))
 import Control.Monad.State (get)
 import Data.Maybe (fromMaybe)
-import Extras (Name, concatForM, forM)
+import Extras (Name, concatForM, forM, (<.>))
 
 moduleKindEnvironment :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m b (Environment Kind)
 moduleKindEnvironment ProtoModule{..} = do
@@ -65,25 +65,28 @@ moduleKindEnvironment ProtoModule{..} = do
           \name ->
             pure $
               if importedModule `exports` name
-                then nameKindPairs name (typeConstructorKind name importedModule)
+                then nameKindPairs (qualified path name) (typeConstructorKind name importedModule)
                 else []
         ps2 <- concatForM (Environment.names protoObuildTraits) $
           \name ->
             pure $
               if importedModule `exports` name
-                then nameKindPairs name (traitKind name importedModule)
+                then nameKindPairs (qualified path name) (traitKind name importedModule)
                 else []
         ps3 <- concatForM (Environment.names protoObuildAliases) $
           \name ->
             pure $
               if importedModule `exports` name
-                then nameKindPairs name (aliasKind name importedModule)
+                then nameKindPairs (qualified path name) (aliasKind name importedModule)
                 else []
         pure (ps1 <> ps2 <> ps3)
       _ ->
         pure []
   pure $
     Environment.fromList (concat res)
+
+qualified :: Path -> Name -> Name
+qualified path name = principalPath path <.> name
 
 nameKindPairs :: Name -> Maybe Kind -> [(Name, Kind)]
 nameKindPairs name maybeKind =
