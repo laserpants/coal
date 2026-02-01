@@ -20,7 +20,7 @@ import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.ProtoTypeSystem.Kind.Substitution
 import Coal.ProtoTypeSystem.Kind.Unification
-import Control.Monad.State (evalState)
+import Control.Monad.State (evalState, evalStateT)
 import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras (Name)
@@ -907,7 +907,7 @@ testD = protoOapplyKinds sub testB
 testE :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
 testE = do
   evalProtoCompilerT $ do
-    let indexedModule = evalState (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0 :: ProtoModule () Kind ()
+    indexedModule <- evalStateT (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0 -- :: ProtoModule () Kind ()
     env <- moduleKindEnvironment indexedModule
     let res1 = runProtoKindConstraintsGen env (protoOemitKindConstraints indexedModule)
     let constraints = rights (snd res1)

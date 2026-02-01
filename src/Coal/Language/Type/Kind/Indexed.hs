@@ -20,7 +20,7 @@ import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (forM)
-import Control.Monad.State (State)
+import Control.Monad.State (StateT)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
@@ -28,7 +28,7 @@ import qualified Data.Set as Set
 import Data.Tuple.Extra (secondM)
 
 class ToKindIndexed t u where
-  toKindIndexed :: t -> State Int u
+  toKindIndexed :: (Monad m) => t -> StateT Int m u
 
 instance ToKindIndexed () () where
   toKindIndexed = pure
@@ -342,5 +342,5 @@ instance ToKindIndexed (Row Parameter k (Type Parameter k)) (Row Parameter Kind 
       RNil ->
         pure RNil
 
-kVar :: State Int Kind
+kVar :: (Monad m) => StateT Int m Kind
 kVar = KVar <$> supply
