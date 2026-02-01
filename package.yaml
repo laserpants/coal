@@ -92,3 +92,4 @@ tests:
     dependencies:
     - coal
     - hspec
+    - pretty-simple

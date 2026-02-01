@@ -2,14 +2,14 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Debug.Trace
-import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Language.Type (Parameter (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
+import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, evalProtoCompilerT)
@@ -23,9 +23,10 @@ import Coal.ProtoTypeSystem.Kind.Unification
 import Control.Monad.State (evalState, evalStateT)
 import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Extras (Name)
-import qualified Coal.Common.Environment as Environment
 import qualified Data.Set as Set
+import Debug.Trace
+import Extras (Name)
+import Text.Pretty.Simple (pPrint)
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -880,24 +881,24 @@ testModule2B =
                       )
                 }
             )
-          ]
-      }
+        ]
+    }
 
-  --testA :: (Monoid a) => IO (Either () (ProtoBuild a))
-  --testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
+-- testA :: (Monoid a) => IO (Either () (ProtoBuild a))
+-- testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
 
 --  testB :: ProtoModule () Kind ()
 --  testB = evalStateT (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
 
---testC :: ([(Name, Kind)], [ProtoKindConstraintsGenOutput])
---testC = runProtoKindConstraintsGen env (protoOemitKindConstraints testB)
+-- testC :: ([(Name, Kind)], [ProtoKindConstraintsGenOutput])
+-- testC = runProtoKindConstraintsGen env (protoOemitKindConstraints testB)
 -- where
 --  env =
 --    Environment.fromList
 --      [ ("Numeric", KArrow KType KTrait)
 --      ]
 
---testD = protoOapplyKinds sub testB
+-- testD = protoOapplyKinds sub testB
 -- where
 --  Right sub = res
 --  res :: Either ProtoKindError ProtoKindSubstitution
@@ -914,3 +915,4 @@ testE = do
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub indexedModule :: ProtoModule () Kind ()
     protoOprepareBuild res3
+

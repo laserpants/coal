@@ -421,6 +421,7 @@ test-suite coal-test
     , memory
     , mtl
     , parser-combinators
+    , pretty-simple
     , prettyprinter
     , process
     , process-extras
