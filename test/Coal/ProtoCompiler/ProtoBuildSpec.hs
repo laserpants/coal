@@ -909,8 +909,8 @@ testE = do
   evalProtoCompilerT $ do
     indexedModule <- toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())
     env <- moduleKindEnvironment indexedModule
-    res1 <- runProtoKindConstraintsGen env (protoOemitKindConstraints indexedModule)
-    let constraints = rights (snd res1)
+    (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints indexedModule)
+    let constraints = rights res1
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub indexedModule :: ProtoModule () Kind ()
     protoOprepareBuild res3
