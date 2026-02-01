@@ -7,7 +7,7 @@ module Coal.ProtoCompiler.ProtoBuild (
   ProtoBuild (..),
   protoOemptyBuild,
   setBuildPath,
-  setBuildFile,
+--  setBuildFile,
   setBuildBitcode,
   setBuildHash,
   setBuildKernelNames,
@@ -42,7 +42,7 @@ type InstanceMap a = Map IndexedType a
 
 data ProtoBuild a = ProtoBuild
   { protoObuildPath :: Path
-  , protoObuildFile :: FilePath
+--  , protoObuildFile :: FilePath
   , protoObuildNames :: Environment [ProtoNameEntry]
   , protoObuildExportedNames :: Set Name
   , protoObuildDataConstructors :: Environment (ProtoDataConstructorEntry a)
@@ -64,7 +64,7 @@ protoOemptyBuild :: ProtoBuild a
 protoOemptyBuild =
   ProtoBuild
     { protoObuildPath = Path []
-    , protoObuildFile = mempty
+--    , protoObuildFile = mempty
     , protoObuildNames = mempty
     , protoObuildExportedNames = mempty
     , protoObuildDataConstructors = mempty
@@ -86,12 +86,12 @@ setBuildPath newBuildPath ProtoBuild{..} =
     , ..
     }
 
-setBuildFile :: FilePath -> ProtoBuild a -> ProtoBuild a
-setBuildFile newBuildFile ProtoBuild{..} =
-  ProtoBuild
-    { protoObuildFile = newBuildFile
-    , ..
-    }
+--setBuildFile :: FilePath -> ProtoBuild a -> ProtoBuild a
+--setBuildFile newBuildFile ProtoBuild{..} =
+--  ProtoBuild
+--    { protoObuildFile = newBuildFile
+--    , ..
+--    }
 
 overBuildNames :: (Environment [ProtoNameEntry] -> Environment [ProtoNameEntry]) -> ProtoBuild a -> ProtoBuild a
 overBuildNames f ProtoBuild{..} =
