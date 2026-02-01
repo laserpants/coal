@@ -68,7 +68,7 @@ data ProtoAliasEntry a = ProtoAliasEntry
   { protoOaliasEntryMetadata :: a
   , protoOaliasEntryName :: Name
   , protoOaliasEntryParams :: [Name]
-  , protoOaliasEntryType :: ParameterizedType
+  , protoOaliasEntryType :: Type Parameter Kind
   }
   deriving (Show, Eq, Ord, Read, Generic)
 

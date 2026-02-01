@@ -6,11 +6,14 @@ module Coal.ProtoCompiler.ProtoState (
   initialProtoCompilerState,
 ) where
 
+import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
+import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Extras (Over)
 
 data ProtoCompilerState a = ProtoCompilerState
   { protoOcompilerSupply :: Int
+  , protoOcompilerModules :: Environment (ProtoBuild a)
   }
   deriving (Show, Eq, Ord)
 
@@ -18,6 +21,7 @@ initialProtoCompilerState :: ProtoCompilerState a
 initialProtoCompilerState =
   ProtoCompilerState
     { protoOcompilerSupply = 0
+    , protoOcompilerModules = mempty
     }
 
 {-# INLINE overProtoCompilerSupply #-}

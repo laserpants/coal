@@ -130,8 +130,6 @@ prepareBuild module_@(Module path exports defs) =
                     [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` exps]
                   TypeExport loc name _ ->
                     [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
-                  _ ->
-                    []
         unless (null errs) $ do
           tellErrors errs
           throwError PreflightFailure

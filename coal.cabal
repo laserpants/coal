@@ -225,6 +225,7 @@ library
       Coal.Parser.Type
       Coal.Parser.Type.Intrinsic
       Coal.Parser.Utils
+      Coal.ProtoCompiler.KindEnvironment
       Coal.ProtoCompiler.ProtoBuild
       Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
       Coal.ProtoCompiler.ProtoBuild.ProtoPrep

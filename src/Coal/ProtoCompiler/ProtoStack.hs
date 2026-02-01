@@ -28,7 +28,6 @@ newtype ProtoCompilerT m a o = ProtoCompiler {protoOcompilerStack :: ProtoCompil
     , MonadError ()
     , --    , MonadReader (CompilerEnvironment a)
       --    , MonadWriter (CompilerJournal a)
-      --    , MonadState (CompilerState a)
       --    , MonadError CompilerFailureMode
       MonadIO
     , MonadThrow
