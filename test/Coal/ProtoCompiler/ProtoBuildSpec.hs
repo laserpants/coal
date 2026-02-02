@@ -34,7 +34,15 @@ testModuleBuiltinsPreKinds =
     { protoOmodulePath = Path ["Builtin"]
     , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
-        [ ProtoDTrait
+        [ ProtoDType
+            mempty
+            "IO"
+            ( ProtoTypeDefinition
+                { protoOtypeDefinitionParameters = [Parameter () "a"]
+                , protoOtypeDefinitionConstructors = []
+                }
+            )
+        , ProtoDTrait
             mempty
             "Numeric"
             ( ProtoTraitDefinition
@@ -274,7 +282,15 @@ testModuleBuiltins =
     { protoOmodulePath = Path ["Builtin"]
     , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
-        [ ProtoDTrait
+        [ ProtoDType
+            mempty
+            "IO"
+            ( ProtoTypeDefinition
+                { protoOtypeDefinitionParameters = [Parameter KType "a"]
+                , protoOtypeDefinitionConstructors = []
+                }
+            )
+        , ProtoDTrait
             mempty
             "Numeric"
             ( ProtoTraitDefinition
@@ -509,6 +525,47 @@ testModuleBuiltins =
     }
 
 --
+
+testModule0PreKinds :: (Monoid a) => ProtoModule a () ()
+testModule0PreKinds =
+  ProtoModule
+    { protoOmodulePath = Path ["IO"]
+    , protoOmoduleExportList = ExportAll
+    , protoOmoduleDefinitions =
+        [ ProtoDFunction
+            mempty
+            "println_int32"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation =
+                    Just
+                      ( With
+                          []
+                          ( TApplication
+                              ()
+                              (TConstructor () "IO")
+                              (TIntrinsic IUnit)
+                          )
+                      )
+                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "n"))
+                      :| []
+                , protoOfunctionDefinitionExpression =
+                    EApplication
+                      mempty
+                      ()
+                      (EVariable mempty (Label () "io$_println_int32"))
+                      ( EVariable mempty (Label () "n")
+                          :| []
+                      )
+                }
+            )
+        ]
+    }
 
 testModule0 :: (Monoid a) => ProtoModule a Kind ()
 testModule0 =
@@ -914,5 +971,19 @@ testE = do
     let constraints = rights res1
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
+    traceShowM res3
     traceShowM (res3 == testModuleBuiltins)
+    protoOprepareBuild res3
+
+testF :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
+testF = do
+  evalProtoCompilerT $ do
+    kindIndexedModule <- toKindIndexed (testModule0PreKinds :: ProtoModule () () ())
+    env <- moduleKindEnvironment kindIndexedModule
+    (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
+    let constraints = rights res1
+        Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+        res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
+    traceShowM res3
+    traceShowM (res3 == testModule0)
     protoOprepareBuild res3
