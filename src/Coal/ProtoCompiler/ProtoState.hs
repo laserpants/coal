@@ -4,6 +4,8 @@
 module Coal.ProtoCompiler.ProtoState (
   ProtoCompilerState (..),
   initialProtoCompilerState,
+  overProtoCompilerSupply,
+  overProtoCompilerModules,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -29,6 +31,14 @@ overProtoCompilerSupply :: Over (ProtoCompilerState a) Int
 overProtoCompilerSupply fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerSupply = fn protoOcompilerSupply
+    , ..
+    }
+
+{-# INLINE overProtoCompilerModules #-}
+overProtoCompilerModules :: Over (ProtoCompilerState a) (Environment (ProtoBuild a))
+overProtoCompilerModules fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerModules = fn protoOcompilerModules
     , ..
     }
 

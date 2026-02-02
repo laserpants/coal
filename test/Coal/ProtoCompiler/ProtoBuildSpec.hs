@@ -2,6 +2,7 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Coal.ProtoCompiler.ProtoStack
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Language
@@ -21,7 +22,7 @@ import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.ProtoTypeSystem.Kind.Substitution
 import Coal.ProtoTypeSystem.Kind.Unification
 import Control.Monad.State (evalState, evalStateT)
-import Data.Either (rights)
+import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
 import Debug.Trace
@@ -532,7 +533,12 @@ testModule0PreKinds =
     { protoOmodulePath = Path ["IO"]
     , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
-        [ ProtoDFunction
+        [ ProtoDImport
+            mempty
+            (Path ["Builtin"])
+            [ TypeImport mempty "IO" []
+            ]
+        , ProtoDFunction
             mempty
             "println_int32"
             ( ProtoFunctionDefinition
@@ -573,7 +579,12 @@ testModule0 =
     { protoOmodulePath = Path ["IO"]
     , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
-        [ ProtoDFunction
+        [ ProtoDImport
+            mempty
+            (Path ["Builtin"])
+            [ TypeImport mempty "IO" []
+            ]
+        , ProtoDFunction
             mempty
             "println_int32"
             ( ProtoFunctionDefinition
@@ -601,6 +612,56 @@ testModule0 =
                       ()
                       (EVariable mempty (Label () "io$_println_int32"))
                       ( EVariable mempty (Label () "n")
+                          :| []
+                      )
+                }
+            )
+        ]
+    }
+
+testModule1PreKinds :: (Monoid a) => ProtoModule a () ()
+testModule1PreKinds =
+  ProtoModule
+    { protoOmodulePath = Path ["Main"]
+    , protoOmoduleExportList = ExportAll
+    , protoOmoduleDefinitions =
+        [ ProtoDImport
+            mempty
+            (Path ["Math"])
+            [ NameImport mempty "factorial"
+            ]
+        , ProtoDImport
+            mempty
+            (Path ["IO"])
+            [ NameImport mempty "println_int32"
+            ]
+        , ProtoDFunction
+            mempty
+            "main"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation = Nothing
+                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PLiteral mempty LUnit :| []
+                , protoOfunctionDefinitionExpression =
+                    EApplication
+                      mempty
+                      ()
+                      (EVariable mempty (Label () "println_int32"))
+                      ( EApplication
+                          mempty
+                          ()
+                          (EVariable mempty (Label () "factorial"))
+                          ( EApplication
+                              mempty
+                              ()
+                              (EVariable mempty (Label () "from_int32"))
+                              ( ELiteral mempty (LInt32 8)
+                                  :| []
+                              )
+                              :| []
+                          )
                           :| []
                       )
                 }
@@ -651,6 +712,102 @@ testModule1 =
                               )
                               :| []
                           )
+                          :| []
+                      )
+                }
+            )
+        ]
+    }
+
+testModule2PreKinds :: (Monoid a) => ProtoModule a () ()
+testModule2PreKinds =
+  ProtoModule
+    { protoOmodulePath = Path ["Math"]
+    , protoOmoduleExportList = ExportAll
+    , protoOmoduleDefinitions =
+        [ ProtoDImport
+            mempty
+            (Path ["Nat"])
+            [ NameImport mempty "pack"
+            , NameImport mempty "unpack"
+            ]
+        , ProtoDFunction
+            mempty
+            "factorial"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata =
+                    mempty
+                , protoOfunctionDefinitionAnnotation =
+                    Just (With [] (TIntrinsic IInt32))
+                , protoOfunctionDefinitionType =
+                    With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "n"))
+                      :| []
+                , protoOfunctionDefinitionExpression =
+                    EFold
+                      mempty
+                      ()
+                      ( EApplication
+                          mempty
+                          ()
+                          (EVariable mempty (Label () "pack"))
+                          (EVariable mempty (Label () "n") :| [])
+                          :| []
+                      )
+                      ( EClause
+                          mempty
+                          (PConstructor mempty (Label () "Zero") [])
+                          ( CPlain
+                              mempty
+                              []
+                              ( EApplication
+                                  mempty
+                                  ()
+                                  (EVariable mempty (Label () "from_int32"))
+                                  ( ELiteral mempty (LInt32 1)
+                                      :| []
+                                  )
+                              )
+                              :| []
+                          )
+                          <| EClause
+                            mempty
+                            ( PAs
+                                mempty
+                                (Label () "m")
+                                ( PConstructor
+                                    mempty
+                                    (Label () "Succ")
+                                    [ PAtVariable
+                                        mempty
+                                        (Label () "f")
+                                    ]
+                                )
+                            )
+                            ( CPlain
+                                mempty
+                                []
+                                ( EApplication
+                                    mempty
+                                    ()
+                                    (EVariable mempty (Label () "(*)"))
+                                    ( EApplication
+                                        mempty
+                                        ()
+                                        (EVariable mempty (Label () "unpack"))
+                                        ( EVariable mempty (Label () "m")
+                                            :| []
+                                        )
+                                        <| EVariable mempty (Label () "f")
+                                        :| []
+                                    )
+                                )
+                                :| []
+                            )
                           :| []
                       )
                 }
@@ -747,6 +904,73 @@ testModule2 =
                                 )
                                 :| []
                             )
+                          :| []
+                      )
+                }
+            )
+        ]
+    }
+
+testModule3PreKinds :: (Monoid a) => ProtoModule a () ()
+testModule3PreKinds =
+  ProtoModule
+    { protoOmodulePath = Path ["Nat"]
+    , protoOmoduleExportList = ExportAll
+    , protoOmoduleDefinitions =
+        [ ProtoDFunction
+            mempty
+            "pack"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation =
+                    Just
+                      ( With
+                          []
+                          (TIntrinsic INat)
+                      )
+                , protoOfunctionDefinitionType =
+                    With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "m"))
+                      :| []
+                , protoOfunctionDefinitionExpression =
+                    EApplication
+                      mempty
+                      ()
+                      (EVariable mempty (Label () "nat$_pack"))
+                      ( EVariable mempty (Label () "m")
+                          :| []
+                      )
+                }
+            )
+        , ProtoDFunction
+            mempty
+            "unpack"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation =
+                    Just
+                      ( With
+                          []
+                          (TIntrinsic IInt32)
+                      )
+                , protoOfunctionDefinitionType =
+                    With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic INat)
+                      (PVariable mempty (Label () "n"))
+                      :| []
+                , protoOfunctionDefinitionExpression =
+                    EApplication
+                      mempty
+                      ()
+                      (EVariable mempty (Label () "nat$_unpack"))
+                      ( EVariable mempty (Label () "n")
                           :| []
                       )
                 }
@@ -969,8 +1193,10 @@ testE = do
     env <- moduleKindEnvironment kindIndexedModule
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
     let constraints = rights res1
+        errs = lefts res1
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
+    traceShowM errs
     traceShowM res3
     traceShowM (res3 == testModuleBuiltins)
     protoOprepareBuild res3
@@ -982,8 +1208,35 @@ testF = do
     env <- moduleKindEnvironment kindIndexedModule
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
     let constraints = rights res1
+        errs = lefts res1
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
-    traceShowM res3
+    traceShowM errs
     traceShowM (res3 == testModule0)
     protoOprepareBuild res3
+
+testG :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
+testG = do
+  evalProtoCompilerT $ do
+    kindIndexedModule <- toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())
+    env <- moduleKindEnvironment kindIndexedModule
+    (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
+    let constraints = rights res1
+        errs = lefts res1
+        Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+        res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
+    b <- protoOprepareBuild res3
+    insertBuildC b
+    --
+    kindIndexedModule <- toKindIndexed (testModule0PreKinds :: ProtoModule () () ())
+    env <- moduleKindEnvironment kindIndexedModule
+    (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
+    let constraints = rights res1
+        errs = lefts res1
+        Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+        res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
+    traceShowM errs
+    traceShowM res3 
+    traceShowM (res3 == testModule0)
+    protoOprepareBuild res3
+    

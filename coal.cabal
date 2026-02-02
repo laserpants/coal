@@ -231,6 +231,7 @@ library
       Coal.ProtoCompiler.ProtoBuild.ProtoPrep
       Coal.ProtoCompiler.ProtoBuild.ProtoUnit
       Coal.ProtoCompiler.ProtoError
+      Coal.ProtoCompiler.ProtoJournal
       Coal.ProtoCompiler.ProtoPipeline
       Coal.ProtoCompiler.ProtoStack
       Coal.ProtoCompiler.ProtoState

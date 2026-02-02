@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
@@ -7,15 +8,21 @@ module Coal.ProtoCompiler.ProtoStack (
   ProtoCompilerT (..),
   runProtoCompilerT,
   evalProtoCompilerT,
+  insertBuildC,
 ) where
 
-import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..), initialProtoCompilerState)
+import qualified Coal.Common.Environment as Environment
+import Coal.Language.Module.Path (principalPath)
+import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
+import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
+import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..), initialProtoCompilerState, overProtoCompilerModules)
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
+import Control.Monad.State (modify)
 
-type ProtoCompilerStack m a o = ExceptT () (RWST () () (ProtoCompilerState a) m) o
+type ProtoCompilerStack m a o = ExceptT () (RWST () (ProtoCompilerJournal a) (ProtoCompilerState a) m) o
 
 newtype ProtoCompilerT m a o = ProtoCompiler {protoOcompilerStack :: ProtoCompilerStack m a o}
   deriving
@@ -23,7 +30,7 @@ newtype ProtoCompilerT m a o = ProtoCompiler {protoOcompilerStack :: ProtoCompil
     , Applicative
     , Monad
     , MonadReader ()
-    , MonadWriter ()
+    , MonadWriter (ProtoCompilerJournal a)
     , MonadState (ProtoCompilerState a)
     , MonadError ()
     , --    , MonadReader (CompilerEnvironment a)
@@ -46,3 +53,8 @@ evalProtoCompilerT :: (Monad m) => ProtoCompilerT m a o -> m (Either () o)
 evalProtoCompilerT com = do
   (c, _, _) <- runProtoCompilerT com
   pure c
+
+insertBuildC :: (Monad m) => ProtoBuild a -> ProtoCompilerT m a ()
+insertBuildC ProtoBuild{..} = modify (overProtoCompilerModules (Environment.insert name ProtoBuild{..}))
+ where
+  name = principalPath protoObuildPath
