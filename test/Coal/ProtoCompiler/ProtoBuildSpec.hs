@@ -914,4 +914,5 @@ testE = do
     let constraints = rights res1
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
+    traceShowM (res3 == testModuleBuiltins)
     protoOprepareBuild res3

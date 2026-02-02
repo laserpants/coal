@@ -6,7 +6,7 @@
 module Coal.Language.Type.Kind.Indexed (ToKindIndexed (..)) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (Supply (..), supplied, supply)
+import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -20,7 +20,7 @@ import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (forM)
-import Control.Monad.State (MonadState, StateT)
+import Control.Monad.State (MonadState)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
