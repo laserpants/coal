@@ -90,7 +90,7 @@ instance ProtoKindSubstitutable Kind where
       KArrow k1 k2 ->
         KArrow (protoOapplyKinds sub k1) (protoOapplyKinds sub k2)
       KVar n ->
-        fromMaybe (KVar n) (Map.lookup n (kindSubstitutionMap sub))
+        fromMaybe KType (Map.lookup n (kindSubstitutionMap sub))
       k ->
         k
 
