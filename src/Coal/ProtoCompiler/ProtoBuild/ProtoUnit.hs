@@ -13,15 +13,15 @@ import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Extras (Name)
 
 data ProtoBuildUnit a
-  = UnitSource a
-  | UnitCached (ProtoBuild a)
+  = FromSource a
+  | Cached (ProtoBuild a)
   deriving (Show, Eq, Ord)
 
 unitPrincipalPath :: ProtoBuildUnit (ProtoModule a k t) -> Name
 unitPrincipalPath =
   principalPath
     . \case
-      UnitSource ProtoModule{..} ->
+      FromSource ProtoModule{..} ->
         protoOmodulePath
-      UnitCached ProtoBuild{..} ->
+      Cached ProtoBuild{..} ->
         protoObuildPath
