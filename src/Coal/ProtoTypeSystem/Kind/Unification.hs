@@ -15,8 +15,7 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set, member)
 import qualified Data.Set as Set
 
-newtype ProtoKindUnifier a = ProtoKindUnifier
-  {protoOKindUnifierMonad :: Either ProtoKindError a}
+newtype ProtoKindUnifier a = ProtoKindUnifier {protoOKindUnifierMonad :: Either ProtoKindError a}
   deriving
     ( Functor
     , Applicative
