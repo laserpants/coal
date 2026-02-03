@@ -1,7 +1,9 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Coal.AST.Metadata (Metadata (..))
 import Coal.ProtoCompiler.ProtoStack
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
@@ -26,7 +28,7 @@ import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
 import Debug.Trace
-import Extras (Name)
+import Extras (Name, forM_)
 import Text.Pretty.Simple (pPrint)
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
@@ -1240,3 +1242,28 @@ testG = do
     traceShowM (res3 == testModule0)
     protoOprepareBuild res3
     
+
+xyz :: [ProtoModule Metadata () ()] -> IO ()
+xyz modules = do
+  r <- evalProtoCompilerT $ do
+    forM_ modules $
+      \module_ -> do
+        a <- toKindIndexed module_ 
+        env <- moduleKindEnvironment a
+        (_, r) <- runProtoKindConstraintsGen env (protoOemitKindConstraints a)
+        let constraints = rights r
+            errors = lefts r
+            Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+            res3 = protoOapplyKinds sub a :: ProtoModule Metadata Kind ()
+        b <- protoOprepareBuild res3
+        traceShowM errors
+        insertBuildC b
+  pure ()
+
+foo = xyz 
+  [ testModuleBuiltinsPreKinds
+  , testModule0PreKinds
+  , testModule3PreKinds
+  , testModule2PreKinds
+  , testModule1PreKinds
+  ]
