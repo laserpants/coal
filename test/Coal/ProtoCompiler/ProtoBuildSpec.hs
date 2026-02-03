@@ -4,7 +4,6 @@
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.ProtoCompiler.ProtoStack
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Language
@@ -15,7 +14,7 @@ import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, evalProtoCompilerT)
+import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Kind.Constraint.Generation
@@ -1238,17 +1237,16 @@ testG = do
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
     traceShowM errs
-    traceShowM res3 
+    traceShowM res3
     traceShowM (res3 == testModule0)
     protoOprepareBuild res3
-    
 
 xyz :: [ProtoModule Metadata () ()] -> IO ()
 xyz modules = do
   r <- evalProtoCompilerT $ do
     forM_ modules $
       \module_ -> do
-        a <- toKindIndexed module_ 
+        a <- toKindIndexed module_
         env <- moduleKindEnvironment a
         (_, r) <- runProtoKindConstraintsGen env (protoOemitKindConstraints a)
         let constraints = rights r
@@ -1260,10 +1258,11 @@ xyz modules = do
         insertBuildC b
   pure ()
 
-foo = xyz 
-  [ testModuleBuiltinsPreKinds
-  , testModule0PreKinds
-  , testModule3PreKinds
-  , testModule2PreKinds
-  , testModule1PreKinds
-  ]
+foo =
+  xyz
+    [ testModuleBuiltinsPreKinds
+    , testModule0PreKinds
+    , testModule3PreKinds
+    , testModule2PreKinds
+    , testModule1PreKinds
+    ]
