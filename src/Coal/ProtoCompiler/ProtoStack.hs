@@ -8,6 +8,7 @@ module Coal.ProtoCompiler.ProtoStack (
   ProtoCompilerT (..),
   runProtoCompilerT,
   evalProtoCompilerT,
+  updateSupplyC,
   insertBuildC,
 ) where
 
@@ -15,7 +16,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Language.Module.Path (principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
-import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..), initialProtoCompilerState, overProtoCompilerModules)
+import Coal.ProtoCompiler.ProtoState 
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
@@ -53,6 +54,9 @@ evalProtoCompilerT :: (Monad m) => ProtoCompilerT m a o -> m (Either () o)
 evalProtoCompilerT com = do
   (c, _, _) <- runProtoCompilerT com
   pure c
+
+updateSupplyC :: (Monad m) => Int -> ProtoCompilerT m a ()
+updateSupplyC supply = modify (overProtoCompilerSupply (const supply))
 
 insertBuildC :: (Monad m) => ProtoBuild a -> ProtoCompilerT m a ()
 insertBuildC ProtoBuild{..} = modify (overProtoCompilerModules (Environment.insert name ProtoBuild{..}))

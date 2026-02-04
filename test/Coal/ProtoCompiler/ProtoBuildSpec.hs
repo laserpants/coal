@@ -9,6 +9,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
+import Coal.ProtoCompiler.ProtoState
 import Coal.Language.Type (Parameter (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
@@ -22,7 +23,7 @@ import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.ProtoTypeSystem.Kind.Substitution
 import Coal.ProtoTypeSystem.Kind.Unification
-import Control.Monad.State (evalState, evalStateT)
+import Control.Monad.State (gets, runState, evalState, evalStateT)
 import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
@@ -1243,7 +1244,7 @@ testG = do
 
 xyz :: [ProtoModule Metadata () ()] -> IO ()
 xyz modules = do
-  r <- evalProtoCompilerT $ do
+  (_, r, _) <- runProtoCompilerT $ do
     forM_ modules $
       \module_ -> do
         a <- toKindIndexed module_
@@ -1254,9 +1255,19 @@ xyz modules = do
             Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
             res3 = protoOapplyKinds sub a :: ProtoModule Metadata Kind ()
         b <- protoOprepareBuild res3
-        traceShowM errors
+        c <- indexTypes res3
+        pPrint c
         insertBuildC b
+--  pPrint r
   pure ()
+
+indexTypes :: (Monad m, Traversable t) => t e -> ProtoCompilerT m a (t IndexedType)
+indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
+ where
+  run s m = do
+    let (r, n) = runState s m
+    updateSupplyC n
+    pure r
 
 foo =
   xyz
