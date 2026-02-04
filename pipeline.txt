@@ -37,7 +37,7 @@
 
 # Build prep
 
-  - Prepare build object
+  - Prepare build context
 
 # Type checking
 
