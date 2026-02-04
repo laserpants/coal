@@ -39,7 +39,7 @@ translationPhasePasses =
     >-> generateDebugArtifacts "MatchExpressions"
     >-> passPlaceholders
     >-> generateDebugArtifacts "Placeholders"
-    >-> passDenormalizeObjects
-    >-> generateDebugArtifacts "DenormalizeObjects"
     >-> passCompileNats
     >-> generateDebugArtifacts "CompileNats"
+    >-> passDenormalizeObjects
+    >-> generateDebugArtifacts "DenormalizeObjects"
