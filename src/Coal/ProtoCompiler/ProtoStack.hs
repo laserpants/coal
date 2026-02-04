@@ -16,7 +16,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Language.Module.Path (principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
-import Coal.ProtoCompiler.ProtoState 
+import Coal.ProtoCompiler.ProtoState
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)

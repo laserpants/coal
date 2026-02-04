@@ -30,6 +30,7 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Data.Binary
 import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
@@ -55,6 +56,7 @@ data ProtoBuild a = ProtoBuild
   , protoObuildKernelNames :: Environment Kernel.Type
   , protoObuildKernelIRTypes :: Environment IRType
   , protoObuildKernelConstructors :: Environment Int
+  , protoObuildTypedExpressions :: [ProtoDefinition a Kind IndexedType]
   }
   deriving (Show, Eq, Ord, Generic)
 
@@ -77,6 +79,7 @@ protoOemptyBuild =
     , protoObuildKernelNames = mempty
     , protoObuildKernelIRTypes = mempty
     , protoObuildKernelConstructors = mempty
+    , protoObuildTypedExpressions = mempty
     }
 
 setBuildPath :: Path -> ProtoBuild a -> ProtoBuild a

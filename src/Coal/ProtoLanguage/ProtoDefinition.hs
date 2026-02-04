@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -18,9 +19,11 @@ module Coal.ProtoLanguage.ProtoDefinition (
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
+import Data.Binary
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Name)
+import GHC.Generics (Generic)
 
 data ProtoTypeDefinition a k t = ProtoTypeDefinition
   { protoOtypeDefinitionParameters :: [Parameter k]
@@ -36,7 +39,10 @@ data ProtoTypeDefinition a k t = ProtoTypeDefinition
     , Traversable
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k, Binary t) => Binary (ProtoTypeDefinition a k t)
 
 data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
   { protoOfunctionDefinitionMetadata :: a
@@ -55,7 +61,10 @@ data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
     , Traversable
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k, Binary t) => Binary (ProtoFunctionDefinition a k t)
 
 data ProtoLetDefinition a k t = ProtoLetDefinition
   { protoOletDefinitionMetadata :: a
@@ -73,7 +82,10 @@ data ProtoLetDefinition a k t = ProtoLetDefinition
     , Traversable
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k, Binary t) => Binary (ProtoLetDefinition a k t)
 
 data ProtoFoldDefinition a k t = ProtoFoldDefinition
   { protoOfoldDefinitionMetadata :: a
@@ -90,7 +102,10 @@ data ProtoFoldDefinition a k t = ProtoFoldDefinition
     , Traversable
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k, Binary t) => Binary (ProtoFoldDefinition a k t)
 
 data ProtoTraitDefinition a k = ProtoTraitDefinition
   { protoOtraitDefinitionMetadata :: a
@@ -106,7 +121,10 @@ data ProtoTraitDefinition a k = ProtoTraitDefinition
     , Read
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k) => Binary (ProtoTraitDefinition a k)
 
 data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
   { protoOinstanceDefinitionMetadata :: a
@@ -125,7 +143,10 @@ data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
     , Traversable
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k, Binary t) => Binary (ProtoInstanceDefinition a k t)
 
 instanceDefinitionTrait :: ProtoInstanceDefinition a Kind t -> Trait (Type Parameter Kind)
 instanceDefinitionTrait ProtoInstanceDefinition{..} =
@@ -142,7 +163,10 @@ data ProtoAliasDefinition a k = ProtoAliasDefinition
     , Read
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k) => Binary (ProtoAliasDefinition a k)
 
 data ProtoDefinition a k t
   = -- | Type definition
@@ -175,4 +199,7 @@ data ProtoDefinition a k t
     , Traversable
     , Data
     , Typeable
+    , Generic
     )
+
+instance (Binary a, Binary k, Binary t) => Binary (ProtoDefinition a k t)
