@@ -1257,6 +1257,10 @@ xyz modules = do
         b <- protoOprepareBuild res3
         c <- indexTypes res3
         pPrint c
+
+--        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
+--        (tdefs, _) <- typeDefinitionsC defs
+
         insertBuildC b
 --  pPrint r
   pure ()
