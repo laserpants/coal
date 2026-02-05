@@ -23,10 +23,8 @@ import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
-import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
