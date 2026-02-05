@@ -56,7 +56,7 @@ data ProtoBuild a = ProtoBuild
   , protoObuildKernelNames :: Environment Kernel.Type
   , protoObuildKernelIRTypes :: Environment IRType
   , protoObuildKernelConstructors :: Environment Int
-  , protoObuildTypedExpressions :: [ProtoDefinition a Kind IndexedType]
+  , protoObuildTypedDefinitions :: [ProtoDefinition a Kind IndexedType]
   }
   deriving (Show, Eq, Ord, Generic)
 
@@ -79,7 +79,7 @@ protoOemptyBuild =
     , protoObuildKernelNames = mempty
     , protoObuildKernelIRTypes = mempty
     , protoObuildKernelConstructors = mempty
-    , protoObuildTypedExpressions = mempty
+    , protoObuildTypedDefinitions = mempty
     }
 
 setBuildPath :: Path -> ProtoBuild a -> ProtoBuild a
