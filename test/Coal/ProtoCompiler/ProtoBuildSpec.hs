@@ -1260,7 +1260,7 @@ xyz modules = do
 
         let tenv = typeEnvironment b
 
-        pPrint tenv
+--        pPrint tenv
 
 --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
 --        (tdefs, _) <- typeDefinitionsC defs

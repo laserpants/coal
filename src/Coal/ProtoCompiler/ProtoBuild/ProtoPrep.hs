@@ -26,6 +26,7 @@ import Control.Monad.Trans (lift)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => Name -> ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
@@ -324,21 +325,30 @@ collectImports =
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
-          NameImport _ importName ->
-            if importName `elem` protoObuildExportedNames
-              then do
-                forM_ (Environment.lookupWithDefault [] importName protoObuildNames) $
+          NameImport _ name
+            | name `elem` protoObuildExportedNames ->
+                forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
                   \case
-                    info@(ProtoNName name _) ->
+                    info@ProtoNName{} ->
                       modify (insertBuildNameEntry name info)
                     _ ->
                       pure ()
-              else error "TODO"
-          TypeImport loc name _ ->
-            if name `elem` protoObuildExportedNames
-              then do
-                undefined
-              else error "TODO"
+            | otherwise ->
+                error "TODO"
+          TypeImport _ name _
+            | name `elem` protoObuildExportedNames ->
+                forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
+                  \case
+                    info@ProtoNType{} ->
+                      modify (insertBuildNameEntry name info)
+                    info@ProtoNTrait{} ->
+                      modify (insertBuildNameEntry name info)
+                    info@ProtoNTypeAlias{} ->
+                      modify (insertBuildNameEntry name info)
+                    _ ->
+                      pure ()
+            | otherwise ->
+                error "TODO"
     ProtoDQualifiedImport _ path ->
       error "!"
     _ ->
