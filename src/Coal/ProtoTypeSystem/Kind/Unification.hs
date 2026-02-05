@@ -28,9 +28,9 @@ unifyKinds (KArrow k1 k2) (KArrow k3 k4) = do
   sub1 <- unifyKinds k1 k3
   sub2 <- unifyKinds (protoOapplyKinds sub1 k2) (protoOapplyKinds sub1 k4)
   pure (sub2 <> sub1)
-unifyKinds (KVar k1) k2 =
+unifyKinds (KVariable k1) k2 =
   bindKind k1 k2
-unifyKinds k1 (KVar k2) =
+unifyKinds k1 (KVariable k2) =
   bindKind k2 k1
 unifyKinds k1 k2
   | k1 == k2 = pure mempty
@@ -39,7 +39,7 @@ unifyKinds k1 k2
 bindKind :: Int -> Kind -> ProtoKindUnifier ProtoKindSubstitution
 bindKind n =
   \case
-    KVar k
+    KVariable k
       | k == n ->
           pure mempty
     k
@@ -53,7 +53,7 @@ kindIdsIn =
   \case
     KArrow k1 k2 ->
       kindIdsIn k1 <> kindIdsIn k2
-    KVar n ->
+    KVariable n ->
       Set.singleton n
     _ ->
       mempty

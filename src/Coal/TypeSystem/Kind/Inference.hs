@@ -44,7 +44,7 @@ data KindNode
   | IsKRow
   | IsKTrait
   | IsKArrow KindNode KindNode
-  | IsKVar Int
+  | IsKVariable Int
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 liftKind :: Kind -> KindNode
@@ -58,8 +58,8 @@ liftKind =
       IsKArrow (liftKind k1) (liftKind k2)
     KTrait ->
       IsKTrait
-    KVar v ->
-      IsKVar v
+    KVariable v ->
+      IsKVariable v
 
 class LowerKinds a b where
   lowerKinds :: a -> b
@@ -71,7 +71,7 @@ instance LowerKinds KindNode Kind where
       IsKRow -> KRow
       IsKTrait -> KTrait
       IsKArrow a b -> KArrow (lowerKinds a) (lowerKinds b)
-      IsKVar _ -> KType
+      IsKVariable _ -> KType
 
 instance LowerKinds (Parameter KindNode) (Parameter Kind) where
   lowerKinds (Parameter k name) = Parameter (lowerKinds k) name
@@ -264,7 +264,7 @@ instance (EmitKinds t) => EmitKinds (DataConstructor Parameter KindNode t) where
 next :: State Int KindNode
 next = do
   modify (+ 1)
-  gets IsKVar
+  gets IsKVariable
 
 class IndexKinds a where
   type Indexed a
@@ -407,8 +407,8 @@ instance KindSubstitutable KindNode where
     \case
       IsKArrow k1 k2 ->
         IsKArrow (applyKinds sub k1) (applyKinds sub k2)
-      IsKVar n ->
-        fromMaybe (IsKVar n) (Map.lookup n (kindSubstitutionMap sub))
+      IsKVariable n ->
+        fromMaybe (IsKVariable n) (Map.lookup n (kindSubstitutionMap sub))
       k ->
         k
 
@@ -465,9 +465,9 @@ unifyKinds (IsKArrow k1 k2) (IsKArrow k3 k4) = do
   sub1 <- unifyKinds k1 k3
   sub2 <- unifyKinds (applyKinds sub1 k2) (applyKinds sub1 k4)
   pure (sub2 <> sub1)
-unifyKinds (IsKVar k1) k2 =
+unifyKinds (IsKVariable k1) k2 =
   bindKind k1 k2
-unifyKinds k1 (IsKVar k2) =
+unifyKinds k1 (IsKVariable k2) =
   bindKind k2 k1
 unifyKinds k1 k2
   | k1 == k2 = pure mempty
@@ -476,7 +476,7 @@ unifyKinds k1 k2
 bindKind :: Int -> KindNode -> KindUnifier KindSubstitution
 bindKind n =
   \case
-    IsKVar k
+    IsKVariable k
       | k == n ->
           pure mempty
     k
@@ -490,7 +490,7 @@ kindIdsIn =
   \case
     IsKArrow k1 k2 ->
       kindIdsIn k1 <> kindIdsIn k2
-    IsKVar n ->
+    IsKVariable n ->
       Set.singleton n
     _ ->
       mempty
@@ -549,7 +549,7 @@ inferTraitKinds env def@(TraitDefinition ts p defs) =
           (lowerKinds param0)
           defs0
  where
-  qs = zip (Set.toList (paramsIn def)) [IsKVar n | n <- [1 ..]]
+  qs = zip (Set.toList (paramsIn def)) [IsKVariable n | n <- [1 ..]]
   go =
     forM defs $
       \(n, s) -> do

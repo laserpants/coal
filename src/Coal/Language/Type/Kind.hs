@@ -28,16 +28,8 @@ data Kind
   | KRow
   | KArrow Kind Kind
   | KTrait
-  | KVar Int
-  deriving
-    ( Show
-    , Eq
-    , Ord
-    , Read
-    , Data
-    , Typeable
-    , Generic
-    )
+  | KVariable Int
+  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
 instance Binary Kind
 
@@ -83,7 +75,7 @@ prettyKindPrec prec =
       "Row"
     KTrait ->
       "Trait"
-    KVar v ->
+    KVariable v ->
       "k" <> pretty v
     KArrow k1 k2 ->
       parensIf (prec > precKArrow) $

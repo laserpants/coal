@@ -343,4 +343,4 @@ instance ToKindIndexed (Row Parameter k (Type Parameter k)) (Row Parameter Kind 
         pure RNil
 
 kVar :: (MonadState s m, Supply s) => m Kind
-kVar = supplied KVar
+kVar = supplied KVariable
