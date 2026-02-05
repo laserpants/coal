@@ -12,6 +12,7 @@ module Coal.Common.Environment (
   fromList,
   toList,
   lookup,
+  lookupWithDefault,
   contains,
   restrict,
   lookupAll,
@@ -26,6 +27,7 @@ module Coal.Common.Environment (
 
 import Data.Binary (Binary)
 import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
 import Extras (Dictionary, Name, Over)
 import GHC.Generics (Generic)
 import Prelude hiding (filter, lookup)
@@ -89,6 +91,10 @@ toList = Map.toList . envDictionary
 {-# INLINE lookup #-}
 lookup :: Name -> Environment a -> Maybe a
 lookup name = Map.lookup name . envDictionary
+
+{-# INLINE lookupWithDefault #-}
+lookupWithDefault :: a -> Name -> Environment a -> a
+lookupWithDefault value name = fromMaybe value . Map.lookup name . envDictionary
 
 contains :: Name -> Environment a -> Bool
 contains name (Environment e) = Map.member name e

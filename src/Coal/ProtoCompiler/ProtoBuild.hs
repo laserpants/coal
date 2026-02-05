@@ -20,6 +20,7 @@ module Coal.ProtoCompiler.ProtoBuild (
   insertBuildTrait,
   insertBuildInstance,
   insertBuildAlias,
+  typeEnvironment,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -31,12 +32,13 @@ import Coal.Language
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
+import Control.Monad.State (execState, modify)
 import Data.Binary
 import Data.ByteString (ByteString)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (Name, Set)
+import Extras (Name, Set, forM_)
 import GHC.Generics (Generic)
 
 type InstanceMap a = Map IndexedType a
@@ -207,3 +209,13 @@ setBuildKernelConstructors env ProtoBuild{..} =
     { protoObuildKernelConstructors = env
     , ..
     }
+
+typeEnvironment :: ProtoBuild a -> Environment IndexedScheme
+typeEnvironment ProtoBuild{..} =
+  flip execState mempty $ do
+    forM_ (concat $ Environment.elems protoObuildNames) $
+      \case
+        ProtoNName name s ->
+          modify (Environment.insert name s)
+        _ ->
+          pure ()

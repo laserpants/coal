@@ -19,10 +19,10 @@ import Extras (Name)
 import Extras.Control.Monad (concatMapM)
 import Extras.Operators ((<>^))
 
-class ToIndexed a b where
-  toIndexed :: (MonadState s m, Supply s) => a -> ReaderT (Environment (TypeIndex Kind)) m b
+class ToIndexed i o where
+  toIndexed :: (MonadState s m, Supply s) => i -> ReaderT (Environment (TypeIndex Kind)) m o
 
-instance (ToIndexed a b) => ToIndexed [a] [b] where
+instance (ToIndexed i o) => ToIndexed [i] [o] where
   toIndexed = traverse toIndexed
 
 instance ToIndexed (Trait (Type Parameter Kind)) (Trait (Type TypeIndex Kind)) where
@@ -31,7 +31,7 @@ instance ToIndexed (Trait (Type Parameter Kind)) (Trait (Type TypeIndex Kind)) w
       Trait name t ->
         Trait name <$> toIndexed t
 
-instance (Ord b, ToIndexed a b) => ToIndexed (Set a) (Set b) where
+instance (Ord o, ToIndexed i o) => ToIndexed (Set i) (Set o) where
   toIndexed s = Set.fromList <$> toIndexed (Set.toList s)
 
 instance ToIndexed (Type Parameter Kind) (Type TypeIndex Kind) where

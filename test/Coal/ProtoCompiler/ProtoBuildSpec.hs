@@ -1256,7 +1256,11 @@ xyz modules = do
             res3 = protoOapplyKinds sub a :: ProtoModule Metadata Kind ()
         b <- protoOprepareBuild res3
         c <- indexTypes res3
-        pPrint c
+--        pPrint c
+
+        let tenv = typeEnvironment b
+
+        pPrint tenv
 
 --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
 --        (tdefs, _) <- typeDefinitionsC defs
