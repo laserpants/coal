@@ -13,6 +13,10 @@ module Coal.ProtoCompiler.ProtoStack (
   setCurrentPathC,
   setCurrentModuleC,
   getCurrentBuildC,
+  insertConstraintsC,
+  clearConstraintsC,
+  insertAssumptionsC, 
+  clearAssumptionsC,
 ) where
 
 import qualified Coal.Common.Environment as Environment
@@ -81,3 +85,15 @@ getCurrentBuildC = do
       error "Implementation error"
     Just build ->
       return build
+
+insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> ProtoCompilerT m a ()
+insertConstraintsC constraints = modify (overProtoCompilerConstraints (<> constraints))
+
+clearConstraintsC :: (Monad m) => ProtoCompilerT m a ()
+clearConstraintsC = modify (overProtoCompilerConstraints (const mempty))
+
+insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> ProtoCompilerT m a ()
+insertAssumptionsC assumptions = modify (overProtoCompilerAssumptions (<> assumptions))
+
+clearAssumptionsC :: (Monad m) => ProtoCompilerT m a ()
+clearAssumptionsC = modify (overProtoCompilerAssumptions (const mempty))

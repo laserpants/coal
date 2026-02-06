@@ -3,6 +3,8 @@
 
 module Coal.ProtoCompiler.ProtoState (
   ProtoCompilerState (..),
+  CompilerConstraint,
+  CompilerAssumption,
   initialProtoCompilerState,
   overProtoCompilerSupply,
   overProtoCompilerModules,
