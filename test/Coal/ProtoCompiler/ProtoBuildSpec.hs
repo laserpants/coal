@@ -1285,7 +1285,7 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
  where
   run s m = do
     let (r, n) = runState s m
-    updateSupplyC n
+    protoOupdateSupplyC n
     pure r
 
 typeDefinitionsX :: (Monad m, Data a, Show a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
@@ -1316,22 +1316,6 @@ typeDefinition1 =
             undefined
           ProtoDLet _ name ProtoLetDefinition{..} ->
             undefined
-
-protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a x
-protoOrunConstraintsGen stack = do
-  ProtoCompilerState{..} <- get
-  ProtoBuild{..} <- getCurrentBuildC
-  let (result, ConstraintsGenState{..}, output) =
-        runConstraintsGenStack
-          protoOcompilerSupply
-          ( emptyConstraintsGenContext
-              { constraintsGenContextDataConstructors = protoObuildDataConstructors
-              , constraintsGenContextTypeConstructors = protoObuildTypeConstructors
-              }
-          )
-          stack
-  updateSupplyC constraintsGenStateSupply
-  undefined
 
 foo =
   xyz

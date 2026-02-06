@@ -8,11 +8,11 @@ module Coal.ProtoCompiler.ProtoStack (
   ProtoCompilerT (..),
   runProtoCompilerT,
   evalProtoCompilerT,
-  updateSupplyC,
+  protoOupdateSupplyC,
   insertBuildC,
   setCurrentPathC,
   setCurrentModuleC,
-  getCurrentBuildC,
+  protoOgetCurrentBuildC,
   insertConstraintsC,
   clearConstraintsC,
   insertAssumptionsC,
@@ -70,8 +70,8 @@ evalProtoCompilerT com = do
   (c, _, _) <- runProtoCompilerT com
   pure c
 
-updateSupplyC :: (Monad m) => Int -> ProtoCompilerT m a ()
-updateSupplyC supply = modify (overProtoCompilerSupply (const supply))
+protoOupdateSupplyC :: (Monad m) => Int -> ProtoCompilerT m a ()
+protoOupdateSupplyC supply = modify (overProtoCompilerSupply (const supply))
 
 insertBuildC :: (Monad m) => ProtoBuild a -> ProtoCompilerT m a ()
 insertBuildC ProtoBuild{..} = modify (overProtoCompilerModules (Environment.insert principalName ProtoBuild{..}))
@@ -84,8 +84,8 @@ setCurrentPathC path = modify (overProtoCompilerCurrentPath (const path))
 setCurrentModuleC :: (Monad m) => ProtoModule a s t -> ProtoCompilerT m a ()
 setCurrentModuleC ProtoModule{..} = setCurrentPathC protoOmodulePath
 
-getCurrentBuildC :: (Monad m) => ProtoCompilerT m a (ProtoBuild a)
-getCurrentBuildC = do
+protoOgetCurrentBuildC :: (Monad m) => ProtoCompilerT m a (ProtoBuild a)
+protoOgetCurrentBuildC = do
   ProtoCompilerState{..} <- get
   case Environment.lookup (principalPath protoOcompilerCurrentPath) protoOcompilerModules of
     Nothing ->
