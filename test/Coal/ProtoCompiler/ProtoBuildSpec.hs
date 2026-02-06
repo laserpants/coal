@@ -5,6 +5,7 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Coal.Compiler.TypeInference
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
@@ -1294,10 +1295,11 @@ typeDefinitionsX ds = do
 typeDefinition1 :: (Monad m) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
 typeDefinition1 =
   \case
-    ProtoDFunction _ name ProtoFunctionDefinition{..} ->
+    ProtoDFunction _ name ProtoFunctionDefinition{..} -> do
       -- generateConstraints def
       -- solve
       --      generateConstraints protoOfunctionDefinitionExpression
+      protoOgenerateConstraints protoOfunctionDefinitionExpression
       -- define name (typeOf (apply sub def))
       undefined
     ProtoDLet _ name ProtoLetDefinition{..} ->

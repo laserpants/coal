@@ -6,7 +6,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Coal.Compiler.TypeInference (typeDefinitionsC, toIndexedType, toIndexedScheme) where
+module Coal.Compiler.TypeInference where -- (typeDefinitionsC, toIndexedType, toIndexedScheme) where
 
 import Coal.AST.Type.Parameterized
 import Coal.Common.Environment (Environment (..))
@@ -19,8 +19,10 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
+import Control.Monad (unless)
 import Control.Monad.Except (MonadError (..), forM_, void, when)
 import Control.Monad.Reader (asks)
 import Control.Monad.State (evalState, gets)
@@ -32,7 +34,17 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
+import Debug.Trace
 import Extras (Dictionary, Name)
+
+class ProtoGenerateConstraints c where
+  protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
+
+instance ProtoGenerateConstraints (Expression a Kind IndexedType) where
+  protoOgenerateConstraints =
+    undefined
+
+--
 
 class GenerateConstraints a o where
   generateConstraints :: (Monad m, Data a, Show a) => o -> CompilerT a m ()
@@ -106,7 +118,11 @@ instance GenerateConstraints a (Definition a Kind IndexedType) where
       _ ->
         error "Not implemented"
 
-type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
+type ConstraintsGenResult g o a t s =
+  ( s
+  , Dictionary (g, o a)
+  , [ConstraintsGenOutput g o a t]
+  )
 
 -- TODO: remove
 tmpConvert1 :: DataConstructorEntry a -> ProtoDataConstructorEntry a
