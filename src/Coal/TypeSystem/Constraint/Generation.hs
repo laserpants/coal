@@ -4,10 +4,13 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+-- module Coal.TypeSystem.Constraint.Generation where
+
 module Coal.TypeSystem.Constraint.Generation (
   ConstraintsGenContext (..),
   ConstraintsGenError (..),
   emitConstraints,
+  protoOemitConstraints,
   runConstraintsGenStack,
   evalConstraintsGenStack,
 ) where
@@ -128,6 +131,9 @@ emitPRecordConstraints loc t fields p = do
     _ ->
       pure ()
 
+protoOemitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a Kind IndexedType -> ConstraintsGen a [Name]
+protoOemitPatternConstraints = undefined
+
 emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a () IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
   \case
@@ -194,6 +200,16 @@ emitEAnnotationConstraints loc t e = do
       tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
   emitConstraints e
 
+protoOemitEAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter Kind -> Expression a Kind IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+protoOemitEAnnotationConstraints loc t e = do
+  r <- undefined -- instantiateAnnotation loc t
+  case r of
+    Left err ->
+      tellLeft [EIllFormedTypeAnnotation err]
+    Right t1 ->
+      tellRight [Equality (RuleAnnotation loc (typeOf e) t1) [typeOf e, t1]]
+  protoOemitConstraints e
+
 emitEConstructorConstraints :: a -> Label IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEConstructorConstraints loc (Label t name) = do
   r <- lookupDataConstructor name
@@ -210,6 +226,12 @@ emitELambdaConstraints loc ps e = do
   names <- concatForM ps (emitPatternConstraints (assertEqualityAssumptions loc) ms)
   pure (filter (assumptionNameIsNotOneOf names) ms)
 
+protoOemitELambdaConstraints :: (Show a, Data a) => a -> NonEmpty (Pattern a Kind IndexedType) -> Expression a Kind IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+protoOemitELambdaConstraints loc ps e = do
+  ms <- withMonomorphic ps (protoOemitConstraints e)
+  names <- concatForM ps (protoOemitPatternConstraints (assertEqualityAssumptions loc) ms)
+  pure (filter (assumptionNameIsNotOneOf names) ms)
+
 emitERecursiveLetConstraints :: (Show a, Data a) => a -> Pattern a () IndexedType -> Expression a () IndexedType -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitERecursiveLetConstraints loc p e1 e2 = do
   ms1 <- emitConstraints e2
@@ -221,8 +243,27 @@ emitERecursiveLetConstraints loc p e1 e2 = do
   t1 = typeOf p
   t2 = typeOf e1
 
+protoOemitERecursiveLetConstraints :: (Show a, Data a) => a -> Pattern a Kind IndexedType -> Expression a Kind IndexedType -> Expression a Kind IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+protoOemitERecursiveLetConstraints loc p e1 e2 = do
+  ms1 <- protoOemitConstraints e2
+  tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
+  ms2 <- protoOemitConstraints e1
+  names <- protoOemitPatternConstraints (assertEqualityAssumptions loc) (ms1 <> ms2) p
+  pure (filter (assumptionNameIsNotOneOf names) (ms1 <> ms2))
+ where
+  t1 = typeOf p
+  t2 = typeOf e1
+
 normalizeBinding :: (Data a) => Binding Expression a () IndexedType -> Binding Expression a () IndexedType
 normalizeBinding =
+  \case
+    b@BPattern{} ->
+      b
+    BFunction loc name ps e ->
+      BPattern loc (PVariable loc (Label (foldTypeOf e ps) name)) (ELambda loc ps e)
+
+protoOnormalizeBinding :: (Data a) => Binding Expression a Kind IndexedType -> Binding Expression a Kind IndexedType
+protoOnormalizeBinding =
   \case
     b@BPattern{} ->
       b
@@ -246,6 +287,27 @@ emitELetConstraints loc gs e1 = do
     \case
       BPattern _ p _ ->
         emitPatternConstraints (assertImplicitAssumptions loc) ms1 p
+      BFunction{} ->
+        error "Implementation error"
+  pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
+
+protoOemitELetConstraints :: (Show a, Data a) => a -> NonEmpty (Binding Expression a Kind IndexedType) -> Expression a Kind IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+protoOemitELetConstraints loc gs e1 = do
+  let gs' = protoOnormalizeBinding <$> gs
+  ms1 <- protoOemitConstraints e1
+  ms2 <- concatForM gs' $
+    \case
+      BPattern _ p e -> do
+        let t1 = typeOf p
+            t2 = typeOf e
+        tellRight [Equality (RuleLetBindingPattern loc t1 t2) [t1, t2]]
+        protoOemitConstraints e
+      BFunction{} ->
+        error "Implementation error"
+  names <- concatForM gs' $
+    \case
+      BPattern _ p _ ->
+        protoOemitPatternConstraints (assertImplicitAssumptions loc) ms1 p
       BFunction{} ->
         error "Implementation error"
   pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)
@@ -384,6 +446,58 @@ emitEFFICallConstraints loc u (Label t _) es e = do
       tellRight [Equality (RuleAnnotation loc t2 t1) [t2, t1]]
       tellRight [Equality (RuleAnnotation loc t3 t4) [t3, t4]]
       pure (ms1 <> ms2)
+
+protoOemitConstraints :: (Show a, Data a) => Expression a Kind IndexedType -> ConstraintsGen a [Assumption a IndexedType]
+protoOemitConstraints =
+  \case
+    EAnnotation loc t e ->
+      protoOemitEAnnotationConstraints loc t e
+    EConstructor loc ll ->
+      emitEConstructorConstraints loc ll
+    EVariable loc (Label t name) ->
+      pure [Assumption loc name t]
+    ELambda loc ps e ->
+      protoOemitELambdaConstraints loc ps e
+    ERecursiveLet loc p e1 e2 ->
+      protoOemitERecursiveLetConstraints loc p e1 e2
+    ELet loc gs e1 ->
+      protoOemitELetConstraints loc gs e1
+
+--    EIf loc t e1 e2 e3 ->
+--      emitEIfConstraints loc t e1 e2 e3
+--    EApplication loc t e1 es ->
+--      emitEApplicationConstraints loc t e1 es
+--    ELiteral{} ->
+--      pure []
+--    EListCons loc t e1 e2 ->
+--      emitEListConsConstraints loc t e1 e2
+--    EListLiteral loc t es ->
+--      emitEListLiteralConstraints loc t es
+--    EMatch loc t e cs ->
+--      emitClauseConstraints loc t e [] cs
+--    EOperator loc t op -> do
+--      tellRight [Explicit (RuleOperator loc) t (operatorTypeScheme op)]
+--      pure []
+--    ESelect loc ll e ->
+--      emitESelectConstraints loc ll e
+--    ERecord loc t d me ->
+--      emitERecordConstraints loc t d me
+--    ETuple loc t es ->
+--      emitETupleConstraints loc t es
+--    EFFICall loc t ll es e ->
+--      emitEFFICallConstraints loc t ll es e
+--    EFocus{} ->
+--      error "Implementation error"
+--    ETraitInstance{} ->
+--      error "Implementation error"
+--    ELambdaMatch{} ->
+--      error "Implementation error"
+--    EDoBlock{} ->
+--      error "Implementation error"
+--    ECompiledMatch{} ->
+--      error "Implementation error"
+--    EFold{} ->
+--      error "Implementation error"
 
 emitConstraints :: (Show a, Data a) => Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitConstraints =

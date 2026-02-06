@@ -22,6 +22,7 @@ import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Coal.TypeSystem.Substitution
 import Extras (Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
@@ -32,6 +33,7 @@ data ProtoCompilerState a = ProtoCompilerState
   { protoOcompilerSupply :: Int
   , protoOcompilerModules :: Environment (ProtoBuild a)
   , protoOcompilerCurrentPath :: Path
+  , protoOcompilerSubstitution :: Substitution
   , protoOcompilerNameStore :: Environment IndexedScheme
   , protoOcompilerConstraints :: [CompilerConstraint a]
   , protoOcompilerAssumptions :: [CompilerAssumption a]
@@ -44,6 +46,7 @@ initialProtoCompilerState =
     { protoOcompilerSupply = 0
     , protoOcompilerModules = mempty
     , protoOcompilerCurrentPath = emptyPath
+    , protoOcompilerSubstitution = mempty
     , protoOcompilerNameStore = mempty
     , protoOcompilerConstraints = mempty
     , protoOcompilerAssumptions = mempty

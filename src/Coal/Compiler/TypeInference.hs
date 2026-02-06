@@ -8,9 +8,9 @@
 
 module Coal.Compiler.TypeInference where -- (typeDefinitionsC, toIndexedType, toIndexedScheme) where
 
-import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.AST.Type.Parameterized
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
@@ -20,7 +20,8 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOupdateSupplyC, protoOgetCurrentBuildC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOupdateSupplyC)
+import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
@@ -31,36 +32,34 @@ import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map.Strict as Map
+import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Debug.Trace
 import Extras (Dictionary, Name)
-import qualified Coal.Common.Environment as Environment
-import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
 
 instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind IndexedType) where
   protoOgenerateConstraints expr = do
-    (assumptions1, constraints1) <- protoOgenerateExpressionConstraints expr
-    undefined
-
---    (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
---    sub <- gets compilerSubstitution
---    insertAssumptionsC (apply sub ms2)
---    insertConstraintsC (cs1 <> cs2)
+    (sms1, cs1) <- protoOgenerateExpressionConstraints expr
+    (sms2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints sms1
+    sub <- gets protoOcompilerSubstitution
+    protoOinsertAssumptionsC (apply sub sms2)
+    protoOinsertConstraintsC (cs1 <> cs2)
 
 protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> ProtoCompilerT m a ([CompilerAssumption a], [CompilerConstraint a])
 protoOgenerateExpressionConstraints expr = do
-  (assumptions, params, result) <- protoOrunConstraintsGen undefined -- (emitConstraints expr)
+  (assumptions, params, result) <- protoOrunConstraintsGen (protoOemitConstraints expr)
   let (errors, constraints) = partitionEithers result
   undefined
+
 --  compilerReportConstraintsGenErrors errors
 --  compilerSetTypeAnnotationParams params
 --  pure (assumptions, constraints)
 
-protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a x
+protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
 protoOrunConstraintsGen stack = do
   ProtoCompilerState{..} <- get
   ProtoBuild{..} <- protoOgetCurrentBuildC
@@ -74,10 +73,9 @@ protoOrunConstraintsGen stack = do
           )
           stack
   protoOupdateSupplyC constraintsGenStateSupply
-  undefined
+  pure (result, constraintsGenStateTypeIndexes, output)
 
 --
-
 
 class GenerateConstraints a o where
   generateConstraints :: (Monad m, Data a, Show a) => o -> CompilerT a m ()
@@ -192,6 +190,16 @@ generateExpressionConstraints e = do
 assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
 assumptionConstraints Assumption{..} = do
   names <- gets compilerNameStore
+  pure $
+    case Environment.lookup (normalizedName assumptionName) names of
+      Nothing ->
+        Left Assumption{..}
+      Just s ->
+        Right (Explicit (RuleTypeConstraint assumptionMetadata assumptionName assumptionType s) assumptionType s)
+
+protoOassumptionConstraints :: (Monad m) => CompilerAssumption a -> ProtoCompilerT m a (Either (CompilerAssumption a) (CompilerConstraint a))
+protoOassumptionConstraints Assumption{..} = do
+  names <- gets protoOcompilerNameStore
   pure $
     case Environment.lookup (normalizedName assumptionName) names of
       Nothing ->
