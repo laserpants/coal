@@ -6,16 +6,19 @@ module Coal.ProtoCompiler.ProtoState (
   initialProtoCompilerState,
   overProtoCompilerSupply,
   overProtoCompilerModules,
+  overProtoCompilerCurrentPath,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
+import Coal.Language.Module.Path (Path (..), emptyPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Extras (Over)
 
 data ProtoCompilerState a = ProtoCompilerState
   { protoOcompilerSupply :: Int
   , protoOcompilerModules :: Environment (ProtoBuild a)
+  , protoOcompilerCurrentPath :: Path
   }
   deriving (Show, Eq, Ord)
 
@@ -24,6 +27,7 @@ initialProtoCompilerState =
   ProtoCompilerState
     { protoOcompilerSupply = 0
     , protoOcompilerModules = mempty
+    , protoOcompilerCurrentPath = emptyPath
     }
 
 {-# INLINE overProtoCompilerSupply #-}
@@ -39,6 +43,14 @@ overProtoCompilerModules :: Over (ProtoCompilerState a) (Environment (ProtoBuild
 overProtoCompilerModules fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerModules = fn protoOcompilerModules
+    , ..
+    }
+
+{-# INLINE overProtoCompilerCurrentPath #-}
+overProtoCompilerCurrentPath :: Over (ProtoCompilerState a) Path
+overProtoCompilerCurrentPath fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerCurrentPath = fn protoOcompilerCurrentPath
     , ..
     }
 

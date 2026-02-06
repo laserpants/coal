@@ -28,7 +28,7 @@ import Coal.ProtoTypeSystem.Kind.Substitution
 import Coal.ProtoTypeSystem.Kind.Unification
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Stack
-import Control.Monad.State (evalState, evalStateT, gets, runState)
+import Control.Monad.State (evalState, evalStateT, get, gets, runState)
 import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
@@ -1252,6 +1252,8 @@ xyz modules = do
   (_, r, _) <- runProtoCompilerT $ do
     forM_ modules $
       \module_ -> do
+        setCurrentModuleC module_
+
         a <- toKindIndexed module_
         env <- moduleKindEnvironment a
         (_, r) <- runProtoKindConstraintsGen env (protoOemitKindConstraints a)
@@ -1314,14 +1316,14 @@ typeDefinition1 =
 
 protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a x
 protoOrunConstraintsGen stack = do
-  supply <- gets protoOcompilerSupply
-  undefined
+  ProtoCompilerState{..} <- get
+  ProtoBuild{..} <- getCurrentBuildC
   let (result, ConstraintsGenState{..}, output) =
         runConstraintsGenStack
-          supply
+          protoOcompilerSupply
           ( emptyConstraintsGenContext
-              { constraintsGenContextDataConstructors = undefined
-              , constraintsGenContextTypeConstructors = undefined
+              { constraintsGenContextDataConstructors = protoObuildDataConstructors
+              , constraintsGenContextTypeConstructors = protoObuildTypeConstructors
               }
           )
           stack

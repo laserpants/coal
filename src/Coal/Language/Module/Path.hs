@@ -6,6 +6,7 @@
 module Coal.Language.Module.Path (
   Path (..),
   principalPath,
+  emptyPath,
   parsePath,
   toFilePath,
 ) where
@@ -23,6 +24,10 @@ newtype Path = Path {pathComponents :: [Name]}
   deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
 
 instance Binary Path
+
+{-# INLINE emptyPath #-}
+emptyPath :: Path
+emptyPath = Path []
 
 {-# INLINE principalPath #-}
 principalPath :: Path -> Name

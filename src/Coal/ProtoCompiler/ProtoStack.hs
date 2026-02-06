@@ -10,18 +10,22 @@ module Coal.ProtoCompiler.ProtoStack (
   evalProtoCompilerT,
   updateSupplyC,
   insertBuildC,
+  setCurrentPathC,
+  setCurrentModuleC,
+  getCurrentBuildC,
 ) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Language.Module.Path (principalPath)
+import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
 import Coal.ProtoCompiler.ProtoState
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
-import Control.Monad.State (modify)
+import Control.Monad.State (get, modify)
 
 type ProtoCompilerStack m a o = ExceptT () (RWST () (ProtoCompilerJournal a) (ProtoCompilerState a) m) o
 
@@ -62,3 +66,18 @@ insertBuildC :: (Monad m) => ProtoBuild a -> ProtoCompilerT m a ()
 insertBuildC ProtoBuild{..} = modify (overProtoCompilerModules (Environment.insert name ProtoBuild{..}))
  where
   name = principalPath protoObuildPath
+
+setCurrentPathC :: (Monad m) => Path -> ProtoCompilerT m a ()
+setCurrentPathC path = modify (overProtoCompilerCurrentPath (const path))
+
+setCurrentModuleC :: (Monad m) => ProtoModule a s t -> ProtoCompilerT m a ()
+setCurrentModuleC ProtoModule{..} = setCurrentPathC protoOmodulePath
+
+getCurrentBuildC :: (Monad m) => ProtoCompilerT m a (ProtoBuild a)
+getCurrentBuildC = do
+  ProtoCompilerState{..} <- get
+  case Environment.lookup (principalPath protoOcompilerCurrentPath) protoOcompilerModules of
+    Nothing ->
+      error "Implementation error"
+    Just build ->
+      return build
