@@ -7,18 +7,30 @@ module Coal.ProtoCompiler.ProtoState (
   overProtoCompilerSupply,
   overProtoCompilerModules,
   overProtoCompilerCurrentPath,
+  overProtoCompilerConstraints,
+  overProtoCompilerAssumptions,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
+import Coal.Language
 import Coal.Language.Module.Path (Path (..), emptyPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
+import Coal.TypeSystem.Constraint
+import Coal.TypeSystem.Constraint.Assumption
+import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Extras (Over)
+
+type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
+
+type CompilerAssumption a = Assumption a IndexedType
 
 data ProtoCompilerState a = ProtoCompilerState
   { protoOcompilerSupply :: Int
   , protoOcompilerModules :: Environment (ProtoBuild a)
   , protoOcompilerCurrentPath :: Path
+  , protoOcompilerConstraints :: [CompilerConstraint a]
+  , protoOcompilerAssumptions :: [CompilerAssumption a]
   }
   deriving (Show, Eq, Ord)
 
@@ -28,6 +40,8 @@ initialProtoCompilerState =
     { protoOcompilerSupply = 0
     , protoOcompilerModules = mempty
     , protoOcompilerCurrentPath = emptyPath
+    , protoOcompilerConstraints = mempty
+    , protoOcompilerAssumptions = mempty
     }
 
 {-# INLINE overProtoCompilerSupply #-}
@@ -51,6 +65,22 @@ overProtoCompilerCurrentPath :: Over (ProtoCompilerState a) Path
 overProtoCompilerCurrentPath fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerCurrentPath = fn protoOcompilerCurrentPath
+    , ..
+    }
+
+{-# INLINE overProtoCompilerConstraints #-}
+overProtoCompilerConstraints :: Over (ProtoCompilerState a) [CompilerConstraint a]
+overProtoCompilerConstraints fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerConstraints = fn protoOcompilerConstraints
+    , ..
+    }
+
+{-# INLINE overProtoCompilerAssumptions #-}
+overProtoCompilerAssumptions :: Over (ProtoCompilerState a) [CompilerAssumption a]
+overProtoCompilerAssumptions fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerAssumptions = fn protoOcompilerAssumptions
     , ..
     }
 
