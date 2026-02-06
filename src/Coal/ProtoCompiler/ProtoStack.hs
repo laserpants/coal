@@ -63,9 +63,9 @@ updateSupplyC :: (Monad m) => Int -> ProtoCompilerT m a ()
 updateSupplyC supply = modify (overProtoCompilerSupply (const supply))
 
 insertBuildC :: (Monad m) => ProtoBuild a -> ProtoCompilerT m a ()
-insertBuildC ProtoBuild{..} = modify (overProtoCompilerModules (Environment.insert name ProtoBuild{..}))
+insertBuildC ProtoBuild{..} = modify (overProtoCompilerModules (Environment.insert principalName ProtoBuild{..}))
  where
-  name = principalPath protoObuildPath
+  principalName = principalPath protoObuildPath
 
 setCurrentPathC :: (Monad m) => Path -> ProtoCompilerT m a ()
 setCurrentPathC path = modify (overProtoCompilerCurrentPath (const path))
