@@ -4,7 +4,6 @@ module Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Build (emptyModuleBuild)
 import Coal.Language
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
@@ -31,7 +30,8 @@ collectEConstructorConstraintsSpec1 = null ms && ENoDataConstructor () "Blue" `e
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 collectEConstructorConstraintsSpec2 :: Bool
@@ -42,7 +42,8 @@ collectEConstructorConstraintsSpec2 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 fixture2 :: Expression () () IndexedType
@@ -57,7 +58,8 @@ collectEConstructorConstraintsSpec3 = null ms && ENoDataConstructor () "Blue" `e
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 collectEConstructorConstraintsSpec4 :: Bool
@@ -68,7 +70,8 @@ collectEConstructorConstraintsSpec4 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
@@ -86,7 +89,8 @@ collectEConstructorConstraintsSpec5 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 collectEConstructorConstraintsSpec6 :: Bool

@@ -3,7 +3,7 @@
 module Coal.TypeSystem.Constraint.GenerationSpec (collectExampleConstraintsSpec1) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Build (emptyModuleBuild)
+
 import Coal.Compiler.State
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation
@@ -19,7 +19,8 @@ collectExampleConstraintsSpec1 = (ms, outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 --    let

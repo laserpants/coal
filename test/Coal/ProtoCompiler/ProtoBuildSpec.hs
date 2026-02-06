@@ -5,21 +5,20 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Coal.TypeSystem.Constraint.Generation.Stack
-import Coal.TypeSystem.Constraint.Assumption
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Build
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
-import Coal.ProtoCompiler.ProtoState
 import Coal.Language.Type (Parameter (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild)
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Kind.Constraint.Generation
@@ -27,7 +26,9 @@ import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.ProtoTypeSystem.Kind.Substitution
 import Coal.ProtoTypeSystem.Kind.Unification
-import Control.Monad.State (gets, runState, evalState, evalStateT)
+import Coal.TypeSystem.Constraint.Assumption
+import Coal.TypeSystem.Constraint.Generation.Stack
+import Control.Monad.State (evalState, evalStateT, gets, runState)
 import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
@@ -1260,19 +1261,19 @@ xyz modules = do
             res3 = protoOapplyKinds sub a :: ProtoModule Metadata Kind ()
         b <- protoOprepareBuild res3
         ProtoModule _ _ ds <- indexTypes res3
---        pPrint c
+        --        pPrint c
 
         let tenv = typeEnvironment b
 
         (defs1, asms) <- typeDefinitionsX ds
 
---        pPrint tenv
+        --        pPrint tenv
 
---        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
---        (tdefs, _) <- typeDefinitionsC defs
+        --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
+        --        (tdefs, _) <- typeDefinitionsC defs
 
         insertBuildC b
---  pPrint r
+  --  pPrint r
   pure ()
 
 indexTypes :: (Monad m, Traversable t) => t e -> ProtoCompilerT m a (t IndexedType)
@@ -1289,27 +1290,25 @@ typeDefinitionsX ds = do
   undefined
 
 typeDefinition1 :: (Monad m) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
-typeDefinition1 = 
+typeDefinition1 =
   \case
     ProtoDFunction _ name ProtoFunctionDefinition{..} ->
-      --generateConstraints def
-      -- solve 
---      generateConstraints protoOfunctionDefinitionExpression
-      --define name (typeOf (apply sub def))
+      -- generateConstraints def
+      -- solve
+      --      generateConstraints protoOfunctionDefinitionExpression
+      -- define name (typeOf (apply sub def))
       undefined
-
     ProtoDLet _ name ProtoLetDefinition{..} ->
-      --generateConstraints def
-      -- solve 
+      -- generateConstraints def
+      -- solve
       undefined
-      --define name (typeOf (apply sub def))
+    -- define name (typeOf (apply sub def))
 
     ProtoDInstance a ProtoInstanceDefinition{..} ->
       forM_ protoOinstanceDefinitionImplementations $
-        \case 
+        \case
           ProtoDFunction _ name ProtoFunctionDefinition{..} ->
             undefined
-
           ProtoDLet _ name ProtoLetDefinition{..} ->
             undefined
 
@@ -1317,10 +1316,14 @@ protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind Ind
 protoOrunConstraintsGen stack = do
   supply <- gets protoOcompilerSupply
   undefined
-  let (result, ConstraintsGenState{..}, output) = 
-        runConstraintsGenStack 
-          supply 
-          (emptyConstraintsGenContext{constraintsGenContextModules = mempty}) 
+  let (result, ConstraintsGenState{..}, output) =
+        runConstraintsGenStack
+          supply
+          ( emptyConstraintsGenContext
+              { constraintsGenContextDataConstructors = undefined
+              , constraintsGenContextTypeConstructors = undefined
+              }
+          )
           stack
   updateSupplyC constraintsGenStateSupply
   undefined
@@ -1333,4 +1336,3 @@ foo =
     , testModule2PreKinds
     , testModule1PreKinds
     ]
-

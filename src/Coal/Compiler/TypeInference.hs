@@ -18,6 +18,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
@@ -107,11 +108,27 @@ instance GenerateConstraints a (Definition a Kind IndexedType) where
 
 type ConstraintsGenResult g o a t s = (s, Dictionary (g, o a), [ConstraintsGenOutput g o a t])
 
+-- TODO: remove
+tmpConvert1 :: DataConstructorEntry a -> ProtoDataConstructorEntry a
+tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = ProtoDataConstructorEntry v1 v2 v3 v4
+
+-- TODO: remove
+tmpConvert2 :: TypeConstructorEntry a -> ProtoTypeConstructorEntry a
+tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = ProtoTypeConstructorEntry v1 v2 v3 v4
+
 runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 runConstraintsGen stack = do
   sup <- gets compilerSupply
   build <- getCurrentBuildC
-  let (result, ConstraintsGenState{..}, output) = runConstraintsGenStack sup (emptyConstraintsGenContext{constraintsGenContextModules = build}) stack
+  let (result, ConstraintsGenState{..}, output) =
+        runConstraintsGenStack
+          sup
+          ( emptyConstraintsGenContext
+              { constraintsGenContextDataConstructors = Environment.mapEnvironment tmpConvert1 (moduleDataConstructors build)
+              , constraintsGenContextTypeConstructors = Environment.mapEnvironment tmpConvert2 (moduleTypeConstructors build)
+              }
+          )
+          stack
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
 

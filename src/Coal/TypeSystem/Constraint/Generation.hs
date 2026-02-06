@@ -15,8 +15,8 @@ module Coal.TypeSystem.Constraint.Generation (
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Build
 import Coal.Language
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Annotation (instantiateAnnotation)
@@ -32,11 +32,11 @@ type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 
 lookupDataConstructor :: Name -> ConstraintsGen a (Maybe (DataConstructor TypeIndex Kind IndexedType))
 lookupDataConstructor name = do
-  modules <- asks constraintsGenContextModules
-  case Environment.lookup name (moduleDataConstructors modules) of
+  env <- asks constraintsGenContextDataConstructors
+  case Environment.lookup name env of
     Nothing ->
       pure Nothing
-    Just (DataConstructorEntry _ _ ctor _) ->
+    Just (ProtoDataConstructorEntry _ _ ctor _) ->
       pure (Just ctor)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()

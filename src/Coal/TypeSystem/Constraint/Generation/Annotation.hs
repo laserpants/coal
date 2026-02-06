@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.TypeSystem.Constraint.Generation.Annotation (
@@ -13,6 +12,7 @@ module Coal.TypeSystem.Constraint.Generation.Annotation (
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (ModuleBuild (..), TypeConstructorEntry (..))
 import Coal.Language
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
 import Coal.TypeSystem.Substitution (Substitution (..))
@@ -31,11 +31,11 @@ type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedTyp
 
 lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = do
-  ModuleBuild{..} <- asks constraintsGenContextModules
-  case Environment.lookup name moduleTypeConstructors of
+  env <- asks constraintsGenContextTypeConstructors
+  case Environment.lookup name env of
     Nothing ->
       pure Nothing
-    Just (TypeConstructorEntry _ _ kind _) ->
+    Just (ProtoTypeConstructorEntry _ _ kind _) ->
       pure (Just kind)
 
 instantiateAnnotation ::

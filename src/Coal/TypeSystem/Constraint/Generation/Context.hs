@@ -7,12 +7,15 @@ module Coal.TypeSystem.Constraint.Generation.Context (
   emptyConstraintsGenContext,
 ) where
 
+import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Build (ModuleBuild, emptyModuleBuild)
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem.Constraint (Monomorphic (..))
 
 data ConstraintsGenContext g o a t = ConstraintsGenContext
   { constraintsGenContextMonomorphicSet :: Monomorphic (o a)
-  , constraintsGenContextModules :: ModuleBuild g
+  , constraintsGenContextDataConstructors :: Environment (ProtoDataConstructorEntry g)
+  , constraintsGenContextTypeConstructors :: Environment (ProtoTypeConstructorEntry g)
   }
   deriving (Show, Eq, Ord)
 
@@ -20,7 +23,8 @@ emptyConstraintsGenContext :: (Ord (o a)) => ConstraintsGenContext g o a t
 emptyConstraintsGenContext =
   ConstraintsGenContext
     { constraintsGenContextMonomorphicSet = mempty
-    , constraintsGenContextModules = emptyModuleBuild
+    , constraintsGenContextDataConstructors = mempty
+    , constraintsGenContextTypeConstructors = mempty
     }
 
 {-# INLINE overConstraintsGenMonomorphicSet #-}

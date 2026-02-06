@@ -2,7 +2,6 @@
 
 module Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec (collectEAnnotationConstraintsSpecAll) where
 
-import Coal.Compiler.Build (emptyModuleBuild)
 import Coal.Language
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Generation
@@ -28,7 +27,8 @@ collectEAnnotationConstraintsSpec1 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
@@ -42,7 +42,8 @@ collectEAnnotationConstraintsSpec2 = null ms && constraint1 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 fixture2 :: Expression () () IndexedType
@@ -60,7 +61,8 @@ collectEAnnotationConstraintsSpec3 = null ms && constraint2 `elem` rights outs
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
 
 fixture3 :: Expression () () IndexedType
@@ -75,5 +77,6 @@ collectEAnnotationConstraintsSpec4 = null ms && null (lefts outs)
   ctx =
     ConstraintsGenContext
       { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextModules = emptyModuleBuild
+      , constraintsGenContextDataConstructors = mempty
+      , constraintsGenContextTypeConstructors = mempty
       }
