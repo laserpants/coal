@@ -1,8 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Coal.TypeSystem.Constraint.Generation.Stack
+import Coal.TypeSystem.Constraint.Assumption
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
@@ -1255,10 +1259,12 @@ xyz modules = do
             Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
             res3 = protoOapplyKinds sub a :: ProtoModule Metadata Kind ()
         b <- protoOprepareBuild res3
-        c <- indexTypes res3
+        ProtoModule _ _ ds <- indexTypes res3
 --        pPrint c
 
         let tenv = typeEnvironment b
+
+        (defs1, asms) <- typeDefinitionsX ds
 
 --        pPrint tenv
 
@@ -1277,6 +1283,48 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
     updateSupplyC n
     pure r
 
+typeDefinitionsX :: (Monad m) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
+typeDefinitionsX ds = do
+  forM_ ds typeDefinition1
+  undefined
+
+typeDefinition1 :: (Monad m) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
+typeDefinition1 = 
+  \case
+    ProtoDFunction _ name ProtoFunctionDefinition{..} ->
+      --generateConstraints def
+      -- solve 
+--      generateConstraints protoOfunctionDefinitionExpression
+      --define name (typeOf (apply sub def))
+      undefined
+
+    ProtoDLet _ name ProtoLetDefinition{..} ->
+      --generateConstraints def
+      -- solve 
+      undefined
+      --define name (typeOf (apply sub def))
+
+    ProtoDInstance a ProtoInstanceDefinition{..} ->
+      forM_ protoOinstanceDefinitionImplementations $
+        \case 
+          ProtoDFunction _ name ProtoFunctionDefinition{..} ->
+            undefined
+
+          ProtoDLet _ name ProtoLetDefinition{..} ->
+            undefined
+
+protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a x
+protoOrunConstraintsGen stack = do
+  supply <- gets protoOcompilerSupply
+  undefined
+  let (result, ConstraintsGenState{..}, output) = 
+        runConstraintsGenStack 
+          supply 
+          (emptyConstraintsGenContext{constraintsGenContextModules = mempty}) 
+          stack
+  updateSupplyC constraintsGenStateSupply
+  undefined
+
 foo =
   xyz
     [ testModuleBuiltinsPreKinds
@@ -1285,3 +1333,4 @@ foo =
     , testModule2PreKinds
     , testModule1PreKinds
     ]
+
