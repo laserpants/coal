@@ -5,6 +5,7 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Data.Data (Data)
 import Coal.Compiler.TypeInference
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
@@ -1287,12 +1288,12 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
     updateSupplyC n
     pure r
 
-typeDefinitionsX :: (Monad m) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
+typeDefinitionsX :: (Monad m, Data a, Show a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
 typeDefinitionsX ds = do
   forM_ ds typeDefinition1
   undefined
 
-typeDefinition1 :: (Monad m) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
+typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
 typeDefinition1 =
   \case
     ProtoDFunction _ name ProtoFunctionDefinition{..} -> do

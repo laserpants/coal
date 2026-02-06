@@ -37,12 +37,21 @@ import Data.Tuple.Extra (fst3)
 import Debug.Trace
 import Extras (Dictionary, Name)
 
-class ProtoGenerateConstraints c where
+class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
 
-instance ProtoGenerateConstraints (Expression a Kind IndexedType) where
-  protoOgenerateConstraints =
+instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind IndexedType) where
+  protoOgenerateConstraints expr = do
+    (ams1, ctrs1) <- protoOgenerateExpressionConstraints expr
     undefined
+
+--    (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
+--    sub <- gets compilerSubstitution
+--    insertAssumptionsC (apply sub ms2)
+--    insertConstraintsC (cs1 <> cs2)
+
+protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> ProtoCompilerT m a ([CompilerAssumption a], [CompilerConstraint a])
+protoOgenerateExpressionConstraints = undefined
 
 --
 

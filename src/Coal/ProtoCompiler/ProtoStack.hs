@@ -15,11 +15,17 @@ module Coal.ProtoCompiler.ProtoStack (
   getCurrentBuildC,
   insertConstraintsC,
   clearConstraintsC,
-  insertAssumptionsC, 
+  insertAssumptionsC,
   clearAssumptionsC,
+  clearNameStoreC,
+  insertNameC,
+  insertNamesC,
+  setNamesC,
 ) where
 
+import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Language (IndexedScheme)
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
@@ -30,6 +36,7 @@ import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
 import Control.Monad.State (get, modify)
+import Extras (Name)
 
 type ProtoCompilerStack m a o = ExceptT () (RWST () (ProtoCompilerJournal a) (ProtoCompilerState a) m) o
 
@@ -97,3 +104,15 @@ insertAssumptionsC assumptions = modify (overProtoCompilerAssumptions (<> assump
 
 clearAssumptionsC :: (Monad m) => ProtoCompilerT m a ()
 clearAssumptionsC = modify (overProtoCompilerAssumptions (const mempty))
+
+clearNameStoreC :: (Monad m) => ProtoCompilerT m a ()
+clearNameStoreC = modify (overProtoCompilerNameStore (const mempty))
+
+insertNameC :: (Monad m) => Name -> IndexedScheme -> ProtoCompilerT m a ()
+insertNameC name scheme_ = modify (overProtoCompilerNameStore (Environment.insert name scheme_))
+
+insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> ProtoCompilerT m a ()
+insertNamesC names = modify (overProtoCompilerNameStore (Environment.insertMultiple names))
+
+setNamesC :: (Monad m) => Environment IndexedScheme -> ProtoCompilerT m a ()
+setNamesC names = modify (overProtoCompilerNameStore (const names))

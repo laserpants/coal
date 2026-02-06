@@ -9,6 +9,7 @@ module Coal.ProtoCompiler.ProtoState (
   overProtoCompilerSupply,
   overProtoCompilerModules,
   overProtoCompilerCurrentPath,
+  overProtoCompilerNameStore,
   overProtoCompilerConstraints,
   overProtoCompilerAssumptions,
 ) where
@@ -31,6 +32,7 @@ data ProtoCompilerState a = ProtoCompilerState
   { protoOcompilerSupply :: Int
   , protoOcompilerModules :: Environment (ProtoBuild a)
   , protoOcompilerCurrentPath :: Path
+  , protoOcompilerNameStore :: Environment IndexedScheme
   , protoOcompilerConstraints :: [CompilerConstraint a]
   , protoOcompilerAssumptions :: [CompilerAssumption a]
   }
@@ -42,6 +44,7 @@ initialProtoCompilerState =
     { protoOcompilerSupply = 0
     , protoOcompilerModules = mempty
     , protoOcompilerCurrentPath = emptyPath
+    , protoOcompilerNameStore = mempty
     , protoOcompilerConstraints = mempty
     , protoOcompilerAssumptions = mempty
     }
@@ -67,6 +70,14 @@ overProtoCompilerCurrentPath :: Over (ProtoCompilerState a) Path
 overProtoCompilerCurrentPath fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerCurrentPath = fn protoOcompilerCurrentPath
+    , ..
+    }
+
+{-# INLINE overProtoCompilerNameStore #-}
+overProtoCompilerNameStore :: Over (ProtoCompilerState a) (Environment IndexedScheme)
+overProtoCompilerNameStore fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerNameStore = fn protoOcompilerNameStore
     , ..
     }
 
