@@ -53,8 +53,8 @@ protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a
 protoOgenerateExpressionConstraints expr = do
   (assumptions, params, result) <- protoOrunConstraintsGen (protoOemitConstraints expr)
   let (errors, constraints) = partitionEithers result
---  compilerReportConstraintsGenErrors errors
---  compilerSetTypeAnnotationParams params
+  --  compilerReportConstraintsGenErrors errors
+  --  compilerSetTypeAnnotationParams params
   pure (assumptions, constraints)
 
 protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])

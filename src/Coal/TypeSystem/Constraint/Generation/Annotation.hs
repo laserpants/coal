@@ -5,6 +5,7 @@
 module Coal.TypeSystem.Constraint.Generation.Annotation (
   TypeAnnotationError,
   instantiateAnnotation,
+  protoOinstantiateAnnotation,
   checkTypeAnnotationParameters,
   runTypeAnnotation,
 ) where
@@ -13,6 +14,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (ModuleBuild (..), TypeConstructorEntry (..))
 import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoTypeSystem.Parameterized
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
 import Coal.TypeSystem.Substitution (Substitution (..))
@@ -20,6 +22,7 @@ import Coal.Utils (lexOrderRank)
 import Control.Arrow ((>>>))
 import Control.Monad.Except (ExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.RWS (MonadReader, asks, get)
+import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (MonadState, StateT, modify, runStateT)
 import Control.Monad.Writer (MonadWriter, tell)
 import Data.List.Extra (groupSortOn)
@@ -38,17 +41,23 @@ lookupTypeConstructor name = do
     Just (ProtoTypeConstructorEntry _ _ kind _) ->
       pure (Just kind)
 
-instantiateAnnotation ::
-  (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) =>
-  a ->
-  Type Parameter () ->
-  m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+instantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter () -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 instantiateAnnotation loc a = do
   (t, s) <- runTypeAnnotation loc (instantiate a)
   forM_ (Map.toList s) $
     \(n, k) ->
       modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
   return t
+
+protoOinstantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter Kind -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+protoOinstantiateAnnotation loc a = do
+  undefined
+
+--  (t, s) <- runReaderT (toIndexed a) mempty
+--  forM_ (Map.toList s) $
+--    \(n, k) ->
+--      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
+--  return t
 
 type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
 

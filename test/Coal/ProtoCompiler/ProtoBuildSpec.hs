@@ -678,55 +678,55 @@ testModule1PreKinds =
         ]
     }
 
-testModule1 :: (Monoid a) => ProtoModule a Kind ()
-testModule1 =
-  ProtoModule
-    { protoOmodulePath = Path ["Main"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
-        [ ProtoDImport
-            mempty
-            (Path ["Math"])
-            [ NameImport mempty "factorial"
-            ]
-        , ProtoDImport
-            mempty
-            (Path ["IO"])
-            [ NameImport mempty "println_int32"
-            ]
-        , ProtoDFunction
-            mempty
-            "main"
-            ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation = Nothing
-                , protoOfunctionDefinitionType = With [] ()
-                , protoOfunctionDefinitionPatterns =
-                    PLiteral mempty LUnit :| []
-                , protoOfunctionDefinitionExpression =
-                    EApplication
-                      mempty
-                      ()
-                      (EVariable mempty (Label () "println_int32"))
-                      ( EApplication
-                          mempty
-                          ()
-                          (EVariable mempty (Label () "factorial"))
-                          ( EApplication
-                              mempty
-                              ()
-                              (EVariable mempty (Label () "from_int32"))
-                              ( ELiteral mempty (LInt32 8)
-                                  :| []
-                              )
-                              :| []
-                          )
-                          :| []
-                      )
-                }
-            )
-        ]
-    }
+--testModule1 :: (Monoid a) => ProtoModule a Kind ()
+--testModule1 =
+--  ProtoModule
+--    { protoOmodulePath = Path ["Main"]
+--    , protoOmoduleExportList = ExportAll
+--    , protoOmoduleDefinitions =
+--        [ ProtoDImport
+--            mempty
+--            (Path ["Math"])
+--            [ NameImport mempty "factorial"
+--            ]
+--        , ProtoDImport
+--            mempty
+--            (Path ["IO"])
+--            [ NameImport mempty "println_int32"
+--            ]
+--        , ProtoDFunction
+--            mempty
+--            "main"
+--            ( ProtoFunctionDefinition
+--                { protoOfunctionDefinitionMetadata = mempty
+--                , protoOfunctionDefinitionAnnotation = Nothing
+--                , protoOfunctionDefinitionType = With [] ()
+--                , protoOfunctionDefinitionPatterns =
+--                    PLiteral mempty LUnit :| []
+--                , protoOfunctionDefinitionExpression =
+--                    EApplication
+--                      mempty
+--                      ()
+--                      (EVariable mempty (Label () "println_int32"))
+--                      ( EApplication
+--                          mempty
+--                          ()
+--                          (EVariable mempty (Label () "factorial"))
+--                          ( EApplication
+--                              mempty
+--                              ()
+--                              (EVariable mempty (Label () "from_int32"))
+--                              ( ELiteral mempty (LInt32 8)
+--                                  :| []
+--                              )
+--                              :| []
+--                          )
+--                          :| []
+--                      )
+--                }
+--            )
+--        ]
+--    }
 
 testModule2PreKinds :: (Monoid a) => ProtoModule a () ()
 testModule2PreKinds =
@@ -824,101 +824,101 @@ testModule2PreKinds =
         ]
     }
 
-testModule2 :: (Monoid a) => ProtoModule a Kind ()
-testModule2 =
-  ProtoModule
-    { protoOmodulePath = Path ["Math"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
-        [ ProtoDImport
-            mempty
-            (Path ["Nat"])
-            [ NameImport mempty "pack"
-            , NameImport mempty "unpack"
-            ]
-        , ProtoDFunction
-            mempty
-            "factorial"
-            ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionMetadata =
-                    mempty
-                , protoOfunctionDefinitionAnnotation =
-                    Just (With [] (TIntrinsic IInt32))
-                , protoOfunctionDefinitionType =
-                    With [] ()
-                , protoOfunctionDefinitionPatterns =
-                    PAnnotation
-                      mempty
-                      (TIntrinsic IInt32)
-                      (PVariable mempty (Label () "n"))
-                      :| []
-                , protoOfunctionDefinitionExpression =
-                    EFold
-                      mempty
-                      ()
-                      ( EApplication
-                          mempty
-                          ()
-                          (EVariable mempty (Label () "pack"))
-                          (EVariable mempty (Label () "n") :| [])
-                          :| []
-                      )
-                      ( EClause
-                          mempty
-                          (PConstructor mempty (Label () "Zero") [])
-                          ( CPlain
-                              mempty
-                              []
-                              ( EApplication
-                                  mempty
-                                  ()
-                                  (EVariable mempty (Label () "from_int32"))
-                                  ( ELiteral mempty (LInt32 1)
-                                      :| []
-                                  )
-                              )
-                              :| []
-                          )
-                          <| EClause
-                            mempty
-                            ( PAs
-                                mempty
-                                (Label () "m")
-                                ( PConstructor
-                                    mempty
-                                    (Label () "Succ")
-                                    [ PAtVariable
-                                        mempty
-                                        (Label () "f")
-                                    ]
-                                )
-                            )
-                            ( CPlain
-                                mempty
-                                []
-                                ( EApplication
-                                    mempty
-                                    ()
-                                    (EVariable mempty (Label () "(*)"))
-                                    ( EApplication
-                                        mempty
-                                        ()
-                                        (EVariable mempty (Label () "unpack"))
-                                        ( EVariable mempty (Label () "m")
-                                            :| []
-                                        )
-                                        <| EVariable mempty (Label () "f")
-                                        :| []
-                                    )
-                                )
-                                :| []
-                            )
-                          :| []
-                      )
-                }
-            )
-        ]
-    }
+--testModule2 :: (Monoid a) => ProtoModule a Kind ()
+--testModule2 =
+--  ProtoModule
+--    { protoOmodulePath = Path ["Math"]
+--    , protoOmoduleExportList = ExportAll
+--    , protoOmoduleDefinitions =
+--        [ ProtoDImport
+--            mempty
+--            (Path ["Nat"])
+--            [ NameImport mempty "pack"
+--            , NameImport mempty "unpack"
+--            ]
+--        , ProtoDFunction
+--            mempty
+--            "factorial"
+--            ( ProtoFunctionDefinition
+--                { protoOfunctionDefinitionMetadata =
+--                    mempty
+--                , protoOfunctionDefinitionAnnotation =
+--                    Just (With [] (TIntrinsic IInt32))
+--                , protoOfunctionDefinitionType =
+--                    With [] ()
+--                , protoOfunctionDefinitionPatterns =
+--                    PAnnotation
+--                      mempty
+--                      (TIntrinsic IInt32)
+--                      (PVariable mempty (Label () "n"))
+--                      :| []
+--                , protoOfunctionDefinitionExpression =
+--                    EFold
+--                      mempty
+--                      ()
+--                      ( EApplication
+--                          mempty
+--                          ()
+--                          (EVariable mempty (Label () "pack"))
+--                          (EVariable mempty (Label () "n") :| [])
+--                          :| []
+--                      )
+--                      ( EClause
+--                          mempty
+--                          (PConstructor mempty (Label () "Zero") [])
+--                          ( CPlain
+--                              mempty
+--                              []
+--                              ( EApplication
+--                                  mempty
+--                                  ()
+--                                  (EVariable mempty (Label () "from_int32"))
+--                                  ( ELiteral mempty (LInt32 1)
+--                                      :| []
+--                                  )
+--                              )
+--                              :| []
+--                          )
+--                          <| EClause
+--                            mempty
+--                            ( PAs
+--                                mempty
+--                                (Label () "m")
+--                                ( PConstructor
+--                                    mempty
+--                                    (Label () "Succ")
+--                                    [ PAtVariable
+--                                        mempty
+--                                        (Label () "f")
+--                                    ]
+--                                )
+--                            )
+--                            ( CPlain
+--                                mempty
+--                                []
+--                                ( EApplication
+--                                    mempty
+--                                    ()
+--                                    (EVariable mempty (Label () "(*)"))
+--                                    ( EApplication
+--                                        mempty
+--                                        ()
+--                                        (EVariable mempty (Label () "unpack"))
+--                                        ( EVariable mempty (Label () "m")
+--                                            :| []
+--                                        )
+--                                        <| EVariable mempty (Label () "f")
+--                                        :| []
+--                                    )
+--                                )
+--                                :| []
+--                            )
+--                          :| []
+--                      )
+--                }
+--            )
+--        ]
+--    }
 
 testModule3PreKinds :: (Monoid a) => ProtoModule a () ()
 testModule3PreKinds =
@@ -987,192 +987,192 @@ testModule3PreKinds =
         ]
     }
 
-testModule3 :: (Monoid a) => ProtoModule a Kind ()
-testModule3 =
-  ProtoModule
-    { protoOmodulePath = Path ["Nat"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
-        [ ProtoDFunction
-            mempty
-            "pack"
-            ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation =
-                    Just
-                      ( With
-                          []
-                          (TIntrinsic INat)
-                      )
-                , protoOfunctionDefinitionType =
-                    With [] ()
-                , protoOfunctionDefinitionPatterns =
-                    PAnnotation
-                      mempty
-                      (TIntrinsic IInt32)
-                      (PVariable mempty (Label () "m"))
-                      :| []
-                , protoOfunctionDefinitionExpression =
-                    EApplication
-                      mempty
-                      ()
-                      (EVariable mempty (Label () "nat$_pack"))
-                      ( EVariable mempty (Label () "m")
-                          :| []
-                      )
-                }
-            )
-        , ProtoDFunction
-            mempty
-            "unpack"
-            ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation =
-                    Just
-                      ( With
-                          []
-                          (TIntrinsic IInt32)
-                      )
-                , protoOfunctionDefinitionType =
-                    With [] ()
-                , protoOfunctionDefinitionPatterns =
-                    PAnnotation
-                      mempty
-                      (TIntrinsic INat)
-                      (PVariable mempty (Label () "n"))
-                      :| []
-                , protoOfunctionDefinitionExpression =
-                    EApplication
-                      mempty
-                      ()
-                      (EVariable mempty (Label () "nat$_unpack"))
-                      ( EVariable mempty (Label () "n")
-                          :| []
-                      )
-                }
-            )
-        ]
-    }
+--testModule3 :: (Monoid a) => ProtoModule a Kind ()
+--testModule3 =
+--  ProtoModule
+--    { protoOmodulePath = Path ["Nat"]
+--    , protoOmoduleExportList = ExportAll
+--    , protoOmoduleDefinitions =
+--        [ ProtoDFunction
+--            mempty
+--            "pack"
+--            ( ProtoFunctionDefinition
+--                { protoOfunctionDefinitionMetadata = mempty
+--                , protoOfunctionDefinitionAnnotation =
+--                    Just
+--                      ( With
+--                          []
+--                          (TIntrinsic INat)
+--                      )
+--                , protoOfunctionDefinitionType =
+--                    With [] ()
+--                , protoOfunctionDefinitionPatterns =
+--                    PAnnotation
+--                      mempty
+--                      (TIntrinsic IInt32)
+--                      (PVariable mempty (Label () "m"))
+--                      :| []
+--                , protoOfunctionDefinitionExpression =
+--                    EApplication
+--                      mempty
+--                      ()
+--                      (EVariable mempty (Label () "nat$_pack"))
+--                      ( EVariable mempty (Label () "m")
+--                          :| []
+--                      )
+--                }
+--            )
+--        , ProtoDFunction
+--            mempty
+--            "unpack"
+--            ( ProtoFunctionDefinition
+--                { protoOfunctionDefinitionMetadata = mempty
+--                , protoOfunctionDefinitionAnnotation =
+--                    Just
+--                      ( With
+--                          []
+--                          (TIntrinsic IInt32)
+--                      )
+--                , protoOfunctionDefinitionType =
+--                    With [] ()
+--                , protoOfunctionDefinitionPatterns =
+--                    PAnnotation
+--                      mempty
+--                      (TIntrinsic INat)
+--                      (PVariable mempty (Label () "n"))
+--                      :| []
+--                , protoOfunctionDefinitionExpression =
+--                    EApplication
+--                      mempty
+--                      ()
+--                      (EVariable mempty (Label () "nat$_unpack"))
+--                      ( EVariable mempty (Label () "n")
+--                          :| []
+--                      )
+--                }
+--            )
+--        ]
+--    }
 
 --
 
-testModule2B :: (Monoid a) => ProtoModule a Kind ()
-testModule2B =
-  ProtoModule
-    { protoOmodulePath = Path ["Math"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
-        [ ProtoDImport
-            mempty
-            (Path ["Nat"])
-            [ NameImport mempty "pack"
-            , NameImport mempty "unpack"
-            ]
-        , ProtoDFunction
-            mempty
-            "factorial"
-            ( ProtoFunctionDefinition
-                { protoOfunctionDefinitionMetadata =
-                    mempty
-                , protoOfunctionDefinitionAnnotation =
-                    Just (With [] (TIntrinsic IInt32))
-                , protoOfunctionDefinitionType =
-                    With [] ()
-                , protoOfunctionDefinitionPatterns =
-                    PAnnotation
-                      mempty
-                      (TIntrinsic IInt32)
-                      (PVariable mempty (Label () "n"))
-                      :| []
-                , protoOfunctionDefinitionExpression =
-                    ERecursiveLet
-                      mempty
-                      (PVariable mempty (Label () "$fold-70cdac64"))
-                      ( ELambda
-                          mempty
-                          (PVariable mempty (Label () "$variable-185c7b8df7b0") :| [])
-                          ( EMatch
-                              mempty
-                              ()
-                              (EVariable mempty (Label () "$variable-185c7b8df7b0"))
-                              ( EClause
-                                  mempty
-                                  (PConstructor mempty (Label () "Zero") [])
-                                  ( CPlain
-                                      mempty
-                                      []
-                                      ( EApplication
-                                          mempty
-                                          ()
-                                          (EVariable mempty (Label () "from_int32"))
-                                          ( ELiteral mempty (LInt32 1)
-                                              :| []
-                                          )
-                                      )
-                                      :| []
-                                  )
-                                  <| EClause
-                                    mempty
-                                    ( PAs
-                                        mempty
-                                        (Label () "m")
-                                        ( PConstructor
-                                            mempty
-                                            (Label () "Succ")
-                                            [ PVariable
-                                                mempty
-                                                (Label () "f")
-                                            ]
-                                        )
-                                    )
-                                    ( CPlain
-                                        mempty
-                                        []
-                                        ( EApplication
-                                            mempty
-                                            ()
-                                            (EVariable mempty (Label () "(*)"))
-                                            ( EApplication
-                                                mempty
-                                                ()
-                                                (EVariable mempty (Label () "unpack"))
-                                                ( EVariable mempty (Label () "m")
-                                                    :| []
-                                                )
-                                                <| EApplication
-                                                  mempty
-                                                  ()
-                                                  (EVariable mempty (Label () "$fold-70cdac64"))
-                                                  ( EVariable mempty (Label () "f")
-                                                      :| []
-                                                  )
-                                                :| []
-                                            )
-                                        )
-                                        :| []
-                                    )
-                                  :| []
-                              )
-                          )
-                      )
-                      ( EApplication
-                          mempty
-                          ()
-                          (EVariable mempty (Label () "$fold-70cdac64"))
-                          ( EApplication
-                              mempty
-                              ()
-                              (EVariable mempty (Label () "pack"))
-                              ( EVariable mempty (Label () "n")
-                                  :| []
-                              )
-                              :| []
-                          )
-                      )
-                }
-            )
-        ]
-    }
+--testModule2B :: (Monoid a) => ProtoModule a Kind ()
+--testModule2B =
+--  ProtoModule
+--    { protoOmodulePath = Path ["Math"]
+--    , protoOmoduleExportList = ExportAll
+--    , protoOmoduleDefinitions =
+--        [ ProtoDImport
+--            mempty
+--            (Path ["Nat"])
+--            [ NameImport mempty "pack"
+--            , NameImport mempty "unpack"
+--            ]
+--        , ProtoDFunction
+--            mempty
+--            "factorial"
+--            ( ProtoFunctionDefinition
+--                { protoOfunctionDefinitionMetadata =
+--                    mempty
+--                , protoOfunctionDefinitionAnnotation =
+--                    Just (With [] (TIntrinsic IInt32))
+--                , protoOfunctionDefinitionType =
+--                    With [] ()
+--                , protoOfunctionDefinitionPatterns =
+--                    PAnnotation
+--                      mempty
+--                      (TIntrinsic IInt32)
+--                      (PVariable mempty (Label () "n"))
+--                      :| []
+--                , protoOfunctionDefinitionExpression =
+--                    ERecursiveLet
+--                      mempty
+--                      (PVariable mempty (Label () "$fold-70cdac64"))
+--                      ( ELambda
+--                          mempty
+--                          (PVariable mempty (Label () "$variable-185c7b8df7b0") :| [])
+--                          ( EMatch
+--                              mempty
+--                              ()
+--                              (EVariable mempty (Label () "$variable-185c7b8df7b0"))
+--                              ( EClause
+--                                  mempty
+--                                  (PConstructor mempty (Label () "Zero") [])
+--                                  ( CPlain
+--                                      mempty
+--                                      []
+--                                      ( EApplication
+--                                          mempty
+--                                          ()
+--                                          (EVariable mempty (Label () "from_int32"))
+--                                          ( ELiteral mempty (LInt32 1)
+--                                              :| []
+--                                          )
+--                                      )
+--                                      :| []
+--                                  )
+--                                  <| EClause
+--                                    mempty
+--                                    ( PAs
+--                                        mempty
+--                                        (Label () "m")
+--                                        ( PConstructor
+--                                            mempty
+--                                            (Label () "Succ")
+--                                            [ PVariable
+--                                                mempty
+--                                                (Label () "f")
+--                                            ]
+--                                        )
+--                                    )
+--                                    ( CPlain
+--                                        mempty
+--                                        []
+--                                        ( EApplication
+--                                            mempty
+--                                            ()
+--                                            (EVariable mempty (Label () "(*)"))
+--                                            ( EApplication
+--                                                mempty
+--                                                ()
+--                                                (EVariable mempty (Label () "unpack"))
+--                                                ( EVariable mempty (Label () "m")
+--                                                    :| []
+--                                                )
+--                                                <| EApplication
+--                                                  mempty
+--                                                  ()
+--                                                  (EVariable mempty (Label () "$fold-70cdac64"))
+--                                                  ( EVariable mempty (Label () "f")
+--                                                      :| []
+--                                                  )
+--                                                :| []
+--                                            )
+--                                        )
+--                                        :| []
+--                                    )
+--                                  :| []
+--                              )
+--                          )
+--                      )
+--                      ( EApplication
+--                          mempty
+--                          ()
+--                          (EVariable mempty (Label () "$fold-70cdac64"))
+--                          ( EApplication
+--                              mempty
+--                              ()
+--                              (EVariable mempty (Label () "pack"))
+--                              ( EVariable mempty (Label () "n")
+--                                  :| []
+--                              )
+--                              :| []
+--                          )
+--                      )
+--                }
+--            )
+--        ]
+--    }
 
 -- testA :: (Monoid a) => IO (Either () (ProtoBuild a))
 -- testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
@@ -1264,6 +1264,8 @@ xyz modules = do
             Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
             res3 = protoOapplyKinds sub a :: ProtoModule Metadata Kind ()
         b <- protoOprepareBuild res3
+        insertBuildC b
+
         ProtoModule _ _ ds <- indexTypes res3
         --        pPrint c
 
@@ -1291,7 +1293,7 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
 typeDefinitionsX :: (Monad m, Data a, Show a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
 typeDefinitionsX ds = do
   forM_ ds typeDefinition1
-  undefined
+  pure ([], [])
 
 typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
 typeDefinition1 =
@@ -1302,20 +1304,22 @@ typeDefinition1 =
       --      generateConstraints protoOfunctionDefinitionExpression
       protoOgenerateConstraints protoOfunctionDefinitionExpression
       -- define name (typeOf (apply sub def))
-      undefined
     ProtoDLet _ name ProtoLetDefinition{..} ->
       -- generateConstraints def
       -- solve
-      undefined
+      pure ()
     -- define name (typeOf (apply sub def))
 
     ProtoDInstance a ProtoInstanceDefinition{..} ->
       forM_ protoOinstanceDefinitionImplementations $
         \case
           ProtoDFunction _ name ProtoFunctionDefinition{..} ->
-            undefined
+            pure ()
           ProtoDLet _ name ProtoLetDefinition{..} ->
-            undefined
+            pure ()
+
+    _ ->
+      pure ()
 
 foo =
   xyz

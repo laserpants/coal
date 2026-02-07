@@ -89,7 +89,8 @@ protoOgetCurrentBuildC = do
   ProtoCompilerState{..} <- get
   case Environment.lookup (principalPath protoOcompilerCurrentPath) protoOcompilerModules of
     Nothing ->
-      error "Implementation error"
+      --      error "Implementation error"
+      error (show (principalPath protoOcompilerCurrentPath))
     Just build ->
       return build
 
