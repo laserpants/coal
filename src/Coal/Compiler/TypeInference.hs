@@ -43,10 +43,14 @@ class ProtoGenerateConstraints a c where
 
 instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind IndexedType) where
   protoOgenerateConstraints expr = do
-    (sms1, cs1) <- protoOgenerateExpressionConstraints expr
-    (sms2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints sms1
+    (sps1, cs1) <- protoOgenerateExpressionConstraints expr
+    (sps2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints sps1
+
+    traceShowM sps2
+    traceShowM (cs1 <> cs2)
+
     sub <- gets protoOcompilerSubstitution
-    protoOinsertAssumptionsC (apply sub sms2)
+    protoOinsertAssumptionsC (apply sub sps2)
     protoOinsertConstraintsC (cs1 <> cs2)
 
 protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> ProtoCompilerT m a ([CompilerAssumption a], [CompilerConstraint a])

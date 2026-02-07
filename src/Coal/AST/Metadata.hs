@@ -13,7 +13,10 @@ data Metadata = Metadata
   { locationStart :: SourcePos
   , locationEnd :: SourcePos
   }
-  deriving (Show, Eq, Ord, Read, Data, Generic)
+  deriving (Eq, Ord, Read, Data, Generic)
+
+instance Show Metadata where
+  show _ = ""
 
 instance Binary Metadata where
   put _ = pure ()

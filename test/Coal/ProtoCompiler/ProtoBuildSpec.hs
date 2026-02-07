@@ -1369,6 +1369,8 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
 typeDefinitionsX :: (Monad m, Data a, Show a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
 typeDefinitionsX ds = do
   forM_ ds typeDefinition1
+  sub <- gets protoOcompilerSubstitution
+  sps <- gets protoOcompilerAssumptions
   pure ([], [])
 
 typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()

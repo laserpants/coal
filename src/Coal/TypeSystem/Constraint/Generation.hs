@@ -67,8 +67,30 @@ emitPAnnotationConstraints loc t p = do
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
 
+protoOemitPAnnotationConstraints :: (Data a) => a -> Type Parameter Kind -> Pattern a Kind IndexedType -> ConstraintsGen a ()
+protoOemitPAnnotationConstraints loc t p = do
+  r <- protoOinstantiateAnnotation loc t
+  case r of
+    Left err ->
+      tellLeft [EIllFormedTypeAnnotation err]
+    Right t1 ->
+      tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
+
 emitPConstructorConstraints :: (Data a) => a -> Label IndexedType -> [Pattern a () IndexedType] -> ConstraintsGen a ()
 emitPConstructorConstraints loc (Label t name) ps = do
+  r <- lookupDataConstructor name
+  case r of
+    Nothing ->
+      tellLeft [ENoDataConstructor loc name]
+    Just DataConstructor{..}
+      | constructorArity /= length ps ->
+          tellLeft [EDataConstructorArityMismatch loc name constructorArity (length ps)]
+    Just DataConstructor{..} -> do
+      let t1 = foldTypeOf t ps
+      tellRight [Explicit (RuleDataConstructor loc constructorName t1 constructorScheme) t1 constructorScheme]
+
+protoOemitPConstructorConstraints :: (Data a) => a -> Label IndexedType -> [Pattern a Kind IndexedType] -> ConstraintsGen a ()
+protoOemitPConstructorConstraints loc (Label t name) ps = do
   r <- lookupDataConstructor name
   case r of
     Nothing ->
@@ -87,13 +109,38 @@ emitPOrConstraints loc t p1 p2 = do
   t1 = typeOf p1
   t2 = typeOf p2
 
+protoOemitPOrConstraints :: (Data a) => a -> IndexedType -> Pattern a Kind IndexedType -> Pattern a Kind IndexedType -> ConstraintsGen a ()
+protoOemitPOrConstraints loc t p1 p2 = do
+  tellRight [Equality (RuleOrConstraint loc t1 t2) [t, t1, t2]]
+ where
+  t1 = typeOf p1
+  t2 = typeOf p2
+
 emitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
 emitPListConsConstraints loc t p1 p2 = do
   let t1 = foldTypeOf t [p1, p2]
   tellRight [Explicit (RuleListConstructor loc t1 listConstructorScheme) t1 listConstructorScheme]
 
+protoOemitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a Kind IndexedType -> Pattern a Kind IndexedType -> ConstraintsGen a ()
+protoOemitPListConsConstraints loc t p1 p2 = do
+  let t1 = foldTypeOf t [p1, p2]
+  tellRight [Explicit (RuleListConstructor loc t1 listConstructorScheme) t1 listConstructorScheme]
+
 emitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a () IndexedType] -> ConstraintsGen a ()
 emitPListLiteralConstraints loc t ps =
+  case ts of
+    t1 : _ ->
+      tellRight
+        [ Equality (RuleListLiteral loc ts) ts
+        , Equality (RuleAssumption loc t t1) [t, t1]
+        ]
+    _ ->
+      pure ()
+ where
+  ts = listType . typeOf <$> ps
+
+protoOemitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a Kind IndexedType] -> ConstraintsGen a ()
+protoOemitPListLiteralConstraints loc t ps =
   case ts of
     t1 : _ ->
       tellRight
@@ -113,8 +160,19 @@ emitPTupleConstraints loc t ps =
  where
   t1 = tupleType (typeOf <$> ps)
 
+protoOemitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a Kind IndexedType) -> ConstraintsGen a ()
+protoOemitPTupleConstraints loc t ps =
+  tellRight
+    [ Equality (RuleTuple loc t t1) [t, t1]
+    ]
+ where
+  t1 = tupleType (typeOf <$> ps)
+
 emitPAsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
 emitPAsConstraints loc t p = tellRight [Equality (RuleAsConstraint loc) [t, typeOf p]]
+
+protoOemitPAsConstraints :: (Data a) => a -> IndexedType -> Pattern a Kind IndexedType -> ConstraintsGen a ()
+protoOemitPAsConstraints loc t p = tellRight [Equality (RuleAsConstraint loc) [t, typeOf p]]
 
 emitPRecordConstraints :: (Data a) => a -> IndexedType -> Dictionary (Pattern a () IndexedType) -> Maybe (Pattern a () IndexedType) -> ConstraintsGen a ()
 emitPRecordConstraints loc t fields p = do
@@ -129,8 +187,74 @@ emitPRecordConstraints loc t fields p = do
     _ ->
       pure ()
 
+protoOemitPRecordConstraints :: (Data a) => a -> IndexedType -> Dictionary (Pattern a Kind IndexedType) -> Maybe (Pattern a Kind IndexedType) -> ConstraintsGen a ()
+protoOemitPRecordConstraints loc t fields p = do
+  row <- tailRow loc p
+  let t1 = fieldsRecordType (typeOf <$> fields) row
+  tellRight [Equality (RuleRecordEquality loc t t1) [t, t1]]
+  case row of
+    r@RVariable{} ->
+      forM_ (Map.keys fields) $
+        \field ->
+          tellRight [Lacks (RuleRecordField loc field (TRow r)) (TRow r) field]
+    _ ->
+      pure ()
+
 protoOemitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a Kind IndexedType -> ConstraintsGen a [Name]
-protoOemitPatternConstraints = undefined
+protoOemitPatternConstraints assertF assumptions = 
+  \case
+    PAnnotation loc t p -> do
+      protoOemitPAnnotationConstraints loc t p
+      protoOemitPatternConstraints assertF assumptions p
+    PVariable _ (Label t name) -> do
+      assertF t (filter (assumptionNameIs name) assumptions)
+      pure [name]
+    PConstructor loc ll ps -> do
+      protoOemitPConstructorConstraints loc ll ps
+      concatForM ps (protoOemitPatternConstraints assertF assumptions)
+    POr loc t p1 p2 -> do
+      protoOemitPOrConstraints loc t p1 p2
+      ps1 <- protoOemitPatternConstraints assertF assumptions p1
+      ps2 <- protoOemitPatternConstraints assertF assumptions p2
+      pure (ps1 <> ps2)
+    PShorthand _ (Label t name) -> do
+      assertF t (filter (assumptionNameIs name) assumptions)
+      pure [name]
+    PRecord loc t fields p -> do
+      protoOemitPRecordConstraints loc t fields p
+      forM_ (Map.toList fields) $
+        \(name, p1) ->
+          assertF (typeOf p1) (filter (assumptionNameIs name) assumptions)
+      concatForM (Map.elems fields <> maybeToList p) (protoOemitPatternConstraints assertF assumptions)
+    PAny{} ->
+      pure []
+    PListCons loc t p1 p2 -> do
+      protoOemitPListConsConstraints loc t p1 p2
+      assumptions1 <- protoOemitPatternConstraints assertF assumptions p1
+      assumptions2 <- protoOemitPatternConstraints assertF assumptions p2
+      pure (assumptions1 <> assumptions2)
+    PListLiteral loc t ps -> do
+      protoOemitPListLiteralConstraints loc t ps
+      concatForM ps (protoOemitPatternConstraints assertF assumptions)
+    PAtVariable _ (Label _ name) ->
+      pure [name]
+    PAs loc (Label t name) p -> do
+      names <- protoOemitPatternConstraints assertF assumptions p
+      protoOemitPAsConstraints loc t p
+      assertF t (filter (assumptionNameIs name) assumptions)
+      pure (name : names)
+    PInteger{} ->
+      pure []
+    PLiteral{} ->
+      pure []
+    PTuple loc t ps -> do
+      protoOemitPTupleConstraints loc t ps
+      concatForM ps (protoOemitPatternConstraints assertF assumptions)
+    PNamedFold a _ _ -> do
+      tellLeft [EFoldPatternInRegularMatch a]
+      pure []
+    _ ->
+      error "Not implemented"
 
 emitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a () IndexedType -> ConstraintsGen a [Name]
 emitPatternConstraints assertF ms =
@@ -518,8 +642,19 @@ clauseConstraintsImpl (EClause loc p cs) = do
   pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
 protoOclauseConstraintsImpl :: (Show a, Data a) => Clause a Kind IndexedType -> ConstraintsGen a (IndexedType, [IndexedType], [Assumption a IndexedType])
-protoOclauseConstraintsImpl =
-  undefined
+protoOclauseConstraintsImpl (EClause loc p cs) = do
+  (ts1, ms) <- second concat . unzip <$$> withMonomorphic p $
+    forM (toList cs) $
+      \case
+        CPlain _ gs e -> do
+          ms1 <- concatForM gs $
+            \(CGuard g) -> do
+              tellRight [Equality (RuleMatchClauseGuard loc) [typeOf g, TIntrinsic IBool]]
+              protoOemitConstraints g
+          ms2 <- protoOemitConstraints e
+          pure (typeOf e, ms1 <> ms2)
+  names <- protoOemitPatternConstraints (assertEqualityAssumptions loc) ms p
+  pure (typeOf p, ts1, filter (assumptionNameIsNotOneOf names) ms)
 
 emitEFFICallConstraints :: (Show a, Data a) => a -> IndexedType -> Label (Type Parameter ()) -> [Expression a () IndexedType] -> Expression a () IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitEFFICallConstraints loc u (Label t _) es e = do
