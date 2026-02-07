@@ -5,12 +5,11 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Data.Data (Data)
-import Coal.Compiler.TypeInference
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build
+import Coal.Compiler.TypeInference
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
@@ -31,6 +30,7 @@ import Coal.ProtoTypeSystem.Kind.Unification
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Control.Monad.State (evalState, evalStateT, get, gets, runState)
+import Data.Data (Data)
 import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.Set as Set
@@ -678,8 +678,8 @@ testModule1PreKinds =
         ]
     }
 
---testModule1 :: (Monoid a) => ProtoModule a Kind ()
---testModule1 =
+-- testModule1 :: (Monoid a) => ProtoModule a Kind ()
+-- testModule1 =
 --  ProtoModule
 --    { protoOmodulePath = Path ["Main"]
 --    , protoOmoduleExportList = ExportAll
@@ -757,75 +757,151 @@ testModule2PreKinds =
                       (PVariable mempty (Label () "n"))
                       :| []
                 , protoOfunctionDefinitionExpression =
-                    EFold
+                    ERecursiveLet
                       mempty
-                      ()
+                      (PVariable mempty (Label () "$fold"))
+                      ( ELambda
+                          mempty
+                          (PVariable mempty (Label () "$fold.expr") :| [])
+                          ( EMatch
+                              mempty
+                              ()
+                              (EVariable mempty (Label () "$fold.expr"))
+                              ( EClause
+                                  mempty
+                                  (PConstructor mempty (Label () "Zero") [])
+                                  ( CPlain
+                                      mempty
+                                      []
+                                      ( EApplication
+                                          mempty
+                                          ()
+                                          (EVariable mempty (Label () "from_int32"))
+                                          ( ELiteral mempty (LInt32 1)
+                                              :| []
+                                          )
+                                      )
+                                      :| []
+                                  )
+                                  <| EClause
+                                    mempty
+                                    ( PAs
+                                        mempty
+                                        (Label () "m")
+                                        ( PConstructor
+                                            mempty
+                                            (Label () "Succ")
+                                            [ PAtVariable
+                                                mempty
+                                                (Label () "f")
+                                            ]
+                                        )
+                                    )
+                                    ( CPlain
+                                        mempty
+                                        []
+                                        ( EApplication
+                                            mempty
+                                            ()
+                                            (EVariable mempty (Label () "(*)"))
+                                            ( EApplication
+                                                mempty
+                                                ()
+                                                (EVariable mempty (Label () "unpack"))
+                                                ( EVariable mempty (Label () "m")
+                                                    :| []
+                                                )
+                                                <| EVariable mempty (Label () "f")
+                                                :| []
+                                            )
+                                        )
+                                        :| []
+                                    )
+                                  :| []
+                              )
+                          )
+                      )
                       ( EApplication
                           mempty
                           ()
-                          (EVariable mempty (Label () "pack"))
-                          (EVariable mempty (Label () "n") :| [])
-                          :| []
-                      )
-                      ( EClause
-                          mempty
-                          (PConstructor mempty (Label () "Zero") [])
-                          ( CPlain
+                          (EVariable mempty (Label () "$fold"))
+                          ( EApplication
                               mempty
-                              []
-                              ( EApplication
-                                  mempty
-                                  ()
-                                  (EVariable mempty (Label () "from_int32"))
-                                  ( ELiteral mempty (LInt32 1)
-                                      :| []
-                                  )
-                              )
+                              ()
+                              (EVariable mempty (Label () "pack"))
+                              (EVariable mempty (Label () "n") :| [])
                               :| []
                           )
-                          <| EClause
-                            mempty
-                            ( PAs
-                                mempty
-                                (Label () "m")
-                                ( PConstructor
-                                    mempty
-                                    (Label () "Succ")
-                                    [ PAtVariable
-                                        mempty
-                                        (Label () "f")
-                                    ]
-                                )
-                            )
-                            ( CPlain
-                                mempty
-                                []
-                                ( EApplication
-                                    mempty
-                                    ()
-                                    (EVariable mempty (Label () "(*)"))
-                                    ( EApplication
-                                        mempty
-                                        ()
-                                        (EVariable mempty (Label () "unpack"))
-                                        ( EVariable mempty (Label () "m")
-                                            :| []
-                                        )
-                                        <| EVariable mempty (Label () "f")
-                                        :| []
-                                    )
-                                )
-                                :| []
-                            )
-                          :| []
                       )
+                      -- EFold
+                      --  mempty
+                      --  ()
+                      --  ( EApplication
+                      --      mempty
+                      --      ()
+                      --      (EVariable mempty (Label () "pack"))
+                      --      (EVariable mempty (Label () "n") :| [])
+                      --      :| []
+                      --  )
+                      --  ( EClause
+                      --      mempty
+                      --      (PConstructor mempty (Label () "Zero") [])
+                      --      ( CPlain
+                      --          mempty
+                      --          []
+                      --          ( EApplication
+                      --              mempty
+                      --              ()
+                      --              (EVariable mempty (Label () "from_int32"))
+                      --              ( ELiteral mempty (LInt32 1)
+                      --                  :| []
+                      --              )
+                      --          )
+                      --          :| []
+                      --      )
+                      --      <| EClause
+                      --        mempty
+                      --        ( PAs
+                      --            mempty
+                      --            (Label () "m")
+                      --            ( PConstructor
+                      --                mempty
+                      --                (Label () "Succ")
+                      --                [ PAtVariable
+                      --                    mempty
+                      --                    (Label () "f")
+                      --                ]
+                      --            )
+                      --        )
+                      --        ( CPlain
+                      --            mempty
+                      --            []
+                      --            ( EApplication
+                      --                mempty
+                      --                ()
+                      --                (EVariable mempty (Label () "(*)"))
+                      --                ( EApplication
+                      --                    mempty
+                      --                    ()
+                      --                    (EVariable mempty (Label () "unpack"))
+                      --                    ( EVariable mempty (Label () "m")
+                      --                        :| []
+                      --                    )
+                      --                    <| EVariable mempty (Label () "f")
+                      --                    :| []
+                      --                )
+                      --            )
+                      --            :| []
+                      --        )
+                      --      :| []
+                      --  )
                 }
             )
         ]
     }
 
---testModule2 :: (Monoid a) => ProtoModule a Kind ()
---testModule2 =
+-- testModule2 :: (Monoid a) => ProtoModule a Kind ()
+-- testModule2 =
 --  ProtoModule
 --    { protoOmodulePath = Path ["Math"]
 --    , protoOmoduleExportList = ExportAll
@@ -987,8 +1063,8 @@ testModule3PreKinds =
         ]
     }
 
---testModule3 :: (Monoid a) => ProtoModule a Kind ()
---testModule3 =
+-- testModule3 :: (Monoid a) => ProtoModule a Kind ()
+-- testModule3 =
 --  ProtoModule
 --    { protoOmodulePath = Path ["Nat"]
 --    , protoOmoduleExportList = ExportAll
@@ -1056,8 +1132,8 @@ testModule3PreKinds =
 
 --
 
---testModule2B :: (Monoid a) => ProtoModule a Kind ()
---testModule2B =
+-- testModule2B :: (Monoid a) => ProtoModule a Kind ()
+-- testModule2B =
 --  ProtoModule
 --    { protoOmodulePath = Path ["Math"]
 --    , protoOmoduleExportList = ExportAll
@@ -1303,7 +1379,7 @@ typeDefinition1 =
       -- solve
       --      generateConstraints protoOfunctionDefinitionExpression
       protoOgenerateConstraints protoOfunctionDefinitionExpression
-      -- define name (typeOf (apply sub def))
+    -- define name (typeOf (apply sub def))
     ProtoDLet _ name ProtoLetDefinition{..} ->
       -- generateConstraints def
       -- solve
@@ -1317,7 +1393,6 @@ typeDefinition1 =
             pure ()
           ProtoDLet _ name ProtoLetDefinition{..} ->
             pure ()
-
     _ ->
       pure ()
 
