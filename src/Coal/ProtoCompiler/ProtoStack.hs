@@ -14,9 +14,9 @@ module Coal.ProtoCompiler.ProtoStack (
   setCurrentModuleC,
   protoOgetCurrentBuildC,
   protoOinsertConstraintsC,
-  clearConstraintsC,
+  protoOclearConstraintsC,
   protoOinsertAssumptionsC,
-  clearAssumptionsC,
+  protoOclearAssumptionsC,
   clearNameStoreC,
   insertNameC,
   insertNamesC,
@@ -97,14 +97,14 @@ protoOgetCurrentBuildC = do
 protoOinsertConstraintsC :: (Monad m) => [CompilerConstraint a] -> ProtoCompilerT m a ()
 protoOinsertConstraintsC constraints = modify (overProtoCompilerConstraints (<> constraints))
 
-clearConstraintsC :: (Monad m) => ProtoCompilerT m a ()
-clearConstraintsC = modify (overProtoCompilerConstraints (const mempty))
+protoOclearConstraintsC :: (Monad m) => ProtoCompilerT m a ()
+protoOclearConstraintsC = modify (overProtoCompilerConstraints (const mempty))
 
 protoOinsertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> ProtoCompilerT m a ()
 protoOinsertAssumptionsC assumptions = modify (overProtoCompilerAssumptions (<> assumptions))
 
-clearAssumptionsC :: (Monad m) => ProtoCompilerT m a ()
-clearAssumptionsC = modify (overProtoCompilerAssumptions (const mempty))
+protoOclearAssumptionsC :: (Monad m) => ProtoCompilerT m a ()
+protoOclearAssumptionsC = modify (overProtoCompilerAssumptions (const mempty))
 
 clearNameStoreC :: (Monad m) => ProtoCompilerT m a ()
 clearNameStoreC = modify (overProtoCompilerNameStore (const mempty))

@@ -20,7 +20,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOupdateSupplyC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOupdateSupplyC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
@@ -220,6 +220,9 @@ solveConstraintsC cs = do
   compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
+solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> ProtoCompilerT m a Substitution
+solveConstraintsX = undefined
+
 solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveC = do
   constraints <- gets compilerConstraints
@@ -234,8 +237,13 @@ solveX :: (Monad m, Data a, Eq a) => ProtoCompilerT m a Substitution
 solveX = do
   constraints <- gets protoOcompilerConstraints
   sub1 <- gets protoOcompilerSubstitution
-  sub2 <- undefined -- protoOsolveConstraintsC constraints
+  sub2 <- solveConstraintsX constraints
+  protoOclearConstraintsC
   undefined
+
+--  clearTypeAnnotationParamsC
+--  setSubstitutionsC (sub2 <> sub1)
+--  gets compilerSubstitution
 
 typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption a])
 typeDefinitionsC ds = do
