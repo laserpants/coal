@@ -25,7 +25,7 @@ module Coal.Compiler.Stack (
   clearNameStoreC,
   clearConstraintsC,
   clearTypeAnnotationParamsC,
-  updateSubstitutionC,
+  setSubstitutionsC,
   updateSupply,
   updateSupplyC,
   insertSupplyC,
@@ -145,8 +145,8 @@ insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
 updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
 updateSupplyC supply = modify (overCompilerSupply (const supply))
 
-updateSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
-updateSubstitutionC sub = modify (overCompilerSubstitution (const sub))
+setSubstitutionsC :: (Monad m) => Substitution -> CompilerT a m ()
+setSubstitutionsC sub = modify (overCompilerSubstitution (const sub))
 
 setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
 setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))

@@ -227,8 +227,15 @@ solveC = do
   sub2 <- solveConstraintsC constraints
   clearConstraintsC
   clearTypeAnnotationParamsC
-  updateSubstitutionC (sub2 <> sub1)
+  setSubstitutionsC (sub2 <> sub1)
   gets compilerSubstitution
+
+solveX :: (Monad m, Data a, Eq a) => ProtoCompilerT m a Substitution
+solveX = do
+  constraints <- gets protoOcompilerConstraints
+  sub1 <- gets protoOcompilerSubstitution
+  sub2 <- undefined -- protoOsolveConstraintsC constraints
+  undefined
 
 typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption a])
 typeDefinitionsC ds = do
