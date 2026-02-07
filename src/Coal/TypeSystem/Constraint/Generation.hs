@@ -201,7 +201,7 @@ protoOemitPRecordConstraints loc t fields p = do
       pure ()
 
 protoOemitPatternConstraints :: (Show a, Data a) => Assertion a -> [Assumption a IndexedType] -> Pattern a Kind IndexedType -> ConstraintsGen a [Name]
-protoOemitPatternConstraints assertF assumptions = 
+protoOemitPatternConstraints assertF assumptions =
   \case
     PAnnotation loc t p -> do
       protoOemitPAnnotationConstraints loc t p

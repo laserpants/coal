@@ -37,6 +37,7 @@ import qualified Data.Set as Set
 import Debug.Trace
 import Extras (Name, forM_)
 import Text.Pretty.Simple (pPrint)
+import Coal.TypeSystem.Substitution
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -1370,9 +1371,10 @@ typeDefinitionsX :: (Monad m, Data a, Show a, Eq a) => [ProtoDefinition a Kind I
 typeDefinitionsX ds = do
   forM_ ds typeDefinition1
   sub <- gets protoOcompilerSubstitution
-  sps <- gets protoOcompilerAssumptions
+  asms <- gets protoOcompilerAssumptions
+  --
   sub1 <- solveX
-  pure ([], [])
+  pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 asms)
 
 typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
 typeDefinition1 =
