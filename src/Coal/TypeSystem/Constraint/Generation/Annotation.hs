@@ -51,13 +51,11 @@ instantiateAnnotation loc a = do
 
 protoOinstantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter Kind -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 protoOinstantiateAnnotation loc a = do
-  undefined
-
---  (t, s) <- runReaderT (toIndexed a) mempty
---  forM_ (Map.toList s) $
---    \(n, k) ->
---      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
---  return t
+  (t, s) <- runTypeAnnotation loc undefined -- (instantiate a)
+  forM_ (Map.toList s) $
+    \(n, k) ->
+      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
+  return t
 
 type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
 

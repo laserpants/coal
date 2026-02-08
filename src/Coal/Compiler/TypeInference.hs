@@ -112,8 +112,17 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                 protoOletDefinitionExpression
               Just (With _ annotationType) ->
                 EAnnotation loc annotationType protoOletDefinitionExpression
-      _ ->
-        undefined
+      ProtoDInstance a ProtoInstanceDefinition{..} ->
+        forM_ protoOinstanceDefinitionImplementations $
+          \case
+            ProtoDFunction _ name ProtoFunctionDefinition{..} ->
+              -- TODO
+              pure ()
+            ProtoDLet _ name ProtoLetDefinition{..} ->
+              -- TODO
+              pure ()
+      _ -> 
+        pure ()
 
 freshTypeVariable :: (Monad m) => ProtoCompilerT m a (Type TypeIndex Kind)
 freshTypeVariable = supplied (TVariable . TypeIndex KType)
