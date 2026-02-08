@@ -9,9 +9,11 @@ module Coal.ProtoCompiler.ProtoState (
   overProtoCompilerSupply,
   overProtoCompilerModules,
   overProtoCompilerCurrentPath,
+  overProtoCompilerSubstitution,
   overProtoCompilerNameStore,
   overProtoCompilerConstraints,
   overProtoCompilerAssumptions,
+  overProtoCompilerTypeAnnotationParams,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -23,7 +25,7 @@ import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Substitution
-import Extras (Over)
+import Extras (Dictionary, Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
@@ -37,6 +39,7 @@ data ProtoCompilerState a = ProtoCompilerState
   , protoOcompilerNameStore :: Environment IndexedScheme
   , protoOcompilerConstraints :: [CompilerConstraint a]
   , protoOcompilerAssumptions :: [CompilerAssumption a]
+  , protoOcompilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   }
   deriving (Show, Eq, Ord)
 
@@ -50,6 +53,7 @@ initialProtoCompilerState =
     , protoOcompilerNameStore = mempty
     , protoOcompilerConstraints = mempty
     , protoOcompilerAssumptions = mempty
+    , protoOcompilerTypeAnnotationParams = mempty
     }
 
 {-# INLINE overProtoCompilerSupply #-}
@@ -76,6 +80,14 @@ overProtoCompilerCurrentPath fn ProtoCompilerState{..} =
     , ..
     }
 
+{-# INLINE overProtoCompilerSubstitution #-}
+overProtoCompilerSubstitution :: Over (ProtoCompilerState a) Substitution
+overProtoCompilerSubstitution fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerSubstitution = fn protoOcompilerSubstitution
+    , ..
+    }
+
 {-# INLINE overProtoCompilerNameStore #-}
 overProtoCompilerNameStore :: Over (ProtoCompilerState a) (Environment IndexedScheme)
 overProtoCompilerNameStore fn ProtoCompilerState{..} =
@@ -97,6 +109,14 @@ overProtoCompilerAssumptions :: Over (ProtoCompilerState a) [CompilerAssumption 
 overProtoCompilerAssumptions fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerAssumptions = fn protoOcompilerAssumptions
+    , ..
+    }
+
+{-# INLINE overProtoCompilerTypeAnnotationParams #-}
+overProtoCompilerTypeAnnotationParams :: Over (ProtoCompilerState a) (Dictionary (a, TypeIndex Kind))
+overProtoCompilerTypeAnnotationParams fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerTypeAnnotationParams = fn protoOcompilerTypeAnnotationParams
     , ..
     }
 

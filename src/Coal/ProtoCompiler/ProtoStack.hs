@@ -12,11 +12,13 @@ module Coal.ProtoCompiler.ProtoStack (
   insertBuildC,
   setCurrentPathC,
   setCurrentModuleC,
+  protoOsetSubstitutionC,
   protoOgetCurrentBuildC,
   protoOinsertConstraintsC,
   protoOclearConstraintsC,
   protoOinsertAssumptionsC,
   protoOclearAssumptionsC,
+  protoOclearTypeAnnotationParamsC,
   clearNameStoreC,
   insertNameC,
   insertNamesC,
@@ -31,6 +33,7 @@ import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule
+import Coal.TypeSystem.Substitution (Substitution)
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
@@ -84,6 +87,9 @@ setCurrentPathC path = modify (overProtoCompilerCurrentPath (const path))
 setCurrentModuleC :: (Monad m) => ProtoModule a s t -> ProtoCompilerT m a ()
 setCurrentModuleC ProtoModule{..} = setCurrentPathC protoOmodulePath
 
+protoOsetSubstitutionC :: (Monad m) => Substitution -> ProtoCompilerT m a ()
+protoOsetSubstitutionC sub = modify (overProtoCompilerSubstitution (const sub))
+
 protoOgetCurrentBuildC :: (Monad m) => ProtoCompilerT m a (ProtoBuild a)
 protoOgetCurrentBuildC = do
   ProtoCompilerState{..} <- get
@@ -105,6 +111,9 @@ protoOinsertAssumptionsC assumptions = modify (overProtoCompilerAssumptions (<> 
 
 protoOclearAssumptionsC :: (Monad m) => ProtoCompilerT m a ()
 protoOclearAssumptionsC = modify (overProtoCompilerAssumptions (const mempty))
+
+protoOclearTypeAnnotationParamsC :: (Monad m) => ProtoCompilerT m a ()
+protoOclearTypeAnnotationParamsC = modify (overProtoCompilerTypeAnnotationParams (const mempty))
 
 clearNameStoreC :: (Monad m) => ProtoCompilerT m a ()
 clearNameStoreC = modify (overProtoCompilerNameStore (const mempty))

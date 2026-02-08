@@ -20,7 +20,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOupdateSupplyC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOsetSubstitutionC, protoOupdateSupplyC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
@@ -239,11 +239,9 @@ solveX = do
   sub1 <- gets protoOcompilerSubstitution
   sub2 <- solveConstraintsX constraints
   protoOclearConstraintsC
-  undefined
-
---  clearTypeAnnotationParamsC
---  setSubstitutionC (sub2 <> sub1)
---  gets compilerSubstitution
+  protoOclearTypeAnnotationParamsC
+  protoOsetSubstitutionC (sub2 <> sub1)
+  gets protoOcompilerSubstitution
 
 typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption a])
 typeDefinitionsC ds = do
