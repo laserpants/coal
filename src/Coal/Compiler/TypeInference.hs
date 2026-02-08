@@ -46,8 +46,8 @@ instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind Index
     (asms1, cs1) <- protoOgenerateExpressionConstraints expr
     (asms2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints asms1
 
-    traceShowM asms2
-    traceShowM (cs1 <> cs2)
+--    traceShowM asms2
+--    traceShowM (cs1 <> cs2)
 
     sub <- gets protoOcompilerSubstitution
     protoOinsertAssumptionsC (apply sub asms2)
@@ -221,7 +221,12 @@ solveConstraintsC cs = do
   pure sub
 
 solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> ProtoCompilerT m a Substitution
-solveConstraintsX = undefined
+solveConstraintsX constraints = do
+  n <- gets protoOcompilerSupply
+  let (sub, m, rs) = solveConstraints n constraints
+  protoOupdateSupplyC m
+  -- TODO
+  pure sub
 
 solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveC = do

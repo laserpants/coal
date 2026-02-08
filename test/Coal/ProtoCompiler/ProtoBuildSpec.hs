@@ -5,6 +5,7 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
@@ -1064,6 +1065,30 @@ testModule3PreKinds =
         ]
     }
 
+
+testModule4PreKinds :: (Monoid a) => ProtoModule a () ()
+testModule4PreKinds =
+  ProtoModule
+    { protoOmodulePath = Path ["Main"]
+    , protoOmoduleExportList = ExportAll
+    , protoOmoduleDefinitions =
+        [ ProtoDFunction
+            mempty
+            "some_fun"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation = Nothing
+                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PVariable mempty (Label () "m") :| []
+                , protoOfunctionDefinitionExpression =
+                    ELiteral mempty (LInt32 1) 
+                }
+            )
+        ]
+    }
+
+
 -- testModule3 :: (Monoid a) => ProtoModule a Kind ()
 -- testModule3 =
 --  ProtoModule
@@ -1350,7 +1375,7 @@ xyz modules = do
 
         (defs1, asms) <- typeDefinitionsX ds
 
-        --        pPrint tenv
+        --pPrint defs1
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
         --        (tdefs, _) <- typeDefinitionsC defs
@@ -1367,14 +1392,18 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
     protoOupdateSupplyC n
     pure r
 
-typeDefinitionsX :: (Monad m, Data a, Show a, Eq a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
-typeDefinitionsX ds = do
-  forM_ ds typeDefinition1
+typeDefinitionsX :: (MonadIO m, Data a, Show a, Eq a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
+typeDefinitionsX defs = do
+  forM_ defs typeDefinition1
   sub <- gets protoOcompilerSubstitution
   asms <- gets protoOcompilerAssumptions
   --
   sub1 <- solveX
-  pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 asms)
+
+  traceShowM "vvvvvvvvv"
+  liftIO $ pPrint sub1
+
+  pure (fmap (fmap normalizeRowTypes) (apply sub1 defs), apply sub1 asms)
 
 typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
 typeDefinition1 =
@@ -1408,4 +1437,9 @@ foo =
     , testModule3PreKinds
     , testModule2PreKinds
     , testModule1PreKinds
+    ]
+
+foo2 =
+  xyz
+    [ testModule4PreKinds
     ]
