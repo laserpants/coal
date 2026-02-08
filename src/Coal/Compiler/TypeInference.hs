@@ -22,6 +22,7 @@ import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOsetSubstitutionC, protoOupdateSupplyC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
+import Coal.ProtoLanguage.ProtoDefinition
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
@@ -37,6 +38,8 @@ import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Debug.Trace
 import Extras (Dictionary, Name)
+import Text.Pretty.Simple (pPrint)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
@@ -46,12 +49,49 @@ instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind Index
     (asms1, cs1) <- protoOgenerateExpressionConstraints expr
     (asms2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints asms1
 
---    traceShowM asms2
---    traceShowM (cs1 <> cs2)
+    --    traceShowM asms2
+    --    traceShowM (cs1 <> cs2)
 
     sub <- gets protoOcompilerSubstitution
     protoOinsertAssumptionsC (apply sub asms2)
     protoOinsertConstraintsC (cs1 <> cs2)
+
+instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind IndexedType) where
+  protoOgenerateConstraints =
+    \case
+      ProtoDFunction
+        _
+        name
+        ProtoFunctionDefinition
+          { protoOfunctionDefinitionMetadata = loc
+          , protoOfunctionDefinitionType = With _ functionType
+          , ..
+          } -> do
+          protoOinsertConstraintsC
+            [ Equality
+                (RuleTopLevelFunction loc)
+                [ functionType
+                , typeOf protoOfunctionDefinitionExpression
+                ]
+            ]
+          expressionType <- supplied (TVariable . TypeIndex KType)
+          protoOgenerateConstraints $
+            ELet
+              loc
+              (BFunction loc placeholder protoOfunctionDefinitionPatterns functionExpr :| [])
+              (EVariable loc (Label expressionType placeholder))
+         where
+          placeholder = "#_function__" <> name
+          functionExpr =
+            case protoOfunctionDefinitionAnnotation of
+              Nothing ->
+                protoOfunctionDefinitionExpression
+              Just (With _ annotationType) ->
+                EAnnotation loc annotationType protoOfunctionDefinitionExpression
+      ProtoDLet{} ->
+        pure ()
+      _ ->
+        undefined
 
 protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> ProtoCompilerT m a ([CompilerAssumption a], [CompilerConstraint a])
 protoOgenerateExpressionConstraints expr = do
@@ -238,7 +278,7 @@ solveC = do
   setSubstitutionC (sub2 <> sub1)
   gets compilerSubstitution
 
-solveX :: (Monad m, Data a, Eq a) => ProtoCompilerT m a Substitution
+solveX :: (Monad m, Data a, Eq a, Show a) => ProtoCompilerT m a Substitution
 solveX = do
   constraints <- gets protoOcompilerConstraints
   sub1 <- gets protoOcompilerSubstitution

@@ -5,7 +5,6 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
-import Control.Monad.IO.Class (MonadIO, liftIO)
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
@@ -28,8 +27,11 @@ import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.ProtoTypeSystem.Kind.Substitution
 import Coal.ProtoTypeSystem.Kind.Unification
+import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Stack
+import Coal.TypeSystem.Substitution
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (evalState, evalStateT, get, gets, runState)
 import Data.Data (Data)
 import Data.Either (lefts, rights)
@@ -38,7 +40,6 @@ import qualified Data.Set as Set
 import Debug.Trace
 import Extras (Name, forM_)
 import Text.Pretty.Simple (pPrint)
-import Coal.TypeSystem.Substitution
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -1065,7 +1066,6 @@ testModule3PreKinds =
         ]
     }
 
-
 testModule4PreKinds :: (Monoid a) => ProtoModule a () ()
 testModule4PreKinds =
   ProtoModule
@@ -1082,12 +1082,11 @@ testModule4PreKinds =
                 , protoOfunctionDefinitionPatterns =
                     PVariable mempty (Label () "m") :| []
                 , protoOfunctionDefinitionExpression =
-                    ELiteral mempty (LInt32 1) 
+                    ELiteral mempty (LInt32 1)
                 }
             )
         ]
     }
-
 
 -- testModule3 :: (Monoid a) => ProtoModule a Kind ()
 -- testModule3 =
@@ -1375,7 +1374,7 @@ xyz modules = do
 
         (defs1, asms) <- typeDefinitionsX ds
 
-        --pPrint defs1
+        pPrint defs1
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
         --        (tdefs, _) <- typeDefinitionsC defs
@@ -1394,41 +1393,35 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
 
 typeDefinitionsX :: (MonadIO m, Data a, Show a, Eq a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
 typeDefinitionsX defs = do
-  forM_ defs typeDefinition1
+  forM_ defs protoOgenerateConstraints
   sub <- gets protoOcompilerSubstitution
   asms <- gets protoOcompilerAssumptions
   --
   sub1 <- solveX
-
-  traceShowM "vvvvvvvvv"
-  liftIO $ pPrint sub1
-
   pure (fmap (fmap normalizeRowTypes) (apply sub1 defs), apply sub1 asms)
 
-typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
-typeDefinition1 =
-  \case
-    ProtoDFunction _ name ProtoFunctionDefinition{..} -> do
-      -- generateConstraints def
-      -- solve
-      --      generateConstraints protoOfunctionDefinitionExpression
-      protoOgenerateConstraints protoOfunctionDefinitionExpression
-    -- define name (typeOf (apply sub def))
-    ProtoDLet _ name ProtoLetDefinition{..} ->
-      -- generateConstraints def
-      -- solve
-      pure ()
-    -- define name (typeOf (apply sub def))
-
-    ProtoDInstance a ProtoInstanceDefinition{..} ->
-      forM_ protoOinstanceDefinitionImplementations $
-        \case
-          ProtoDFunction _ name ProtoFunctionDefinition{..} ->
-            pure ()
-          ProtoDLet _ name ProtoLetDefinition{..} ->
-            pure ()
-    _ ->
-      pure ()
+--typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
+--typeDefinition1 =
+--  \case
+--    ProtoDFunction _ name ProtoFunctionDefinition { .. } -> do
+--      protoOgenerateConstraints protoOfunctionDefinitionExpression
+--
+--    -- define name (typeOf (apply sub def))
+--    ProtoDLet _ name ProtoLetDefinition{..} ->
+--      -- generateConstraints def
+--      -- solve
+--      pure ()
+--    -- define name (typeOf (apply sub def))
+--
+--    ProtoDInstance a ProtoInstanceDefinition{..} ->
+--      forM_ protoOinstanceDefinitionImplementations $
+--        \case
+--          ProtoDFunction _ name ProtoFunctionDefinition{..} ->
+--            pure ()
+--          ProtoDLet _ name ProtoLetDefinition{..} ->
+--            pure ()
+--    _ ->
+--      pure ()
 
 foo =
   xyz
