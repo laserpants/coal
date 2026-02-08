@@ -48,10 +48,6 @@ instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind Index
   protoOgenerateConstraints expr = do
     (asms1, cs1) <- protoOgenerateExpressionConstraints expr
     (asms2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints asms1
-
-    --    traceShowM asms2
-    --    traceShowM (cs1 <> cs2)
-
     sub <- gets protoOcompilerSubstitution
     protoOinsertAssumptionsC (apply sub asms2)
     protoOinsertConstraintsC (cs1 <> cs2)
@@ -88,8 +84,34 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                 protoOfunctionDefinitionExpression
               Just (With _ annotationType) ->
                 EAnnotation loc annotationType protoOfunctionDefinitionExpression
-      ProtoDLet{} ->
-        pure ()
+      ProtoDLet
+        _
+        name
+        ProtoLetDefinition
+          { protoOletDefinitionMetadata = loc
+          , protoOletDefinitionType = With _ letType
+          , ..
+          } -> do
+          protoOinsertConstraintsC
+            [ Equality
+                (RuleTopLevelConstant loc)
+                [ letType
+                , typeOf protoOletDefinitionExpression
+                ]
+            ]
+          protoOgenerateConstraints $
+            ELet
+              loc
+              (BPattern loc (PVariable loc (Label letType placeholder)) letExpr :| [])
+              (EVariable loc (Label letType placeholder))
+         where
+          placeholder = "#_constant__" <> name
+          letExpr =
+            case protoOletDefinitionAnnotation of
+              Nothing ->
+                protoOletDefinitionExpression
+              Just (With _ annotationType) ->
+                EAnnotation loc annotationType protoOletDefinitionExpression
       _ ->
         undefined
 
