@@ -26,6 +26,7 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks)
 import Control.Monad.State (evalState, get, gets)
 import Control.Monad.Writer (execWriter)
@@ -39,7 +40,6 @@ import Data.Tuple.Extra (fst3)
 import Debug.Trace
 import Extras (Dictionary, Name)
 import Text.Pretty.Simple (pPrint)
-import Control.Monad.IO.Class (MonadIO, liftIO)
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
@@ -74,7 +74,7 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                 , typeOf protoOfunctionDefinitionExpression
                 ]
             ]
-          expressionType <- supplied (TVariable . TypeIndex KType)
+          expressionType <- freshTypeVariable
           protoOgenerateConstraints $
             ELet
               loc
@@ -92,6 +92,9 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
         pure ()
       _ ->
         undefined
+
+freshTypeVariable :: (Monad m) => ProtoCompilerT m a (Type TypeIndex Kind)
+freshTypeVariable = supplied (TVariable . TypeIndex KType)
 
 protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> ProtoCompilerT m a ([CompilerAssumption a], [CompilerConstraint a])
 protoOgenerateExpressionConstraints expr = do
