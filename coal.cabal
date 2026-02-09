@@ -237,6 +237,7 @@ library
       Coal.ProtoCompiler.ProtoState
       Coal.ProtoLanguage.ProtoDefinition
       Coal.ProtoLanguage.ProtoModule
+      Coal.ProtoTypeSystem.Annotations
       Coal.ProtoTypeSystem.Kind.Constraint
       Coal.ProtoTypeSystem.Kind.Constraint.Generation
       Coal.ProtoTypeSystem.Kind.Constraint.Solver

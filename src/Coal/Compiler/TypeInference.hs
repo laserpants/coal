@@ -121,7 +121,7 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
             ProtoDLet _ name ProtoLetDefinition{..} ->
               -- TODO
               pure ()
-      _ -> 
+      _ ->
         pure ()
 
 freshTypeVariable :: (Monad m) => ProtoCompilerT m a (Type TypeIndex Kind)
