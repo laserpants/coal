@@ -8,7 +8,6 @@ module Coal.TypeSystem.Constraint.Generation.Context (
 ) where
 
 import Coal.Common.Environment (Environment (..))
-import Coal.Compiler.Build (ModuleBuild, emptyModuleBuild)
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem.Constraint (Monomorphic (..))
 
