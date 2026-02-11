@@ -23,11 +23,12 @@ module Coal.ProtoCompiler.ProtoStack (
   insertNameC,
   insertNamesC,
   setNamesC,
+  setTypeAnnotationParamsC,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Language (IndexedScheme)
+import Coal.Language
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
@@ -39,7 +40,7 @@ import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
 import Control.Monad.State (get, modify)
-import Extras (Name)
+import Extras (Dictionary, Name, Over)
 
 type ProtoCompilerStack m a o = ExceptT () (RWST () (ProtoCompilerJournal a) (ProtoCompilerState a) m) o
 
@@ -126,3 +127,6 @@ insertNamesC names = modify (overProtoCompilerNameStore (Environment.insertMulti
 
 setNamesC :: (Monad m) => Environment IndexedScheme -> ProtoCompilerT m a ()
 setNamesC names = modify (overProtoCompilerNameStore (const names))
+
+setTypeAnnotationParamsC :: (Monad m) => Dictionary (a, TypeIndex Kind) -> ProtoCompilerT m a ()
+setTypeAnnotationParamsC params = modify (overProtoCompilerTypeAnnotationParams (const params))

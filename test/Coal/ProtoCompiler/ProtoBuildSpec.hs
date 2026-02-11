@@ -1374,7 +1374,7 @@ xyz modules = do
 
         (defs1, asms) <- typeDefinitionsX ds
 
-        pPrint defs1
+--        pPrint defs1
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
         --        (tdefs, _) <- typeDefinitionsC defs

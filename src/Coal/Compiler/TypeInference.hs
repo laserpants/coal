@@ -20,7 +20,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOsetSubstitutionC, protoOupdateSupplyC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.TypeSystem
@@ -39,7 +39,8 @@ import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Debug.Trace
 import Extras (Dictionary, Name)
-import Text.Pretty.Simple (pPrint)
+
+-- import Text.Pretty.Simple (pPrint)
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
@@ -121,6 +122,8 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
             ProtoDLet _ name ProtoLetDefinition{..} ->
               -- TODO
               pure ()
+            _ ->
+              pure ()
       _ ->
         pure ()
 
@@ -132,7 +135,7 @@ protoOgenerateExpressionConstraints expr = do
   (assumptions, params, result) <- protoOrunConstraintsGen (protoOemitConstraints expr)
   let (errors, constraints) = partitionEithers result
   --  compilerReportConstraintsGenErrors errors
-  --  compilerSetTypeAnnotationParams params
+  setTypeAnnotationParamsC params
   pure (assumptions, constraints)
 
 protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
