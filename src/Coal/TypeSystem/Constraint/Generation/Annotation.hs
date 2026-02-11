@@ -5,7 +5,7 @@
 module Coal.TypeSystem.Constraint.Generation.Annotation (
   TypeAnnotationError,
   instantiateAnnotation,
-  protoOinstantiateAnnotation,
+  --  protoOinstantiateAnnotation,
   checkTypeAnnotationParameters,
   runTypeAnnotation,
 ) where
@@ -14,6 +14,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (ModuleBuild (..), TypeConstructorEntry (..))
 import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoTypeSystem.Annotations
 import Coal.ProtoTypeSystem.Parameterized
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
@@ -30,7 +31,7 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name, concatMapM, forM_)
 
-type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedType
+-- type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedType
 
 lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = do
@@ -49,13 +50,13 @@ instantiateAnnotation loc a = do
       modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
   return t
 
-protoOinstantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter Kind -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
-protoOinstantiateAnnotation loc a = do
-  (t, s) <- runTypeAnnotation loc undefined -- (instantiate a)
-  forM_ (Map.toList s) $
-    \(n, k) ->
-      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
-  return t
+-- protoOinstantiateAnnotation :: (Monad m) => a -> Type Parameter Kind -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+-- protoOinstantiateAnnotation loc a = do
+--  (t, s) <- runAnnotationsT loc undefined undefined -- (instantiate a)
+--  forM_ (Map.toList s) $
+--    \(n, k) ->
+--      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
+----  return t
 
 type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
 

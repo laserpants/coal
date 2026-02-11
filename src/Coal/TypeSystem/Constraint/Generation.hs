@@ -18,11 +18,15 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoTypeSystem.Annotations
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
-import Coal.TypeSystem.Constraint.Generation.Annotation (instantiateAnnotation, protoOinstantiateAnnotation)
+import Coal.TypeSystem.Constraint.Generation.Annotation (instantiateAnnotation)
+import Coal.TypeSystem.Constraint.Generation.Context
 import Coal.TypeSystem.Constraint.Generation.Stack
-import Control.Monad.Reader (asks)
+import Coal.TypeSystem.Constraint.Generation.State
+import Control.Monad.Reader (ask, asks)
+import Control.Monad.State (modify)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
@@ -795,3 +799,12 @@ emitConstraints =
       error "Implementation error"
     EFold{} ->
       error "Implementation error"
+
+protoOinstantiateAnnotation :: a -> Type Parameter Kind -> ConstraintsGen a (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+protoOinstantiateAnnotation loc a = do
+  env <- ask
+  (t, s) <- runAnnotationsT loc env (indexTypeAnnotations a)
+  forM_ (Map.toList s) $
+    \(n, k) ->
+      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
+  return t

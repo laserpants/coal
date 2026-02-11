@@ -4,7 +4,6 @@ module Coal.Utils (lexOrderRank) where
 
 import Data.Char (ord)
 import Data.Text (Text)
-
 import qualified Data.Text as Text
 
 {-# INLINE inCharRange #-}
