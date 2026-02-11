@@ -5,17 +5,17 @@
 
 module Coal.ProtoTypeSystem.Annotations where
 
-import Coal.Utils (lexOrderRank)
-import qualified Data.Map.Strict as Map
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem.Constraint.Generation.Annotation.Error (TypeAnnotationError (..))
 import Coal.TypeSystem.Constraint.Generation.Context
+import Coal.Utils (lexOrderRank)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError, withExceptT)
 import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, get, modify, runStateT)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name)
 
 type TypeIndexMap = Dictionary (TypeIndex Kind)
@@ -51,7 +51,7 @@ indexTypeAnnotations =
     t@TApplication{} -> do
       uncurry indexTypeApplicationTypeAnnotations (listTypeArgs t)
     TVariable (Parameter k v) ->
-      TVariable <$> baz k v
+      TVariable <$> protoOtypeIndex k v
     TArrow t1 t2 ->
       TArrow <$> indexTypeAnnotations t1 <*> indexTypeAnnotations t2
     TConstructor _ name -> do
@@ -74,7 +74,7 @@ indexTypeAnnotationsInRow :: (Monad m) => Row Parameter Kind (Type Parameter Kin
 indexTypeAnnotationsInRow =
   \case
     RVariable (Parameter k v) ->
-      RVariable <$> baz k v
+      RVariable <$> protoOtypeIndex k v
     RExtend name t row ->
       RExtend name <$> indexTypeAnnotations t <*> indexTypeAnnotationsInRow row
     RNil ->
@@ -83,24 +83,27 @@ indexTypeAnnotationsInRow =
 indexTypeApplicationTypeAnnotations :: (Monad m) => Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> AnnotationsT m a IndexedType
 indexTypeApplicationTypeAnnotations con@(TConstructor _ name) ts
   | isTupleType con =
-      undefined
-indexTypeApplicationTypeAnnotations (TVariable (Parameter _ v)) ts =
-  undefined
+      applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
+        <$> traverse indexTypeAnnotations ts
+indexTypeApplicationTypeAnnotations (TVariable (Parameter _ v)) ts = do
+  us <- traverse indexTypeAnnotations ts
+  u <- TVariable <$> protoOtypeIndex (foldKind KType (kindOf <$> us)) v
+  pure (applyTypeArgs KType u us)
 indexTypeApplicationTypeAnnotations t ts =
-  undefined
+  applyTypeArgs KType <$> indexTypeAnnotations t <*> traverse indexTypeAnnotations ts
 
-baz :: (Monad m) => Kind -> Name -> AnnotationsT m a (TypeIndex Kind)
-baz kind name = do
+protoOtypeIndex :: (Monad m) => Kind -> Name -> AnnotationsT m a (TypeIndex Kind)
+protoOtypeIndex kind name = do
   dict <- get
   case Map.lookup name dict of
     Just (TypeIndex k1 _)
       | k1 /= kind ->
           throwError EAnnotationKindMismatch
+    Just{} ->
+      pure index
     Nothing -> do
       modify (Map.insert name index)
       pure index
-    Just{} ->
-      pure index
- where 
+ where
   index = TypeIndex kind annotationIndex
   annotationIndex = negate (lexOrderRank name) - 1
