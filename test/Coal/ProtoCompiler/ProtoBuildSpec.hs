@@ -1375,6 +1375,8 @@ xyz modules = do
         (defs1, asms) <- typeDefinitionsX ds
 
         pPrint defs1
+
+
         --cs <- gets protoOcompilerConstraints
         --pPrint cs
 
@@ -1399,12 +1401,12 @@ typeDefinitionsX defs = do
   sub <- gets protoOcompilerSubstitution
   asms <- gets protoOcompilerAssumptions
 
---  cs <- gets protoOcompilerConstraints
+  cs <- gets protoOcompilerConstraints
 
   --
   sub1 <- solveX
 
---  pPrint sub1
+--  pPrint cs
 
   pure (fmap (fmap normalizeRowTypes) (apply sub1 defs), apply sub1 asms)
 
@@ -1437,7 +1439,15 @@ testModule9 =
     { protoOmodulePath = Path ["IO"]
     , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
-        [ ProtoDFunction
+        [ ProtoDType
+            mempty
+            "IO"
+            ( ProtoTypeDefinition
+                { protoOtypeDefinitionParameters = [Parameter () "a"]
+                , protoOtypeDefinitionConstructors = []
+                }
+            )
+        , ProtoDFunction
             mempty
             "println_int32"
             ( ProtoFunctionDefinition
