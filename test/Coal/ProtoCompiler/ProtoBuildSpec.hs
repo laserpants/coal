@@ -1374,7 +1374,9 @@ xyz modules = do
 
         (defs1, asms) <- typeDefinitionsX ds
 
---        pPrint defs1
+        pPrint defs1
+        --cs <- gets protoOcompilerConstraints
+        --pPrint cs
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
         --        (tdefs, _) <- typeDefinitionsC defs
@@ -1396,8 +1398,14 @@ typeDefinitionsX defs = do
   forM_ defs protoOgenerateConstraints
   sub <- gets protoOcompilerSubstitution
   asms <- gets protoOcompilerAssumptions
+
+--  cs <- gets protoOcompilerConstraints
+
   --
   sub1 <- solveX
+
+--  pPrint sub1
+
   pure (fmap (fmap normalizeRowTypes) (apply sub1 defs), apply sub1 asms)
 
 --typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
@@ -1423,6 +1431,47 @@ typeDefinitionsX defs = do
 --    _ ->
 --      pure ()
 
+testModule9 :: (Monoid a) => ProtoModule a () ()
+testModule9 =
+  ProtoModule
+    { protoOmodulePath = Path ["IO"]
+    , protoOmoduleExportList = ExportAll
+    , protoOmoduleDefinitions =
+        [ ProtoDFunction
+            mempty
+            "println_int32"
+            ( ProtoFunctionDefinition
+                { protoOfunctionDefinitionMetadata = mempty
+                , protoOfunctionDefinitionAnnotation =
+                    Just
+                      ( With
+                          []
+                          ( TApplication
+                              ()
+                              (TConstructor () "IO")
+                              (TIntrinsic IUnit)
+                          )
+                      )
+                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionPatterns =
+                    PAnnotation
+                      mempty
+                      (TIntrinsic IInt32)
+                      (PVariable mempty (Label () "n"))
+                      :| []
+                , protoOfunctionDefinitionExpression =
+                    EApplication
+                      mempty
+                      ()
+                      (EVariable mempty (Label () "io$_println_int32"))
+                      ( EVariable mempty (Label () "n")
+                          :| []
+                      )
+                }
+            )
+        ]
+    }
+
 foo =
   xyz
     [ testModuleBuiltinsPreKinds
@@ -1435,4 +1484,9 @@ foo =
 foo2 =
   xyz
     [ testModule4PreKinds
+    ]
+
+foo3 =
+  xyz
+    [ testModule9
     ]

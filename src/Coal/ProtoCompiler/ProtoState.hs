@@ -38,6 +38,7 @@ data ProtoCompilerState a = ProtoCompilerState
   , protoOcompilerSubstitution :: Substitution
   , protoOcompilerNameStore :: Environment IndexedScheme
   , protoOcompilerConstraints :: [CompilerConstraint a]
+  -- TODO: add kind constraints
   , protoOcompilerAssumptions :: [CompilerAssumption a]
   , protoOcompilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   }
