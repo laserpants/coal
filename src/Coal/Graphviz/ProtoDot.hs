@@ -6,6 +6,7 @@
 
 module Coal.Graphviz.ProtoDot where
 
+import Coal.Language.Type.Scheme
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
@@ -224,11 +225,15 @@ instance ProtoDot (DataConstructor o k t) where
 
 instance ProtoDot (Parameter k) where
   toDot =
-    undefined
+    \case
+      Parameter{..} ->
+        undefined
 
 instance ProtoDot (Scheme o k t) where
   toDot =
-    undefined
+    \case
+      Forall{..} ->
+        undefined
 
 instance ProtoDot (Binding Expression a k t) where
   toDot =
@@ -242,87 +247,87 @@ instance ProtoDot (Expression a k t) where
   toDot =
     \case
       EAnnotation a t e ->
-        undefined
+        emitShape RectangleShape "EAnnotation"
       EApplication a t e es ->
-        undefined
+        emitShape RectangleShape "EApplication"
       ELambda a ps e ->
-        undefined
+        emitShape RectangleShape "ELambda"
       ELet a bs e ->
-        undefined
+        emitShape RectangleShape "ELet"
       ERecursiveLet a p e1 e2 ->
-        undefined
+        emitShape RectangleShape "ERecursiveLet"
       EVariable a ll ->
-        undefined
+        emitShape RectangleShape "EVariable"
       EConstructor a ll ->
-        undefined
+        emitShape RectangleShape "EConstructor"
       ELiteral a p ->
-        undefined
+        emitShape RectangleShape "ELiteral"
       EIf a t e1 e2 e3 ->
-        undefined
+        emitShape RectangleShape "EIf"
       EOperator a t op ->
-        undefined
+        emitShape RectangleShape "EOperator"
       ERecord a t d me ->
-        undefined
+        emitShape RectangleShape "ERecord"
       EListCons a t e1 e2 ->
-        undefined
+        emitShape RectangleShape "EListCons"
       EListLiteral a t es ->
-        undefined
+        emitShape RectangleShape "EListLiteral"
       ETuple a t es ->
-        undefined
+        emitShape RectangleShape "ETuple"
       EMatch a t e cs ->
-        undefined
+        emitShape RectangleShape "EMatch"
       ELambdaMatch a t cs ->
-        undefined
+        emitShape RectangleShape "ELambdaMatch"
       ECompiledMatch a t e cs ->
-        undefined
+        emitShape RectangleShape "ECompiledMatch"
       EFold a t es cs ->
-        undefined
+        emitShape RectangleShape "EFold"
       ESelect a ll e ->
-        undefined
+        emitShape RectangleShape "ESelect"
       EFocus a name ll1 ll2 e1 e2 ->
-        undefined
+        emitShape RectangleShape "EFocus"
       ETraitInstance a t tr ->
-        undefined
+        emitShape RectangleShape "ETraitInstance"
       EFFICall a t ll es e ->
-        undefined
+        emitShape RectangleShape "EFFICall"
       EDoBlock a is ->
-        undefined
+        emitShape RectangleShape "EDoBlock"
 
 instance ProtoDot (Pattern a k t) where
   toDot =
     \case
       PAnnotation a t p ->
-        undefined
+        emitShape ParallelogramShape "PAnnotation"
       PAny a t ->
-        undefined
+        emitShape ParallelogramShape "PAny"
       PVariable a ll ->
-        undefined
+        emitShape ParallelogramShape "PVariable"
       PConstructor a ll ps ->
-        undefined
+        emitShape ParallelogramShape "PConstructor"
       PInteger a t n ->
-        undefined
+        emitShape ParallelogramShape "PInteger"
       PLiteral a p ->
-        undefined
+        emitShape ParallelogramShape "PLiteral"
       PRecord a t d mp ->
-        undefined
+        emitShape ParallelogramShape "PRecord"
       PListCons a t p1 p2 ->
-        undefined
+        emitShape ParallelogramShape "PListCons"
       PListLiteral a t ps ->
-        undefined
+        emitShape ParallelogramShape "PListLiteral"
       PTuple a t ps ->
-        undefined
+        emitShape ParallelogramShape "PTuple"
       POr a t p1 p2 ->
-        undefined
+        emitShape ParallelogramShape "POr"
       PAs a ll p ->
-        undefined
+        emitShape ParallelogramShape "PAs"
       PShorthand a ll ->
-        undefined
+        emitShape ParallelogramShape "PShorthand"
       PAtVariable a ll ->
-        undefined
+        emitShape ParallelogramShape "PAtVariable"
       PNamedFold a name ll ->
-        undefined
+        emitShape ParallelogramShape "PNamedFold"
       PTraitInstance a t tr ->
-        undefined
+        emitShape ParallelogramShape "PTraitInstance"
 
 instance ProtoDot (Clause a k t) where
   toDot =
