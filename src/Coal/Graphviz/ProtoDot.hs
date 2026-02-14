@@ -10,7 +10,6 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
 import Coal.Language.Module.Export (Export (..))
-import Coal.Language.Type.Scheme
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.State
@@ -338,8 +337,13 @@ instance ProtoDot (Pattern a k t) where
 instance ProtoDot (Clause a k t) where
   toDot =
     \case
-      EClause a p cs ->
-        undefined
+      EClause a p cs -> do
+        id1 <- emitShape RectangleShape "Clause"
+        id2 <- toDot p
+        emitEdge id1 id2
+        ids <- forM cs toDot
+        forM_ ids $ emitEdge id1
+        pure id1
 
 instance ProtoDot (Choice Expression a k t) where
   toDot =
