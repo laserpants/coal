@@ -5,6 +5,7 @@
 
 module Coal.ProtoCompiler.ProtoBuildSpec where
 
+import Coal.Graphviz.ProtoDot
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
@@ -1376,12 +1377,18 @@ xyz modules = do
 
         pPrint defs1
 
+        let mm = module_ { protoOmoduleDefinitions = defs1 }
+        let qq = generateDotSyntax mm
+
+        pPrint qq
+
 
         --cs <- gets protoOcompilerConstraints
         --pPrint cs
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
         --        (tdefs, _) <- typeDefinitionsC defs
+
 
         insertBuildC b
   --  pPrint r
