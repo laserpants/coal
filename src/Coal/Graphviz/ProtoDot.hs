@@ -29,7 +29,7 @@ data DotShape
 
 data DotNode = DotNode
   { dotNodeId :: Int
-  , dotNodeX :: Text
+  , dotNodeLabel :: Text
   , dotNodeShape :: DotShape
   }
   deriving (Show, Eq, Read)
@@ -182,42 +182,48 @@ instance ProtoDot (ProtoFunctionDefinition a k t) where
     \case
       ProtoFunctionDefinition{..} -> do
         id1 <- emitShape EllipseShape "FunctionDefinition"
-        undefined
+        -- TODO
+        pure id1
 
 instance ProtoDot (ProtoLetDefinition a k t) where
   toDot =
     \case
       ProtoLetDefinition{..} -> do
         id1 <- emitShape EllipseShape "LetDefinition"
-        undefined
+        -- TODO
+        pure id1
 
 instance ProtoDot (ProtoFoldDefinition a k t) where
   toDot =
     \case
       ProtoFoldDefinition{..} -> do
         id1 <- emitShape EllipseShape "FoldDefinition"
-        undefined
+        -- TODO
+        pure id1
 
 instance ProtoDot (ProtoTraitDefinition a k) where
   toDot =
     \case
       ProtoTraitDefinition{..} -> do
         id1 <- emitShape EllipseShape "TraitDefinition"
-        undefined
+        -- TODO
+        pure id1
 
 instance ProtoDot (ProtoInstanceDefinition a k t) where
   toDot =
     \case
       ProtoInstanceDefinition{..} -> do
         id1 <- emitShape EllipseShape "InstanceDefinition"
-        undefined
+        -- TODO
+        pure id1
 
 instance ProtoDot (ProtoAliasDefinition a k) where
   toDot =
     \case
       ProtoAliasDefinition{..} -> do
         id1 <- emitShape EllipseShape "AliasDefinition"
-        undefined
+        -- TODO
+        pure id1
 
 instance ProtoDot (DataConstructor o k t) where
   toDot =

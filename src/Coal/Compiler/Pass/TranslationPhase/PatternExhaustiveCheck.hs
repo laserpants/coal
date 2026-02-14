@@ -173,9 +173,3 @@ checkExhaustive name loc cs = do
   pure cs
  where
   patterns = NonEmpty.toList (translatePattern . clausePattern <$> cs)
-
-clausePattern :: Clause a () t -> Pattern a () t
-clausePattern =
-  \case
-    EClause _ p _ ->
-      p

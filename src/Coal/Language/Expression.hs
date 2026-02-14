@@ -87,7 +87,11 @@ data Expression a s t
 
 instance (Binary a, Binary s, Binary t) => Binary (Expression a s t)
 
-data Clause a s t = EClause a (Pattern a s t) (NonEmpty (Choice Expression a s t))
+data Clause a s t = EClause
+  { clauseMetadata :: a
+  , clausePattern :: Pattern a s t
+  , clauseChoices :: NonEmpty (Choice Expression a s t)
+  }
   deriving
     ( Show
     , Eq
@@ -103,7 +107,11 @@ data Clause a s t = EClause a (Pattern a s t) (NonEmpty (Choice Expression a s t
 
 instance (Binary a, Binary s, Binary t) => Binary (Clause a s t)
 
-data CompiledClause a s t = ECompiledClause a (NonEmpty (Label t)) (Expression a s t)
+data CompiledClause a s t = ECompiledClause
+  { compiledClauseMetadata :: a
+  , compiledClauseSegments :: NonEmpty (Label t)
+  , compiledClauseExpression :: Expression a s t
+  }
   deriving
     ( Show
     , Eq
