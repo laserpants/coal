@@ -6,10 +6,10 @@
 
 module Coal.Graphviz.ProtoDot where
 
-import Coal.Language.Module.Export (Export (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
+import Coal.Language.Module.Export (Export (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.State
@@ -108,7 +108,11 @@ instance ProtoDot (Label t) where
 
 instance ProtoDot (Export a) where
   toDot =
-    undefined
+    \case
+      NameExport a name ->
+        emitShape RectangleShape "NameExport"
+      TypeExport a name names ->
+        emitShape RectangleShape "TypeExport"
 
 instance ProtoDot (ModuleExportList a) where
   toDot =
@@ -125,37 +129,53 @@ instance ProtoDot (ModuleExportList a) where
 
 instance ProtoDot (ProtoModule a k t) where
   toDot =
-    undefined
+    \case
+      ProtoModule{..} -> do
+        id1 <- emitShape RectangleShape "Module"
+        id2 <- toDot protoOmoduleExportList
+        emitEdge id1 id2
+        ids <- forM protoOmoduleDefinitions toDot
+        forM_ ids $ emitEdge id1
+        pure id1
 
 instance ProtoDot (ProtoDefinition a k t) where
   toDot =
     \case
       ProtoDType a name def ->
-        undefined
+        emitShape EllipseShape "DType"
       ProtoDTypeAlias a name def ->
-        undefined
+        emitShape EllipseShape "DTypeAlias"
       ProtoDFunction a name def ->
-        undefined
+        emitShape EllipseShape "DFunction"
       ProtoDFunctionGroup a name defs ->
-        undefined
+        emitShape EllipseShape "DFunctionGroup"
       ProtoDFold a name def ->
-        undefined
+        emitShape EllipseShape "DFold"
       ProtoDLet a name def ->
-        undefined
+        emitShape EllipseShape "DLet"
       ProtoDImport a path imports ->
-        undefined
+        emitShape EllipseShape "DImport"
       ProtoDQualifiedImport a path ->
-        undefined
+        emitShape EllipseShape "DQualifiedImport"
       ProtoDTrait a name def ->
-        undefined
+        emitShape EllipseShape "DTrait"
       ProtoDInstance a def ->
-        undefined
+        emitShape EllipseShape "DInstance"
 
 instance ProtoDot (ProtoTypeDefinition a k t) where
   toDot =
     \case
-      ProtoTypeDefinition{..} ->
-        undefined
+      ProtoTypeDefinition{..} -> do
+        id1 <- emitShape EllipseShape "TypeDefinition"
+        forM_ protoOtypeDefinitionParameters $
+          \p -> do
+            idn <- toDot p
+            emitEdge id1 idn
+        forM_ protoOtypeDefinitionConstructors $
+          \ctor -> do
+            idn <- toDot ctor
+            emitEdge id1 idn
+        pure id1
 
 instance ProtoDot (ProtoFunctionDefinition a k t) where
   toDot =
@@ -192,6 +212,23 @@ instance ProtoDot (ProtoAliasDefinition a k) where
     \case
       ProtoAliasDefinition{..} ->
         undefined
+
+instance ProtoDot (DataConstructor o k t) where
+  toDot =
+    \case
+      DataConstructor{..} -> do
+        id1 <- emitShape EllipseShape "DataConstructor"
+        id2 <- toDot constructorScheme
+        emitEdge id1 id2
+        pure id1
+
+instance ProtoDot (Parameter k) where
+  toDot =
+    undefined
+
+instance ProtoDot (Scheme o k t) where
+  toDot =
+    undefined
 
 instance ProtoDot (Binding Expression a k t) where
   toDot =
