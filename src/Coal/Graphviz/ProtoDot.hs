@@ -6,11 +6,11 @@
 
 module Coal.Graphviz.ProtoDot where
 
-import Coal.Language.Type.Scheme
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
 import Coal.Language.Module.Export (Export (..))
+import Coal.Language.Type.Scheme
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.State
@@ -181,37 +181,43 @@ instance ProtoDot (ProtoTypeDefinition a k t) where
 instance ProtoDot (ProtoFunctionDefinition a k t) where
   toDot =
     \case
-      ProtoFunctionDefinition{..} ->
+      ProtoFunctionDefinition{..} -> do
+        id1 <- emitShape EllipseShape "FunctionDefinition"
         undefined
 
 instance ProtoDot (ProtoLetDefinition a k t) where
   toDot =
     \case
-      ProtoLetDefinition{..} ->
+      ProtoLetDefinition{..} -> do
+        id1 <- emitShape EllipseShape "LetDefinition"
         undefined
 
 instance ProtoDot (ProtoFoldDefinition a k t) where
   toDot =
     \case
-      ProtoFoldDefinition{..} ->
+      ProtoFoldDefinition{..} -> do
+        id1 <- emitShape EllipseShape "FoldDefinition"
         undefined
 
 instance ProtoDot (ProtoTraitDefinition a k) where
   toDot =
     \case
-      ProtoTraitDefinition{..} ->
+      ProtoTraitDefinition{..} -> do
+        id1 <- emitShape EllipseShape "TraitDefinition"
         undefined
 
 instance ProtoDot (ProtoInstanceDefinition a k t) where
   toDot =
     \case
-      ProtoInstanceDefinition{..} ->
+      ProtoInstanceDefinition{..} -> do
+        id1 <- emitShape EllipseShape "InstanceDefinition"
         undefined
 
 instance ProtoDot (ProtoAliasDefinition a k) where
   toDot =
     \case
-      ProtoAliasDefinition{..} ->
+      ProtoAliasDefinition{..} -> do
+        id1 <- emitShape EllipseShape "AliasDefinition"
         undefined
 
 instance ProtoDot (DataConstructor o k t) where
