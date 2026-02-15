@@ -16,6 +16,7 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.State
 import Data.Foldable (foldrM)
+import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -99,6 +100,13 @@ emitEdges :: (Traversable f, ProtoDot a) => Int -> f a -> ProtoDotGen ()
 emitEdges from tos = do
   ids <- forM tos toDot
   forM_ ids $ emitEdge from
+
+emitEdgesWithLabels :: (ProtoDot a) => [Text] -> Int -> [a] -> ProtoDotGen ()
+emitEdgesWithLabels labels from tos = do
+  ids <- forM tos toDot
+  forM_ (zip labels ids) $
+    \(ll, to) ->
+      emitEdgeWithLabel ll from to
 
 emitNamedShape :: DotShape -> Maybe Text -> Text -> ProtoDotGen Int
 emitNamedShape shape name label = do
@@ -242,7 +250,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoFunctionDefinition a k
         dotId <- emitShape EllipseShape "FunctionDefinition"
         emitEdge dotId (annotation protoOfunctionDefinitionAnnotation)
         emitEdge dotId protoOfunctionDefinitionType
-        emitEdges dotId protoOfunctionDefinitionPatterns
+        emitEdgesWithLabels paramList dotId (NonEmpty.toList protoOfunctionDefinitionPatterns)
         emitEdge dotId protoOfunctionDefinitionExpression
         return dotId
 
@@ -410,7 +418,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Expression a k t) where
         return id1
       ELambda _ ps e -> do
         dotId <- emitShape HouseShape "ELambda"
-        emitEdges dotId ps
+        emitEdgesWithLabels paramList dotId (NonEmpty.toList ps)
         emitEdge dotId e
         return dotId
       ELet _ bs e -> do
@@ -633,6 +641,9 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (CompiledClause a k t) where
         emitEdges dotId compiledClauseSegments
         emitEdge dotId compiledClauseExpression
         return dotId
+
+paramList :: [Text]
+paramList = ["#" <> showt i | i <- [1 :: Int ..]]
 
 shapeToDotSyntax :: DotShape -> Text
 shapeToDotSyntax =
