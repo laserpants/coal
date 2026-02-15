@@ -250,7 +250,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoFunctionDefinition a k
         dotId <- emitShape EllipseShape "FunctionDefinition"
         emitEdge dotId (annotation protoOfunctionDefinitionAnnotation)
         emitEdge dotId protoOfunctionDefinitionType
-        emitEdgesWithLabels paramList dotId (NonEmpty.toList protoOfunctionDefinitionPatterns)
+        emitEdgesWithLabels numberedList dotId (NonEmpty.toList protoOfunctionDefinitionPatterns)
         emitEdge dotId protoOfunctionDefinitionExpression
         return dotId
 
@@ -414,11 +414,11 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Expression a k t) where
       EApplication _ t e es -> do
         (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EApplication"
         emitEdgeWithLabel "@f" id2 e
-        emitEdgesWithLabels paramList id2 (NonEmpty.toList es)
+        emitEdgesWithLabels numberedList id2 (NonEmpty.toList es)
         return id1
       ELambda _ ps e -> do
         dotId <- emitShape HouseShape "ELambda"
-        emitEdgesWithLabels paramList dotId (NonEmpty.toList ps)
+        emitEdgesWithLabels numberedList dotId (NonEmpty.toList ps)
         emitEdge dotId e
         return dotId
       ELet _ bs e -> do
@@ -473,7 +473,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Expression a k t) where
       EMatch _ t e cs -> do
         (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EMatch"
         emitEdge id2 e
-        emitEdges id2 cs
+        emitEdgesWithLabels numberedList id2 (NonEmpty.toList cs)
         return id1
       ELambdaMatch _ t cs -> do
         (id1, id2) <- withTypeInfo t $ emitShape HouseShape "ELambdaMatch"
@@ -642,8 +642,8 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (CompiledClause a k t) where
         emitEdge dotId compiledClauseExpression
         return dotId
 
-paramList :: [Text]
-paramList = ["#" <> showt i | i <- [1 :: Int ..]]
+numberedList :: [Text]
+numberedList = ["#" <> showt i | i <- [1 :: Int ..]]
 
 shapeToDotSyntax :: DotShape -> Text
 shapeToDotSyntax =
