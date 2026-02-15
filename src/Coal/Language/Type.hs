@@ -294,7 +294,7 @@ prettyTypePrec prec =
     TConstructor _ name ->
       pretty name
     TVariable v ->
-      "t" <> "[" <> pretty v <> "]"
+      "t" <> "_" <> pretty v
     TIntrinsic i ->
       prettyIntrinsic i
     TRecord t ->
