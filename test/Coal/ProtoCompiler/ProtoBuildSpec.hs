@@ -638,7 +638,15 @@ testModule1PreKinds =
     { protoOmodulePath = Path ["Main"]
     , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
-        [ ProtoDImport
+        [ ProtoDType
+            mempty
+            "IO"
+            ( ProtoTypeDefinition
+                { protoOtypeDefinitionParameters = [Parameter () "a"]
+                , protoOtypeDefinitionConstructors = []
+                }
+            )
+        , ProtoDImport
             mempty
             (Path ["Math"])
             [ NameImport mempty "factorial"

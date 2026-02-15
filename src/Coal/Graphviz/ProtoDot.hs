@@ -6,6 +6,7 @@
 
 module Coal.Graphviz.ProtoDot (generateDotSyntax) where
 
+import Coal.Language.Module.Import (Import (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
@@ -15,6 +16,7 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.State
 import Data.Text (Text)
+import Data.Foldable (foldrM)
 import qualified Data.Text as Text
 import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
@@ -83,6 +85,14 @@ emitNode = modify . insertNode
 emitEdge :: Int -> Int -> ProtoDotGen ()
 emitEdge from to = modify (insertEdge from to Nothing)
 
+forEdges :: (Foldable f) => Int -> f Int -> ProtoDotGen ()
+forEdges from ids = forM_ ids $ emitEdge from
+
+emitEdges :: (Traversable f, ProtoDot a) => Int -> f a -> ProtoDotGen ()
+emitEdges from tos = do
+  ids <- forM tos toDot
+  forEdges from ids
+
 emitEdgeWithLabel :: Int -> Int -> Text -> ProtoDotGen ()
 emitEdgeWithLabel from to label = modify (insertEdge from to (Just label))
 
@@ -109,18 +119,26 @@ instance (ProtoDot a) => ProtoDot (Maybe a) where
         emitEdge id1 id2
         return id1
 
-instance ProtoDot (Label t) where
+instance ProtoDot t => ProtoDot (Label t) where
   toDot =
     \case
       Label t name ->
-        emitNamedShape NoteShape (Just name) "Label"
+        withTypeInfo t $ emitNamedShape NoteShape (Just name) "Label"
+
+instance ProtoDot (Import a) where
+  toDot =
+    \case
+      NameImport _ name -> 
+        emitNamedShape RectangleShape (Just name) "NameImport"
+      TypeImport _ name names -> do
+        emitNamedShape RectangleShape (Just name) "TypeImport"
 
 instance ProtoDot (Export a) where
   toDot =
     \case
-      NameExport a name ->
+      NameExport _ name ->
         emitNamedShape RectangleShape (Just name) "NameExport"
-      TypeExport a name names ->
+      TypeExport _ name names ->
         emitNamedShape RectangleShape (Just name) "TypeExport"
 
 instance ProtoDot (ModuleExportList a) where
@@ -128,91 +146,104 @@ instance ProtoDot (ModuleExportList a) where
     \case
       Exports exports -> do
         id1 <- emitShape FolderShape "Exports"
-        forM_ exports $
-          \export -> do
-            idn <- toDot export
-            emitEdge id1 idn
+        emitEdges id1 exports 
         return id1
       ExportAll ->
         emitShape FolderShape "ExportsAll"
 
-instance (ProtoDot t) => ProtoDot (ProtoModule a k t) where
+instance (ProtoDot t, ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoModule a k t) where
   toDot =
     \case
       ProtoModule{..} -> do
         id1 <- emitNamedShape RectangleShape (Just $ principalPath protoOmodulePath) "Module"
         id2 <- toDot protoOmoduleExportList
         emitEdge id1 id2
-        ids <- forM protoOmoduleDefinitions toDot
-        forM_ ids $ emitEdge id1
+        emitEdges id1 protoOmoduleDefinitions 
         return id1
 
-instance (ProtoDot t) => ProtoDot (ProtoDefinition a k t) where
+emitDefinition :: (ProtoDot t) => Text -> Text -> t -> ProtoDotGen Int
+emitDefinition name label def = do
+  id1 <- emitNamedShape TriangleShape (Just name) label
+  id2 <- toDot def
+  emitEdge id1 id2
+  return id1
+
+instance (ProtoDot t, ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoDefinition a k t) where
   toDot =
     \case
-      ProtoDType a name def -> do
-        id1 <- emitNamedShape TriangleShape (Just name) "DType"
-        id2 <- toDot def
-        emitEdge id1 id2
-        return id1
-      ProtoDTypeAlias a name def ->
-        emitNamedShape TriangleShape (Just name) "DTypeAlias"
-      ProtoDFunction a name def -> do
-        id1 <- emitNamedShape TriangleShape (Just name) "DFunction"
-        id2 <- toDot def
-        emitEdge id1 id2
-        return id1
-      ProtoDLet a name def -> do
-        id1 <- emitNamedShape TriangleShape (Just name) "DLet"
-        id2 <- toDot def
-        emitEdge id1 id2
-        return id1
-      ProtoDFunctionGroup a name defs ->
+      ProtoDType _ name def ->
+        emitDefinition name "DType" def
+      ProtoDTypeAlias _ name def ->
+        emitDefinition name "DTypeAlias" def
+      ProtoDFunction _ name def ->
+        emitDefinition name "DFunction" def
+      ProtoDLet _ name def ->
+        emitDefinition name "DLet" def
+      ProtoDFunctionGroup _ name defs ->
         emitNamedShape TriangleShape (Just name) "DFunctionGroup"
-      ProtoDFold a name def ->
-        emitNamedShape TriangleShape (Just name) "DFold"
-      ProtoDImport a path imports ->
-        emitShape TriangleShape "DImport"
-      ProtoDQualifiedImport a path ->
-        emitShape TriangleShape "DQualifiedImport"
-      ProtoDTrait a name def ->
-        emitNamedShape TriangleShape (Just name) "DTrait"
-      ProtoDInstance a def ->
-        emitShape TriangleShape "DInstance"
+      ProtoDFold _ name def -> do
+        emitDefinition name "DFold" def
+      ProtoDImport _ path imports -> do
+        id1 <- emitNamedShape TriangleShape (Just $ principalPath path) "DImport"
+        _ <- foldrM connectDots id1 imports
+        return id1
+      ProtoDQualifiedImport _ path -> do
+        emitNamedShape TriangleShape (Just $ principalPath path) "DQualifiedImport"
+      ProtoDTrait _ name def ->
+        emitDefinition name "DTrait" def
+      ProtoDInstance _ def -> do
+        id1 <- emitShape TriangleShape "DInstance"
+        id2 <- toDot def
+        emitEdge id1 id2
+        return id1
 
-instance ProtoDot (ProtoTypeDefinition a k t) where
+connectDots :: (ProtoDot a) => a -> Int -> ProtoDotGen Int
+connectDots a from = do
+  id1 <- toDot a
+  emitEdge from id1
+  return id1
+
+instance ProtoDot k => ProtoDot (ProtoTypeDefinition a k t) where
   toDot =
     \case
       ProtoTypeDefinition{..} -> do
         id1 <- emitShape EllipseShape "TypeDefinition"
-        forM_ protoOtypeDefinitionParameters $
-          \p -> do
-            idn <- toDot p
-            emitEdge id1 idn
-        forM_ protoOtypeDefinitionConstructors $
-          \ctor -> do
-            idn <- toDot ctor
-            emitEdge id1 idn
+        emitEdges id1 protoOtypeDefinitionParameters
+        emitEdges id1 protoOtypeDefinitionConstructors
         return id1
 
-instance (ProtoDot t) => ProtoDot (ProtoFunctionDefinition a k t) where
+annotation :: (ProtoDot t) => t -> ProtoDotGen Int
+annotation t = do
+  id1 <- emitShape RectangleShape "Annotation"
+  id2 <- toDot t
+  emitEdge id1 id2
+  return id1
+
+instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoFunctionDefinition a k t) where
   toDot =
     \case
       ProtoFunctionDefinition{..} -> do
         id1 <- emitShape EllipseShape "FunctionDefinition"
-        -- id2 <- toDot protoOfunctionDefinitionAnnotation
-        -- id3 <- toDot protoOfunctionDefinitionType
-        -- id3 <- toDot protoOfunctionDefinitionPatterns
+        id2 <- annotation protoOfunctionDefinitionAnnotation
+        emitEdge id1 id2
+        id3 <- toDot protoOfunctionDefinitionType
+        emitEdge id1 id3
+        emitEdges id1 protoOfunctionDefinitionPatterns 
         id4 <- toDot protoOfunctionDefinitionExpression
         emitEdge id1 id4
         return id1
 
-instance ProtoDot (ProtoLetDefinition a k t) where
+instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoLetDefinition a k t) where
   toDot =
     \case
       ProtoLetDefinition{..} -> do
         id1 <- emitShape EllipseShape "LetDefinition"
-        -- TODO
+        id2 <- annotation protoOletDefinitionAnnotation
+        emitEdge id1 id2
+        id3 <- toDot protoOletDefinitionType
+        emitEdge id1 id3
+        id4 <- toDot protoOletDefinitionExpression
+        emitEdge id1 id4
         return id1
 
 instance ProtoDot (ProtoFoldDefinition a k t) where
@@ -256,11 +287,14 @@ instance ProtoDot (DataConstructor o k t) where
         emitEdge id1 id2
         return id1
 
-instance ProtoDot (Parameter k) where
+instance (ProtoDot k) => ProtoDot (Parameter k) where
   toDot =
     \case
-      Parameter{..} ->
-        emitNamedShape RectangleShape (Just parameterName) "Parameter"
+      Parameter{..} -> do
+        id1 <- emitNamedShape RectangleShape (Just parameterName) "Parameter"
+        id2 <- toDot parameterKind
+        emitEdge id1 id2
+        return id1
 
 instance ProtoDot (Scheme o k t) where
   toDot =
@@ -268,17 +302,55 @@ instance ProtoDot (Scheme o k t) where
       Forall{..} ->
         emitShape RectangleShape "Scheme"
 
-instance ProtoDot (Type TypeIndex Kind) where
+instance (ProtoDot t) => ProtoDot (Trait t) where
+  toDot =
+    \case
+      Trait{..} -> do
+        id1 <- emitNamedShape HexagonShape (Just traitName) "Trait"
+        id2 <- toDot traitType
+        emitEdge id1 id2
+        return id1
+
+instance (ProtoDot t) => ProtoDot (With t) where
+  toDot (With traits t) = do
+    id1 <- emitShape HexagonShape "With"
+    case traits of
+      [] -> do
+        id2 <- emitShape HexagonShape "[]"
+        emitEdge id1 id2
+      _ -> emitEdges id1 traits
+    id2 <- toDot t
+    emitEdge id1 id2
+    return id1
+
+instance (Show k, Pretty k) => ProtoDot (Type TypeIndex k) where
   toDot t = do
     emitShape HexagonShape (prettyType t)
 
-instance ProtoDot (Binding Expression a k t) where
+instance (Show k, Pretty k) => ProtoDot (Type Parameter k) where
+  toDot t = do
+    emitShape HexagonShape (prettyType t)
+
+instance ProtoDot Kind where
+  toDot k = do
+    emitShape HexagonShape (Text.pack $ show k)
+
+instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Binding Expression a k t) where
   toDot =
     \case
-      BPattern a p e ->
-        emitShape RectangleShape "BPattern"
-      BFunction a name ps e ->
-        emitNamedShape RectangleShape (Just name) "BFunction"
+      BPattern _ p e -> do
+        id1 <- emitShape RectangleShape "BPattern"
+        id2 <- toDot p
+        id3 <- toDot e
+        emitEdge id1 id2
+        emitEdge id1 id3
+        return id1
+      BFunction _ name ps e -> do
+        id1 <- emitNamedShape RectangleShape (Just name) "BFunction"
+        id2 <- toDot e
+        emitEdges id1 ps
+        emitEdge id1 id2
+        return id1
 
 withTypeInfo :: (ProtoDot t) => t -> ProtoDotGen Int -> ProtoDotGen Int
 withTypeInfo t e = do
@@ -287,30 +359,65 @@ withTypeInfo t e = do
   emitEdge id1 id2
   return id1
 
-instance (ProtoDot t) => ProtoDot (Expression a k t) where
+instance ProtoDot Primitive where
   toDot =
     \case
-      EAnnotation a t e ->
+      LUnit ->
+        emitShape RectangleShape "LUnit"
+      LBool b ->
+        emitNamedShape RectangleShape (Just $ showt b) "LBool"
+      LInt32 int ->
+        emitNamedShape RectangleShape (Just $ showt int) "LInt32"
+      LInt64 int ->
+        emitNamedShape RectangleShape (Just $ showt int) "LInt64"
+      LBignum int ->
+        emitNamedShape RectangleShape (Just $ showt int) "LBignum"
+      LFloat float ->
+        emitNamedShape RectangleShape (Just $ showt float) "LFloat"
+      LDouble double ->
+        emitNamedShape RectangleShape (Just $ showt double) "LDouble"
+      LChar c ->
+        emitNamedShape RectangleShape (Just $ showt c) "LChar"
+      LString str ->
+        emitNamedShape RectangleShape (Just $ showt str) "LString"
+
+instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Expression a k t) where
+  toDot =
+    \case
+      EAnnotation _ t e ->
         emitShape HouseShape "EAnnotation"
-      EApplication a t e es -> do
+      EApplication _ t e es -> do
         id1 <- withTypeInfo t $ emitShape HouseShape "EApplication"
         id2 <- toDot e
         emitEdge id1 id2
-        ids <- forM es toDot
-        forM_ ids $ emitEdge id1
+        emitEdges id1 es
         return id1
-      ELambda a ps e ->
-        emitShape HouseShape "ELambda"
-      ELet a bs e ->
+      ELambda _ ps e -> do
+        id1 <- emitShape HouseShape "ELambda"
+        emitEdges id1 ps
+        id2 <- toDot e
+        emitEdge id1 id2
+        return id1
+      ELet _ bs e ->
         emitShape HouseShape "ELet"
-      ERecursiveLet a p e1 e2 ->
-        emitShape HouseShape "ERecursiveLet"
-      EVariable a (Label t name) -> do
+      ERecursiveLet _ p e1 e2 -> do
+        id1 <- emitShape HouseShape "ERecursiveLet"
+        id2 <- toDot p
+        id3 <- toDot e1
+        id4 <- toDot e2
+        emitEdge id1 id2
+        emitEdge id1 id3
+        emitEdge id1 id4
+        return id1
+      EVariable _ (Label t name) -> do
         withTypeInfo t $ emitNamedShape HouseShape (Just name) "EVariable"
       EConstructor a ll ->
         emitShape HouseShape "EConstructor"
-      ELiteral a p ->
-        emitShape HouseShape "ELiteral"
+      ELiteral _ p -> do
+        id1 <- emitShape HouseShape "ELiteral"
+        id2 <- toDot p
+        emitEdge id1 id2
+        return id1
       EIf a t e1 e2 e3 ->
         emitShape HouseShape "EIf"
       EOperator a t op ->
@@ -323,8 +430,12 @@ instance (ProtoDot t) => ProtoDot (Expression a k t) where
         emitShape HouseShape "EListLiteral"
       ETuple a t es ->
         emitShape HouseShape "ETuple"
-      EMatch a t e cs ->
-        emitShape HouseShape "EMatch"
+      EMatch _ t e cs -> do
+        id1 <- withTypeInfo t $ emitShape HouseShape "EMatch"
+        id2 <- toDot e
+        emitEdge id1 id2
+        emitEdges id1 cs
+        return id1
       ELambdaMatch a t cs ->
         emitShape HouseShape "ELambdaMatch"
       ECompiledMatch a t e cs ->
@@ -342,21 +453,29 @@ instance (ProtoDot t) => ProtoDot (Expression a k t) where
       EDoBlock a is ->
         emitShape HouseShape "EDoBlock"
 
-instance ProtoDot (Pattern a k t) where
+instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Pattern a k t) where
   toDot =
     \case
-      PAnnotation a t p ->
-        emitShape ParallelogramShape "PAnnotation"
-      PAny a t ->
-        emitShape ParallelogramShape "PAny"
-      PVariable a ll ->
-        emitShape ParallelogramShape "PVariable"
-      PConstructor a ll ps ->
-        emitShape ParallelogramShape "PConstructor"
-      PInteger a t n ->
-        emitShape ParallelogramShape "PInteger"
-      PLiteral a p ->
-        emitShape ParallelogramShape "PLiteral"
+      PAnnotation _ t p -> do
+        id1 <- withTypeInfo t $ emitShape ParallelogramShape "PAnnotation"
+        id2 <- toDot p
+        emitEdge id1 id2
+        return id1
+      PAny _ t ->
+        withTypeInfo t $ emitShape ParallelogramShape "PAny"
+      PVariable _ (Label t name) ->
+        withTypeInfo t $ emitNamedShape ParallelogramShape (Just name) "PVariable"
+      PConstructor _ (Label t name) ps -> do
+        id1 <- withTypeInfo t $ emitNamedShape ParallelogramShape (Just name) "PConstructor"
+        emitEdges id1 ps
+        return id1
+      PInteger _ t n ->
+        withTypeInfo t $ emitShape ParallelogramShape "PInteger"
+      PLiteral _ p -> do
+        id1 <- emitShape ParallelogramShape "PLiteral"
+        id2 <- toDot p
+        emitEdge id1 id2
+        return id1
       PRecord a t d mp ->
         emitShape ParallelogramShape "PRecord"
       PListCons a t p1 p2 ->
@@ -378,15 +497,14 @@ instance ProtoDot (Pattern a k t) where
       PTraitInstance a t tr ->
         emitShape ParallelogramShape "PTraitInstance"
 
-instance ProtoDot (Clause a k t) where
+instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Clause a k t) where
   toDot =
     \case
       EClause{..} -> do
         id1 <- emitShape RectangleShape "EClause"
         id2 <- toDot clausePattern
         emitEdge id1 id2
-        ids <- forM clauseChoices toDot
-        forM_ ids $ emitEdge id1
+        emitEdges id1 clauseChoices
         return id1
 
 instance ProtoDot (Choice Expression a k t) where
@@ -395,11 +513,14 @@ instance ProtoDot (Choice Expression a k t) where
       CPlain a gs e ->
         emitShape RectangleShape "CPlain"
 
-instance ProtoDot (Guard Expression a k t) where
+instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Guard Expression a k t) where
   toDot =
     \case
-      CGuard e ->
-        emitShape RectangleShape "CGuard"
+      CGuard e -> do
+        id1 <- emitShape RectangleShape "CGuard"
+        id2 <- toDot e
+        emitEdge id1 id2
+        return id1
 
 instance ProtoDot (CompiledClause a k t) where
   toDot =
@@ -437,6 +558,7 @@ edgeLabelToDotSyntax =
     Just ll ->
       " [label=\"  " <> ll <> "\", labeldistance=2]"
 
+labelToDotSyntax :: Text -> Maybe Text -> Text
 labelToDotSyntax label Nothing = "\"" <> escapeQuotes label <> "\""
 labelToDotSyntax label (Just name) = "<" <> escapeQuotes label <> "<BR/>" <> (inBold name <> "<BR/>") <> ">"
 
@@ -444,6 +566,7 @@ labelToDotSyntax label (Just name) = "<" <> escapeQuotes label <> "<BR/>" <> (in
 escapeQuotes :: Text -> Text
 escapeQuotes = Text.replace "\"" "\\\""
 
+{-# INLINE inBold #-}
 inBold :: Text -> Text
 inBold text = "<B>" <> text <> "</B>"
 
@@ -479,4 +602,4 @@ generateDotSyntax ast =
 
 -- TODO
 prettyType :: (Pretty t) => t -> Text
-prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
+prettyType p = Text.replace "->" "→" (renderStrict $ layoutPretty defaultLayoutOptions $ pretty p)
