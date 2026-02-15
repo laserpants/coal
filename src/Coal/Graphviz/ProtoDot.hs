@@ -413,8 +413,8 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Expression a k t) where
         return id1
       EApplication _ t e es -> do
         (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EApplication"
-        emitEdge id2 e
-        emitEdges id2 es
+        emitEdgeWithLabel "@f" id2 e
+        emitEdgesWithLabels paramList id2 (NonEmpty.toList es)
         return id1
       ELambda _ ps e -> do
         dotId <- emitShape HouseShape "ELambda"
