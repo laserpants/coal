@@ -752,6 +752,11 @@ testModule2PreKinds =
             [ NameImport mempty "pack"
             , NameImport mempty "unpack"
             ]
+        , ProtoDImport
+            mempty
+            (Path ["Nat"])
+            [ TypeImport mempty "Nat" ["Succ", "Zero"]
+            ]
         , ProtoDFunction
             mempty
             "factorial"
@@ -1014,7 +1019,26 @@ testModule3PreKinds =
     { protoOmodulePath = Path ["Nat"]
     , protoOmoduleExportList = ExportAll
     , protoOmoduleDefinitions =
-        [ ProtoDFunction
+        [ ProtoDType
+            mempty
+            "Nat"
+            ( ProtoTypeDefinition
+                { protoOtypeDefinitionParameters = []
+                , protoOtypeDefinitionConstructors =
+                    [ DataConstructor
+                        { constructorName = "Succ"
+                        , constructorArity = 1
+                        , constructorScheme = Forall mempty [] (TConstructor () "Nat" `TArrow` TConstructor () "Nat")
+                        }
+                    , DataConstructor
+                        { constructorName = "Zero"
+                        , constructorArity = 0
+                        , constructorScheme = Forall mempty [] (TConstructor () "Nat")
+                        }
+                    ]
+                }
+            )
+        , ProtoDFunction
             mempty
             "pack"
             ( ProtoFunctionDefinition

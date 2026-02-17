@@ -169,7 +169,7 @@ collectTypeConstructors =
     _ ->
       pure ()
 
-collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectDataConstructors :: (Show a, Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectDataConstructors =
   \case
     ProtoDType loc _ ProtoTypeDefinition{..} ->
@@ -183,11 +183,31 @@ collectDataConstructors =
                 insertNameEntry (ProtoNName constructorName constructorScheme)
                 insertExportedName constructorName
                 insertDataConstructor constructorName entry
+                lift $ lift $ protoOinsertNameC constructorName constructorScheme
      where
       ctorSet = Set.fromList (for protoOtypeDefinitionConstructors constructorName)
-    -- TODO
-    ProtoDImport loc path items ->
-      pure ()
+    ProtoDImport loc path imports -> do
+      ProtoBuild{..} <- lift $ lift $ importedBuild path
+      forM_ imports $
+        \case
+          TypeImport _ name ctors
+            | name `elem` protoObuildExportedNames ->
+                case Environment.lookup name protoObuildTypeConstructors of
+                  Nothing ->
+                    error "TODO"
+                  Just ProtoTypeConstructorEntry{..} ->
+                    forM_ ctors $
+                      \ctor -> do
+                        case Environment.lookup ctor protoObuildDataConstructors of
+                          Nothing ->
+                            error "TODO"
+                          Just entry@ProtoDataConstructorEntry{protoOdataConstructorEntryConstructor = DataConstructor{..}, ..} -> do
+                            insertDataConstructor ctor entry
+                            lift $ lift $ protoOinsertNameC constructorName constructorScheme
+            | otherwise ->
+                error "TODO"
+          _ ->
+            pure ()
     -- TODO
     ProtoDQualifiedImport loc path ->
       pure ()

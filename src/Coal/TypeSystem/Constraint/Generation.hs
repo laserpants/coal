@@ -97,7 +97,8 @@ protoOemitPConstructorConstraints :: (Data a) => a -> Label IndexedType -> [Patt
 protoOemitPConstructorConstraints loc (Label t name) ps = do
   r <- lookupDataConstructor name
   case r of
-    Nothing ->
+    Nothing -> do
+      --      error (show name)
       tellLeft [ENoDataConstructor loc name]
     Just DataConstructor{..}
       | constructorArity /= length ps ->
