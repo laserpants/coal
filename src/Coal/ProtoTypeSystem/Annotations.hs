@@ -45,7 +45,7 @@ protoOlookupTypeConstructor name = do
     Just ProtoTypeConstructorEntry{..} ->
       pure (Just protoOtypeConstructorEntryKind)
 
-indexTypeAnnotations :: (Monad m) => Type Parameter Kind -> AnnotationsT m a IndexedType
+indexTypeAnnotations :: (Show a, Monad m) => Type Parameter Kind -> AnnotationsT m a IndexedType
 indexTypeAnnotations =
   \case
     t@TApplication{} -> do
@@ -70,7 +70,7 @@ indexTypeAnnotations =
     TAlias name ts t ->
       TAlias name <$> traverse indexTypeAnnotations ts <*> indexTypeAnnotations t
 
-indexTypeAnnotationsInRow :: (Monad m) => Row Parameter Kind (Type Parameter Kind) -> AnnotationsT m a (Row TypeIndex Kind IndexedType)
+indexTypeAnnotationsInRow :: (Show a, Monad m) => Row Parameter Kind (Type Parameter Kind) -> AnnotationsT m a (Row TypeIndex Kind IndexedType)
 indexTypeAnnotationsInRow =
   \case
     RVariable (Parameter k v) ->
@@ -80,7 +80,7 @@ indexTypeAnnotationsInRow =
     RNil ->
       pure RNil
 
-indexTypeApplicationTypeAnnotations :: (Monad m) => Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> AnnotationsT m a IndexedType
+indexTypeApplicationTypeAnnotations :: (Show a, Monad m) => Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> AnnotationsT m a IndexedType
 indexTypeApplicationTypeAnnotations con@(TConstructor _ name) ts
   | isTupleType con =
       applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)

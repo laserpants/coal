@@ -20,7 +20,7 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.TypeSystem
@@ -41,6 +41,10 @@ import Debug.Trace
 import Extras (Dictionary, Name)
 
 -- import Text.Pretty.Simple (pPrint)
+
+-- generateKindConstraints :: (Monad m) => Module a k t -> ProtoCompilerT m a ()
+-- generateKindConstraints =
+--  undefined
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
@@ -153,6 +157,11 @@ protoOrunConstraintsGen stack = do
           stack
   protoOupdateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
+
+protoOdefine :: (Monad m) => Name -> IndexedType -> ProtoCompilerT m a ()
+protoOdefine name t = protoOinsertNameC name (Forall (typeIndexesIn s) [] s)
+ where
+  s = normalizeTypeIndexes t
 
 --
 

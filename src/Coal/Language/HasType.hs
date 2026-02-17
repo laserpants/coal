@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.HasType (HasType (..), foldTypeOf) where
@@ -18,6 +19,7 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (KindProxy (..), Type (..), applyTypeArgs, foldType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
+import Coal.ProtoLanguage.ProtoDefinition
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -98,6 +100,16 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k
         typeOf e
       d ->
         head (universeBi d)
+
+instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (ProtoDefinition a k (Type o k)) where
+  typeOf =
+    \case
+      ProtoDFunction _ _ ProtoFunctionDefinition{..} ->
+        foldTypeOf protoOfunctionDefinitionExpression protoOfunctionDefinitionPatterns
+      ProtoDLet _ _ ProtoLetDefinition{..} ->
+        typeOf protoOletDefinitionExpression
+      d ->
+        error "TODO"
 
 instance (KindProxy o Kind) => HasType o Kind (Trait (Type o Kind)) where
   typeOf (Trait name t) =

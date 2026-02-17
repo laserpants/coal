@@ -283,6 +283,7 @@ instance (ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoTraitDefinition a k) w
         forM_ protoOtraitDefinitionInterface $
           \(name, s) -> do
             id1 <- emitNamedShape EllipseShape (Just name) "Member"
+            emitEdge dotId id1
             emitEdge id1 s
         return dotId
 

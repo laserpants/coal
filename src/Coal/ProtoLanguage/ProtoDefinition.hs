@@ -16,9 +16,15 @@ module Coal.ProtoLanguage.ProtoDefinition (
   instanceDefinitionTrait,
 ) where
 
-import Coal.Language
+import Coal.Language.Data.Constructor (DataConstructor (..))
+import Coal.Language.Expression
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
+import Coal.Language.Pattern
+import Coal.Language.Trait
+import Coal.Language.Type
+import Coal.Language.Type.Kind
+import Coal.Language.Type.Scheme
 import Data.Binary
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)

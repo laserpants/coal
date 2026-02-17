@@ -6,6 +6,7 @@
 module Coal.ProtoCompiler.ProtoBuild (
   ProtoBuild (..),
   protoOemptyBuild,
+  overBuildNames,
   setBuildPath,
   --  setBuildFile,
   setBuildBitcode,
@@ -14,6 +15,8 @@ module Coal.ProtoCompiler.ProtoBuild (
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
   insertBuildNameEntry,
+  removeBuildNamePlaceholder,
+  replaceBuildNameEntry,
   insertBuildExportedName,
   insertBuildDataConstructor,
   insertBuildTypeConstructor,
@@ -105,8 +108,21 @@ overBuildNames f ProtoBuild{..} =
     , ..
     }
 
-insertBuildNameEntry :: Name -> ProtoNameEntry -> ProtoBuild a -> ProtoBuild a
-insertBuildNameEntry name entry = overBuildNames (Environment.insertWith (<>) name [entry])
+insertBuildNameEntry :: ProtoNameEntry -> ProtoBuild a -> ProtoBuild a
+insertBuildNameEntry entry =
+  overBuildNames (Environment.insertWith (<>) name [entry])
+ where
+  name = protoOnameOf entry
+
+removeBuildNamePlaceholder :: Name -> ProtoBuild a -> ProtoBuild a
+removeBuildNamePlaceholder name =
+  overBuildNames (Environment.adjust (filter (/= ProtoNPlaceholder name)) name)
+
+replaceBuildNameEntry :: ProtoNameEntry -> ProtoBuild a -> ProtoBuild a
+replaceBuildNameEntry entry =
+  removeBuildNamePlaceholder name . insertBuildNameEntry entry
+ where
+  name = protoOnameOf entry
 
 overBuildExportedNames :: (Set Name -> Set Name) -> ProtoBuild a -> ProtoBuild a
 overBuildExportedNames f ProtoBuild{..} =

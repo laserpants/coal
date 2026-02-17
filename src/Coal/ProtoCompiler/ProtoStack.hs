@@ -14,14 +14,16 @@ module Coal.ProtoCompiler.ProtoStack (
   setCurrentModuleC,
   protoOsetSubstitutionC,
   protoOgetCurrentBuildC,
+  protoOupdateBuildC,
+  protoOupdateCurrentBuildC,
   protoOinsertConstraintsC,
   protoOclearConstraintsC,
   protoOinsertAssumptionsC,
   protoOclearAssumptionsC,
   protoOclearTypeAnnotationParamsC,
   clearNameStoreC,
-  insertNameC,
-  insertNamesC,
+  protoOinsertNameC,
+  protoOinsertNamesC,
   setNamesC,
   setTypeAnnotationParamsC,
 ) where
@@ -39,7 +41,7 @@ import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
-import Control.Monad.State (get, modify)
+import Control.Monad.State (get, gets, modify)
 import Extras (Dictionary, Name)
 
 type ProtoCompilerStack m a o = ExceptT () (RWST () (ProtoCompilerJournal a) (ProtoCompilerState a) m) o
@@ -91,15 +93,36 @@ setCurrentModuleC ProtoModule{..} = setCurrentPathC protoOmodulePath
 protoOsetSubstitutionC :: (Monad m) => Substitution -> ProtoCompilerT m a ()
 protoOsetSubstitutionC sub = modify (overProtoCompilerSubstitution (const sub))
 
+protoOgetBuildC :: (Monad m) => Path -> ProtoCompilerT m a (Maybe (ProtoBuild a))
+protoOgetBuildC path = do
+  modules <- gets protoOcompilerModules
+  pure (Environment.lookup (principalPath path) modules)
+
 protoOgetCurrentBuildC :: (Monad m) => ProtoCompilerT m a (ProtoBuild a)
 protoOgetCurrentBuildC = do
   ProtoCompilerState{..} <- get
-  case Environment.lookup (principalPath protoOcompilerCurrentPath) protoOcompilerModules of
+  maybeBuild <- protoOgetBuildC protoOcompilerCurrentPath
+  case maybeBuild of
     Nothing ->
       --      error "Implementation error"
       error (show (principalPath protoOcompilerCurrentPath))
     Just build ->
       return build
+
+protoOupdateBuildC :: (Monad m) => Path -> (ProtoBuild a -> ProtoCompilerT m a (ProtoBuild a)) -> ProtoCompilerT m a ()
+protoOupdateBuildC path f = do
+  maybeBuild <- protoOgetBuildC path
+  case maybeBuild of
+    Nothing ->
+      error "Implementation error"
+    Just build -> do
+      newBuild <- f build
+      modify (overProtoCompilerModules (Environment.insert (principalPath path) newBuild))
+
+protoOupdateCurrentBuildC :: (Monad m) => (ProtoBuild a -> ProtoCompilerT m a (ProtoBuild a)) -> ProtoCompilerT m a ()
+protoOupdateCurrentBuildC f = do
+  ProtoCompilerState{..} <- get
+  protoOupdateBuildC protoOcompilerCurrentPath f
 
 protoOinsertConstraintsC :: (Monad m) => [CompilerConstraint a] -> ProtoCompilerT m a ()
 protoOinsertConstraintsC constraints = modify (overProtoCompilerConstraints (<> constraints))
@@ -119,11 +142,11 @@ protoOclearTypeAnnotationParamsC = modify (overProtoCompilerTypeAnnotationParams
 clearNameStoreC :: (Monad m) => ProtoCompilerT m a ()
 clearNameStoreC = modify (overProtoCompilerNameStore (const mempty))
 
-insertNameC :: (Monad m) => Name -> IndexedScheme -> ProtoCompilerT m a ()
-insertNameC name scheme_ = modify (overProtoCompilerNameStore (Environment.insert name scheme_))
+protoOinsertNameC :: (Monad m) => Name -> IndexedScheme -> ProtoCompilerT m a ()
+protoOinsertNameC name scheme_ = modify (overProtoCompilerNameStore (Environment.insert name scheme_))
 
-insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> ProtoCompilerT m a ()
-insertNamesC names = modify (overProtoCompilerNameStore (Environment.insertMultiple names))
+protoOinsertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> ProtoCompilerT m a ()
+protoOinsertNamesC names = modify (overProtoCompilerNameStore (Environment.insertMultiple names))
 
 setNamesC :: (Monad m) => Environment IndexedScheme -> ProtoCompilerT m a ()
 setNamesC names = modify (overProtoCompilerNameStore (const names))

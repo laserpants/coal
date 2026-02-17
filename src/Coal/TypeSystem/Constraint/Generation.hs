@@ -71,7 +71,7 @@ emitPAnnotationConstraints loc t p = do
     Right t1 ->
       tellRight [Equality (RuleAnnotation loc (typeOf p) t1) [typeOf p, t1]]
 
-protoOemitPAnnotationConstraints :: (Data a) => a -> Type Parameter Kind -> Pattern a Kind IndexedType -> ConstraintsGen a ()
+protoOemitPAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter Kind -> Pattern a Kind IndexedType -> ConstraintsGen a ()
 protoOemitPAnnotationConstraints loc t p = do
   r <- protoOinstantiateAnnotation loc t
   case r of
@@ -798,7 +798,7 @@ emitConstraints =
     EFold{} ->
       error "Implementation error"
 
-protoOinstantiateAnnotation :: a -> Type Parameter Kind -> ConstraintsGen a (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+protoOinstantiateAnnotation :: (Show a) => a -> Type Parameter Kind -> ConstraintsGen a (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 protoOinstantiateAnnotation loc a = do
   env <- ask
   (t, s) <- runAnnotationsT loc env (indexTypeAnnotations a)

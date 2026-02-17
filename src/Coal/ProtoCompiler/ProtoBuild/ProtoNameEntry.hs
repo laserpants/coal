@@ -79,7 +79,7 @@ data ProtoNameEntry
   | ProtoNType Name Kind
   | ProtoNTrait Name
   | ProtoNTypeAlias Name
-  | PRotoNPlaceholder Name
+  | ProtoNPlaceholder Name
   deriving (Show, Eq, Ord, Read, Generic)
 
 instance Binary ProtoNameEntry
@@ -98,7 +98,7 @@ instance ProtoHasName ProtoNameEntry where
         name
       ProtoNTypeAlias name ->
         name
-      PRotoNPlaceholder name ->
+      ProtoNPlaceholder name ->
         name
 
 instance ProtoHasName (Import a) where
