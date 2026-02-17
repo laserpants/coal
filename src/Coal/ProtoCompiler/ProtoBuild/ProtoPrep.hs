@@ -17,7 +17,7 @@ import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOinsertNameC)
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
@@ -360,11 +360,13 @@ collectImports =
         \case
           NameImport _ name
             | name `elem` protoObuildExportedNames -> do
+                traceShowM name
                 forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
                   \case
-                    info@ProtoNName{} ->
+                    info@(ProtoNName _ s) -> do
                       modify (insertBuildNameEntry info)
-                    _ ->
+                      lift $ lift $ protoOinsertNameC name s
+                    _ -> do
                       pure ()
             | otherwise ->
                 error "TODO"
