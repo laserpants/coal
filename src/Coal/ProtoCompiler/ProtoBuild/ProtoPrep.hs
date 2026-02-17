@@ -380,7 +380,6 @@ collectImports =
         \case
           NameImport _ name
             | name `elem` protoObuildExportedNames -> do
-                traceShowM name
                 forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
                   \case
                     info@(ProtoNName _ s) -> do

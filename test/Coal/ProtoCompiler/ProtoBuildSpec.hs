@@ -41,6 +41,7 @@ import qualified Data.Set as Set
 import Debug.Trace
 import Extras (Name, forM_)
 import Text.Pretty.Simple (pPrint)
+import qualified Data.Map.Strict as Map
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -1028,12 +1029,12 @@ testModule3PreKinds =
                     [ DataConstructor
                         { constructorName = "Succ"
                         , constructorArity = 1
-                        , constructorScheme = Forall mempty [] (TConstructor () "Nat" `TArrow` TConstructor () "Nat")
+                        , constructorScheme = Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
                         }
                     , DataConstructor
                         { constructorName = "Zero"
                         , constructorArity = 0
-                        , constructorScheme = Forall mempty [] (TConstructor () "Nat")
+                        , constructorScheme = Forall mempty [] (TIntrinsic INat)
                         }
                     ]
                 }
@@ -1454,11 +1455,9 @@ xyz modules = do
 
         --        pPrint errors
         sub1 <- gets protoOcompilerSubstitution
-        traceShowM sub1
+--        traceShowM sub1
         pPrint qq
 
-        -- cs <- gets protoOcompilerConstraints
-        -- pPrint cs
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
         --        (tdefs, _) <- typeDefinitionsC defs
@@ -1486,7 +1485,14 @@ typeDefinitionsX defs = do
   forM_ defs $
     \def -> do
       protoOgenerateConstraints def
+
+--      asms <- gets protoOcompilerAssumptions
+--      cs <- gets protoOcompilerConstraints
+--      forM_ cs $
+--        \c -> traceShowM c
+
       sub <- solveX
+
       defineName (apply sub def)
 
   sub1 <- gets protoOcompilerSubstitution
