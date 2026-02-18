@@ -33,15 +33,15 @@ import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Substitution
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.State (evalState, evalStateT, get, gets, runState)
+import Control.Monad.State (evalState, evalStateT, get, gets, modify, runState)
 import Data.Data (Data)
 import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Debug.Trace
 import Extras (Name, forM_)
 import Text.Pretty.Simple (pPrint)
-import qualified Data.Map.Strict as Map
 
 testModuleBuiltinsPreKinds :: (Monoid a) => ProtoModule a () ()
 testModuleBuiltinsPreKinds =
@@ -1344,6 +1344,7 @@ testE = do
     traceShowM res3
     traceShowM (res3 == testModuleBuiltins)
     protoOprepareBuild res3
+    protoOgetCurrentBuildC
 
 testF :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
 testF = do
@@ -1358,6 +1359,7 @@ testF = do
     traceShowM errs
     traceShowM (res3 == testModule0)
     protoOprepareBuild res3
+    protoOgetCurrentBuildC
 
 testG :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
 testG = do
@@ -1369,8 +1371,7 @@ testG = do
         errs = lefts res1
         Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
-    b <- protoOprepareBuild res3
-    insertBuildC b
+    protoOprepareBuild res3
     --
     kindIndexedModule <- toKindIndexed (testModule0PreKinds :: ProtoModule () () ())
     env <- moduleKindEnvironment kindIndexedModule
@@ -1383,6 +1384,7 @@ testG = do
     traceShowM res3
     traceShowM (res3 == testModule0)
     protoOprepareBuild res3
+    protoOgetCurrentBuildC
 
 -- updateNames :: (Monad m, Data a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ()
 -- updateNames defs =
@@ -1415,33 +1417,11 @@ xyz modules = do
         clearNameStoreC
         setCurrentModuleC modul
 
-        --        p <- gets protoOcompilerCurrentPath
-        --        traceShowM p
+        res3 <- inferKinds modul
+        protoOprepareBuild res3
 
---        a <- toKindIndexed modul
---        kenv <- moduleKindEnvironment a
---
---        (_, r) <- runProtoKindConstraintsGen kenv (protoOemitKindConstraints a)
---        let constraints = rights r
---            errors = lefts r
-
-        indexed <- toKindIndexed modul
-        generateKindConstraints indexed
-        constraints <- gets protoOcompilerKindConstraints
-
-        let Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
-            res3 = protoOapplyKinds sub indexed 
-        b <- protoOprepareBuild res3
-        insertBuildC b
-
-        ProtoModule _ _ ds <- indexTypes res3
-        --        pPrint b
-
-        --let tenv = typeEnvironment b
-
-        (defs1, asms) <- typeDefinitionsX ds
-        --        updateNames defs1
-        protoOreplacePlaceholders 
+        ProtoModule _ _ defs1 <- inferTypes res3
+        protoOreplacePlaceholders
 
         c <- protoOgetCurrentBuildC
         pPrint c
@@ -1461,7 +1441,7 @@ xyz modules = do
 
         --        pPrint errors
         sub1 <- gets protoOcompilerSubstitution
---        traceShowM sub1
+        --        traceShowM sub1
         pPrint qq
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
@@ -1485,25 +1465,32 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
     protoOupdateSupplyC n
     pure r
 
-typeDefinitionsX :: (MonadIO m, Data a, Show a, Eq a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ([ProtoDefinition a Kind IndexedType], [Assumption a IndexedType])
-typeDefinitionsX defs = do
-  forM_ defs $
+inferKinds :: (Monad m) => ProtoModule Metadata () () -> ProtoCompilerT m Metadata (ProtoModule Metadata Kind ())
+inferKinds modul = do
+  indexed <- toKindIndexed modul
+  generateKindConstraints indexed
+  constraints <- gets protoOcompilerKindConstraints
+  case protoOKindUnifierMonad (protoOsolveKindConstraints constraints) of
+    Left err ->
+      error "TODO"
+    Right sub ->
+      return (protoOapplyKinds sub indexed)
+
+inferTypes :: (MonadIO m, Data a, Show a, Eq a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
+inferTypes modul = do
+  ProtoModule{..} <- indexTypes modul
+  forM_ protoOmoduleDefinitions $
     \def -> do
       protoOgenerateConstraints def
-
---      asms <- gets protoOcompilerAssumptions
---      cs <- gets protoOcompilerConstraints
---      forM_ cs $
---        \c -> traceShowM c
-
       sub <- solveX
-
       defineName (apply sub def)
-
-  sub1 <- gets protoOcompilerSubstitution
-  asms <- gets protoOcompilerAssumptions
-
-  pure (fmap (fmap normalizeRowTypes) (apply sub1 defs), apply sub1 asms)
+  sub <- gets protoOcompilerSubstitution
+  modify (overProtoCompilerAssumptions (apply sub))
+  pure $
+    ProtoModule
+      { protoOmoduleDefinitions = fmap (fmap normalizeRowTypes) (apply sub protoOmoduleDefinitions)
+      , ..
+      }
 
 -- typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
 -- typeDefinition1 =
@@ -1583,7 +1570,7 @@ foo =
     , testModule0PreKinds
     , testModule3PreKinds
     , testModule2PreKinds
---    , testModule1PreKinds
+    --    , testModule1PreKinds
     ]
 
 foo2 =

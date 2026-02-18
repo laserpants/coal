@@ -40,9 +40,9 @@ data ProtoCompilerState a = ProtoCompilerState
   , protoOcompilerSubstitution :: Substitution
   , protoOcompilerNameStore :: Environment IndexedScheme
   , protoOcompilerConstraints :: [CompilerConstraint a]
-  , protoOcompilerKindConstraints :: [ProtoKindConstraint]
   , protoOcompilerAssumptions :: [CompilerAssumption a]
   , protoOcompilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
+  , protoOcompilerKindConstraints :: [ProtoKindConstraint]
   }
   deriving (Show, Eq, Ord)
 
@@ -55,9 +55,9 @@ initialProtoCompilerState =
     , protoOcompilerSubstitution = mempty
     , protoOcompilerNameStore = mempty
     , protoOcompilerConstraints = mempty
-    , protoOcompilerKindConstraints = mempty
     , protoOcompilerAssumptions = mempty
     , protoOcompilerTypeAnnotationParams = mempty
+    , protoOcompilerKindConstraints = mempty
     }
 
 {-# INLINE overProtoCompilerSupply #-}
