@@ -809,7 +809,7 @@ testModule2PreKinds =
                                         ( PConstructor
                                             mempty
                                             (Label () "Succ")
-                                            [ PAtVariable
+                                            [ PVariable
                                                 mempty
                                                 (Label () "f")
                                             ]
@@ -1440,7 +1440,7 @@ xyz modules = do
         let qq = generateDotSyntax mm
 
         --        pPrint errors
-        sub1 <- gets protoOcompilerSubstitution
+        --sub1 <- gets protoOcompilerSubstitution
         --        traceShowM sub1
         pPrint qq
 
