@@ -18,6 +18,8 @@ module Coal.ProtoCompiler.ProtoStack (
   protoOupdateCurrentBuildC,
   protoOinsertConstraintsC,
   protoOclearConstraintsC,
+  protoOinsertKindConstraintsC,
+  protoOclearKindConstraintsC,
   protoOinsertAssumptionsC,
   protoOclearAssumptionsC,
   protoOclearTypeAnnotationParamsC,
@@ -36,6 +38,7 @@ import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule
+import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
 import Coal.TypeSystem.Substitution (Substitution)
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
@@ -129,6 +132,12 @@ protoOinsertConstraintsC constraints = modify (overProtoCompilerConstraints (<> 
 
 protoOclearConstraintsC :: (Monad m) => ProtoCompilerT m a ()
 protoOclearConstraintsC = modify (overProtoCompilerConstraints (const mempty))
+
+protoOinsertKindConstraintsC :: (Monad m) => [ProtoKindConstraint] -> ProtoCompilerT m a ()
+protoOinsertKindConstraintsC constraints = modify (overProtoCompilerKindConstraints (<> constraints))
+
+protoOclearKindConstraintsC :: (Monad m) => ProtoCompilerT m a ()
+protoOclearKindConstraintsC = modify (overProtoCompilerKindConstraints (const mempty))
 
 protoOinsertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> ProtoCompilerT m a ()
 protoOinsertAssumptionsC assumptions = modify (overProtoCompilerAssumptions (<> assumptions))

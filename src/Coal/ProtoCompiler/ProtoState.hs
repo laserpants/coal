@@ -12,6 +12,7 @@ module Coal.ProtoCompiler.ProtoState (
   overProtoCompilerSubstitution,
   overProtoCompilerNameStore,
   overProtoCompilerConstraints,
+  overProtoCompilerKindConstraints,
   overProtoCompilerAssumptions,
   overProtoCompilerTypeAnnotationParams,
 ) where
@@ -21,6 +22,7 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Language
 import Coal.Language.Module.Path (Path (..), emptyPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
+import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
@@ -38,8 +40,8 @@ data ProtoCompilerState a = ProtoCompilerState
   , protoOcompilerSubstitution :: Substitution
   , protoOcompilerNameStore :: Environment IndexedScheme
   , protoOcompilerConstraints :: [CompilerConstraint a]
-  , -- TODO: add kind constraints
-    protoOcompilerAssumptions :: [CompilerAssumption a]
+  , protoOcompilerKindConstraints :: [ProtoKindConstraint]
+  , protoOcompilerAssumptions :: [CompilerAssumption a]
   , protoOcompilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   }
   deriving (Show, Eq, Ord)
@@ -53,6 +55,7 @@ initialProtoCompilerState =
     , protoOcompilerSubstitution = mempty
     , protoOcompilerNameStore = mempty
     , protoOcompilerConstraints = mempty
+    , protoOcompilerKindConstraints = mempty
     , protoOcompilerAssumptions = mempty
     , protoOcompilerTypeAnnotationParams = mempty
     }
@@ -102,6 +105,14 @@ overProtoCompilerConstraints :: Over (ProtoCompilerState a) [CompilerConstraint 
 overProtoCompilerConstraints fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerConstraints = fn protoOcompilerConstraints
+    , ..
+    }
+
+{-# INLINE overProtoCompilerKindConstraints #-}
+overProtoCompilerKindConstraints :: Over (ProtoCompilerState a) [ProtoKindConstraint]
+overProtoCompilerKindConstraints fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerKindConstraints = fn protoOcompilerKindConstraints
     , ..
     }
 

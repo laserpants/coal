@@ -20,7 +20,8 @@ import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
+import Coal.ProtoCompiler.ProtoJournal (protoOcompilerReportConstraintsGenErrors)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.TypeSystem
@@ -42,9 +43,9 @@ import Extras (Dictionary, Name)
 
 -- import Text.Pretty.Simple (pPrint)
 
--- generateKindConstraints :: (Monad m) => Module a k t -> ProtoCompilerT m a ()
--- generateKindConstraints =
---  undefined
+generateKindConstraints :: (Monad m) => Module a k t -> ProtoCompilerT m a ()
+generateKindConstraints =
+  undefined
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
@@ -138,7 +139,7 @@ protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a
 protoOgenerateExpressionConstraints expr = do
   (assumptions, params, result) <- protoOrunConstraintsGen (protoOemitConstraints expr)
   let (errors, constraints) = partitionEithers result
-  --  compilerReportConstraintsGenErrors errors
+  protoOcompilerReportConstraintsGenErrors errors
   setTypeAnnotationParamsC params
   pure (assumptions, constraints)
 
@@ -330,6 +331,7 @@ solveX = do
   sub1 <- gets protoOcompilerSubstitution
   sub2 <- solveConstraintsX constraints
   protoOclearConstraintsC
+  protoOclearKindConstraintsC
   protoOclearTypeAnnotationParamsC
   protoOsetSubstitutionC (sub2 <> sub1)
   gets protoOcompilerSubstitution

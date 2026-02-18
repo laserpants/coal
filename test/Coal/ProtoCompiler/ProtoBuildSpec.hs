@@ -1578,7 +1578,7 @@ foo =
     , testModule0PreKinds
     , testModule3PreKinds
     , testModule2PreKinds
-    --    , testModule1PreKinds
+--    , testModule1PreKinds
     ]
 
 foo2 =
