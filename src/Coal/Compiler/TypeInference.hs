@@ -23,8 +23,8 @@ import Coal.Language.Type.Kind.Indexed
 import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoJournal (protoOcompilerReportConstraintsGenErrors)
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
+import Coal.ProtoCompiler.ProtoJournal (protoOcompilerReportConstraintsGenErrors, protoOcompilerReportKindConstraintsGenErrors)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertKindConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -38,21 +38,21 @@ import Control.Monad.State (evalState, get, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Data.List (nub)
+import Data.List (nub, partition)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Extras (Dictionary, Name)
 
--- import Text.Pretty.Simple (pPrint)
-
 generateKindConstraints :: (Monad m) => ProtoModule Metadata k () -> ProtoCompilerT m Metadata ()
 generateKindConstraints modul = do
   ixd <- toKindIndexed modul
   env <- moduleKindEnvironment (ixd :: ProtoModule Metadata Kind ())
-  (_, r) <- runProtoKindConstraintsGen env (protoOemitKindConstraints ixd)
-  pure ()
+  (_, result) <- runProtoKindConstraintsGen env (protoOemitKindConstraints ixd)
+  let (errors, constraints) = partitionEithers result
+  protoOinsertKindConstraintsC constraints
+  protoOcompilerReportKindConstraintsGenErrors errors
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
