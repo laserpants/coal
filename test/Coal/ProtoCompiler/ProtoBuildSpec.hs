@@ -1437,7 +1437,7 @@ xyz modules = do
         ProtoModule _ _ ds <- indexTypes res3
         --        pPrint b
 
-        let tenv = typeEnvironment b
+        --let tenv = typeEnvironment b
 
         (defs1, asms) <- typeDefinitionsX ds
         --        updateNames defs1
