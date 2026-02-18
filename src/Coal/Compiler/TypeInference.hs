@@ -32,13 +32,12 @@ import Coal.ProtoTypeSystem.Kind.Constraint.Generation
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
-import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks)
 import Control.Monad.State (evalState, get, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Data.List (nub, partition)
+import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
@@ -332,7 +331,7 @@ solveC = do
   setSubstitutionC (sub2 <> sub1)
   gets compilerSubstitution
 
-solveX :: (Monad m, Data a, Eq a, Show a) => ProtoCompilerT m a Substitution
+solveX :: (Monad m, Data a, Eq a) => ProtoCompilerT m a Substitution
 solveX = do
   constraints <- gets protoOcompilerConstraints
   sub1 <- gets protoOcompilerSubstitution
