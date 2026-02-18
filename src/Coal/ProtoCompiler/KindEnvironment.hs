@@ -11,7 +11,6 @@ import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoJournal
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition

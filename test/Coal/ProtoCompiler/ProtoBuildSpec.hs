@@ -1436,9 +1436,10 @@ xyz modules = do
 
         (defs1, asms) <- typeDefinitionsX ds
         --        updateNames defs1
-        c <- protoOreplacePlaceholders b
+        protoOreplacePlaceholders 
 
-        insertBuildC c
+        c <- protoOgetCurrentBuildC
+        pPrint c
 
         --        p <- gets protoOcompilerCurrentPath
         --        xxx <- gets protoOcompilerModules
@@ -1457,7 +1458,6 @@ xyz modules = do
         sub1 <- gets protoOcompilerSubstitution
 --        traceShowM sub1
         pPrint qq
-
 
         --        let ProtoModule _ _ defs = c :: ProtoModule Metadata Kind IndexedType
         --        (tdefs, _) <- typeDefinitionsC defs

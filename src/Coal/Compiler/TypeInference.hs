@@ -8,6 +8,7 @@
 
 module Coal.Compiler.TypeInference where -- (typeDefinitionsC, toIndexedType, toIndexedScheme) where
 
+import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Type.Parameterized
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
@@ -18,12 +19,16 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.Language.Type.Kind.Indexed
+import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoJournal (protoOcompilerReportConstraintsGenErrors)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
+import Coal.ProtoTypeSystem.Kind.Constraint.Generation
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
@@ -38,14 +43,16 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
-import Debug.Trace
 import Extras (Dictionary, Name)
 
 -- import Text.Pretty.Simple (pPrint)
 
-generateKindConstraints :: (Monad m) => Module a k t -> ProtoCompilerT m a ()
-generateKindConstraints =
-  undefined
+generateKindConstraints :: (Monad m) => ProtoModule Metadata k () -> ProtoCompilerT m Metadata ()
+generateKindConstraints modul = do
+  ixd <- toKindIndexed modul
+  env <- moduleKindEnvironment (ixd :: ProtoModule Metadata Kind ())
+  (_, r) <- runProtoKindConstraintsGen env (protoOemitKindConstraints ixd)
+  pure ()
 
 class ProtoGenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()

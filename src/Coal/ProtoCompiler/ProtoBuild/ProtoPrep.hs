@@ -17,7 +17,7 @@ import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOinsertNameC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), insertBuildC, protoOgetCurrentBuildC, protoOinsertNameC)
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
@@ -371,7 +371,7 @@ instantiateScheme Forall{..} =
 instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 
-collectImports :: (Monad m, Show a) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectImports :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectImports =
   \case
     ProtoDImport _ path imports -> do
@@ -417,39 +417,16 @@ importedBuild path = do
     Just build ->
       return build
 
-protoOreplacePlaceholders :: (Monad m) => ProtoBuild a -> ProtoCompilerT m a (ProtoBuild a)
-protoOreplacePlaceholders build = do
+protoOreplacePlaceholders :: (Monad m) => ProtoCompilerT m a ()
+protoOreplacePlaceholders = do
+  build <- protoOgetCurrentBuildC
   store <- gets protoOcompilerNameStore
-  flip execStateT build $
+  newBuild <- flip execStateT build $
     forM_ (Environment.toList store) $
       \(name, s) ->
         modify (replaceBuildNameEntry (ProtoNName name s))
+  insertBuildC newBuild
 
--- newBuildNames <- flip Environment.mapMEnvironment protoObuildNames $
---   \case
---     ProtoNPlaceholder name ->
---       case Environment.lookup name store of
---         Nothing ->
---           error ("No name: " <> Text.unpack name)
---         Just s -> do
---           modify $ replaceBuildNameEntry (ProtoNName name s)
---     _ ->
---       pure ()
--- return ProtoBuild {
---  protoObuildNames = newBuildNames
---  , ..
---  }
-
---    forM_ (concat (Environment.elems protoObuildNames)) $
---      \case
---        ProtoNPlaceholder name ->
---          case Environment.lookup name store of
---            Nothing ->
---              error ("No name: " <> Text.unpack name)
---            Just s -> do
---              modify $ replaceBuildNameEntry (ProtoNName name s)
---        _ ->
---          pure ()
 --
 -- protoOreplacePlaceholders :: (Monad m) => ProtoCompilerT m a ()
 -- protoOreplacePlaceholders = do
