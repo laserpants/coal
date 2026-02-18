@@ -1418,14 +1418,19 @@ xyz modules = do
         --        p <- gets protoOcompilerCurrentPath
         --        traceShowM p
 
-        a <- toKindIndexed modul
-        kenv <- moduleKindEnvironment a
+--        a <- toKindIndexed modul
+--        kenv <- moduleKindEnvironment a
+--
+--        (_, r) <- runProtoKindConstraintsGen kenv (protoOemitKindConstraints a)
+--        let constraints = rights r
+--            errors = lefts r
 
-        (_, r) <- runProtoKindConstraintsGen kenv (protoOemitKindConstraints a)
-        let constraints = rights r
-            errors = lefts r
-            Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
-            res3 = protoOapplyKinds sub a :: ProtoModule Metadata Kind ()
+        indexed <- toKindIndexed modul
+        generateKindConstraints indexed
+        constraints <- gets protoOcompilerKindConstraints
+
+        let Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+            res3 = protoOapplyKinds sub indexed 
         b <- protoOprepareBuild res3
         insertBuildC b
 

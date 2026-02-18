@@ -44,11 +44,10 @@ import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Extras (Dictionary, Name)
 
-generateKindConstraints :: (Monad m) => ProtoModule Metadata k () -> ProtoCompilerT m Metadata ()
+generateKindConstraints :: (Monad m) => ProtoModule Metadata Kind () -> ProtoCompilerT m Metadata ()
 generateKindConstraints modul = do
-  ixd <- toKindIndexed modul
-  env <- moduleKindEnvironment (ixd :: ProtoModule Metadata Kind ())
-  (_, result) <- runProtoKindConstraintsGen env (protoOemitKindConstraints ixd)
+  env <- moduleKindEnvironment modul
+  (_, result) <- runProtoKindConstraintsGen env (protoOemitKindConstraints modul)
   let (errors, constraints) = partitionEithers result
   protoOinsertKindConstraintsC constraints
   protoOcompilerReportKindConstraintsGenErrors errors
