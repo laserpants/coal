@@ -13,6 +13,7 @@ module Coal.Language.Module (
   principalPath,
   qualified,
   importedPaths,
+  toProtoModule,
   module Coal.Language.Module.Definition,
   module Coal.Language.Module.Definition.Function,
   module Coal.Language.Module.Definition.Constant,
@@ -25,6 +26,7 @@ module Coal.Language.Module (
   module Coal.Language.Module.Export,
 ) where
 
+import Coal.ProtoLanguage.ProtoModule
 import Coal.Language.Module.Definition (Definition (..), Path (..), definitionName, importPath)
 import Coal.Language.Module.Definition.Alias
 import Coal.Language.Module.Definition.Constant
@@ -79,3 +81,10 @@ qualified name path = principalPath path <> "." <> name
 
 importedPaths :: Module a k t -> [(a, Path)]
 importedPaths = mapMaybe importPath . moduleDefinitions
+
+-- TODO: temp
+toProtoModule :: Module a k t -> ProtoModule a k t
+toProtoModule =
+  undefined
+
+

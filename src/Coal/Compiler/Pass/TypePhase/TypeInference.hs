@@ -3,6 +3,7 @@
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
+import Coal.ProtoLanguage.ProtoModule
 import Coal.Compiler.Build.Core (buildEnv, replacePlaceholders)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Journal (tellErrors)
@@ -10,7 +11,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (typeDefinitionsC)
 import Coal.Language (IndexedType, Kind, indexed)
-import Coal.Language.Module (Module (..), principalPath)
+import Coal.Language.Module (Module (..), principalPath, toProtoModule)
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.Except
@@ -58,3 +59,6 @@ runTypeInference m = do
   pure (Module p ns (normalizeTypeIndexes tdefs))
  where
   Module p ns ds = m
+
+  -- protoModule :: ProtoModule a Kind ()
+  protoModule = toProtoModule m
