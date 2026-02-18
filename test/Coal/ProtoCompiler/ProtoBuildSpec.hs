@@ -1410,15 +1410,15 @@ xyz :: [ProtoModule Metadata () ()] -> IO ()
 xyz modules = do
   (_, r, _) <- runProtoCompilerT $ do
     forM_ modules $
-      \module_ -> do
+      \modul -> do
         protoOclearAssumptionsC
         clearNameStoreC
-        setCurrentModuleC module_
+        setCurrentModuleC modul
 
         --        p <- gets protoOcompilerCurrentPath
         --        traceShowM p
 
-        a <- toKindIndexed module_
+        a <- toKindIndexed modul
         kenv <- moduleKindEnvironment a
 
         (_, r) <- runProtoKindConstraintsGen kenv (protoOemitKindConstraints a)
@@ -1451,7 +1451,7 @@ xyz modules = do
 
         --        pPrint defs1
 
-        let mm = module_{protoOmoduleDefinitions = defs1}
+        let mm = modul{protoOmoduleDefinitions = defs1}
         let qq = generateDotSyntax mm
 
         --        pPrint errors

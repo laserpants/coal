@@ -28,7 +28,6 @@ import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
@@ -115,7 +114,7 @@ expandExports = do
       return
         (Exports newExports)
 
-collectTypeConstructors :: (Show a, Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTypeConstructors =
   \case
     ProtoDType loc name ProtoTypeDefinition{..} -> do
@@ -169,7 +168,7 @@ collectTypeConstructors =
     _ ->
       pure ()
 
-collectDataConstructors :: (Show a, Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectDataConstructors =
   \case
     ProtoDType loc _ ProtoTypeDefinition{..} ->
@@ -421,26 +420,9 @@ protoOreplacePlaceholders :: (Monad m) => ProtoCompilerT m a ()
 protoOreplacePlaceholders = do
   build <- protoOgetCurrentBuildC
   store <- gets protoOcompilerNameStore
-  newBuild <- flip execStateT build $
-    forM_ (Environment.toList store) $
-      \(name, s) ->
-        modify (replaceBuildNameEntry (ProtoNName name s))
+  newBuild <-
+    flip execStateT build $
+      forM_ (Environment.toList store) $
+        \(name, s) ->
+          modify (replaceBuildNameEntry (ProtoNName name s))
   insertBuildC newBuild
-
---
--- protoOreplacePlaceholders :: (Monad m) => ProtoCompilerT m a ()
--- protoOreplacePlaceholders = do
---  store <- gets protoOcompilerNameStore
---  protoOupdateCurrentBuildC $
---    \ProtoBuild{..} ->
---      flip execStateT ProtoBuild{..} $
---        forM_ (concat (Environment.elems protoObuildNames)) $
---          \case
---            ProtoNPlaceholder name ->
---              case Environment.lookup name store of
---                Nothing ->
---                  error ("No name: " <> Text.unpack name)
---                Just s -> do
---                  modify $ replaceBuildNameEntry (ProtoNName name s)
---            _ ->
---              pure ()
