@@ -62,7 +62,7 @@ insertExportedName name = do
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoBuild a)
+protoOprepareBuild :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoBuild a)
 protoOprepareBuild ProtoModule{..} =
   execStateT
     (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
@@ -70,7 +70,7 @@ protoOprepareBuild ProtoModule{..} =
       { protoObuildPath = protoOmodulePath
       }
 
-protoOprepareDefinitions :: (Monad m, Show a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
   -- collect type constructors
   traverse_ collectTypeConstructors defs
