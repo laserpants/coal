@@ -2,6 +2,7 @@
 
 module E2E.Spec (e2eSpec, runSpec) where
 
+import Coal.ProtoCompiler.ProtoStack
 import Coal.Compiler (pipeline)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment
@@ -1610,13 +1611,18 @@ expectOutput expt srcPath files =
 
 runSpec :: FilePath -> [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec srcPath files = do
-  (e, _, _) <-
-    runCompilerT (emptyCompilerEnvironment Nothing) $ do
-      setConfigC defaultConfig{configSilent = True, configSourcePaths = [srcPath]}
-      runPass pipeline files
-  case e of
-    Left e1 ->
-      pure (Left e1)
-    Right{} -> do
-      txt <- readProcess "./dist" [] ""
-      pure (Right txt)
+  q <-
+    evalProtoCompilerT $
+      runCompilerT (emptyCompilerEnvironment Nothing) $ do
+        setConfigC defaultConfig{configSilent = True, configSourcePaths = [srcPath]}
+        runPass pipeline files
+  case q of
+    Left _ ->
+      error "!!?"
+    Right (e, _, _) ->
+      case e of
+        Left e1 ->
+          pure (Left e1)
+        Right{} -> do
+          txt <- readProcess "./dist" [] ""
+          pure (Right txt)

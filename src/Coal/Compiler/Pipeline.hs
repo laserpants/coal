@@ -68,7 +68,7 @@ compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
   (e, CompilerState{..}, es) <-
     if configSilent config
-      then go Nothing
+      then undefined -- go Nothing
       else do
         displayConsoleRegions $ do
           pb <-
@@ -78,7 +78,7 @@ compileWithCFiles config files cFiles = do
                 , pgWidth = 100
                 , pgFormat = "Compiling [:bar] :current/:total"
                 }
-          go (Just pb)
+          undefined -- go (Just pb)
   forM_ (nub es) $
     \err -> do
       case errorLocation err of
@@ -89,7 +89,7 @@ compileWithCFiles config files cFiles = do
       Text.putStrLn (prettyError compilerVerbatimSource err)
   case e of
     Left e1 ->
-      print e1
+      undefined -- print e1
     Right{} -> do
       pure ()
  where

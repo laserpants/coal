@@ -10,6 +10,7 @@ module Coal.Compiler.Pass (
   tickBar,
 ) where
 
+import Coal.ProtoCompiler.ProtoStack
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Core (typeConstructorEnv)
@@ -23,14 +24,14 @@ import Control.Monad.State (evalStateT)
 import Data.Foldable (for_)
 import System.Console.AsciiProgress
 
-newtype Pass a m i o = Pass {runPass :: i -> CompilerT a m o}
+newtype Pass a m i o = Pass {runPass :: i -> CompilerT a (ProtoCompilerT m a) o}
 
 tickBar :: (MonadIO m) => CompilerT a m ()
 tickBar = do
   pb <- asks compilerProgressBar
   liftIO (for_ pb tick)
 
-runPassAndTickBar :: (MonadIO m) => Pass a m i b -> i -> CompilerT a m b
+runPassAndTickBar :: (MonadIO m) => Pass a m i b -> i -> CompilerT a (ProtoCompilerT m a) b
 runPassAndTickBar p i = do
   tickBar
   runPass p i

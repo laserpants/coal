@@ -413,7 +413,7 @@ importedBuild path = do
   env <- gets protoOcompilerModules
   case Environment.lookup (principalPath path) env of
     Nothing ->
-      undefined
+      error "TODO"
     Just build ->
       return build
 
