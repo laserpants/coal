@@ -1,29 +1,43 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
-import Coal.ProtoLanguage.ProtoModule
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Core (buildEnv, replacePlaceholders)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Compiler.TypeInference (typeDefinitionsC)
-import Coal.Language (IndexedType, Kind, indexed)
-import Coal.Language.Module (Module (..), principalPath, toProtoModule)
+import Coal.Compiler.TypeInference (generateKindConstraints, protoOdefine, protoOgenerateConstraints, solveX, typeDefinitionsC)
+import Coal.Graphviz.ProtoDot
+import Coal.Language (IndexedType, Kind, Trait (..), indexed, instanceLabel, normalizeRowTypes, typeOf)
+import Coal.Language.Module (Module (..), fromProtoModule, principalPath, toProtoModule)
+import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
+import Coal.ProtoCompiler.ProtoBuild.ProtoPrep
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOupdateSupplyC, setCurrentModuleC)
+import Coal.ProtoCompiler.ProtoState
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
+import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
+import Coal.ProtoTypeSystem.Kind.Substitution
+import Coal.ProtoTypeSystem.Kind.Unification
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
-import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
+import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Control.Monad.Except
-import Control.Monad.State (gets, runState)
+import Control.Monad.State (gets, modify, runState)
 import Data.Data (Data)
 import Data.List (nub)
 import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
+import Debug.Trace
+import Text.Pretty.Simple (pPrint)
 
 passTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference = Pass{runPass = pass}
 
-pass :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+pass :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
 pass m@(Module path _ _) = do
   env <- buildEnv
   setNamesC env
@@ -52,13 +66,79 @@ indexTypes ds = run (indexed ds) =<< gets compilerSupply
     insertSupplyC n
     pure r
 
-runTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+runTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
 runTypeInference m = do
   defs <- traverse indexTypes ds
   (tdefs, _) <- typeDefinitionsC defs
+
+  nm <- lift $ ti (toProtoModule m)
   pure (Module p ns (normalizeTypeIndexes tdefs))
  where
+  -- pure (fromProtoModule nm)
+
   Module p ns ds = m
 
-  -- protoModule :: ProtoModule a Kind ()
-  protoModule = toProtoModule m
+ti :: (MonadIO m, Data a, Show a, Eq a) => ProtoModule a () () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
+ti modul = do
+  protoOclearAssumptionsC
+  protoOclearNameStoreC
+  setCurrentModuleC modul
+  indexed <- inferKinds modul
+  protoOprepareBuild indexed
+  newModule <- inferTypes indexed
+  protoOreplacePlaceholders
+  return newModule
+
+inferTypes :: (MonadIO m, Data a, Show a, Eq a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
+inferTypes modul = do
+  ProtoModule{..} <- protoOindexTypes modul
+  forM_ protoOmoduleDefinitions $
+    \def -> do
+      protoOgenerateConstraints def
+      sub <- solveX
+      defineName (apply sub def)
+  sub <- gets protoOcompilerSubstitution
+  modify (overProtoCompilerAssumptions (apply sub))
+  let newModuleDefinitions = fmap (fmap normalizeRowTypes) (apply sub protoOmoduleDefinitions)
+  pure $
+    ProtoModule
+      { protoOmoduleDefinitions = normalizeTypeIndexes newModuleDefinitions
+      , ..
+      }
+
+inferKinds :: (MonadIO m, Show a) => ProtoModule a () () -> ProtoCompilerT m a (ProtoModule a Kind ())
+inferKinds modul = do
+  indexed <- toKindIndexed modul
+  generateKindConstraints indexed
+  constraints <- gets protoOcompilerKindConstraints
+  case protoOkindUnifierMonad (protoOsolveKindConstraints constraints) of
+    Left err ->
+      error (show err)
+    Right sub ->
+      return (protoOreplaceVariables (protoOapplyKinds sub indexed))
+
+defineName :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
+defineName =
+  \case
+    def@(ProtoDFunction _ name ProtoFunctionDefinition{..}) ->
+      protoOdefine name (typeOf def)
+    def@(ProtoDLet _ name ProtoLetDefinition{..}) ->
+      protoOdefine name (typeOf def)
+    ProtoDInstance _ ProtoInstanceDefinition{..} -> do
+      let trait = Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
+      forM_ protoOinstanceDefinitionImplementations $
+        \case
+          def@(ProtoDFunction _ name _) ->
+            protoOdefine (instanceLabel trait name) (typeOf def)
+          def@(ProtoDLet _ name _) ->
+            protoOdefine (instanceLabel trait name) (typeOf def)
+    _ ->
+      pure ()
+
+protoOindexTypes :: (Monad m, Traversable t) => t e -> ProtoCompilerT m a (t IndexedType)
+protoOindexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
+ where
+  run s m = do
+    let (r, n) = runState s m
+    protoOupdateSupplyC n
+    pure r

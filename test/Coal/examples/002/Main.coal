@@ -1,17 +1,18 @@
 module Main {
 
-  import Nat(pack, unpack)
+//  import Nat(pack, unpack)
   import IO(println_int32)
 
-  fun factorial(n : int32) =
-    fold(pack(n)) {
-      | Zero =>
-          1
-      | Succ(@p) as m =>
-          unpack(m) * p
-    }
+//  fun factorial(n : int32) =
+//    fold(pack(n)) {
+//      | Zero =>
+//          1
+//      | Succ(@p) as m =>
+//          unpack(m) * p
+//    }
+//
 
   fun main() : IO<unit> =
-    println_int32(factorial(4))
+    println_int32(5)
 
 }

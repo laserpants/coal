@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
@@ -69,6 +70,7 @@ import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT)
 import Control.Monad.RWS (RWST, runRWST)
 import Control.Monad.Reader (MonadReader)
 import Control.Monad.State (MonadState, gets, modify)
+import Control.Monad.Trans.Class (MonadTrans, lift)
 import Control.Monad.Writer (MonadWriter)
 import Data.ByteString (ByteString)
 import qualified Data.Map.Strict as Map
@@ -92,6 +94,9 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , MonadCatch
     , MonadMask
     )
+
+instance MonadTrans (CompilerT a) where
+  lift = Compiler . lift . lift
 
 runCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])
 runCompilerT env com = do

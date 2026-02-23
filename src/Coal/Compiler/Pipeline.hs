@@ -30,6 +30,7 @@ import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
+import Coal.ProtoCompiler.ProtoStack
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Inference (KindInferenceError (..))
@@ -37,6 +38,7 @@ import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad (replicateM_)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except (MonadIO, forM_)
+import Data.Either (fromRight)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -68,7 +70,9 @@ compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
   (e, CompilerState{..}, es) <-
     if configSilent config
-      then undefined -- go Nothing
+      then do
+        z <- go Nothing
+        pure $ fromRight (error "???") z
       else do
         displayConsoleRegions $ do
           pb <-
@@ -78,7 +82,8 @@ compileWithCFiles config files cFiles = do
                 , pgWidth = 100
                 , pgFormat = "Compiling [:bar] :current/:total"
                 }
-          undefined -- go (Just pb)
+          z <- go (Just pb)
+          pure $ fromRight (error "???") z
   forM_ (nub es) $
     \err -> do
       case errorLocation err of
@@ -89,14 +94,15 @@ compileWithCFiles config files cFiles = do
       Text.putStrLn (prettyError compilerVerbatimSource err)
   case e of
     Left e1 ->
-      undefined -- print e1
+      print e1
     Right{} -> do
       pure ()
  where
   go progressBar = do
-    runCompilerT (emptyCompilerEnvironment progressBar) $ do
-      setConfigC config{configCFiles = configCFiles config <> cFiles}
-      runPass pipeline files
+    evalProtoCompilerT $
+      runCompilerT (emptyCompilerEnvironment progressBar) $ do
+        setConfigC config{configCFiles = configCFiles config <> cFiles}
+        runPass pipeline files
 
 compile :: CompilerConfig -> [FilePath] -> IO ()
 compile config files = compileWithCFiles config files []

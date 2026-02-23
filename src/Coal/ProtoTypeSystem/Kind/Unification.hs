@@ -14,8 +14,9 @@ import Control.Monad.Except (MonadError, throwError)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, member)
 import qualified Data.Set as Set
+import Debug.Trace
 
-newtype ProtoKindUnifier a = ProtoKindUnifier {protoOKindUnifierMonad :: Either ProtoKindError a}
+newtype ProtoKindUnifier a = ProtoKindUnifier {protoOkindUnifierMonad :: Either ProtoKindError a}
   deriving
     ( Functor
     , Applicative
@@ -34,7 +35,8 @@ unifyKinds k1 (KVariable k2) =
   bindKind k2 k1
 unifyKinds k1 k2
   | k1 == k2 = pure mempty
-  | otherwise = throwError ProtoEInfiniteKind
+  | otherwise = do
+      throwError ProtoECannotUnifyKinds
 
 bindKind :: Int -> Kind -> ProtoKindUnifier ProtoKindSubstitution
 bindKind n =

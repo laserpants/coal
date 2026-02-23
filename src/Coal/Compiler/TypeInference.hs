@@ -19,7 +19,6 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Type.Kind.Indexed
 import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
@@ -44,7 +43,7 @@ import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Extras (Dictionary, Name)
 
-generateKindConstraints :: (Monad m) => ProtoModule Metadata Kind () -> ProtoCompilerT m Metadata ()
+generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 generateKindConstraints modul = do
   env <- moduleKindEnvironment modul
   (_, result) <- runProtoKindConstraintsGen env (protoOemitKindConstraints modul)

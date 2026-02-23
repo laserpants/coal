@@ -10,13 +10,13 @@ module Coal.Compiler.Pass (
   tickBar,
 ) where
 
-import Coal.ProtoCompiler.ProtoStack
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Core (typeConstructorEnv)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
+import Coal.ProtoCompiler.ProtoStack
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)

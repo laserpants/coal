@@ -64,11 +64,12 @@ insertExportedName name = do
 
 protoOprepareBuild :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
-  build <- execStateT
-    (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
-    protoOemptyBuild
-      { protoObuildPath = protoOmodulePath
-      }
+  build <-
+    execStateT
+      (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
+      protoOemptyBuild
+        { protoObuildPath = protoOmodulePath
+        }
   insertBuildC build
 
 protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()

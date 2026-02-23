@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment) where
@@ -45,6 +46,9 @@ moduleKindEnvironment ProtoModule{..} = do
             , kindOf protoOaliasDefinitionType
             )
           ]
+      -- TODO: temp
+      ProtoDImport _ (Path ["Builtin$"]) items -> do
+        pure []
       ProtoDImport _ path items -> do
         importedModule <- importedBuild path
         concatForM items $

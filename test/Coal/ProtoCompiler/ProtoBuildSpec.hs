@@ -1327,7 +1327,7 @@ testModule4PreKinds =
 -- where
 --  Right sub = res
 --  res :: Either ProtoKindError ProtoKindSubstitution
---  res = protoOKindUnifierMonad (protoOsolveKindConstraints constraints)
+--  res = protoOkindUnifierMonad (protoOsolveKindConstraints constraints)
 --  constraints = rights (snd testC)
 
 testE :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
@@ -1338,7 +1338,7 @@ testE = do
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
     traceShowM errs
     traceShowM res3
@@ -1354,7 +1354,7 @@ testF = do
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
     traceShowM errs
     traceShowM (res3 == testModule0)
@@ -1369,7 +1369,7 @@ testG = do
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
     protoOprepareBuild res3
     --
@@ -1378,7 +1378,7 @@ testG = do
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOKindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
+        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either ProtoKindError ProtoKindSubstitution
         res3 = protoOapplyKinds sub kindIndexedModule :: ProtoModule () Kind ()
     traceShowM errs
     traceShowM res3
@@ -1414,7 +1414,7 @@ xyz modules = do
     forM_ modules $
       \modul -> do
         protoOclearAssumptionsC
-        clearNameStoreC
+        protoOclearNameStoreC
         setCurrentModuleC modul
 
         res3 <- inferKinds modul
@@ -1470,7 +1470,7 @@ inferKinds modul = do
   indexed <- toKindIndexed modul
   generateKindConstraints indexed
   constraints <- gets protoOcompilerKindConstraints
-  case protoOKindUnifierMonad (protoOsolveKindConstraints constraints) of
+  case protoOkindUnifierMonad (protoOsolveKindConstraints constraints) of
     Left err ->
       error "TODO"
     Right sub ->

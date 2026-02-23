@@ -310,6 +310,7 @@ library
     , temporary
     , text
     , text-show
+    , transformers
     , uniplate
   default-language: Haskell2010
 
@@ -376,6 +377,7 @@ executable coal
     , temporary
     , text
     , text-show
+    , transformers
     , uniplate
   default-language: Haskell2010
 
@@ -433,5 +435,6 @@ test-suite coal-test
     , temporary
     , text
     , text-show
+    , transformers
     , uniplate
   default-language: Haskell2010

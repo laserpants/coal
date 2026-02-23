@@ -23,7 +23,7 @@ module Coal.ProtoCompiler.ProtoStack (
   protoOinsertAssumptionsC,
   protoOclearAssumptionsC,
   protoOclearTypeAnnotationParamsC,
-  clearNameStoreC,
+  protoOclearNameStoreC,
   protoOinsertNameC,
   protoOinsertNamesC,
   setNamesC,
@@ -148,8 +148,8 @@ protoOclearAssumptionsC = modify (overProtoCompilerAssumptions (const mempty))
 protoOclearTypeAnnotationParamsC :: (Monad m) => ProtoCompilerT m a ()
 protoOclearTypeAnnotationParamsC = modify (overProtoCompilerTypeAnnotationParams (const mempty))
 
-clearNameStoreC :: (Monad m) => ProtoCompilerT m a ()
-clearNameStoreC = modify (overProtoCompilerNameStore (const mempty))
+protoOclearNameStoreC :: (Monad m) => ProtoCompilerT m a ()
+protoOclearNameStoreC = modify (overProtoCompilerNameStore (const mempty))
 
 protoOinsertNameC :: (Monad m) => Name -> IndexedScheme -> ProtoCompilerT m a ()
 protoOinsertNameC name scheme_ = modify (overProtoCompilerNameStore (Environment.insert name scheme_))

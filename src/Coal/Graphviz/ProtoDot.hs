@@ -1,8 +1,10 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Coal.Graphviz.ProtoDot (generateDotSyntax) where
 
@@ -21,7 +23,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extras (Dictionary)
+import Extras (Dictionary, Name)
 import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
 import TextShow (showt)
@@ -120,6 +122,12 @@ emitShape shape = emitNamedShape shape Nothing
 class ProtoDot a where
   toDot :: a -> ProtoDotGen Int
 
+instance ProtoDot () where
+  toDot () = emitShape EllipseShape "()"
+
+instance ProtoDot Name where
+  toDot = emitShape RectangleShape
+
 instance ProtoDot Int where
   toDot = pure
 
@@ -159,15 +167,19 @@ instance ProtoDot (Import a) where
       NameImport _ name ->
         emitNamedShape RectangleShape (Just name) "NameImport"
       TypeImport _ name names -> do
-        emitNamedShape RectangleShape (Just name) "TypeImport"
+        dotId <- emitNamedShape RectangleShape (Just name) "TypeImport"
+        _ <- foldrM connectDots dotId names
+        return dotId
 
 instance ProtoDot (Export a) where
   toDot =
     \case
       NameExport _ name ->
         emitNamedShape RectangleShape (Just name) "NameExport"
-      TypeExport _ name names ->
-        emitNamedShape RectangleShape (Just name) "TypeExport"
+      TypeExport _ name names -> do
+        dotId <- emitNamedShape RectangleShape (Just name) "TypeExport"
+        _ <- foldrM connectDots dotId names
+        return dotId
 
 instance ProtoDot (ModuleExportList a) where
   toDot =
@@ -179,7 +191,7 @@ instance ProtoDot (ModuleExportList a) where
       ExportAll ->
         emitShape FolderShape "ExportsAll"
 
-instance (ProtoDot t, ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoModule a k t) where
+instance (ProtoDot t) => ProtoDot (ProtoModule a Kind t) where
   toDot =
     \case
       ProtoModule{..} -> do
@@ -194,7 +206,7 @@ emitDefinition name label def = do
   emitEdge dotId def
   return dotId
 
-instance (ProtoDot t, ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoDefinition a k t) where
+instance (ProtoDot t) => ProtoDot (ProtoDefinition a Kind t) where
   toDot =
     \case
       ProtoDType _ name def ->
@@ -228,7 +240,7 @@ connectDots a from = do
   emitEdge from dotId
   return dotId
 
-instance (ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoTypeDefinition a k t) where
+instance ProtoDot (ProtoTypeDefinition a Kind t) where
   toDot =
     \case
       ProtoTypeDefinition{..} -> do
@@ -243,7 +255,7 @@ annotation t = do
   emitEdge dotId t
   return dotId
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoFunctionDefinition a k t) where
+instance (ProtoDot t) => ProtoDot (ProtoFunctionDefinition a Kind t) where
   toDot =
     \case
       ProtoFunctionDefinition{..} -> do
@@ -254,7 +266,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoFunctionDefinition a k
         emitEdge dotId protoOfunctionDefinitionExpression
         return dotId
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoLetDefinition a k t) where
+instance (ProtoDot t) => ProtoDot (ProtoLetDefinition a Kind t) where
   toDot =
     \case
       ProtoLetDefinition{..} -> do
@@ -264,7 +276,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoLetDefinition a k t) w
         emitEdge dotId protoOletDefinitionExpression
         return dotId
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoFoldDefinition a k t) where
+instance (ProtoDot t) => ProtoDot (ProtoFoldDefinition a Kind t) where
   toDot =
     \case
       ProtoFoldDefinition{..} -> do
@@ -273,7 +285,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoFoldDefinition a k t) 
         emitEdges dotId protoOfoldDefinitionClauses
         return dotId
 
-instance (ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoTraitDefinition a k) where
+instance ProtoDot (ProtoTraitDefinition a Kind) where
   toDot =
     \case
       ProtoTraitDefinition{..} -> do
@@ -287,7 +299,7 @@ instance (ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoTraitDefinition a k) w
             emitEdge id1 s
         return dotId
 
-instance (ProtoDot k, ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoInstanceDefinition a k t) where
+instance (ProtoDot t) => ProtoDot (ProtoInstanceDefinition a Kind t) where
   toDot =
     \case
       ProtoInstanceDefinition{..} -> do
@@ -297,7 +309,7 @@ instance (ProtoDot k, ProtoDot t, Show k, Pretty k) => ProtoDot (ProtoInstanceDe
         emitEdges dotId protoOinstanceDefinitionImplementations
         return dotId
 
-instance (ProtoDot k, Show k, Pretty k) => ProtoDot (ProtoAliasDefinition a k) where
+instance ProtoDot (ProtoAliasDefinition a Kind) where
   toDot =
     \case
       ProtoAliasDefinition{..} -> do
@@ -350,19 +362,21 @@ instance (ProtoDot t) => ProtoDot (With t) where
     emitEdge dotId t
     return dotId
 
-instance (Show k, Pretty k) => ProtoDot (Type TypeIndex k) where
+instance (Show k, Pretty k, HasKind (Type TypeIndex k)) => ProtoDot (Type TypeIndex k) where
   toDot t = do
-    emitShape HexagonShape (prettyType t)
+    (id1, _) <- withTypeInfo (kindOf t) $ emitShape HexagonShape (prettyType t)
+    return id1
 
-instance (Show k, Pretty k) => ProtoDot (Type Parameter k) where
+instance (Show k, Pretty k, HasKind (Type Parameter k)) => ProtoDot (Type Parameter k) where
   toDot t = do
-    emitShape HexagonShape (prettyType t)
+    (id1, _) <- withTypeInfo (kindOf t) $ emitShape HexagonShape (prettyType t)
+    return id1
 
 instance ProtoDot Kind where
   toDot k = do
     emitShape HexagonShape (Text.pack $ show k)
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Binding Expression a k t) where
+instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot (Binding Expression a k t) where
   toDot =
     \case
       BPattern _ p e -> do
@@ -405,7 +419,7 @@ instance ProtoDot Primitive where
       LString str ->
         emitNamedShape RectangleShape (Just $ showt str) "LString"
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Expression a k t) where
+instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot (Expression a k t) where
   toDot =
     \case
       EAnnotation _ t e -> do
@@ -520,7 +534,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Expression a k t) where
             emitEdge id1 e
         return dotId
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Pattern a k t) where
+instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot (Pattern a k t) where
   toDot =
     \case
       PAnnotation _ t p -> do
@@ -608,7 +622,7 @@ instance ProtoDot Operator where
       OListConcatenation ->
         emitShape RectangleShape "OListConcatenation"
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Clause a k t) where
+instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot (Clause a k t) where
   toDot =
     \case
       EClause{..} -> do
@@ -617,7 +631,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Clause a k t) where
         emitEdges dotId clauseChoices
         return dotId
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Choice Expression a k t) where
+instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot (Choice Expression a k t) where
   toDot =
     \case
       CPlain _ gs e -> do
@@ -626,7 +640,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Choice Expression a k t) wh
         emitEdge dotId e
         return dotId
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Guard Expression a k t) where
+instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot (Guard Expression a k t) where
   toDot =
     \case
       CGuard e -> do
@@ -634,7 +648,7 @@ instance (ProtoDot t, Show k, Pretty k) => ProtoDot (Guard Expression a k t) whe
         emitEdge dotId e
         return dotId
 
-instance (ProtoDot t, Show k, Pretty k) => ProtoDot (CompiledClause a k t) where
+instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot (CompiledClause a k t) where
   toDot =
     \case
       ECompiledClause{..} -> do
@@ -678,7 +692,10 @@ edgeLabelToDotSyntax =
 
 labelToDotSyntax :: Text -> Maybe Text -> Text
 labelToDotSyntax label Nothing = "\"" <> escapeQuotes label <> "\""
-labelToDotSyntax label (Just name) = "<" <> escapeQuotes label <> "<BR/>" <> inBold name <> "<BR/>" <> ">"
+labelToDotSyntax label (Just name) = "<" <> escapeHtmlEntities (escapeHtmlEntities label) <> "<BR/>" <> inBold (escapeHtmlEntities name) <> "<BR/>" <> ">"
+
+escapeHtmlEntities :: Text -> Text
+escapeHtmlEntities = Text.replace "<" "&lt;" . Text.replace ">" "&gt;"
 
 {-# INLINE escapeQuotes #-}
 escapeQuotes :: Text -> Text
