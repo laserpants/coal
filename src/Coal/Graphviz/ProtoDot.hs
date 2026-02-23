@@ -392,8 +392,8 @@ instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot
 
 withTypeInfo :: (ProtoDot t) => t -> ProtoDotGen Int -> ProtoDotGen (Int, Int)
 withTypeInfo t e = do
-  id1 <- toDot t
-  id2 <- toDot e
+  id1 <- toDot e
+  id2 <- toDot t
   emitEdge id1 id2
   return (id1, id2)
 
