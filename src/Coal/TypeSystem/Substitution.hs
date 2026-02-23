@@ -179,7 +179,11 @@ fromList = Substitution . Map.fromList
 
 normalizeScheme :: IndexedScheme -> IndexedScheme
 normalizeScheme Forall{..} =
-  Forall (Set.fromList (snd <$> m)) (apply sub schemeTraits) (apply sub schemeTypeBody)
+  Forall
+    { schemeTypeVariables = Set.fromList (snd <$> m)
+    , schemeTraits = apply sub schemeTraits
+    , schemeTypeBody = apply sub schemeTypeBody
+    }
  where
   free = Set.map typeIndexId (Set.filter (`notElem` schemeTypeVariables) (typeIndexesIn schemeTypeBody))
   sub = fromList (second TVariable <$> m)
