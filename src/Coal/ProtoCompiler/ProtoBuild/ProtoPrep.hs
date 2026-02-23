@@ -23,14 +23,13 @@ import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
-import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme, normalizeTypeIndexes)
+import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Debug.Trace
-import Extras (Name, for, forM, forM_, second, traverse_)
+import Extras (Name, for, forM, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
