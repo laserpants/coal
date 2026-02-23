@@ -14,7 +14,6 @@ import Control.Monad.Except (MonadError, throwError)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, member)
 import qualified Data.Set as Set
-import Debug.Trace
 
 newtype ProtoKindUnifier a = ProtoKindUnifier {protoOkindUnifierMonad :: Either ProtoKindError a}
   deriving
