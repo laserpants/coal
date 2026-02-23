@@ -6,3 +6,4 @@ dist
 .coal
 coal.lock.json
 coal.json
+tmp

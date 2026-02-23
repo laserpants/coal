@@ -9,6 +9,7 @@ module Coal.TypeSystem.Substitution (
   Substitution (..),
   mapsTo,
   fromList,
+  normalizeScheme,
   normalizeTypeIndexes,
   applyT,
   merge,
@@ -26,7 +27,7 @@ import Data.Map.Strict (Map, keysSet, union)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, intersection)
 import qualified Data.Set as Set
-import Extras (fromMaybe)
+import Extras (fromMaybe, second)
 
 class Substitutable s where
   apply :: Substitution -> s -> s
@@ -175,6 +176,19 @@ mapsTo index = Substitution . Map.singleton index
 {-# INLINE fromList #-}
 fromList :: [(Int, IndexedType)] -> Substitution
 fromList = Substitution . Map.fromList
+
+normalizeScheme :: IndexedScheme -> IndexedScheme
+normalizeScheme Forall{..} =
+  Forall (Set.fromList (snd <$> m)) (apply sub schemeTraits) (apply sub schemeTypeBody)
+ where
+  free = Set.map typeIndexId (Set.filter (`notElem` schemeTypeVariables) (typeIndexesIn schemeTypeBody))
+  sub = fromList (second TVariable <$> m)
+  m = do
+    (TypeIndex k t, n) <-
+      zip
+        [TypeIndex k t | TypeIndex k t <- Set.toList schemeTypeVariables]
+        (filter (`notElem` free) [0 ..])
+    pure (t, TypeIndex k n)
 
 normalizeTypeIndexes :: (Substitutable s, TypeIndexed Kind s) => s -> s
 normalizeTypeIndexes a = apply (fromList sub) a

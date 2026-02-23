@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -22,13 +23,14 @@ import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
-import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo)
+import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme, normalizeTypeIndexes)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extras (Name, for, forM, forM_, traverse_)
+import Debug.Trace
+import Extras (Name, for, forM, forM_, second, traverse_)
 
 insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
@@ -133,6 +135,10 @@ collectTypeConstructors =
           , protoOtypeConstructorEntryDataConstructors =
               for protoOtypeDefinitionConstructors constructorName
           }
+
+    -- TODO: remove
+    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+      pure ()
     ProtoDImport _ path imports -> do
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       forM_ imports $
@@ -187,6 +193,10 @@ collectDataConstructors =
                 lift $ lift $ protoOinsertNameC constructorName constructorScheme
      where
       ctorSet = Set.fromList (for protoOtypeDefinitionConstructors constructorName)
+
+    -- TODO: remove
+    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+      pure ()
     ProtoDImport loc path imports -> do
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       forM_ imports $
@@ -195,7 +205,8 @@ collectDataConstructors =
             | name `elem` protoObuildExportedNames ->
                 case Environment.lookup name protoObuildTypeConstructors of
                   Nothing ->
-                    error "TODO"
+                    error (show (path, name))
+                  --                    error "TODO"
                   Just ProtoTypeConstructorEntry{..} ->
                     forM_ ctors $
                       \ctor -> do
@@ -367,7 +378,7 @@ instantiateScheme Forall{..} =
           <$> toIndexed schemeTypeVariables
           <*> toIndexed schemeTraits
           <*> toIndexed schemeTypeBody
-    pure (s, env)
+    pure (normalizeScheme s, env)
 
 instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
@@ -375,6 +386,9 @@ instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 collectImports :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectImports =
   \case
+    -- TODO: remove
+    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+      pure ()
     ProtoDImport _ path imports -> do
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       forM_ imports $
@@ -405,7 +419,8 @@ collectImports =
             | otherwise ->
                 error "TODO"
     ProtoDQualifiedImport _ path ->
-      error "!"
+      pure ()
+    --      error "!"
     _ ->
       pure ()
 
@@ -414,7 +429,7 @@ importedBuild path = do
   env <- gets protoOcompilerModules
   case Environment.lookup (principalPath path) env of
     Nothing ->
-      error "TODO"
+      error (show path) -- "TODO"
     Just build ->
       return build
 

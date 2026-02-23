@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -5,6 +6,7 @@
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Common.Environment (mapEnvironment)
 import Coal.Compiler.Build.Core (buildEnv, replacePlaceholders)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Journal (tellErrors)
@@ -12,11 +14,13 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (generateKindConstraints, protoOdefine, protoOgenerateConstraints, solveX, typeDefinitionsC)
 import Coal.Graphviz.ProtoDot
-import Coal.Language (IndexedType, Kind, Trait (..), indexed, instanceLabel, normalizeRowTypes, typeOf)
+import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), TypeIndex, indexed, instanceLabel, normalizeRowTypes, typeOf)
 import Coal.Language.Module (Module (..), fromProtoModule, principalPath, toProtoModule)
+import Coal.Language.Type (Type (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
+import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), protoObuildNames)
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOupdateSupplyC, setCurrentModuleC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOupdateSupplyC, setCurrentModuleC)
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -31,8 +35,10 @@ import Data.Data (Data)
 import Data.List (nub)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Data.Text.Lazy (toStrict)
 import Debug.Trace
-import Text.Pretty.Simple (pPrint)
+import Text.Pretty.Simple (pPrint, pShowNoColor)
+import TextShow (showt)
 
 passTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference = Pass{runPass = pass}
@@ -72,6 +78,14 @@ runTypeInference m = do
   (tdefs, _) <- typeDefinitionsC defs
 
   nm <- lift $ ti (toProtoModule m)
+  liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (modulePath m))) (generateDotSyntax nm)
+  ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+  liftIO $ Text.writeFile ("tmp/names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
+  stor <- gets compilerNameStore
+  liftIO $ Text.writeFile ("tmp/oldnames_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ stor)
+
+  traceShowM (modulePath m)
+
   pure (Module p ns (normalizeTypeIndexes tdefs))
  where
   -- pure (fromProtoModule nm)
