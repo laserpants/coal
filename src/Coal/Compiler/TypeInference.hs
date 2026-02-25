@@ -8,7 +8,6 @@
 
 module Coal.Compiler.TypeInference where -- (typeDefinitionsC, toIndexedType, toIndexedScheme) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Type.Parameterized
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
@@ -28,10 +27,11 @@ import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint.Generation
+import Coal.ProtoTypeSystem.Parameterized
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Except (MonadError (..), forM_, void, when)
-import Control.Monad.Reader (asks)
+import Control.Monad.Reader (asks, runReaderT)
 import Control.Monad.State (evalState, get, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
@@ -41,7 +41,8 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
-import Extras (Dictionary, Name)
+import Debug.Trace
+import Extras (Dictionary, Name, tellRight)
 
 generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 generateKindConstraints modul = do
@@ -122,19 +123,45 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                 protoOletDefinitionExpression
               Just (With _ annotationType) ->
                 EAnnotation loc annotationType protoOletDefinitionExpression
-      ProtoDInstance a ProtoInstanceDefinition{..} ->
-        forM_ protoOinstanceDefinitionImplementations $
-          \case
-            ProtoDFunction _ name ProtoFunctionDefinition{..} ->
-              -- TODO
-              pure ()
-            ProtoDLet _ name ProtoLetDefinition{..} ->
-              -- TODO
-              pure ()
-            _ ->
-              pure ()
+      ProtoDInstance _ ProtoInstanceDefinition{..} -> do
+        ProtoBuild{..} <- protoOgetCurrentBuildC
+        case Environment.lookup protoOinstanceDefinitionTraitName protoObuildTraits of
+          Nothing ->
+            error "TODO"
+          Just ProtoTraitEntry{..} ->
+            forM_ protoOinstanceDefinitionImplementations $
+              \case
+                d@(ProtoDFunction loc name def) ->
+                  case Environment.lookup name protoOtraitEntryInterface of
+                    Nothing ->
+                      error "TODO"
+                    Just sig -> do
+                      s <- protoOtoIndexedScheme sig
+                      protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
+                      protoOgenerateConstraints $ ProtoDFunction loc (instanceLabel trait name) def
+                d@(ProtoDLet loc name def) ->
+                  case Environment.lookup name protoOtraitEntryInterface of
+                    Nothing ->
+                      error "TODO"
+                    Just sig -> do
+                      s <- protoOtoIndexedScheme sig
+                      protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
+                      protoOgenerateConstraints $ ProtoDLet loc (instanceLabel trait name) def
+                _ ->
+                  pure ()
+           where
+            trait = Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
       _ ->
         pure ()
+
+protoOtoIndexedScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ProtoCompilerT m a (Scheme TypeIndex Kind IndexedType)
+protoOtoIndexedScheme Forall{..} = do
+  env <- protoOinstantiateTypeIndexes schemeTypeVariables
+  flip runReaderT (Environment.fromList env) $
+    Forall
+      <$> toIndexed schemeTypeVariables
+      <*> toIndexed schemeTraits
+      <*> toIndexed schemeTypeBody
 
 freshTypeVariable :: (Monad m) => ProtoCompilerT m a (Type TypeIndex Kind)
 freshTypeVariable = supplied (TVariable . TypeIndex KType)

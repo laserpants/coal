@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Coal.Graphviz.Dot (Dot (..), writeDotFile) where
+module Coal.Graphviz.Dot (Dot (..), writeDotFile, generateDot) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Name)

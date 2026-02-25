@@ -293,10 +293,10 @@ instance ProtoDot (ProtoTraitDefinition a Kind) where
         emitEdges dotId protoOtraitDefinitionConstraints
         emitEdge dotId protoOtraitDefinitionParameter
         forM_ protoOtraitDefinitionInterface $
-          \(name, s) -> do
-            id1 <- emitNamedShape EllipseShape (Just name) "Member"
+          \ProtoTraitDefinitionInterfaceEntry{..} -> do
+            id1 <- emitNamedShape EllipseShape (Just protoOtraitDefinitionInterfaceEntryName) "Member"
             emitEdge dotId id1
-            emitEdge id1 s
+            emitEdge id1 protoOtraitDefinitionInterfaceEntryScheme
         return dotId
 
 instance (ProtoDot t) => ProtoDot (ProtoInstanceDefinition a Kind t) where
