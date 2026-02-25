@@ -70,55 +70,55 @@ testModuleBuiltinsPreKinds =
                 , protoOtraitDefinitionParameter =
                     Parameter () "a"
                 , protoOtraitDefinitionInterface =
-                    [
-                      ( "from_int32"
-                      , Forall
-                          (Set.fromList [Parameter () "a"])
-                          [Trait "Numeric" (TVariable (Parameter () "a"))]
-                          (TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a"))
-                      )
-                    ,
-                      ( "from_int64"
-                      , Forall
-                          (Set.fromList [Parameter () "a"])
-                          [Trait "Numeric" (TVariable (Parameter () "a"))]
-                          (TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
-                      )
-                    ,
-                      ( "from_bignum"
-                      , Forall
-                          (Set.fromList [Parameter () "a"])
-                          [Trait "Numeric" (TVariable (Parameter () "a"))]
-                          (TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
-                      )
-                    ,
-                      ( "negate"
-                      , Forall
-                          (Set.fromList [Parameter () "a"])
-                          [Trait "Numeric" (TVariable (Parameter () "a"))]
-                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
-                      )
-                    ,
-                      ( "(+)"
-                      , Forall
-                          (Set.fromList [Parameter () "a"])
-                          [Trait "Numeric" (TVariable (Parameter () "a"))]
-                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
-                      )
-                    ,
-                      ( "(-)"
-                      , Forall
-                          (Set.fromList [Parameter () "a"])
-                          [Trait "Numeric" (TVariable (Parameter () "a"))]
-                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
-                      )
-                    ,
-                      ( "(*)"
-                      , Forall
-                          (Set.fromList [Parameter () "a"])
-                          [Trait "Numeric" (TVariable (Parameter () "a"))]
-                          (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
-                      )
+                    [ ProtoTraitDefinitionInterfaceEntry
+                        "from_int32"
+                        ( Forall
+                            (Set.fromList [Parameter () "a"])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "from_int64"
+                        ( Forall
+                            (Set.fromList [Parameter () "a"])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "from_bignum"
+                        ( Forall
+                            (Set.fromList [Parameter () "a"])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "negate"
+                        ( Forall
+                            (Set.fromList [Parameter () "a"])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "(+)"
+                        ( Forall
+                            (Set.fromList [Parameter () "a"])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "(-)"
+                        ( Forall
+                            (Set.fromList [Parameter () "a"])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "(*)"
+                        ( Forall
+                            (Set.fromList [Parameter () "a"])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+                        )
                     ]
                 }
             )
@@ -318,55 +318,55 @@ testModuleBuiltins =
                 , protoOtraitDefinitionParameter =
                     Parameter KType "a"
                 , protoOtraitDefinitionInterface =
-                    [
-                      ( "from_int32"
-                      , Forall
-                          (Set.fromList [Parameter KType "a"])
-                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
-                          (TIntrinsic IInt32 `TArrow` TVariable (Parameter KType "a"))
-                      )
-                    ,
-                      ( "from_int64"
-                      , Forall
-                          (Set.fromList [Parameter KType "a"])
-                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
-                          (TIntrinsic IInt64 `TArrow` TVariable (Parameter KType "a"))
-                      )
-                    ,
-                      ( "from_bignum"
-                      , Forall
-                          (Set.fromList [Parameter KType "a"])
-                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
-                          (TIntrinsic IBignum `TArrow` TVariable (Parameter KType "a"))
-                      )
-                    ,
-                      ( "negate"
-                      , Forall
-                          (Set.fromList [Parameter KType "a"])
-                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
-                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
-                      )
-                    ,
-                      ( "(+)"
-                      , Forall
-                          (Set.fromList [Parameter KType "a"])
-                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
-                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
-                      )
-                    ,
-                      ( "(-)"
-                      , Forall
-                          (Set.fromList [Parameter KType "a"])
-                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
-                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
-                      )
-                    ,
-                      ( "(*)"
-                      , Forall
-                          (Set.fromList [Parameter KType "a"])
-                          [Trait "Numeric" (TVariable (Parameter KType "a"))]
-                          (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
-                      )
+                    [ ProtoTraitDefinitionInterfaceEntry
+                        "from_int32"
+                        ( Forall
+                            (Set.fromList [Parameter KType "a"])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (TIntrinsic IInt32 `TArrow` TVariable (Parameter KType "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "from_int64"
+                        ( Forall
+                            (Set.fromList [Parameter KType "a"])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (TIntrinsic IInt64 `TArrow` TVariable (Parameter KType "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "from_bignum"
+                        ( Forall
+                            (Set.fromList [Parameter KType "a"])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (TIntrinsic IBignum `TArrow` TVariable (Parameter KType "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "negate"
+                        ( Forall
+                            (Set.fromList [Parameter KType "a"])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "(+)"
+                        ( Forall
+                            (Set.fromList [Parameter KType "a"])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "(-)"
+                        ( Forall
+                            (Set.fromList [Parameter KType "a"])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
+                        )
+                    , ProtoTraitDefinitionInterfaceEntry
+                        "(*)"
+                        ( Forall
+                            (Set.fromList [Parameter KType "a"])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
+                        )
                     ]
                 }
             )
@@ -1440,7 +1440,7 @@ xyz modules = do
         let qq = generateDotSyntax mm
 
         --        pPrint errors
-        --sub1 <- gets protoOcompilerSubstitution
+        -- sub1 <- gets protoOcompilerSubstitution
         --        traceShowM sub1
         pPrint qq
 

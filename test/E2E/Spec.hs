@@ -2,12 +2,12 @@
 
 module E2E.Spec (e2eSpec, runSpec) where
 
-import Coal.ProtoCompiler.ProtoStack
 import Coal.Compiler (pipeline)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
+import Coal.ProtoCompiler.ProtoStack
 import System.Process
 import Test.Hspec
 
