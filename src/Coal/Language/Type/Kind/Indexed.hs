@@ -25,7 +25,6 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Tuple.Extra (secondM)
 
 class ToKindIndexed t u where
   toKindIndexed :: (MonadState s m, Supply s) => t -> m u
@@ -106,7 +105,14 @@ instance ToKindIndexed (ProtoTraitDefinition a k) (ProtoTraitDefinition a Kind) 
         ProtoTraitDefinition protoOtraitDefinitionMetadata protoOtraitDefinitionTraitName
           <$> toKindIndexed protoOtraitDefinitionConstraints
           <*> toKindIndexed protoOtraitDefinitionParameter
-          <*> traverse (secondM toKindIndexed) protoOtraitDefinitionInterface
+          <*> toKindIndexed protoOtraitDefinitionInterface
+
+instance ToKindIndexed (ProtoTraitDefinitionInterfaceEntry k) (ProtoTraitDefinitionInterfaceEntry Kind) where
+  toKindIndexed =
+    \case
+      ProtoTraitDefinitionInterfaceEntry{..} ->
+        ProtoTraitDefinitionInterfaceEntry protoOtraitDefinitionInterfaceEntryName
+          <$> toKindIndexed protoOtraitDefinitionInterfaceEntryScheme
 
 instance ToKindIndexed (ProtoFoldDefinition a k ()) (ProtoFoldDefinition a Kind ()) where
   toKindIndexed =

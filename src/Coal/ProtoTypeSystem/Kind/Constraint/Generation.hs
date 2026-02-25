@@ -353,7 +353,7 @@ instance ProtoEmitKinds (ProtoTraitDefinition a Kind) where
             <>^ protoOemitKindConstraints protoOtraitDefinitionParameter
             <>^ protoOemitKindConstraints (Trait protoOtraitDefinitionTraitName protoOtraitDefinitionParameter)
         forM_ protoOtraitDefinitionInterface $
-          \(_, Forall{..}) -> do
+          \(ProtoTraitDefinitionInterfaceEntry _ Forall{..}) -> do
             ps2 <-
               protoOemitKindConstraints schemeTypeVariables
                 <>^ protoOemitKindConstraints schemeTraits

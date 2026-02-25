@@ -91,7 +91,7 @@ data TypeIndex k = TypeIndex
 instance (Binary k) => Binary (TypeIndex k)
 
 instance Pretty (TypeIndex k) where
-  pretty (TypeIndex _ i) = pretty i
+  pretty (TypeIndex _ i) = "t" <> "." <> pretty i
 
 data Parameter k = Parameter
   { parameterKind :: k
@@ -294,7 +294,7 @@ prettyTypePrec prec =
     TConstructor _ name ->
       pretty name
     TVariable v ->
-      "t" <> "_" <> pretty v
+      pretty v
     TIntrinsic i ->
       prettyIntrinsic i
     TRecord t ->

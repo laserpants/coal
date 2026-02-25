@@ -29,6 +29,7 @@ import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_)
 
 insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
@@ -204,7 +205,8 @@ collectDataConstructors =
             | name `elem` protoObuildExportedNames ->
                 case Environment.lookup name protoObuildTypeConstructors of
                   Nothing ->
-                    error (show (path, name))
+                    pure ()
+                  -- error (show (path, name))
                   --                    error "TODO"
                   Just ProtoTypeConstructorEntry{..} ->
                     forM_ ctors $
@@ -254,7 +256,7 @@ collectTraits =
           , protoOtraitEntryName = name
           , protoOtraitEntryParameter = protoOtraitDefinitionParameter
           , protoOtraitEntryConstraints = protoOtraitDefinitionConstraints
-          , protoOtraitEntryInterface = Environment.fromList protoOtraitDefinitionInterface
+          , protoOtraitEntryInterface = Environment.fromList (fmap traitDefinitionInterfaceEntryToPair protoOtraitDefinitionInterface)
           }
     -- TODO
     ProtoDImport loc path items ->
@@ -265,21 +267,25 @@ collectTraits =
     _ ->
       pure ()
 
+traitDefinitionInterfaceEntryToPair :: ProtoTraitDefinitionInterfaceEntry Kind -> (Name, Scheme Parameter Kind (Type Parameter Kind))
+traitDefinitionInterfaceEntryToPair ProtoTraitDefinitionInterfaceEntry{..} = (protoOtraitDefinitionInterfaceEntryName, protoOtraitDefinitionInterfaceEntryScheme)
+
 collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraitsInterface =
   \case
     ProtoDTrait _ name ProtoTraitDefinition{..} ->
       forM_ protoOtraitDefinitionInterface $
-        \(entryName, entryScheme) -> do
-          (s, _) <- instantiateScheme entryScheme
-          insertNameEntry (ProtoNName entryName s)
+        \ProtoTraitDefinitionInterfaceEntry{..} -> do
+          (s, _) <- instantiateScheme protoOtraitDefinitionInterfaceEntryScheme
+          insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName s)
+          lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName s
           exportList <- ask
-          let insertName = modify (Build.insertBuildExportedName entryName)
+          let insertName = modify (Build.insertBuildExportedName protoOtraitDefinitionInterfaceEntryName)
           case exportList of
             ExportAll ->
               insertName
             Exports exports
-              | exports `includesName` entryName || exports `includesName` name ->
+              | exports `includesName` protoOtraitDefinitionInterfaceEntryName || exports `includesName` name ->
                   insertName
             _ ->
               pure ()

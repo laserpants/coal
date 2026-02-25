@@ -13,6 +13,7 @@ module Coal.ProtoLanguage.ProtoDefinition (
   ProtoTraitDefinition (..),
   ProtoInstanceDefinition (..),
   ProtoAliasDefinition (..),
+  ProtoTraitDefinitionInterfaceEntry (..),
   instanceDefinitionTrait,
 ) where
 
@@ -118,7 +119,7 @@ data ProtoTraitDefinition a k = ProtoTraitDefinition
   , protoOtraitDefinitionTraitName :: Name
   , protoOtraitDefinitionConstraints :: [Trait (Parameter k)]
   , protoOtraitDefinitionParameter :: Parameter k
-  , protoOtraitDefinitionInterface :: [(Name, Scheme Parameter k (Type Parameter k))]
+  , protoOtraitDefinitionInterface :: [ProtoTraitDefinitionInterfaceEntry k]
   }
   deriving
     ( Show
@@ -131,6 +132,22 @@ data ProtoTraitDefinition a k = ProtoTraitDefinition
     )
 
 instance (Binary a, Binary k) => Binary (ProtoTraitDefinition a k)
+
+data ProtoTraitDefinitionInterfaceEntry k = ProtoTraitDefinitionInterfaceEntry
+  { protoOtraitDefinitionInterfaceEntryName :: Name
+  , protoOtraitDefinitionInterfaceEntryScheme :: Scheme Parameter k (Type Parameter k)
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Data
+    , Typeable
+    , Generic
+    )
+
+instance (Binary k) => Binary (ProtoTraitDefinitionInterfaceEntry k)
 
 data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
   { protoOinstanceDefinitionMetadata :: a

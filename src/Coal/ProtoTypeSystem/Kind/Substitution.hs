@@ -26,7 +26,6 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Tuple.Extra (second)
 import Extras (Name)
 
 newtype ProtoKindSubstitution = ProtoKindSubstitution
@@ -438,16 +437,26 @@ instance ProtoKindSubstitutable (ProtoTraitDefinition a Kind) where
     ProtoTraitDefinition
       { protoOtraitDefinitionConstraints = protoOapplyKinds sub protoOtraitDefinitionConstraints
       , protoOtraitDefinitionParameter = protoOapplyKinds sub protoOtraitDefinitionParameter
-      , protoOtraitDefinitionInterface = fmap (second (protoOapplyKinds sub)) protoOtraitDefinitionInterface
+      , protoOtraitDefinitionInterface = protoOapplyKinds sub protoOtraitDefinitionInterface
       , ..
       }
   protoOreplaceVariables ProtoTraitDefinition{..} =
     ProtoTraitDefinition
       { protoOtraitDefinitionConstraints = protoOreplaceVariables protoOtraitDefinitionConstraints
       , protoOtraitDefinitionParameter = protoOreplaceVariables protoOtraitDefinitionParameter
-      , protoOtraitDefinitionInterface = fmap (second protoOreplaceVariables) protoOtraitDefinitionInterface
+      , protoOtraitDefinitionInterface = protoOreplaceVariables protoOtraitDefinitionInterface
       , ..
       }
+
+instance ProtoKindSubstitutable (ProtoTraitDefinitionInterfaceEntry Kind) where
+  protoOapplyKinds sub ProtoTraitDefinitionInterfaceEntry{..} =
+    ProtoTraitDefinitionInterfaceEntry
+      protoOtraitDefinitionInterfaceEntryName
+      (protoOapplyKinds sub protoOtraitDefinitionInterfaceEntryScheme)
+  protoOreplaceVariables ProtoTraitDefinitionInterfaceEntry{..} =
+    ProtoTraitDefinitionInterfaceEntry
+      protoOtraitDefinitionInterfaceEntryName
+      (protoOreplaceVariables protoOtraitDefinitionInterfaceEntryScheme)
 
 instance ProtoKindSubstitutable (ProtoInstanceDefinition a Kind ()) where
   protoOapplyKinds sub ProtoInstanceDefinition{..} =

@@ -48,6 +48,7 @@ import Coal.Language.Module.Path (principalPath)
 import Coal.Language.Pattern
 import Coal.Language.Trait
 import Coal.Language.Type
+import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Kind
 import Coal.Language.Type.Row
 import Coal.Language.Type.Scheme (Scheme (..))
@@ -186,17 +187,23 @@ toProtoTraitDefinition a name TraitDefinition{..} =
         , protoOtraitDefinitionTraitName = name
         , protoOtraitDefinitionConstraints = traitDefinitionRequired
         , protoOtraitDefinitionParameter = traitDefinitionParameter
-        , protoOtraitDefinitionInterface = traitDefinitionMethods
+        , protoOtraitDefinitionInterface = fmap toInterfaceEntry traitDefinitionMethods
         }
     )
+
+toInterfaceEntry :: (Name, Scheme Parameter () (Type Parameter ())) -> ProtoTraitDefinitionInterfaceEntry ()
+toInterfaceEntry (name, scheme) = ProtoTraitDefinitionInterfaceEntry name scheme
 
 fromProtoTraitDefinition :: ProtoTraitDefinition a Kind -> TraitDefinition ()
 fromProtoTraitDefinition ProtoTraitDefinition{..} =
   TraitDefinition
     { traitDefinitionRequired = fmap (fmap fromProtoParameter) protoOtraitDefinitionConstraints
     , traitDefinitionParameter = fromProtoParameter protoOtraitDefinitionParameter
-    , traitDefinitionMethods = fmap (fmap fromProtoScheme) protoOtraitDefinitionInterface
+    , traitDefinitionMethods = fmap fromInterfaceEntry protoOtraitDefinitionInterface
     }
+
+fromInterfaceEntry :: ProtoTraitDefinitionInterfaceEntry Kind -> (Name, Scheme Parameter () (Type Parameter ()))
+fromInterfaceEntry (ProtoTraitDefinitionInterfaceEntry name scheme) = (name, fromProtoScheme scheme)
 
 toProtoInstanceDefinition :: a -> Name -> InstanceDefinition Definition a Kind t -> ProtoDefinition a () t
 toProtoInstanceDefinition a name InstanceDefinition{..} =
@@ -509,12 +516,12 @@ fromProtoModuleDefinition =
     ProtoDInstance a def ->
       fromProtoInstanceDefinition a def
 
-toProtoModule :: Module a Kind () -> ProtoModule a () ()
-toProtoModule Module{..} =
+toProtoModule :: [Definition a Kind ()] -> Module a Kind () -> ProtoModule a () ()
+toProtoModule extra Module{..} =
   ProtoModule
     { protoOmodulePath = modulePath
     , protoOmoduleExportList = toProtoModuleExportList moduleExports
-    , protoOmoduleDefinitions = toProtoModuleDefinitions moduleDefinitions
+    , protoOmoduleDefinitions = toProtoModuleDefinitions (extra <> moduleDefinitions)
     }
 
 fromProtoModule :: ProtoModule a Kind IndexedType -> Module a Kind IndexedType
