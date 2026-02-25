@@ -80,7 +80,7 @@ runTypeInference m = do
   defs <- traverse indexTypes ds
   (tdefs, _) <- typeDefinitionsC defs
 
-  nm <- lift $ ti (toProtoModule builtinTraits m)
+  nm <- lift $ ti (toProtoModule [] m) -- builtinTraits m)
 
   liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (modulePath m))) (generateDotSyntax nm)
   liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
