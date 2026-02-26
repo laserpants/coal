@@ -193,8 +193,7 @@ collectTypeAliases =
           , protoOaliasEntryParams = fmap parameterName protoOaliasDefinitionParameters
           , protoOaliasEntryType = protoOaliasDefinitionType
           }
-
-    ProtoDImport _ path imports -> 
+    ProtoDImport _ path imports ->
       pure ()
     ProtoDQualifiedImport loc path ->
       pure ()
@@ -232,16 +231,19 @@ collectDataConstructors =
                   Nothing ->
                     pure ()
                   -- error (show (path, name))
-                  --                    error "TODO"
                   Just ProtoTypeConstructorEntry{..} ->
-                    forM_ ctors $
-                      \ctor -> do
+                    forM_ dataConstructors $
+                      \ctor ->
                         case Environment.lookup ctor protoObuildDataConstructors of
                           Nothing ->
                             error "TODO"
                           Just entry@ProtoDataConstructorEntry{protoOdataConstructorEntryConstructor = DataConstructor{..}, ..} -> do
                             insertDataConstructor ctor entry
                             lift $ lift $ protoOinsertNameC constructorName constructorScheme
+                   where
+                    dataConstructors
+                      | ["*"] == ctors = protoOtypeConstructorEntryDataConstructors
+                      | otherwise = ctors
             | otherwise ->
                 error "TODO"
           _ ->

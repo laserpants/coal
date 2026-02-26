@@ -16,8 +16,8 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module (Module (..), principalPath)
 import Control.Monad.IO.Class (MonadIO)
-import Extras (Name)
 import Debug.Trace
+import Extras (Name)
 
 passKernelTranslate :: (MonadIO m) => Pass Metadata m (BuildUnit (Module Metadata Kind IndexedType)) (BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)))
 passKernelTranslate = Pass{runPass = \p -> tickBar >> traverse pass p}

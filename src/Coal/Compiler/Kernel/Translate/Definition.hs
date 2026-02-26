@@ -19,8 +19,8 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
-import Extras (Name, (<.>))
 import Debug.Trace
+import Extras (Name, (<.>))
 
 translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
 translateDefinition =
@@ -38,7 +38,7 @@ translateDefinition =
       pure [Kernel.OConstant (moduleName <.> name) c]
     DTrait _ name (TraitDefinition _ _ ds) ->
       forM ds $
-        \(n, Forall _ _ t) -> 
+        \(n, Forall _ _ t) ->
           traitAccessor name n (translateType t)
     DInstance _ name (InstanceDefinition _ t ds) ->
       concatForM ds $
