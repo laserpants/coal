@@ -36,6 +36,7 @@ instance (Pretty t) => Pretty (Trait t) where
   pretty (Trait name t) =
     pretty name <> "<" <> pretty t <> ">"
 
+-- | Qualified type
 data With t = With [Trait t] t
   deriving
     ( Show
