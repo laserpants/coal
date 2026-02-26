@@ -1614,7 +1614,8 @@ runSpec srcPath files = do
   q <-
     evalProtoCompilerT $
       runCompilerT (emptyCompilerEnvironment Nothing) $ do
-        setConfigC defaultConfig{configSilent = True, configSourcePaths = [srcPath]}
+        -- TODO: cache?
+        setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
         runPass pipeline files
   case q of
     Left _ ->

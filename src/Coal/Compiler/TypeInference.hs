@@ -42,7 +42,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Debug.Trace
-import Extras (Dictionary, Name, tellRight)
+import Extras (Dictionary, Name)
 
 generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 generateKindConstraints modul = do

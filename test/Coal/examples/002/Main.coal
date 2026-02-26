@@ -12,6 +12,6 @@ module Main {
     }
 
   fun main() : IO<unit> =
-    println_int32(factorial(5))
+    println_int32(factorial(4))
 
 }
