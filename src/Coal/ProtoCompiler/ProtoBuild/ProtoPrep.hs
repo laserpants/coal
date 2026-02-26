@@ -76,22 +76,24 @@ protoOprepareBuild ProtoModule{..} = do
 
 protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
-  -- collect type constructors
+  -- Collect type constructors
   traverse_ collectTypeConstructors defs
-  -- collect data constructors
+  -- Collect type aliases
+  traverse_ collectTypeAliases defs
+  -- Collect data constructors
   traverse_ collectDataConstructors defs
   -- expand exports
   exports <- expandExports
   local (const exports) $ do
-    -- collect traits
+    -- Collect traits
     traverse_ collectTraits defs
-    -- collect trait interfaces
+    -- Collect trait interfaces
     traverse_ collectTraitsInterface defs
-    -- collect instances
+    -- Collect instances
     traverse_ collectInstances defs
-    -- collect imports
+    -- Collect imports
     traverse_ collectImports defs
-    -- collect placeholders
+    -- Collect placeholders
     traverse_ collectPlaceholders defs
 
 -- TODO: Set qualified names?
@@ -168,9 +170,32 @@ collectTypeConstructors =
                     _ ->
                       pure ()
             | otherwise ->
-                error "TODO"
+                error (show name)
           _ ->
             pure ()
+    ProtoDQualifiedImport loc path ->
+      pure ()
+    _ ->
+      pure ()
+
+collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTypeAliases =
+  \case
+    ProtoDTypeAlias loc name ProtoAliasDefinition{..} -> do
+      insertNameEntry (ProtoNTypeAlias name)
+      insertExportedName name
+      insertAlias name entry
+     where
+      entry =
+        ProtoAliasEntry
+          { protoOaliasEntryMetadata = loc
+          , protoOaliasEntryName = name
+          , protoOaliasEntryParams = fmap parameterName protoOaliasDefinitionParameters
+          , protoOaliasEntryType = protoOaliasDefinitionType
+          }
+
+    ProtoDImport _ path imports -> 
+      pure ()
     ProtoDQualifiedImport loc path ->
       pure ()
     _ ->
