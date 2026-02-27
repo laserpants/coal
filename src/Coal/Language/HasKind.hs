@@ -33,6 +33,8 @@ instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
         KType
       TRecord{} ->
         KType
+      TAlias _ _ k ->
+        kindOf k
       k ->
         head (universeBi k)
 
