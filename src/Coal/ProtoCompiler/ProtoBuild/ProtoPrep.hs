@@ -295,7 +295,7 @@ collectTraits =
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
-          TypeImport _ name members
+          TypeImport _ name _ 
             | name `elem` protoObuildExportedNames ->
                 case Environment.lookup name protoObuildTraits of
                   Nothing ->
@@ -304,24 +304,6 @@ collectTraits =
                   Just ProtoTraitEntry{..} -> do
                     insertNameEntry (ProtoNTrait name)
                     insertTrait name ProtoTraitEntry{..}
-                    forM_ names $
-                      \case
-                        member | member `elem` protoObuildExportedNames -> do
-                          forM_ (Environment.lookupWithDefault [] member protoObuildNames) $
-                            \case
-                              info@(ProtoNName _ s) -> do
-                                modify (insertBuildNameEntry info)
-                                lift $ lift $ protoOinsertNameC name s
-                              _ -> do
-                                pure ()
-                        _ ->
-                          pure ()
-                   where
-                    names
-                      | ["*"] == members = Environment.names protoOtraitEntryInterface
-                      -- TODO: remove
-                      | null members = Environment.names protoOtraitEntryInterface
-                      | otherwise = members
             | otherwise ->
                 error "TODO"
           _ ->
@@ -355,8 +337,41 @@ collectTraitsInterface =
             _ ->
               pure ()
     -- TODO
-    ProtoDImport loc path items ->
+    ProtoDImport _ (Path ["Builtin$"]) imports -> do
       pure ()
+    ProtoDImport loc path imports -> do
+      ProtoBuild{..} <- lift $ lift $ importedBuild path
+      forM_ imports $
+        \case
+          TypeImport _ name members
+            | name `elem` protoObuildExportedNames ->
+                case Environment.lookup name protoObuildTraits of
+                  Nothing ->
+                    pure ()
+                  -- error (show (path, name))
+                  Just ProtoTraitEntry{..} -> do
+                    forM_ names $
+                      \case
+                        member | member `elem` protoObuildExportedNames -> do
+                          forM_ (Environment.lookupWithDefault [] member protoObuildNames) $
+                            \case
+                              info@(ProtoNName _ s) -> do
+                                modify (insertBuildNameEntry info)
+                                lift $ lift $ protoOinsertNameC member s
+                              _ -> do
+                                pure ()
+                        _ ->
+                          pure ()
+                   where
+                    names
+                      | ["*"] == members = Environment.names protoOtraitEntryInterface
+                      -- TODO: remove
+                      | null members = Environment.names protoOtraitEntryInterface
+                      | otherwise = members
+            | otherwise ->
+                error "TODO"
+          _ ->
+            pure ()
     -- TODO
     ProtoDQualifiedImport loc path ->
       pure ()
