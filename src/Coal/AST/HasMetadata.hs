@@ -3,6 +3,7 @@
 
 module Coal.AST.HasMetadata (HasMetadata (..), metadataSpan) where
 
+import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Module.Definition (Definition (..))
@@ -130,6 +131,20 @@ instance HasMetadata (Definition Metadata k ()) where
       DInstance a _ _ -> a
       DTypeAlias a _ _ -> a
       DFold a _ _ -> a
+
+instance HasMetadata (ProtoDefinition Metadata k ()) where
+  getMetadata =
+    \case
+      ProtoDType a _ _ -> a
+      ProtoDTypeAlias a _ _ -> a
+      ProtoDFunction a _ _ -> a
+      ProtoDFunctionGroup a _ _ -> a
+      ProtoDFold a _ _ -> a
+      ProtoDLet a _ _ -> a
+      ProtoDImport a _ _ -> a
+      ProtoDQualifiedImport a _ -> a
+      ProtoDTrait a _ _ -> a
+      ProtoDInstance a _ -> a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs =
