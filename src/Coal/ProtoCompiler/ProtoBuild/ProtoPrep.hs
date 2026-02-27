@@ -9,6 +9,7 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (
   protoOreplacePlaceholders,
 ) where
 
+import Control.Monad (when)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
@@ -64,7 +65,7 @@ insertExportedName name = do
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
+protoOprepareBuild :: (Monad m, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
   build <-
     execStateT
@@ -74,7 +75,7 @@ protoOprepareBuild ProtoModule{..} = do
         }
   insertBuildC build
 
-protoOprepareDefinitions :: (Monad m) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m, Show a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
   -- Collect type constructors
   traverse_ collectTypeConstructors defs
@@ -243,6 +244,7 @@ collectDataConstructors =
                    where
                     dataConstructors
                       | ["*"] == ctors = protoOtypeConstructorEntryDataConstructors
+                      | null ctors = protoOtypeConstructorEntryDataConstructors
                       | otherwise = ctors
             | otherwise ->
                 error "TODO"
@@ -269,7 +271,7 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
 
-collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTraits :: (Monad m, Show a) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraits =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} -> do
@@ -286,8 +288,42 @@ collectTraits =
           , protoOtraitEntryInterface = Environment.fromList (fmap traitDefinitionInterfaceEntryToPair protoOtraitDefinitionInterface)
           }
     -- TODO
-    ProtoDImport loc path items ->
+    ProtoDImport _ (Path ["Builtin$"]) imports -> do
       pure ()
+    ProtoDImport loc path imports -> do
+      ProtoBuild{..} <- lift $ lift $ importedBuild path
+      forM_ imports $
+        \case
+          TypeImport _ name members
+            | name `elem` protoObuildExportedNames ->
+                case Environment.lookup name protoObuildTraits of
+                  Nothing ->
+                    pure ()
+                    -- error (show (path, name))
+                  Just ProtoTraitEntry{..} -> do
+                    insertNameEntry (ProtoNTrait name)
+                    insertTrait name ProtoTraitEntry{..}
+                    forM_ names $
+                      \case
+                        member | member `elem` protoObuildExportedNames -> do
+                          forM_ (Environment.lookupWithDefault [] member protoObuildNames) $
+                            \case
+                              info@(ProtoNName _ s) -> do
+                                modify (insertBuildNameEntry info)
+                                lift $ lift $ protoOinsertNameC name s
+                              _ -> do
+                                pure ()
+                        _ ->
+                          pure ()
+                   where
+                     names 
+                      | ["*"] == members = Environment.names protoOtraitEntryInterface
+                      | null members = Environment.names protoOtraitEntryInterface
+                      | otherwise = members
+            | otherwise ->
+                error "TODO"
+          _ ->
+            pure ()
     -- TODO
     ProtoDQualifiedImport loc path ->
       pure ()
