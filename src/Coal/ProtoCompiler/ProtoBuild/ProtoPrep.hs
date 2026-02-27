@@ -9,7 +9,6 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (
   protoOreplacePlaceholders,
 ) where
 
-import Control.Monad (when)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
@@ -25,6 +24,7 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
 import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme)
+import Control.Monad (when)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
@@ -300,7 +300,7 @@ collectTraits =
                 case Environment.lookup name protoObuildTraits of
                   Nothing ->
                     pure ()
-                    -- error (show (path, name))
+                  -- error (show (path, name))
                   Just ProtoTraitEntry{..} -> do
                     insertNameEntry (ProtoNTrait name)
                     insertTrait name ProtoTraitEntry{..}
@@ -317,7 +317,7 @@ collectTraits =
                         _ ->
                           pure ()
                    where
-                     names 
+                    names
                       | ["*"] == members = Environment.names protoOtraitEntryInterface
                       -- TODO: remove
                       | null members = Environment.names protoOtraitEntryInterface
@@ -494,7 +494,7 @@ collectImports =
       forM_ protoObuildExportedNames $
         \exportedName ->
           forM_ (Environment.lookupWithDefault [] exportedName protoObuildNames) $
-            \case 
+            \case
               ProtoNName name s -> do
                 modify (insertBuildNameEntry (ProtoNName (qualifiedName name) s))
                 lift $ lift $ protoOinsertNameC (qualifiedName name) s
@@ -503,10 +503,8 @@ collectImports =
               ProtoNTrait name ->
                 modify (insertBuildNameEntry (ProtoNTrait (qualifiedName name)))
               ProtoNTypeAlias name ->
-                -- TODO
-                pure ()
-                -- modify (insertBuildNameEntry (ProtoNTrait (principalPath protoObuildPath <.> "name")))
-              ProtoNPlaceholder name ->
+                modify (insertBuildNameEntry (ProtoNTypeAlias (qualifiedName name)))
+              ProtoNPlaceholder{} ->
                 pure ()
     _ ->
       pure ()
