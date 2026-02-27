@@ -345,13 +345,13 @@ collectTraitsInterface =
           insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName s)
           lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName s
           exportList <- ask
-          let insertName = modify (Build.insertBuildExportedName protoOtraitDefinitionInterfaceEntryName)
+          let exportName = modify (Build.insertBuildExportedName protoOtraitDefinitionInterfaceEntryName)
           case exportList of
             ExportAll ->
-              insertName
+              exportName
             Exports exports
               | exports `includesName` protoOtraitDefinitionInterfaceEntryName || exports `includesName` name ->
-                  insertName
+                  exportName
             _ ->
               pure ()
     -- TODO
