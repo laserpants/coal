@@ -3,11 +3,11 @@
 
 module Coal.AST.HasMetadata (HasMetadata (..), metadataSpan) where
 
-import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Pattern (Pattern (..))
+import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError (..), TypeAnnotationError (..))

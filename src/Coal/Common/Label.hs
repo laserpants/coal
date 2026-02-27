@@ -32,4 +32,8 @@ instance (Binary t) => Binary (Label t)
 
 {-# INLINE setLabelName #-}
 setLabelName :: Name -> Label t -> Label t
-setLabelName newName Label{..} = Label{labelName = newName, ..}
+setLabelName newName Label{..} =
+  Label
+    { labelName = newName
+    , ..
+    }
