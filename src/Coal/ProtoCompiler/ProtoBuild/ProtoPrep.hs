@@ -295,7 +295,7 @@ collectTraits =
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
-          TypeImport _ name _ 
+          TypeImport _ name _
             | name `elem` protoObuildExportedNames ->
                 case Environment.lookup name protoObuildTraits of
                   Nothing ->
