@@ -31,7 +31,7 @@ import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Debug.Trace
-import Extras (Name, for, forM, forM_, traverse_)
+import Extras (Name, for, forM, forM_, traverse_, (<.>))
 
 insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
@@ -488,9 +488,26 @@ collectImports =
                       pure ()
             | otherwise ->
                 error "TODO"
-    ProtoDQualifiedImport _ path ->
-      pure ()
-    --      error "!"
+    ProtoDQualifiedImport _ path -> do
+      ProtoBuild{..} <- lift $ lift $ importedBuild path
+      let qualifiedName name = principalPath protoObuildPath <.> name
+      forM_ protoObuildExportedNames $
+        \exportedName ->
+          forM_ (Environment.lookupWithDefault [] exportedName protoObuildNames) $
+            \case 
+              ProtoNName name s -> do
+                modify (insertBuildNameEntry (ProtoNName (qualifiedName name) s))
+                lift $ lift $ protoOinsertNameC (qualifiedName name) s
+              ProtoNType name k ->
+                modify (insertBuildNameEntry (ProtoNType (qualifiedName name) k))
+              ProtoNTrait name ->
+                modify (insertBuildNameEntry (ProtoNTrait (qualifiedName name)))
+              ProtoNTypeAlias name ->
+                -- TODO
+                pure ()
+                -- modify (insertBuildNameEntry (ProtoNTrait (principalPath protoObuildPath <.> "name")))
+              ProtoNPlaceholder name ->
+                pure ()
     _ ->
       pure ()
 
