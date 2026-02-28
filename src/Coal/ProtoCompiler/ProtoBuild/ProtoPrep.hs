@@ -244,8 +244,6 @@ collectDataConstructors =
                    where
                     dataConstructors
                       | ["*"] == ctors = protoOtypeConstructorEntryDataConstructors
-                      -- TODO: remove
-                      | null ctors = protoOtypeConstructorEntryDataConstructors
                       | otherwise = ctors
             | otherwise ->
                 error "TODO"
@@ -365,8 +363,6 @@ collectTraitsInterface =
                    where
                     names
                       | ["*"] == members = Environment.names protoOtraitEntryInterface
-                      -- TODO: remove
-                      | null members = Environment.names protoOtraitEntryInterface
                       | otherwise = members
             | otherwise ->
                 error "TODO"
