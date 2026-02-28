@@ -56,12 +56,19 @@ pass m@(Module path _ _) = do
   names <- gets compilerNameStore
   replacePlaceholders names
 
-  assumptions <- gets (filter (not . isFoldAssumption) . nub . compilerAssumptions)
+  assumptions <- lift $ gets (filter (not . isFoldAssumption) . nub . protoOcompilerAssumptions)
   forM_ assumptions $
     \Assumption{..} -> do
       tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
   unless (null assumptions) $
     throwError NoSuchIdentifier
+
+--  assumptions <- gets (filter (not . isFoldAssumption) . nub . compilerAssumptions)
+--  forM_ assumptions $
+--    \Assumption{..} -> do
+--      tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
+--  unless (null assumptions) $
+--    throwError NoSuchIdentifier
   pure next
 
 isFoldAssumption :: Assumption a t -> Bool
