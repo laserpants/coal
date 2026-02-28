@@ -15,6 +15,9 @@ module Coal.ProtoCompiler.ProtoState (
   overProtoCompilerKindConstraints,
   overProtoCompilerAssumptions,
   overProtoCompilerTypeAnnotationParams,
+  overProtoCompilerConstraintsGenErrors,
+  overProtoCompilerKindConstraintsGenErrors,
+  overProtoCompilerSolverRuleViolations,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -23,8 +26,10 @@ import Coal.Language
 import Coal.Language.Module.Path (Path (..), emptyPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
+import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
+import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Substitution
 import Extras (Dictionary, Over)
@@ -43,6 +48,9 @@ data ProtoCompilerState a = ProtoCompilerState
   , protoOcompilerAssumptions :: [CompilerAssumption a]
   , protoOcompilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , protoOcompilerKindConstraints :: [ProtoKindConstraint]
+  , protoOcompilerConstraintsGenErrors :: [ConstraintsGenError a]
+  , protoOcompilerKindConstraintsGenErrors :: [ProtoKindError]
+  , protoOcompilerSolverRuleViolations :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord)
 
@@ -58,6 +66,9 @@ initialProtoCompilerState =
     , protoOcompilerAssumptions = mempty
     , protoOcompilerTypeAnnotationParams = mempty
     , protoOcompilerKindConstraints = mempty
+    , protoOcompilerConstraintsGenErrors = []
+    , protoOcompilerKindConstraintsGenErrors = []
+    , protoOcompilerSolverRuleViolations = []
     }
 
 {-# INLINE overProtoCompilerSupply #-}
@@ -129,6 +140,30 @@ overProtoCompilerTypeAnnotationParams :: Over (ProtoCompilerState a) (Dictionary
 overProtoCompilerTypeAnnotationParams fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerTypeAnnotationParams = fn protoOcompilerTypeAnnotationParams
+    , ..
+    }
+
+{-# INLINE overProtoCompilerConstraintsGenErrors #-}
+overProtoCompilerConstraintsGenErrors :: Over (ProtoCompilerState a) [ConstraintsGenError a]
+overProtoCompilerConstraintsGenErrors fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerConstraintsGenErrors = fn protoOcompilerConstraintsGenErrors
+    , ..
+    }
+
+{-# INLINE overProtoCompilerKindConstraintsGenErrors #-}
+overProtoCompilerKindConstraintsGenErrors :: Over (ProtoCompilerState a) [ProtoKindError]
+overProtoCompilerKindConstraintsGenErrors fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerKindConstraintsGenErrors = fn protoOcompilerKindConstraintsGenErrors
+    , ..
+    }
+
+{-# INLINE overProtoCompilerSolverRuleViolations #-}
+overProtoCompilerSolverRuleViolations :: Over (ProtoCompilerState a) [InferenceRule Kind a]
+overProtoCompilerSolverRuleViolations fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerSolverRuleViolations = fn protoOcompilerSolverRuleViolations
     , ..
     }
 

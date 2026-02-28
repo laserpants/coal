@@ -28,6 +28,9 @@ module Coal.ProtoCompiler.ProtoStack (
   protoOinsertNamesC,
   setNamesC,
   setTypeAnnotationParamsC,
+  protoOcompilerReportConstraintsGenErrors,
+  protoOcompilerReportKindConstraintsGenErrors,
+  protoOcompilerReportSolverRuleViolations,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -39,6 +42,9 @@ import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
+import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
+import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
+import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Substitution (Substitution)
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT)
@@ -162,3 +168,15 @@ setNamesC names = modify (overProtoCompilerNameStore (const names))
 
 setTypeAnnotationParamsC :: (Monad m) => Dictionary (a, TypeIndex Kind) -> ProtoCompilerT m a ()
 setTypeAnnotationParamsC params = modify (overProtoCompilerTypeAnnotationParams (const params))
+
+{-# INLINE protoOcompilerReportConstraintsGenErrors #-}
+protoOcompilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> ProtoCompilerT m a ()
+protoOcompilerReportConstraintsGenErrors errors = modify (overProtoCompilerConstraintsGenErrors (<> errors))
+
+{-# INLINE protoOcompilerReportKindConstraintsGenErrors #-}
+protoOcompilerReportKindConstraintsGenErrors :: (Monad m) => [ProtoKindError] -> ProtoCompilerT m a ()
+protoOcompilerReportKindConstraintsGenErrors errors = modify (overProtoCompilerKindConstraintsGenErrors (<> errors))
+
+{-# INLINE protoOcompilerReportSolverRuleViolations #-}
+protoOcompilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> ProtoCompilerT m a ()
+protoOcompilerReportSolverRuleViolations errors = modify (overProtoCompilerSolverRuleViolations (<> errors))

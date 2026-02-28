@@ -7,25 +7,30 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module (..), principalPath)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
+import Coal.ProtoCompiler.ProtoState
 import Control.Monad (forM_, unless)
 import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.State (gets)
+import Control.Monad.Trans (lift)
 import Data.List (nub)
 
 passTypePhaseErrors :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passTypePhaseErrors = Pass{runPass = pass}
 
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
 pass m@(Module path _ _) = do
-  constraintsGenErrors <- gets compilerConstraintsGenErrors
+  constraintsGenErrors <- lift $ gets protoOcompilerConstraintsGenErrors
   let errs1 = nub constraintsGenErrors
   forM_ errs1 $
     \err ->
       tellErrors [ConstraintsError err (ErrorLocation (principalPath path) (getMetadata err))]
-  solverRuleViolations <- gets compilerSolverRuleViolations
+
+  solverRuleViolations <- lift $ gets protoOcompilerSolverRuleViolations
   let errs2 = nub solverRuleViolations
   forM_ errs2 $
     \err ->
       tellErrors [SolverError err (ErrorLocation (principalPath path) (getMetadata err))]
+
   unless (null errs1 && null errs2) (throwError TypeError)
   pure m

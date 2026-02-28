@@ -63,12 +63,6 @@ pass m@(Module path _ _) = do
   unless (null assumptions) $
     throwError NoSuchIdentifier
 
---  assumptions <- gets (filter (not . isFoldAssumption) . nub . compilerAssumptions)
---  forM_ assumptions $
---    \Assumption{..} -> do
---      tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
---  unless (null assumptions) $
---    throwError NoSuchIdentifier
   pure next
 
 isFoldAssumption :: Assumption a t -> Bool
@@ -106,7 +100,7 @@ runTypeInference m = do
  where
   Module p ns ds = m
 
-ti :: (MonadIO m, Data a, Show a, Eq a) => ProtoModule a () () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
+ti :: (MonadIO m, Data a, Monoid a, Show a, Eq a) => ProtoModule a () () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
 ti modul = do
   protoOclearAssumptionsC
   protoOclearNameStoreC

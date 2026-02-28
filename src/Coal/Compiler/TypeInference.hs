@@ -21,8 +21,7 @@ import Coal.Language.Module
 import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoJournal (protoOcompilerReportConstraintsGenErrors, protoOcompilerReportKindConstraintsGenErrors)
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearTypeAnnotationParamsC, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertKindConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearTypeAnnotationParamsC, protoOcompilerReportConstraintsGenErrors, protoOcompilerReportKindConstraintsGenErrors, protoOcompilerReportSolverRuleViolations, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertKindConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
 import Coal.ProtoCompiler.ProtoState (ProtoCompilerState (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -340,10 +339,13 @@ solveConstraintsC cs = do
 
 solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> ProtoCompilerT m a Substitution
 solveConstraintsX constraints = do
+  dict <- gets protoOcompilerTypeAnnotationParams
   n <- gets protoOcompilerSupply
   let (sub, m, rs) = solveConstraints n constraints
   protoOupdateSupplyC m
-  -- TODO
+  let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
+  protoOcompilerReportSolverRuleViolations (apply sub rs)
+  protoOcompilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
 solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution

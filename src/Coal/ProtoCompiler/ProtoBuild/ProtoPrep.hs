@@ -65,7 +65,7 @@ insertExportedName name = do
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
+protoOprepareBuild :: (Monad m, Monoid a, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
   build <-
     execStateT
@@ -75,8 +75,43 @@ protoOprepareBuild ProtoModule{..} = do
         }
   insertBuildC build
 
-protoOprepareDefinitions :: (Monad m, Show a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m, Monoid a, Show a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
+  insertNameEntry (ProtoNType "List" (KArrow KType KType))
+  insertTypeConstructor "List" $
+    ProtoTypeConstructorEntry
+      { protoOtypeConstructorEntryMetadata = mempty
+      , protoOtypeConstructorEntryName = "List"
+      , protoOtypeConstructorEntryKind = KArrow KType KType
+      , protoOtypeConstructorEntryDataConstructors = ["::", "[]"]
+      }
+  insertNameEntry (ProtoNName "Zero" (Forall mempty [] (TIntrinsic INat)))
+  insertDataConstructor "Zero" $
+    ProtoDataConstructorEntry
+      { protoOdataConstructorEntryMetaData = mempty
+      , protoOdataConstructorEntryName = "Zero"
+      , protoOdataConstructorEntryConstructor =
+          DataConstructor
+            { constructorName = "Zero"
+            , constructorArity = 0
+            , constructorScheme = Forall mempty [] (TIntrinsic INat)
+            }
+      , protoOdataConstructorEntryConstructorSet = Set.fromList ["Zero", "Succ"]
+      }
+  insertNameEntry (ProtoNName "Succ" (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)))
+  insertDataConstructor "Succ" $
+    ProtoDataConstructorEntry
+      { protoOdataConstructorEntryMetaData = mempty
+      , protoOdataConstructorEntryName = "Succ"
+      , protoOdataConstructorEntryConstructor =
+          DataConstructor
+            { constructorName = "Succ"
+            , constructorArity = 1
+            , constructorScheme = Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
+            }
+      , protoOdataConstructorEntryConstructorSet = Set.fromList ["Zero", "Succ"]
+      }
+
   -- Collect type constructors
   traverse_ collectTypeConstructors defs
   -- Collect type aliases
@@ -99,7 +134,7 @@ protoOprepareDefinitions defs = do
 
 -- TODO: Set qualified names?
 
-expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
+expandExports :: (Monad m, Monoid a) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
 expandExports = do
   exportList <- ask
   ProtoBuild{protoObuildDataConstructors} <- get
