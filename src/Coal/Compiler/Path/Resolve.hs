@@ -56,11 +56,12 @@ resolveModule roots fp =
 
     -- Find all roots that are directory prefixes of the canonical file
     let matching = filter (`isDirectoryPrefix` canFile) roots'
-    bestRoot <- case matching of
-      [] ->
-        throwError $ "File is not inside any source root. Canonical file: " ++ canFile
-      _ ->
-        return $ maximumBy (comparing length) matching
+    bestRoot <-
+      case matching of
+        [] ->
+          throwError $ "File is not inside any source root. Canonical file: " ++ canFile
+        _ ->
+          return $ maximumBy (comparing length) matching
 
     -- Compute relative path and check extension
     let rel = makeRelative bestRoot canFile
