@@ -24,13 +24,12 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
 import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme)
-import Control.Monad (when)
+import Control.Monad (unless)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_, (<.>))
 
 insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
@@ -65,7 +64,7 @@ insertExportedName name = do
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m, Monoid a, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
+protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
   build <-
     execStateT
@@ -75,7 +74,7 @@ protoOprepareBuild ProtoModule{..} = do
         }
   insertBuildC build
 
-protoOprepareDefinitions :: (Monad m, Monoid a, Show a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
   insertNameEntry (ProtoNType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
@@ -134,7 +133,7 @@ protoOprepareDefinitions defs = do
 
 -- TODO: Set qualified names?
 
-expandExports :: (Monad m, Monoid a) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
+expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
 expandExports = do
   exportList <- ask
   ProtoBuild{protoObuildDataConstructors} <- get
@@ -181,30 +180,19 @@ collectTypeConstructors =
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
-          TypeImport _ name _
-            | name `elem` protoObuildExportedNames ->
-                forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
-                  \case
-                    ProtoNType{} ->
-                      case Environment.lookup name protoObuildTypeConstructors of
-                        Nothing ->
-                          error "TODO"
-                        Just entry ->
-                          insertTypeConstructor name entry
-                    ProtoNTrait{} ->
-                      case Environment.lookup name protoObuildTraits of
-                        Nothing ->
-                          error "TODO"
-                        Just entry ->
-                          insertTrait name entry
-                    ProtoNTypeAlias{} ->
-                      case Environment.lookup name protoObuildAliases of
-                        Nothing ->
-                          error "TODO"
-                        Just entry ->
-                          insertAlias name entry
-                    _ ->
-                      pure ()
+          TypeImport loc name _
+            | name `elem` protoObuildExportedNames -> do
+                build <- lift $ lift $ importedBuild path
+                found <- insertTypeName build loc name
+                unless found $ do
+                  error "TODO"
+            -- throwError PreflightFailure
+
+            -- found <- insertTypeName path loc name
+            -- unless found $ do
+            --  tellErrors [MissingType name path (ErrorLocation this loc)]
+            --  throwError PreflightFailure
+
             | otherwise ->
                 error (show name)
           _ ->
@@ -213,6 +201,37 @@ collectTypeConstructors =
       pure ()
     _ ->
       pure ()
+
+insertTypeName :: (Monad m) => ProtoBuild a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) Bool
+insertTypeName ProtoBuild{..} loc name =
+  or <$> forM (Environment.lookupWithDefault [] name protoObuildNames) go
+ where
+  go =
+    \case
+      ProtoNType{} ->
+        case Environment.lookup name protoObuildTypeConstructors of
+          Nothing ->
+            error "TODO"
+          Just entry -> do
+            insertTypeConstructor name entry
+            return True
+      ProtoNTrait{} ->
+        case Environment.lookup name protoObuildTraits of
+          Nothing ->
+            error "TODO"
+          Just entry -> do
+            insertTrait name entry
+            return True
+      ProtoNTypeAlias{} ->
+        case Environment.lookup name protoObuildAliases of
+          Nothing ->
+            error "TODO"
+          Just ProtoAliasEntry{..} -> do
+            insertAlias name ProtoAliasEntry{..}
+            forM_ (constructors protoOaliasEntryType) (insertTypeName ProtoBuild{..} loc)
+            return True
+      _ ->
+        return False
 
 collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTypeAliases =
@@ -305,7 +324,7 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
 
-collectTraits :: (Monad m, Show a) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraits =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} -> do
