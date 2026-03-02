@@ -32,7 +32,6 @@ import Control.Monad.Trans (lift)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
