@@ -12,6 +12,7 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
+import Coal.Language.Module (qualified)
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
@@ -24,13 +25,16 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
 import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme)
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
+import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_, (<.>))
+import Extras.Control.Monad (concatForM)
 
 insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
@@ -131,7 +135,46 @@ protoOprepareDefinitions defs = do
     -- Collect placeholders
     traverse_ collectPlaceholders defs
 
--- TODO: Set qualified names?
+  build <- get
+  qualifiedNames <- traverse (qualifiedImports build) defs
+  modify (setQualifiedNames (Environment.fromList (concat qualifiedNames)))
+
+qualifiedImports :: (Monad m) => ProtoBuild a -> ProtoDefinition a k t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) [(Name, Name)]
+qualifiedImports ProtoBuild{..} =
+  \case
+    ProtoDImport _ path names ->
+      concatForM names $
+        \case
+          NameImport _ name ->
+            pure [(name, principalPath path <.> name)]
+          TypeImport _ name ["*"] ->
+            case Environment.lookup name protoObuildTypeConstructors of
+              Just ProtoTypeConstructorEntry{..} ->
+                pure
+                  [(n, principalPath path <.> n) | n <- protoOtypeConstructorEntryDataConstructors]
+              _ ->
+                case Environment.lookup name protoObuildTraits of
+                  Just ProtoTraitEntry{..} ->
+                    pure
+                      [(name_, principalPath path <.> name_) | name_ <- Environment.names protoOtraitEntryInterface]
+                  _ ->
+                    pure []
+          TypeImport _ _ ctors ->
+            pure [(ctor, principalPath path <.> ctor) | ctor <- ctors]
+    ProtoDQualifiedImport _ path -> do
+      ProtoBuild{protoObuildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
+      concatForM (Set.toList exportedNames) $
+        \name ->
+          --          concatForM (fromMaybe [] $ Environment.lookup name importedNames) $
+          --            \case
+          --              ProtoNName{} -> do
+          --                when (Path ["List"] == path) $
+          --                  traceShowM (qualified name path)
+          pure [(qualified name path, qualified name path)]
+    --              _ ->
+    --                pure []
+    _ ->
+      pure []
 
 expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
 expandExports = do

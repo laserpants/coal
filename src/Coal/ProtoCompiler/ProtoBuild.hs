@@ -14,6 +14,7 @@ module Coal.ProtoCompiler.ProtoBuild (
   setBuildKernelNames,
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
+  setQualifiedNames,
   insertBuildNameEntry,
   removeBuildNamePlaceholder,
   replaceBuildNameEntry,
@@ -56,6 +57,7 @@ data ProtoBuild a = ProtoBuild
   , protoObuildTraits :: Environment (ProtoTraitEntry a)
   , protoObuildInstances :: Environment (InstanceMap (ProtoInstanceEntry a))
   , protoObuildAliases :: Environment (ProtoAliasEntry a)
+  , protoObuildQualifiedNames :: Environment Name
   , protoObuildBitcode :: Maybe ByteString
   , protoObuildHash :: Maybe Hash256
   , protoObuildKernelNames :: Environment Kernel.Type
@@ -79,6 +81,7 @@ protoOemptyBuild =
     , protoObuildTraits = mempty
     , protoObuildInstances = mempty
     , protoObuildAliases = mempty
+    , protoObuildQualifiedNames = mempty
     , protoObuildBitcode = Nothing
     , protoObuildHash = Nothing
     , protoObuildKernelNames = mempty
@@ -188,6 +191,13 @@ overBuildAliases f ProtoBuild{..} =
     , ..
     }
 
+overBuildQualifiedNames :: (Environment Name -> Environment Name) -> ProtoBuild a -> ProtoBuild a
+overBuildQualifiedNames f ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildQualifiedNames = f protoObuildQualifiedNames
+    , ..
+    }
+
 insertBuildAlias :: Name -> ProtoAliasEntry a -> ProtoBuild a -> ProtoBuild a
 insertBuildAlias name = overBuildAliases . Environment.insert name
 
@@ -223,6 +233,13 @@ setBuildKernelConstructors :: Environment Int -> ProtoBuild a -> ProtoBuild a
 setBuildKernelConstructors env ProtoBuild{..} =
   ProtoBuild
     { protoObuildKernelConstructors = env
+    , ..
+    }
+
+setQualifiedNames :: Environment Name -> ProtoBuild a -> ProtoBuild a
+setQualifiedNames names ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildQualifiedNames = names
     , ..
     }
 

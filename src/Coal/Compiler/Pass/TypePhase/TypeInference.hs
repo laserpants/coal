@@ -5,7 +5,6 @@
 
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
-import Coal.TypeSystem.Constraint
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import Coal.Compiler.Build.Core (buildEnv, replacePlaceholders)
@@ -24,13 +23,14 @@ import Coal.Language.Type (Type (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), protoObuildNames)
 import Coal.ProtoCompiler.ProtoBuild.ProtoPrep
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOinsertNameC, protoOupdateSupplyC, setCurrentModuleC, protoOinsertConstraintsC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOinsertConstraintsC, protoOinsertNameC, protoOupdateSupplyC, setCurrentModuleC)
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
 import Coal.ProtoTypeSystem.Kind.Substitution
 import Coal.ProtoTypeSystem.Kind.Unification
+import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..), normalizedName)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
@@ -38,13 +38,13 @@ import Control.Monad.Except
 import Control.Monad.State (gets, modify, runState)
 import Data.Data (Data)
 import Data.List (nub)
+import qualified Data.Map as Map
+import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
 import Data.Text.Lazy (toStrict)
 import Debug.Trace
 import Text.Pretty.Simple (pPrint, pShowNoColor)
 import TextShow (showt)
-import qualified Data.Map as Map
-import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
 
 passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference = Pass{runPass = pass}
