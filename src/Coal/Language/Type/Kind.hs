@@ -12,6 +12,7 @@ module Coal.Language.Type.Kind (
   unfoldKind,
   applyKind,
   tupleKind,
+  tupleConstructorKind,
 ) where
 
 import Data.Binary (Binary)
@@ -19,6 +20,8 @@ import Data.Data (Data, Typeable)
 import Data.List (isPrefixOf)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Text as Text
+import Extras (Name)
 import Extras.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter (Doc, Pretty (..), group, (<+>))
@@ -60,6 +63,9 @@ applyKind ks k
 tupleKind :: Int -> Kind
 tupleKind n = foldKind KType (replicate n KType)
 
+tupleConstructorKind :: Name -> Kind
+tupleConstructorKind con = tupleKind (read (drop 6 (Text.unpack con)))
+
 precKArrow :: Int
 precKArrow = 1 -- a -> b
 
@@ -76,7 +82,7 @@ prettyKindPrec prec =
     KTrait ->
       "Trait"
     KVariable v ->
-      "k" <> pretty v
+      "k." <> pretty v
     KArrow k1 k2 ->
       parensIf (prec > precKArrow) $
         group (prettyKindPrec (precKArrow + 1) k1 <+> "→" <+> prettyKindPrec precKArrow k2)

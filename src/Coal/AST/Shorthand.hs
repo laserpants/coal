@@ -31,75 +31,75 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name)
 
 {-# INLINE matchE #-}
-matchE :: (Monoid a) => Expression a () () -> NonEmpty (Clause a () ()) -> Expression a () ()
+matchE :: (Monoid a) => Expression a k () -> NonEmpty (Clause a k ()) -> Expression a k ()
 matchE = EMatch mempty ()
 
 {-# INLINE varE #-}
-varE :: (Monoid a) => Name -> Expression a () ()
+varE :: (Monoid a) => Name -> Expression a k ()
 varE = EVariable mempty . label
 
 {-# INLINE varE' #-}
-varE' :: a -> Name -> Expression a () ()
+varE' :: a -> Name -> Expression a k ()
 varE' a = EVariable a . label
 
 {-# INLINE ifE #-}
-ifE :: (Monoid a) => Expression a () () -> Expression a () () -> Expression a () () -> Expression a () ()
+ifE :: (Monoid a) => Expression a k () -> Expression a k () -> Expression a k () -> Expression a k ()
 ifE = EIf mempty ()
 
 {-# INLINE letE #-}
-letE :: (Monoid a) => Name -> Expression a () () -> Expression a () () -> Expression a () ()
+letE :: (Monoid a) => Name -> Expression a k () -> Expression a k () -> Expression a k ()
 letE name = ERecursiveLet mempty (PVariable mempty (label name))
 
 {-# INLINE letE' #-}
-letE' :: a -> Name -> Expression a () () -> Expression a () () -> Expression a () ()
+letE' :: a -> Name -> Expression a k () -> Expression a k () -> Expression a k ()
 letE' a name = ERecursiveLet a (PVariable a (label name))
 
 {-# INLINE applicationE #-}
-applicationE :: (Monoid a) => Expression a () () -> NonEmpty (Expression a () ()) -> Expression a () ()
+applicationE :: (Monoid a) => Expression a k () -> NonEmpty (Expression a k ()) -> Expression a k ()
 applicationE = EApplication mempty ()
 
 {-# INLINE applicationE' #-}
-applicationE' :: a -> Expression a () () -> NonEmpty (Expression a () ()) -> Expression a () ()
+applicationE' :: a -> Expression a k () -> NonEmpty (Expression a k ()) -> Expression a k ()
 applicationE' a = EApplication a ()
 
 {-# INLINE lambdaE #-}
-lambdaE :: (Monoid a) => NonEmpty (Pattern a () ()) -> Expression a () () -> Expression a () ()
+lambdaE :: (Monoid a) => NonEmpty (Pattern a k ()) -> Expression a k () -> Expression a k ()
 lambdaE = ELambda mempty
 
 {-# INLINE lambdaE' #-}
-lambdaE' :: a -> NonEmpty (Pattern a () ()) -> Expression a () () -> Expression a () ()
+lambdaE' :: a -> NonEmpty (Pattern a k ()) -> Expression a k () -> Expression a k ()
 lambdaE' = ELambda
 
 {-# INLINE lambda1E #-}
-lambda1E :: (Monoid a) => Name -> Expression a () () -> Expression a () ()
+lambda1E :: (Monoid a) => Name -> Expression a k () -> Expression a k ()
 lambda1E var = ELambda mempty (PVariable mempty (label var) :| [])
 
 {-# INLINE lambdaAnyE #-}
-lambdaAnyE :: (Monoid a) => Expression a () () -> Expression a () ()
+lambdaAnyE :: (Monoid a) => Expression a k () -> Expression a k ()
 lambdaAnyE = ELambda mempty (PAny mempty () :| [])
 
 {-# INLINE lambdaAnyE' #-}
-lambdaAnyE' :: a -> Expression a () () -> Expression a () ()
+lambdaAnyE' :: a -> Expression a k () -> Expression a k ()
 lambdaAnyE' a = ELambda a (PAny a () :| [])
 
 {-# INLINE selectE #-}
-selectE :: (Monoid a) => Name -> Expression a () () -> Expression a () ()
+selectE :: (Monoid a) => Name -> Expression a k () -> Expression a k ()
 selectE = ESelect mempty . label
 
 {-# INLINE tupleE #-}
-tupleE :: (Monoid a) => NonEmpty (Expression a () ()) -> Expression a () ()
+tupleE :: (Monoid a) => NonEmpty (Expression a k ()) -> Expression a k ()
 tupleE = ETuple mempty ()
 
 {-# INLINE literalBoolE #-}
-literalBoolE :: (Monoid a) => Bool -> Expression a () ()
+literalBoolE :: (Monoid a) => Bool -> Expression a k ()
 literalBoolE = ELiteral mempty . LBool
 
 {-# INLINE opAndE #-}
-opAndE :: (Monoid a) => Expression a () ()
+opAndE :: (Monoid a) => Expression a k ()
 opAndE = EOperator mempty () OLogicalAnd
 
 {-# INLINE plainClauseE #-}
-plainClauseE :: (Monoid a) => Pattern a () () -> Expression a () () -> Clause a () ()
+plainClauseE :: (Monoid a) => Pattern a k () -> Expression a k () -> Clause a k ()
 plainClauseE p e = EClause mempty p (CPlain mempty [] e :| [])
 
 {-# INLINE label #-}
@@ -107,19 +107,19 @@ label :: Name -> Label ()
 label = Label ()
 
 {-# INLINE varP #-}
-varP :: (Monoid a) => Name -> Pattern a () ()
+varP :: (Monoid a) => Name -> Pattern a k ()
 varP = PVariable mempty . Label ()
 
 {-# INLINE constructorP #-}
-constructorP :: (Monoid a) => Name -> [Pattern a () ()] -> Pattern a () ()
+constructorP :: (Monoid a) => Name -> [Pattern a k ()] -> Pattern a k ()
 constructorP name = PConstructor mempty (Label () name)
 
 {-# INLINE anyP #-}
-anyP :: (Monoid a) => Pattern a () ()
+anyP :: (Monoid a) => Pattern a k ()
 anyP = PAny mempty ()
 
 {-# INLINE tupleP #-}
-tupleP :: (Monoid a) => NonEmpty (Pattern a () ()) -> Pattern a () ()
+tupleP :: (Monoid a) => NonEmpty (Pattern a k ()) -> Pattern a k ()
 tupleP = PTuple mempty ()
 
 {-# INLINE funDef #-}

@@ -51,9 +51,9 @@ passTypeInference = Pass{runPass = pass}
 
 pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
 pass m@(Module path _ _) = do
---  env <- buildEnv
---  setNamesC env
---  insertNamesC builtinFunctions
+  --  env <- buildEnv
+  --  setNamesC env
+  --  insertNamesC builtinFunctions
 
   next <- runTypeInference m
 
@@ -87,7 +87,7 @@ runTypeInference m = do
 
   nm <- lift $ ti (toProtoModule [] m) -- builtinTraits m)
   liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (modulePath m))) (generateDotSyntax nm)
---  liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
+  --  liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
   ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
   liftIO $ Text.writeFile ("tmp/names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
   stor <- gets compilerNameStore
@@ -106,12 +106,6 @@ runTypeInference m = do
 
 ti :: (MonadIO m, Data a, Monoid a, Show a, Eq a) => ProtoModule a () () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
 ti modul = do
-  protoOclearAssumptionsC
-  protoOclearNameStoreC
-  setCurrentModuleC modul
-
-  forM_ builtinFunctions $ uncurry protoOinsertNameC
-
   indexed <- inferKinds modul
   protoOprepareBuild indexed
   newModule <- inferTypes indexed

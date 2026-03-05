@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -22,7 +23,7 @@ import Coal.Language.HasKind (HasKind (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
 import Coal.Language.Type (Parameter (..), Type (..))
-import Coal.Language.Type.Kind (Kind (..))
+import Coal.Language.Type.Kind (Kind (..), tupleConstructorKind)
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.ProtoLanguage.ProtoDefinition
@@ -36,6 +37,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 import Extras (Dictionary, Name, concatForM, second, (<$$>), (<>^))
 import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
@@ -101,6 +103,13 @@ instance ProtoEmitKinds (Type Parameter Kind) where
         protoOemitKindConstraints t1 <>^ protoOemitKindConstraints t2
       TArrow t1 t2 ->
         protoOemitKindConstraints t1 <>^ protoOemitKindConstraints t2
+      TConstructor k "List" -> do
+        tellRight [ProtoKEquality k (KArrow KType KType)]
+        pure []
+      TConstructor k con
+        | "#Tuple" `Text.isPrefixOf` con -> do
+            tellRight [ProtoKEquality k (tupleConstructorKind con)]
+            pure []
       TConstructor k name -> do
         env <- ask
         case Environment.lookup name env of
