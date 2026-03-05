@@ -7,14 +7,15 @@ import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..))
 import Control.Monad.Except (MonadIO)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 
-passPrep :: (MonadIO m, Monoid a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind ())
+passPrep :: (MonadIO m, Monoid a, Eq a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passPrep = Pass{runPass = pass}
 
-pass :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+pass :: (MonadIO m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind ())
 pass = withCurrentModuleC prep
 
-prep :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+prep :: (MonadIO m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind ())
 prep m = do
   clearAssumptionsC
   clearNameStoreC
