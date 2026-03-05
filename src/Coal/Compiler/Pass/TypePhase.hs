@@ -21,13 +21,13 @@ typePhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Mod
 typePhasePasses =
   passPrep
     >-> passExpandFunctionGroups
-    >-> generateDebugArtifacts "IntegerLiteralPatterns"
-    >-> overlayEnvironment passExpandAliases
-    >-> generateDebugArtifacts "ExpandAliases"
+----    >-> generateDebugArtifacts "IntegerLiteralPatterns"
+--    >-> overlayEnvironment passExpandAliases
+----    >-> generateDebugArtifacts "ExpandAliases"
     >-> passTopLevelFolds
     >-> passExpressionFolds
-    >-> generateDebugArtifacts "Folds"
+----    >-> generateDebugArtifacts "Folds"
     >-> passLambdaMatchExpansion
     >-> overlayEnvironment passTypeInference
-    >-> generateDebugArtifacts "TypeInference"
+--    >-> generateDebugArtifacts "TypeInference"
     >-> passTypePhaseErrors

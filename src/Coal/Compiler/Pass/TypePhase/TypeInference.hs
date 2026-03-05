@@ -46,14 +46,14 @@ import Debug.Trace
 import Text.Pretty.Simple (pPrint, pShowNoColor)
 import TextShow (showt)
 
-passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
+passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (ProtoModule a Kind ()) (Module a Kind IndexedType)
 passTypeInference = Pass{runPass = pass}
 
-pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
-pass m@(Module path _ _) = do
-  --  env <- buildEnv
-  --  setNamesC env
-  --  insertNamesC builtinFunctions
+pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
+pass m@(ProtoModule path _ _) = do
+  env <- buildEnv
+  setNamesC env
+  insertNamesC builtinFunctions
 
   next <- runTypeInference m
 
@@ -80,18 +80,18 @@ indexTypes ds = run (indexed ds) =<< gets compilerSupply
     insertSupplyC n
     pure r
 
-runTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
+runTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
 runTypeInference m = do
-  defs <- traverse indexTypes ds
-  (tdefs, _) <- typeDefinitionsC defs
+--  defs <- traverse indexTypes ds
+--  (tdefs, _) <- typeDefinitionsC defs
 
-  nm <- lift $ ti (toProtoModule [] m) -- builtinTraits m)
-  liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (modulePath m))) (generateDotSyntax nm)
+  nm <- lift $ ti m -- builtinTraits m)
+  liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (protoOmodulePath m))) (generateDotSyntax nm)
   --  liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
   ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
-  liftIO $ Text.writeFile ("tmp/names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
-  stor <- gets compilerNameStore
-  liftIO $ Text.writeFile ("tmp/oldnames_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ stor)
+  liftIO $ Text.writeFile ("tmp/names_" <> Text.unpack (principalPath (protoOmodulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
+--  stor <- gets compilerNameStore
+--  liftIO $ Text.writeFile ("tmp/oldnames_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ stor)
 
   --  traceShowM (modulePath m)
 
@@ -101,10 +101,11 @@ runTypeInference m = do
   --  traceShowM (definitionName <$> (moduleDefinitions $ fromProtoModule nm))
 
   pure (fromProtoModule nm)
- where
-  Module p ns ds = m
 
-ti :: (MonadIO m, Data a, Monoid a, Show a, Eq a) => ProtoModule a () () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
+-- where
+--  Module p ns ds = m
+
+ti :: (MonadIO m, Data a, Monoid a, Show a, Eq a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
 ti modul = do
   indexed <- inferKinds modul
   protoOprepareBuild indexed
@@ -141,9 +142,9 @@ inferTypes modul = do
       , ..
       }
 
-inferKinds :: (MonadIO m, Show a) => ProtoModule a () () -> ProtoCompilerT m a (ProtoModule a Kind ())
-inferKinds modul = do
-  indexed <- toKindIndexed modul
+inferKinds :: (MonadIO m, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind ())
+inferKinds indexed = do
+  --indexed <- toKindIndexed modul
   generateKindConstraints indexed
   constraints <- gets protoOcompilerKindConstraints
   case protoOkindUnifierMonad (protoOsolveKindConstraints constraints) of

@@ -72,7 +72,8 @@ replacePlaceholders store =
   go name info =
     case Environment.lookup name store of
       Nothing ->
-        error "Implementation error"
+        pure ()
+        -- error "Implementation error"
       Just s ->
         modify $ addName (info name s)
 
