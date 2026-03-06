@@ -8,7 +8,6 @@
 module Coal.Compiler.Aliases (AliasTransform (..)) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
@@ -21,7 +20,6 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Debug.Trace
 import Extras (Dictionary, Name)
 
 class AliasTransform c where
@@ -185,10 +183,10 @@ instance (AliasTransform t) => AliasTransform (Scheme o k t) where
         Forall schemeTypeVariables schemeTraits
           <$> aliasTransform schemeTypeBody
 
---
-
 instance AliasTransform () where
   aliasTransform _ = pure ()
+
+--
 
 -- instance (AliasTransform t, Data a, Data t) => AliasTransform (Pattern a () t) where
 --  aliasTransform =
@@ -309,7 +307,7 @@ aliasTransformTypeApplication k _ t ts =
 --      t ->
 --        pure t
 
-lookupAlias :: (Monad m, AliasTransform (Type Parameter Kind)) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
+lookupAlias :: (Monad m) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
 lookupAlias t ts name = do
   env <- asks compilerAliasEnvironment
   case Environment.lookup name env of
