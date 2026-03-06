@@ -8,6 +8,7 @@ module Coal.ProtoCompiler.ProtoState (
   initialProtoCompilerState,
   overProtoCompilerSupply,
   overProtoCompilerModules,
+  overProtoCompilerModuleWithPath,
   overProtoCompilerCurrentPath,
   overProtoCompilerSubstitution,
   overProtoCompilerNameStore,
@@ -23,7 +24,7 @@ module Coal.ProtoCompiler.ProtoState (
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
 import Coal.Language
-import Coal.Language.Module.Path (Path (..), emptyPath)
+import Coal.Language.Module.Path (Path (..), principalPath, emptyPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
@@ -33,6 +34,7 @@ import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Substitution
 import Extras (Dictionary, Over)
+import qualified Coal.Common.Environment as Environment
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
@@ -84,6 +86,14 @@ overProtoCompilerModules :: Over (ProtoCompilerState a) (Environment (ProtoBuild
 overProtoCompilerModules fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerModules = fn protoOcompilerModules
+    , ..
+    }
+
+{-# INLINE overProtoCompilerModuleWithPath #-}
+overProtoCompilerModuleWithPath :: Path -> Over (ProtoCompilerState a) (ProtoBuild a)
+overProtoCompilerModuleWithPath path fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerModules = Environment.adjust fn (principalPath path) protoOcompilerModules
     , ..
     }
 

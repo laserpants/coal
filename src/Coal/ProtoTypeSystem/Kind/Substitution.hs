@@ -7,16 +7,19 @@ module Coal.ProtoTypeSystem.Kind.Substitution (
   ProtoKindSubstitution (..),
 ) where
 
+import Coal.Common.Environment (Environment (..), mapEnvironment)
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait (..), With (..))
-import Coal.Language.Type (Parameter (..), Type (..))
+import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
+import Coal.ProtoCompiler.ProtoBuild (InstanceMap, ProtoBuild (..))
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
@@ -60,6 +63,10 @@ instance (ProtoKindSubstitutable k) => ProtoKindSubstitutable (Map Name k) where
   protoOapplyKinds = fmap . protoOapplyKinds
   protoOreplaceVariables = fmap protoOreplaceVariables
 
+instance (ProtoKindSubstitutable k) => ProtoKindSubstitutable (Environment k) where
+  protoOapplyKinds = mapEnvironment . protoOapplyKinds
+  protoOreplaceVariables = mapEnvironment protoOreplaceVariables
+
 instance (Ord k, ProtoKindSubstitutable k) => ProtoKindSubstitutable (Set k) where
   protoOapplyKinds = Set.map . protoOapplyKinds
   protoOreplaceVariables = Set.map protoOreplaceVariables
@@ -68,7 +75,7 @@ instance (ProtoKindSubstitutable n, ProtoKindSubstitutable k) => ProtoKindSubsti
   protoOapplyKinds sub (a, b) = (protoOapplyKinds sub a, protoOapplyKinds sub b)
   protoOreplaceVariables = fmap protoOreplaceVariables
 
-instance (Ord k, ProtoKindSubstitutable k, ProtoKindSubstitutable t) => ProtoKindSubstitutable (Scheme Parameter k t) where
+instance (Ord (o k), ProtoKindSubstitutable (o k), ProtoKindSubstitutable t) => ProtoKindSubstitutable (Scheme o k t) where
   protoOapplyKinds sub =
     \case
       Forall{..} ->
@@ -132,7 +139,23 @@ instance (ProtoKindSubstitutable k) => ProtoKindSubstitutable (Parameter k) wher
       Parameter k name ->
         Parameter (protoOreplaceVariables k) name
 
-instance ProtoKindSubstitutable (Type Parameter Kind) where
+instance (ProtoKindSubstitutable k) => ProtoKindSubstitutable (TypeIndex k) where
+  protoOapplyKinds sub =
+    \case
+      TypeIndex{..} ->
+        TypeIndex
+          { typeIndexKind = protoOapplyKinds sub typeIndexKind
+          , ..
+          }
+  protoOreplaceVariables =
+    \case
+      TypeIndex{..} ->
+        TypeIndex
+          { typeIndexKind = protoOreplaceVariables typeIndexKind
+          , ..
+          }
+
+instance (ProtoKindSubstitutable (o Kind)) => ProtoKindSubstitutable (Type o Kind) where
   protoOapplyKinds sub =
     \case
       TApplication k t1 t2 ->
@@ -165,30 +188,36 @@ instance ProtoKindSubstitutable (Type Parameter Kind) where
         TRecord (protoOreplaceVariables t)
       TRow row ->
         TRow (protoOreplaceVariables row)
-      TVariable param ->
-        TVariable (protoOreplaceVariables param)
+      TVariable var ->
+        TVariable (protoOreplaceVariables var)
       TAlias name ts t ->
         TAlias name (fmap protoOreplaceVariables ts) (protoOreplaceVariables t)
 
-instance (ProtoKindSubstitutable n, ProtoKindSubstitutable k) => ProtoKindSubstitutable (Row Parameter n k) where
+instance (ProtoKindSubstitutable n, ProtoKindSubstitutable (o n), ProtoKindSubstitutable k) => ProtoKindSubstitutable (Row o n k) where
   protoOapplyKinds sub =
     \case
       RExtend name t row ->
         RExtend name (protoOapplyKinds sub t) (protoOapplyKinds sub row)
-      RVariable (Parameter k name) -> do
-        RVariable (Parameter (protoOapplyKinds sub k) name)
+      RVariable var -> do
+        RVariable (protoOapplyKinds sub var)
       RNil ->
         RNil
   protoOreplaceVariables =
     \case
       RExtend name t row ->
         RExtend name (protoOreplaceVariables t) (protoOreplaceVariables row)
-      RVariable (Parameter k name) -> do
-        RVariable (Parameter (protoOreplaceVariables k) name)
+      RVariable var -> do
+        RVariable (protoOreplaceVariables var)
       RNil ->
         RNil
 
 instance (ProtoKindSubstitutable k, ProtoKindSubstitutable t, Ord k) => ProtoKindSubstitutable (DataConstructor Parameter k t) where
+  protoOapplyKinds sub DataConstructor{..} =
+    DataConstructor{constructorScheme = protoOapplyKinds sub constructorScheme, ..}
+  protoOreplaceVariables DataConstructor{..} =
+    DataConstructor{constructorScheme = protoOreplaceVariables constructorScheme, ..}
+
+instance ProtoKindSubstitutable (DataConstructor TypeIndex Kind (Type TypeIndex Kind)) where
   protoOapplyKinds sub DataConstructor{..} =
     DataConstructor{constructorScheme = protoOapplyKinds sub constructorScheme, ..}
   protoOreplaceVariables DataConstructor{..} =
@@ -549,3 +578,139 @@ instance ProtoKindSubstitutable (With (Type Parameter Kind)) where
     \case
       With ts t ->
         With (protoOreplaceVariables ts) (protoOreplaceVariables t)
+
+instance ProtoKindSubstitutable (ProtoBuild a) where
+  protoOapplyKinds sub =
+    \case
+      ProtoBuild{..} ->
+        ProtoBuild
+          { protoObuildNames = protoOapplyKinds sub protoObuildNames
+          , protoObuildDataConstructors = protoOapplyKinds sub protoObuildDataConstructors
+          , protoObuildTypeConstructors = protoOapplyKinds sub protoObuildTypeConstructors
+          , protoObuildTraits = protoOapplyKinds sub protoObuildTraits
+          , protoObuildInstances = mapEnvironment (protoOapplyKinds sub) protoObuildInstances
+          , protoObuildAliases = protoOapplyKinds sub protoObuildAliases
+          , ..
+          }
+  protoOreplaceVariables =
+    \case
+      ProtoBuild{..} ->
+        ProtoBuild
+          { protoObuildNames = protoOreplaceVariables protoObuildNames
+          , protoObuildDataConstructors = protoOreplaceVariables protoObuildDataConstructors
+          , protoObuildTypeConstructors = protoOreplaceVariables protoObuildTypeConstructors
+          , protoObuildTraits = protoOreplaceVariables protoObuildTraits
+          , protoObuildInstances = mapEnvironment protoOreplaceVariables protoObuildInstances
+          , protoObuildAliases = protoOreplaceVariables protoObuildAliases
+          , ..
+          }
+
+instance (ProtoKindSubstitutable a) => ProtoKindSubstitutable (InstanceMap a) where
+  protoOapplyKinds = Map.map . protoOapplyKinds
+  protoOreplaceVariables = Map.map protoOreplaceVariables
+
+instance ProtoKindSubstitutable (ProtoDataConstructorEntry a) where
+  protoOapplyKinds sub =
+    \case
+      ProtoDataConstructorEntry{..} ->
+        ProtoDataConstructorEntry
+          { protoOdataConstructorEntryConstructor =
+              protoOapplyKinds sub protoOdataConstructorEntryConstructor
+          , ..
+          }
+  protoOreplaceVariables =
+    \case
+      ProtoDataConstructorEntry{..} ->
+        ProtoDataConstructorEntry
+          { protoOdataConstructorEntryConstructor =
+              protoOreplaceVariables protoOdataConstructorEntryConstructor
+          , ..
+          }
+
+instance ProtoKindSubstitutable (ProtoTypeConstructorEntry a) where
+  protoOapplyKinds sub =
+    \case
+      ProtoTypeConstructorEntry{..} ->
+        ProtoTypeConstructorEntry
+          { protoOtypeConstructorEntryKind =
+              protoOapplyKinds sub protoOtypeConstructorEntryKind
+          , ..
+          }
+  protoOreplaceVariables =
+    \case
+      ProtoTypeConstructorEntry{..} ->
+        ProtoTypeConstructorEntry
+          { protoOtypeConstructorEntryKind =
+              protoOreplaceVariables protoOtypeConstructorEntryKind
+          , ..
+          }
+
+instance ProtoKindSubstitutable (ProtoTraitEntry a) where
+  protoOapplyKinds sub =
+    \case
+      ProtoTraitEntry{..} ->
+        ProtoTraitEntry
+          { protoOtraitEntryParameter = protoOapplyKinds sub protoOtraitEntryParameter
+          , protoOtraitEntryConstraints = protoOapplyKinds sub protoOtraitEntryConstraints
+          , protoOtraitEntryInterface = protoOapplyKinds sub protoOtraitEntryInterface
+          , ..
+          }
+  protoOreplaceVariables =
+    \case
+      ProtoTraitEntry{..} ->
+        ProtoTraitEntry
+          { protoOtraitEntryParameter = protoOreplaceVariables protoOtraitEntryParameter
+          , protoOtraitEntryConstraints = protoOreplaceVariables protoOtraitEntryConstraints
+          , protoOtraitEntryInterface = protoOreplaceVariables protoOtraitEntryInterface
+          , ..
+          }
+
+instance ProtoKindSubstitutable (ProtoInstanceEntry a) where
+  protoOapplyKinds sub =
+    \case
+      ProtoInstanceEntry{..} ->
+        ProtoInstanceEntry
+          { protoOinstanceEntryType = protoOapplyKinds sub protoOinstanceEntryType
+          , protoOinstanceEntryIndexedType = protoOapplyKinds sub protoOinstanceEntryIndexedType
+          , protoOinstanceEntryTypeSchemes = protoOapplyKinds sub protoOinstanceEntryTypeSchemes
+          , ..
+          }
+  protoOreplaceVariables =
+    \case
+      ProtoInstanceEntry{..} ->
+        ProtoInstanceEntry
+          { protoOinstanceEntryType = protoOreplaceVariables protoOinstanceEntryType
+          , protoOinstanceEntryIndexedType = protoOreplaceVariables protoOinstanceEntryIndexedType
+          , protoOinstanceEntryTypeSchemes = protoOreplaceVariables protoOinstanceEntryTypeSchemes
+          , ..
+          }
+
+instance ProtoKindSubstitutable (ProtoAliasEntry a) where
+  protoOapplyKinds sub =
+    \case
+      ProtoAliasEntry{..} ->
+        ProtoAliasEntry
+          { protoOaliasEntryType = protoOapplyKinds sub protoOaliasEntryType
+          , ..
+          }
+  protoOreplaceVariables =
+    \case
+      ProtoAliasEntry{..} ->
+        ProtoAliasEntry
+          { protoOaliasEntryType = protoOreplaceVariables protoOaliasEntryType
+          , ..
+          }
+
+instance ProtoKindSubstitutable ProtoNameEntry where
+  protoOapplyKinds sub =
+    \case
+      ProtoNName n s ->
+        ProtoNName n (protoOapplyKinds sub s)
+      entry ->
+        entry
+  protoOreplaceVariables =
+    \case
+      ProtoNName n s ->
+        ProtoNName n (protoOreplaceVariables s)
+      entry ->
+        entry

@@ -4,15 +4,15 @@ module Stream {
 
   type alias Stream<a> = Process<a, unit>
 
-//  fun repeat(state : a) : Stream<a> =
-//    process(state, fn(_, _) => state)
-//
-//  fun enum_from(n : int32) : Stream<int32> =
-//    process(n, fn(_, m) => m + 1)
-//
-//  let nats : Stream<int32> = enum_from(0)
-//
-//  let tail = receive()
-//  let head = observe
+  fun repeat(state : a) : Stream<a> =
+    process(state, fn(_, _) => state)
+
+  fun enum_from(n : int32) : Stream<int32> =
+    process(n, fn(_, m) => m + 1)
+
+  let nats : Stream<int32> = enum_from(0)
+
+  let tail = receive()
+  let head = observe
 
 }

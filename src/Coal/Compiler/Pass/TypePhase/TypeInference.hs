@@ -82,16 +82,16 @@ indexTypes ds = run (indexed ds) =<< gets compilerSupply
 
 runTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
 runTypeInference m = do
---  defs <- traverse indexTypes ds
---  (tdefs, _) <- typeDefinitionsC defs
+  --  defs <- traverse indexTypes ds
+  --  (tdefs, _) <- typeDefinitionsC defs
 
   nm <- lift $ ti m -- builtinTraits m)
   liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (protoOmodulePath m))) (generateDotSyntax nm)
   --  liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
   ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
   liftIO $ Text.writeFile ("tmp/names_" <> Text.unpack (principalPath (protoOmodulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
---  stor <- gets compilerNameStore
---  liftIO $ Text.writeFile ("tmp/oldnames_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ stor)
+  --  stor <- gets compilerNameStore
+  --  liftIO $ Text.writeFile ("tmp/oldnames_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ stor)
 
   --  traceShowM (modulePath m)
 
@@ -107,8 +107,8 @@ runTypeInference m = do
 
 ti :: (MonadIO m, Data a, Monoid a, Show a, Eq a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
 ti modul = do
+  protoOprepareBuild modul
   indexed <- inferKinds modul
-  protoOprepareBuild indexed
   newModule <- inferTypes indexed
   protoOreplacePlaceholders
   return newModule
@@ -144,13 +144,14 @@ inferTypes modul = do
 
 inferKinds :: (MonadIO m, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind ())
 inferKinds indexed = do
-  --indexed <- toKindIndexed modul
   generateKindConstraints indexed
   constraints <- gets protoOcompilerKindConstraints
   case protoOkindUnifierMonad (protoOsolveKindConstraints constraints) of
     Left err ->
       error (show err)
-    Right sub ->
+    Right sub -> do
+      modify (overProtoCompilerNameStore (protoOreplaceVariables . protoOapplyKinds sub))
+      modify (overProtoCompilerModuleWithPath (protoOmodulePath indexed) (protoOreplaceVariables . protoOapplyKinds sub))
       return (protoOreplaceVariables (protoOapplyKinds sub indexed))
 
 defineName :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()

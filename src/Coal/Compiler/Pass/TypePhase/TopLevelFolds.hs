@@ -36,10 +36,10 @@ pass ProtoModule{..} = do
   -- withCurrentModuleC (overModuleDefinitionsM (traverse compileTopLevelFolds))
   newModuleDefinitions <- traverse compileTopLevelFolds protoOmoduleDefinitions
   return $
-    ProtoModule{
-      protoOmoduleDefinitions = newModuleDefinitions,
-      ..
-    }
+    ProtoModule
+      { protoOmoduleDefinitions = newModuleDefinitions
+      , ..
+      }
 
 compileTopLevelFolds :: (Monad m, Monoid a, Data a) => ProtoDefinition a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoDefinition a Kind ())
 compileTopLevelFolds =
@@ -123,7 +123,7 @@ updateName _ (name, label) =
       )
 
 eliminateAtPatterns :: Pattern a Kind () -> Pattern a Kind ()
-eliminateAtPatterns = 
+eliminateAtPatterns =
   \case
     PNamedFold a _ ll ->
       PVariable a ll

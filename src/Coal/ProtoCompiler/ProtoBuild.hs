@@ -5,6 +5,7 @@
 
 module Coal.ProtoCompiler.ProtoBuild (
   ProtoBuild (..),
+  InstanceMap,
   protoOemptyBuild,
   overBuildNames,
   setBuildPath,
@@ -63,7 +64,7 @@ data ProtoBuild a = ProtoBuild
   , protoObuildKernelNames :: Environment Kernel.Type
   , protoObuildKernelIRTypes :: Environment IRType
   , protoObuildKernelConstructors :: Environment Int
-  , protoObuildTypedDefinitions :: [ProtoDefinition a Kind IndexedType]
+  --  , protoObuildTypedDefinitions :: [ProtoDefinition a Kind IndexedType]
   }
   deriving (Show, Eq, Ord, Generic)
 
@@ -87,7 +88,7 @@ protoOemptyBuild =
     , protoObuildKernelNames = mempty
     , protoObuildKernelIRTypes = mempty
     , protoObuildKernelConstructors = mempty
-    , protoObuildTypedDefinitions = mempty
+    --   , protoObuildTypedDefinitions = mempty
     }
 
 setBuildPath :: Path -> ProtoBuild a -> ProtoBuild a

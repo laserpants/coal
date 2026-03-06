@@ -6,12 +6,12 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), fromProtoModule, principalPath, toProtoModule)
+import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOinsertConstraintsC, protoOinsertNameC, protoOupdateSupplyC, setCurrentModuleC, setCurrentPathC)
+import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadIO)
 import Control.Monad.Trans (lift)
 import Extras (forM_)
-import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 
 passPrep :: (MonadIO m, Monoid a, Eq a) => Pass a m (Module a Kind ()) (ProtoModule a Kind ())
 passPrep = Pass{runPass = pass}
@@ -21,7 +21,8 @@ pass m = do
   setCompilerCurrentModuleC (modulePath m)
   lift $ setCurrentPathC (modulePath m)
   prep m
-  --withCurrentModuleC prep
+
+-- withCurrentModuleC prep
 
 prep :: (MonadIO m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
 prep m = do
