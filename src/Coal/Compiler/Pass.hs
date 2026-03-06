@@ -16,12 +16,15 @@ import Coal.Compiler.Build.Core (typeConstructorEnv)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoStack
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
 import Control.Monad.State (evalStateT)
+import Control.Monad.Trans (lift)
 import Data.Foldable (for_)
+import Data.Maybe (fromMaybe)
 import System.Console.AsciiProgress
 
 newtype Pass a m i o = Pass {runPass :: i -> CompilerT a (ProtoCompilerT m a) o}
@@ -50,13 +53,16 @@ overlayEnvironment p = Pass{runPass = pass}
  where
   pass i = do
     ModuleBuild{..} <- getCurrentBuildC
+
+    ProtoBuild{..} <- lift (fromMaybe (error "!!") <$> protoOgetBuildC moduleBuildPath)
+
     typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
     local
       ( \env ->
           env
             { compilerDataConstructorEnvironment = moduleDataConstructors
             , compilerTypeConstructorEnvironment = typeConstructors
-            , compilerAliasEnvironment = moduleAliases
+            , compilerAliasEnvironment = protoObuildAliases
             , compilerTraitEnvironment = moduleTraits
             , compilerInstanceEnvironment = moduleInstances
             , compilerDictionaryNameEnvironment = mempty

@@ -13,6 +13,7 @@ module Coal.ProtoCompiler.ProtoStack (
   setCurrentPathC,
   setCurrentModuleC,
   protoOsetSubstitutionC,
+  protoOgetBuildC,
   protoOgetCurrentBuildC,
   protoOupdateBuildC,
   protoOupdateCurrentBuildC,

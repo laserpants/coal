@@ -7,6 +7,7 @@ import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), fromProtoModule, principalPath, toProtoModule)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
+import Coal.ProtoCompiler.ProtoBuild.ProtoPrep
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOinsertConstraintsC, protoOinsertNameC, protoOupdateSupplyC, setCurrentModuleC, setCurrentPathC)
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadIO)
@@ -32,7 +33,9 @@ prep m = do
     protoOclearNameStoreC
     setCurrentModuleC modul
     forM_ builtinFunctions $ uncurry protoOinsertNameC
-    toKindIndexed modul
+    x <- toKindIndexed modul
+    protoOprepareBuild x
+    pure x
 
   clearAssumptionsC
   clearNameStoreC

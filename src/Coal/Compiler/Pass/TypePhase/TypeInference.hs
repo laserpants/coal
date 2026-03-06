@@ -107,7 +107,6 @@ runTypeInference m = do
 
 ti :: (MonadIO m, Data a, Monoid a, Show a, Eq a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
 ti modul = do
-  protoOprepareBuild modul
   indexed <- inferKinds modul
   newModule <- inferTypes indexed
   protoOreplacePlaceholders

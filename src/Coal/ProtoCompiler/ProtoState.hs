@@ -22,9 +22,10 @@ module Coal.ProtoCompiler.ProtoState (
 ) where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Language
-import Coal.Language.Module.Path (Path (..), principalPath, emptyPath)
+import Coal.Language.Module.Path (Path (..), emptyPath, principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
@@ -34,7 +35,6 @@ import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Substitution
 import Extras (Dictionary, Over)
-import qualified Coal.Common.Environment as Environment
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 

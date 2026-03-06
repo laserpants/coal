@@ -23,6 +23,8 @@ import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (toIndexedScheme, toIndexedType)
 import Coal.Language
 import Coal.Language.Module
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.TypeSystem.Kind.Inference (inferTraitKinds)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification (Unifiable (match), evalUnifier)
@@ -77,7 +79,7 @@ replacePlaceholders store =
       Just s ->
         modify $ addName (info name s)
 
-prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind (), ModuleBuild a)
+prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind (), ModuleBuild a)
 prepareBuild module_@(Module path exports defs) =
   flip runStateT emptyModuleBuild $ do
     modify (setPath path)
@@ -359,12 +361,12 @@ typeConstructorEnv = do
   insertTypeInfo :: TypeConstructorEntry a -> Environment Kind -> Environment Kind
   insertTypeInfo (TypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
 
-collectDataConstructors :: (Monad m) => Environment (AliasEntry a) -> Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a m) ()
+collectDataConstructors :: (Monad m) => Environment (AliasEntry a) -> Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a (ProtoCompilerT m a)) ()
 collectDataConstructors aliases env =
   \case
     DType loc _ def -> do
       entries <- lift $ do
-        def' <- local (\e -> e{compilerAliasEnvironment = aliases}) (expandAliases def)
+        def' <- local (\e -> e{compilerAliasEnvironment = undefined aliases}) (aliasTransform def)
         dataConstructorEntries env loc def'
       forM_ entries $
         \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do

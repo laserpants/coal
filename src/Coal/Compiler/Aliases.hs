@@ -3,8 +3,9 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE UndecidableInstances #-}
 
-module Coal.Compiler.Aliases (AliasContext (..)) where
+module Coal.Compiler.Aliases (AliasTransform (..)) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
@@ -12,166 +13,328 @@ import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
+import Debug.Trace
 import Extras (Dictionary, Name)
 
-class AliasContext c where
-  expandAliases :: (Monad m) => c -> CompilerT a m c
+class AliasTransform c where
+  aliasTransform :: (Monad m) => c -> CompilerT a (ProtoCompilerT m a) c
 
-instance AliasContext () where
-  expandAliases _ = pure ()
+instance (AliasTransform c) => AliasTransform [c] where
+  aliasTransform = traverse aliasTransform
 
-instance (AliasContext c) => AliasContext [c] where
-  expandAliases = traverse expandAliases
+instance (AliasTransform c) => AliasTransform (Maybe c) where
+  aliasTransform = traverse aliasTransform
 
-instance (AliasContext c) => AliasContext (Maybe c) where
-  expandAliases = traverse expandAliases
+instance (AliasTransform c) => AliasTransform (Dictionary c) where
+  aliasTransform = traverse aliasTransform
 
-instance (AliasContext c) => AliasContext (Dictionary c) where
-  expandAliases = traverse expandAliases
+instance (AliasTransform c) => AliasTransform (NonEmpty c) where
+  aliasTransform = traverse aliasTransform
 
-instance (AliasContext c) => AliasContext (NonEmpty c) where
-  expandAliases = traverse expandAliases
+instance (AliasTransform t) => AliasTransform (Trait t) where
+  aliasTransform = traverse aliasTransform
 
-instance (AliasContext t) => AliasContext (Trait t) where
-  expandAliases = traverse expandAliases
+instance (AliasTransform t) => AliasTransform (With t) where
+  aliasTransform = traverse aliasTransform
 
-instance (AliasContext t) => AliasContext (With t) where
-  expandAliases = traverse expandAliases
+instance (AliasTransform t) => AliasTransform (Row o k t) where
+  aliasTransform = traverse aliasTransform
 
-instance (AliasContext t) => AliasContext (Row o k t) where
-  expandAliases = traverse expandAliases
-
-instance (AliasContext t, Data a, Data t) => AliasContext (Pattern a () t) where
-  expandAliases =
-    transformM $
-      \case
-        PAnnotation a t p ->
-          PAnnotation a <$> expandAliases t <*> expandAliases p
-        p ->
-          pure p
-
-instance (AliasContext t, Data t, Data a) => AliasContext (Expression a () t) where
-  expandAliases =
-    transformM $
-      \case
-        EAnnotation a t e ->
-          EAnnotation a <$> expandAliases t <*> expandAliases e
-        ELet a bs e ->
-          ELet a <$> expandAliases bs <*> expandAliases e
-        e ->
-          pure e
-
-instance (AliasContext t, Data t, Data a) => AliasContext (Binding Expression a () t) where
-  expandAliases =
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoModule e a t) where
+  aliasTransform =
     \case
-      BPattern a p e ->
-        BPattern a <$> expandAliases p <*> expandAliases e
-      BFunction a n ps e ->
-        BFunction a n <$> expandAliases ps <*> expandAliases e
+      ProtoModule{..} ->
+        ProtoModule protoOmodulePath protoOmoduleExportList
+          <$> aliasTransform protoOmoduleDefinitions
 
-instance (AliasContext t, Data e, Data t) => AliasContext (Module e a t) where
-  expandAliases =
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoDefinition e a t) where
+  aliasTransform =
     \case
-      Module p ns o ->
-        Module p ns <$> expandAliases o
-
-instance (AliasContext t, Data a, Data t) => AliasContext (FunctionDefinition a t) where
-  expandAliases =
-    \case
-      FunctionDefinition a u w ps e ->
-        FunctionDefinition a
-          <$> expandAliases u
-          <*> expandAliases w
-          <*> expandAliases ps
-          <*> expandAliases e
-
-instance (AliasContext t, Data a, Data t) => AliasContext (ConstantDefinition a t) where
-  expandAliases =
-    \case
-      ConstantDefinition a u w e ->
-        ConstantDefinition a
-          <$> expandAliases u
-          <*> expandAliases w
-          <*> expandAliases e
-
-instance (AliasContext t) => AliasContext (Scheme o k t) where
-  expandAliases =
-    \case
-      Forall vs ts t ->
-        Forall vs ts <$> expandAliases t
-
-instance AliasContext TypeDefinition where
-  expandAliases =
-    \case
-      TypeDefinition ps ctors ->
-        TypeDefinition ps <$> traverse expandAliases ctors
-
-instance (AliasContext t) => AliasContext (DataConstructor o k t) where
-  expandAliases =
-    \case
-      DataConstructor{..} -> do
-        s <- expandAliases constructorScheme
-        pure DataConstructor{constructorScheme = s, ..}
-
-instance (AliasContext t, Data a, Data t) => AliasContext (Definition a k t) where
-  expandAliases =
-    \case
-      DFunction loc name f fs ->
-        DFunction loc name <$> expandAliases f <*> traverse expandAliases fs
-      DConstant loc name c fs ->
-        DConstant loc name <$> expandAliases c <*> traverse expandAliases fs
-      DInstance loc name (InstanceDefinition ts t ds) ->
-        DInstance loc name . InstanceDefinition ts t <$> traverse expandAliases ds
-      DType loc name (TypeDefinition params ctors) ->
-        DType loc name . TypeDefinition params <$> traverse expandAliases ctors
-      DTypeAlias loc name (AliasDefinition params t) ->
-        DTypeAlias loc name . AliasDefinition params <$> expandAliases t
+      ProtoDFunction loc name def ->
+        ProtoDFunction loc name <$> aliasTransform def
+      ProtoDLet loc name def ->
+        ProtoDLet loc name <$> aliasTransform def
+      ProtoDInstance loc def ->
+        ProtoDInstance loc <$> aliasTransform def
+      ProtoDType loc name def ->
+        ProtoDType loc name <$> aliasTransform def
+      ProtoDTypeAlias loc name def ->
+        ProtoDTypeAlias loc name <$> aliasTransform def
       o ->
         pure o
 
-expandAliasesTypeApplication :: (Monad m) => ParameterizedType -> ParameterizedType -> NonEmpty ParameterizedType -> CompilerT a m ParameterizedType
-expandAliasesTypeApplication t (TConstructor _ name) ts =
-  lookupAlias t (toList ts) name
-expandAliasesTypeApplication _ t ts =
-  applyTypeArgs () <$> expandAliases t <*> expandAliases ts
-
-instance AliasContext ParameterizedType where
-  expandAliases =
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoFunctionDefinition e a t) where
+  aliasTransform =
     \case
-      t@TApplication{} ->
-        uncurry (expandAliasesTypeApplication t) (listTypeArgs t)
+      ProtoFunctionDefinition{..} ->
+        ProtoFunctionDefinition protoOfunctionDefinitionMetadata
+          <$> aliasTransform protoOfunctionDefinitionAnnotation
+          <*> aliasTransform protoOfunctionDefinitionType
+          <*> aliasTransform protoOfunctionDefinitionPatterns
+          <*> aliasTransform protoOfunctionDefinitionExpression
+
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoLetDefinition e a t) where
+  aliasTransform =
+    \case
+      ProtoLetDefinition{..} ->
+        ProtoLetDefinition protoOletDefinitionMetadata
+          <$> aliasTransform protoOletDefinitionAnnotation
+          <*> aliasTransform protoOletDefinitionType
+          <*> aliasTransform protoOletDefinitionExpression
+
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoInstanceDefinition e a t) where
+  aliasTransform =
+    \case
+      ProtoInstanceDefinition{..} -> do
+        newprotoOInstanceDefinitionImplementations <- aliasTransform protoOinstanceDefinitionImplementations
+        pure $
+          ProtoInstanceDefinition
+            { protoOinstanceDefinitionImplementations = newprotoOInstanceDefinitionImplementations
+            , ..
+            }
+
+instance (AliasTransform (Type Parameter a)) => AliasTransform (ProtoTypeDefinition e a t) where
+  aliasTransform =
+    \case
+      ProtoTypeDefinition{..} -> do
+        newprotoOTypeDefinitionConstructors <- aliasTransform protoOtypeDefinitionConstructors
+        pure $
+          ProtoTypeDefinition
+            { protoOtypeDefinitionConstructors = newprotoOTypeDefinitionConstructors
+            , ..
+            }
+
+instance (AliasTransform (Type Parameter k)) => AliasTransform (ProtoAliasDefinition a k) where
+  aliasTransform =
+    \case
+      ProtoAliasDefinition{..} -> do
+        newprotoOAliasDefinitionType <- aliasTransform protoOaliasDefinitionType
+        pure $
+          ProtoAliasDefinition
+            { protoOaliasDefinitionType = newprotoOAliasDefinitionType
+            , ..
+            }
+
+instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Expression e a t) where
+  aliasTransform =
+    transformM $
+      \case
+        EAnnotation a t e ->
+          EAnnotation a <$> aliasTransform t <*> aliasTransform e
+        ELet a bs e ->
+          ELet a <$> aliasTransform bs <*> aliasTransform e
+        e ->
+          pure e
+
+instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Pattern e a t) where
+  aliasTransform =
+    transformM $
+      \case
+        PAnnotation a t p ->
+          PAnnotation a <$> aliasTransform t <*> aliasTransform p
+        p ->
+          pure p
+
+instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Binding Expression e a t) where
+  aliasTransform =
+    \case
+      BPattern a p e ->
+        BPattern a <$> aliasTransform p <*> aliasTransform e
+      BFunction a n ps e ->
+        BFunction a n <$> aliasTransform ps <*> aliasTransform e
+
+instance (AliasTransform (Type Parameter a)) => AliasTransform (DataConstructor Parameter a (Type Parameter a)) where
+  aliasTransform =
+    \case
+      DataConstructor{..} -> do
+        newConstructorScheme <- aliasTransform constructorScheme
+        pure DataConstructor{constructorScheme = newConstructorScheme, ..}
+
+instance AliasTransform (Type Parameter Kind) where
+  aliasTransform =
+    \case
+      t@(TApplication k _ _) ->
+        uncurry (aliasTransformTypeApplication k t) (listTypeArgs t)
       TArrow t1 t2 ->
-        TArrow <$> expandAliases t1 <*> expandAliases t2
+        TArrow <$> aliasTransform t1 <*> aliasTransform t2
       TAlias name ts t ->
-        TAlias name <$> expandAliases ts <*> expandAliases t
+        TAlias name <$> aliasTransform ts <*> aliasTransform t
       TIntrinsic t ->
         pure (TIntrinsic t)
       TRecord t ->
-        TRecord <$> expandAliases t
+        TRecord <$> aliasTransform t
       TRow row ->
-        TRow <$> traverse expandAliases row
+        TRow <$> traverse aliasTransform row
       t@(TConstructor _ name) ->
         lookupAlias t [] name
       t ->
         pure t
 
-lookupAlias :: (Monad m) => ParameterizedType -> [ParameterizedType] -> Name -> CompilerT a m ParameterizedType
+instance (AliasTransform t) => AliasTransform (Scheme o k t) where
+  aliasTransform =
+    \case
+      Forall{..} ->
+        Forall schemeTypeVariables schemeTraits
+          <$> aliasTransform schemeTypeBody
+
+--
+
+instance AliasTransform () where
+  aliasTransform _ = pure ()
+
+-- instance (AliasTransform t, Data a, Data t) => AliasTransform (Pattern a () t) where
+--  aliasTransform =
+--    transformM $
+--      \case
+--        PAnnotation a t p ->
+--          PAnnotation a <$> aliasTransform t <*> aliasTransform p
+--        p ->
+--          pure p
+--
+-- instance (AliasTransform t, Data t, Data a) => AliasTransform (Expression a () t) where
+--  aliasTransform =
+--    transformM $
+--      \case
+--        EAnnotation a t e ->
+--          EAnnotation a <$> aliasTransform t <*> aliasTransform e
+--        ELet a bs e ->
+--          ELet a <$> aliasTransform bs <*> aliasTransform e
+--        e ->
+--          pure e
+--
+-- instance (AliasTransform t, Data t, Data a) => AliasTransform (Binding Expression a () t) where
+--  aliasTransform =
+--    \case
+--      BPattern a p e ->
+--        BPattern a <$> aliasTransform p <*> aliasTransform e
+--      BFunction a n ps e ->
+--        BFunction a n <$> aliasTransform ps <*> aliasTransform e
+--
+-- instance (AliasTransform t, Data e, Data t) => AliasTransform (Module e a t) where
+--  aliasTransform =
+--    \case
+--      Module p ns o ->
+--        Module p ns <$> aliasTransform o
+
+instance (AliasTransform t, Data a, Data t) => AliasTransform (FunctionDefinition a t) where
+  aliasTransform =
+    \case
+      FunctionDefinition a u w ps e ->
+        undefined
+
+--        FunctionDefinition a
+--          <$> aliasTransform u
+--          <*> aliasTransform w
+--          <*> aliasTransform ps
+--          <*> aliasTransform e
+
+instance (AliasTransform t, Data a, Data t) => AliasTransform (ConstantDefinition a t) where
+  aliasTransform =
+    \case
+      ConstantDefinition a u w e ->
+        undefined
+
+--        ConstantDefinition a
+--          <$> aliasTransform u
+--          <*> aliasTransform w
+--          <*> aliasTransform e
+
+-- instance (AliasTransform t) => AliasTransform (Scheme o k t) where
+--  aliasTransform =
+--    \case
+--      Forall vs ts t ->
+--        Forall vs ts <$> aliasTransform t
+
+instance AliasTransform TypeDefinition where
+  aliasTransform = pure
+
+--    \case
+--      TypeDefinition ps ctors ->
+--        TypeDefinition ps <$> traverse aliasTransform ctors
+
+-- instance (AliasTransform t) => AliasTransform (DataConstructor o k t) where
+--  aliasTransform =
+--    \case
+--      DataConstructor{..} -> do
+--        s <- aliasTransform constructorScheme
+--        pure DataConstructor{constructorScheme = s, ..}
+
+instance (AliasTransform t, Data a, Data t) => AliasTransform (Definition a Kind t) where
+  aliasTransform =
+    \case
+      --      DFunction loc name f fs ->
+      --        DFunction loc name <$> aliasTransform f <*> traverse aliasTransform fs
+      --      DConstant loc name c fs ->
+      --        DConstant loc name <$> aliasTransform c <*> traverse aliasTransform fs
+      --      DInstance loc name (InstanceDefinition ts t ds) ->
+      --        DInstance loc name . InstanceDefinition ts t <$> traverse aliasTransform ds
+      --      DType loc name (TypeDefinition params ctors) ->
+      --        DType loc name . TypeDefinition params <$> traverse aliasTransform ctors
+      --      DTypeAlias loc name (AliasDefinition params t) ->
+      --        DTypeAlias loc name . AliasDefinition params <$> aliasTransform t
+      o ->
+        pure o
+
+aliasTransformTypeApplication :: (Monad m) => Kind -> Type Parameter Kind -> Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
+aliasTransformTypeApplication _ t (TConstructor _ name) ts =
+  lookupAlias t (toList ts) name
+aliasTransformTypeApplication k _ t ts =
+  applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
+
+-- instance AliasTransform ParameterizedType where
+--  aliasTransform =
+--    \case
+--      t@TApplication{} ->
+--        uncurry (aliasTransformTypeApplication t) (listTypeArgs t)
+--      TArrow t1 t2 ->
+--        TArrow <$> aliasTransform t1 <*> aliasTransform t2
+--      TAlias name ts t ->
+--        TAlias name <$> aliasTransform ts <*> aliasTransform t
+--      TIntrinsic t ->
+--        pure (TIntrinsic t)
+--      TRecord t ->
+--        TRecord <$> aliasTransform t
+--      TRow row ->
+--        TRow <$> traverse aliasTransform row
+--      t@(TConstructor _ name) ->
+--        lookupAlias t [] name
+--      t ->
+--        pure t
+
+lookupAlias :: (Monad m, AliasTransform (Type Parameter Kind)) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
 lookupAlias t ts name = do
   env <- asks compilerAliasEnvironment
   case Environment.lookup name env of
     Nothing ->
       case t of
-        TApplication _ t1 t2 ->
-          TApplication () <$> expandAliases t1 <*> expandAliases t2
+        TApplication k t1 t2 ->
+          TApplication k <$> aliasTransform t1 <*> aliasTransform t2
         _ ->
           pure t
-    Just AliasEntry{..} -> do
-      let t1 = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
-      TAlias name ts <$> expandAliases t1
+    Just ProtoAliasEntry{..} -> do
+      let t1 = foldr (uncurry substituteAlias) protoOaliasEntryType (protoOaliasEntryParams `zip` ts)
+      TAlias name ts <$> aliasTransform t1
+
+--  traceShowM name
+--
+--  case Environment.lookup name env of
+--    Nothing ->
+--      case t of
+--        TApplication k t1 t2 ->
+--          TApplication k <$> aliasTransform t1 <*> aliasTransform t2
+--        _ ->
+--          pure t
+--    Just AliasEntry{..} -> do
+--      let t1 = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
+--      TAlias name ts <$> aliasTransform t1
 
 substituteAlias :: Name -> Type Parameter k -> Type Parameter k -> Type Parameter k
 substituteAlias name s =

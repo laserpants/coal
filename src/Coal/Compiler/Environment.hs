@@ -16,6 +16,7 @@ module Coal.Compiler.Environment (
 import Coal.Common.Environment (Environment (..))
 import Coal.Compiler.Build
 import Coal.Language (IndexedScheme, IndexedType, Kind)
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Data.Map.Strict (Map)
 import Extras (Name, Over, Set)
 import System.Console.AsciiProgress
@@ -56,7 +57,7 @@ data CompilerEnvironment a = CompilerEnvironment
   , compilerTypeConstructorEnvironment :: Environment Kind
   , compilerTraitEnvironment :: Environment (TraitEntry a)
   , compilerInstanceEnvironment :: Environment (Map IndexedType (InstanceEntry a))
-  , compilerAliasEnvironment :: Environment (AliasEntry a)
+  , compilerAliasEnvironment :: Environment (ProtoAliasEntry a)
   , compilerDictionaryNameEnvironment :: Environment IndexedScheme
   , compilerKernelEnvironment :: KernelEnvironment
   , compilerProgressBar :: Maybe ProgressBar

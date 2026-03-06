@@ -34,7 +34,7 @@ unifyKinds k1 (KVariable k2) =
   bindKind k2 k1
 unifyKinds k1 k2
   | k1 == k2 = pure mempty
-  | otherwise = do
+  | otherwise =
       throwError ProtoECannotUnifyKinds
 
 bindKind :: Int -> Kind -> ProtoKindUnifier ProtoKindSubstitution

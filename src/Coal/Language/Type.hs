@@ -169,6 +169,14 @@ instance KindProxy TypeIndex Kind where
       _ ->
         error "Invalid kind"
 
+instance KindProxy Parameter Kind where
+  tailKind t =
+    case head (universeBi t) of
+      KArrow _ k ->
+        k
+      _ ->
+        error "Invalid kind"
+
 instance KindProxy a () where
   tailKind _ = ()
 
