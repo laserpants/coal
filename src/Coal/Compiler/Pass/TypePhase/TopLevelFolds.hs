@@ -61,7 +61,7 @@ expandClauses :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a Kind ()) -> C
 expandClauses clauses = do
   name <- supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
-  pure $ lambda1E name (matchE (varE (name <> ".expr")) expr)
+  pure $ lambda1E (name <> ".expr") (matchE (varE (name <> ".expr")) expr)
 
 class TopLevelFoldContext a e where
   expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> CompilerT a (ProtoCompilerT m a) e
