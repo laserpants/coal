@@ -580,7 +580,8 @@ collectImports =
                     _ -> do
                       pure ()
             | otherwise ->
-                error "TODO"
+                -- error "TODO"
+                error (show name)
           TypeImport _ name _
             | name `elem` protoObuildExportedNames ->
                 forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
