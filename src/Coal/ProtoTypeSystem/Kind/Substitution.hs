@@ -588,7 +588,7 @@ instance ProtoKindSubstitutable (ProtoBuild a) where
           , protoObuildDataConstructors = protoOapplyKinds sub protoObuildDataConstructors
           , protoObuildTypeConstructors = protoOapplyKinds sub protoObuildTypeConstructors
           , protoObuildTraits = protoOapplyKinds sub protoObuildTraits
-          , protoObuildInstances = mapEnvironment (protoOapplyKinds sub) protoObuildInstances
+          , protoObuildInstances = mapEnvironment (Map.mapKeys (protoOapplyKinds sub) . Map.map (protoOapplyKinds sub)) protoObuildInstances
           , protoObuildAliases = protoOapplyKinds sub protoObuildAliases
           , ..
           }
