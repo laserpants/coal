@@ -8,9 +8,6 @@
 
 module Coal.Compiler.Pass.TypePhase.TopLevelFolds (passTopLevelFolds) where
 
-import Coal.Language.Module.Path (principalPath)
-import Coal.ProtoCompiler.ProtoJournal
-import Control.Monad.Except (MonadError, throwError)
 import Coal.AST.Shorthand (applicationE, lambda1E, matchE, varE)
 import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
@@ -18,10 +15,13 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), With (..))
+import Coal.Language.Module.Path (principalPath)
+import Coal.ProtoCompiler.ProtoJournal
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
+import Control.Monad.Except (MonadError, throwError)
 import Control.Monad.State (get, gets)
 import Control.Monad.Trans (lift)
 import Control.Monad.Writer (execWriter, tell)

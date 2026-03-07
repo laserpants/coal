@@ -109,9 +109,9 @@ prepareBuild module_@(Module path exports defs) =
     inEachDef (collectInstances kinds traits)
 
     -- Built-in instances
-    forM_ builtinInstances $
-      \(name, t, info) ->
-        modify $ insertInstance name t info
+    --    forM_ builtinInstances $
+    --      \(name, t, info) ->
+    --        modify $ insertInstance name t info
 
     inEachDef collectImportedNames
     inEachDef collectPlaceholders

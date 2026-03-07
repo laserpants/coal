@@ -16,6 +16,7 @@ import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Control.Monad.Extra (anyM, (||^))
 import Control.Monad.Reader (asks)
 import Data.Function ((&))
@@ -138,7 +139,7 @@ isUseful px@(ps : _) qs =
 isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
-  defined <- asks (mapEnvironment dataConstructorEntryNameSet . compilerDataConstructorEnvironment)
+  defined <- asks (mapEnvironment protoOdataConstructorEntryConstructorSet . compilerDataConstructorEnvironment)
   case Environment.lookup name (defined `Environment.union` builtIn) of
     Nothing ->
       pure ("%Tuple" `Text.isPrefixOf` name)

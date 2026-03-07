@@ -2,6 +2,7 @@
 
 module Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec) where
 
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
@@ -102,12 +103,12 @@ example20 =
   , Con "Fez" [Lit (LBool False), Con "B" []]
   ]
 
-testEnv :: Environment (DataConstructorEntry Metadata)
+testEnv :: Environment (ProtoDataConstructorEntry Metadata)
 testEnv =
   Environment.fromList
     [
       ( "Cons"
-      , DataConstructorEntry
+      , ProtoDataConstructorEntry
           mempty
           "Cons"
           ( DataConstructor
@@ -119,7 +120,7 @@ testEnv =
       )
     ,
       ( "Nil"
-      , DataConstructorEntry
+      , ProtoDataConstructorEntry
           mempty
           "Nil"
           ( DataConstructor
@@ -131,7 +132,7 @@ testEnv =
       )
     ,
       ( "A"
-      , DataConstructorEntry
+      , ProtoDataConstructorEntry
           mempty
           "A"
           ( DataConstructor
@@ -143,7 +144,7 @@ testEnv =
       )
     ,
       ( "B"
-      , DataConstructorEntry
+      , ProtoDataConstructorEntry
           mempty
           "B"
           ( DataConstructor
@@ -155,7 +156,7 @@ testEnv =
       )
     ,
       ( "Fez"
-      , DataConstructorEntry
+      , ProtoDataConstructorEntry
           mempty
           "Fez"
           ( DataConstructor

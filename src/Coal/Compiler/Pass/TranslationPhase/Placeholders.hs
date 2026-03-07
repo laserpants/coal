@@ -21,6 +21,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem.Constraint.Assumption (normalizedName)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
@@ -83,7 +84,7 @@ updateNames store =
       Just s ->
         modify $ replaceName (info name s)
 
-insertPlaceholders :: (Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
+insertPlaceholders :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
 insertPlaceholders =
   \case
     d@(DConstant _ name _ _) -> do
@@ -95,7 +96,7 @@ insertPlaceholders =
     d ->
       pure d
 
-insertPlaceholdersInDef :: (Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
+insertPlaceholdersInDef :: (Show a, Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
 insertPlaceholdersInDef trait =
   \case
     c@DConstant{} -> do
@@ -144,7 +145,7 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (ParameterizedType, IndexedType, Dictionary IndexedScheme))
+findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
   env <- asks compilerInstanceEnvironment
   case Environment.lookup name env of
@@ -159,18 +160,18 @@ findFirstMatch (Trait name t) = do
           pure (Just (t1, k, v))
  where
   go f m = fmap catMaybes . forM (Map.toList m) $
-    \(k, InstanceEntry{..}) -> do
+    \(k, ProtoInstanceEntry{..}) -> do
       result <- f k
       case result of
         Left{} ->
           pure Nothing
         Right sub ->
-          pure $ Just (instanceEntryType, k, Map.map (substituteInScheme sub) instanceEntryEntries)
+          pure $ Just (protoOinstanceEntryType, k, Map.map (substituteInScheme sub) protoOinstanceEntryTypeSchemes)
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-lookupTraitInstance :: (Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a () IndexedType)))
+lookupTraitInstance :: (Show a, Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a () IndexedType)))
 lookupTraitInstance loc trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
@@ -193,7 +194,7 @@ isConcrete (Trait _ TIntrinsic{}) = True
 isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
-applyTraits :: (Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a () IndexedType)
+applyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a () IndexedType)
 applyTraits loc (Label t name) =
   \case
     [] ->
@@ -222,7 +223,7 @@ expandRecursiveLet :: Expression a () IndexedType -> Expression a () IndexedType
 expandRecursiveLet (ELet a (BPattern _ p e1 :| []) e2) = ERecursiveLet a p e1 e2
 expandRecursiveLet _ = error "Implementation error"
 
-instance (Monoid a, Data a) => TraitContext a (Expression a () IndexedType) where
+instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedType) where
   expandTraits =
     \case
       ERecursiveLet a p e1 e2 ->
@@ -244,7 +245,7 @@ instance (Monoid a, Data a) => TraitContext a (Expression a () IndexedType) wher
       e ->
         descendM expandTraits e
 
-transformBinding :: (Monoid a, Data a, Monad m) => Binding Expression a () IndexedType -> CompilerT a m (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
+transformBinding :: (Monoid a, Data a, Show a, Monad m) => Binding Expression a () IndexedType -> CompilerT a m (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
 transformBinding =
   \case
     BPattern a var@(PVariable _ (Label t name)) e
@@ -260,24 +261,24 @@ transformBinding =
     _ ->
       error "Not implemented"
 
-transformScope :: (Monoid a, Data a, Monad m) => Expression a () IndexedType -> CompilerT a m (Expression a () IndexedType, [Trait IndexedType])
+transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a m (Expression a () IndexedType, [Trait IndexedType])
 transformScope e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
   case nub traits of
     [] -> pure (expr, traits)
     tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
-instance (Monoid a, Data a) => TraitContext a (CompiledClause a () IndexedType) where
+instance (Monoid a, Data a, Show a) => TraitContext a (CompiledClause a () IndexedType) where
   expandTraits =
     \case
       ECompiledClause a lls e ->
         ECompiledClause a lls <$> expandTraits e
 
-instance (Monoid a, Data a) => TraitContext a (Module a Kind IndexedType) where
+instance (Monoid a, Data a, Show a) => TraitContext a (Module a Kind IndexedType) where
   expandTraits =
     overModuleDefinitionsM (traverse expandTraits)
 
-instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) where
+instance (Monoid a, Data a, Show a) => TraitContext a (Definition a Kind IndexedType) where
   expandTraits =
     \case
       DConstant loc name c fs ->
@@ -285,7 +286,7 @@ instance (Monoid a, Data a) => TraitContext a (Definition a Kind IndexedType) wh
       d ->
         pure d
 
-expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a) => Name -> ConstantDefinition a IndexedType -> CompilerT a m (ConstantDefinition a IndexedType)
+expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a m (ConstantDefinition a IndexedType)
 expandConstantDefinitionTraits name =
   \case
     ConstantDefinition loc with (With _ t) e -> do

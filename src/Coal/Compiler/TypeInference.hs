@@ -411,7 +411,7 @@ typeDefinitionC =
         Nothing ->
           -- TODO: Handle error
           error ("Missing trait: " <> Text.unpack trait)
-        Just (TraitEntry _ _ p@(Parameter k _) _ traitInfoEntries) ->
+        Just (ProtoTraitEntry _ _ p@(Parameter k _) _ traitInfoEntries) ->
           forM_ ds $
             \d -> do
               case Environment.lookup (definitionName d) traitInfoEntries of

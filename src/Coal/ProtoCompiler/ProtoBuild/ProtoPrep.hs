@@ -11,12 +11,14 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Builtin.Instances (builtinInstances, protoObuiltinInstances)
 import Coal.Language
 import Coal.Language.Module (qualified)
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild
+import Coal.ProtoCompiler.ProtoBuild (InstanceMap)
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), insertBuildC, protoOgetCurrentBuildC, protoOinsertNameC)
@@ -29,9 +31,11 @@ import Control.Monad (unless, when)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
+import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Data.Tuple.Extra (uncurry3)
 import Extras (Name, for, forM, forM_, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
@@ -129,6 +133,8 @@ protoOprepareDefinitions defs = do
     traverse_ collectTraitsInterface defs
     -- Collect instances
     traverse_ collectInstances defs
+    -- Built-in instances
+    forM_ protoObuiltinInstances (modify . uncurry3 insertBuildInstance)
     -- Collect imports
     traverse_ collectImports defs
     -- Collect placeholders
@@ -398,6 +404,10 @@ collectTraits =
                   Just ProtoTraitEntry{..} -> do
                     insertNameEntry (ProtoNTrait name)
                     insertTrait name ProtoTraitEntry{..}
+                    forM_ (traitInstances name protoObuildInstances) $
+                      \(traitName, instanceMap) ->
+                        forM_ (Map.toList instanceMap) $
+                          uncurry (insertInstance traitName)
             | otherwise ->
                 error "TODO"
           _ ->
@@ -407,6 +417,9 @@ collectTraits =
       pure ()
     _ ->
       pure ()
+
+traitInstances :: Name -> Environment (InstanceMap a) -> [(Name, InstanceMap a)]
+traitInstances name instances = filter ((==) name . fst) (Environment.toList instances)
 
 traitDefinitionInterfaceEntryToPair :: ProtoTraitDefinitionInterfaceEntry Kind -> (Name, Scheme Parameter Kind (Type Parameter Kind))
 traitDefinitionInterfaceEntryToPair ProtoTraitDefinitionInterfaceEntry{..} = (protoOtraitDefinitionInterfaceEntryName, protoOtraitDefinitionInterfaceEntryScheme)

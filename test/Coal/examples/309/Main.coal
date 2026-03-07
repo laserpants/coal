@@ -1,0 +1,16 @@
+module Main {
+
+  import Nat(pack, unpack)
+  import IO(println_int32)
+
+  type alias Foo<k> = { a : k }
+
+  type X = A | B(Foo<int32>)
+
+  fun baz(x : Foo<int32>) =
+    x.a
+
+  fun main() : IO<unit> =
+    println_int32(baz({ a = 123 }))
+
+}
