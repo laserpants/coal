@@ -18,7 +18,6 @@ import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild (InstanceMap)
 import qualified Coal.ProtoCompiler.ProtoBuild as Build
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), insertBuildC, protoOgetCurrentBuildC, protoOinsertNameC)
