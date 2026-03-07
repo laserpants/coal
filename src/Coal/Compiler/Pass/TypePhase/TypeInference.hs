@@ -86,7 +86,6 @@ runTypeInference m = do
   --  (tdefs, _) <- typeDefinitionsC defs
 
   nm <- lift $ ti m -- builtinTraits m)
-
   liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (protoOmodulePath m))) (generateDotSyntax nm)
   --  liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
   ProtoBuild{..} <- lift $ protoOgetCurrentBuildC

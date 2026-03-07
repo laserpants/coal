@@ -135,7 +135,7 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                     Nothing ->
                       error "TODO"
                     Just sig -> do
-                      s <- protoOtoIndexedScheme sig
+                      s <- protoOtoIndexedScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType sig)
                       protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
                       protoOgenerateConstraints $ ProtoDFunction loc (instanceLabel trait name) def
                 d@(ProtoDLet loc name def) ->
@@ -143,7 +143,7 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                     Nothing ->
                       error "TODO"
                     Just sig -> do
-                      s <- protoOtoIndexedScheme sig
+                      s <- protoOtoIndexedScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType sig)
                       protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
                       protoOgenerateConstraints $ ProtoDLet loc (instanceLabel trait name) def
                 _ ->

@@ -1,10 +1,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Coal.ProtoTypeSystem.Parameterized (
   ProtoParameterized (..),
   ToIndexed (..),
+  replaceParamInScheme,
 ) where
 
 import Coal.Common.Environment (Environment)
@@ -118,3 +120,38 @@ instance ProtoParameterized (Parameter Kind) where
   protoOinstantiateTypeIndexes (Parameter kind name) = do
     index <- supplied (TypeIndex kind)
     pure [(name, index)]
+
+replaceParamInScheme :: Parameter Kind -> Type Parameter Kind -> Scheme Parameter Kind (Type Parameter Kind) -> Scheme Parameter Kind (Type Parameter Kind)
+replaceParamInScheme p o Forall{..} =
+  Forall
+    (Set.filter (/= p) schemeTypeVariables)
+    (fmap replaceParamTrait schemeTraits)
+    (replaceParam schemeTypeBody)
+ where
+  replaceParamTrait =
+    \case
+      Trait name t ->
+        Trait name (replaceParam t)
+  replaceParam =
+    \case
+      TApplication k t1 t2 ->
+        TApplication k (replaceParam t1) (replaceParam t2)
+      TArrow t1 t2 ->
+        TArrow (replaceParam t1) (replaceParam t2)
+      TRecord t ->
+        TRecord (replaceParam t)
+      TRow r ->
+        TRow (replaceParamRow r)
+      TVariable q
+        | p == q -> o
+        | otherwise -> TVariable q
+      TAlias name ts t ->
+        TAlias name (fmap replaceParam ts) (replaceParam t)
+      t ->
+        t
+  replaceParamRow =
+    \case
+      RExtend name t r ->
+        RExtend name (replaceParam t) (replaceParamRow r)
+      r ->
+        r
