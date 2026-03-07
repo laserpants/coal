@@ -8,6 +8,9 @@
 
 module Coal.Compiler.Pass.TypePhase.TopLevelFolds (passTopLevelFolds) where
 
+import Coal.Language.Module.Path (principalPath)
+import Coal.ProtoCompiler.ProtoJournal
+import Control.Monad.Except (MonadError, throwError)
 import Coal.AST.Shorthand (applicationE, lambda1E, matchE, varE)
 import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
@@ -77,10 +80,12 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a Kind ()) where
     \case
       EClause _ (PAtVariable loc _) _ -> do
         ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
-        error "TODO"
+        lift $ tellErrors [ProtoError] -- FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
+        throwError PatternAnomaly
       EClause _ (PNamedFold loc _ _) _ -> do
         ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
-        error "TODO"
+        lift $ tellErrors [ProtoError] -- FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
+        throwError PatternAnomaly
       EClause{..} -> do
         newClauseChoices <- expandFolds name (atLabels clausePattern) clauseChoices
         return $
@@ -109,10 +114,10 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Choice Expression a Kind (
         CPlain a gs <$> expandFolds name lls e
 
 instance (Monoid a, Data a) => TopLevelFoldContext a (Expression a Kind ()) where
-  expandFolds = flip . foldrM . updateName
+  expandFolds = flip . foldrM . const (uncurry updateName)
 
-updateName :: (Monad m, Monoid a, Data a) => Name -> (Name, Label ()) -> Expression a Kind () -> CompilerT a (ProtoCompilerT m a) (Expression a Kind ())
-updateName _ (name, label) =
+updateName :: (Monad m, Monoid a, Data a) => Name -> Label () -> Expression a Kind () -> CompilerT a (ProtoCompilerT m a) (Expression a Kind ())
+updateName name label =
   pure
     . replace
       (labelName label)
