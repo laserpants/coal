@@ -132,7 +132,7 @@ collectTraits u name = do
       r <- tryMatch (apply sub1 t) u
       case r of
         Left{} ->
-          error (show (apply sub1 t, u)) -- "TODO"
+          error (show (name, apply sub1 t, u)) -- "TODO"
         Right sub2 ->
           pure (apply (sub2 <> sub1) ts)
  where

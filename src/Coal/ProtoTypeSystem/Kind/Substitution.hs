@@ -706,11 +706,15 @@ instance ProtoKindSubstitutable ProtoNameEntry where
     \case
       ProtoNName n s ->
         ProtoNName n (protoOapplyKinds sub s)
+      ProtoNType n k ->
+        ProtoNType n (protoOapplyKinds sub k)
       entry ->
         entry
   protoOreplaceVariables =
     \case
       ProtoNName n s ->
         ProtoNName n (protoOreplaceVariables s)
+      ProtoNType n k ->
+        ProtoNType n (protoOreplaceVariables k)
       entry ->
         entry
