@@ -327,6 +327,7 @@ e2eSpec = do
       "7"
       "test/Coal/examples/066"
       [ "Main.coal"
+      , "MyList.coal"
       ]
 
   describe "067" $
@@ -334,6 +335,7 @@ e2eSpec = do
       "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}"
       "test/Coal/examples/067"
       [ "StringUtils.coal"
+      , "MyList.coal"
       , "Main.coal"
       ]
 

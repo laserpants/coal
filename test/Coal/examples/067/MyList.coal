@@ -1,4 +1,4 @@
-module List {
+module MyList {
 
   fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
