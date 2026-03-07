@@ -477,6 +477,10 @@ instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot
         emitEdge id2 e1
         emitEdge id2 e2
         return id1
+      EListLiteral _ t [] -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "EListLiteral"
+        emitEdge id2 (emitShape HexagonShape "[]")
+        return id1
       EListLiteral _ t es -> do
         (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EListLiteral"
         emitEdges id2 es
@@ -565,8 +569,12 @@ instance (ProtoDot t, ProtoDot (Type Parameter k), Show k, Pretty k) => ProtoDot
         return id1
       PListCons _ t p1 p2 -> do
         (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PListCons"
-        emitEdges id2 p1
-        emitEdges id2 p2
+        emitEdge id2 p1
+        emitEdge id2 p2
+        return id1
+      PListLiteral _ t [] -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PListLiteral"
+        emitEdge id2 (emitShape HexagonShape "[]")
         return id1
       PListLiteral _ t ps -> do
         (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PListLiteral"
