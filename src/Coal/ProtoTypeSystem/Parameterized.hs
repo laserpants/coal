@@ -15,6 +15,7 @@ import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
 import Control.Monad.Reader (ReaderT, ask)
 import Control.Monad.State (MonadState)
+import Data.Function (on)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
@@ -124,7 +125,7 @@ instance ProtoParameterized (Parameter Kind) where
 replaceParamInScheme :: Parameter Kind -> Type Parameter Kind -> Scheme Parameter Kind (Type Parameter Kind) -> Scheme Parameter Kind (Type Parameter Kind)
 replaceParamInScheme p o Forall{..} =
   Forall
-    (Set.filter (/= p) schemeTypeVariables)
+    (Set.filter (on (/=) parameterName p) schemeTypeVariables)
     (fmap replaceParamTrait schemeTraits)
     (replaceParam schemeTypeBody)
  where
@@ -143,7 +144,7 @@ replaceParamInScheme p o Forall{..} =
       TRow r ->
         TRow (replaceParamRow r)
       TVariable q
-        | p == q -> o
+        | parameterName p == parameterName q -> o
         | otherwise -> TVariable q
       TAlias name ts t ->
         TAlias name (fmap replaceParam ts) (replaceParam t)

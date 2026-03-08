@@ -17,7 +17,7 @@ import Coal.Compiler.TypeInference (generateKindConstraints, protoOdefine, proto
 import Coal.Graphviz.Dot (generateDot)
 import Coal.Graphviz.ProtoDot
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), TypeIndex, indexed, instanceLabel, normalizeRowTypes, typeOf)
-import Coal.Language.Module (Module (..), fromProtoModule, principalPath, toProtoModule)
+import Coal.Language.Module (Module (..), Path (..), fromProtoModule, principalPath, toProtoModule)
 import Coal.Language.Module.Definition (definitionName)
 import Coal.Language.Type (Type (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
@@ -90,6 +90,9 @@ runTypeInference m = do
   --  liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
   ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
   liftIO $ Text.writeFile ("tmp/names_" <> Text.unpack (principalPath (protoOmodulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
+
+  liftIO $ Text.writeFile ("tmp/build_" <> Text.unpack (principalPath (protoOmodulePath m))) (toStrict $ pShowNoColor $ ProtoBuild{..})
+
   --  stor <- gets compilerNameStore
   --  liftIO $ Text.writeFile ("tmp/oldnames_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ stor)
 
@@ -99,6 +102,9 @@ runTypeInference m = do
 
   --  traceShowM (definitionName <$> tdefs)
   --  traceShowM (definitionName <$> (moduleDefinitions $ fromProtoModule nm))
+
+  --  when (protoOmodulePath m == Path ["Main"]) $ do
+  --    pPrint nm
 
   pure (fromProtoModule nm)
 

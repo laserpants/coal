@@ -162,20 +162,18 @@ class KindProxy o k where
   tailKind :: Type o k -> k
 
 instance KindProxy TypeIndex Kind where
-  tailKind t =
-    case head (universeBi t) of
-      KArrow _ k ->
-        k
-      _ ->
-        error "Invalid kind"
+  tailKind = typeVarTailKind
 
 instance KindProxy Parameter Kind where
-  tailKind t =
-    case head (universeBi t) of
-      KArrow _ k ->
-        k
-      _ ->
-        error "Invalid kind"
+  tailKind = typeVarTailKind
+
+typeVarTailKind :: (Data a) => a -> Kind
+typeVarTailKind t =
+  case head (universeBi t) of
+    KArrow _ k ->
+      k
+    _ ->
+      error "Invalid kind"
 
 instance KindProxy a () where
   tailKind _ = ()

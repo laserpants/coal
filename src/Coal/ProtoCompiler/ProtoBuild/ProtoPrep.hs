@@ -24,7 +24,7 @@ import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), insertBuildC, protoOg
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
-import Coal.ProtoTypeSystem.Parameterized (ProtoParameterized (..), ToIndexed (..))
+import Coal.ProtoTypeSystem.Parameterized
 import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme)
 import Control.Monad (unless, when)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
@@ -35,6 +35,7 @@ import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
+import Debug.Trace
 import Extras (Name, for, forM, forM_, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
@@ -358,7 +359,7 @@ collectDataConstructors =
 
 dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ProtoDataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
-  (s, _) <- instantiateScheme constructorScheme
+  s <- instantiateScheme constructorScheme
   pure $
     ProtoDataConstructorEntry
       { protoOdataConstructorEntryMetaData = loc
@@ -429,7 +430,7 @@ collectTraitsInterface =
     ProtoDTrait _ name ProtoTraitDefinition{..} ->
       forM_ protoOtraitDefinitionInterface $
         \ProtoTraitDefinitionInterfaceEntry{..} -> do
-          (s, _) <- instantiateScheme protoOtraitDefinitionInterfaceEntryScheme
+          s <- instantiateScheme protoOtraitDefinitionInterfaceEntryScheme
           insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName s)
           lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName s
           exportList <- ask
@@ -513,16 +514,16 @@ collectInstances =
         Just ProtoTraitEntry{..} -> do
           Environment env <- flip Environment.mapMEnvironment protoOtraitEntryInterface $
             \entry -> do
-              (Forall{..}, env) <- instantiateScheme entry
-              case lookup (parameterName protoOtraitEntryParameter) env of
-                Nothing ->
-                  error "TODO"
-                Just (TypeIndex _ index) -> do
-                  let sub = index `mapsTo` t
-                      newTraits = apply sub schemeTraits
-                      newTypeBody = apply sub schemeTypeBody
-                      vars = typeIndexesIn newTraits <> typeIndexesIn newTypeBody
-                  pure $ Forall vars newTraits newTypeBody
+              instantiateScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType entry)
+          -- case lookup (parameterName protoOtraitEntryParameter) env of
+          --  Nothing ->
+          --    error "TODO"
+          --  Just (TypeIndex _ index) -> do
+          --    let sub = index `mapsTo` t
+          --        newTraits = apply sub schemeTraits
+          --        newTypeBody = apply sub schemeTypeBody
+          --        vars = typeIndexesIn newTraits <> typeIndexesIn newTypeBody
+          --    pure $ Forall vars newTraits newTypeBody
           let entry =
                 ProtoInstanceEntry
                   { protoOinstanceEntryMetadata = protoOinstanceDefinitionMetadata
@@ -557,7 +558,7 @@ collectPlaceholders =
     _ ->
       pure ()
 
-instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (IndexedScheme, [(Name, TypeIndex Kind)])
+instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedScheme
 instantiateScheme Forall{..} =
   lift $ lift $ do
     env <- protoOinstantiateTypeIndexes schemeTypeVariables
@@ -567,7 +568,7 @@ instantiateScheme Forall{..} =
           <$> toIndexed schemeTypeVariables
           <*> toIndexed schemeTraits
           <*> toIndexed schemeTypeBody
-    pure (normalizeScheme s, env)
+    return (normalizeScheme s)
 
 instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty

@@ -39,8 +39,8 @@ import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Control.Monad.State (execState, modify)
 import Data.Binary
-import Data.List (nub)
 import Data.ByteString (ByteString)
+import Data.List (nub)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
