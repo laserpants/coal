@@ -198,7 +198,7 @@ instance (ProtoKindSubstitutable n, ProtoKindSubstitutable (o n), ProtoKindSubst
     \case
       RExtend name t row ->
         RExtend name (protoOapplyKinds sub t) (protoOapplyKinds sub row)
-      RVariable var -> do
+      RVariable var -> 
         RVariable (protoOapplyKinds sub var)
       RNil ->
         RNil
@@ -206,7 +206,7 @@ instance (ProtoKindSubstitutable n, ProtoKindSubstitutable (o n), ProtoKindSubst
     \case
       RExtend name t row ->
         RExtend name (protoOreplaceVariables t) (protoOreplaceVariables row)
-      RVariable var -> do
+      RVariable var -> 
         RVariable (protoOreplaceVariables var)
       RNil ->
         RNil
