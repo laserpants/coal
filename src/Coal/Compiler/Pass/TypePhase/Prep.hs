@@ -1,5 +1,6 @@
 module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
+import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Core (buildEnv, prepareBuild)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Pass (Pass (..))
@@ -13,11 +14,12 @@ import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadIO)
 import Control.Monad.Trans (lift)
 import Extras (forM_)
+import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
 
-passPrep :: (MonadIO m, Monoid a, Eq a, Show a) => Pass a m (Module a Kind ()) (ProtoModule a Kind ())
+passPrep :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (ProtoModule Metadata Kind ())
 passPrep = Pass{runPass = pass}
 
-pass :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
+pass :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
 pass m = do
   setCompilerCurrentModuleC (modulePath m)
   lift $ setCurrentPathC (modulePath m)
@@ -25,7 +27,7 @@ pass m = do
 
 -- withCurrentModuleC prep
 
-prep :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
+prep :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
 prep m = do
   m1 <- lift $ do
     let modul = toProtoModule [] m
@@ -33,9 +35,10 @@ prep m = do
     protoOclearNameStoreC
     setCurrentModuleC modul
     forM_ builtinFunctions $ uncurry protoOinsertNameC
-    x <- toKindIndexed modul
-    protoOprepareBuild x
-    pure x
+    toKindIndexed modul
+
+  y <- expandFunctionGroups m1
+  lift $ protoOprepareBuild y
 
   clearAssumptionsC
   clearNameStoreC
@@ -45,4 +48,4 @@ prep m = do
   setNamesC env
   insertNamesC builtinFunctions
 
-  pure m1
+  pure y

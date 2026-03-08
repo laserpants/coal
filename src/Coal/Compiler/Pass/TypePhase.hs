@@ -20,7 +20,7 @@ import Control.Monad.IO.Class (MonadIO)
 typePhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind IndexedType)
 typePhasePasses =
   passPrep
-    >-> passExpandFunctionGroups
+    --  >-> passExpandFunctionGroups
     ----    >-> generateDebugArtifacts "IntegerLiteralPatterns"
     >-> overlayEnvironment passExpandAliases
     ----    >-> generateDebugArtifacts "ExpandAliases"
