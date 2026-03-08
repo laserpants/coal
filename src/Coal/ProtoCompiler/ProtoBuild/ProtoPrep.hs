@@ -11,7 +11,7 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Builtin.Instances (builtinInstances, protoObuiltinInstances)
+import Coal.Compiler.Builtin.Instances (protoObuiltinInstances)
 import Coal.Language
 import Coal.Language.Module (qualified)
 import Coal.Language.Module.Export (Export (..), includesName)
@@ -25,13 +25,12 @@ import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized
-import Coal.TypeSystem.Substitution (Substitutable (apply), mapsTo, normalizeScheme)
+import Coal.TypeSystem.Substitution (Substitutable (apply), normalizeScheme)
 import Control.Monad (unless, when)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import qualified Data.Map.Strict as Map
-import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
@@ -58,20 +57,59 @@ insertAlias :: (Monad m) => Name -> ProtoAliasEntry a -> ReaderT (ModuleExportLi
 insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
 insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
-insertExportedName name = do
-  exportList <- ask
-  case exportList of
-    ExportAll ->
-      insertName
-    Exports exports
-      | name `elem` (protoOnameOf <$> exports) ->
-          insertName
-    _ ->
+insertExportedName name
+  | name `elem` builtinNames =
       pure ()
+  | otherwise = do
+      exportList <- ask
+      case exportList of
+        ExportAll ->
+          insertName
+        Exports exports
+          | name `elem` (protoOnameOf <$> exports) ->
+              insertName
+        _ ->
+          pure ()
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
+builtinNames :: Set Name
+builtinNames =
+  Set.fromList
+    [ "(%)"
+    , "(*)"
+    , "(+)"
+    , "(-)"
+    , "(/)"
+    , "(<>)"
+    , "(==)"
+    , "(!=)"
+    , "Comparable"
+    , "Divisible"
+    , "EqualTo"
+    , "GreaterThan"
+    , "IO"
+    , "LessThan"
+    , "Modulo"
+    , "None"
+    , "Numeric"
+    , "Option"
+    , "Result"
+    , "Ok"
+    , "Err"
+    , "Ordered"
+    , "Ordering"
+    , "Semigroup"
+    , "Some"
+    , "Process"
+    , "compare"
+    , "from_int32"
+    , "from_int64"
+    , "from_bignum"
+    , "negate"
+    ]
+
+protoOprepareBuild :: (Monad m, Monoid a, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
   build <-
     execStateT
@@ -81,7 +119,7 @@ protoOprepareBuild ProtoModule{..} = do
         }
   insertBuildC build
 
-protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m, Monoid a, Show a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
   insertNameEntry (ProtoNType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
@@ -434,7 +472,9 @@ collectTraitsInterface =
           insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName s)
           lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName s
           exportList <- ask
-          let exportName = modify (Build.insertBuildExportedName protoOtraitDefinitionInterfaceEntryName)
+          let exportName =
+                unless (protoOtraitDefinitionInterfaceEntryName `elem` builtinNames) $
+                  modify (Build.insertBuildExportedName protoOtraitDefinitionInterfaceEntryName)
           case exportList of
             ExportAll ->
               exportName
@@ -594,7 +634,7 @@ collectImports =
                       pure ()
             | otherwise ->
                 -- error "TODO"
-                error (show name)
+                error (show (name, protoObuildExportedNames))
           TypeImport _ name _
             | name `elem` protoObuildExportedNames ->
                 forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
