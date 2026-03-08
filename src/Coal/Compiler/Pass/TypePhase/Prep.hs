@@ -14,10 +14,10 @@ import Control.Monad.Except (MonadIO)
 import Control.Monad.Trans (lift)
 import Extras (forM_)
 
-passPrep :: (MonadIO m, Monoid a, Eq a) => Pass a m (Module a Kind ()) (ProtoModule a Kind ())
+passPrep :: (MonadIO m, Monoid a, Eq a, Show a) => Pass a m (Module a Kind ()) (ProtoModule a Kind ())
 passPrep = Pass{runPass = pass}
 
-pass :: (MonadIO m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
+pass :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
 pass m = do
   setCompilerCurrentModuleC (modulePath m)
   lift $ setCurrentPathC (modulePath m)
@@ -25,7 +25,7 @@ pass m = do
 
 -- withCurrentModuleC prep
 
-prep :: (MonadIO m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
+prep :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
 prep m = do
   m1 <- lift $ do
     let modul = toProtoModule [] m
