@@ -120,19 +120,19 @@ interpretObject =
 interpretArtifact :: IRInterpreterArtifact -> IRInterpreter [IRConstruct [IRLine]]
 interpretArtifact =
   \case
-    ArtifactHashMapKey name ->
+    AHashMapKey name ->
       pure [CString ("label." <> name) (encodeUtf8 name)]
-    ArtifactDataConstructor name t ->
+    ADataConstructor name t ->
       pure [CType name t]
-    ArtifactMemoizedConstant name ->
+    AMemoizedConstant name ->
       pure [CGlobal name i8Ptr (Just LPrivate) Null]
-    ArtifactCFunctionCall "bignum_init" _ _ ->
+    ACFunctionCall "bignum_init" _ _ ->
       pure []
-    ArtifactCFunctionCall name t ts ->
+    ACFunctionCall name t ts ->
       pure [CDeclare name t ts]
-    ArtifactStringLiteral name str ->
+    AStringLiteral name str ->
       pure [CString name str]
-    ArtifactBignum name n ->
+    ABignum name n ->
       pure [CString name (encodeUtf8 (showt n))]
 
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
@@ -230,7 +230,7 @@ interpreter =
       d <- nextLabelIndex
       next (showt d)
     MakeConstructor t name next -> do
-      addArtifact (ArtifactDataConstructor name t)
+      addArtifact (ADataConstructor name t)
       ix <- constructorIndex name
       case ix of
         Nothing ->
@@ -241,20 +241,20 @@ interpreter =
       t1 = TNamed name t
     MakeKey name next -> do
       let label = "label." <> name
-      addArtifact (ArtifactHashMapKey name)
+      addArtifact (AHashMapKey name)
       next (Global (ptr (stringLiteral (Text.length name + 1))) label)
     MakeString str next -> do
       d <- nextLabelIndex
       let name = "str." <> showt d
-      addArtifact (ArtifactStringLiteral name str)
+      addArtifact (AStringLiteral name str)
       next (Global (ptr (TArray (ByteString.length str + 1) i8)) name)
     MakeBignum n next -> do
       d <- nextLabelIndex
       let name = "bignum." <> showt d
-      addArtifact (ArtifactBignum name n)
+      addArtifact (ABignum name n)
       next (Global (ptr (TArray (Text.length (showt n) + 1) i8)) name)
     CCall t name vs next -> do
-      addArtifact (ArtifactCFunctionCall name t [irTypeOf v | v <- vs])
+      addArtifact (ACFunctionCall name t [irTypeOf v | v <- vs])
       instruction t next ["call", irEncode t, irGlobalName name <> "(" <> commaSep (annotated <$> vs) <> ")"]
     NameLookup var next -> do
       env <- asks irInterpreterValueEnv
@@ -279,7 +279,7 @@ interpreter =
     Memoize next -> do
       d <- nextLabelIndex
       let name = "ptr." <> showt d
-      addArtifact (ArtifactMemoizedConstant name)
+      addArtifact (AMemoizedConstant name)
       next (Global i8Ptr name)
 
 constructorIndex :: Name -> IRInterpreter (Maybe Int)

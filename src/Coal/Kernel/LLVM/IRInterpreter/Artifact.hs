@@ -7,10 +7,10 @@ import Data.ByteString (ByteString)
 import Extras (Name)
 
 data IRInterpreterArtifact
-  = ArtifactHashMapKey Name
-  | ArtifactDataConstructor Name IRType
-  | ArtifactMemoizedConstant Name
-  | ArtifactCFunctionCall Name IRType [IRType]
-  | ArtifactStringLiteral Name ByteString
-  | ArtifactBignum Name Integer
+  = AHashMapKey Name
+  | ADataConstructor Name IRType
+  | AMemoizedConstant Name
+  | ACFunctionCall Name IRType [IRType]
+  | AStringLiteral Name ByteString
+  | ABignum Name Integer
   deriving (Show, Eq, Ord)
