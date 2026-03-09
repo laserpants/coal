@@ -197,9 +197,22 @@ qualifiedImports ProtoBuild{..} =
                   [(n, principalPath path <.> n) | n <- protoOtypeConstructorEntryDataConstructors]
               _ ->
                 case Environment.lookup name protoObuildTraits of
-                  Just ProtoTraitEntry{..} ->
-                    pure
-                      [(name_, principalPath path <.> name_) | name_ <- Environment.names protoOtraitEntryInterface]
+                  Just ProtoTraitEntry{..} -> do
+                    let ns1 = [(n, principalPath path <.> n) | n <- Environment.names protoOtraitEntryInterface]
+                    ns2 <- concatForM (traitInstances name protoObuildInstances) $
+                      \(traitName, instanceMap) ->
+                        concatForM (Map.toList instanceMap) $
+                          \(t, ProtoInstanceEntry{..}) -> do
+                            concatForM (Map.keys protoOinstanceEntryTypeSchemes) $
+                              \member -> do
+                                let instanceName = instanceLabel (Trait traitName t) member
+                                concatForM (Environment.lookupWithDefault [] instanceName protoObuildNames) $
+                                  \case
+                                    ProtoNName n _ -> do
+                                      pure [(n, principalPath path <.> n)]
+                                    _ ->
+                                      pure []
+                    pure (ns1 <> ns2)
                   _ ->
                     pure []
           TypeImport _ _ ctors ->
@@ -445,7 +458,18 @@ collectTraits =
                     forM_ (traitInstances name protoObuildInstances) $
                       \(traitName, instanceMap) ->
                         forM_ (Map.toList instanceMap) $
-                          uncurry (insertInstance traitName)
+                          \(t, ProtoInstanceEntry{..}) -> do
+                            insertInstance traitName t ProtoInstanceEntry{..}
+                            forM_ (Map.keys protoOinstanceEntryTypeSchemes) $
+                              \member -> do
+                                let instanceName = instanceLabel (Trait traitName t) member
+                                forM_ (Environment.lookupWithDefault [] instanceName protoObuildNames) $
+                                  \case
+                                    info@(ProtoNName n s) -> do
+                                      insertNameEntry info
+                                      lift $ lift $ protoOinsertNameC n s
+                                    _ ->
+                                      pure ()
             | otherwise ->
                 error "TODO"
           _ ->
