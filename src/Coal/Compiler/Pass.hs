@@ -11,12 +11,14 @@ module Coal.Compiler.Pass (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Core (typeConstructorEnv)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
 import Coal.ProtoCompiler.ProtoBuild
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (protoOtypeConstructorEntryKind)
 import Coal.ProtoCompiler.ProtoStack
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -56,7 +58,10 @@ overlayEnvironment p = Pass{runPass = pass}
 
     ProtoBuild{..} <- lift (fromMaybe (error "!!") <$> protoOgetBuildC moduleBuildPath)
 
-    typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
+    -- typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
+
+    let typeConstructors = Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
+
     local
       ( \env ->
           env

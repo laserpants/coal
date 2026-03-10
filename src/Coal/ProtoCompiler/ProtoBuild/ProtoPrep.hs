@@ -110,7 +110,7 @@ builtinNames =
     , "negate"
     ]
 
-protoOprepareBuild :: (Monad m, Monoid a, Show a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
+protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
   build <-
     execStateT
@@ -120,7 +120,7 @@ protoOprepareBuild ProtoModule{..} = do
         }
   insertBuildC build
 
-protoOprepareDefinitions :: (Monad m, Monoid a, Show a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
   insertNameEntry (ProtoNType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
@@ -200,7 +200,7 @@ qualifiedImports ProtoBuild{..} =
                         else names `intersect` protoOtypeConstructorEntryDataConstructors
                     ns1 = [(n, principalPath path <.> n) | n <- dataConstructors]
                 ProtoBuild{protoObuildInstances = importInstances} <- lift $ lift $ importedBuild path
-                ns2 <- baz path protoObuildNames (typeInstances name importInstances)
+                ns2 <- qualifiedInstanceNames (typeInstances name importInstances)
                 pure (ns1 <> ns2)
               _ ->
                 case Environment.lookup name protoObuildTraits of
@@ -211,10 +211,26 @@ qualifiedImports ProtoBuild{..} =
                           | n <- if ["*"] == names then entries else names `intersect` entries
                           ]
                     ProtoBuild{protoObuildInstances = importInstances} <- lift $ lift $ importedBuild path
-                    ns2 <- baz path protoObuildNames (traitInstances name importInstances)
+                    ns2 <- qualifiedInstanceNames (traitInstances name importInstances)
                     pure (ns1 <> ns2)
                   _ ->
                     pure []
+     where
+      -- qualifiedInstanceNames :: (Monad m) => Path -> Environment [ProtoNameEntry] -> [(Name, InstanceMap (ProtoInstanceEntry a))] -> m [(Name, Name)]
+      qualifiedInstanceNames instances =
+        concatForM instances $
+          \(traitName, instanceMap) ->
+            concatForM (Map.toList instanceMap) $
+              \(t, ProtoInstanceEntry{..}) -> do
+                concatForM (Map.keys protoOinstanceEntryTypeSchemes) $
+                  \member -> do
+                    let instanceName = instanceLabel (Trait traitName t) member
+                    concatForM (Environment.lookupWithDefault [] instanceName protoObuildNames) $
+                      \case
+                        ProtoNName n _ -> do
+                          pure [(n, principalPath path <.> n)]
+                        _ ->
+                          pure []
     ProtoDQualifiedImport _ path -> do
       ProtoBuild{protoObuildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
       concatForM (Set.toList exportedNames) $
@@ -229,21 +245,6 @@ qualifiedImports ProtoBuild{..} =
     --                pure []
     _ ->
       pure []
-
-baz path protoObuildNames instances =
-  concatForM instances $
-    \(traitName, instanceMap) ->
-      concatForM (Map.toList instanceMap) $
-        \(t, ProtoInstanceEntry{..}) -> do
-          concatForM (Map.keys protoOinstanceEntryTypeSchemes) $
-            \member -> do
-              let instanceName = instanceLabel (Trait traitName t) member
-              concatForM (Environment.lookupWithDefault [] instanceName protoObuildNames) $
-                \case
-                  ProtoNName n _ -> do
-                    pure [(n, principalPath path <.> n)]
-                  _ ->
-                    pure []
 
 expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
 expandExports = do
@@ -436,7 +437,7 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
 
-collectTraits :: (Monad m, Show a) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectTraits =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} -> do
@@ -466,18 +467,18 @@ collectTraits =
                     case Environment.lookup name protoObuildTypeConstructors of
                       Just ProtoTypeConstructorEntry{} -> do
                         -- traceShowM name
-                        baz2 (typeInstances name protoObuildInstances)
+                        qualifiedInstanceNames (typeInstances name protoObuildInstances)
                       Nothing ->
                         pure ()
                   -- error (show (path, name))
                   Just ProtoTraitEntry{..} -> do
                     insertNameEntry (ProtoNTrait name)
                     insertTrait name ProtoTraitEntry{..}
-                    baz2 (traitInstances name protoObuildInstances)
+                    qualifiedInstanceNames (traitInstances name protoObuildInstances)
             | otherwise ->
                 error "TODO"
            where
-            baz2 instances =
+            qualifiedInstanceNames instances =
               forM_ instances $
                 \(traitName, instanceMap) ->
                   forM_ (Map.toList instanceMap) $
@@ -510,10 +511,10 @@ traitInstances :: Name -> Environment (InstanceMap a) -> [(Name, InstanceMap a)]
 traitInstances name instances = filter ((==) name . fst) (Environment.toList instances)
 
 typeInstances :: Name -> Environment (InstanceMap (ProtoInstanceEntry a)) -> [(Name, InstanceMap (ProtoInstanceEntry a))]
-typeInstances name instances = fmap (second (bork name)) (Environment.toList instances)
+typeInstances name instances = fmap (second (instancesForType name)) (Environment.toList instances)
 
-bork :: Name -> InstanceMap (ProtoInstanceEntry a) -> InstanceMap (ProtoInstanceEntry a)
-bork name = Map.filter isType
+instancesForType :: Name -> InstanceMap (ProtoInstanceEntry a) -> InstanceMap (ProtoInstanceEntry a)
+instancesForType name = Map.filter isType
  where
   isType ProtoInstanceEntry{..} =
     Just name == headConstructor protoOinstanceEntryType
