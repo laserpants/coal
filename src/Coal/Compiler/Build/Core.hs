@@ -16,7 +16,6 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Aliases
 import Coal.Compiler.Build
 import Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors)
-import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
