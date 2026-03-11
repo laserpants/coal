@@ -54,15 +54,35 @@ pass =
       -- TODO: This needs some cleanup. We are effectively running the same
       -- steps twice...
 
-      _ <- overModuleDefinitionsM (traverse insertPlaceholders) m
-      names <- gets compilerNameStore
-      updateNames names
+--      _ <- overModuleDefinitionsM (traverse insertPlaceholders) m
+      -- names <- gets compilerNameStore
+--      names <- lift $ gets protoOcompilerNameStore
+--      updateNames names
+--      updateNames2 names
 
-      m2 <- overModuleDefinitionsM (traverse insertPlaceholders) m
-      names2 <- gets compilerNameStore
-      updateNames names2
+      overModuleDefinitionsM (traverse insertPlaceholders) m
+      -- names2 <- gets compilerNameStore
+--      names2 <- lift $ gets protoOcompilerNameStore
+--      updateNames names2
+--      updateNames2 names2
 
-      pure m2
+
+updateNames2 :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m Metadata) ()
+updateNames2 store =
+  lift $
+    protoOupdateCurrentBuildC $
+      \build@ProtoBuild{..} ->
+        flip execStateT build $
+          forM_ (concat $ Environment.elems protoObuildNames) $
+            \case
+              ProtoNName name _ ->
+                case Environment.lookup (normalizedName name) store of
+                  Nothing ->
+                    pure ()
+                  Just s ->
+                    modify (replaceBuildNameEntry (ProtoNName name s))
+              _ ->
+                pure ()
 
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 updateNames store =
@@ -117,13 +137,15 @@ expandInLocalEnv d = do
   --env1 <- lift $ gets protoOcompilerNameStore
   local (overCompilerDictionaryNameEnvironment (const env1)) (expandTraits d)
 
-insertTypeInfo :: (Monad m) => Name -> Definition a k IndexedType -> CompilerT a m (Definition a k IndexedType)
+insertTypeInfo :: (Monad m) => Name -> Definition a k IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a k IndexedType)
 insertTypeInfo name d = do
   insertName d name
   pure d
 
-insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
-insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = insertNameC name (Forall (typeIndexesIn t) ts t)
+insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a (ProtoCompilerT m Metadata) ()
+insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
+  insertNameC name (Forall (typeIndexesIn t) ts t)
+  lift $ protoOinsertNameC name (Forall (typeIndexesIn t) ts t)
 insertName _ _ = error "Implementation error"
 
 collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
