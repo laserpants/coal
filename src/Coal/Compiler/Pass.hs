@@ -54,19 +54,12 @@ overlayEnvironment :: (MonadIO m) => Pass Metadata m a b -> Pass Metadata m a b
 overlayEnvironment p = Pass{runPass = pass}
  where
   pass i = do
-    ModuleBuild{..} <- getCurrentBuildC
-
-    ProtoBuild{..} <- lift (fromMaybe (error "!!") <$> protoOgetBuildC moduleBuildPath)
-
-    -- typeConstructors <- evalStateT typeConstructorEnv ModuleBuild{..}
-
-    let typeConstructors = Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
-
+    ProtoBuild{..} <- lift protoOgetCurrentBuildC
     local
       ( \env ->
           env
             { compilerDataConstructorEnvironment = protoObuildDataConstructors
-            , compilerTypeConstructorEnvironment = typeConstructors
+            , compilerTypeConstructorEnvironment = Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
             , compilerAliasEnvironment = protoObuildAliases
             , compilerTraitEnvironment = protoObuildTraits
             , compilerInstanceEnvironment = protoObuildInstances
