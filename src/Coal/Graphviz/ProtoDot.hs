@@ -217,8 +217,10 @@ instance (ProtoDot t) => ProtoDot (ProtoDefinition a Kind t) where
         emitDefinition name "DFunction" def
       ProtoDLet _ name def ->
         emitDefinition name "DLet" def
-      ProtoDFunctionGroup _ name defs ->
-        emitNamedShape TriangleShape (Just name) "DFunctionGroup"
+      ProtoDFunctionGroup _ name defs -> do
+        dotId <- emitNamedShape TriangleShape (Just name) "DFunctionGroup"
+        emitEdges dotId defs
+        return dotId
       ProtoDFold _ name def -> do
         emitDefinition name "DFold" def
       ProtoDImport _ path imports -> do
