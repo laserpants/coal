@@ -51,9 +51,9 @@ passTypeInference = Pass{runPass = pass}
 
 pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
 pass m@(ProtoModule path _ _) = do
---  env <- buildEnv
---  setNamesC env
---  insertNamesC builtinFunctions
+  --  env <- buildEnv
+  --  setNamesC env
+  --  insertNamesC builtinFunctions
 
   next <- runTypeInference m
 
