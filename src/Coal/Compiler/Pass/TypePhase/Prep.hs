@@ -40,12 +40,13 @@ prep m = do
   y <- expandFunctionGroups m1
   lift $ protoOprepareBuild y
 
-  clearAssumptionsC
-  clearNameStoreC
-  (next, build) <- prepareBuild m
-  insertCurrentModuleC build
-  env <- buildEnv
-  setNamesC env
-  insertNamesC builtinFunctions
+--  clearAssumptionsC
+--  clearNameStoreC
+--  (next, build) <- prepareBuild m
+--  insertCurrentModuleC build
+--  env <- buildEnv
+--
+--  setNamesC env
+--  insertNamesC builtinFunctions
 
   pure y
