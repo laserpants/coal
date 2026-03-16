@@ -528,9 +528,17 @@ collectTraitsInterface =
     ProtoDTrait _ name ProtoTraitDefinition{..} ->
       forM_ protoOtraitDefinitionInterface $
         \ProtoTraitDefinitionInterfaceEntry{..} -> do
-          s <- instantiateScheme protoOtraitDefinitionInterfaceEntryScheme
+          let Forall{..} = protoOtraitDefinitionInterfaceEntryScheme
+          s <-
+            instantiateScheme
+              ( Forall
+                  schemeTypeVariables
+                  [Trait name (TVariable protoOtraitDefinitionParameter)]
+                  schemeTypeBody
+              )
           insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName s)
           lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName s
+
           exportList <- ask
           let exportName =
                 unless (protoOtraitDefinitionInterfaceEntryName `elem` builtinNames) $
