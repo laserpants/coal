@@ -2,7 +2,6 @@
 
 module Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec) where
 
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
@@ -12,6 +11,7 @@ import Coal.Compiler.Environment
 import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
 import Coal.Language
+import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Control.Monad.Identity (runIdentity)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
