@@ -9,6 +9,12 @@
 
 module Coal.Compiler.Pass.TranslationPhase.Placeholders (TraitContext (..), passPlaceholders) where
 
+import Debug.Trace
+import Data.Text.Lazy (toStrict)
+import Text.Pretty.Simple (pPrint, pShowNoColor)
+import Coal.ProtoLanguage.ProtoModule
+import qualified Data.Text as Text
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
@@ -42,11 +48,12 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (catMaybes, fromJust)
 import Data.Text (isPrefixOf)
 import Extras (Dictionary, Name, forM_)
+import qualified Data.Text.IO as Text
 
-passPlaceholders :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passPlaceholders :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPlaceholders = Pass{runPass = pass}
 
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
+pass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
 pass =
   withCurrentModuleC $
     \m -> do
@@ -61,13 +68,21 @@ pass =
       --      updateNames names
       --      updateNames2 names
 
-      overModuleDefinitionsM (traverse insertPlaceholders) m
+      mm <- overModuleDefinitionsM (traverse insertPlaceholders) m
 
--- names2 <- gets compilerNameStore
---      names2 <- lift $ gets protoOcompilerNameStore
---      updateNames names2
---      updateNames2 names2
+      --names2 <- gets compilerNameStore
+      names2 <- lift $ gets protoOcompilerNameStore
+      --updateNames names2
+      updateNames2 names2
 
+      ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+      liftIO $ Text.writeFile ("tmp/placeholder_names_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ protoObuildNames)
+
+      liftIO $ Text.writeFile ("tmp/placeholder_build_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ ProtoBuild{..})
+
+      return mm
+
+ 
 updateNames2 :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m Metadata) ()
 updateNames2 store =
   lift $
@@ -135,7 +150,11 @@ insertPlaceholdersInDef trait =
 expandInLocalEnv :: (Monad m, TraitContext a b) => b -> CompilerT a (ProtoCompilerT m Metadata) b
 expandInLocalEnv d = do
   -- env1 <- gets compilerNameStore
-  env1 <- lift $ gets protoOcompilerNameStore
+
+  b <- lift protoOgetCurrentBuildC
+  let env1 = typeEnvironment b
+
+--  env1 <- lift $ gets protoOcompilerNameStore
 
   local (overCompilerDictionaryNameEnvironment (const env1)) (expandTraits d)
 
