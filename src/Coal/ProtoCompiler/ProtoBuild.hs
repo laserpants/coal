@@ -245,6 +245,7 @@ setQualifiedNames names ProtoBuild{..} =
     , ..
     }
 
+-- TODO: rename
 typeEnvironment :: ProtoBuild a -> Environment IndexedScheme
 typeEnvironment ProtoBuild{..} =
   flip execState mempty $ do
