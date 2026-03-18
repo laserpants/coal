@@ -27,7 +27,7 @@ module Coal.ProtoCompiler.ProtoStack (
   protoOclearNameStoreC,
   protoOinsertNameC,
   protoOinsertNamesC,
-  setNamesC,
+  protoOsetNamesC,
   setTypeAnnotationParamsC,
   protoOcompilerReportConstraintsGenErrors,
   protoOcompilerReportKindConstraintsGenErrors,
@@ -164,8 +164,8 @@ protoOinsertNameC name scheme_ = modify (overProtoCompilerNameStore (Environment
 protoOinsertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> ProtoCompilerT m a ()
 protoOinsertNamesC names = modify (overProtoCompilerNameStore (Environment.insertMultiple names))
 
-setNamesC :: (Monad m) => Environment IndexedScheme -> ProtoCompilerT m a ()
-setNamesC names = modify (overProtoCompilerNameStore (const names))
+protoOsetNamesC :: (Monad m) => Environment IndexedScheme -> ProtoCompilerT m a ()
+protoOsetNamesC names = modify (overProtoCompilerNameStore (const names))
 
 setTypeAnnotationParamsC :: (Monad m) => Dictionary (a, TypeIndex Kind) -> ProtoCompilerT m a ()
 setTypeAnnotationParamsC params = modify (overProtoCompilerTypeAnnotationParams (const params))
