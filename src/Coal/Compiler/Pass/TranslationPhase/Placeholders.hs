@@ -9,12 +9,6 @@
 
 module Coal.Compiler.Pass.TranslationPhase.Placeholders (TraitContext (..), passPlaceholders) where
 
-import Debug.Trace
-import Data.Text.Lazy (toStrict)
-import Text.Pretty.Simple (pPrint, pShowNoColor)
-import Coal.ProtoLanguage.ProtoModule
-import qualified Data.Text as Text
-import Control.Monad.IO.Class (MonadIO, liftIO)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
@@ -25,19 +19,22 @@ import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
+import Coal.Graphviz.Dot (Dot (..), generateDot, writeDotFile)
 import Coal.Language
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoCompiler.ProtoState
+import Coal.ProtoLanguage.ProtoModule
 import Coal.TypeSystem.Constraint.Assumption (normalizedName)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
 import Control.Monad (when)
 import Control.Monad.Except (MonadError (throwError), forM)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
-import Control.Monad.State (StateT, execStateT, gets, modify)
+import Control.Monad.State (StateT, execStateT, get, gets, modify, put)
 import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
@@ -47,8 +44,12 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (catMaybes, fromJust)
 import Data.Text (isPrefixOf)
-import Extras (Dictionary, Name, forM_)
+import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Data.Text.Lazy (toStrict)
+import Debug.Trace
+import Extras (Dictionary, Name, forM_)
+import Text.Pretty.Simple (pPrint, pShowNoColor)
 
 passPlaceholders :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPlaceholders = Pass{runPass = pass}
@@ -68,21 +69,34 @@ pass =
       --      updateNames names
       --      updateNames2 names
 
+      b <- lift protoOgetCurrentBuildC
+      lift $ protoOsetNamesC (typeEnvironment b)
+
+      --  lift $ protoOsetNamesC env1
+
       mm <- overModuleDefinitionsM (traverse insertPlaceholders) m
 
-      --names2 <- gets compilerNameStore
-      names2 <- lift $ gets protoOcompilerNameStore
-      --updateNames names2
-      updateNames2 names2
+      -- names2 <- gets compilerNameStore
+      -- names2 <- lift $ gets protoOcompilerNameStore
+      -- updateNames names2
+      -- updateNames2 names2
+
+      -- mm2 <- overModuleDefinitionsM (traverse insertPlaceholders) mm
+
+      ----names2 <- gets compilerNameStore
+      -- names3 <- lift $ gets protoOcompilerNameStore
+      -- updateNames names2
+      -- updateNames2 names3
 
       ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
       liftIO $ Text.writeFile ("tmp/placeholder_names_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ protoObuildNames)
 
       liftIO $ Text.writeFile ("tmp/placeholder_build_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ ProtoBuild{..})
 
+      liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
+
       return mm
 
- 
 updateNames2 :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m Metadata) ()
 updateNames2 store =
   lift $
@@ -149,13 +163,8 @@ insertPlaceholdersInDef trait =
 
 expandInLocalEnv :: (Monad m, TraitContext a b) => b -> CompilerT a (ProtoCompilerT m Metadata) b
 expandInLocalEnv d = do
-  -- env1 <- gets compilerNameStore
-
   b <- lift protoOgetCurrentBuildC
   let env1 = typeEnvironment b
-
---  env1 <- lift $ gets protoOcompilerNameStore
-
   local (overCompilerDictionaryNameEnvironment (const env1)) (expandTraits d)
 
 insertTypeInfo :: (Monad m) => Name -> Definition a k IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a k IndexedType)
@@ -165,13 +174,15 @@ insertTypeInfo name d = do
 
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a (ProtoCompilerT m Metadata) ()
 insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
-  insertNameC name (Forall (typeIndexesIn t) ts t)
-  lift $ protoOinsertNameC name (Forall (typeIndexesIn t) ts t)
+  let s = Forall (typeIndexesIn t) ts t
+  insertNameC name s
+  lift $ protoOinsertNameC name s
 insertName _ _ = error "Implementation error"
 
 collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a (ProtoCompilerT m Metadata) [Trait IndexedType]
 collectTraits u name = do
-  env <- asks compilerDictionaryNameEnvironment
+  -- env <- asks compilerDictionaryNameEnvironment
+  env <- lift $ gets protoOcompilerNameStore
   case Environment.lookup (normalizedName name) env of
     Nothing ->
       pure []
@@ -274,6 +285,14 @@ expandRecursiveLet :: Expression a () IndexedType -> Expression a () IndexedType
 expandRecursiveLet (ELet a (BPattern _ p e1 :| []) e2) = ERecursiveLet a p e1 e2
 expandRecursiveLet _ = error "Implementation error"
 
+withLocalEnvironment :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a (ProtoCompilerT m a) r -> CompilerT a (ProtoCompilerT m a) r
+withLocalEnvironment xs action  = do
+  old <- lift get
+  lift $ protoOinsertNamesC xs
+  r <- action
+  lift $ put old
+  return r
+
 instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedType) where
   expandTraits =
     \case
@@ -282,7 +301,14 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedTy
       ELet a bs e -> do
         as <- censorDictionaryTraits (const []) (traverse transformBinding bs)
         let xs = concat (toList (snd <$> as))
-        ELet a (fst <$> as) <$> local (overCompilerDictionaryNameEnvironment (Environment.insertMultiple xs)) (expandTraits e)
+
+        old <- lift get
+        lift $ protoOinsertNamesC xs
+
+        r <- ELet a (fst <$> as) <$> local (overCompilerDictionaryNameEnvironment (Environment.insertMultiple xs)) (expandTraits e)
+
+        lift $ put old
+        return r
       var@(EVariable _ (Label t name))
         | "$fold" `isPrefixOf` name -> do
             traits <- collectTraits t name
