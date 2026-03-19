@@ -334,21 +334,21 @@ lookupAlias t ts name = do
 --      let t1 = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
 --      TAlias name ts <$> aliasTransform t1
 
-substituteAlias :: Name -> Type Parameter k -> Type Parameter k -> Type Parameter k
-substituteAlias name s =
+substituteAlias :: Parameter k -> Type Parameter k -> Type Parameter k -> Type Parameter k
+substituteAlias param s =
   \case
     t@(TVariable (Parameter _ match))
-      | name == match ->
+      | parameterName param == match ->
           s
       | otherwise ->
           t
     TApplication k t1 t2 ->
-      TApplication k (substituteAlias name s t1) (substituteAlias name s t2)
+      TApplication k (substituteAlias param s t1) (substituteAlias param s t2)
     TArrow t1 t2 ->
-      TArrow (substituteAlias name s t1) (substituteAlias name s t2)
+      TArrow (substituteAlias param s t1) (substituteAlias param s t2)
     TRow row ->
-      TRow (substituteAlias name s <$> row)
+      TRow (substituteAlias param s <$> row)
     TRecord t ->
-      TRecord (substituteAlias name s t)
+      TRecord (substituteAlias param s t)
     t ->
       t

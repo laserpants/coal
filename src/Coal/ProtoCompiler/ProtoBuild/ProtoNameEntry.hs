@@ -67,7 +67,7 @@ instance (Binary a) => Binary (ProtoInstanceEntry a)
 data ProtoAliasEntry a = ProtoAliasEntry
   { protoOaliasEntryMetadata :: a
   , protoOaliasEntryName :: Name
-  , protoOaliasEntryParams :: [Name]
+  , protoOaliasEntryParams :: [Parameter Kind]
   , protoOaliasEntryType :: Type Parameter Kind
   }
   deriving (Show, Eq, Ord, Read, Generic)

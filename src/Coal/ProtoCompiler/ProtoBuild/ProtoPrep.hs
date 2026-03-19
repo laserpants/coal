@@ -358,7 +358,7 @@ collectTypeAliases =
         ProtoAliasEntry
           { protoOaliasEntryMetadata = loc
           , protoOaliasEntryName = name
-          , protoOaliasEntryParams = fmap parameterName protoOaliasDefinitionParameters
+          , protoOaliasEntryParams = protoOaliasDefinitionParameters
           , protoOaliasEntryType = protoOaliasDefinitionType
           }
     ProtoDImport _ path imports ->
