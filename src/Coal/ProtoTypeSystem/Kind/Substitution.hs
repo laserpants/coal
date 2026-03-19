@@ -691,6 +691,7 @@ instance ProtoKindSubstitutable (ProtoAliasEntry a) where
       ProtoAliasEntry{..} ->
         ProtoAliasEntry
           { protoOaliasEntryType = protoOapplyKinds sub protoOaliasEntryType
+          , protoOaliasEntryParams = protoOapplyKinds sub protoOaliasEntryParams
           , ..
           }
   protoOreplaceVariables =
@@ -698,6 +699,7 @@ instance ProtoKindSubstitutable (ProtoAliasEntry a) where
       ProtoAliasEntry{..} ->
         ProtoAliasEntry
           { protoOaliasEntryType = protoOreplaceVariables protoOaliasEntryType
+          , protoOaliasEntryParams = protoOreplaceVariables protoOaliasEntryParams
           , ..
           }
 
