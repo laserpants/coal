@@ -12,11 +12,12 @@ inCharRange n (a, b) = n >= ord a && n <= ord b
 
 intToVar :: Int -> String
 intToVar n =
-  let (q, r) = n `divMod` 26
-      letter = ['a' .. 'z'] !! r
-   in if q == 0
-        then [letter]
-        else letter : show (q - 1)
+  if q == 0
+    then [letter]
+    else letter : show (q - 1)
+ where
+  (q, r) = n `divMod` 26
+  letter = ['a' .. 'z'] !! r
 
 lexOrderRank :: Text -> Int
 lexOrderRank text
