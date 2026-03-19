@@ -77,9 +77,9 @@ pass =
       mm <- overModuleDefinitionsM (traverse insertPlaceholders) m
 
       -- names2 <- gets compilerNameStore
-      -- names2 <- lift $ gets protoOcompilerNameStore
+      names2 <- lift $ gets protoOcompilerNameStore
       -- updateNames names2
-      -- updateNames2 names2
+      updateNames2 names2
 
       -- mm2 <- overModuleDefinitionsM (traverse insertPlaceholders) mm
 
@@ -286,7 +286,7 @@ expandRecursiveLet (ELet a (BPattern _ p e1 :| []) e2) = ERecursiveLet a p e1 e2
 expandRecursiveLet _ = error "Implementation error"
 
 withLocalEnvironment :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a (ProtoCompilerT m a) r -> CompilerT a (ProtoCompilerT m a) r
-withLocalEnvironment xs action  = do
+withLocalEnvironment xs action = do
   old <- lift get
   lift $ protoOinsertNamesC xs
   r <- action
