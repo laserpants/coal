@@ -38,6 +38,7 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..), tupleKind)
 import Coal.Language.Type.Row (Row (..), fromDictionary, normalizeRow)
+import Coal.Utils (intToVar)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform, universeBi)
@@ -91,7 +92,7 @@ data TypeIndex k = TypeIndex
 instance (Binary k) => Binary (TypeIndex k)
 
 instance Pretty (TypeIndex k) where
-  pretty (TypeIndex _ i) = "t." <> pretty i
+  pretty (TypeIndex _ i) = pretty (intToVar i)
 
 data Parameter k = Parameter
   { parameterKind :: k

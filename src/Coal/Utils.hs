@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Utils (lexOrderRank) where
+module Coal.Utils (intToVar, lexOrderRank) where
 
 import Data.Char (ord)
 import Data.Text (Text)
@@ -9,6 +9,14 @@ import qualified Data.Text as Text
 {-# INLINE inCharRange #-}
 inCharRange :: Int -> (Char, Char) -> Bool
 inCharRange n (a, b) = n >= ord a && n <= ord b
+
+intToVar :: Int -> String
+intToVar n =
+  let (q, r) = n `divMod` 26
+      letter = ['a' .. 'z'] !! r
+   in if q == 0
+        then [letter]
+        else letter : show (q - 1)
 
 lexOrderRank :: Text -> Int
 lexOrderRank text
