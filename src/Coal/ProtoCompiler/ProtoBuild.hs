@@ -26,6 +26,7 @@ module Coal.ProtoCompiler.ProtoBuild (
   insertBuildInstance,
   insertBuildAlias,
   typeEnvironment,
+  overBuildDataConstructors,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -40,7 +41,7 @@ import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Control.Monad.State (execState, modify)
 import Data.Binary
 import Data.ByteString (ByteString)
-import Data.List (nub)
+import Data.List (nubBy)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -113,9 +114,25 @@ overBuildNames f ProtoBuild{..} =
     , ..
     }
 
+nameEntryEquality :: ProtoNameEntry -> ProtoNameEntry -> Bool
+nameEntryEquality a b =
+  case (a, b) of
+    (ProtoNName n1 _, ProtoNName n2 _)
+      | n1 == n2 -> True
+    (ProtoNType n1 _, ProtoNType n2 _)
+      | n1 == n2 -> True
+    (ProtoNTrait n1, ProtoNTrait n2)
+      | n1 == n2 -> True
+    (ProtoNTypeAlias n1, ProtoNTypeAlias n2)
+      | n1 == n2 -> True
+    (ProtoNPlaceholder n1, ProtoNPlaceholder n2)
+      | n1 == n2 -> True
+    (_, _) ->
+      False
+
 insertBuildNameEntry :: ProtoNameEntry -> ProtoBuild a -> ProtoBuild a
 insertBuildNameEntry entry =
-  overBuildNames (Environment.adjust nub name . Environment.insertWith (<>) name [entry])
+  overBuildNames (Environment.adjust (nubBy nameEntryEquality) name . Environment.insertWith (<>) name [entry])
  where
   name = protoOnameOf entry
 
