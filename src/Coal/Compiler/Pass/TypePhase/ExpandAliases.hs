@@ -9,5 +9,5 @@ import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.IO.Class (MonadIO)
 import Data.Data (Data)
 
-passExpandAliases :: (MonadIO m, Data a, Data k, AliasTransform (Type Parameter k)) => Pass a m (ProtoModule a k ()) (ProtoModule a k ())
+passExpandAliases :: (MonadIO m, Data a, Show a, Data k, AliasTransform (Type Parameter k)) => Pass a m (ProtoModule a k ()) (ProtoModule a k ())
 passExpandAliases = Pass{runPass = aliasTransform}

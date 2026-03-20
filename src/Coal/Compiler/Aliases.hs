@@ -7,23 +7,38 @@
 
 module Coal.Compiler.Aliases (AliasTransform (..)) where
 
+import Coal.Common.Environment (forMEnvironment)
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Graphviz.Dot (Dot (..), generateDot, writeDotFile)
 import Coal.Language
 import Coal.Language.Module
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
-import Control.Monad.Reader (asks)
+import Coal.ProtoTypeSystem.Parameterized
+import Coal.TypeSystem.Substitution (applyT)
+import qualified Coal.TypeSystem.Substitution as Substitution
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.Reader (asks, runReaderT)
+import Control.Monad.State (StateT, execStateT, get, gets, modify, put)
+import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Extras (Dictionary, Name)
+import qualified Data.Text as Text
+import qualified Data.Text.IO as Text
+import Data.Text.Lazy (toStrict)
+import Extras (Dictionary, Name, forM_)
+import Text.Pretty.Simple (pPrint, pShowNoColor)
 
 class AliasTransform c where
-  aliasTransform :: (Monad m) => c -> CompilerT a (ProtoCompilerT m a) c
+  aliasTransform :: (MonadIO m, Show a) => c -> CompilerT a (ProtoCompilerT m a) c
 
 instance (AliasTransform c) => AliasTransform [c] where
   aliasTransform = traverse aliasTransform
@@ -49,9 +64,59 @@ instance (AliasTransform t) => AliasTransform (Row o k t) where
 instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoModule e a t) where
   aliasTransform =
     \case
-      ProtoModule{..} ->
-        ProtoModule protoOmodulePath protoOmoduleExportList
-          <$> aliasTransform protoOmoduleDefinitions
+      ProtoModule{..} -> do
+        m <- ProtoModule protoOmodulePath protoOmoduleExportList <$> aliasTransform protoOmoduleDefinitions
+        updateNames
+
+        tempprotoOupdateCurrentBuildC $
+          \ProtoBuild{..} -> do
+            newDataConstructors <- forMEnvironment protoObuildDataConstructors $ aliasTransform
+            return
+              ProtoBuild
+                { protoObuildDataConstructors = newDataConstructors
+                , ..
+                }
+
+        ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath protoOmodulePath)) (toStrict $ pShowNoColor $ ProtoBuild{..})
+        liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath protoOmodulePath)) (toStrict $ pShowNoColor $ protoObuildNames)
+
+        pure m
+
+-- fooz :: ProtoDataConstructorEntry a -> ProtoDataConstructorEntry a
+-- fooz ProtoDataConstructorEntry{..} =
+--  ProtoDataConstructorEntry{
+--    protoOdataConstructorEntryConstructor = protoOdataConstructorEntryConstructor
+--  , ..
+--  }
+
+updateNames :: (MonadIO m, Show a) => CompilerT a (ProtoCompilerT m a) ()
+updateNames =
+  tempprotoOupdateCurrentBuildC $
+    \build@ProtoBuild{..} ->
+      flip execStateT build $ do
+        forM_ (concat $ Environment.elems protoObuildNames) $
+          \case
+            ProtoNName name s -> do
+              newScheme <- lift $ aliasTransform s
+              modify (replaceBuildNameEntry (ProtoNName name newScheme))
+            _ ->
+              pure ()
+
+tempprotoOupdateBuildC :: (Monad m) => Path -> (ProtoBuild a -> CompilerT a (ProtoCompilerT m a) (ProtoBuild a)) -> CompilerT a (ProtoCompilerT m a) ()
+tempprotoOupdateBuildC path f = do
+  maybeBuild <- lift $ protoOgetBuildC path
+  case maybeBuild of
+    Nothing ->
+      error "Implementation error"
+    Just build -> do
+      newBuild <- f build
+      lift $ modify (overProtoCompilerModules (Environment.insert (principalPath path) newBuild))
+
+tempprotoOupdateCurrentBuildC :: (Monad m) => (ProtoBuild a -> CompilerT a (ProtoCompilerT m a) (ProtoBuild a)) -> CompilerT a (ProtoCompilerT m a) ()
+tempprotoOupdateCurrentBuildC f = do
+  ProtoCompilerState{..} <- lift get
+  tempprotoOupdateBuildC protoOcompilerCurrentPath f
 
 instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoDefinition e a t) where
   aliasTransform =
@@ -156,6 +221,14 @@ instance (AliasTransform (Type Parameter a)) => AliasTransform (DataConstructor 
         newConstructorScheme <- aliasTransform constructorScheme
         pure DataConstructor{constructorScheme = newConstructorScheme, ..}
 
+-- TODO: DRY
+instance AliasTransform (DataConstructor TypeIndex Kind (Type TypeIndex Kind)) where
+  aliasTransform =
+    \case
+      DataConstructor{..} -> do
+        newConstructorScheme <- aliasTransform constructorScheme
+        pure DataConstructor{constructorScheme = newConstructorScheme, ..}
+
 instance AliasTransform (Type Parameter Kind) where
   aliasTransform =
     \case
@@ -176,6 +249,26 @@ instance AliasTransform (Type Parameter Kind) where
       t ->
         pure t
 
+instance AliasTransform (Type TypeIndex Kind) where
+  aliasTransform =
+    \case
+      t@(TApplication k _ _) ->
+        uncurry (aliasTransformTypeApplication2 k t) (listTypeArgs t)
+      TArrow t1 t2 ->
+        TArrow <$> aliasTransform t1 <*> aliasTransform t2
+      TAlias name ts t ->
+        TAlias name <$> aliasTransform ts <*> aliasTransform t
+      TIntrinsic t ->
+        pure (TIntrinsic t)
+      TRecord t ->
+        TRecord <$> aliasTransform t
+      TRow row ->
+        TRow <$> traverse aliasTransform row
+      t@(TConstructor _ name) ->
+        lookupAlias2 t [] name
+      t ->
+        pure t
+
 instance (AliasTransform t) => AliasTransform (Scheme o k t) where
   aliasTransform =
     \case
@@ -185,6 +278,17 @@ instance (AliasTransform t) => AliasTransform (Scheme o k t) where
 
 instance AliasTransform () where
   aliasTransform _ = pure ()
+
+instance AliasTransform (ProtoDataConstructorEntry a) where
+  aliasTransform =
+    \case
+      ProtoDataConstructorEntry{..} -> do
+        newDataConstructorEntryConstructor <- aliasTransform protoOdataConstructorEntryConstructor
+        return
+          ProtoDataConstructorEntry
+            { protoOdataConstructorEntryConstructor = newDataConstructorEntryConstructor
+            , ..
+            }
 
 --
 
@@ -281,10 +385,16 @@ instance (AliasTransform t, Data a, Data t) => AliasTransform (Definition a Kind
       o ->
         pure o
 
-aliasTransformTypeApplication :: (Monad m) => Kind -> Type Parameter Kind -> Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
+aliasTransformTypeApplication :: (MonadIO m, Show a) => Kind -> Type Parameter Kind -> Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
 aliasTransformTypeApplication _ t (TConstructor _ name) ts =
   lookupAlias t (toList ts) name
 aliasTransformTypeApplication k _ t ts =
+  applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
+
+aliasTransformTypeApplication2 :: (MonadIO m, Show a) => Kind -> Type TypeIndex Kind -> Type TypeIndex Kind -> NonEmpty (Type TypeIndex Kind) -> CompilerT a (ProtoCompilerT m a) (Type TypeIndex Kind)
+aliasTransformTypeApplication2 _ t (TConstructor _ name) ts =
+  lookupAlias2 t (toList ts) name
+aliasTransformTypeApplication2 k _ t ts =
   applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
 
 -- instance AliasTransform ParameterizedType where
@@ -307,7 +417,7 @@ aliasTransformTypeApplication k _ t ts =
 --      t ->
 --        pure t
 
-lookupAlias :: (Monad m) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
+lookupAlias :: (MonadIO m, Show a) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
 lookupAlias t ts name = do
   env <- asks compilerAliasEnvironment
   case Environment.lookup name env of
@@ -321,18 +431,22 @@ lookupAlias t ts name = do
       let t1 = foldr (uncurry substituteAlias) protoOaliasEntryType (protoOaliasEntryParams `zip` ts)
       TAlias name ts <$> aliasTransform t1
 
---  traceShowM name
---
---  case Environment.lookup name env of
---    Nothing ->
---      case t of
---        TApplication k t1 t2 ->
---          TApplication k <$> aliasTransform t1 <*> aliasTransform t2
---        _ ->
---          pure t
---    Just AliasEntry{..} -> do
---      let t1 = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
---      TAlias name ts <$> aliasTransform t1
+lookupAlias2 :: (MonadIO m, Show a) => Type TypeIndex Kind -> [Type TypeIndex Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type TypeIndex Kind)
+lookupAlias2 t ts name = do
+  env <- asks compilerAliasEnvironment
+  case Environment.lookup name env of
+    Nothing ->
+      case t of
+        TApplication k t1 t2 ->
+          TApplication k <$> aliasTransform t1 <*> aliasTransform t2
+        _ ->
+          pure t
+    Just ProtoAliasEntry{..} -> do
+      ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) protoOaliasEntryParams
+      let abc = (parameterName <$> protoOaliasEntryParams) `zip` ixs
+          sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)
+      t1 <- lift $ runReaderT (toIndexed protoOaliasEntryType) (Environment.fromList abc)
+      TAlias name ts <$> aliasTransform (applyT sub t1)
 
 substituteAlias :: Parameter k -> Type Parameter k -> Type Parameter k -> Type Parameter k
 substituteAlias param s =
