@@ -78,7 +78,7 @@ replacePlaceholders store =
       Just s ->
         modify $ addName (info name s)
 
-prepareBuild :: (Monad m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind (), ModuleBuild a)
+prepareBuild :: (MonadIO m, Monoid a, Eq a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind (), ModuleBuild a)
 prepareBuild module_@(Module path exports defs) =
   flip runStateT emptyModuleBuild $ do
     modify (setPath path)
@@ -360,7 +360,7 @@ typeConstructorEnv = do
   insertTypeInfo :: TypeConstructorEntry a -> Environment Kind -> Environment Kind
   insertTypeInfo (TypeConstructorEntry _ name kind_ _) = Environment.insert name kind_
 
-collectDataConstructors :: (Monad m) => Environment (AliasEntry a) -> Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a (ProtoCompilerT m a)) ()
+collectDataConstructors :: (MonadIO m) => Environment (AliasEntry a) -> Environment Kind -> Definition a Kind () -> StateT (ModuleBuild a) (CompilerT a (ProtoCompilerT m a)) ()
 collectDataConstructors aliases env =
   \case
     DType loc _ def -> do
