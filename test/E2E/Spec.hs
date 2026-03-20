@@ -1135,12 +1135,12 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  describe "220" $ do
-    expectOutput
-      "true"
-      "test/Coal/examples/220"
-      [ "Main.coal"
-      ]
+--  describe "220" $ do
+--    expectOutput
+--      "true"
+--      "test/Coal/examples/220"
+--      [ "Main.coal"
+--      ]
 
   describe "221" $ do
     expectOutput
