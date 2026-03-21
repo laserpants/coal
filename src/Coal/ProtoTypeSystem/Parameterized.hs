@@ -20,6 +20,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 import Extras.Control.Monad (concatMapM)
+import Extras.Data.Set (unionMap)
 import Extras.Operators ((<>^))
 
 class ToIndexed i o where
@@ -125,10 +126,34 @@ instance ProtoParameterized (Parameter Kind) where
 replaceParamInScheme :: Parameter Kind -> Type Parameter Kind -> Scheme Parameter Kind (Type Parameter Kind) -> Scheme Parameter Kind (Type Parameter Kind)
 replaceParamInScheme p o Forall{..} =
   Forall
-    (Set.filter (on (/=) parameterName p) schemeTypeVariables)
+    (paramsIn o <> Set.filter (on (/=) parameterName p) schemeTypeVariables)
     (fmap replaceParamTrait schemeTraits)
     (replaceParam schemeTypeBody)
  where
+  paramsIn =
+    \case
+      TApplication _ t1 t2 ->
+        paramsIn t1 <> paramsIn t2
+      TArrow t1 t2 ->
+        paramsIn t1 <> paramsIn t2
+      TRecord t ->
+        paramsIn t
+      TRow r ->
+        paramsInRow r
+      TVariable p ->
+        Set.singleton p
+      TAlias name ts t ->
+        unionMap paramsIn ts <> paramsIn t
+      _ ->
+        mempty
+  paramsInRow =
+    \case
+      RExtend _ t r ->
+        paramsIn t <> paramsInRow r
+      RVariable p ->
+        Set.singleton p
+      _ ->
+        mempty
   replaceParamTrait =
     \case
       Trait name t ->
