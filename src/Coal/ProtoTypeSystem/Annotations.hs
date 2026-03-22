@@ -12,7 +12,7 @@ import Coal.TypeSystem.Constraint.Generation.Annotation.Error (TypeAnnotationErr
 import Coal.TypeSystem.Constraint.Generation.Context
 import Coal.Utils (lexOrderRank)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError, withExceptT)
-import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, runReaderT)
+import Control.Monad.Reader (MonadReader, ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, get, modify, runStateT)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
