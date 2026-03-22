@@ -60,11 +60,11 @@ overlayEnvironment p = Pass{runPass = pass}
           env
             { compilerDataConstructorEnvironment = protoObuildDataConstructors
             , compilerTypeConstructorEnvironment = Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
-            , compilerAliasEnvironment = protoObuildAliases
-            , compilerTraitEnvironment = protoObuildTraits
-            , compilerInstanceEnvironment = protoObuildInstances
-            , compilerDictionaryNameEnvironment = mempty
-            , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
+            , -- , compilerAliasEnvironment = protoObuildAliases
+              -- , compilerTraitEnvironment = protoObuildTraits
+              -- , compilerInstanceEnvironment = protoObuildInstances
+              -- , compilerDictionaryNameEnvironment = mempty
+              compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
             }
       )
       (runPassAndTickBar p i)

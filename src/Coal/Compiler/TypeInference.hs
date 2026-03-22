@@ -405,7 +405,7 @@ typeDefinitionC =
                 Right sch ->
                   insertNameC n (Forall (typeIndexesIn sch) [Trait name (TVariable (TypeIndex k 0))] sch)
     DInstance loc trait (InstanceDefinition _ t0 ds) -> do
-      env <- asks compilerTraitEnvironment
+      env <- undefined -- asks compilerTraitEnvironment
       kinds <- asks compilerTypeConstructorEnvironment
       case Environment.lookup trait env of
         Nothing ->

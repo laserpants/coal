@@ -30,6 +30,14 @@ data Primitive
     LChar Int32
   | -- | Strings
     LString ByteString
-  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance Binary Primitive

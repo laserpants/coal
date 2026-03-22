@@ -365,7 +365,7 @@ collectDataConstructors aliases env =
   \case
     DType loc _ def -> do
       entries <- lift $ do
-        def' <- local (\e -> e{compilerAliasEnvironment = undefined aliases}) (aliasTransform def)
+        def' <- undefined -- local (\e -> e{compilerAliasEnvironment = undefined aliases}) (aliasTransform def)
         dataConstructorEntries env loc def'
       forM_ entries $
         \info@(DataConstructorEntry _ _ DataConstructor{..} _) -> do

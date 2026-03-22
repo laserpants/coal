@@ -419,8 +419,9 @@ aliasTransformTypeApplication2 k _ t ts =
 
 lookupAlias :: (MonadIO m, Show a) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
 lookupAlias t ts name = do
-  env <- asks compilerAliasEnvironment
-  case Environment.lookup name env of
+  ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+  -- env <- asks compilerAliasEnvironment
+  case Environment.lookup name protoObuildAliases of
     Nothing ->
       case t of
         TApplication k t1 t2 ->
@@ -433,8 +434,9 @@ lookupAlias t ts name = do
 
 lookupAlias2 :: (MonadIO m, Show a) => Type TypeIndex Kind -> [Type TypeIndex Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type TypeIndex Kind)
 lookupAlias2 t ts name = do
-  env <- asks compilerAliasEnvironment
-  case Environment.lookup name env of
+  ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+  -- env <- asks compilerAliasEnvironment
+  case Environment.lookup name protoObuildAliases of
     Nothing ->
       case t of
         TApplication k t1 t2 ->

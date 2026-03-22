@@ -21,6 +21,14 @@ data Intrinsic
   | IString
   | IUnit
   | IVoid
-  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Data
+    , Typeable
+    , Generic
+    )
 
 instance Binary Intrinsic

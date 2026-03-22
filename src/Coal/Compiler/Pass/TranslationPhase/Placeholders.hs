@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -15,7 +16,6 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
-import Coal.Compiler.Environment (overCompilerDictionaryNameEnvironment)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
@@ -97,7 +97,7 @@ pass =
 
       return mm
 
-updateNames2 :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m Metadata) ()
+updateNames2 :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m a) ()
 updateNames2 store =
   lift $
     protoOupdateCurrentBuildC $
@@ -140,7 +140,7 @@ updateNames store =
       Just s ->
         modify $ replaceName (info name s)
 
-insertPlaceholders :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a Kind IndexedType)
+insertPlaceholders :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a Kind IndexedType)
 insertPlaceholders =
   \case
     d@(DConstant _ name _ _) -> do
@@ -152,7 +152,7 @@ insertPlaceholders =
     d ->
       pure d
 
-insertPlaceholdersInDef :: (Show a, Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a Kind IndexedType)
+insertPlaceholdersInDef :: (Show a, Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a Kind IndexedType)
 insertPlaceholdersInDef trait =
   \case
     c@DConstant{} -> do
@@ -161,25 +161,25 @@ insertPlaceholdersInDef trait =
     _ ->
       error "Not implemented"
 
-expandInLocalEnv :: (Monad m, TraitContext a b) => b -> CompilerT a (ProtoCompilerT m Metadata) b
+expandInLocalEnv :: (Monad m, TraitContext a b) => b -> CompilerT a (ProtoCompilerT m a) b
 expandInLocalEnv d = do
   b <- lift protoOgetCurrentBuildC
   let env1 = typeEnvironment b
-  local (overCompilerDictionaryNameEnvironment (const env1)) (expandTraits d)
+  expandTraits d
 
-insertTypeInfo :: (Monad m) => Name -> Definition a k IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a k IndexedType)
+insertTypeInfo :: (Monad m) => Name -> Definition a k IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a k IndexedType)
 insertTypeInfo name d = do
   insertName d name
   pure d
 
-insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a (ProtoCompilerT m Metadata) ()
+insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a (ProtoCompilerT m a) ()
 insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
   let s = Forall (typeIndexesIn t) ts t
   insertNameC name s
   lift $ protoOinsertNameC name s
 insertName _ _ = error "Implementation error"
 
-collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a (ProtoCompilerT m Metadata) [Trait IndexedType]
+collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a (ProtoCompilerT m a) [Trait IndexedType]
 collectTraits u name = do
   -- env <- asks compilerDictionaryNameEnvironment
   env <- lift $ gets protoOcompilerNameStore
@@ -201,15 +201,16 @@ collectTraits u name = do
     var <- supplied (TVariable . TypeIndex k)
     pure (index `mapsTo` var <> acc)
 
-tryMatch :: (Monad m) => IndexedType -> IndexedType -> CompilerT a m (Either UnificationError Substitution)
+tryMatch :: (Monad m) => IndexedType -> IndexedType -> CompilerT a (ProtoCompilerT m a) (Either UnificationError Substitution)
 tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
-findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))
+findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a (ProtoCompilerT m a) (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
-  env <- asks compilerInstanceEnvironment
-  case Environment.lookup name env of
+  -- env <- asks compilerInstanceEnvironment
+  ProtoBuild{protoObuildInstances} <- lift protoOgetCurrentBuildC
+  case Environment.lookup name protoObuildInstances of
     Nothing ->
       pure Nothing
     Just env1 -> do
@@ -232,7 +233,7 @@ findFirstMatch (Trait name t) = do
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-lookupTraitInstance :: (Show a, Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Maybe (Dictionary (Expression a () IndexedType)))
+lookupTraitInstance :: (Show a, Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a (ProtoCompilerT m a) (Maybe (Dictionary (Expression a () IndexedType)))
 lookupTraitInstance loc trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
@@ -255,7 +256,7 @@ isConcrete (Trait _ TIntrinsic{}) = True
 isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
-applyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a (ProtoCompilerT m Metadata) (Expression a () IndexedType)
+applyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType)
 applyTraits loc (Label t name) =
   \case
     [] ->
@@ -279,7 +280,7 @@ applyTraits loc (Label t name) =
             pure (ERecord mempty (typeOf trait) r Nothing)
 
 class TraitContext a d where
-  expandTraits :: (Monad m) => d -> CompilerT a (ProtoCompilerT m Metadata) d
+  expandTraits :: (Monad m) => d -> CompilerT a (ProtoCompilerT m a) d
 
 expandRecursiveLet :: Expression a () IndexedType -> Expression a () IndexedType
 expandRecursiveLet (ELet a (BPattern _ p e1 :| []) e2) = ERecursiveLet a p e1 e2
@@ -305,7 +306,7 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedTy
         old <- lift get
         lift $ protoOinsertNamesC xs
 
-        r <- ELet a (fst <$> as) <$> local (overCompilerDictionaryNameEnvironment (Environment.insertMultiple xs)) (expandTraits e)
+        r <- ELet a (fst <$> as) <$> expandTraits e
 
         lift $ put old
         return r
@@ -322,7 +323,7 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedTy
       e ->
         descendM expandTraits e
 
-transformBinding :: (Monoid a, Data a, Show a, Monad m) => Binding Expression a () IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
+transformBinding :: (Monoid a, Data a, Show a, Monad m) => Binding Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
 transformBinding =
   \case
     BPattern a var@(PVariable _ (Label t name)) e
@@ -338,7 +339,7 @@ transformBinding =
     _ ->
       error "Not implemented"
 
-transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Expression a () IndexedType, [Trait IndexedType])
+transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType, [Trait IndexedType])
 transformScope e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
   case nub traits of
@@ -363,7 +364,7 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Definition a Kind Indexed
       d ->
         pure d
 
-expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (ConstantDefinition a IndexedType)
+expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a (ProtoCompilerT m a) (ConstantDefinition a IndexedType)
 expandConstantDefinitionTraits name =
   \case
     ConstantDefinition loc with (With _ t) e -> do
