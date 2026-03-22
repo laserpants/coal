@@ -600,7 +600,7 @@ instance ProtoKindSubstitutable (ProtoBuild a) where
           , protoObuildDataConstructors = protoOreplaceVariables protoObuildDataConstructors
           , protoObuildTypeConstructors = protoOreplaceVariables protoObuildTypeConstructors
           , protoObuildTraits = protoOreplaceVariables protoObuildTraits
-          , protoObuildInstances = mapEnvironment protoOreplaceVariables protoObuildInstances
+          , protoObuildInstances = mapEnvironment (Map.mapKeys protoOreplaceVariables . Map.map protoOreplaceVariables) protoObuildInstances
           , protoObuildAliases = protoOreplaceVariables protoObuildAliases
           , ..
           }
