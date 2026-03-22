@@ -2,7 +2,10 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoLanguage.ProtoModule (ProtoModule (..), ModuleExportList (..)) where
+module Coal.ProtoLanguage.ProtoModule (
+  ProtoModule (..),
+  ModuleExportList (..),
+) where
 
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Path (Path)
