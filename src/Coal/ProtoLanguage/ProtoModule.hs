@@ -12,9 +12,7 @@ import Coal.Language.Module.Path (Path)
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Data.Data (Data, Typeable)
 
-data ModuleExportList a
-  = Exports [Export a]
-  | ExportAll
+data ModuleExportList a = Exports [Export a] | ExportAll
   deriving
     ( Show
     , Eq
