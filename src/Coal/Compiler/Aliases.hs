@@ -70,7 +70,7 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
 
         tempprotoOupdateCurrentBuildC $
           \ProtoBuild{..} -> do
-            newDataConstructors <- forMEnvironment protoObuildDataConstructors $ aliasTransform
+            newDataConstructors <- forMEnvironment protoObuildDataConstructors aliasTransform
             return
               ProtoBuild
                 { protoObuildDataConstructors = newDataConstructors
