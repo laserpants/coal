@@ -1,14 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TranslationPhase.Placeholders (TraitContext (..), passPlaceholders) where
 
+import Coal.AST.HasMetadata (HasMetadata (..))
+import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
@@ -140,7 +142,7 @@ updateNames store =
       Just s ->
         modify $ replaceName (info name s)
 
-insertPlaceholders :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a Kind IndexedType)
+insertPlaceholders :: (HasMetadata a, Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a Kind IndexedType)
 insertPlaceholders =
   \case
     d@(DConstant _ name _ _) -> do
@@ -152,7 +154,7 @@ insertPlaceholders =
     d ->
       pure d
 
-insertPlaceholdersInDef :: (Show a, Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a Kind IndexedType)
+insertPlaceholdersInDef :: (HasMetadata a, Show a, Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Definition a Kind IndexedType)
 insertPlaceholdersInDef trait =
   \case
     c@DConstant{} -> do
@@ -232,7 +234,7 @@ findFirstMatch (Trait name t) = do
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-lookupTraitInstance :: (Show a, Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Maybe (Dictionary (Expression a () IndexedType)))
+lookupTraitInstance :: (HasMetadata a, Show a, Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Maybe (Dictionary (Expression a () IndexedType)))
 lookupTraitInstance loc trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
@@ -240,6 +242,9 @@ lookupTraitInstance loc trait@(Trait name _) = do
       if isConcrete trait
         then do
           path <- lift $ gets protoOcompilerCurrentPath
+
+          --traceShowM (prettyErrorMessage ["here"] loc "")
+
           tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
           throwError TraitError
         else pure Nothing
@@ -255,7 +260,7 @@ isConcrete (Trait _ TIntrinsic{}) = True
 isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
-applyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a (ProtoCompilerT m Metadata) (Expression a () IndexedType)
+applyTraits :: (HasMetadata a, Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a (ProtoCompilerT m Metadata) (Expression a () IndexedType)
 applyTraits loc (Label t name) =
   \case
     [] ->
@@ -275,8 +280,10 @@ applyTraits loc (Label t name) =
           Nothing -> do
             tellDictionaryTraits [trait]
             pure (ETraitInstance mempty (typeOf trait) trait)
-          Just r ->
-            pure (ERecord mempty (typeOf trait) r Nothing)
+          Just r -> do
+            --traceShowM r
+            sub <- lift $ gets protoOcompilerSubstitution
+            pure (ERecord mempty (typeOf trait) (apply sub r) Nothing)
 
 class TraitContext a d where
   expandTraits :: (Monad m) => d -> CompilerT a (ProtoCompilerT m Metadata) d
@@ -293,7 +300,7 @@ withLocalEnvironment xs action = do
   lift $ put old
   return r
 
-instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedType) where
+instance (HasMetadata a, Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedType) where
   expandTraits =
     \case
       ERecursiveLet a p e1 e2 ->
@@ -316,13 +323,17 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedTy
             pure var
       EVariable loc (Label t name) -> do
         traits <- collectTraits t name
+
+        when ("and_eval" == name) $
+          traceShowM traits
+        
         applyTraits loc (Label t name) (nub traits)
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       e ->
         descendM expandTraits e
 
-transformBinding :: (Monoid a, Data a, Show a, Monad m) => Binding Expression a () IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
+transformBinding :: (HasMetadata a, Monoid a, Data a, Show a, Monad m) => Binding Expression a () IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
 transformBinding =
   \case
     BPattern a var@(PVariable _ (Label t name)) e
@@ -338,24 +349,24 @@ transformBinding =
     _ ->
       error "Not implemented"
 
-transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Expression a () IndexedType, [Trait IndexedType])
+transformScope :: (HasMetadata a, Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (Expression a () IndexedType, [Trait IndexedType])
 transformScope e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
   case nub traits of
     [] -> pure (expr, traits)
     tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
-instance (Monoid a, Data a, Show a) => TraitContext a (CompiledClause a () IndexedType) where
+instance (HasMetadata a, Monoid a, Data a, Show a) => TraitContext a (CompiledClause a () IndexedType) where
   expandTraits =
     \case
       ECompiledClause a lls e ->
         ECompiledClause a lls <$> expandTraits e
 
-instance (Monoid a, Data a, Show a) => TraitContext a (Module a Kind IndexedType) where
+instance (HasMetadata a, Monoid a, Data a, Show a) => TraitContext a (Module a Kind IndexedType) where
   expandTraits =
     overModuleDefinitionsM (traverse expandTraits)
 
-instance (Monoid a, Data a, Show a) => TraitContext a (Definition a Kind IndexedType) where
+instance (HasMetadata a, Monoid a, Data a, Show a) => TraitContext a (Definition a Kind IndexedType) where
   expandTraits =
     \case
       DConstant loc name c fs ->
@@ -363,7 +374,7 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Definition a Kind Indexed
       d ->
         pure d
 
-expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (ConstantDefinition a IndexedType)
+expandConstantDefinitionTraits :: (HasMetadata a, Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a (ProtoCompilerT m Metadata) (ConstantDefinition a IndexedType)
 expandConstantDefinitionTraits name =
   \case
     ConstantDefinition loc with (With _ t) e -> do
@@ -375,30 +386,31 @@ expandConstantDefinitionTraits name =
           -- path <- gets compilerCurrentModule
           path <- lift $ gets protoOcompilerCurrentPath
           -- Insert default int32 instance for Numeric and Ordered traits
-          if "main" == name && Path ["Main"] == path
-            then do
-              recs <- forM (tr :| trs) $
-                \(Trait trait _) -> do
-                  fields <- fromJust <$> lookupTraitInstance loc (Trait trait (TIntrinsic IInt32))
-                  pure $
-                    ERecord
-                      mempty
-                      (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (TIntrinsic IInt32 :| []))
-                      fields
-                      Nothing
-              pure $
-                ConstantDefinition
-                  loc
-                  with
-                  (With trs t)
-                  ( EApplication
-                      mempty
-                      t
-                      (dictionaryLambda tr trs expr)
-                      recs
-                  )
-            else
-              pure $
+          --if "main" == name && Path ["Main"] == path
+          --  then do
+          --    recs <- forM (tr :| trs) $
+          --      \(Trait trait _) -> do
+          --        traceShowM (tr :| trs) 
+          --        fields <- fromJust <$> lookupTraitInstance loc (Trait trait (TIntrinsic IInt32))
+          --        pure $
+          --          ERecord
+          --            mempty
+          --            (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (TIntrinsic IInt32 :| []))
+          --            fields
+          --            Nothing
+          --    pure $
+          --      ConstantDefinition
+          --        loc
+          --        with
+          --        (With trs t)
+          --        ( EApplication
+          --            mempty
+          --            t
+          --            (dictionaryLambda tr trs expr)
+          --            recs
+          --        )
+          --  else
+          pure $
                 ConstantDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
 
 isVariable :: Trait IndexedType -> Bool

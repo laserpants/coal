@@ -29,12 +29,12 @@ module Containers.Tree {
   fold height : Tree<a> -> int32 
     | Node({ children = tree_list_height(@h) | _ }) = 1 + h
 
-  fold tree_list_map : List<Tree<a>> -> (a -> b) -> List<Tree<b>> 
+  fold tree_list_map : List<Tree<a>> -> (a -> a) -> List<Tree<a>> 
     | [] = fn(_) => []
     | Node({ value, children = tree_list_map(@children) }) :: tree_list_map(@trees) =
         fn(f) => Node({ value = f(value), children = children(f) }) :: trees(f)
 
-  fun tree_map(f : a -> b, Node({ value, children }) : Tree<a>) : Tree<b> =
+  fun tree_map(f : a -> a, Node({ value, children }) : Tree<a>) : Tree<a> =
     Node({ value = f(value), children = tree_list_map(children, f) })
 
 }

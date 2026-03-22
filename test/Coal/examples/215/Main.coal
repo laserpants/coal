@@ -1,7 +1,7 @@
 module Main {
 
   import Coal.Functor(Functor)
-  import Coal.Applicative(ap)
+  import Coal.Applicative(Applicative)
   import namespace IO
 
   fun main() =

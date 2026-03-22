@@ -32,6 +32,7 @@ import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Substitution
+import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (evalState, evalStateT, get, gets, modify, runState)
 import Data.Data (Data)
@@ -1401,8 +1402,9 @@ defineName =
       let trait = Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
       forM_ protoOinstanceDefinitionImplementations $
         \case
-          def@(ProtoDFunction _ name _) ->
-            protoOdefine (instanceLabel trait name) (typeOf def)
+          def@(ProtoDFunction _ name _) -> do
+            let to = (typeOf def)
+            protoOdefine (instanceLabel trait name) to
           def@(ProtoDLet _ name _) ->
             protoOdefine (instanceLabel trait name) (typeOf def)
     _ ->

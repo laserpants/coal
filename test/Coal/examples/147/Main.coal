@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_int32)
-  import Eq(equalalias, Answer(Yes, No))
+  import Eq(Equality, equalalias, Answer(Yes, No))
 
   //import Eq(equal2, Answer(Yes, No))
 
