@@ -92,7 +92,7 @@ data TypeIndex k = TypeIndex
 instance (Binary k) => Binary (TypeIndex k)
 
 instance Pretty (TypeIndex k) where
-  pretty (TypeIndex _ i) = pretty ("t - " :: String) <> pretty i -- (intToVar i)
+  pretty (TypeIndex _ i) = pretty (intToVar i)
 
 data Parameter k = Parameter
   { parameterKind :: k
