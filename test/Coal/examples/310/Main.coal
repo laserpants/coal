@@ -1,0 +1,18 @@
+module Main {
+
+  import namespace IO
+  import Coal.Monad(Monad, and_eval)
+  import IO(return)
+
+  fun print_msgs(msgs : List<string>) =
+    fold(msgs) {
+      | [] => 
+          return()
+      | m :: @next =>
+          IO.println_string(m) |. and_eval(next)
+    }
+
+  fun main() =
+    print_msgs([ "hello", "one", "two" ])
+
+}
