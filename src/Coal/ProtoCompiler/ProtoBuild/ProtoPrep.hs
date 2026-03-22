@@ -25,8 +25,8 @@ import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized
-import Coal.TypeSystem.Substitution (Substitutable (apply), normalizeScheme)
-import Control.Monad (unless, when)
+import Coal.TypeSystem.Substitution (normalizeScheme)
+import Control.Monad (unless)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
@@ -35,7 +35,6 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
-import Debug.Trace
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
