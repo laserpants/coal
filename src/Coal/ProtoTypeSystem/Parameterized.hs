@@ -142,7 +142,7 @@ replaceParamInScheme p o Forall{..} =
         paramsInRow r
       TVariable p ->
         Set.singleton p
-      TAlias name ts t ->
+      TAlias _ ts t ->
         unionMap paramsIn ts <> paramsIn t
       _ ->
         mempty
