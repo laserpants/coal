@@ -233,7 +233,7 @@ qualifiedImports ProtoBuild{..} =
               \(t, ProtoInstanceEntry{..}) -> do
                 concatForM (Map.keys protoOinstanceEntryTypeSchemes) $
                   \member -> do
-                    let instanceName = instanceLabel (Trait traitName t) member
+                    let instanceName = instanceLabel (Trait traitName protoOinstanceEntryType) member
                     concatForM (Environment.lookupWithDefault [] instanceName protoObuildNames) $
                       \case
                         ProtoNName n _ -> do
@@ -503,7 +503,7 @@ collectTraits =
                       forM_ members $
                         \member -> do
                           -- traceShowM member
-                          let instanceName = instanceLabel (Trait traitName t) member
+                          let instanceName = instanceLabel (Trait traitName protoOinstanceEntryType) member
                           forM_ (Environment.lookupWithDefault [] instanceName protoObuildNames) $
                             \case
                               info@(ProtoNName n s) -> do
