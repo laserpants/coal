@@ -181,8 +181,11 @@ protoOrunConstraintsGen stack = do
         runConstraintsGenStack
           protoOcompilerSupply
           ( emptyConstraintsGenContext
-              { constraintsGenContextDataConstructors = protoObuildDataConstructors
-              , constraintsGenContextTypeConstructors = protoObuildTypeConstructors
+              { constraintsGenContextDataConstructors =
+                  Environment.mapEnvironment protoOdataConstructorEntryConstructor protoObuildDataConstructors
+              , constraintsGenContextTypeConstructors =
+                  Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
+                    <> Environment.mapEnvironment (kindOf . protoOaliasEntryType) protoObuildAliases
               }
           )
           stack
@@ -275,12 +278,12 @@ type ConstraintsGenResult g o a t s =
   )
 
 -- TODO: remove
-tmpConvert1 :: DataConstructorEntry a -> ProtoDataConstructorEntry a
-tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = ProtoDataConstructorEntry v1 v2 v3 v4
+tmpConvert1 :: DataConstructorEntry a -> DataConstructor TypeIndex Kind IndexedType -- ProtoDataConstructorEntry a
+tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = v3 -- ProtoDataConstructorEntry v1 v2 v3 v4
 
 -- TODO: remove
-tmpConvert2 :: TypeConstructorEntry a -> ProtoTypeConstructorEntry a
-tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = ProtoTypeConstructorEntry v1 v2 v3 v4
+tmpConvert2 :: TypeConstructorEntry a -> Kind -- ProtoTypeConstructorEntry a
+tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- ProtoTypeConstructorEntry v1 v2 v3 v4
 
 runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 runConstraintsGen stack = do
@@ -291,7 +294,8 @@ runConstraintsGen stack = do
           sup
           ( emptyConstraintsGenContext
               { constraintsGenContextDataConstructors = Environment.mapEnvironment tmpConvert1 (moduleDataConstructors build)
-              , constraintsGenContextTypeConstructors = Environment.mapEnvironment tmpConvert2 (moduleTypeConstructors build)
+              , constraintsGenContextTypeConstructors =
+                  Environment.mapEnvironment tmpConvert2 (moduleTypeConstructors build)
               }
           )
           stack

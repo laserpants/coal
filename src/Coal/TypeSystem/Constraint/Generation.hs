@@ -38,11 +38,13 @@ type ConstraintsGen a = ConstraintsGenStack a TypeIndex Kind IndexedType
 lookupDataConstructor :: Name -> ConstraintsGen a (Maybe (DataConstructor TypeIndex Kind IndexedType))
 lookupDataConstructor name = do
   env <- asks constraintsGenContextDataConstructors
-  case Environment.lookup name env of
-    Nothing ->
-      pure Nothing
-    Just (ProtoDataConstructorEntry _ _ ctor _) ->
-      pure (Just ctor)
+  return $ Environment.lookup name env
+
+--  case Environment.lookup name env of
+--    Nothing ->
+--      pure Nothing
+--    Just (ProtoDataConstructorEntry _ _ ctor _) ->
+--      pure (Just ctor)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 assertEqualityAssumptions loc t ms =

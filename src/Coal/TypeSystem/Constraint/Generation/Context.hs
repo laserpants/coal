@@ -8,13 +8,13 @@ module Coal.TypeSystem.Constraint.Generation.Context (
 ) where
 
 import Coal.Common.Environment (Environment (..))
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.Language (DataConstructor (..), IndexedType, Kind, TypeIndex)
 import Coal.TypeSystem.Constraint (Monomorphic (..))
 
 data ConstraintsGenContext g o a t = ConstraintsGenContext
   { constraintsGenContextMonomorphicSet :: Monomorphic (o a)
-  , constraintsGenContextDataConstructors :: Environment (ProtoDataConstructorEntry g)
-  , constraintsGenContextTypeConstructors :: Environment (ProtoTypeConstructorEntry g)
+  , constraintsGenContextDataConstructors :: Environment (DataConstructor TypeIndex Kind IndexedType)
+  , constraintsGenContextTypeConstructors :: Environment Kind
   }
   deriving (Show, Eq, Ord)
 

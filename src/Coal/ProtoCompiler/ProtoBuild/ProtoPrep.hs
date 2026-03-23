@@ -111,13 +111,19 @@ builtinNames =
 
 protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
-  build <-
+  -- ProtoBuild{
+  --  protoObuildAliases = aliases
+  --  protoObuildNames = names
+  --  protoObuildExportedNames = exportedNames
+  -- } <- protoOgetCurrentBuildC
+  build <- protoOgetCurrentBuildC
+  newBuild <-
     execStateT
       (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
-      protoOemptyBuild
+      build
         { protoObuildPath = protoOmodulePath
         }
-  insertBuildC build
+  insertBuildC newBuild
 
 protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 protoOprepareDefinitions defs = do
@@ -158,8 +164,10 @@ protoOprepareDefinitions defs = do
 
   -- Collect type constructors
   traverse_ collectTypeConstructors defs
-  -- Collect type aliases
-  traverse_ collectTypeAliases defs
+
+  --  -- Collect type aliases
+  --  traverse_ collectTypeAliases defs
+
   -- Collect data constructors
   traverse_ collectDataConstructors defs
   -- expand exports
@@ -298,6 +306,7 @@ collectTypeConstructors =
                 found <- insertTypeName build loc name
                 unless found $ do
                   error "TODO"
+
             -- throwError PreflightFailure
 
             -- found <- insertTypeName path loc name
@@ -306,7 +315,7 @@ collectTypeConstructors =
             --  throwError PreflightFailure
 
             | otherwise ->
-                error (show name)
+                pure () -- error (show name)
           _ ->
             pure ()
     ProtoDQualifiedImport loc path ->
@@ -339,33 +348,35 @@ insertTypeName ProtoBuild{..} loc name =
           Nothing ->
             error "TODO"
           Just ProtoAliasEntry{..} -> do
-            insertAlias name ProtoAliasEntry{..}
             forM_ (constructors protoOaliasEntryType) (insertTypeName ProtoBuild{..} loc)
             return True
+      --            insertAlias name ProtoAliasEntry{..}
+      --            forM_ (constructors protoOaliasEntryType) (insertTypeName ProtoBuild{..} loc)
+      --            return True
       _ ->
         return False
 
-collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
-collectTypeAliases =
-  \case
-    ProtoDTypeAlias loc name ProtoAliasDefinition{..} -> do
-      insertNameEntry (ProtoNTypeAlias name)
-      insertExportedName name
-      insertAlias name entry
-     where
-      entry =
-        ProtoAliasEntry
-          { protoOaliasEntryMetadata = loc
-          , protoOaliasEntryName = name
-          , protoOaliasEntryParams = protoOaliasDefinitionParameters
-          , protoOaliasEntryType = protoOaliasDefinitionType
-          }
-    ProtoDImport _ path imports ->
-      pure ()
-    ProtoDQualifiedImport loc path ->
-      pure ()
-    _ ->
-      pure ()
+-- collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+-- collectTypeAliases =
+--  \case
+--    ProtoDTypeAlias loc name ProtoAliasDefinition{..} -> do
+--      insertNameEntry (ProtoNTypeAlias name)
+--      insertExportedName name
+--      insertAlias name entry
+--     where
+--      entry =
+--        ProtoAliasEntry
+--          { protoOaliasEntryMetadata = loc
+--          , protoOaliasEntryName = name
+--          , protoOaliasEntryParams = protoOaliasDefinitionParameters
+--          , protoOaliasEntryType = protoOaliasDefinitionType
+--          }
+--    ProtoDImport _ path imports ->
+--      pure ()
+--    ProtoDQualifiedImport loc path ->
+--      pure ()
+--    _ ->
+--      pure ()
 
 collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
 collectDataConstructors =
@@ -412,7 +423,7 @@ collectDataConstructors =
                       | ["*"] == ctors = protoOtypeConstructorEntryDataConstructors
                       | otherwise = ctors
             | otherwise ->
-                error "TODO"
+                error (show name)
           _ ->
             pure ()
     -- TODO

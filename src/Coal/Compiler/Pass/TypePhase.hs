@@ -11,6 +11,7 @@ import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGrou
 import Coal.Compiler.Pass.TypePhase.ExpressionFolds (passExpressionFolds)
 import Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (passLambdaMatchExpansion)
 import Coal.Compiler.Pass.TypePhase.Prep (passPrep)
+import Coal.Compiler.Pass.TypePhase.Prep2 (passPrep2)
 import Coal.Compiler.Pass.TypePhase.TopLevelFolds (passTopLevelFolds)
 import Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference)
 import Coal.Language (IndexedType, Kind)
@@ -23,6 +24,7 @@ typePhasePasses =
     --  >-> passExpandFunctionGroups
     ----    >-> generateDebugArtifacts "IntegerLiteralPatterns"
     >-> overlayEnvironment passExpandAliases
+    >-> passPrep2
     ----    >-> generateDebugArtifacts "ExpandAliases"
     >-> passTopLevelFolds
     >-> passExpressionFolds

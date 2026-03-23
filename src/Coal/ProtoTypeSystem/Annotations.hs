@@ -39,11 +39,13 @@ runAnnotationsT loc env o = runStateT (runReaderT (runExceptT (withExceptT ($ lo
 protoOlookupTypeConstructor :: (Monad m) => Name -> AnnotationsT m a (Maybe Kind)
 protoOlookupTypeConstructor name = do
   env <- asks constraintsGenContextTypeConstructors
-  case Environment.lookup name env of
-    Nothing ->
-      pure Nothing
-    Just ProtoTypeConstructorEntry{..} ->
-      pure (Just protoOtypeConstructorEntryKind)
+  pure $ Environment.lookup name env
+
+--  case Environment.lookup name env of
+--    Nothing ->
+--      pure Nothing
+--    Just ProtoTypeConstructorEntry{..} ->
+--      pure (Just protoOtypeConstructorEntryKind)
 
 indexTypeAnnotations :: (Show a, Monad m) => Type Parameter Kind -> AnnotationsT m a IndexedType
 indexTypeAnnotations =

@@ -36,11 +36,13 @@ import Extras (Dictionary, Name, concatMapM, forM_)
 lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
 lookupTypeConstructor name = do
   env <- asks constraintsGenContextTypeConstructors
-  case Environment.lookup name env of
-    Nothing ->
-      pure Nothing
-    Just (ProtoTypeConstructorEntry _ _ kind _) ->
-      pure (Just kind)
+  pure $ Environment.lookup name env
+
+--  case Environment.lookup name env of
+--    Nothing ->
+--      pure Nothing
+--    Just (ProtoTypeConstructorEntry _ _ kind _) ->
+--      pure (Just kind)
 
 instantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter () -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 instantiateAnnotation loc a = do
