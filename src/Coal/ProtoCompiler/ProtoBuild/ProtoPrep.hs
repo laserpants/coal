@@ -25,16 +25,18 @@ import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized
-import Coal.TypeSystem.Substitution (normalizeScheme)
-import Control.Monad (unless)
+import Coal.TypeSystem.Substitution (apply, normalizeScheme)
+import qualified Coal.TypeSystem.Substitution as Substitution
+import Control.Monad (unless, when)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.List (intersect)
 import qualified Data.Map.Strict as Map
-import Data.Set (Set)
+import Data.Set (Set, (\\))
 import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
+import Debug.Trace
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
@@ -434,14 +436,14 @@ collectDataConstructors =
 
 dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ProtoDataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
-  s <- instantiateScheme constructorScheme
+  (s, _) <- instantiateScheme constructorScheme
   pure $
     ProtoDataConstructorEntry
       { protoOdataConstructorEntryMetaData = loc
       , protoOdataConstructorEntryName = constructorName
       , protoOdataConstructorEntryConstructor =
           DataConstructor
-            { constructorScheme = s
+            { constructorScheme = normalizeScheme s
             , ..
             }
       , protoOdataConstructorEntryConstructorSet = constructorSet
@@ -539,15 +541,16 @@ collectTraitsInterface =
       forM_ protoOtraitDefinitionInterface $
         \ProtoTraitDefinitionInterfaceEntry{..} -> do
           let Forall{..} = protoOtraitDefinitionInterfaceEntryScheme
-          s <-
+          (s, _) <-
             instantiateScheme
               ( Forall
                   schemeTypeVariables
                   [Trait name (TVariable protoOtraitDefinitionParameter)]
                   schemeTypeBody
               )
-          insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName s)
-          lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName s
+          let normalizedScheme = normalizeScheme s
+          insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName normalizedScheme)
+          lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName normalizedScheme
 
           exportList <- ask
           let exportName =
@@ -632,7 +635,16 @@ collectInstances =
         Just ProtoTraitEntry{..} -> do
           Environment env <- flip Environment.mapMEnvironment protoOtraitEntryInterface $
             \entry -> do
-              instantiateScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType entry)
+              (Forall{..}, env) <- instantiateScheme entry
+              case lookup (parameterName protoOtraitEntryParameter) env of
+                Just TypeIndex{..} -> do
+                  let sub = Substitution.mapsTo typeIndexId t
+                      vs = apply sub schemeTraits
+                      t1 = apply sub schemeTypeBody
+                  return $ Forall ((typeIndexesIn vs <> typeIndexesIn t1) \\ typeIndexesIn t) vs t1
+                Nothing ->
+                  error "Implementation error"
+
           -- case lookup (parameterName protoOtraitEntryParameter) env of
           --  Nothing ->
           --    error "TODO"
@@ -647,7 +659,7 @@ collectInstances =
                   { protoOinstanceEntryMetadata = protoOinstanceDefinitionMetadata
                   , protoOinstanceEntryType = protoOinstanceDefinitionType
                   , protoOinstanceEntryIndexedType = t
-                  , protoOinstanceEntryTypeSchemes = env
+                  , protoOinstanceEntryTypeSchemes = normalizeScheme <$> env
                   }
           insertInstance protoOinstanceDefinitionTraitName t entry
         Nothing ->
@@ -676,7 +688,7 @@ collectPlaceholders =
     _ ->
       pure ()
 
-instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedScheme
+instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (IndexedScheme, [(Name, TypeIndex Kind)])
 instantiateScheme Forall{..} =
   lift $ lift $ do
     env <- protoOinstantiateTypeIndexes schemeTypeVariables
@@ -686,7 +698,7 @@ instantiateScheme Forall{..} =
           <$> toIndexed schemeTypeVariables
           <*> toIndexed schemeTraits
           <*> toIndexed schemeTypeBody
-    return (normalizeScheme s)
+    return (s, env)
 
 instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
