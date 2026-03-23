@@ -53,11 +53,19 @@ module Main {
     tell(["one"])
       |. and_eval(tell(["two"]))
       |. and_eval(tell(["three"]))
-      |. and_eval(pure(100 : int32))
+      |. and_eval(pure(100))
+
+  fun print_msgs(msgs : List<string>) =
+    fold(msgs) {
+      | [] => 
+          return()
+      | m :: @next =>
+          IO.println_string(m) |. and_eval(next)
+    }
 
   fun main() =
     match(run_writer(test_writer())) {
-      | ((_, w)) => IO.println_int32(1) 
+      | ((_, w)) => print_msgs(w)
     }
 
 }
