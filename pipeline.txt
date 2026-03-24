@@ -1,20 +1,13 @@
-32
 
 
-176
 299
-306
-
-
 220
-
-
-262
-
 
 
 - topo
 - trait ann.
+- fold ann. (299)
+- loop (220)
 
 
 # Parsing
