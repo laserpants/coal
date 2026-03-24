@@ -16,6 +16,7 @@ import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
+import Coal.ProtoCompiler.ProtoStack
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
 import Data.List.NonEmpty (NonEmpty)
@@ -25,7 +26,7 @@ import Extras (Name)
 passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPatternExhaustiveCheck = Pass{runPass = patternExhaustiveCheckM}
 
-patternExhaustiveCheckM :: (Monad m) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
+patternExhaustiveCheckM :: (Monad m) => Module Metadata k t -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata k t)
 patternExhaustiveCheckM m = do
   (m', es) <-
     listenErrors $
@@ -34,7 +35,7 @@ patternExhaustiveCheckM m = do
   pure m'
 
 class PatternExhaustiveCheckContext c where
-  patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT Metadata m c
+  patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT Metadata (ProtoCompilerT m Metadata) c
 
 instance PatternExhaustiveCheckContext (Definition Metadata k t) where
   patternExhaustiveCheck name =
@@ -165,7 +166,7 @@ instance PatternExhaustiveCheckContext (Expression Metadata () t) where
       e@EFold{} ->
         pure e
 
-checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata () t) -> CompilerT Metadata m (NonEmpty (Clause Metadata () t))
+checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata () t) -> CompilerT Metadata (ProtoCompilerT m Metadata) (NonEmpty (Clause Metadata () t))
 checkExhaustive name loc cs = do
   isExhaustive <- exhaustive patterns
   unless isExhaustive $ do

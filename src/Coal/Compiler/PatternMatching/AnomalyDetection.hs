@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.PatternMatching.AnomalyDetection (
@@ -16,9 +17,13 @@ import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearAssumptionsC, protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearNameStoreC, protoOclearTypeAnnotationParamsC, protoOcompilerReportConstraintsGenErrors, protoOcompilerReportKindConstraintsGenErrors, protoOcompilerReportSolverRuleViolations, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertKindConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setCurrentModuleC, setTypeAnnotationParamsC)
 import Control.Monad.Extra (anyM, (||^))
 import Control.Monad.Reader (asks)
+import Control.Monad.State (gets)
+import Control.Monad.Trans (lift)
 import Data.Function ((&))
 import Data.List (sortOn)
 import qualified Data.List.NonEmpty as NonEmpty
@@ -39,7 +44,7 @@ data Pat
   | Any
   deriving (Show, Eq, Ord, Read)
 
-exhaustive :: (Monad m) => [Pat] -> CompilerT a m Bool
+exhaustive :: (Monad m) => [Pat] -> CompilerT a (ProtoCompilerT m a) Bool
 exhaustive ps = not <$> isUseful ((: []) <$> ps) [Any]
 
 specialized :: Name -> Int -> [[Pat]] -> [[Pat]]
@@ -114,7 +119,7 @@ prim =
     LString{} ->
       "%String"
 
-isUseful :: (Monad m) => [[Pat]] -> [Pat] -> CompilerT a m Bool
+isUseful :: (Monad m) => [[Pat]] -> [Pat] -> CompilerT a (ProtoCompilerT m a) Bool
 isUseful [] _ = pure True -- zero rows (0x0 matrix)
 isUseful px@(ps : _) qs =
   case (qs, length ps) of
@@ -136,10 +141,11 @@ isUseful px@(ps : _) qs =
   cs = headCons px
   go name n = isUseful (specialized name n px) (head (specialized name n [qs]))
 
-isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
+isComplete :: (Monad m) => [Name] -> CompilerT a (ProtoCompilerT m a) Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
-  defined <- asks (mapEnvironment protoOdataConstructorEntryConstructorSet . compilerDataConstructorEnvironment)
+  ProtoBuild{..} <- lift protoOgetCurrentBuildC
+  let defined = mapEnvironment protoOdataConstructorEntryConstructorSet protoObuildDataConstructors
   case Environment.lookup name (defined `Environment.union` builtIn) of
     Nothing ->
       pure ("%Tuple" `Text.isPrefixOf` name)

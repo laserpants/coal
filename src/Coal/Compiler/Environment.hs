@@ -54,8 +54,8 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
     }
 
 data CompilerEnvironment a = CompilerEnvironment
-  { compilerDataConstructorEnvironment :: Environment (ProtoDataConstructorEntry a)
-  , compilerTypeConstructorEnvironment :: Environment Kind
+  { -- compilerDataConstructorEnvironment :: Environment (ProtoDataConstructorEntry a)
+    compilerTypeConstructorEnvironment :: Environment Kind
   , -- , compilerTraitEnvironment :: Environment (ProtoTraitEntry a)
     -- , compilerInstanceEnvironment :: Environment (InstanceMap (ProtoInstanceEntry a))
     -- , compilerAliasEnvironment :: Environment (ProtoAliasEntry a)
@@ -67,8 +67,8 @@ data CompilerEnvironment a = CompilerEnvironment
 emptyCompilerEnvironment :: Maybe ProgressBar -> CompilerEnvironment a
 emptyCompilerEnvironment pb =
   CompilerEnvironment
-    { compilerDataConstructorEnvironment = mempty
-    , compilerTypeConstructorEnvironment = mempty
+    { -- compilerDataConstructorEnvironment = mempty
+      compilerTypeConstructorEnvironment = mempty
     , -- , compilerTraitEnvironment = mempty
       -- , compilerInstanceEnvironment = mempty
       -- , compilerAliasEnvironment = mempty

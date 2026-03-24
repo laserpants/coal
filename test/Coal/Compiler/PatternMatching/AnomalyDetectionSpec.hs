@@ -11,8 +11,13 @@ import Coal.Compiler.Environment
 import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
 import Coal.Language
+import Coal.Language.Module.Path (Path (..))
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
+import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Control.Monad.Identity (runIdentity)
+import Control.Monad.State (lift, modify, put)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name)
@@ -169,10 +174,27 @@ testEnv =
     ]
 
 runTest :: [Pat] -> Bool
-runTest px = res
+runTest px = r3
  where
-  Right res = runIdentity (evalCompilerT env (exhaustive px))
-  env = (emptyCompilerEnvironment Nothing){compilerDataConstructorEnvironment = testEnv}
+  Right r3 = r2
+  Right r2 = res
+  Right res = evalProtoCompilerT (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive px))
+  setupEnv = do
+    -- lift $ protoOupdateCurrentBuildC (pure . overBuildDataConstructors (const testEnv))
+    lift $
+      put
+        initialProtoCompilerState
+          { protoOcompilerCurrentPath = Path ["Test"]
+          , protoOcompilerModules =
+              Environment.fromList
+                [
+                  ( "Test"
+                  , protoOemptyBuild
+                      { protoObuildDataConstructors = testEnv
+                      }
+                  )
+                ]
+          }
 
 example6 :: [Pattern () () ()]
 example6 =
@@ -216,10 +238,26 @@ example11 =
   ]
 
 runTest2 :: [Pattern a () t] -> Bool
-runTest2 px = res
+runTest2 px = r3
  where
-  Right res = runIdentity (evalCompilerT env (exhaustive (translatePattern <$> px)))
-  env = (emptyCompilerEnvironment Nothing){compilerDataConstructorEnvironment = testEnv}
+  Right r3 = r2
+  Right r2 = res
+  Right res = evalProtoCompilerT (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive (translatePattern <$> px)))
+  setupEnv = do
+    lift $
+      put
+        initialProtoCompilerState
+          { protoOcompilerCurrentPath = Path ["Test"]
+          , protoOcompilerModules =
+              Environment.fromList
+                [
+                  ( "Test"
+                  , protoOemptyBuild
+                      { protoObuildDataConstructors = testEnv
+                      }
+                  )
+                ]
+          }
 
 patternAnomaliesSpec :: Spec
 patternAnomaliesSpec =

@@ -58,13 +58,10 @@ overlayEnvironment p = Pass{runPass = pass}
     local
       ( \env ->
           env
-            { compilerDataConstructorEnvironment = protoObuildDataConstructors
-            , compilerTypeConstructorEnvironment = Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
-            , -- , compilerAliasEnvironment = protoObuildAliases
-              -- , compilerTraitEnvironment = protoObuildTraits
-              -- , compilerInstanceEnvironment = protoObuildInstances
-              -- , compilerDictionaryNameEnvironment = mempty
-              compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
+            { compilerTypeConstructorEnvironment =
+                Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
+            , compilerKernelEnvironment =
+                KernelEnvironment mempty mempty mempty
             }
       )
       (runPassAndTickBar p i)

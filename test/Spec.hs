@@ -120,8 +120,8 @@ res =
 
 fooe = runState food 10000000
 
---foox :: IndexedType
---foox = t
+-- foox :: IndexedType
+-- foox = t
 -- where
 --  (t, _, _) =
 --    runSolver 100 $
