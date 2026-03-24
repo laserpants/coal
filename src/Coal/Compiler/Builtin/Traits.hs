@@ -48,31 +48,31 @@ builtinTraits =
           (Parameter () "a")
           [
             ( "from_int32"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Numeric" (TVariable (Parameter () "a"))] $ TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "from_int64"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Numeric" (TVariable (Parameter () "a"))] $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "from_bignum"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Numeric" (TVariable (Parameter () "a"))] $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "negate"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Numeric" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "(+)"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Numeric" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "(-)"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Numeric" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ,
             ( "(*)"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Numeric" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )
@@ -84,7 +84,7 @@ builtinTraits =
           (Parameter () "a")
           [
             ( "compare"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Ordered" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
             )
           ]
       )
@@ -96,7 +96,7 @@ builtinTraits =
           (Parameter () "a")
           [
             ( "(==)"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Comparable" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
             )
           ]
       )
@@ -108,7 +108,7 @@ builtinTraits =
           (Parameter () "a")
           [
             ( "(/)"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Divisible" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )
@@ -120,7 +120,7 @@ builtinTraits =
           (Parameter () "a")
           [
             ( "(%)"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Modulo" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )
@@ -132,7 +132,7 @@ builtinTraits =
           (Parameter () "a")
           [
             ( "(<>)"
-            , Forall (Set.fromList [Parameter () "a"]) [Trait "Semigroup" (TVariable (Parameter () "a"))] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
+            , Forall (Set.fromList [Parameter () "a"]) [] $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
             )
           ]
       )
