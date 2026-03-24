@@ -56,6 +56,10 @@ data ProtoCompilerState a = ProtoCompilerState
   }
   deriving (Show, Eq, Ord)
 
+instance Supply (ProtoCompilerState a) where
+  updateSupply = overProtoCompilerSupply
+  getSupply = protoOcompilerSupply
+
 initialProtoCompilerState :: ProtoCompilerState a
 initialProtoCompilerState =
   ProtoCompilerState
@@ -176,7 +180,3 @@ overProtoCompilerSolverRuleViolations fn ProtoCompilerState{..} =
     { protoOcompilerSolverRuleViolations = fn protoOcompilerSolverRuleViolations
     , ..
     }
-
-instance Supply (ProtoCompilerState a) where
-  updateSupply = overProtoCompilerSupply
-  getSupply = protoOcompilerSupply
