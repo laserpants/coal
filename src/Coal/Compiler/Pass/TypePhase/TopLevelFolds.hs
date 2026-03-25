@@ -123,7 +123,8 @@ updateName name label =
       (labelName label)
       ( \loc _ ->
           applicationE
-            (EVariable loc (Label () ("!" <> name)))
+            --            (EVariable loc (Label () ("!" <> name)))
+            (EVariable loc (Label () name))
             (EVariable loc label :| [])
       )
 

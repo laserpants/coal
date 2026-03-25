@@ -55,19 +55,21 @@ pass m@(ProtoModule path _ _) = do
   --  setNamesC env
   --  insertNamesC builtinFunctions
 
-  next <- runTypeInference m
+  runTypeInference m
 
-  names <- gets compilerNameStore
-  replacePlaceholders names
-
-  assumptions <- lift $ gets (filter (not . isFoldAssumption) . nub . protoOcompilerAssumptions)
-  forM_ assumptions $
-    \Assumption{..} -> do
-      tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
-  unless (null assumptions) $
-    throwError NoSuchIdentifier
-
-  pure next
+--  next <- runTypeInference m
+--
+--  names <- gets compilerNameStore
+--  replacePlaceholders names
+--
+----  assumptions <- lift $ gets (filter (not . isFoldAssumption) . nub . protoOcompilerAssumptions)
+----  forM_ assumptions $
+----    \Assumption{..} -> do
+----      tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath path) assumptionMetadata)]
+----  unless (null assumptions) $
+----    throwError NoSuchIdentifier
+--
+--  pure next
 
 isFoldAssumption :: Assumption a t -> Bool
 isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
