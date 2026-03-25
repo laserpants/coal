@@ -361,6 +361,8 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Definition a Kind Indexed
     \case
       DConstant loc name c fs ->
         DConstant loc name <$> expandConstantDefinitionTraits name c <*> traverse expandTraits fs
+      DInstance loc name (InstanceDefinition ps t ds) ->
+        DInstance loc name . InstanceDefinition ps t <$> traverse expandTraits ds
       d ->
         pure d
 
