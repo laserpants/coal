@@ -114,31 +114,31 @@ updateNames2 store =
               _ ->
                 pure ()
 
-updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
-updateNames store =
-  updateCurrentBuildC $
-    \build@ModuleBuild{..} ->
-      flip execStateT build $
-        forM_ moduleNames $
-          \case
-            NFunction name _ ->
-              go name NFunction
-            NConstant name _ ->
-              go name NConstant
-            NFold name _ ->
-              go name NFold
-            NDataConstructor name _ ->
-              go name NDataConstructor
-            _ ->
-              pure ()
- where
-  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
-  go name info =
-    case Environment.lookup (normalizedName name) store of
-      Nothing ->
-        pure ()
-      Just s ->
-        modify $ replaceName (info name s)
+--updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+--updateNames store =
+--  updateCurrentBuildC $
+--    \build@ModuleBuild{..} ->
+--      flip execStateT build $
+--        forM_ moduleNames $
+--          \case
+--            NFunction name _ ->
+--              go name NFunction
+--            NConstant name _ ->
+--              go name NConstant
+--            NFold name _ ->
+--              go name NFold
+--            NDataConstructor name _ ->
+--              go name NDataConstructor
+--            _ ->
+--              pure ()
+-- where
+--  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
+--  go name info =
+--    case Environment.lookup (normalizedName name) store of
+--      Nothing ->
+--        pure ()
+--      Just s ->
+--        modify $ replaceName (info name s)
 
 insertPlaceholders :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a Kind IndexedType)
 insertPlaceholders =
