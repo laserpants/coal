@@ -10,6 +10,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.Placeholders (TraitContext (..), passPlaceholders) where
 
+import Coal.Common.FreeVars
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
@@ -34,7 +35,7 @@ import Control.Monad (when)
 import Control.Monad.Except (MonadError (throwError), forM)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
-import Control.Monad.State (StateT, execStateT, get, gets, modify, put)
+import Control.Monad.State (StateT, execStateT, evalStateT, get, gets, modify, put)
 import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
@@ -48,8 +49,14 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Data.Text.Lazy (toStrict)
 import Debug.Trace
-import Extras (Dictionary, Name, forM_)
+import Extras (Dictionary, Name, forM_, concatForM)
 import Text.Pretty.Simple (pPrint, pShowNoColor)
+import Data.Map.Strict (Map)
+import Data.Set (Set)
+import qualified Data.Set as Set
+import Data.Graph (SCC(..), stronglyConnComp)
+import qualified Data.Set as Set
+import Data.Foldable.Extra (notNull)
 
 passPlaceholders :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPlaceholders = Pass{runPass = pass}
@@ -72,7 +79,23 @@ pass =
       b <- lift protoOgetCurrentBuildC
       lift $ protoOsetNamesC (typeEnvironment b)
 
-      --  lift $ protoOsetNamesC env1
+----
+--
+--      baz <- concatForM (moduleDefinitions m) freeNames 
+--      let foo = Map.fromList (collapseCycles baz)
+--
+--      evalStateT considerNext foo 
+--
+--
+----      let foo2 = foo :: Map (Set Name) (Set Name)
+--
+--      traceShowM ">>>>"
+--      traceShowM (modulePath m)
+----      traceShowM foo
+--
+--      --  lift $ protoOsetNamesC env1
+--
+----
 
       mm <- overModuleDefinitionsM (traverse insertPlaceholders) m
 
@@ -96,6 +119,116 @@ pass =
       liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
 
       return mm
+
+-- 
+-- leaf => []
+-- node => []
+-- tree_list_size => [size, tree_list_size]
+-- size => [tree_list_size]
+-- main => [size, example_tree]
+--
+--
+-- 
+-- leaf => []
+-- node => []
+-- [tree_list_size, size] => [size, tree_list_size]
+-- main => [size, example_tree]
+--
+--
+--
+--
+
+freeInConstant :: (Show a, Data a) => ConstantDefinition a IndexedType -> Set (Label IndexedType)
+freeInConstant ConstantDefinition{..} = freeIn constantDefinitionExpression
+
+freeInFunction :: (Show a, Data a) => FunctionDefinition a IndexedType -> Set (Label IndexedType)
+freeInFunction FunctionDefinition{..} = freeSet (boundIn functionDefinitionPatterns) functionDefinitionExpression
+
+freeNames :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) [(Name, Set Name)]
+freeNames =
+  \case
+     DConstant _ name def _ ->
+       return [(name, Set.map labelName (freeInConstant def))]
+     DFunction _ name (def :| _) _ ->
+       return [(name, Set.map labelName (freeInFunction def))]
+     DInstance _ trait InstanceDefinition{..} ->
+       concatForM instanceDefinitionEntries $
+         \case
+           DConstant _ name def _ ->
+             return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInConstant def))]
+           DFunction _ name (def :| _) _ ->
+             return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInFunction def))]
+     _ ->
+       return []
+
+collapseCycles :: [(Name, Set.Set Name)] -> [(Set.Set Name, Set.Set Name)]
+collapseCycles defs = map collapseSCC (stronglyConnComp edges)
+ where
+  edges = [ (name, name, Set.toList deps) | (name, deps) <- defs ]
+
+  collapseSCC :: SCC Name -> (Set.Set Name, Set.Set Name)
+  collapseSCC scc = (names, deps `Set.difference` names)
+    where
+        names =
+          case scc of
+            AcyclicSCC n -> Set.singleton n
+            CyclicSCC ns -> Set.fromList ns
+
+        deps = Set.unions [ lookupDeps n | n <- Set.toList names ]
+
+  lookupDeps n = Map.findWithDefault Set.empty n (Map.fromList defs)
+
+considerNext :: (Monad m) => StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
+considerNext = do
+  m <- get
+  case Map.keys m of
+    [] -> pure ()
+    k : _ -> considerKey k
+ where
+  considerKey :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
+  considerKey key = do
+    m <- get
+    case Map.lookup key m of
+      Nothing ->
+        error "Implementation error"
+      Just names -> do
+        res <- firstNonVisited names
+        case res of
+          Nothing -> do
+
+            forM_ names $
+              \name -> do
+                env <- lift $ lift $ gets protoOcompilerNameStore
+                case Environment.lookup name env of
+                  Nothing ->
+                    pure () -- error (show (name, "??"))
+                  Just xx ->
+                    traceShowM (name, xx)
+
+            modify (Map.delete key)
+            considerNext
+          Just k ->
+            considerKey k
+
+  firstNonVisited :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) (Maybe (Set Name))
+  firstNonVisited names = do
+    m <- get
+    pure $
+      case filter (notNull . Set.intersection names) (Map.keys m) of
+        [] -> Nothing
+        k : _ -> Just k
+
+--containsAny :: Map (Set Name) (Set Name) -> Set Name -> Maybe (Set Name)
+--containsAny m names = 
+
+-- leaf => []
+-- node => []
+-- [tree_list_size, size] => [size, tree_list_size]
+-- main => [size, example_tree]
+
+--  where
+--    inKeySets :: Name -> Bool
+--    inKeySets name = undefined
 
 updateNames2 :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m a) ()
 updateNames2 store =

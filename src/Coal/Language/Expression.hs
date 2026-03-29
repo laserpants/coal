@@ -1,9 +1,11 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Coal.Language.Expression (
   Expression (..),
@@ -11,6 +13,8 @@ module Coal.Language.Expression (
   CompiledClause (..),
 ) where
 
+import qualified Data.Map.Strict as Map
+import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), freeSet)
 import Coal.Common.Label (Label (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
@@ -24,6 +28,8 @@ import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Dictionary, Name)
 import GHC.Generics (Generic)
+import Data.Set (Set)
+import qualified Data.Set as Set
 
 data Expression a s t
   = -- | Type-annotated expression
@@ -126,3 +132,66 @@ data CompiledClause a s t = ECompiledClause
     )
 
 instance (Binary a, Binary s, Binary t) => Binary (CompiledClause a s t)
+
+instance (Show a, Show s, Show t, Ord t, Data a, Data s, Data t) => FreeVars (Expression a s t) t where
+  freeIn = 
+    \case
+      EAnnotation _ _ e ->
+        freeIn e
+      EApplication _ _ f args ->
+        freeIn f <> freeIn args
+      ELambda _ pats body ->
+        freeSet (boundIn pats) body
+      ELet _ bindings body ->
+        freeIn bindings <> freeSet (boundIn bindings) body
+      ERecursiveLet _ pat rhs body ->
+        let bound = boundIn pat
+         in freeSet bound rhs <> freeSet bound body
+      EVariable _ lbl ->
+        Set.singleton lbl
+      EConstructor{} ->
+        mempty
+      ELiteral{} ->
+        mempty
+      EIf _ _ c t f ->
+        freeIn c <> freeIn t <> freeIn f
+      EOperator{} ->
+        mempty
+      ERecord _ _ fields rest ->
+        freeIn (Map.elems fields) <> freeIn rest
+      EListCons _ _ x xs ->
+        freeIn x <> freeIn xs
+      EListLiteral _ _ xs ->
+        freeIn xs
+      ETuple _ _ xs ->
+        freeIn xs
+      EMatch _ _ expr clauses ->
+        freeIn expr <> foldMap freeClause clauses
+      ECompiledMatch _ _ expr clauses ->
+        freeIn expr <> foldMap freeCompiledClause clauses
+      EFold _ _ exprs clauses ->
+        freeIn exprs <> foldMap freeClause clauses
+      ESelect _ _ e ->
+        freeIn e
+      EFocus _ _ ll1 ll2 e1 e2 ->
+        freeSet [labelName ll1, labelName ll2] [e1, e2]
+      ETraitInstance{} ->
+        mempty
+      EFFICall _ _ _ args k ->
+        freeIn args <> freeIn k
+      e ->
+        error (show e)
+
+-- TODO: may not be necessary
+freeClause :: (Show a, Show s, Show t, Data a, Data s, Data t, Ord t) => Clause a s t -> Set (Label t)
+freeClause (EClause _ pat choices) = foldMap (freeChoice bound) choices
+  where 
+    bound = boundIn pat
+
+freeCompiledClause :: (Show a, Show s, Show t, Data a, Data s, Data t, Ord t) => CompiledClause a s t -> Set (Label t)
+freeCompiledClause (ECompiledClause _ args expr) = freeSet (fmap labelName args) expr
+
+-- TODO: may not be necessary
+freeChoice :: (Show a, Show s, Show t, Data a, Data s, Data t, Ord t) => Set Name -> Choice Expression a s t -> Set (Label t)
+freeChoice bound (CPlain _ guards expr) =
+  freeIn guards <> freeSet bound expr
