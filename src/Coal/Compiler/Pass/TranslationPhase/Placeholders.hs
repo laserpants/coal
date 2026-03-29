@@ -312,15 +312,15 @@ insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
   lift $ protoOinsertNameC name s
 insertName _ _ = error "Implementation error"
 
-collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a (ProtoCompilerT m a) [Trait IndexedType]
+collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a (ProtoCompilerT m a) (Set (Trait IndexedType))
 collectTraits u name = do
   -- env <- asks compilerDictionaryNameEnvironment
   env <- lift $ gets protoOcompilerNameStore
   case Environment.lookup (normalizedName name) env of
     Nothing ->
-      pure []
+      pure mempty
     Just (Forall _ [] _) ->
-      pure []
+      pure mempty
     Just (Forall vs ts t) -> do
       sub1 <- foldrM instantiate mempty vs
       r <- tryMatch (apply sub1 t) u
@@ -328,7 +328,7 @@ collectTraits u name = do
         Left{} ->
           error (show (name, apply sub1 t, u)) -- "TODO"
         Right sub2 ->
-          pure (apply (sub2 <> sub1) ts)
+          pure (apply (sub2 <> sub1) (Set.fromList ts))
  where
   instantiate (TypeIndex k index) acc = do
     var <- supplied (TVariable . TypeIndex k)
@@ -407,7 +407,7 @@ applyTraits loc (Label t name) =
             tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
             throwError TraitError
           Nothing -> do
-            tellDictionaryTraits [trait]
+            tellDictionaryTraits (Set.singleton trait)
             pure (ETraitInstance mempty (typeOf trait) trait)
           Just r ->
             pure (ERecord mempty (typeOf trait) r Nothing)
@@ -433,7 +433,7 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedTy
       ERecursiveLet a p e1 e2 ->
         expandRecursiveLet <$> expandTraits (ELet a (BPattern a p e1 :| []) e2)
       ELet a bs e -> do
-        as <- censorDictionaryTraits (const []) (traverse transformBinding bs)
+        as <- censorDictionaryTraits (const mempty) (traverse transformBinding bs)
         let xs = concat (toList (snd <$> as))
 
         old <- lift get
@@ -450,7 +450,7 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedTy
             pure var
       EVariable loc (Label t name) -> do
         traits <- collectTraits t name
-        applyTraits loc (Label t name) (nub traits)
+        applyTraits loc (Label t name) (Set.toList traits)
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       e ->
@@ -462,20 +462,20 @@ transformBinding =
     BPattern a var@(PVariable _ (Label t name)) e
       | "$fold" `isPrefixOf` name -> do
           (body, traits) <- listenDictionaryTraits (expandTraits e)
-          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) (nub traits) t)])
+          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
     BPattern _ (PVariable a (Label t name)) e -> do
       (e1, traits) <- transformScope e
-      let ll = Label (foldTypeOf t (nub traits)) name
-      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) (nub traits) t)])
+      let ll = Label (foldTypeOf t (Set.toList traits)) name
+      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
     BPattern a (PAnnotation _ _ p) e ->
       transformBinding (BPattern a p e)
     _ ->
       error "Not implemented"
 
-transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType, [Trait IndexedType])
+transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType, Set (Trait IndexedType))
 transformScope e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
-  case nub traits of
+  case Set.toList traits of
     [] -> pure (expr, traits)
     tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
@@ -504,7 +504,7 @@ expandConstantDefinitionTraits name =
   \case
     ConstantDefinition loc with (With _ t) e -> do
       (expr, traits) <- listenDictionaryTraits (expandTraits e)
-      case nub traits of
+      case Set.toList traits of
         [] ->
           pure $ ConstantDefinition loc with (With [] t) expr
         tr : trs -> do
