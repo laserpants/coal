@@ -96,7 +96,7 @@ parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter 
 parseConstructor tn qs = do
   n <- constructor
   ps <- option [] (parens (commaSep1 parseType))
-  pure (DataConstructor n (length ps) (Forall (Set.fromList qs) [] (foldr TArrow t0 ps)))
+  pure (DataConstructor n (length ps) (Forall (Set.fromList qs) mempty (foldr TArrow t0 ps)))
  where
   t0 =
     case qs of
@@ -221,7 +221,7 @@ parseAnnotation = symbol_ ":" *> parseType
 
 -- TODO: move
 toScheme :: Type Parameter () -> Scheme Parameter () ParameterizedType
-toScheme t = Forall (Set.fromList (params t)) [] t
+toScheme t = Forall (Set.fromList (params t)) mempty t
 
 class Parameterized p where
   params :: p -> [Parameter ()]

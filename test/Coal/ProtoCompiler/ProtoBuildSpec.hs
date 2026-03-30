@@ -55,7 +55,7 @@ testModuleBuiltinsPreKinds =
             "IO"
             ( ProtoTypeDefinition
                 { protoOtypeDefinitionParameters = [Parameter () "a"]
-                , protoOtypeDefinitionConstructors = []
+                , protoOtypeDefinitionConstructors = mempty
                 }
             )
         , ProtoDTrait
@@ -67,7 +67,7 @@ testModuleBuiltinsPreKinds =
                 , protoOtraitDefinitionTraitName =
                     "Numeric"
                 , protoOtraitDefinitionConstraints =
-                    []
+                    mempty
                 , protoOtraitDefinitionParameter =
                     Parameter () "a"
                 , protoOtraitDefinitionInterface =
@@ -75,49 +75,49 @@ testModuleBuiltinsPreKinds =
                         "from_int32"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
                             (TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "from_int64"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
                             (TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "from_bignum"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
                             (TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "negate"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "(+)"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "(-)"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "(*)"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            [Trait "Numeric" (TVariable (Parameter () "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     ]
@@ -129,7 +129,7 @@ testModuleBuiltinsPreKinds =
                 { protoOinstanceDefinitionMetadata =
                     mempty
                 , protoOinstanceDefinitionConstraints =
-                    []
+                    mempty
                 , protoOinstanceDefinitionTraitName =
                     "Numeric"
                 , protoOinstanceDefinitionType =
@@ -144,9 +144,9 @@ testModuleBuiltinsPreKinds =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EVariable mempty (Label () "n")
                             }
@@ -160,16 +160,16 @@ testModuleBuiltinsPreKinds =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
                                   (EVariable mempty (Label () "bultin$_int64_to_int32"))
                                   ( EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -182,16 +182,16 @@ testModuleBuiltinsPreKinds =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
                                   (EVariable mempty (Label () "bultin$_bignum_to_int32"))
                                   ( EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -204,16 +204,16 @@ testModuleBuiltinsPreKinds =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
                                   (EVariable mempty (Label () "bultin$_int32_neg"))
                                   ( EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -226,9 +226,9 @@ testModuleBuiltinsPreKinds =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
@@ -236,7 +236,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_add"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -249,9 +249,9 @@ testModuleBuiltinsPreKinds =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
@@ -259,7 +259,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_sub"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -272,9 +272,9 @@ testModuleBuiltinsPreKinds =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
@@ -282,7 +282,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_mul"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -303,7 +303,7 @@ testModuleBuiltins =
             "IO"
             ( ProtoTypeDefinition
                 { protoOtypeDefinitionParameters = [Parameter KType "a"]
-                , protoOtypeDefinitionConstructors = []
+                , protoOtypeDefinitionConstructors = mempty
                 }
             )
         , ProtoDTrait
@@ -315,7 +315,7 @@ testModuleBuiltins =
                 , protoOtraitDefinitionTraitName =
                     "Numeric"
                 , protoOtraitDefinitionConstraints =
-                    []
+                    mempty
                 , protoOtraitDefinitionParameter =
                     Parameter KType "a"
                 , protoOtraitDefinitionInterface =
@@ -323,49 +323,49 @@ testModuleBuiltins =
                         "from_int32"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
                             (TIntrinsic IInt32 `TArrow` TVariable (Parameter KType "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "from_int64"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
                             (TIntrinsic IInt64 `TArrow` TVariable (Parameter KType "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "from_bignum"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
                             (TIntrinsic IBignum `TArrow` TVariable (Parameter KType "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "negate"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "(+)"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "(-)"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     , ProtoTraitDefinitionInterfaceEntry
                         "(*)"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
+                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     ]
@@ -377,7 +377,7 @@ testModuleBuiltins =
                 { protoOinstanceDefinitionMetadata =
                     mempty
                 , protoOinstanceDefinitionConstraints =
-                    []
+                    mempty
                 , protoOinstanceDefinitionTraitName =
                     "Numeric"
                 , protoOinstanceDefinitionType =
@@ -392,9 +392,9 @@ testModuleBuiltins =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EVariable mempty (Label () "n")
                             }
@@ -408,16 +408,16 @@ testModuleBuiltins =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
                                   (EVariable mempty (Label () "bultin$_int64_to_int32"))
                                   ( EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -430,16 +430,16 @@ testModuleBuiltins =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
                                   (EVariable mempty (Label () "bultin$_bignum_to_int32"))
                                   ( EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -452,16 +452,16 @@ testModuleBuiltins =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
                                   (EVariable mempty (Label () "bultin$_int32_neg"))
                                   ( EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -474,9 +474,9 @@ testModuleBuiltins =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
@@ -484,7 +484,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_add"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -497,9 +497,9 @@ testModuleBuiltins =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
@@ -507,7 +507,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_sub"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -520,9 +520,9 @@ testModuleBuiltins =
                             , protoOfunctionDefinitionAnnotation =
                                 Nothing
                             , protoOfunctionDefinitionType =
-                                With [] ()
+                                With mempty ()
                             , protoOfunctionDefinitionPatterns =
-                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| []
+                                PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
                             , protoOfunctionDefinitionExpression =
                                 EApplication
                                   mempty
@@ -530,7 +530,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_mul"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| []
+                                      :| mempty
                                   )
                             }
                         )
@@ -551,7 +551,7 @@ testModule0PreKinds =
         [ ProtoDImport
             mempty
             (Path ["Builtin"])
-            [ TypeImport mempty "IO" []
+            [ TypeImport mempty "IO" mempty
             ]
         , ProtoDFunction
             mempty
@@ -561,27 +561,27 @@ testModule0PreKinds =
                 , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
-                          []
+                          mempty
                           ( TApplication
                               ()
                               (TConstructor () "IO")
                               (TIntrinsic IUnit)
                           )
                       )
-                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionType = With mempty ()
                 , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
-                      :| []
+                      :| mempty
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
                       (EVariable mempty (Label () "io$_println_int32"))
                       ( EVariable mempty (Label () "n")
-                          :| []
+                          :| mempty
                       )
                 }
             )
@@ -597,7 +597,7 @@ testModule0 =
         [ ProtoDImport
             mempty
             (Path ["Builtin"])
-            [ TypeImport mempty "IO" []
+            [ TypeImport mempty "IO" mempty
             ]
         , ProtoDFunction
             mempty
@@ -607,27 +607,27 @@ testModule0 =
                 , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
-                          []
+                          mempty
                           ( TApplication
                               KType
                               (TConstructor (KArrow KType KType) "IO")
                               (TIntrinsic IUnit)
                           )
                       )
-                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionType = With mempty ()
                 , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
-                      :| []
+                      :| mempty
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
                       (EVariable mempty (Label () "io$_println_int32"))
                       ( EVariable mempty (Label () "n")
-                          :| []
+                          :| mempty
                       )
                 }
             )
@@ -645,7 +645,7 @@ testModule1PreKinds =
             "IO"
             ( ProtoTypeDefinition
                 { protoOtypeDefinitionParameters = [Parameter () "a"]
-                , protoOtypeDefinitionConstructors = []
+                , protoOtypeDefinitionConstructors = mempty
                 }
             )
         , ProtoDImport
@@ -664,9 +664,9 @@ testModule1PreKinds =
             ( ProtoFunctionDefinition
                 { protoOfunctionDefinitionMetadata = mempty
                 , protoOfunctionDefinitionAnnotation = Nothing
-                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionType = With mempty ()
                 , protoOfunctionDefinitionPatterns =
-                    PLiteral mempty LUnit :| []
+                    PLiteral mempty LUnit :| mempty
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
@@ -681,11 +681,11 @@ testModule1PreKinds =
                               ()
                               (EVariable mempty (Label () "from_int32"))
                               ( ELiteral mempty (LInt32 8)
-                                  :| []
+                                  :| mempty
                               )
-                              :| []
+                              :| mempty
                           )
-                          :| []
+                          :| mempty
                       )
                 }
             )
@@ -714,9 +714,9 @@ testModule1PreKinds =
 --            ( ProtoFunctionDefinition
 --                { protoOfunctionDefinitionMetadata = mempty
 --                , protoOfunctionDefinitionAnnotation = Nothing
---                , protoOfunctionDefinitionType = With [] ()
+--                , protoOfunctionDefinitionType = With mempty ()
 --                , protoOfunctionDefinitionPatterns =
---                    PLiteral mempty LUnit :| []
+--                    PLiteral mempty LUnit :| mempty
 --                , protoOfunctionDefinitionExpression =
 --                    EApplication
 --                      mempty
@@ -731,11 +731,11 @@ testModule1PreKinds =
 --                              ()
 --                              (EVariable mempty (Label () "from_int32"))
 --                              ( ELiteral mempty (LInt32 8)
---                                  :| []
+--                                  :| mempty
 --                              )
---                              :| []
+--                              :| mempty
 --                          )
---                          :| []
+--                          :| mempty
 --                      )
 --                }
 --            )
@@ -766,41 +766,41 @@ testModule2PreKinds =
                 { protoOfunctionDefinitionMetadata =
                     mempty
                 , protoOfunctionDefinitionAnnotation =
-                    Just (With [] (TIntrinsic IInt32))
+                    Just (With mempty (TIntrinsic IInt32))
                 , protoOfunctionDefinitionType =
-                    With [] ()
+                    With mempty ()
                 , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
-                      :| []
+                      :| mempty
                 , protoOfunctionDefinitionExpression =
                     ERecursiveLet
                       mempty
                       (PVariable mempty (Label () "$fold"))
                       ( ELambda
                           mempty
-                          (PVariable mempty (Label () "$fold.expr") :| [])
+                          (PVariable mempty (Label () "$fold.expr") :| mempty)
                           ( EMatch
                               mempty
                               ()
                               (EVariable mempty (Label () "$fold.expr"))
                               ( EClause
                                   mempty
-                                  (PConstructor mempty (Label () "Zero") [])
+                                  (PConstructor mempty (Label () "Zero") mempty)
                                   ( CPlain
                                       mempty
-                                      []
+                                      mempty
                                       ( EApplication
                                           mempty
                                           ()
                                           (EVariable mempty (Label () "from_int32"))
                                           ( ELiteral mempty (LInt32 1)
-                                              :| []
+                                              :| mempty
                                           )
                                       )
-                                      :| []
+                                      :| mempty
                                   )
                                   <| EClause
                                     mempty
@@ -818,7 +818,7 @@ testModule2PreKinds =
                                     )
                                     ( CPlain
                                         mempty
-                                        []
+                                        mempty
                                         ( EApplication
                                             mempty
                                             ()
@@ -828,15 +828,15 @@ testModule2PreKinds =
                                                 ()
                                                 (EVariable mempty (Label () "unpack"))
                                                 ( EVariable mempty (Label () "m")
-                                                    :| []
+                                                    :| mempty
                                                 )
                                                 <| EVariable mempty (Label () "f")
-                                                :| []
+                                                :| mempty
                                             )
                                         )
-                                        :| []
+                                        :| mempty
                                     )
-                                  :| []
+                                  :| mempty
                               )
                           )
                       )
@@ -848,8 +848,8 @@ testModule2PreKinds =
                               mempty
                               ()
                               (EVariable mempty (Label () "pack"))
-                              (EVariable mempty (Label () "n") :| [])
-                              :| []
+                              (EVariable mempty (Label () "n") :| mempty)
+                              :| mempty
                           )
                       )
                       -- EFold
@@ -859,24 +859,24 @@ testModule2PreKinds =
                       --      mempty
                       --      ()
                       --      (EVariable mempty (Label () "pack"))
-                      --      (EVariable mempty (Label () "n") :| [])
-                      --      :| []
+                      --      (EVariable mempty (Label () "n") :| mempty)
+                      --      :| mempty
                       --  )
                       --  ( EClause
                       --      mempty
-                      --      (PConstructor mempty (Label () "Zero") [])
+                      --      (PConstructor mempty (Label () "Zero") mempty)
                       --      ( CPlain
                       --          mempty
-                      --          []
+                      --          mempty
                       --          ( EApplication
                       --              mempty
                       --              ()
                       --              (EVariable mempty (Label () "from_int32"))
                       --              ( ELiteral mempty (LInt32 1)
-                      --                  :| []
+                      --                  :| mempty
                       --              )
                       --          )
-                      --          :| []
+                      --          :| mempty
                       --      )
                       --      <| EClause
                       --        mempty
@@ -894,7 +894,7 @@ testModule2PreKinds =
                       --        )
                       --        ( CPlain
                       --            mempty
-                      --            []
+                      --            mempty
                       --            ( EApplication
                       --                mempty
                       --                ()
@@ -904,15 +904,15 @@ testModule2PreKinds =
                       --                    ()
                       --                    (EVariable mempty (Label () "unpack"))
                       --                    ( EVariable mempty (Label () "m")
-                      --                        :| []
+                      --                        :| mempty
                       --                    )
                       --                    <| EVariable mempty (Label () "f")
-                      --                    :| []
+                      --                    :| mempty
                       --                )
                       --            )
-                      --            :| []
+                      --            :| mempty
                       --        )
-                      --      :| []
+                      --      :| mempty
                       --  )
                 }
             )
@@ -938,15 +938,15 @@ testModule2PreKinds =
 --                { protoOfunctionDefinitionMetadata =
 --                    mempty
 --                , protoOfunctionDefinitionAnnotation =
---                    Just (With [] (TIntrinsic IInt32))
+--                    Just (With mempty (TIntrinsic IInt32))
 --                , protoOfunctionDefinitionType =
---                    With [] ()
+--                    With mempty ()
 --                , protoOfunctionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic IInt32)
 --                      (PVariable mempty (Label () "n"))
---                      :| []
+--                      :| mempty
 --                , protoOfunctionDefinitionExpression =
 --                    EFold
 --                      mempty
@@ -955,24 +955,24 @@ testModule2PreKinds =
 --                          mempty
 --                          ()
 --                          (EVariable mempty (Label () "pack"))
---                          (EVariable mempty (Label () "n") :| [])
---                          :| []
+--                          (EVariable mempty (Label () "n") :| mempty)
+--                          :| mempty
 --                      )
 --                      ( EClause
 --                          mempty
---                          (PConstructor mempty (Label () "Zero") [])
+--                          (PConstructor mempty (Label () "Zero") mempty)
 --                          ( CPlain
 --                              mempty
---                              []
+--                              mempty
 --                              ( EApplication
 --                                  mempty
 --                                  ()
 --                                  (EVariable mempty (Label () "from_int32"))
 --                                  ( ELiteral mempty (LInt32 1)
---                                      :| []
+--                                      :| mempty
 --                                  )
 --                              )
---                              :| []
+--                              :| mempty
 --                          )
 --                          <| EClause
 --                            mempty
@@ -990,7 +990,7 @@ testModule2PreKinds =
 --                            )
 --                            ( CPlain
 --                                mempty
---                                []
+--                                mempty
 --                                ( EApplication
 --                                    mempty
 --                                    ()
@@ -1000,15 +1000,15 @@ testModule2PreKinds =
 --                                        ()
 --                                        (EVariable mempty (Label () "unpack"))
 --                                        ( EVariable mempty (Label () "m")
---                                            :| []
+--                                            :| mempty
 --                                        )
 --                                        <| EVariable mempty (Label () "f")
---                                        :| []
+--                                        :| mempty
 --                                    )
 --                                )
---                                :| []
+--                                :| mempty
 --                            )
---                          :| []
+--                          :| mempty
 --                      )
 --                }
 --            )
@@ -1025,17 +1025,17 @@ testModule3PreKinds =
             mempty
             "Nat"
             ( ProtoTypeDefinition
-                { protoOtypeDefinitionParameters = []
+                { protoOtypeDefinitionParameters = mempty
                 , protoOtypeDefinitionConstructors =
                     [ DataConstructor
                         { constructorName = "Succ"
                         , constructorArity = 1
-                        , constructorScheme = Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
+                        , constructorScheme = Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)
                         }
                     , DataConstructor
                         { constructorName = "Zero"
                         , constructorArity = 0
-                        , constructorScheme = Forall mempty [] (TIntrinsic INat)
+                        , constructorScheme = Forall mempty mempty (TIntrinsic INat)
                         }
                     ]
                 }
@@ -1048,24 +1048,24 @@ testModule3PreKinds =
                 , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
-                          []
+                          mempty
                           (TIntrinsic INat)
                       )
                 , protoOfunctionDefinitionType =
-                    With [] ()
+                    With mempty ()
                 , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "m"))
-                      :| []
+                      :| mempty
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
                       (EVariable mempty (Label () "nat$_pack"))
                       ( EVariable mempty (Label () "m")
-                          :| []
+                          :| mempty
                       )
                 }
             )
@@ -1077,24 +1077,24 @@ testModule3PreKinds =
                 , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
-                          []
+                          mempty
                           (TIntrinsic IInt32)
                       )
                 , protoOfunctionDefinitionType =
-                    With [] ()
+                    With mempty ()
                 , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic INat)
                       (PVariable mempty (Label () "n"))
-                      :| []
+                      :| mempty
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
                       (EVariable mempty (Label () "nat$_unpack"))
                       ( EVariable mempty (Label () "n")
-                          :| []
+                          :| mempty
                       )
                 }
             )
@@ -1113,9 +1113,9 @@ testModule4PreKinds =
             ( ProtoFunctionDefinition
                 { protoOfunctionDefinitionMetadata = mempty
                 , protoOfunctionDefinitionAnnotation = Nothing
-                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionType = With mempty ()
                 , protoOfunctionDefinitionPatterns =
-                    PVariable mempty (Label () "m") :| []
+                    PVariable mempty (Label () "m") :| mempty
                 , protoOfunctionDefinitionExpression =
                     ELiteral mempty (LInt32 1)
                 }
@@ -1137,24 +1137,24 @@ testModule4PreKinds =
 --                , protoOfunctionDefinitionAnnotation =
 --                    Just
 --                      ( With
---                          []
+--                          mempty
 --                          (TIntrinsic INat)
 --                      )
 --                , protoOfunctionDefinitionType =
---                    With [] ()
+--                    With mempty ()
 --                , protoOfunctionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic IInt32)
 --                      (PVariable mempty (Label () "m"))
---                      :| []
+--                      :| mempty
 --                , protoOfunctionDefinitionExpression =
 --                    EApplication
 --                      mempty
 --                      ()
 --                      (EVariable mempty (Label () "nat$_pack"))
 --                      ( EVariable mempty (Label () "m")
---                          :| []
+--                          :| mempty
 --                      )
 --                }
 --            )
@@ -1166,24 +1166,24 @@ testModule4PreKinds =
 --                , protoOfunctionDefinitionAnnotation =
 --                    Just
 --                      ( With
---                          []
+--                          mempty
 --                          (TIntrinsic IInt32)
 --                      )
 --                , protoOfunctionDefinitionType =
---                    With [] ()
+--                    With mempty ()
 --                , protoOfunctionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic INat)
 --                      (PVariable mempty (Label () "n"))
---                      :| []
+--                      :| mempty
 --                , protoOfunctionDefinitionExpression =
 --                    EApplication
 --                      mempty
 --                      ()
 --                      (EVariable mempty (Label () "nat$_unpack"))
 --                      ( EVariable mempty (Label () "n")
---                          :| []
+--                          :| mempty
 --                      )
 --                }
 --            )
@@ -1211,41 +1211,41 @@ testModule4PreKinds =
 --                { protoOfunctionDefinitionMetadata =
 --                    mempty
 --                , protoOfunctionDefinitionAnnotation =
---                    Just (With [] (TIntrinsic IInt32))
+--                    Just (With mempty (TIntrinsic IInt32))
 --                , protoOfunctionDefinitionType =
---                    With [] ()
+--                    With mempty ()
 --                , protoOfunctionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic IInt32)
 --                      (PVariable mempty (Label () "n"))
---                      :| []
+--                      :| mempty
 --                , protoOfunctionDefinitionExpression =
 --                    ERecursiveLet
 --                      mempty
 --                      (PVariable mempty (Label () "$fold-70cdac64"))
 --                      ( ELambda
 --                          mempty
---                          (PVariable mempty (Label () "$variable-185c7b8df7b0") :| [])
+--                          (PVariable mempty (Label () "$variable-185c7b8df7b0") :| mempty)
 --                          ( EMatch
 --                              mempty
 --                              ()
 --                              (EVariable mempty (Label () "$variable-185c7b8df7b0"))
 --                              ( EClause
 --                                  mempty
---                                  (PConstructor mempty (Label () "Zero") [])
+--                                  (PConstructor mempty (Label () "Zero") mempty)
 --                                  ( CPlain
 --                                      mempty
---                                      []
+--                                      mempty
 --                                      ( EApplication
 --                                          mempty
 --                                          ()
 --                                          (EVariable mempty (Label () "from_int32"))
 --                                          ( ELiteral mempty (LInt32 1)
---                                              :| []
+--                                              :| mempty
 --                                          )
 --                                      )
---                                      :| []
+--                                      :| mempty
 --                                  )
 --                                  <| EClause
 --                                    mempty
@@ -1263,7 +1263,7 @@ testModule4PreKinds =
 --                                    )
 --                                    ( CPlain
 --                                        mempty
---                                        []
+--                                        mempty
 --                                        ( EApplication
 --                                            mempty
 --                                            ()
@@ -1273,21 +1273,21 @@ testModule4PreKinds =
 --                                                ()
 --                                                (EVariable mempty (Label () "unpack"))
 --                                                ( EVariable mempty (Label () "m")
---                                                    :| []
+--                                                    :| mempty
 --                                                )
 --                                                <| EApplication
 --                                                  mempty
 --                                                  ()
 --                                                  (EVariable mempty (Label () "$fold-70cdac64"))
 --                                                  ( EVariable mempty (Label () "f")
---                                                      :| []
+--                                                      :| mempty
 --                                                  )
---                                                :| []
+--                                                :| mempty
 --                                            )
 --                                        )
---                                        :| []
+--                                        :| mempty
 --                                    )
---                                  :| []
+--                                  :| mempty
 --                              )
 --                          )
 --                      )
@@ -1300,9 +1300,9 @@ testModule4PreKinds =
 --                              ()
 --                              (EVariable mempty (Label () "pack"))
 --                              ( EVariable mempty (Label () "n")
---                                  :| []
+--                                  :| mempty
 --                              )
---                              :| []
+--                              :| mempty
 --                          )
 --                      )
 --                }
@@ -1528,7 +1528,7 @@ testModule9 =
             "IO"
             ( ProtoTypeDefinition
                 { protoOtypeDefinitionParameters = [Parameter () "a"]
-                , protoOtypeDefinitionConstructors = []
+                , protoOtypeDefinitionConstructors = mempty
                 }
             )
         , ProtoDFunction
@@ -1539,27 +1539,27 @@ testModule9 =
                 , protoOfunctionDefinitionAnnotation =
                     Just
                       ( With
-                          []
+                          mempty
                           ( TApplication
                               ()
                               (TConstructor () "IO")
                               (TIntrinsic IUnit)
                           )
                       )
-                , protoOfunctionDefinitionType = With [] ()
+                , protoOfunctionDefinitionType = With mempty ()
                 , protoOfunctionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
-                      :| []
+                      :| mempty
                 , protoOfunctionDefinitionExpression =
                     EApplication
                       mempty
                       ()
                       (EVariable mempty (Label () "io$_println_int32"))
                       ( EVariable mempty (Label () "n")
-                          :| []
+                          :| mempty
                       )
                 }
             )

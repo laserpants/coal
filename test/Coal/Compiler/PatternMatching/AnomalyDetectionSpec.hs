@@ -26,14 +26,14 @@ import Test.Hspec
 example1 :: [Pat]
 example1 =
   [ Con "Cons" [Any, Con "Cons" [Any, Any]]
-  , Con "Nil" []
+  , Con "Nil" mempty
   , Con "Cons" [Any, Any]
   ]
 
 example2 :: [Pat]
 example2 =
   [ Con "Cons" [Any, Con "Cons" [Any, Any]]
-  , Con "Nil" []
+  , Con "Nil" mempty
   ]
 
 example3 :: [Pat]
@@ -62,50 +62,50 @@ example12 =
 
 example13 :: [Pat]
 example13 =
-  [ Con "Fez" [Lit (LBool False), Con "A" []]
-  , Con "Fez" [Lit (LBool True), Con "B" []]
+  [ Con "Fez" [Lit (LBool False), Con "A" mempty]
+  , Con "Fez" [Lit (LBool True), Con "B" mempty]
   ]
 
 example14 :: [Pat]
 example14 =
-  [ Con "Fez" [Lit (LBool False), Con "A" []]
+  [ Con "Fez" [Lit (LBool False), Con "A" mempty]
   , Con "Fez" [Lit (LBool True), Any]
   ]
 
 example15 :: [Pat]
 example15 =
   [ Con "Fez" [Lit (LBool False), Any]
-  , Con "Fez" [Lit (LBool True), Con "A" []]
+  , Con "Fez" [Lit (LBool True), Con "A" mempty]
   ]
 
 example16 :: [Pat]
 example16 =
-  [ Con "Fez" [Con "A" [], Con "A" []]
-  , Con "Fez" [Con "B" [], Any]
+  [ Con "Fez" [Con "A" mempty, Con "A" mempty]
+  , Con "Fez" [Con "B" mempty, Any]
   ]
 
 example17 :: [Pat]
 example17 =
-  [ Con "Fez" [Con "A" [], Con "A" []]
-  , Con "Fez" [Con "B" [], Con "B" []]
+  [ Con "Fez" [Con "A" mempty, Con "A" mempty]
+  , Con "Fez" [Con "B" mempty, Con "B" mempty]
   ]
 
 example18 :: [Pat]
 example18 =
-  [ Con "Fez" [Con "A" [], Any]
-  , Con "Fez" [Con "B" [], Con "A" []]
+  [ Con "Fez" [Con "A" mempty, Any]
+  , Con "Fez" [Con "B" mempty, Con "A" mempty]
   ]
 
 example19 :: [Pat]
 example19 =
-  [ Con "Fez" [Con "A" [], Lit (LBool False)]
-  , Con "Fez" [Con "B" [], Lit (LBool True)]
+  [ Con "Fez" [Con "A" mempty, Lit (LBool False)]
+  , Con "Fez" [Con "B" mempty, Lit (LBool True)]
   ]
 
 example20 :: [Pat]
 example20 =
-  [ Con "Fez" [Lit (LBool False), Con "A" []]
-  , Con "Fez" [Lit (LBool False), Con "B" []]
+  [ Con "Fez" [Lit (LBool False), Con "A" mempty]
+  , Con "Fez" [Lit (LBool False), Con "B" mempty]
   ]
 
 testEnv :: Environment (ProtoDataConstructorEntry Metadata)
@@ -119,7 +119,7 @@ testEnv =
           ( DataConstructor
               "Cons"
               2
-              (Forall mempty [] (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+              (Forall mempty mempty (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)))
           )
           (Set.fromList ["Cons", "Nil"])
       )
@@ -131,7 +131,7 @@ testEnv =
           ( DataConstructor
               "Nil"
               0
-              (Forall mempty [] (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])))
+              (Forall mempty mempty (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)))
           )
           (Set.fromList ["Cons", "Nil"])
       )
@@ -143,7 +143,7 @@ testEnv =
           ( DataConstructor
               "A"
               0
-              (Forall mempty [] (TConstructor KType "X"))
+              (Forall mempty mempty (TConstructor KType "X"))
           )
           (Set.fromList ["A", "B"])
       )
@@ -155,7 +155,7 @@ testEnv =
           ( DataConstructor
               "B"
               0
-              (Forall mempty [] (TConstructor KType "X"))
+              (Forall mempty mempty (TConstructor KType "X"))
           )
           (Set.fromList ["A", "B"])
       )
@@ -167,7 +167,7 @@ testEnv =
           ( DataConstructor
               "Fez"
               2
-              (Forall mempty [] (TIntrinsic IBool `TArrow` TConstructor KType "X" `TArrow` TConstructor KType "Fez"))
+              (Forall mempty mempty (TIntrinsic IBool `TArrow` TConstructor KType "X" `TArrow` TConstructor KType "Fez"))
           )
           (Set.fromList ["Fez"])
       )
@@ -199,14 +199,14 @@ runTest px = r3
 example6 :: [Pattern () () ()]
 example6 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
-  , PConstructor () (Label () "Nil") []
+  , PConstructor () (Label () "Nil") mempty
   , PConstructor () (Label () "Cons") [PAny () (), PAny () ()]
   ]
 
 example7 :: [Pattern () () ()]
 example7 =
   [ PConstructor () (Label () "Cons") [PVariable () (Label () "x"), PConstructor () (Label () "Cons") [PVariable () (Label () "y"), PVariable () (Label () "ys")]]
-  , PConstructor () (Label () "Nil") []
+  , PConstructor () (Label () "Nil") mempty
   ]
 
 example8 :: [Pattern () () ()]
@@ -221,7 +221,7 @@ example9 =
   , POr
       ()
       ()
-      (PConstructor () (Label () "Nil") [])
+      (PConstructor () (Label () "Nil") mempty)
       (PConstructor () (Label () "Cons") [PAny () (), PAny () ()])
   ]
 

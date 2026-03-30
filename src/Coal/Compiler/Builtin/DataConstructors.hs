@@ -18,7 +18,7 @@ builtinDataConstructors2 =
           DataConstructor
             "Zero"
             0
-            (Forall mempty [] (TIntrinsic INat))
+            (Forall mempty mempty (TIntrinsic INat))
       , protoOdataConstructorEntryConstructorSet =
           Set.fromList ["Succ", "Zero"]
       }
@@ -29,7 +29,7 @@ builtinDataConstructors2 =
           DataConstructor
             "Succ"
             1
-            (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+            (Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat))
       , protoOdataConstructorEntryConstructorSet =
           Set.fromList ["Succ", "Zero"]
       }
@@ -62,7 +62,7 @@ builtinDataConstructors2 =
             )
       , -- ( Forall
         --    (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-        --    []
+        --    mempty
         --    ( TRecord
         --        ( TRow
         --            ( RExtend
@@ -102,7 +102,7 @@ builtinDataConstructors =
         ( DataConstructor
             "Zero"
             0
-            (Forall mempty [] (TIntrinsic INat))
+            (Forall mempty mempty (TIntrinsic INat))
         )
         (Set.fromList ["Succ", "Zero"])
     )
@@ -114,7 +114,7 @@ builtinDataConstructors =
         ( DataConstructor
             "Succ"
             1
-            (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat))
+            (Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat))
         )
         (Set.fromList ["Succ", "Zero"])
     )
@@ -128,7 +128,7 @@ builtinDataConstructors =
             1
             ( Forall
                 (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-                []
+                mempty
                 ( TRecord
                     ( TRow
                         ( RExtend

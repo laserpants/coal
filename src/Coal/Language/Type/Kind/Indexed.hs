@@ -139,7 +139,7 @@ instance ToKindIndexed (ProtoAliasDefinition a k) (ProtoAliasDefinition a Kind) 
           <$> toKindIndexed protoOaliasDefinitionParameters
           <*> toKindIndexed protoOaliasDefinitionType
 
-instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind)) => ToKindIndexed (DataConstructor o k t) (DataConstructor o Kind u) where
+instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind), Ord u) => ToKindIndexed (DataConstructor o k t) (DataConstructor o Kind u) where
   toKindIndexed =
     \case
       DataConstructor{..} ->
@@ -287,7 +287,7 @@ instance ToKindIndexed (Pattern a k ()) (Pattern a Kind ()) where
       PTraitInstance a t trait ->
         PTraitInstance a <$> toKindIndexed t <*> toKindIndexed trait
 
-instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind)) => ToKindIndexed (Scheme o k t) (Scheme o Kind u) where
+instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind), Ord u) => ToKindIndexed (Scheme o k t) (Scheme o Kind u) where
   toKindIndexed =
     \case
       Forall{..} ->

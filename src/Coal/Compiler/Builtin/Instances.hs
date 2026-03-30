@@ -24,31 +24,31 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -63,31 +63,31 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ]
         )
@@ -102,31 +102,31 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ]
         )
@@ -141,31 +141,31 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ]
         )
@@ -180,31 +180,31 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic INat)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic INat)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ]
         )
@@ -219,31 +219,31 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ]
         )
@@ -258,7 +258,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -273,7 +273,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -288,7 +288,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -303,7 +303,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -318,7 +318,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -333,7 +333,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -348,7 +348,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -363,7 +363,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -378,7 +378,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -393,7 +393,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -408,7 +408,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -423,7 +423,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -438,7 +438,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -453,7 +453,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -468,7 +468,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -483,7 +483,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -498,7 +498,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -513,7 +513,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -528,7 +528,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -543,7 +543,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -558,7 +558,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(/)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -573,7 +573,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(/)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -588,7 +588,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -603,7 +603,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ]
         )
@@ -618,7 +618,7 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ]
         )
@@ -633,27 +633,27 @@ protoObuiltinInstances =
         ( Map.fromList
             [
               ( "(<>)"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+              , Forall mempty mempty (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
               )
             ]
         )
     )
   ,
     ( "Semigroup"
-    , applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+    , applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
     , ProtoInstanceEntry
         mempty
-        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (Parameter KType "a") :| []))
-        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| []))
+        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (Parameter KType "a") :| mempty))
+        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty))
         ( Map.fromList
             [
               ( "(<>)"
               , Forall
                   mempty
-                  []
-                  ( applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
-                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
-                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                  mempty
+                  ( applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
                   )
               )
             ]
@@ -673,31 +673,31 @@ builtinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -712,31 +712,31 @@ builtinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ]
         )
@@ -751,31 +751,31 @@ builtinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ]
         )
@@ -790,31 +790,31 @@ builtinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ]
         )
@@ -829,31 +829,31 @@ builtinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic INat)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic INat)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ]
         )
@@ -868,31 +868,31 @@ builtinInstances =
         ( Map.fromList
             [
               ( "from_int32"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "from_int64"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "from_bignum"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "negate"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "(+)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "(-)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "(*)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ]
         )
@@ -907,7 +907,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -922,7 +922,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -937,7 +937,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -952,7 +952,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -967,7 +967,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -982,7 +982,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -997,7 +997,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -1012,7 +1012,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -1027,7 +1027,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -1042,7 +1042,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty [] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
+              , Forall mempty mempty (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
@@ -1057,7 +1057,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1072,7 +1072,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1087,7 +1087,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1102,7 +1102,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1117,7 +1117,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1132,7 +1132,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1147,7 +1147,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IChar `TArrow` TIntrinsic IChar `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1162,7 +1162,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1177,7 +1177,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1192,7 +1192,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty [] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
+              , Forall mempty mempty (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -1207,7 +1207,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(/)"
-              , Forall mempty [] (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -1222,7 +1222,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(/)"
-              , Forall mempty [] (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -1237,7 +1237,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty [] (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ]
         )
@@ -1252,7 +1252,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty [] (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ]
         )
@@ -1267,7 +1267,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty [] (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ]
         )
@@ -1282,27 +1282,27 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(<>)"
-              , Forall mempty [] (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
+              , Forall mempty mempty (TIntrinsic IString `TArrow` TIntrinsic IString `TArrow` TIntrinsic IString)
               )
             ]
         )
     )
   ,
     ( "Semigroup"
-    , applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+    , applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
     , InstanceEntry
         mempty
-        (applyTypeArgs () (TConstructor () "List") (TVariable (Parameter () "a") :| []))
-        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| []))
+        (applyTypeArgs () (TConstructor () "List") (TVariable (Parameter () "a") :| mempty))
+        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty))
         ( Map.fromList
             [
               ( "(<>)"
               , Forall
                   mempty
-                  []
-                  ( applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
-                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
-                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| [])
+                  mempty
+                  ( applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
                   )
               )
             ]

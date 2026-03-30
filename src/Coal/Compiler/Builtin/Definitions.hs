@@ -129,9 +129,9 @@ builtinDefinitions =
       "Ordering"
       ( TypeDefinition
           []
-          [ DataConstructor "LessThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
-          , DataConstructor "GreaterThan" 0 (Forall mempty [] (TConstructor () "Ordering"))
-          , DataConstructor "EqualTo" 0 (Forall mempty [] (TConstructor () "Ordering"))
+          [ DataConstructor "LessThan" 0 (Forall mempty mempty (TConstructor () "Ordering"))
+          , DataConstructor "GreaterThan" 0 (Forall mempty mempty (TConstructor () "Ordering"))
+          , DataConstructor "EqualTo" 0 (Forall mempty mempty (TConstructor () "Ordering"))
           ]
       )
   , DType
@@ -139,8 +139,8 @@ builtinDefinitions =
       "Option"
       ( TypeDefinition
           [Parameter () "a"]
-          [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
-          , DataConstructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) [] (applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| [])))
+          [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) mempty (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| mempty)))
+          , DataConstructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) mempty (applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| mempty)))
           ]
       )
   , DType
@@ -148,8 +148,8 @@ builtinDefinitions =
       "Result"
       ( TypeDefinition
           [Parameter () "a", Parameter () "b"]
-          [ DataConstructor "Ok" 1 (Forall (Set.fromList [Parameter () "a"]) [] (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
-          , DataConstructor "Err" 1 (Forall (Set.fromList [Parameter () "b"]) [] (TVariable (Parameter () "b") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
+          [ DataConstructor "Ok" 1 (Forall (Set.fromList [Parameter () "a"]) mempty (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
+          , DataConstructor "Err" 1 (Forall (Set.fromList [Parameter () "b"]) mempty (TVariable (Parameter () "b") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
           ]
       )
   , DType
@@ -166,7 +166,7 @@ builtinDefinitions =
               1
               ( Forall
                   (Set.fromList [Parameter () "a", Parameter () "v"])
-                  []
+                  mempty
                   ( TRecord
                       ( TRow
                           ( RExtend

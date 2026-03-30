@@ -465,7 +465,7 @@ addTraitEntries loc env trait (TraitDefinition _ p entries) =
     \(name, Forall _ _ t) -> do
       tt <- lift $ toIndexedType loc env p t
       modify $
-        addName (NFunction name $ scheme [Trait trait tvar] tt)
+        addName (NFunction name $ scheme (Set.fromList [Trait trait tvar]) tt)
           . addExport name
  where
   tvar = TVariable (TypeIndex (parameterKind p) 0)
@@ -763,6 +763,6 @@ translateScheme loc env (Forall _ _ s) = do
       throwError PreflightFailure
     Right t -> do
       let vs = typeIndexesIn t
-      pure $ Forall vs [] t
+      pure $ Forall vs mempty t
  where
   r = evalState (instantiateVars [] env s) (0 :: Int)

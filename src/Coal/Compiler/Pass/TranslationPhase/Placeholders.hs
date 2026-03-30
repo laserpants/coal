@@ -57,6 +57,7 @@ import qualified Data.Set as Set
 import Data.Graph (SCC(..), stronglyConnComp)
 import qualified Data.Set as Set
 import Data.Foldable.Extra (notNull)
+import qualified Data.List.NonEmpty as NonEmpty
 
 passPlaceholders :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPlaceholders = Pass{runPass = pass}
@@ -307,7 +308,7 @@ insertTypeInfo name d = do
 
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a (ProtoCompilerT m a) ()
 insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
-  let s = Forall (typeIndexesIn t) ts t
+  let s = Forall (typeIndexesIn t) (Set.fromList ts) t
   insertNameC name s
   lift $ protoOinsertNameC name s
 insertName _ _ = error "Implementation error"
@@ -319,7 +320,7 @@ collectTraits u name = do
   case Environment.lookup (normalizedName name) env of
     Nothing ->
       pure mempty
-    Just (Forall _ [] _) ->
+    Just (Forall _ s _) | Set.null s ->
       pure mempty
     Just (Forall vs ts t) -> do
       sub1 <- foldrM instantiate mempty vs
@@ -328,7 +329,7 @@ collectTraits u name = do
         Left{} ->
           error (show (name, apply sub1 t, u)) -- "TODO"
         Right sub2 ->
-          pure (apply (sub2 <> sub1) (Set.fromList ts))
+          pure (apply (sub2 <> sub1) ts)
  where
   instantiate (TypeIndex k index) acc = do
     var <- supplied (TVariable . TypeIndex k)
@@ -389,15 +390,19 @@ isConcrete (Trait _ TIntrinsic{}) = True
 isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
-applyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType)
-applyTraits loc (Label t name) =
-  \case
-    [] ->
-      pure (EVariable mempty (Label t name))
-    tr : trs ->
-      EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insert_ (tr :| trs)
+applyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> Set (Trait IndexedType) -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType)
+applyTraits loc (Label t name) traits =
+  if Set.null traits
+      then pure (EVariable mempty (Label t name))
+      else EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insert_ (NonEmpty.fromList (Set.toList traits))
+    
+--  \case
+--    [] ->
+--      pure (EVariable mempty (Label t name))
+--    tr : trs ->
+--      EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insert_ (tr :| trs)
      where
-      t1 = foldTypeOf t (tr : trs)
+      t1 = foldTypeOf t (Set.toList traits) -- (tr : trs)
       insert_ trait = do
         fields <- lookupTraitInstance loc trait
         case fields of
@@ -450,7 +455,7 @@ instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedTy
             pure var
       EVariable loc (Label t name) -> do
         traits <- collectTraits t name
-        applyTraits loc (Label t name) (Set.toList traits)
+        applyTraits loc (Label t name) traits
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       e ->
@@ -462,11 +467,11 @@ transformBinding =
     BPattern a var@(PVariable _ (Label t name)) e
       | "$fold" `isPrefixOf` name -> do
           (body, traits) <- listenDictionaryTraits (expandTraits e)
-          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
+          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) traits t)])
     BPattern _ (PVariable a (Label t name)) e -> do
       (e1, traits) <- transformScope e
       let ll = Label (foldTypeOf t (Set.toList traits)) name
-      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
+      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
     BPattern a (PAnnotation _ _ p) e ->
       transformBinding (BPattern a p e)
     _ ->

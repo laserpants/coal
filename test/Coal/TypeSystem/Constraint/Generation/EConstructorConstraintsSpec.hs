@@ -77,9 +77,9 @@ collectEConstructorConstraintsSpec4 = null ms && null (lefts outs)
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint1 =
   Explicit
-    (RuleDataConstructor () "Blue" (TVariable (TypeIndex KType 0)) (Forall mempty [] (TConstructor KType "Color")))
+    (RuleDataConstructor () "Blue" (TVariable (TypeIndex KType 0)) (Forall mempty mempty (TConstructor KType "Color")))
     (TVariable (TypeIndex KType 0))
-    (Forall mempty [] (TConstructor KType "Color"))
+    (Forall mempty mempty (TConstructor KType "Color"))
 
 collectEConstructorConstraintsSpec5 :: Bool
 collectEConstructorConstraintsSpec5 = null ms && constraint1 `elem` rights outs

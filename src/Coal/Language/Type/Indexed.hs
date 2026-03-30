@@ -133,5 +133,5 @@ indexed = traverse (fmap tVar . const supply)
   tVar = TVariable . TypeIndex KType
 
 {-# INLINE scheme #-}
-scheme :: (Ord k, TypeIndexed k t) => [Trait t] -> t -> Scheme TypeIndex k t
+scheme :: (Ord k, TypeIndexed k t) => Set (Trait t) -> t -> Scheme TypeIndex k t
 scheme ts t = Forall (typeIndexesIn t <> typeIndexesIn ts) ts t

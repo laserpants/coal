@@ -75,7 +75,7 @@ instance (ProtoKindSubstitutable n, ProtoKindSubstitutable k) => ProtoKindSubsti
   protoOapplyKinds sub (a, b) = (protoOapplyKinds sub a, protoOapplyKinds sub b)
   protoOreplaceVariables = fmap protoOreplaceVariables
 
-instance (Ord (o k), ProtoKindSubstitutable (o k), ProtoKindSubstitutable t) => ProtoKindSubstitutable (Scheme o k t) where
+instance (Ord (o k), Ord t, ProtoKindSubstitutable (o k), ProtoKindSubstitutable t) => ProtoKindSubstitutable (Scheme o k t) where
   protoOapplyKinds sub =
     \case
       Forall{..} ->
@@ -211,7 +211,7 @@ instance (ProtoKindSubstitutable n, ProtoKindSubstitutable (o n), ProtoKindSubst
       RNil ->
         RNil
 
-instance (ProtoKindSubstitutable k, ProtoKindSubstitutable t, Ord k) => ProtoKindSubstitutable (DataConstructor Parameter k t) where
+instance (ProtoKindSubstitutable k, ProtoKindSubstitutable t, Ord k, Ord t) => ProtoKindSubstitutable (DataConstructor Parameter k t) where
   protoOapplyKinds sub DataConstructor{..} =
     DataConstructor{constructorScheme = protoOapplyKinds sub constructorScheme, ..}
   protoOreplaceVariables DataConstructor{..} =

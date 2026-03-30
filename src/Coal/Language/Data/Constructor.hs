@@ -22,9 +22,7 @@ data DataConstructor o k t = DataConstructor
     , Eq
     , Ord
     , Read
-    , Functor
     , Foldable
-    , Traversable
     , Data
     , Typeable
     , Generic

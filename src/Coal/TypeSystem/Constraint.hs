@@ -30,7 +30,7 @@ data Constraint g o a t
   | Implicit g t t (Monomorphic (o a))
   | Explicit g t (Scheme o a t)
   | Lacks g t Name
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
+  deriving (Show, Eq, Ord, Read, Foldable, Data, Typeable)
 
 instance TypeIndexed k (Monomorphic (TypeIndex k)) where
   typeIndexesIn = monomorphicSet

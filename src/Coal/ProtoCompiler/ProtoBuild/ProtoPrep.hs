@@ -135,9 +135,9 @@ protoOprepareDefinitions defs = do
       { protoOtypeConstructorEntryMetadata = mempty
       , protoOtypeConstructorEntryName = "List"
       , protoOtypeConstructorEntryKind = KArrow KType KType
-      , protoOtypeConstructorEntryDataConstructors = ["::", "[]"]
+      , protoOtypeConstructorEntryDataConstructors = ["::", "mempty"]
       }
-  insertNameEntry (ProtoNName "Zero" (Forall mempty [] (TIntrinsic INat)))
+  insertNameEntry (ProtoNName "Zero" (Forall mempty mempty (TIntrinsic INat)))
   insertDataConstructor "Zero" $
     ProtoDataConstructorEntry
       { protoOdataConstructorEntryMetaData = mempty
@@ -146,11 +146,11 @@ protoOprepareDefinitions defs = do
           DataConstructor
             { constructorName = "Zero"
             , constructorArity = 0
-            , constructorScheme = Forall mempty [] (TIntrinsic INat)
+            , constructorScheme = Forall mempty mempty (TIntrinsic INat)
             }
       , protoOdataConstructorEntryConstructorSet = Set.fromList ["Zero", "Succ"]
       }
-  insertNameEntry (ProtoNName "Succ" (Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)))
+  insertNameEntry (ProtoNName "Succ" (Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)))
   insertDataConstructor "Succ" $
     ProtoDataConstructorEntry
       { protoOdataConstructorEntryMetaData = mempty
@@ -159,7 +159,7 @@ protoOprepareDefinitions defs = do
           DataConstructor
             { constructorName = "Succ"
             , constructorArity = 1
-            , constructorScheme = Forall mempty [] (TIntrinsic INat `TArrow` TIntrinsic INat)
+            , constructorScheme = Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)
             }
       , protoOdataConstructorEntryConstructorSet = Set.fromList ["Zero", "Succ"]
       }
@@ -223,7 +223,7 @@ qualifiedImports ProtoBuild{..} =
                     ns2 <- qualifiedInstanceNames (traitInstances name importInstances)
                     pure (ns1 <> ns2)
                   _ ->
-                    pure []
+                    pure mempty
      where
       -- qualifiedInstanceNames :: (Monad m) => Path -> Environment [ProtoNameEntry] -> [(Name, InstanceMap (ProtoInstanceEntry a))] -> m [(Name, Name)]
       qualifiedInstanceNames instances =
@@ -234,26 +234,26 @@ qualifiedImports ProtoBuild{..} =
                 concatForM (Map.keys protoOinstanceEntryTypeSchemes) $
                   \member -> do
                     let instanceName = instanceLabel (Trait traitName protoOinstanceEntryType) member
-                    concatForM (Environment.lookupWithDefault [] instanceName protoObuildNames) $
+                    concatForM (Environment.lookupWithDefault mempty instanceName protoObuildNames) $
                       \case
                         ProtoNName n _ -> do
                           pure [(n, principalPath path <.> n)]
                         _ ->
-                          pure []
+                          pure mempty
     ProtoDQualifiedImport _ path -> do
       ProtoBuild{protoObuildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
       concatForM (Set.toList exportedNames) $
         \name ->
-          --          concatForM (fromMaybe [] $ Environment.lookup name importedNames) $
+          --          concatForM (fromMaybe mempty $ Environment.lookup name importedNames) $
           --            \case
           --              ProtoNName{} -> do
           --                when (Path ["List"] == path) $
           --                  traceShowM (qualified name path)
           pure [(qualified name path, qualified name path)]
     --              _ ->
-    --                pure []
+    --                pure mempty
     _ ->
-      pure []
+      pure mempty
 
 expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
 expandExports = do
@@ -266,7 +266,7 @@ expandExports = do
       newExports <-
         forM exports $
           \case
-            TypeExport loc name [] ->
+            TypeExport loc name mempty ->
               case Environment.lookup name protoObuildDataConstructors of
                 Nothing ->
                   error "TODO"
@@ -327,7 +327,7 @@ collectTypeConstructors =
 
 insertTypeName :: (Monad m) => ProtoBuild a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) Bool
 insertTypeName ProtoBuild{..} loc name =
-  or <$> forM (Environment.lookupWithDefault [] name protoObuildNames) go
+  or <$> forM (Environment.lookupWithDefault mempty name protoObuildNames) go
  where
   go =
     \case
@@ -504,7 +504,7 @@ collectTraits =
                         \member -> do
                           -- traceShowM member
                           let instanceName = instanceLabel (Trait traitName protoOinstanceEntryType) member
-                          forM_ (Environment.lookupWithDefault [] instanceName protoObuildNames) $
+                          forM_ (Environment.lookupWithDefault mempty instanceName protoObuildNames) $
                             \case
                               info@(ProtoNName n s) -> do
                                 insertNameEntry info
@@ -545,7 +545,7 @@ collectTraitsInterface =
             instantiateScheme
               ( Forall
                   schemeTypeVariables
-                  [Trait name (TVariable protoOtraitDefinitionParameter)]
+                  (Set.fromList [Trait name (TVariable protoOtraitDefinitionParameter)])
                   schemeTypeBody
               )
           let normalizedScheme = normalizeScheme s
@@ -581,7 +581,7 @@ collectTraitsInterface =
                     forM_ names $
                       \case
                         member | member `elem` protoObuildExportedNames -> do
-                          forM_ (Environment.lookupWithDefault [] member protoObuildNames) $
+                          forM_ (Environment.lookupWithDefault mempty member protoObuildNames) $
                             \case
                               info@(ProtoNName _ s) -> do
                                 modify (insertBuildNameEntry info)
@@ -715,7 +715,7 @@ collectImports =
         \case
           NameImport _ name
             | name `elem` protoObuildExportedNames -> do
-                forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
+                forM_ (Environment.lookupWithDefault mempty name protoObuildNames) $
                   \case
                     info@(ProtoNName _ s) -> do
                       modify (insertBuildNameEntry info)
@@ -727,7 +727,7 @@ collectImports =
                 error (show (name, protoObuildExportedNames))
           TypeImport _ name _
             | name `elem` protoObuildExportedNames ->
-                forM_ (Environment.lookupWithDefault [] name protoObuildNames) $
+                forM_ (Environment.lookupWithDefault mempty name protoObuildNames) $
                   \case
                     info@ProtoNType{} ->
                       modify (insertBuildNameEntry info)
@@ -744,7 +744,7 @@ collectImports =
       let qualifiedName name = principalPath protoObuildPath <.> name
       forM_ protoObuildExportedNames $
         \exportedName ->
-          forM_ (Environment.lookupWithDefault [] exportedName protoObuildNames) $
+          forM_ (Environment.lookupWithDefault mempty exportedName protoObuildNames) $
             \case
               ProtoNName name s -> do
                 modify (insertBuildNameEntry (ProtoNName (qualifiedName name) s))

@@ -52,7 +52,7 @@ testTraitDefinition1 =
           ( "bind"
           , Forall
               (Set.fromList [Parameter () "m", Parameter () "a", Parameter () "b"])
-              []
+                mempty
               ( TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "a")) -- m<a>
                   ~> (TVariable (Parameter () "a") ~> TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "b"))) -- a -> m<b>
                   ~> TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "b")) -- m<b>
@@ -68,7 +68,7 @@ testTraitDefinition1 =
             ( "bind"
             , Forall
                 (Set.fromList [Parameter (KArrow KType KType) "m", Parameter KType "a", Parameter KType "b"])
-                []
+                mempty
                 ( TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "a")) -- m<a>
                     ~> (TVariable (Parameter KType "a") ~> TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "b"))) -- a -> m<b>
                     ~> TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "b")) -- m<b>

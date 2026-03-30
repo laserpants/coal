@@ -42,6 +42,7 @@ import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Debug.Trace
 import Extras (Dictionary, Name)
+import qualified Data.Set as Set
 
 generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 generateKindConstraints modul = do
@@ -84,7 +85,7 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
           protoOgenerateConstraints $
             ELet
               loc
-              (BFunction loc placeholder protoOfunctionDefinitionPatterns functionExpr :| [])
+              (BFunction loc placeholder protoOfunctionDefinitionPatterns functionExpr :| mempty)
               (EVariable loc (Label expressionType placeholder))
          where
           placeholder = "#_function__" <> name
@@ -112,7 +113,7 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
           protoOgenerateConstraints $
             ELet
               loc
-              (BPattern loc (PVariable loc (Label letType placeholder)) letExpr :| [])
+              (BPattern loc (PVariable loc (Label letType placeholder)) letExpr :| mempty)
               (EVariable loc (Label letType placeholder))
          where
           placeholder = "#_constant__" <> name
@@ -193,7 +194,7 @@ protoOrunConstraintsGen stack = do
   pure (result, constraintsGenStateTypeIndexes, output)
 
 protoOdefine :: (Monad m) => Name -> IndexedType -> ProtoCompilerT m a ()
-protoOdefine name t = protoOinsertNameC name (Forall (typeIndexesIn s) [] s)
+protoOdefine name t = protoOinsertNameC name (Forall (typeIndexesIn s) mempty s)
  where
   s = normalizeTypeIndexes t
 
@@ -217,7 +218,7 @@ instance GenerateConstraints a (FunctionDefinition a IndexedType) where
     generateConstraints $
       ELet
         loc
-        (BFunction loc placeholder ps expr :| [])
+        (BFunction loc placeholder ps expr :| mempty)
         (EVariable loc (Label t1 placeholder))
    where
     placeholder = "###.function"
@@ -234,7 +235,7 @@ instance GenerateConstraints a (ConstantDefinition a IndexedType) where
     generateConstraints $
       ELet
         loc
-        (BPattern loc (PVariable loc (Label t placeholder)) expr :| [])
+        (BPattern loc (PVariable loc (Label t placeholder)) expr :| mempty)
         (EVariable loc (Label t placeholder))
    where
     placeholder = "###.constant"
@@ -407,7 +408,7 @@ typeDefinitionC =
                   tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
                   throwError PreflightFailure
                 Right sch ->
-                  insertNameC n (Forall (typeIndexesIn sch) [Trait name (TVariable (TypeIndex k 0))] sch)
+                  insertNameC n (Forall (typeIndexesIn sch) (Set.fromList [Trait name (TVariable (TypeIndex k 0))]) sch)
     DInstance loc trait (InstanceDefinition _ t0 ds) -> do
       env <- undefined -- asks compilerTraitEnvironment
       kinds <- asks compilerTypeConstructorEnvironment
@@ -455,7 +456,7 @@ typeDefinitionC =
       define (definitionName d) (typeOf (apply sub d))
 
 toIndexedScheme :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> CompilerT a m IndexedScheme
-toIndexedScheme loc env p (Forall _ _ t) = scheme [] <$> toIndexedType loc env p t
+toIndexedScheme loc env p (Forall _ _ t) = scheme mempty <$> toIndexedType loc env p t
 
 toIndexedType :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Type Parameter k -> CompilerT a m IndexedType
 toIndexedType loc env (Parameter k n) t =
@@ -475,7 +476,7 @@ checkMain loc t ps name = do
       [ Explicit
           (RuleEntrypoint loc t1)
           t1
-          (Forall mempty [] (TIntrinsic IUnit `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit)))
+          (Forall mempty mempty (TIntrinsic IUnit `TArrow` TApplication KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit)))
       ]
  where
   t1 = foldTypeOf t ps
@@ -494,7 +495,7 @@ instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n
 instantiateVarsC :: (Monad m) => a -> Type Parameter () -> CompilerT a m IndexedType
 instantiateVarsC loc t = do
   env <- asks compilerTypeConstructorEnvironment
-  r <- instantiateVars [] env t
+  r <- instantiateVars mempty env t
   case r of
     Left err -> do
       path <- gets compilerCurrentModule
@@ -504,6 +505,6 @@ instantiateVarsC loc t = do
       pure t1
 
 define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
-define name t = insertNameC name (Forall (typeIndexesIn s) [] s)
+define name t = insertNameC name (Forall (typeIndexesIn s) mempty s)
  where
   s = normalizeTypeIndexes t

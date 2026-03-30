@@ -37,7 +37,7 @@ import Prettyprinter (Pretty (..), hsep)
 
 data Scheme o k t = Forall
   { schemeTypeVariables :: Set (o k)
-  , schemeTraits :: [Trait t]
+  , schemeTraits :: Set (Trait t)
   , schemeTypeBody :: t
   }
   deriving
@@ -45,9 +45,7 @@ data Scheme o k t = Forall
     , Eq
     , Ord
     , Read
-    , Functor
     , Foldable
-    , Traversable
     , Data
     , Typeable
     , Generic
@@ -61,10 +59,9 @@ instance (Pretty k, Pretty (o k), Pretty t) => Pretty (Scheme o k t) where
       Forall _ ts t ->
         pretty t <> traits
        where
-        traits =
-          case ts of
-            [] -> ""
-            _ -> " with " <> hsep (intersperse "," (pretty <$> ts))
+        traits 
+          | Set.null ts = ""
+          | otherwise = " with " <> hsep (intersperse "," (pretty <$> Set.toList ts))
 
 {-# INLINE index #-}
 index :: Int -> TypeIndex Kind
@@ -74,58 +71,58 @@ type IndexedScheme = Scheme TypeIndex Kind IndexedType
 
 {-# INLINE forall0 #-}
 forall0 :: IndexedType -> IndexedScheme
-forall0 = Forall mempty []
+forall0 = Forall mempty mempty
 
 forall1 :: (IndexedType -> IndexedType) -> IndexedScheme
-forall1 f = Forall (Set.singleton a0) [] (f (TVariable a0))
+forall1 f = Forall (Set.singleton a0) mempty (f (TVariable a0))
  where
   a0 = index 0
 
-forall1' :: (IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
+forall1' :: (IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
 forall1' f = Forall (Set.singleton a0) traits t
  where
   (traits, t) = f (TVariable a0)
   a0 = index 0
 
 forall2 :: (IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
-forall2 f = Forall (Set.fromList [a0, a1]) [] (f (TVariable a0) (TVariable a1))
+forall2 f = Forall (Set.fromList [a0, a1]) mempty (f (TVariable a0) (TVariable a1))
  where
   (a0, a1) = (index 0, index 1)
 
-forall2' :: (IndexedType -> IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
+forall2' :: (IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
 forall2' f = Forall (Set.singleton a0) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1)
   (a0, a1) = (index 0, index 1)
 
 forall3 :: (IndexedType -> IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
-forall3 f = Forall (Set.fromList [a0, a1, a2]) [] (f (TVariable a0) (TVariable a1) (TVariable a2))
+forall3 f = Forall (Set.fromList [a0, a1, a2]) mempty (f (TVariable a0) (TVariable a1) (TVariable a2))
  where
   (a0, a1, a2) = (index 0, index 1, index 2)
 
-forall3' :: (IndexedType -> IndexedType -> IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
+forall3' :: (IndexedType -> IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
 forall3' f = Forall (Set.fromList [a0, a1, a2]) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2)
   (a0, a1, a2) = (index 0, index 1, index 2)
 
 forall4 :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
-forall4 f = Forall (Set.fromList [a0, a1, a2, a3]) [] (f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3))
+forall4 f = Forall (Set.fromList [a0, a1, a2, a3]) mempty (f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3))
  where
   (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)
 
-forall4' :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
+forall4' :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
 forall4' f = Forall (Set.fromList [a0, a1, a2, a3]) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3)
   (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)
 
 forallN :: Int -> ([IndexedType] -> IndexedType) -> IndexedScheme
-forallN n f = Forall (Set.fromList ixs) [] (f (TVariable <$> ixs))
+forallN n f = Forall (Set.fromList ixs) mempty (f (TVariable <$> ixs))
  where
   ixs = [index i | i <- [0 .. n - 1]]
 
-forallN' :: Int -> ([IndexedType] -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
+forallN' :: Int -> ([IndexedType] -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
 forallN' n f = Forall (Set.fromList ixs) traits t
  where
   (traits, t) = f (TVariable <$> ixs)

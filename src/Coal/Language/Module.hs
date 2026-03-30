@@ -140,7 +140,7 @@ fromProtoScheme :: Scheme Parameter Kind (Type Parameter Kind) -> Scheme Paramet
 fromProtoScheme Forall{..} =
   Forall
     { schemeTypeVariables = Set.map fromProtoParameter schemeTypeVariables
-    , schemeTraits = fmap fromProtoSchemeTrait schemeTraits
+    , schemeTraits = Set.map fromProtoSchemeTrait schemeTraits
     , schemeTypeBody = fromTypeKind schemeTypeBody
     }
 

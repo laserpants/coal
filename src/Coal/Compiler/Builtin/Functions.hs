@@ -4,6 +4,7 @@ module Coal.Compiler.Builtin.Functions (builtinFunctions) where
 
 import Coal.Language
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Set as Set
 import Extras (Name)
 
 builtinFunctions :: [(Name, IndexedScheme)]
@@ -182,47 +183,47 @@ builtinFunctions =
     )
   ,
     ( "from_int32"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
+    , forall1' (\t0 -> (Set.fromList [Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
     )
   ,
     ( "from_int64"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt64 ~> t0))
+    , forall1' (\t0 -> (Set.fromList [Trait "Numeric" t0], TIntrinsic IInt64 ~> t0))
     )
   ,
     ( "from_bignum"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IBignum ~> t0))
+    , forall1' (\t0 -> (Set.fromList [Trait "Numeric" t0], TIntrinsic IBignum ~> t0))
     )
   ,
     ( "negate"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], t0 ~> t0))
+    , forall1' (\t0 -> (Set.fromList [Trait "Numeric" t0], t0 ~> t0))
     )
   ,
     ( "compare"
-    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TConstructor KType "Ordering"))
+    , forall1' (\t0 -> (Set.fromList [Trait "Ordered" t0], t0 ~> t0 ~> TConstructor KType "Ordering"))
     )
   ,
     ( "(<)"
-    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
+    , forall1' (\t0 -> (Set.fromList [Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(>)"
-    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
+    , forall1' (\t0 -> (Set.fromList [Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(<=)"
-    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
+    , forall1' (\t0 -> (Set.fromList [Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(>=)"
-    , forall1' (\t0 -> ([Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
+    , forall1' (\t0 -> (Set.fromList [Trait "Ordered" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "(^)"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], t0 ~> TIntrinsic INat ~> t0))
+    , forall1' (\t0 -> (Set.fromList [Trait "Numeric" t0], t0 ~> TIntrinsic INat ~> t0))
     )
   ,
     ( "(!=)"
-    , forall1' (\t0 -> ([Trait "Comparable" t0], t0 ~> t0 ~> TIntrinsic IBool))
+    , forall1' (\t0 -> (Set.fromList [Trait "Comparable" t0], t0 ~> t0 ~> TIntrinsic IBool))
     )
   ,
     ( "process$_process"

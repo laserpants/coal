@@ -128,7 +128,7 @@ instance
     (Scheme Parameter Kind (Type Parameter Kind))
   where
   lowerKinds (Forall vs ts t) =
-    Forall (lowerKinds vs) (fmap lowerKinds ts) (lowerKinds t)
+    Forall (lowerKinds vs) (Set.map lowerKinds ts) (lowerKinds t)
 
 instance LowerKinds (DataConstructor Parameter KindNode (Type Parameter KindNode)) (DataConstructor Parameter Kind (Type Parameter Kind)) where
   lowerKinds =
@@ -357,9 +357,9 @@ instance IndexKinds (Scheme Parameter () (Type Parameter ())) where
     \case
       Forall vs ts t -> do
         vs' <- indexKinds vs
-        ts' <- traverse indexKinds ts
+        ts' <- traverse indexKinds (Set.toList ts)
         t' <- indexKinds t
-        pure $ Forall vs' ts' t'
+        pure $ Forall vs' (Set.fromList ts') t'
 
 newtype KindSubstitution = KindSubstitution {kindSubstitutionMap :: Map Int KindNode}
   deriving (Show, Eq, Ord)
@@ -384,7 +384,7 @@ instance (Ord k, KindSubstitutable k) => KindSubstitutable (Set k) where
 instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (n, k) where
   applyKinds sub (a, b) = (applyKinds sub a, applyKinds sub b)
 
-instance (Ord k, KindSubstitutable k, KindSubstitutable t) => KindSubstitutable (Scheme Parameter k t) where
+instance (Ord k, Ord t, KindSubstitutable k, KindSubstitutable t) => KindSubstitutable (Scheme Parameter k t) where
   applyKinds sub =
     \case
       Forall vs ts t ->
@@ -448,7 +448,7 @@ instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (Row Pa
       RNil ->
         RNil
 
-instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (DataConstructor Parameter k t) where
+instance (KindSubstitutable k, KindSubstitutable t, Ord k, Ord t) => KindSubstitutable (DataConstructor Parameter k t) where
   applyKinds sub DataConstructor{..} =
     DataConstructor{constructorScheme = applyKinds sub constructorScheme, ..}
 

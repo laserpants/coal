@@ -59,4 +59,4 @@ operatorTypeScheme =
     OListConcatenation ->
       forall1 (\a -> listType a ~> listType a ~> listType a)
     OStringConcatenation ->
-      Forall mempty [] (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
+      Forall mempty mempty (TIntrinsic IString ~> TIntrinsic IString ~> TIntrinsic IString)
