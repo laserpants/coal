@@ -67,188 +67,127 @@ pass =
     \m -> do
       lift $ setCurrentPathC (modulePath m)
 
-      -- TODO: This needs some cleanup. We are effectively running the same
-      -- steps twice...
-
-      --      _ <- overModuleDefinitionsM (traverse insertPlaceholders) m
-      -- names <- gets compilerNameStore
-      --      names <- lift $ gets protoOcompilerNameStore
-      --      updateNames names
-      --      updateNames2 names
-
       b <- lift protoOgetCurrentBuildC
       lift $ protoOsetNamesC (typeEnvironment b)
 
-      ----
-
---      baz <- concatForM (moduleDefinitions m) freeNames
---      let foo = Map.fromList (collapseCycles baz)
---
---      evalStateT (considerNext (moduleDefinitions m)) foo
-
-      ----      let foo2 = foo :: Map (Set Name) (Set Name)
-      --
-      --      traceShowM ">>>>"
-      --      traceShowM (modulePath m)
-      --      traceShowM foo
-
-      --      --  lift $ protoOsetNamesC env1
-      --
-      ----
-
       traverse_ cafe (moduleDefinitions m)
       traverse_ cafe (moduleDefinitions m)
 
-      names2 <- lift $ gets protoOcompilerNameStore
-      -- updateNames names2
-      updateNames2 names2
+      names <- lift $ gets protoOcompilerNameStore
+      updateNames names
 
       ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
       liftIO $ Text.writeFile ("tmp/placeholder_1names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
       liftIO $ Text.writeFile ("tmp/placeholder_1build_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ ProtoBuild{..})
       liftIO $ Text.writeFile ("tmp/placeholder_1defs_" <> Text.unpack (principalPath (modulePath m))) (generateDot m)
 
-
-
       mm <- overModuleDefinitionsM (traverse insertPlaceholders) m
-
-      -- names2 <- gets compilerNameStore
-      names2 <- lift $ gets protoOcompilerNameStore
-      -- updateNames names2
-      updateNames2 names2
-
-      -- mm2 <- overModuleDefinitionsM (traverse insertPlaceholders) mm
-
-      ----names2 <- gets compilerNameStore
-      -- names3 <- lift $ gets protoOcompilerNameStore
-      -- updateNames names2
-      -- updateNames2 names3
 
       ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
       liftIO $ Text.writeFile ("tmp/placeholder_names_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ protoObuildNames)
-
       liftIO $ Text.writeFile ("tmp/placeholder_build_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ ProtoBuild{..})
-
       liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
 
       return mm
 
+--freeInConstant :: (Show a, Data a) => ConstantDefinition a IndexedType -> Set (Label IndexedType)
+--freeInConstant ConstantDefinition{..} = freeIn constantDefinitionExpression
 --
--- leaf => []
--- node => []
--- tree_list_size => [size, tree_list_size]
--- size => [tree_list_size]
--- main => [size, example_tree]
+--freeInFunction :: (Show a, Data a) => FunctionDefinition a IndexedType -> Set (Label IndexedType)
+--freeInFunction FunctionDefinition{..} = freeSet (boundIn functionDefinitionPatterns) functionDefinitionExpression
 --
+--freeNames :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) [(Name, Set Name)]
+--freeNames =
+--  \case
+--    DConstant _ name def _ ->
+--      return [(name, Set.map labelName (freeInConstant def))]
+--    DFunction _ name (def :| _) _ ->
+--      return [(name, Set.map labelName (freeInFunction def))]
+--    DInstance _ trait InstanceDefinition{..} ->
+--      concatForM instanceDefinitionEntries $
+--        \case
+--          DConstant _ name def _ ->
+--            return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInConstant def))]
+--          DFunction _ name (def :| _) _ ->
+--            return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInFunction def))]
+--    _ ->
+--      return []
 --
+--collapseCycles :: [(Name, Set.Set Name)] -> [(Set.Set Name, Set.Set Name)]
+--collapseCycles defs = map collapseSCC (stronglyConnComp edges)
+-- where
+--  edges = [(name, name, Set.toList deps) | (name, deps) <- defs]
 --
--- leaf => []
--- node => []
--- [tree_list_size, size] => [size, tree_list_size]
--- main => [size, example_tree]
+--  collapseSCC :: SCC Name -> (Set.Set Name, Set.Set Name)
+--  collapseSCC scc = (names, deps `Set.difference` names)
+--   where
+--    names =
+--      case scc of
+--        AcyclicSCC n -> Set.singleton n
+--        CyclicSCC ns -> Set.fromList ns
 --
+--    deps = Set.unions [lookupDeps n | n <- Set.toList names]
 --
+--  lookupDeps n = Map.findWithDefault Set.empty n (Map.fromList defs)
 --
+--considerNext :: (Monad m, Monoid a, Data a, Show a) => [Definition a Kind IndexedType] -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
+--considerNext defs = do
+--  m <- get
+--  case Map.keys m of
+--    [] -> pure ()
+--    k : _ -> considerKey k
+-- where
+----  considerKey :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
+--  considerKey key = do
+--    m <- get
+--    case Map.lookup key m of
+--      Nothing ->
+--        error "Implementation error"
+--      Just names -> do
+--        res <- firstNonVisited names
+--        case res of
+--          Nothing -> do
 --
+--            lift $ traverse (zzz key) defs
+--
+--            --            traceShowM (key, names)
+--
+--            --            forM_ names $
+--            --              \name -> do
+--            --                env <- lift $ lift $ gets protoOcompilerNameStore
+--            --                case Environment.lookup name env of
+--            --                  Nothing ->
+--            --                    pure () -- error (show (name, "??"))
+--            --                  Just xx ->
+--            --                    traceShowM (name, xx)
+--
+--            modify (Map.delete key)
+--            considerNext defs
+--          Just k ->
+--            considerKey k
+--
+--  firstNonVisited :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) (Maybe (Set Name))
+--  firstNonVisited names = do
+--    m <- get
+--    pure $
+--      case filter (notNull . Set.intersection names) (Map.keys m) of
+--        [] -> Nothing
+--        k : _ -> Just k
+--
+---- containsAny :: Map (Set Name) (Set Name) -> Set Name -> Maybe (Set Name)
+---- containsAny m names =
+--
+---- leaf => []
+---- node => []
+---- [tree_list_size, size] => [size, tree_list_size]
+---- main => [size, example_tree]
+--
+----  where
+----    inKeySets :: Name -> Bool
+----    inKeySets name = undefined
 
-freeInConstant :: (Show a, Data a) => ConstantDefinition a IndexedType -> Set (Label IndexedType)
-freeInConstant ConstantDefinition{..} = freeIn constantDefinitionExpression
-
-freeInFunction :: (Show a, Data a) => FunctionDefinition a IndexedType -> Set (Label IndexedType)
-freeInFunction FunctionDefinition{..} = freeSet (boundIn functionDefinitionPatterns) functionDefinitionExpression
-
-freeNames :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) [(Name, Set Name)]
-freeNames =
-  \case
-    DConstant _ name def _ ->
-      return [(name, Set.map labelName (freeInConstant def))]
-    DFunction _ name (def :| _) _ ->
-      return [(name, Set.map labelName (freeInFunction def))]
-    DInstance _ trait InstanceDefinition{..} ->
-      concatForM instanceDefinitionEntries $
-        \case
-          DConstant _ name def _ ->
-            return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInConstant def))]
-          DFunction _ name (def :| _) _ ->
-            return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInFunction def))]
-    _ ->
-      return []
-
-collapseCycles :: [(Name, Set.Set Name)] -> [(Set.Set Name, Set.Set Name)]
-collapseCycles defs = map collapseSCC (stronglyConnComp edges)
- where
-  edges = [(name, name, Set.toList deps) | (name, deps) <- defs]
-
-  collapseSCC :: SCC Name -> (Set.Set Name, Set.Set Name)
-  collapseSCC scc = (names, deps `Set.difference` names)
-   where
-    names =
-      case scc of
-        AcyclicSCC n -> Set.singleton n
-        CyclicSCC ns -> Set.fromList ns
-
-    deps = Set.unions [lookupDeps n | n <- Set.toList names]
-
-  lookupDeps n = Map.findWithDefault Set.empty n (Map.fromList defs)
-
-considerNext :: (Monad m, Monoid a, Data a, Show a) => [Definition a Kind IndexedType] -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
-considerNext defs = do
-  m <- get
-  case Map.keys m of
-    [] -> pure ()
-    k : _ -> considerKey k
- where
---  considerKey :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
-  considerKey key = do
-    m <- get
-    case Map.lookup key m of
-      Nothing ->
-        error "Implementation error"
-      Just names -> do
-        res <- firstNonVisited names
-        case res of
-          Nothing -> do
-
-            lift $ traverse (zzz key) defs
-
-            --            traceShowM (key, names)
-
-            --            forM_ names $
-            --              \name -> do
-            --                env <- lift $ lift $ gets protoOcompilerNameStore
-            --                case Environment.lookup name env of
-            --                  Nothing ->
-            --                    pure () -- error (show (name, "??"))
-            --                  Just xx ->
-            --                    traceShowM (name, xx)
-
-            modify (Map.delete key)
-            considerNext defs
-          Just k ->
-            considerKey k
-
-  firstNonVisited :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) (Maybe (Set Name))
-  firstNonVisited names = do
-    m <- get
-    pure $
-      case filter (notNull . Set.intersection names) (Map.keys m) of
-        [] -> Nothing
-        k : _ -> Just k
-
--- containsAny :: Map (Set Name) (Set Name) -> Set Name -> Maybe (Set Name)
--- containsAny m names =
-
--- leaf => []
--- node => []
--- [tree_list_size, size] => [size, tree_list_size]
--- main => [size, example_tree]
-
---  where
---    inKeySets :: Name -> Bool
---    inKeySets name = undefined
-
-updateNames2 :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m a) ()
-updateNames2 store =
+updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m a) ()
+updateNames store =
   lift $
     protoOupdateCurrentBuildC $
       \build@ProtoBuild{..} ->
@@ -264,63 +203,24 @@ updateNames2 store =
               _ ->
                 pure ()
 
--- updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
--- updateNames store =
---  updateCurrentBuildC $
---    \build@ModuleBuild{..} ->
---      flip execStateT build $
---        forM_ moduleNames $
---          \case
---            NFunction name _ ->
---              go name NFunction
---            NConstant name _ ->
---              go name NConstant
---            NFold name _ ->
---              go name NFold
---            NDataConstructor name _ ->
---              go name NDataConstructor
---            _ ->
---              pure ()
--- where
---  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
---  go name info =
---    case Environment.lookup (normalizedName name) store of
---      Nothing ->
---        pure ()
---      Just s ->
---        modify $ replaceName (info name s)
-
 insertPlaceholders :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a Kind IndexedType)
 insertPlaceholders =
   \case
     d@(DConstant _ name _ _) -> do
-      r <- expandInLocalEnv d
-      insertTypeInfo name r
+      expandTraits d
     DInstance loc name (InstanceDefinition ts t ds) -> do
-      es <- forM ds (insertPlaceholdersInDef (Trait name t))
+      es <- forM ds insertPlaceholdersInDef
       pure (DInstance loc name (InstanceDefinition ts t es))
     d ->
       pure d
 
-insertPlaceholdersInDef :: (Show a, Monad m, Monoid a, Data a) => Trait ParameterizedType -> Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a Kind IndexedType)
-insertPlaceholdersInDef trait =
+insertPlaceholdersInDef :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a Kind IndexedType)
+insertPlaceholdersInDef =
   \case
     c@DConstant{} -> do
-      r <- expandInLocalEnv c
-      insertTypeInfo (instanceLabel trait (definitionName c)) r
+      expandTraits c
     _ ->
       error "Not implemented"
-
-expandInLocalEnv :: (Monad m, TraitContext a b) => b -> CompilerT a (ProtoCompilerT m a) b
-expandInLocalEnv d = do
-  b <- lift protoOgetCurrentBuildC
-  let env1 = typeEnvironment b
-  expandTraits d
-
-insertTypeInfo :: (Monad m) => Name -> Definition a k IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a k IndexedType)
-insertTypeInfo name d = do
-  insertName d name
-  pure d
 
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a (ProtoCompilerT m a) ()
 insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
@@ -358,7 +258,6 @@ tryMatch t u = do
 
 findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a (ProtoCompilerT m a) (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
-  -- env <- asks compilerInstanceEnvironment
   ProtoBuild{protoObuildInstances} <- lift protoOgetCurrentBuildC
   case Environment.lookup name protoObuildInstances of
     Nothing ->
@@ -424,7 +323,6 @@ applyTraits loc (Label t name) traits =
     case fields of
       Nothing | not (isVariable trait) -> do
         path <- lift $ gets protoOcompilerCurrentPath
-        -- path <- gets compilerCurrentModule
         tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
         throwError TraitError
       Nothing -> do
@@ -616,10 +514,6 @@ passiveOexpandConstantDefinitionTraits name =
         [] ->
           pure $ ConstantDefinition loc with (With [] t) e
         tr : trs -> do
---          traceShowM "----"
---          traceShowM name
---          traceShowM traits
---          traceShowM t
           path <- lift $ gets protoOcompilerCurrentPath
           pure $ ConstantDefinition loc with (With (tr : trs) t) e
 
@@ -658,7 +552,6 @@ passiveOexpandTraitsInClause =
 
 passiveOapplyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> Set (Trait IndexedType) -> CompilerT a (ProtoCompilerT m a) ()
 passiveOapplyTraits loc (Label t name) traits = do
-  --traverse_ insert_ (NonEmpty.fromList (Set.toList traits))
   case Set.toList traits of
     [] ->
       pure () 
@@ -670,18 +563,11 @@ passiveOapplyTraits loc (Label t name) traits = do
     case fields of
       Nothing | not (isVariable trait) -> do
         pure ()
-      -- path <- lift $ gets protoOcompilerCurrentPath
-      -- tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
-      -- throwError TraitError
       Nothing -> do
         tellDictionaryTraits (Set.singleton trait)
         pure ()
-      -- pure (ETraitInstance mempty (typeOf trait) trait)
       Just r ->
         pure ()
-
--- pure (ERecord mempty (typeOf trait) r Nothing)
---
 
 cafe :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) () -- [(Name, Set Name)]
 cafe = 
