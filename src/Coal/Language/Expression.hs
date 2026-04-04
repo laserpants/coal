@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module Coal.Language.Expression (
   Expression (..),
@@ -13,7 +13,6 @@ module Coal.Language.Expression (
   CompiledClause (..),
 ) where
 
-import qualified Data.Map.Strict as Map
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), freeSet)
 import Coal.Common.Label (Label (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -26,10 +25,11 @@ import Coal.Language.Type (Parameter (..), Type)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
-import Extras (Dictionary, Name)
-import GHC.Generics (Generic)
+import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Extras (Dictionary, Name)
+import GHC.Generics (Generic)
 
 data Expression a s t
   = -- | Type-annotated expression
@@ -134,7 +134,7 @@ data CompiledClause a s t = ECompiledClause
 instance (Binary a, Binary s, Binary t) => Binary (CompiledClause a s t)
 
 instance (Show a, Show s, Show t, Ord t, Data a, Data s, Data t) => FreeVars (Expression a s t) t where
-  freeIn = 
+  freeIn =
     \case
       EAnnotation _ _ e ->
         freeIn e
@@ -185,8 +185,8 @@ instance (Show a, Show s, Show t, Ord t, Data a, Data s, Data t) => FreeVars (Ex
 -- TODO: may not be necessary
 freeClause :: (Show a, Show s, Show t, Data a, Data s, Data t, Ord t) => Clause a s t -> Set (Label t)
 freeClause (EClause _ pat choices) = foldMap (freeChoice bound) choices
-  where 
-    bound = boundIn pat
+ where
+  bound = boundIn pat
 
 freeCompiledClause :: (Show a, Show s, Show t, Data a, Data s, Data t, Ord t) => CompiledClause a s t -> Set (Label t)
 freeCompiledClause (ECompiledClause _ args expr) = freeSet (fmap labelName args) expr

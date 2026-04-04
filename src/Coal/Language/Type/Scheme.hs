@@ -59,7 +59,7 @@ instance (Pretty k, Pretty (o k), Pretty t) => Pretty (Scheme o k t) where
       Forall _ ts t ->
         pretty t <> traits
        where
-        traits 
+        traits
           | Set.null ts = ""
           | otherwise = " with " <> hsep (intersperse "," (pretty <$> Set.toList ts))
 

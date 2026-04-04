@@ -38,11 +38,11 @@ import Data.Either.Extra (partitionEithers)
 import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import qualified Data.Text as Text
 import Data.Tuple.Extra (fst3)
 import Debug.Trace
 import Extras (Dictionary, Name)
-import qualified Data.Set as Set
 
 generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 generateKindConstraints modul = do
