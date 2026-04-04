@@ -90,102 +90,6 @@ pass =
 
       return mm
 
---freeInConstant :: (Show a, Data a) => ConstantDefinition a IndexedType -> Set (Label IndexedType)
---freeInConstant ConstantDefinition{..} = freeIn constantDefinitionExpression
---
---freeInFunction :: (Show a, Data a) => FunctionDefinition a IndexedType -> Set (Label IndexedType)
---freeInFunction FunctionDefinition{..} = freeSet (boundIn functionDefinitionPatterns) functionDefinitionExpression
---
---freeNames :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) [(Name, Set Name)]
---freeNames =
---  \case
---    DConstant _ name def _ ->
---      return [(name, Set.map labelName (freeInConstant def))]
---    DFunction _ name (def :| _) _ ->
---      return [(name, Set.map labelName (freeInFunction def))]
---    DInstance _ trait InstanceDefinition{..} ->
---      concatForM instanceDefinitionEntries $
---        \case
---          DConstant _ name def _ ->
---            return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInConstant def))]
---          DFunction _ name (def :| _) _ ->
---            return [(instanceLabel (Trait trait instanceDefinitionType) name, Set.map labelName (freeInFunction def))]
---    _ ->
---      return []
---
---collapseCycles :: [(Name, Set.Set Name)] -> [(Set.Set Name, Set.Set Name)]
---collapseCycles defs = map collapseSCC (stronglyConnComp edges)
--- where
---  edges = [(name, name, Set.toList deps) | (name, deps) <- defs]
---
---  collapseSCC :: SCC Name -> (Set.Set Name, Set.Set Name)
---  collapseSCC scc = (names, deps `Set.difference` names)
---   where
---    names =
---      case scc of
---        AcyclicSCC n -> Set.singleton n
---        CyclicSCC ns -> Set.fromList ns
---
---    deps = Set.unions [lookupDeps n | n <- Set.toList names]
---
---  lookupDeps n = Map.findWithDefault Set.empty n (Map.fromList defs)
---
---considerNext :: (Monad m, Monoid a, Data a, Show a) => [Definition a Kind IndexedType] -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
---considerNext defs = do
---  m <- get
---  case Map.keys m of
---    [] -> pure ()
---    k : _ -> considerKey k
--- where
-----  considerKey :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) ()
---  considerKey key = do
---    m <- get
---    case Map.lookup key m of
---      Nothing ->
---        error "Implementation error"
---      Just names -> do
---        res <- firstNonVisited names
---        case res of
---          Nothing -> do
---
---            lift $ traverse (zzz key) defs
---
---            --            traceShowM (key, names)
---
---            --            forM_ names $
---            --              \name -> do
---            --                env <- lift $ lift $ gets protoOcompilerNameStore
---            --                case Environment.lookup name env of
---            --                  Nothing ->
---            --                    pure () -- error (show (name, "??"))
---            --                  Just xx ->
---            --                    traceShowM (name, xx)
---
---            modify (Map.delete key)
---            considerNext defs
---          Just k ->
---            considerKey k
---
---  firstNonVisited :: (Monad m) => Set Name -> StateT (Map (Set Name) (Set Name)) (CompilerT a (ProtoCompilerT m a)) (Maybe (Set Name))
---  firstNonVisited names = do
---    m <- get
---    pure $
---      case filter (notNull . Set.intersection names) (Map.keys m) of
---        [] -> Nothing
---        k : _ -> Just k
---
----- containsAny :: Map (Set Name) (Set Name) -> Set Name -> Maybe (Set Name)
----- containsAny m names =
---
----- leaf => []
----- node => []
----- [tree_list_size, size] => [size, tree_list_size]
----- main => [size, example_tree]
---
-----  where
-----    inKeySets :: Name -> Bool
-----    inKeySets name = undefined
-
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m a) ()
 updateNames store =
   lift $
@@ -465,39 +369,6 @@ dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
 
 --
 
-zzz :: (Show a, Monad m, Monoid a, Data a) => Set Name -> Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Definition a Kind IndexedType) -- [(Name, Set Name)]
-zzz names =
-  \case
-    ddd@(DConstant a name def x) | name `elem` names -> do
-      DConstant a name <$> passiveOexpandConstantDefinitionTraits name def <*> pure x
-
-    DFunction _ name (def :| _) _ | name `elem` names ->
-      undefined 
-
-    DInstance a trait InstanceDefinition{..} -> do
-      newEntries <- 
-        forM instanceDefinitionEntries $
-          \case
-            ddd@(DConstant a name def x) | instanceName `elem` names ->
-              DConstant a name <$> passiveOexpandConstantDefinitionTraits instanceName def <*> pure x
-             where
-              instanceName = instanceLabel (Trait trait instanceDefinitionType) name
-
-            DFunction _ name (def :| _) _ | instanceLabel (Trait trait instanceDefinitionType) name `elem` names ->
-              undefined 
-            d ->
-              pure d
-      pure $
-        DInstance
-          a
-          trait
-          InstanceDefinition
-            { instanceDefinitionEntries = newEntries
-            , ..
-            }
-    d ->
-      pure d -- return []
-
 passiveOexpandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a (ProtoCompilerT m a) (ConstantDefinition a IndexedType)
 passiveOexpandConstantDefinitionTraits name =
   \case
@@ -547,7 +418,7 @@ passiveOapplyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Label Indexed
 passiveOapplyTraits loc (Label t name) traits = do
   case Set.toList traits of
     [] ->
-      pure () 
+      pure ()
     x : xs ->
       traverse_ insert_ (x :| xs)
  where
@@ -563,24 +434,20 @@ passiveOapplyTraits loc (Label t name) traits = do
         pure ()
 
 cafe :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) () -- [(Name, Set Name)]
-cafe = 
+cafe =
   \case
-    ddd@(DConstant a name def x) -> do
-      xx <- DConstant a name <$> passiveOexpandConstantDefinitionTraits name def <*> pure x
-      insertName xx name 
-      pure ()
-
-    ddd@(DInstance a trait InstanceDefinition{..}) ->
+    DConstant a name def x -> do
+      d <- passiveOexpandConstantDefinitionTraits name def
+      insertName (DConstant a name d x) name
+    DInstance a trait InstanceDefinition{..} ->
       forM_ instanceDefinitionEntries $
-          \case
-            ddd@(DConstant a name def x)  -> do
-              xx <- DConstant a name <$> passiveOexpandConstantDefinitionTraits instanceName def <*> pure x
-              insertName xx instanceName 
-              pure ()
-             where
-              instanceName = instanceLabel (Trait trait instanceDefinitionType) name
-            _ ->
-              pure ()
+        \case
+          DConstant a name def x -> do
+            d <- passiveOexpandConstantDefinitionTraits instanceName def
+            insertName (DConstant a name d x) instanceName
+           where
+            instanceName = instanceLabel (Trait trait instanceDefinitionType) name
+          _ ->
+            pure ()
     _ ->
-      pure () -- return []
-
+      pure ()

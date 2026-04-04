@@ -36,7 +36,6 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set, (\\))
 import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
-import Debug.Trace
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 

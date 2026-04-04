@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Path.Resolve (resolveModule) where
+module Coal.Compiler.Path.Resolve (validateComponent, resolveModule) where
 
 import Control.Monad (filterM, when)
 import Control.Monad.Except (runExceptT, throwError)
 import Control.Monad.IO.Class (liftIO)
-import Data.Char (isAlpha, isAlphaNum)
+import Data.Char (isAlpha, isAlphaNum, isUpper)
 import Data.List (intercalate, maximumBy)
 import Data.Ord (comparing)
 import Data.Text (Text)
@@ -19,9 +19,12 @@ validateComponent s
       Left "Empty path component"
   | not (isAlpha (head s) || head s == '_') =
       Left $ "Component must start with a letter or underscore: " ++ show s
+  | not (isUpper (head s) || head s == '_') =
+      Left $ "Component must start with an uppercase letter or underscore: " ++ show s
   | not (all (\c -> isAlphaNum c || c == '_') s) =
       Left $ "Component contains invalid characters: " ++ show s
-  | otherwise = Right ()
+  | otherwise =
+      Right ()
 
 isDirectoryPrefix :: FilePath -> FilePath -> Bool
 isDirectoryPrefix root p =
