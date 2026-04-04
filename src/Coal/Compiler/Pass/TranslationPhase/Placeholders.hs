@@ -225,7 +225,6 @@ insertPlaceholdersInDef =
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a (ProtoCompilerT m a) ()
 insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
   let s = Forall (typeIndexesIn t) (Set.fromList ts) t
-  insertNameC name s
   lift $ protoOinsertNameC name s
 insertName _ _ = error "Implementation error"
 
