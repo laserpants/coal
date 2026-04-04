@@ -8,8 +8,8 @@ module Coal.Compiler.State (
   overCompilerSubstitution,
   overCompilerSupply,
   overCompilerAssumptions,
-  overCompilerConstraints,
-  overCompilerNameStore,
+--  overCompilerConstraints,
+--  overCompilerNameStore,
   overCompilerSolverRuleViolations,
   overCompilerTypeAnnotationParams,
   overCompilerStateConstraintsGenErrors,
@@ -38,11 +38,11 @@ type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
   { compilerSupply :: Int
-  , compilerNameStore :: Environment IndexedScheme
+--  , compilerNameStore :: Environment IndexedScheme
   , compilerCurrentModule :: Path
   , compilerFreshModules :: Set Name
   , compilerSubstitution :: Substitution
-  , compilerConstraints :: [CompilerConstraint a]
+--  , compilerConstraints :: [CompilerConstraint a]
   , compilerConstraintsGenErrors :: [ConstraintsGenError a]
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   , compilerAssumptions :: [CompilerAssumption a]
@@ -57,13 +57,13 @@ instance Supply (CompilerState a) where
   updateSupply = overCompilerSupply
   getSupply = compilerSupply
 
-{-# INLINE overCompilerNameStore #-}
-overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
-overCompilerNameStore fn CompilerState{..} =
-  CompilerState
-    { compilerNameStore = fn compilerNameStore
-    , ..
-    }
+--{-# INLINE overCompilerNameStore #-}
+--overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
+--overCompilerNameStore fn CompilerState{..} =
+--  CompilerState
+--    { compilerNameStore = fn compilerNameStore
+--    , ..
+--    }
 
 {-# INLINE overCompilerCurrentModule #-}
 overCompilerCurrentModule :: Over (CompilerState a) Path
@@ -97,13 +97,13 @@ overCompilerSubstitution fn CompilerState{..} =
     , ..
     }
 
-{-# INLINE overCompilerConstraints #-}
-overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
-overCompilerConstraints fn CompilerState{..} =
-  CompilerState
-    { compilerConstraints = fn compilerConstraints
-    , ..
-    }
+--{-# INLINE overCompilerConstraints #-}
+--overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
+--overCompilerConstraints fn CompilerState{..} =
+--  CompilerState
+--    { compilerConstraints = fn compilerConstraints
+--    , ..
+--    }
 
 {-# INLINE overCompilerAssumptions #-}
 overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption a]
@@ -165,11 +165,11 @@ initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
     { compilerSupply = 0
-    , compilerNameStore = mempty
+--    , compilerNameStore = mempty
     , compilerCurrentModule = Path mempty
     , compilerFreshModules = mempty
     , compilerSubstitution = mempty
-    , compilerConstraints = []
+--    , compilerConstraints = []
     , compilerConstraintsGenErrors = []
     , compilerSolverRuleViolations = []
     , compilerAssumptions = []

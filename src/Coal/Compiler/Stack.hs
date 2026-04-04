@@ -16,14 +16,14 @@ module Coal.Compiler.Stack (
   ErrorLocation (..),
   runCompilerT,
   evalCompilerT,
-  insertNameC,
-  insertNamesC,
-  setNamesC,
-  insertConstraintsC,
+--  insertNameC,
+--  insertNamesC,
+--  setNamesC,
+--  insertConstraintsC,
   insertAssumptionsC,
   clearAssumptionsC,
-  clearNameStoreC,
-  clearConstraintsC,
+--  clearNameStoreC,
+--  clearConstraintsC,
   clearTypeAnnotationParamsC,
   setSubstitutionC,
   updateSupply,
@@ -119,20 +119,20 @@ compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolat
 insertSupplyC :: (Monad m) => Int -> CompilerT a m ()
 insertSupplyC = modify . overCompilerSupply . const
 
-insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
-insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
+--insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
+--insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
+--
+--insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
+--insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
+--
+--setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+--setNamesC names = modify (overCompilerNameStore (const names))
 
-insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
-insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
-
-setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
-setNamesC names = modify (overCompilerNameStore (const names))
-
-insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
-insertConstraintsC cs = modify (overCompilerConstraints (<> cs))
-
-clearConstraintsC :: (Monad m) => CompilerT a m ()
-clearConstraintsC = modify (overCompilerConstraints (const mempty))
+--insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
+--insertConstraintsC cs = modify (overCompilerConstraints (<> cs))
+--
+--clearConstraintsC :: (Monad m) => CompilerT a m ()
+--clearConstraintsC = modify (overCompilerConstraints (const mempty))
 
 clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
 clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
@@ -140,8 +140,8 @@ clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mem
 clearAssumptionsC :: (Monad m) => CompilerT a m ()
 clearAssumptionsC = modify (overCompilerAssumptions (const mempty))
 
-clearNameStoreC :: (Monad m) => CompilerT a m ()
-clearNameStoreC = modify (overCompilerNameStore (const mempty))
+--clearNameStoreC :: (Monad m) => CompilerT a m ()
+--clearNameStoreC = modify (overCompilerNameStore (const mempty))
 
 insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
 insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
