@@ -37,7 +37,6 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Control.Monad.State (execState, modify)
 import Data.Binary
 import Data.ByteString (ByteString)
@@ -56,6 +55,7 @@ data ProtoBuild a = ProtoBuild
     protoObuildNames :: Environment [ProtoNameEntry]
   , protoObuildExportedNames :: Set Name
   , protoObuildDataConstructors :: Environment (ProtoDataConstructorEntry a)
+  -- folds?
   , protoObuildTypeConstructors :: Environment (ProtoTypeConstructorEntry a)
   , protoObuildTraits :: Environment (ProtoTraitEntry a)
   , protoObuildInstances :: Environment (InstanceMap (ProtoInstanceEntry a))

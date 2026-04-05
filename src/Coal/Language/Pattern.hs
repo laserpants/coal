@@ -17,7 +17,6 @@ import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty)
-import Data.Set (unions)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
 
@@ -72,10 +71,10 @@ instance (Binary a, Binary s, Binary t) => Binary (Pattern a s t)
 instance (Data a, Data s, Data t) => BoundVars (Pattern a s t) where
   boundIn =
     \case
-      PRecord _ _ d mp ->
-        boundIn mp <> unions (fmap boundIn d)
+      PRecord _ _ d p ->
+        boundIn d <> boundIn p
       PConstructor _ _ ps ->
-        unions (fmap boundIn ps)
+        boundIn ps
       PAnnotation _ _ p ->
         boundIn p
       PAs _ ll p ->

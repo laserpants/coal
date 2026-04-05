@@ -13,7 +13,7 @@ module Coal.Compiler.Pass (
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
-import Coal.Compiler.Build.Core (typeConstructorEnv)
+--import Coal.Compiler.Build.Core (typeConstructorEnv)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)

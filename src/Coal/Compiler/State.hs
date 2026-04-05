@@ -5,14 +5,9 @@ module Coal.Compiler.State (
   CompilerState (..),
   CompilerAssumption,
   CompilerConstraint,
-  overCompilerSubstitution,
   overCompilerSupply,
-  overCompilerAssumptions,
---  overCompilerConstraints,
---  overCompilerNameStore,
-  overCompilerSolverRuleViolations,
-  overCompilerTypeAnnotationParams,
-  overCompilerStateConstraintsGenErrors,
+--  overCompilerSolverRuleViolations,
+--  overCompilerStateConstraintsGenErrors,
   overCompilerVerbatimSource,
   overCompilerCurrentModule,
   overCompilerConfig,
@@ -30,7 +25,7 @@ import Coal.Language.Module.Definition (Path (..))
 import Coal.TypeSystem
 import Data.Set (Set)
 import Data.Text (Text)
-import Extras (Dictionary, Name, Over)
+import Extras (Name, Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
@@ -38,15 +33,8 @@ type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
   { compilerSupply :: Int
---  , compilerNameStore :: Environment IndexedScheme
   , compilerCurrentModule :: Path
   , compilerFreshModules :: Set Name
-  , compilerSubstitution :: Substitution
---  , compilerConstraints :: [CompilerConstraint a]
-  , compilerConstraintsGenErrors :: [ConstraintsGenError a]
-  , compilerSolverRuleViolations :: [InferenceRule Kind a]
-  , compilerAssumptions :: [CompilerAssumption a]
-  , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
   , compilerVerbatimSource :: Environment Text
   , compilerConfig :: CompilerConfig
   , compilerModules :: Environment (ModuleBuild a)
@@ -57,9 +45,9 @@ instance Supply (CompilerState a) where
   updateSupply = overCompilerSupply
   getSupply = compilerSupply
 
---{-# INLINE overCompilerNameStore #-}
---overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
---overCompilerNameStore fn CompilerState{..} =
+-- {-# INLINE overCompilerNameStore #-}
+-- overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
+-- overCompilerNameStore fn CompilerState{..} =
 --  CompilerState
 --    { compilerNameStore = fn compilerNameStore
 --    , ..
@@ -89,53 +77,53 @@ overCompilerSupply fn CompilerState{..} =
     , ..
     }
 
-{-# INLINE overCompilerSubstitution #-}
-overCompilerSubstitution :: Over (CompilerState a) Substitution
-overCompilerSubstitution fn CompilerState{..} =
-  CompilerState
-    { compilerSubstitution = fn compilerSubstitution
-    , ..
-    }
+-- {-# INLINE overCompilerSubstitution #-}
+-- overCompilerSubstitution :: Over (CompilerState a) Substitution
+-- overCompilerSubstitution fn CompilerState{..} =
+--  CompilerState
+--    { compilerSubstitution = fn compilerSubstitution
+--    , ..
+--    }
 
---{-# INLINE overCompilerConstraints #-}
---overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
---overCompilerConstraints fn CompilerState{..} =
+-- {-# INLINE overCompilerConstraints #-}
+-- overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
+-- overCompilerConstraints fn CompilerState{..} =
 --  CompilerState
 --    { compilerConstraints = fn compilerConstraints
 --    , ..
 --    }
 
-{-# INLINE overCompilerAssumptions #-}
-overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption a]
-overCompilerAssumptions fn CompilerState{..} =
-  CompilerState
-    { compilerAssumptions = fn compilerAssumptions
-    , ..
-    }
+-- {-# INLINE overCompilerAssumptions #-}
+-- overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption a]
+-- overCompilerAssumptions fn CompilerState{..} =
+--  CompilerState
+--    { compilerAssumptions = fn compilerAssumptions
+--    , ..
+--    }
 
-{-# INLINE overCompilerStateConstraintsGenErrors #-}
-overCompilerStateConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
-overCompilerStateConstraintsGenErrors fn CompilerState{..} =
-  CompilerState
-    { compilerConstraintsGenErrors = fn compilerConstraintsGenErrors
-    , ..
-    }
+--{-# INLINE overCompilerStateConstraintsGenErrors #-}
+--overCompilerStateConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
+--overCompilerStateConstraintsGenErrors fn CompilerState{..} =
+--  CompilerState
+--    { compilerConstraintsGenErrors = fn compilerConstraintsGenErrors
+--    , ..
+--    }
 
-{-# INLINE overCompilerTypeAnnotationParams #-}
-overCompilerTypeAnnotationParams :: Over (CompilerState a) (Dictionary (a, TypeIndex Kind))
-overCompilerTypeAnnotationParams fn CompilerState{..} =
-  CompilerState
-    { compilerTypeAnnotationParams = fn compilerTypeAnnotationParams
-    , ..
-    }
+-- {-# INLINE overCompilerTypeAnnotationParams #-}
+-- overCompilerTypeAnnotationParams :: Over (CompilerState a) (Dictionary (a, TypeIndex Kind))
+-- overCompilerTypeAnnotationParams fn CompilerState{..} =
+--  CompilerState
+--    { compilerTypeAnnotationParams = fn compilerTypeAnnotationParams
+--    , ..
+--    }
 
-{-# INLINE overCompilerSolverRuleViolations #-}
-overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
-overCompilerSolverRuleViolations fn CompilerState{..} =
-  CompilerState
-    { compilerSolverRuleViolations = fn compilerSolverRuleViolations
-    , ..
-    }
+--{-# INLINE overCompilerSolverRuleViolations #-}
+--overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
+--overCompilerSolverRuleViolations fn CompilerState{..} =
+--  CompilerState
+--    { compilerSolverRuleViolations = fn compilerSolverRuleViolations
+--    , ..
+--    }
 
 {-# INLINE overCompilerVerbatimSource #-}
 overCompilerVerbatimSource :: Over (CompilerState a) (Environment Text)
@@ -165,15 +153,8 @@ initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
     { compilerSupply = 0
---    , compilerNameStore = mempty
     , compilerCurrentModule = Path mempty
     , compilerFreshModules = mempty
-    , compilerSubstitution = mempty
---    , compilerConstraints = []
-    , compilerConstraintsGenErrors = []
-    , compilerSolverRuleViolations = []
-    , compilerAssumptions = []
-    , compilerTypeAnnotationParams = mempty
     , compilerVerbatimSource = mempty
     , compilerConfig = defaultConfig
     , compilerModules = mempty

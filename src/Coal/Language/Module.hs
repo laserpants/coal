@@ -48,7 +48,6 @@ import Coal.Language.Module.Path (principalPath)
 import Coal.Language.Pattern
 import Coal.Language.Trait
 import Coal.Language.Type
-import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Kind
 import Coal.Language.Type.Row
 import Coal.Language.Type.Scheme (Scheme (..))

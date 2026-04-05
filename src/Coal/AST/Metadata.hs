@@ -15,7 +15,7 @@ data Metadata = Metadata
   }
   deriving (Eq, Ord, Read, Data, Generic)
 
--- TODO: remvoe
+-- TODO: remove
 instance Show Metadata where
   show _ = ""
 

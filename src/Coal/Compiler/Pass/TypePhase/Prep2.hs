@@ -1,7 +1,7 @@
 module Coal.Compiler.Pass.TypePhase.Prep2 (passPrep2) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Core (buildEnv, prepareBuild)
+--import Coal.Compiler.Build.Core (buildEnv)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups

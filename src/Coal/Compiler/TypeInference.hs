@@ -28,20 +28,14 @@ import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint.Generation
 import Coal.ProtoTypeSystem.Parameterized
 import Coal.TypeSystem
-import Coal.TypeSystem.Kind.Inference
-import Control.Monad.Except (MonadError (..), forM_, void, when)
+import Control.Monad.Except (MonadError (..), forM_)
 import Control.Monad.Reader (asks, runReaderT)
 import Control.Monad.State (evalState, get, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
-import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
-import qualified Data.Text as Text
-import Data.Tuple.Extra (fst3)
-import Debug.Trace
 import Extras (Dictionary, Name)
 
 generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
@@ -200,21 +194,21 @@ protoOdefine name t = protoOinsertNameC name (Forall (typeIndexesIn s) mempty s)
 
 --
 
-class GenerateConstraints a o where
-  generateConstraints :: (Monad m, Data a, Show a) => o -> CompilerT a m ()
+-- class GenerateConstraints a o where
+--  generateConstraints :: (Monad m, Data a, Show a) => o -> CompilerT a m ()
 
-instance GenerateConstraints a (Expression a () IndexedType) where
-  generateConstraints expr = do
-    undefined
+-- instance GenerateConstraints a (Expression a () IndexedType) where
+--  generateConstraints expr = do
+--    undefined
 --    (ms1, cs1) <- generateExpressionConstraints expr
 --    (ms2, cs2) <- partitionEithers <$> traverse assumptionConstraints ms1
 --    sub <- gets compilerSubstitution
 --    insertAssumptionsC (apply sub ms2)
 --    insertConstraintsC (cs1 <> cs2)
 
-instance GenerateConstraints a (FunctionDefinition a IndexedType) where
-  generateConstraints (FunctionDefinition loc ann (With _ t) ps e) = do
-    undefined
+-- instance GenerateConstraints a (FunctionDefinition a IndexedType) where
+--  generateConstraints (FunctionDefinition loc ann (With _ t) ps e) = do
+--    undefined
 --    insertConstraintsC [Equality (RuleTopLevelFunction loc) [t, typeOf e]]
 --    t1 <- supplied (TVariable . TypeIndex KType)
 --    generateConstraints $
@@ -231,9 +225,9 @@ instance GenerateConstraints a (FunctionDefinition a IndexedType) where
 --        Just (With _ t1) ->
 --          EAnnotation loc t1 e
 
-instance GenerateConstraints a (ConstantDefinition a IndexedType) where
-  generateConstraints (ConstantDefinition loc ann (With _ t) e) = do
-    undefined
+-- instance GenerateConstraints a (ConstantDefinition a IndexedType) where
+--  generateConstraints (ConstantDefinition loc ann (With _ t) e) = do
+--    undefined
 --    insertConstraintsC [Equality (RuleTopLevelConstant loc) [t, typeOf e]]
 --    generateConstraints $
 --      ELet
@@ -249,9 +243,9 @@ instance GenerateConstraints a (ConstantDefinition a IndexedType) where
 --        Just (With _ t1) ->
 --          EAnnotation loc t1 e
 
-instance GenerateConstraints a (Definition a Kind IndexedType) where
-  generateConstraints =
-    undefined
+-- instance GenerateConstraints a (Definition a Kind IndexedType) where
+--  generateConstraints =
+--    undefined
 --    \case
 --      DFunction _ _ (f@(FunctionDefinition loc (Just (With _ t)) (With _ t1) _ _) :| _) _ -> do
 --        generateConstraints f
@@ -307,17 +301,18 @@ runConstraintsGen stack = do
   updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
 
-generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a () IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
-generateExpressionConstraints e = do
-  (assumptions, params, result) <- runConstraintsGen (emitConstraints e)
-  let (errors, constraints) = partitionEithers result
-  compilerReportConstraintsGenErrors errors
-  compilerSetTypeAnnotationParams params
-  pure (assumptions, constraints)
+-- generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a () IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
+-- generateExpressionConstraints e = do
+--  undefined
+--  (assumptions, params, result) <- runConstraintsGen (emitConstraints e)
+--  let (errors, constraints) = partitionEithers result
+--  compilerReportConstraintsGenErrors errors
+--  compilerSetTypeAnnotationParams params
+--  pure (assumptions, constraints)
 
-assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
-assumptionConstraints Assumption{..} = do
-  undefined
+-- assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
+-- assumptionConstraints Assumption{..} = do
+--  undefined
 --  names <- gets compilerNameStore
 --  pure $
 --    case Environment.lookup (normalizedName assumptionName) names of
@@ -336,16 +331,17 @@ protoOassumptionConstraints Assumption{..} = do
       Just s ->
         Right (Explicit (RuleTypeConstraint assumptionMetadata assumptionName assumptionType s) assumptionType s)
 
-solveConstraintsC :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
-solveConstraintsC cs = do
-  dict <- gets compilerTypeAnnotationParams
-  n <- gets compilerSupply
-  let (sub, m, rs) = solveConstraints n cs
-  updateSupplyC m
-  let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
-  compilerReportSolverRuleViolations (apply sub rs)
-  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
-  pure sub
+-- solveConstraintsC :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
+-- solveConstraintsC cs = do
+--  undefined
+--  dict <- gets compilerTypeAnnotationParams
+--  n <- gets compilerSupply
+--  let (sub, m, rs) = solveConstraints n cs
+--  updateSupplyC m
+--  let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
+--  compilerReportSolverRuleViolations (apply sub rs)
+--  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
+--  pure sub
 
 solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> ProtoCompilerT m a Substitution
 solveConstraintsX constraints = do
@@ -358,9 +354,9 @@ solveConstraintsX constraints = do
   protoOcompilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
-solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
-solveC = do
-  undefined
+-- solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
+-- solveC = do
+--  undefined
 --  constraints <- gets compilerConstraints
 --  sub1 <- gets compilerSubstitution
 --  sub2 <- solveConstraintsC constraints
@@ -380,9 +376,9 @@ solveX = do
   protoOsetSubstitutionC (sub2 <> sub1)
   gets protoOcompilerSubstitution
 
-typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption a])
-typeDefinitionsC ds = do
-  undefined
+-- typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption a])
+-- typeDefinitionsC ds = do
+--  undefined
 --  forM_ ds typeDefinitionC
 --  sub <- gets compilerSubstitution
 --  ams <- gets compilerAssumptions
@@ -395,9 +391,9 @@ typeDefinitionsC ds = do
 --  sub1 <- solveC
 --  pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)
 
-typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m ()
-typeDefinitionC =
-  undefined
+-- typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m ()
+-- typeDefinitionC =
+--  undefined
 --  \case
 --    DTrait loc name def -> do
 --      kenv <- asks compilerTypeConstructorEnvironment
@@ -476,8 +472,8 @@ toIndexedType loc env (Parameter k n) t =
     Right r ->
       pure r
 
-checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a () IndexedType) -> Name -> CompilerT a m ()
-checkMain loc t ps name = undefined -- do
+-- checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a () IndexedType) -> Name -> CompilerT a m ()
+-- checkMain loc t ps name = undefined -- do
 --  path <- gets compilerCurrentModule
 --  when (Path ["Main"] == path && "main" == name) $
 --    insertConstraintsC
@@ -489,16 +485,16 @@ checkMain loc t ps name = undefined -- do
 -- where
 --  t1 = foldTypeOf t ps
 
-checkIfNameExists :: (Monad m) => a -> Name -> CompilerT a m ()
-checkIfNameExists loc name = undefined -- do
+-- checkIfNameExists :: (Monad m) => a -> Name -> CompilerT a m ()
+-- checkIfNameExists loc name = undefined -- do
 --  env <- gets compilerNameStore
 --  when (Environment.contains name env) $ do
 --    path <- gets compilerCurrentModule
 --    tellErrors [NameAlreadyDefined name (ErrorLocation (principalPath path) loc)]
 --    throwError PreflightFailure
 
-instantiateTemplate :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
-instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
+-- instantiateTemplate :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
+-- instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
 instantiateVarsC :: (Monad m) => a -> Type Parameter () -> CompilerT a m IndexedType
 instantiateVarsC loc t = do
@@ -511,8 +507,3 @@ instantiateVarsC loc t = do
       throwError PreflightFailure
     Right t1 ->
       pure t1
-
-define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
-define name t = undefined -- insertNameC name (Forall (typeIndexesIn s) mempty s)
--- where
---  s = normalizeTypeIndexes t

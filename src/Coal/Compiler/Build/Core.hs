@@ -3,10 +3,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Build.Core (
-  buildEnv,
-  replacePlaceholders,
-  prepareBuild,
-  typeConstructorEnv,
+--  buildEnv,
+--  replacePlaceholders,
+--  prepareBuild,
+--  typeConstructorEnv,
   dependencies,
 ) where
 
@@ -38,158 +38,159 @@ import qualified Data.Set as Set
 import Extras (Name, for, groupByKey, (<$$>), (<.>))
 import Extras.Control.Monad (concatForM)
 
-buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
-buildEnv = do
-  ModuleBuild{..} <- getCurrentBuildC
-  flip execStateT mempty $ do
-    forM_ moduleNames $
-      \case
-        NFunction name s ->
-          modify (Environment.insert name s)
-        NConstant name s ->
-          modify (Environment.insert name s)
-        NFold name s ->
-          modify (Environment.insert name s)
-        _ ->
-          pure ()
+--buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
+--buildEnv = do
+--  ModuleBuild{..} <- getCurrentBuildC
+--  flip execStateT mempty $ do
+--    forM_ moduleNames $
+--      \case
+--        NFunction name s ->
+--          modify (Environment.insert name s)
+--        NConstant name s ->
+--          modify (Environment.insert name s)
+--        NFold name s ->
+--          modify (Environment.insert name s)
+--        _ ->
+--          pure ()
+--
+--replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+--replacePlaceholders store =
+--  updateCurrentBuildC $
+--    \build@ModuleBuild{..} -> do
+--      flip execStateT build $
+--        forM_ moduleNames $
+--          \case
+--            NFunctionPlaceholder name ->
+--              go name NFunction
+--            NConstantPlaceholder name ->
+--              go name NConstant
+--            NFoldPlaceholder name ->
+--              go name NFold
+--            _ ->
+--              pure ()
+-- where
+--  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
+--  go name info =
+--    case Environment.lookup name store of
+--      Nothing ->
+--        pure ()
+--      -- error "Implementation error"
+--      Just s ->
+--        modify $ addName (info name s)
 
-replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
-replacePlaceholders store =
-  updateCurrentBuildC $
-    \build@ModuleBuild{..} -> do
-      flip execStateT build $
-        forM_ moduleNames $
-          \case
-            NFunctionPlaceholder name ->
-              go name NFunction
-            NConstantPlaceholder name ->
-              go name NConstant
-            NFoldPlaceholder name ->
-              go name NFold
-            _ ->
-              pure ()
- where
-  go :: (Monad m) => Name -> (Name -> IndexedScheme -> NameEntry) -> StateT (ModuleBuild a) (CompilerT a m) ()
-  go name info =
-    case Environment.lookup name store of
-      Nothing ->
-        pure ()
-      -- error "Implementation error"
-      Just s ->
-        modify $ addName (info name s)
-
-prepareBuild :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind (), ModuleBuild a)
-prepareBuild module_@(Module path exports defs) =
-  flip runStateT emptyModuleBuild $ do
-    modify (setPath path)
-
-    inEachDef collectTypeConstructors
-
-    -- Built-in type constructors
-    modify $
-      insertTypeConstructor "List" (TypeConstructorEntry mempty "List" (KArrow KType KType) [])
-        . addName (NType "List" (KArrow KType KType))
-
-    aliases <- gets moduleAliases
-
-    kinds <- typeConstructorEnv
-    inEachDef (collectDataConstructors aliases kinds)
-
-    -- Built-in data constructors
-    forM_ builtinDataConstructors $
-      \(name, info@DataConstructorEntry{dataConstructorEntryConstructor = DataConstructor{..}}) ->
-        modify $
-          insertDataConstructor name info
-            . addName (NDataConstructor name constructorScheme)
-
-    inEachDef (collectTraits kinds)
-    traits <- traitEnv
-
-    inEachDef (collectInstances kinds traits)
-
-    -- Built-in instances
-    --    forM_ builtinInstances $
-    --      \(name, t, info) ->
-    --        modify $ insertInstance name t info
-
-    inEachDef collectImportedNames
-    inEachDef collectPlaceholders
-
-    exps <- gets (Set.filter (`notElem` builtin) . moduleExportedNames)
-    typeExps <- gets (Set.filter (`notElem` builtin) . moduleTypeExports)
-
-    extra <- nub . concat <$> forM defs collectImportedInstances
-
-    let defs1 = [DImport mempty p (NameImport mempty <$> names) | (p, names) <- groupByKey extra]
-
-    if null exports
-      then modify $ setExports (Set.toList exps) . setTypeExports (Set.toList typeExps)
-      else do
-        let errs =
-              flip concatMap exports $
-                \case
-                  NameExport loc name ->
-                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` exps]
-                  TypeExport loc name _ ->
-                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
-        unless (null errs) $ do
-          tellErrors errs
-          throwError PreflightFailure
-
-        modify $
-          setExports (nameExports exports `intersect` Set.toList exps)
-            . setTypeExports (typeExports exports `intersect` Set.toList typeExps)
-
-    env <- lift $ gets compilerVerbatimSource
-    case Environment.lookup (principalPath path) env of
-      Just src ->
-        modify (insertHash src)
-      _ ->
-        error "Implementation error"
-
-    modify $ setDependencies (filter (`notElem` [Path ["Builtin$"]]) (snd <$> dependencies module_))
-
-    let ds' = defs1 <> defs
-
-    build <- get
-    names <- lift $ collectImports build ds'
-    modify (setQualifiedNames names)
-
-    return (Module path exports ds')
- where
-  builtin =
-    Set.fromList
-      [ "(%)"
-      , "(*)"
-      , "(+)"
-      , "(-)"
-      , "(/)"
-      , "(<>)"
-      , "(==)"
-      , "(!=)"
-      , "Comparable"
-      , "Divisible"
-      , "EqualTo"
-      , "GreaterThan"
-      , "IO"
-      , "LessThan"
-      , "Modulo"
-      , "None"
-      , "Numeric"
-      , "Option"
-      , "Result"
-      , "Ok"
-      , "Err"
-      , "Ordered"
-      , "Ordering"
-      , "Semigroup"
-      , "Some"
-      , "Process"
-      , "compare"
-      , "from_int32"
-      , "negate"
-      ]
-  inEachDef = forM_ defs
+--prepareBuild :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind (), ModuleBuild a)
+--prepareBuild module_@(Module path exports defs) =
+--  undefined
+--  flip runStateT emptyModuleBuild $ do
+--    modify (setPath path)
+--
+--    inEachDef collectTypeConstructors
+--
+--    -- Built-in type constructors
+--    modify $
+--      insertTypeConstructor "List" (TypeConstructorEntry mempty "List" (KArrow KType KType) [])
+--        . addName (NType "List" (KArrow KType KType))
+--
+--    aliases <- gets moduleAliases
+--
+--    kinds <- typeConstructorEnv
+--    inEachDef (collectDataConstructors aliases kinds)
+--
+--    -- Built-in data constructors
+--    forM_ builtinDataConstructors $
+--      \(name, info@DataConstructorEntry{dataConstructorEntryConstructor = DataConstructor{..}}) ->
+--        modify $
+--          insertDataConstructor name info
+--            . addName (NDataConstructor name constructorScheme)
+--
+--    inEachDef (collectTraits kinds)
+--    traits <- traitEnv
+--
+--    inEachDef (collectInstances kinds traits)
+--
+--    -- Built-in instances
+--    --    forM_ builtinInstances $
+--    --      \(name, t, info) ->
+--    --        modify $ insertInstance name t info
+--
+--    inEachDef collectImportedNames
+--    inEachDef collectPlaceholders
+--
+--    exps <- gets (Set.filter (`notElem` builtin) . moduleExportedNames)
+--    typeExps <- gets (Set.filter (`notElem` builtin) . moduleTypeExports)
+--
+--    extra <- nub . concat <$> forM defs collectImportedInstances
+--
+--    let defs1 = [DImport mempty p (NameImport mempty <$> names) | (p, names) <- groupByKey extra]
+--
+--    if null exports
+--      then modify $ setExports (Set.toList exps) . setTypeExports (Set.toList typeExps)
+--      else do
+--        let errs =
+--              flip concatMap exports $
+--                \case
+--                  NameExport loc name ->
+--                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` exps]
+--                  TypeExport loc name _ ->
+--                    [ExportNotInModule name path (ErrorLocation (principalPath path) loc) | name `notElem` typeExps]
+--        unless (null errs) $ do
+--          tellErrors errs
+--          throwError PreflightFailure
+--
+--        modify $
+--          setExports (nameExports exports `intersect` Set.toList exps)
+--            . setTypeExports (typeExports exports `intersect` Set.toList typeExps)
+--
+--    env <- lift $ gets compilerVerbatimSource
+--    case Environment.lookup (principalPath path) env of
+--      Just src ->
+--        modify (insertHash src)
+--      _ ->
+--        error "Implementation error"
+--
+--    modify $ setDependencies (filter (`notElem` [Path ["Builtin$"]]) (snd <$> dependencies module_))
+--
+--    let ds' = defs1 <> defs
+--
+--    build <- get
+--    names <- lift $ collectImports build ds'
+--    modify (setQualifiedNames names)
+--
+--    return (Module path exports ds')
+-- where
+--  builtin =
+--    Set.fromList
+--      [ "(%)"
+--      , "(*)"
+--      , "(+)"
+--      , "(-)"
+--      , "(/)"
+--      , "(<>)"
+--      , "(==)"
+--      , "(!=)"
+--      , "Comparable"
+--      , "Divisible"
+--      , "EqualTo"
+--      , "GreaterThan"
+--      , "IO"
+--      , "LessThan"
+--      , "Modulo"
+--      , "None"
+--      , "Numeric"
+--      , "Option"
+--      , "Result"
+--      , "Ok"
+--      , "Err"
+--      , "Ordered"
+--      , "Ordering"
+--      , "Semigroup"
+--      , "Some"
+--      , "Process"
+--      , "compare"
+--      , "from_int32"
+--      , "negate"
+--      ]
+--  inEachDef = forM_ defs
 
 dependencies :: (Monoid a) => Module a k t -> [(a, Path)]
 dependencies (Module p _ defs)
