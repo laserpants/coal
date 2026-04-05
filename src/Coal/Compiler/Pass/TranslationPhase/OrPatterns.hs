@@ -12,7 +12,8 @@ import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module, principalPath)
+import Coal.Language.Module (Module, fromProtoModule, principalPath)
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (when)
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
@@ -23,13 +24,15 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
 import Extras (Map, traverseM)
 
-passOrPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passOrPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passOrPatterns = Pass{runPass = pass}
 
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass = transformBiM expandExpression
+pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+pass m = do
+  foo <- transformBiM expandExpression m
+  return (fromProtoModule foo)
 
-expandExpression :: (Monad m) => Expression Metadata () IndexedType -> CompilerT Metadata m (Expression Metadata () IndexedType)
+expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =
   \case
     EMatch a t e cs ->
@@ -54,14 +57,14 @@ instance (OrPattern a) => OrPattern (Map k a) where
 instance (OrPattern a) => OrPattern (Maybe a) where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance (Data t) => OrPattern (Clause Metadata () t) where
+instance (Data t) => OrPattern (Clause Metadata Kind t) where
   expandOrPatterns =
     \case
       EClause a p cs -> do
         q1 :| qs <- expandOrPatterns p
         pure (EClause a q1 cs :| [EClause a q cs | q <- qs])
 
-instance (Data t) => OrPattern (Pattern Metadata () t) where
+instance (Data t) => OrPattern (Pattern Metadata Kind t) where
   expandOrPatterns =
     \case
       POr loc _ p1 p2 -> do

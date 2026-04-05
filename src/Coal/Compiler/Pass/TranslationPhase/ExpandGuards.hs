@@ -24,13 +24,11 @@ import Data.List.NonEmpty (NonEmpty (..), tails)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Map, traverseM)
 
-passExpandGuards :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passExpandGuards :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passExpandGuards = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
-pass m = do
-  xx <- bork m
-  return (fromProtoModule xx)
+pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+pass = bork
 
 trivial :: Clause a Kind t -> Bool
 trivial (EClause _ _ (CPlain _ [] _ :| [])) = True
