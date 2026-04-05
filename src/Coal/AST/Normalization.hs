@@ -76,8 +76,23 @@ denormalizeConstant name =
       DConstant loc name def []
 
 denormalizeConstant2 :: (Data a, Data k, Data (o k), Typeable o) => Name -> ProtoLetDefinition a k (Type o k) -> ProtoDefinition a k (Type o k)
-denormalizeConstant2 =
-  undefined
+denormalizeConstant2 name =
+  \case
+    ProtoLetDefinition loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
+      denormalizeConstant2 name (ProtoLetDefinition loc w1 w2 (ELambda a1 (ps <> qs) e))
+    ProtoLetDefinition loc w1 (With ts _) (ELambda _ ps e) ->
+      ProtoDFunction
+        loc
+        name
+        ProtoFunctionDefinition
+          { protoOfunctionDefinitionMetadata = loc
+          , protoOfunctionDefinitionAnnotation = w1
+          , protoOfunctionDefinitionType = With ts (typeOf e)
+          , protoOfunctionDefinitionPatterns = ps
+          , protoOfunctionDefinitionExpression = e
+          }
+    def@(ProtoLetDefinition loc _ _ _) ->
+      ProtoDLet loc name def
 
 --
 
@@ -100,13 +115,26 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (ProtoDefinition a k (Type o k)) where
   normalizeObject =
     \case
-      ProtoDFunction loc name ProtoFunctionDefinition{..} ->
-        ProtoDLet loc name ProtoLetDefinition{
-            protoOletDefinitionMetadata = undefined
-          , protoOletDefinitionAnnotation = undefined
-          , protoOletDefinitionType = undefined
-          , protoOletDefinitionExpression = undefined
-        }
+      ProtoDFunction
+        loc
+        name
+        ProtoFunctionDefinition
+          { protoOfunctionDefinitionType = With ts t
+          , ..
+          } ->
+          ProtoDLet
+            loc
+            name
+            ProtoLetDefinition
+              { protoOletDefinitionMetadata =
+                  loc
+              , protoOletDefinitionAnnotation =
+                  protoOfunctionDefinitionAnnotation
+              , protoOletDefinitionType =
+                  With ts (foldTypeOf t protoOfunctionDefinitionPatterns)
+              , protoOletDefinitionExpression =
+                  flattenLambda (ELambda mempty protoOfunctionDefinitionPatterns protoOfunctionDefinitionExpression)
+              }
       ProtoDInstance loc ProtoInstanceDefinition{..} ->
         ProtoDInstance
           loc
@@ -117,14 +145,6 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
             }
       d ->
         d
-
-  --    \case
-  --      DFunction loc name (FunctionDefinition a w1 (With ts t) ps e :| _) _ ->
-  --        DConstant loc name (ConstantDefinition a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
-  --      DInstance loc name (InstanceDefinition ts t ds) ->
-  --        DInstance loc name (InstanceDefinition ts t (normalizeObject ds))
-  --      d ->
-  --        d
   denormalizeObject =
     \case
       ProtoDLet _ name def ->
@@ -139,11 +159,3 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
             }
       d ->
         d
-
---    \case
---      DConstant _ name c _ ->
---        denormalizeConstant name c
---      DInstance loc name (InstanceDefinition ts t ds) ->
---        DInstance loc name (InstanceDefinition ts t (denormalizeObject ds))
---      d ->
---        d
