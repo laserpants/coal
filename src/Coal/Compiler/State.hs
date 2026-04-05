@@ -5,9 +5,9 @@ module Coal.Compiler.State (
   CompilerState (..),
   CompilerAssumption,
   CompilerConstraint,
---  overCompilerSupply,
---  overCompilerSolverRuleViolations,
---  overCompilerStateConstraintsGenErrors,
+  --  overCompilerSupply,
+  --  overCompilerSolverRuleViolations,
+  --  overCompilerStateConstraintsGenErrors,
   overCompilerVerbatimSource,
   overCompilerCurrentModule,
   overCompilerConfig,
@@ -32,9 +32,7 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
-  { 
-
-  -- compilerSupply :: Int
+  { -- compilerSupply :: Int
     compilerCurrentModule :: Path
   , compilerFreshModules :: Set Name
   , compilerVerbatimSource :: Environment Text
@@ -43,7 +41,7 @@ data CompilerState a = CompilerState
   }
   deriving (Show, Eq, Ord)
 
---instance Supply (CompilerState a) where
+-- instance Supply (CompilerState a) where
 --  updateSupply = overCompilerSupply
 --  getSupply = compilerSupply
 
@@ -71,9 +69,9 @@ overCompilerFreshModules fn CompilerState{..} =
     , ..
     }
 
---{-# INLINE overCompilerSupply #-}
---overCompilerSupply :: Over (CompilerState a) Int
---overCompilerSupply fn CompilerState{..} =
+-- {-# INLINE overCompilerSupply #-}
+-- overCompilerSupply :: Over (CompilerState a) Int
+-- overCompilerSupply fn CompilerState{..} =
 --  CompilerState
 --    { compilerSupply = fn compilerSupply
 --    , ..
@@ -103,9 +101,9 @@ overCompilerFreshModules fn CompilerState{..} =
 --    , ..
 --    }
 
---{-# INLINE overCompilerStateConstraintsGenErrors #-}
---overCompilerStateConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
---overCompilerStateConstraintsGenErrors fn CompilerState{..} =
+-- {-# INLINE overCompilerStateConstraintsGenErrors #-}
+-- overCompilerStateConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
+-- overCompilerStateConstraintsGenErrors fn CompilerState{..} =
 --  CompilerState
 --    { compilerConstraintsGenErrors = fn compilerConstraintsGenErrors
 --    , ..
@@ -119,9 +117,9 @@ overCompilerFreshModules fn CompilerState{..} =
 --    , ..
 --    }
 
---{-# INLINE overCompilerSolverRuleViolations #-}
---overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
---overCompilerSolverRuleViolations fn CompilerState{..} =
+-- {-# INLINE overCompilerSolverRuleViolations #-}
+-- overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
+-- overCompilerSolverRuleViolations fn CompilerState{..} =
 --  CompilerState
 --    { compilerSolverRuleViolations = fn compilerSolverRuleViolations
 --    , ..

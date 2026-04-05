@@ -4,6 +4,8 @@
 
 module Coal.AST.Normalization (NormalizationContext (..)) where
 
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Coal.AST.Flattening (flattenLambda)
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
@@ -72,3 +74,38 @@ denormalizeConstant name =
       DFunction loc name (FunctionDefinition loc w1 (With ts (typeOf e)) ps e :| []) []
     def@(ConstantDefinition loc _ _ _) ->
       DConstant loc name def []
+
+--
+
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (ProtoModule a k (Type o k)) where
+  normalizeObject =
+    undefined
+    -- \case
+    --  Module{..} ->
+    --    Module modulePath moduleExports (normalizeObject moduleDefinitions)
+  denormalizeObject =
+    undefined
+    -- \case
+    --   Module{..} ->
+    --     Module modulePath moduleExports (denormalizeObject moduleDefinitions)
+
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (ProtoDefinition a k (Type o k)) where
+  normalizeObject =
+    undefined
+--    \case
+--      DFunction loc name (FunctionDefinition a w1 (With ts t) ps e :| _) _ ->
+--        DConstant loc name (ConstantDefinition a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
+--      DInstance loc name (InstanceDefinition ts t ds) ->
+--        DInstance loc name (InstanceDefinition ts t (normalizeObject ds))
+--      d ->
+--        d
+  denormalizeObject =
+    undefined
+--    \case
+--      DConstant _ name c _ ->
+--        denormalizeConstant name c
+--      DInstance loc name (InstanceDefinition ts t ds) ->
+--        DInstance loc name (InstanceDefinition ts t (denormalizeObject ds))
+--      d ->
+--        d
+

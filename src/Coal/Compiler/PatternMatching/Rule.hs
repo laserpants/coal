@@ -14,9 +14,9 @@ import Coal.Compiler.PatternMatching.Envelope (
  )
 import Coal.Compiler.PatternMatching.Equation
 import Coal.Compiler.Stack (CompilerT)
-import Extras (foldrM, (<.>))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, setCurrentPathC)
 import Control.Monad.Trans (lift)
+import Extras (foldrM, (<.>))
 
 type MatchRule a m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> CompilerT a (ProtoCompilerT m a) (EnvelopeExpression e t)
 

@@ -13,7 +13,6 @@ module Coal.Compiler.PatternMatching (
   compileEnvelope,
 ) where
 
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.AST.Transform (replaceWith)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
@@ -24,12 +23,13 @@ import Coal.Compiler.PatternMatching.Rule (matchPatterns)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), Pattern (..), Primitive (..))
 import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
+import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Dictionary)
 import TextShow (TextShow (showt))
-import Control.Monad.Trans (lift)
 
 class MatchExpressionContext a c where
   compileMatchExprs :: (Monad m) => c -> CompilerT a (ProtoCompilerT m a) c

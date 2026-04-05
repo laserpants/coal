@@ -3,10 +3,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Build.Core (
---  buildEnv,
---  replacePlaceholders,
---  prepareBuild,
---  typeConstructorEnv,
+  --  buildEnv,
+  --  replacePlaceholders,
+  --  prepareBuild,
+  --  typeConstructorEnv,
   dependencies,
 ) where
 
@@ -38,8 +38,8 @@ import qualified Data.Set as Set
 import Extras (Name, for, groupByKey, (<$$>), (<.>))
 import Extras.Control.Monad (concatForM)
 
---buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
---buildEnv = do
+-- buildEnv :: (Monad m) => CompilerT a m (Environment IndexedScheme)
+-- buildEnv = do
 --  ModuleBuild{..} <- getCurrentBuildC
 --  flip execStateT mempty $ do
 --    forM_ moduleNames $
@@ -53,8 +53,8 @@ import Extras.Control.Monad (concatForM)
 --        _ ->
 --          pure ()
 --
---replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
---replacePlaceholders store =
+-- replacePlaceholders :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+-- replacePlaceholders store =
 --  updateCurrentBuildC $
 --    \build@ModuleBuild{..} -> do
 --      flip execStateT build $
@@ -78,8 +78,8 @@ import Extras.Control.Monad (concatForM)
 --      Just s ->
 --        modify $ addName (info name s)
 
---prepareBuild :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind (), ModuleBuild a)
---prepareBuild module_@(Module path exports defs) =
+-- prepareBuild :: (MonadIO m, Monoid a, Eq a, Show a) => Module a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind (), ModuleBuild a)
+-- prepareBuild module_@(Module path exports defs) =
 --  undefined
 --  flip runStateT emptyModuleBuild $ do
 --    modify (setPath path)

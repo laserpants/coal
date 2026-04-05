@@ -6,7 +6,8 @@ module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
---import Coal.Compiler.Build.Core (buildEnv)
+
+-- import Coal.Compiler.Build.Core (buildEnv)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups

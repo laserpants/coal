@@ -45,10 +45,10 @@ import Debug.Trace
 import Text.Pretty.Simple (pPrint, pShowNoColor)
 import TextShow (showt)
 
-passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (ProtoModule a Kind ()) (Module a Kind IndexedType)
+passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (ProtoModule a Kind ()) (ProtoModule a Kind IndexedType)
 passTypeInference = Pass{runPass = pass}
 
-pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
+pass :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind IndexedType)
 pass m@(ProtoModule path _ _) = do
   --  env <- buildEnv
   --  setNamesC env
@@ -81,7 +81,7 @@ indexTypes ds = undefined -- run (indexed ds) =<< gets compilerSupply
 --    insertSupplyC n
 --    pure r
 
-runTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
+runTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind IndexedType)
 runTypeInference m = do
   --  defs <- traverse indexTypes ds
   --  (tdefs, _) <- typeDefinitionsC defs
@@ -107,7 +107,7 @@ runTypeInference m = do
   --  when (protoOmodulePath m == Path ["Main"]) $ do
   --    pPrint nm
 
-  pure (fromProtoModule nm)
+  pure nm
 
 -- where
 --  Module p ns ds = m

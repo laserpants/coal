@@ -22,11 +22,11 @@ import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Module.Definition.Instance (InstanceDefinition (..))
 import Coal.Language.Pattern (IndexedPattern, Pattern (..))
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Control.Monad.Trans (lift)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extras (Name)
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
-import Control.Monad.Trans (lift)
 
 passExpandPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandPatterns = Pass{runPass = desugarPatterns}

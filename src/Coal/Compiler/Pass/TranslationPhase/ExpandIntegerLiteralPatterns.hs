@@ -6,7 +6,6 @@
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
 
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -18,6 +17,7 @@ import Coal.Language.Module (Module (..), principalPath)
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
 import Control.Monad.Writer

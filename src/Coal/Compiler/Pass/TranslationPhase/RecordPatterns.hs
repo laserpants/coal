@@ -10,8 +10,6 @@
 
 module Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns) where
 
-import Control.Monad.Trans (lift)
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (RecordEntry, listenRecordEntry, tellRecordEntry)
@@ -19,7 +17,9 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module (Module)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Control.Monad.RWS (forM, replicateM)
+import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)

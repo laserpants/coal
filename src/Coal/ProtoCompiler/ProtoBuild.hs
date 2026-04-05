@@ -55,8 +55,8 @@ data ProtoBuild a = ProtoBuild
     protoObuildNames :: Environment [ProtoNameEntry]
   , protoObuildExportedNames :: Set Name
   , protoObuildDataConstructors :: Environment (ProtoDataConstructorEntry a)
-  -- folds?
-  , protoObuildTypeConstructors :: Environment (ProtoTypeConstructorEntry a)
+  , -- folds?
+    protoObuildTypeConstructors :: Environment (ProtoTypeConstructorEntry a)
   , protoObuildTraits :: Environment (ProtoTraitEntry a)
   , protoObuildInstances :: Environment (InstanceMap (ProtoInstanceEntry a))
   , protoObuildAliases :: Environment (ProtoAliasEntry a)

@@ -14,13 +14,13 @@ import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
 import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
+import Coal.ProtoCompiler.ProtoStack
 import Control.Monad ((<=<))
+import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras (Dictionary)
-import Coal.ProtoCompiler.ProtoStack
-import Control.Monad.Trans (lift)
 
 passCompileNats :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passCompileNats = Pass{runPass = compileNats}

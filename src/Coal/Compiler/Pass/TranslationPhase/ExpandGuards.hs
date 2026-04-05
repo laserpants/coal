@@ -13,13 +13,13 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module (Module)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Control.Monad.Trans (lift)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..), tails)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Map, traverseM)
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
-import Control.Monad.Trans (lift)
 
 passExpandGuards :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandGuards = Pass{runPass = pass}

@@ -284,8 +284,8 @@ tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = v3 -- ProtoDataConstructorEntry
 tmpConvert2 :: TypeConstructorEntry a -> Kind -- ProtoTypeConstructorEntry a
 tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- ProtoTypeConstructorEntry v1 v2 v3 v4
 
---runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
---runConstraintsGen stack = do
+-- runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
+-- runConstraintsGen stack = do
 --  undefined
 --  sup <- gets compilerSupply
 --  build <- getCurrentBuildC
@@ -497,8 +497,8 @@ toIndexedType loc env (Parameter k n) t =
 -- instantiateTemplate :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
 -- instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
---instantiateVarsC :: (Monad m) => a -> Type Parameter () -> CompilerT a m IndexedType
---instantiateVarsC loc t = do
+-- instantiateVarsC :: (Monad m) => a -> Type Parameter () -> CompilerT a m IndexedType
+-- instantiateVarsC loc t = do
 --  undefined
 --  env <- asks compilerTypeConstructorEnvironment
 --  r <- instantiateVars mempty env t
