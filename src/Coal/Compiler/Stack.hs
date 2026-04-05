@@ -16,25 +16,10 @@ module Coal.Compiler.Stack (
   ErrorLocation (..),
   runCompilerT,
   evalCompilerT,
-  --  insertNameC,
-  --  insertNamesC,
-  --  setNamesC,
-  --  insertConstraintsC,
-  --  insertAssumptionsC,
-  --  clearAssumptionsC,
-  --  clearNameStoreC,
-  --  clearConstraintsC,
-  --  clearTypeAnnotationParamsC,
-  --  setSubstitutionC,
   updateSupply,
---  updateSupplyC,
---  insertSupplyC,
   setVerbatimSourceC,
   setVerbatimSourceForC,
   getVerbatimSourceC,
---  compilerReportConstraintsGenErrors,
---  compilerReportSolverRuleViolations,
-  --  compilerSetTypeAnnotationParams,
   setCompilerCurrentModuleC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
@@ -60,7 +45,6 @@ import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal (CompilerJournal (..))
 import Coal.Compiler.State
-import Coal.Language (TypeIndex)
 import Coal.Language.Module (Module (..), modulePathName, principalPath)
 import Coal.Language.Module.Definition (Path (..))
 import Control.Monad.Catch
@@ -105,51 +89,6 @@ evalCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Eit
 evalCompilerT env com = do
   (c, _, _) <- runCompilerT env com
   pure c
-
--- compilerSetTypeAnnotationParams :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
--- compilerSetTypeAnnotationParams params = modify (overCompilerTypeAnnotationParams (const params))
-
---compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
---compilerReportConstraintsGenErrors errors = modify (overCompilerStateConstraintsGenErrors (<> errors))
---
---compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
---compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
-
--- insertSupplyC :: (Monad m) => Int -> CompilerT a m ()
--- insertSupplyC = modify . overCompilerSupply . const
-
--- insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
--- insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
---
--- insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
--- insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
---
--- setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
--- setNamesC names = modify (overCompilerNameStore (const names))
-
--- insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
--- insertConstraintsC cs = modify (overCompilerConstraints (<> cs))
---
--- clearConstraintsC :: (Monad m) => CompilerT a m ()
--- clearConstraintsC = modify (overCompilerConstraints (const mempty))
-
--- clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
--- clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
-
--- clearAssumptionsC :: (Monad m) => CompilerT a m ()
--- clearAssumptionsC = modify (overCompilerAssumptions (const mempty))
-
--- clearNameStoreC :: (Monad m) => CompilerT a m ()
--- clearNameStoreC = modify (overCompilerNameStore (const mempty))
-
--- insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
--- insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
-
--- updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
--- updateSupplyC supply = modify (overCompilerSupply (const supply))
-
--- setSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
--- setSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
 setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
 setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))
