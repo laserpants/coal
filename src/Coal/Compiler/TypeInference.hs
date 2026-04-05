@@ -29,7 +29,7 @@ import Coal.ProtoTypeSystem.Kind.Constraint.Generation
 import Coal.ProtoTypeSystem.Parameterized
 import Coal.TypeSystem
 import Control.Monad.Except (MonadError (..), forM_)
-import Control.Monad.Reader (asks, runReaderT)
+import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (evalState, get, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
@@ -284,9 +284,9 @@ tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = v3 -- ProtoDataConstructorEntry
 tmpConvert2 :: TypeConstructorEntry a -> Kind -- ProtoTypeConstructorEntry a
 tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- ProtoTypeConstructorEntry v1 v2 v3 v4
 
-runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
-runConstraintsGen stack = do
-  undefined
+--runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
+--runConstraintsGen stack = do
+--  undefined
 --  sup <- gets compilerSupply
 --  build <- getCurrentBuildC
 --  let (result, ConstraintsGenState{..}, output) =
