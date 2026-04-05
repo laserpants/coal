@@ -157,10 +157,10 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
   aliasTransform =
     \case
       ProtoInstanceDefinition{..} -> do
-        newprotoOInstanceDefinitionImplementations <- aliasTransform protoOinstanceDefinitionImplementations
+        newInstanceDefinitionImplementations <- aliasTransform protoOinstanceDefinitionImplementations
         pure $
           ProtoInstanceDefinition
-            { protoOinstanceDefinitionImplementations = newprotoOInstanceDefinitionImplementations
+            { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
 
