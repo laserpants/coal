@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandGuards (passExpandGuards) where
@@ -12,8 +13,9 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module, fromProtoModule, principalPath)
+import Coal.Language.Module (Module, fromProtoModule)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Trans (lift)
 import Data.Foldable (foldrM)
@@ -22,17 +24,19 @@ import Data.List.NonEmpty (NonEmpty (..), tails)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Map, traverseM)
 
-passExpandGuards :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passExpandGuards :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandGuards = Pass{runPass = pass}
 
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
-pass = transformBiM expandExpression
+pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
+pass m = do
+  xx <- bork m
+  return (fromProtoModule xx)
 
-trivial :: Clause a () t -> Bool
+trivial :: Clause a Kind t -> Bool
 trivial (EClause _ _ (CPlain _ [] _ :| [])) = True
 trivial _ = False
 
-expandExpression :: (Monad m) => Expression Metadata () IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Expression Metadata () IndexedType)
+expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Expression Metadata Kind IndexedType)
 expandExpression =
   \case
     e@(EMatch _ _ _ cs)
@@ -71,7 +75,37 @@ instance (ExpandGuards a) => ExpandGuards (Map k a) where
 instance (ExpandGuards a) => ExpandGuards (Maybe a) where
   expandGuards = traverseM expandGuards
 
-expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata () IndexedType -> [Clause Metadata () IndexedType] -> CompilerT Metadata (ProtoCompilerT m Metadata) (Clause Metadata () IndexedType)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+bork =
+  \case
+    ProtoModule{..} -> do
+      newModuleDefinitions <- traverse fnork protoOmoduleDefinitions
+      return $
+        ProtoModule
+          { protoOmoduleDefinitions = newModuleDefinitions
+          , ..
+          }
+
+fnork :: (Monad m) => ProtoDefinition Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoDefinition Metadata Kind IndexedType)
+fnork =
+  \case
+    ProtoDFunction loc name def -> do
+      ProtoDFunction loc name <$> transformBiM expandExpression def
+    ProtoDLet loc name def ->
+      ProtoDLet loc name <$> transformBiM expandExpression def
+    ProtoDInstance loc ProtoInstanceDefinition{..} -> do
+      newInstanceDefinitionImplementations <- traverse fnork protoOinstanceDefinitionImplementations
+      return $
+        ProtoDInstance
+          loc
+          ProtoInstanceDefinition
+            { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
+            , ..
+            }
+    d ->
+      return d
+
+expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata Kind IndexedType -> [Clause Metadata Kind IndexedType] -> CompilerT Metadata (ProtoCompilerT m Metadata) (Clause Metadata Kind IndexedType)
 expandClauseGuards _ _ _ (c@(EClause _ _ (CPlain _ [] _ :| [])) : _) =
   pure c
 expandClauseGuards a1 t var (EClause a2 p choices : clauses) = do
@@ -80,11 +114,11 @@ expandClauseGuards a1 t var (EClause a2 p choices : clauses) = do
   pure $ EClause a2 p (CPlain a1 [] e1 :| [])
  where
   EClause a3 q cs2 = last clauses
-  go :: (Monad m) => Choice Expression Metadata () IndexedType -> Expression Metadata () IndexedType -> CompilerT Metadata m (Expression Metadata () IndexedType)
+  go :: (Monad m) => Choice Expression Metadata Kind IndexedType -> Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
   go (CPlain a gs e) e1 =
     pure $ EIf a (typeOf e1) (foldr1 (conjunction a) (guardExpression <$> gs)) e e1
 expandClauseGuards _ _ _ _ =
   error "Implementation error"
 
-conjunction :: Metadata -> Expression Metadata () IndexedType -> Expression Metadata () IndexedType -> Expression Metadata () IndexedType
+conjunction :: Metadata -> Expression Metadata Kind IndexedType -> Expression Metadata Kind IndexedType -> Expression Metadata Kind IndexedType
 conjunction a e1 e2 = EApplication a (TIntrinsic IBool) e1 (e2 :| [])
