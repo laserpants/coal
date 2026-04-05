@@ -6,6 +6,7 @@
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
 
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -32,7 +33,7 @@ passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (Module Metadat
 passExpandIntegerLiteralPatterns = Pass{runPass = expandIntegerLiteralPatterns}
 
 class TransformContext e where
-  expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata m e
+  expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) e
 
 instance (TransformContext e) => TransformContext [e] where
   expandIntegerLiteralPatterns = traverse expandIntegerLiteralPatterns
@@ -50,7 +51,7 @@ instance TransformContext (Expression Metadata () IndexedType) where
       e ->
         descendM expandIntegerLiteralPatterns e
 
-expandClause :: (Monad m) => Metadata -> Expression Metadata () IndexedType -> (Clause Metadata () IndexedType, [Clause Metadata () IndexedType]) -> CompilerT Metadata m (Clause Metadata () IndexedType)
+expandClause :: (Monad m) => Metadata -> Expression Metadata () IndexedType -> (Clause Metadata () IndexedType, [Clause Metadata () IndexedType]) -> CompilerT Metadata (ProtoCompilerT m Metadata) (Clause Metadata () IndexedType)
 expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
   e1' <- expandIntegerLiteralPatterns e1
   (q, ints) <- runWriterT (transformM collectIntegerLiteralPatterns p)
@@ -107,11 +108,11 @@ fromLiteral t int
             :| []
         )
 
-collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata () IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata () IndexedType)
+collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata () IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata (ProtoCompilerT m Metadata)) (Pattern Metadata () IndexedType)
 collectIntegerLiteralPatterns =
   \case
     PInteger a t int -> do
-      n <- lift (supplied id)
+      n <- lift $ lift (supplied id)
       let ll = Label t ("int" <> ".[" <> showt n <> "]")
       tell [(ll, int)]
       pure (PVariable a ll)

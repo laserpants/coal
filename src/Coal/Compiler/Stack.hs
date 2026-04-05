@@ -27,8 +27,8 @@ module Coal.Compiler.Stack (
   --  clearTypeAnnotationParamsC,
   --  setSubstitutionC,
   updateSupply,
-  updateSupplyC,
-  insertSupplyC,
+--  updateSupplyC,
+--  insertSupplyC,
   setVerbatimSourceC,
   setVerbatimSourceForC,
   getVerbatimSourceC,
@@ -115,8 +115,8 @@ evalCompilerT env com = do
 --compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
 --compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
 
-insertSupplyC :: (Monad m) => Int -> CompilerT a m ()
-insertSupplyC = modify . overCompilerSupply . const
+-- insertSupplyC :: (Monad m) => Int -> CompilerT a m ()
+-- insertSupplyC = modify . overCompilerSupply . const
 
 -- insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
 -- insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
@@ -145,8 +145,8 @@ insertSupplyC = modify . overCompilerSupply . const
 -- insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
 -- insertAssumptionsC as = modify (overCompilerAssumptions (<> as))
 
-updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
-updateSupplyC supply = modify (overCompilerSupply (const supply))
+-- updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
+-- updateSupplyC supply = modify (overCompilerSupply (const supply))
 
 -- setSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 -- setSubstitutionC sub = modify (overCompilerSubstitution (const sub))

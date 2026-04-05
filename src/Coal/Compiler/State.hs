@@ -5,7 +5,7 @@ module Coal.Compiler.State (
   CompilerState (..),
   CompilerAssumption,
   CompilerConstraint,
-  overCompilerSupply,
+--  overCompilerSupply,
 --  overCompilerSolverRuleViolations,
 --  overCompilerStateConstraintsGenErrors,
   overCompilerVerbatimSource,
@@ -32,8 +32,10 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
-  { compilerSupply :: Int
-  , compilerCurrentModule :: Path
+  { 
+
+  -- compilerSupply :: Int
+    compilerCurrentModule :: Path
   , compilerFreshModules :: Set Name
   , compilerVerbatimSource :: Environment Text
   , compilerConfig :: CompilerConfig
@@ -41,9 +43,9 @@ data CompilerState a = CompilerState
   }
   deriving (Show, Eq, Ord)
 
-instance Supply (CompilerState a) where
-  updateSupply = overCompilerSupply
-  getSupply = compilerSupply
+--instance Supply (CompilerState a) where
+--  updateSupply = overCompilerSupply
+--  getSupply = compilerSupply
 
 -- {-# INLINE overCompilerNameStore #-}
 -- overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
@@ -69,13 +71,13 @@ overCompilerFreshModules fn CompilerState{..} =
     , ..
     }
 
-{-# INLINE overCompilerSupply #-}
-overCompilerSupply :: Over (CompilerState a) Int
-overCompilerSupply fn CompilerState{..} =
-  CompilerState
-    { compilerSupply = fn compilerSupply
-    , ..
-    }
+--{-# INLINE overCompilerSupply #-}
+--overCompilerSupply :: Over (CompilerState a) Int
+--overCompilerSupply fn CompilerState{..} =
+--  CompilerState
+--    { compilerSupply = fn compilerSupply
+--    , ..
+--    }
 
 -- {-# INLINE overCompilerSubstitution #-}
 -- overCompilerSubstitution :: Over (CompilerState a) Substitution
@@ -152,8 +154,8 @@ overCompilerModules fn CompilerState{..} =
 initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
-    { compilerSupply = 0
-    , compilerCurrentModule = Path mempty
+    { -- compilerSupply = 0
+      compilerCurrentModule = Path mempty
     , compilerFreshModules = mempty
     , compilerVerbatimSource = mempty
     , compilerConfig = defaultConfig

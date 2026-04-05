@@ -18,18 +18,20 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..), tails)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Map, traverseM)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Control.Monad.Trans (lift)
 
 passExpandGuards :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandGuards = Pass{runPass = pass}
 
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
 pass = transformBiM expandExpression
 
 trivial :: Clause a () t -> Bool
 trivial (EClause _ _ (CPlain _ [] _ :| [])) = True
 trivial _ = False
 
-expandExpression :: (Monad m) => Expression Metadata () IndexedType -> CompilerT Metadata m (Expression Metadata () IndexedType)
+expandExpression :: (Monad m) => Expression Metadata () IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Expression Metadata () IndexedType)
 expandExpression =
   \case
     e@(EMatch _ _ _ cs)
@@ -37,7 +39,7 @@ expandExpression =
           pure e
     EMatch a t e cs -> do
       e' <- expandExpression e
-      name <- supplied (freshName "scr")
+      name <- lift $ supplied (freshName "scr")
       let ll = Label (typeOf e) name
           var = EVariable a ll
       cs' <- traverse (expandClauseGuards a t var) (NonEmpty.init $ tails cs)
@@ -68,7 +70,7 @@ instance (ExpandGuards a) => ExpandGuards (Map k a) where
 instance (ExpandGuards a) => ExpandGuards (Maybe a) where
   expandGuards = traverseM expandGuards
 
-expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata () IndexedType -> [Clause Metadata () IndexedType] -> CompilerT Metadata m (Clause Metadata () IndexedType)
+expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata () IndexedType -> [Clause Metadata () IndexedType] -> CompilerT Metadata (ProtoCompilerT m Metadata) (Clause Metadata () IndexedType)
 expandClauseGuards _ _ _ (c@(EClause _ _ (CPlain _ [] _ :| [])) : _) =
   pure c
 expandClauseGuards a1 t var (EClause a2 p choices : clauses) = do

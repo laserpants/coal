@@ -130,7 +130,7 @@ atLabels = execWriter . go
 
 expandFoldExpr :: (Monad m, Monoid a, Data a, Data k) => NonEmpty (Expression a k ()) -> NonEmpty (Clause a k ()) -> CompilerT a (ProtoCompilerT m a) (Expression a k ())
 expandFoldExpr args clauses = do
-  name <- supplied (freshName "fold")
+  name <- lift $ supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
   pure $
     deepFlattenApplications $

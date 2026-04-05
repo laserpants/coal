@@ -151,12 +151,12 @@ collectTraits u name = do
           pure (apply (sub2 <> sub1) ts)
  where
   instantiate (TypeIndex k index) acc = do
-    var <- supplied (TVariable . TypeIndex k)
+    var <- lift $ supplied (TVariable . TypeIndex k)
     pure (index `mapsTo` var <> acc)
 
 tryMatch :: (Monad m) => IndexedType -> IndexedType -> CompilerT a (ProtoCompilerT m a) (Either UnificationError Substitution)
 tryMatch t u = do
-  var <- supplied id
+  var <- lift $ supplied id
   pure (evalUnifier var (match t u))
 
 findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a (ProtoCompilerT m a) (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))

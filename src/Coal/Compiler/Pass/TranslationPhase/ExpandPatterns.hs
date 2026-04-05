@@ -25,12 +25,14 @@ import Coal.Language.Pattern (IndexedPattern, Pattern (..))
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extras (Name)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Control.Monad.Trans (lift)
 
 passExpandPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandPatterns = Pass{runPass = desugarPatterns}
 
 class TransformContext s where
-  desugarPatterns :: (Monad m) => s -> CompilerT Metadata m s
+  desugarPatterns :: (Monad m) => s -> CompilerT Metadata (ProtoCompilerT m Metadata) s
 
 instance TransformContext (IndexedPattern Metadata) where
   desugarPatterns =
@@ -42,7 +44,7 @@ instance TransformContext (IndexedPattern Metadata) where
       PShorthand loc (Label t name) ->
         desugarPatterns (PVariable loc (Label t name))
       p -> do
-        name <- supplied (freshName "v")
+        name <- lift $ supplied (freshName "v")
         tellPatterns1 (name, p)
         pure (PVariable mempty (Label (typeOf p) name))
 

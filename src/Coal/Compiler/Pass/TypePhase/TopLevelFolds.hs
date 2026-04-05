@@ -62,7 +62,7 @@ compileTopLevelFolds =
 
 expandClauses :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a Kind ()) -> CompilerT a (ProtoCompilerT m a) (Expression a Kind ())
 expandClauses clauses = do
-  name <- supplied (freshName "fold")
+  name <- lift $ supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
   pure $ lambda1E (name <> ".expr") (matchE (varE (name <> ".expr")) expr)
 

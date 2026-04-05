@@ -444,7 +444,7 @@ lookupAlias2 t ts name = do
         _ ->
           pure t
     Just ProtoAliasEntry{..} -> do
-      ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) protoOaliasEntryParams
+      ixs <- traverse (\Parameter{..} -> lift $ supplied (TypeIndex parameterKind)) protoOaliasEntryParams
       let abc = (parameterName <$> protoOaliasEntryParams) `zip` ixs
           sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)
       t1 <- lift $ runReaderT (toIndexed protoOaliasEntryType) (Environment.fromList abc)

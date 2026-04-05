@@ -286,20 +286,21 @@ tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- ProtoTypeConstructorEntry
 
 runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 runConstraintsGen stack = do
-  sup <- gets compilerSupply
-  build <- getCurrentBuildC
-  let (result, ConstraintsGenState{..}, output) =
-        runConstraintsGenStack
-          sup
-          ( emptyConstraintsGenContext
-              { constraintsGenContextDataConstructors = Environment.mapEnvironment tmpConvert1 (moduleDataConstructors build)
-              , constraintsGenContextTypeConstructors =
-                  Environment.mapEnvironment tmpConvert2 (moduleTypeConstructors build)
-              }
-          )
-          stack
-  updateSupplyC constraintsGenStateSupply
-  pure (result, constraintsGenStateTypeIndexes, output)
+  undefined
+--  sup <- gets compilerSupply
+--  build <- getCurrentBuildC
+--  let (result, ConstraintsGenState{..}, output) =
+--        runConstraintsGenStack
+--          sup
+--          ( emptyConstraintsGenContext
+--              { constraintsGenContextDataConstructors = Environment.mapEnvironment tmpConvert1 (moduleDataConstructors build)
+--              , constraintsGenContextTypeConstructors =
+--                  Environment.mapEnvironment tmpConvert2 (moduleTypeConstructors build)
+--              }
+--          )
+--          stack
+--  updateSupplyC constraintsGenStateSupply
+--  pure (result, constraintsGenStateTypeIndexes, output)
 
 -- generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a () IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
 -- generateExpressionConstraints e = do
@@ -496,14 +497,15 @@ toIndexedType loc env (Parameter k n) t =
 -- instantiateTemplate :: TypeIndex Kind -> IndexedType -> IndexedScheme -> IndexedScheme
 -- instantiateTemplate (TypeIndex _ n) t1 (Forall vs ts t) = Forall vs ts (apply (n `mapsTo` t1) t)
 
-instantiateVarsC :: (Monad m) => a -> Type Parameter () -> CompilerT a m IndexedType
-instantiateVarsC loc t = do
-  env <- asks compilerTypeConstructorEnvironment
-  r <- instantiateVars mempty env t
-  case r of
-    Left err -> do
-      path <- gets compilerCurrentModule
-      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
-      throwError PreflightFailure
-    Right t1 ->
-      pure t1
+--instantiateVarsC :: (Monad m) => a -> Type Parameter () -> CompilerT a m IndexedType
+--instantiateVarsC loc t = do
+--  undefined
+--  env <- asks compilerTypeConstructorEnvironment
+--  r <- instantiateVars mempty env t
+--  case r of
+--    Left err -> do
+--      path <- gets compilerCurrentModule
+--      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
+--      throwError PreflightFailure
+--    Right t1 ->
+--      pure t1

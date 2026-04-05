@@ -75,12 +75,12 @@ isFoldAssumption :: Assumption a t -> Bool
 isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
 
 indexTypes :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
-indexTypes ds = run (indexed ds) =<< gets compilerSupply
- where
-  run s m = do
-    let (r, n) = runState s m
-    insertSupplyC n
-    pure r
+indexTypes ds = undefined -- run (indexed ds) =<< gets compilerSupply
+-- where
+--  run s m = do
+--    let (r, n) = runState s m
+--    insertSupplyC n
+--    pure r
 
 runTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
 runTypeInference m = do

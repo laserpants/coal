@@ -15,8 +15,10 @@ import Coal.Compiler.PatternMatching.Envelope (
 import Coal.Compiler.PatternMatching.Equation
 import Coal.Compiler.Stack (CompilerT)
 import Extras (foldrM, (<.>))
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, setCurrentPathC)
+import Control.Monad.Trans (lift)
 
-type MatchRule a m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> CompilerT a m (EnvelopeExpression e t)
+type MatchRule a m p e t = [Label t] -> [p e t] -> EnvelopeExpression e t -> CompilerT a (ProtoCompilerT m a) (EnvelopeExpression e t)
 
 matchPatterns :: (Ord t, EnvelopeHost e t, Monad m) => MatchRule a m PatternEquation e t
 matchPatterns us qs e =
@@ -70,13 +72,15 @@ constructorRule (u@(Label t _) : us) eqs ex = do
   shift (HeadConstructorEquation _ ps (PatternEquationBody qs e)) =
     patternEquation (ps <> qs) e
 
-suppliedLabel :: (Monad m) => EnvelopePattern e t -> CompilerT a m (Label t)
+suppliedLabel :: (Monad m) => EnvelopePattern e t -> CompilerT a (ProtoCompilerT m a) (Label t)
 suppliedLabel =
   \case
     MVariable (Label t name) -> do
-      prefix <- supplied (freshName "match")
+      prefix <- lift $ supplied (freshName "match")
       pure (Label t (prefix <.> name))
-    MConstructor (Label t _) _ ->
-      Label t <$> supplied (freshName "match")
-    MLiteral t _ ->
-      Label t <$> supplied (freshName "match")
+    MConstructor (Label t _) _ -> do
+      prefix <- lift $ supplied (freshName "match")
+      pure (Label t prefix)
+    MLiteral t _ -> do
+      prefix <- lift $ supplied (freshName "match")
+      pure (Label t prefix)
