@@ -1,10 +1,7 @@
 module Coal.Compiler.Pass.TypePhase.Prep2 (passPrep2) where
 
 import Coal.AST.Metadata (Metadata (..))
---import Coal.Compiler.Build.Core (buildEnv)
-import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), fromProtoModule, principalPath, toProtoModule)
@@ -14,7 +11,6 @@ import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, p
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadIO)
 import Control.Monad.Trans (lift)
-import Extras (forM_)
 
 passPrep2 :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind ()) (ProtoModule Metadata Kind ())
 passPrep2 = Pass{runPass = pass}
