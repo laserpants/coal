@@ -300,8 +300,12 @@ instance ToKindIndexed (ProtoModule a k ()) (ProtoModule a Kind ()) where
   toKindIndexed =
     \case
       ProtoModule{..} -> do
-        newProtoOmoduleDefinitions <- traverse toKindIndexed protoOmoduleDefinitions
-        pure ProtoModule{protoOmoduleDefinitions = newProtoOmoduleDefinitions, ..}
+        newModuleDefinitions <- traverse toKindIndexed protoOmoduleDefinitions
+        pure $
+          ProtoModule
+            { protoOmoduleDefinitions = newModuleDefinitions
+            , ..
+            }
 
 instance ToKindIndexed (TypeIndex k) (TypeIndex Kind) where
   toKindIndexed =
