@@ -4,8 +4,6 @@
 
 module Coal.AST.Normalization (NormalizationContext (..)) where
 
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Coal.AST.Flattening (flattenLambda)
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
@@ -16,6 +14,8 @@ import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Module.Definition.Instance (InstanceDefinition (..))
 import Coal.Language.Trait (With (..))
 import Coal.Language.Type (Type (..))
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
@@ -75,32 +75,71 @@ denormalizeConstant name =
     def@(ConstantDefinition loc _ _ _) ->
       DConstant loc name def []
 
+denormalizeConstant2 :: (Data a, Data k, Data (o k), Typeable o) => Name -> ProtoLetDefinition a k (Type o k) -> ProtoDefinition a k (Type o k)
+denormalizeConstant2 =
+  undefined
+
 --
 
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (ProtoModule a k (Type o k)) where
   normalizeObject =
-    undefined
-    -- \case
-    --  Module{..} ->
-    --    Module modulePath moduleExports (normalizeObject moduleDefinitions)
+    \case
+      ProtoModule{..} ->
+        ProtoModule
+          { protoOmoduleDefinitions = normalizeObject protoOmoduleDefinitions
+          , ..
+          }
   denormalizeObject =
-    undefined
-    -- \case
-    --   Module{..} ->
-    --     Module modulePath moduleExports (denormalizeObject moduleDefinitions)
+    \case
+      ProtoModule{..} ->
+        ProtoModule
+          { protoOmoduleDefinitions = denormalizeObject protoOmoduleDefinitions
+          , ..
+          }
 
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (ProtoDefinition a k (Type o k)) where
   normalizeObject =
-    undefined
---    \case
---      DFunction loc name (FunctionDefinition a w1 (With ts t) ps e :| _) _ ->
---        DConstant loc name (ConstantDefinition a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
---      DInstance loc name (InstanceDefinition ts t ds) ->
---        DInstance loc name (InstanceDefinition ts t (normalizeObject ds))
---      d ->
---        d
+    \case
+      ProtoDFunction loc name ProtoFunctionDefinition{..} ->
+        ProtoDLet loc name ProtoLetDefinition{
+            protoOletDefinitionMetadata = undefined
+          , protoOletDefinitionAnnotation = undefined
+          , protoOletDefinitionType = undefined
+          , protoOletDefinitionExpression = undefined
+        }
+      ProtoDInstance loc ProtoInstanceDefinition{..} ->
+        ProtoDInstance
+          loc
+          ProtoInstanceDefinition
+            { protoOinstanceDefinitionImplementations =
+                normalizeObject protoOinstanceDefinitionImplementations
+            , ..
+            }
+      d ->
+        d
+
+  --    \case
+  --      DFunction loc name (FunctionDefinition a w1 (With ts t) ps e :| _) _ ->
+  --        DConstant loc name (ConstantDefinition a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
+  --      DInstance loc name (InstanceDefinition ts t ds) ->
+  --        DInstance loc name (InstanceDefinition ts t (normalizeObject ds))
+  --      d ->
+  --        d
   denormalizeObject =
-    undefined
+    \case
+      ProtoDLet _ name def ->
+        denormalizeConstant2 name def
+      ProtoDInstance loc ProtoInstanceDefinition{..} ->
+        ProtoDInstance
+          loc
+          ProtoInstanceDefinition
+            { protoOinstanceDefinitionImplementations =
+                denormalizeObject protoOinstanceDefinitionImplementations
+            , ..
+            }
+      d ->
+        d
+
 --    \case
 --      DConstant _ name c _ ->
 --        denormalizeConstant name c
@@ -108,4 +147,3 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
 --        DInstance loc name (InstanceDefinition ts t (denormalizeObject ds))
 --      d ->
 --        d
-
