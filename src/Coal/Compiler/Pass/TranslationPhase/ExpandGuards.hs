@@ -12,8 +12,9 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module)
+import Coal.Language.Module (Module, fromProtoModule, principalPath)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Trans (lift)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)

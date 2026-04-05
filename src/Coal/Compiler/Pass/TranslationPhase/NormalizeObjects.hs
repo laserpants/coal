@@ -12,10 +12,8 @@ import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Coal.ProtoLanguage.ProtoModule
 import Data.Data (Data, Typeable)
 
-passNormalizeObjects :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kind (Type TypeIndex Kind)) (Module a Kind (Type TypeIndex Kind))
+passNormalizeObjects :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kind (Type TypeIndex Kind)) (ProtoModule a Kind (Type TypeIndex Kind))
 passNormalizeObjects = Pass{runPass = bork}
 
-bork :: (Monad m, Monoid a, Data a) => ProtoModule a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
-bork xx = do
-  let a = normalizeObject (fromProtoModule xx)
-  return a
+bork :: (Monad m, Monoid a, Data a) => ProtoModule a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind IndexedType)
+bork xx = return (normalizeObject xx)

@@ -25,11 +25,11 @@ import Control.Monad.IO.Class (MonadIO)
 translationPhasePasses :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 translationPhasePasses =
   passNormalizeObjects
-    >-> generateDebugArtifacts "NormalizeObjects"
+    --    >-> generateDebugArtifacts "NormalizeObjects"
     >-> passExpandPatterns
     >-> passExpandGuards
     >-> passOrPatterns
-    >-> generateDebugArtifacts "OrPatterns"
+    --    >-> generateDebugArtifacts "OrPatterns"
     >-> passPatternExhaustiveCheck
     >-> passRecordPatterns
     >-> generateDebugArtifacts "RecordPatterns"

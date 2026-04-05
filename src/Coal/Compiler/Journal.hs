@@ -24,6 +24,7 @@ import Coal.Compiler.Error (CompilerError (..))
 import Coal.Language.Pattern (IndexedPattern, Pattern)
 import Coal.Language.Trait (Trait)
 import Coal.Language.Type (IndexedType)
+import Coal.Language.Type.Kind
 import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Set (Set)
 import Data.Tuple.Extra (second)
@@ -31,7 +32,7 @@ import Data.Tuple.Extra (second)
 type RecordEntry a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
 
 data CompilerJournal a = CompilerJournal
-  { compilerJournalPatterns :: [(Name, Pattern a () IndexedType)]
+  { compilerJournalPatterns :: [(Name, Pattern a Kind IndexedType)]
   , compilerJournalWhereClauses :: [(Name, Name)]
   , compilerJournalRecordEntries :: [RecordEntry a]
   , compilerJournalDictionaryTraits :: Set (Trait IndexedType)
@@ -52,11 +53,11 @@ instance Monoid (CompilerJournal a) where
   mempty = CompilerJournal mempty mempty mempty mempty mempty
 
 {-# INLINE tellPatterns #-}
-tellPatterns :: (MonadWriter (CompilerJournal a) m) => [(Name, Pattern a () IndexedType)] -> m ()
+tellPatterns :: (MonadWriter (CompilerJournal a) m) => [(Name, Pattern a Kind IndexedType)] -> m ()
 tellPatterns w = tell $ CompilerJournal w mempty mempty mempty mempty
 
 {-# INLINE tellPatterns1 #-}
-tellPatterns1 :: (MonadWriter (CompilerJournal a) m) => (Name, Pattern a () IndexedType) -> m ()
+tellPatterns1 :: (MonadWriter (CompilerJournal a) m) => (Name, Pattern a Kind IndexedType) -> m ()
 tellPatterns1 w = tellPatterns [w]
 
 {-# INLINE tellWhereClauses #-}
@@ -75,7 +76,7 @@ tellDictionaryTraits w = tell $ CompilerJournal mempty mempty mempty w mempty
 tellErrors :: (MonadWriter (CompilerJournal a) m) => [CompilerError a] -> m ()
 tellErrors w = tell $ CompilerJournal mempty mempty mempty mempty w
 
-listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a () IndexedType)])
+listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a Kind IndexedType)])
 listenPatterns w = second compilerJournalPatterns <$> listen w
 
 listenWhereClauses :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Name)])
