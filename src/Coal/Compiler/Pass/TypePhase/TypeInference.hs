@@ -7,7 +7,6 @@ module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
---import Coal.Compiler.Build.Core (buildEnv)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Builtin.Traits (builtinTraits)
 import Coal.Compiler.Journal (tellErrors)
