@@ -32,15 +32,16 @@ translationPhasePasses =
     --    >-> generateDebugArtifacts "OrPatterns"
     >-> passPatternExhaustiveCheck
     >-> passRecordPatterns
---    >-> generateDebugArtifacts "RecordPatterns"
+    --    >-> generateDebugArtifacts "RecordPatterns"
     >-> passExpandAsPatterns
     >-> passExpandIntegerLiteralPatterns
---    >-> generateDebugArtifacts "Patterns"
+    --    >-> generateDebugArtifacts "Patterns"
     >-> passMatchExpressions
---    >-> generateDebugArtifacts "MatchExpressions"
+    --    >-> generateDebugArtifacts "MatchExpressions"
     >-> passPlaceholders
---    >-> generateDebugArtifacts "Placeholders"
+    --    >-> generateDebugArtifacts "Placeholders"
     >-> passCompileNats
---    >-> generateDebugArtifacts "CompileNats"
+    --    >-> generateDebugArtifacts "CompileNats"
     >-> passDenormalizeObjects
+
 --    >-> generateDebugArtifacts "DenormalizeObjects"

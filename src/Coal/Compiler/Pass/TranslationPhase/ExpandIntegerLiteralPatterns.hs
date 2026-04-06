@@ -2,10 +2,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
 
+import Data.Data (Data)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -13,11 +15,13 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module (..), principalPath)
+import Coal.Language.Module (Module (..), fromProtoModule, principalPath)
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, setCurrentPathC)
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
 import Control.Monad.Writer
@@ -29,8 +33,13 @@ import qualified Data.List.NonEmpty as NonEmpty
 import GHC.Int (Int32, Int64)
 import TextShow (showt)
 
-passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandIntegerLiteralPatterns = Pass{runPass = expandIntegerLiteralPatterns}
+passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passExpandIntegerLiteralPatterns = Pass{runPass = bork}
+
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
+bork m = do
+  xx <- expandIntegerLiteralPatterns m
+  return (fromProtoModule xx)
 
 class TransformContext e where
   expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) e
@@ -41,7 +50,7 @@ instance (TransformContext e) => TransformContext [e] where
 instance (TransformContext e) => TransformContext (NonEmpty e) where
   expandIntegerLiteralPatterns = traverse expandIntegerLiteralPatterns
 
-instance TransformContext (Expression Metadata () IndexedType) where
+instance (Data k) => TransformContext (Expression Metadata k IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       EMatch a t e cs ->
@@ -51,7 +60,7 @@ instance TransformContext (Expression Metadata () IndexedType) where
       e ->
         descendM expandIntegerLiteralPatterns e
 
-expandClause :: (Monad m) => Metadata -> Expression Metadata () IndexedType -> (Clause Metadata () IndexedType, [Clause Metadata () IndexedType]) -> CompilerT Metadata (ProtoCompilerT m Metadata) (Clause Metadata () IndexedType)
+expandClause :: (Monad m, Data k) => Metadata -> Expression Metadata k IndexedType -> (Clause Metadata k IndexedType, [Clause Metadata k IndexedType]) -> CompilerT Metadata (ProtoCompilerT m Metadata) (Clause Metadata k IndexedType)
 expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
   e1' <- expandIntegerLiteralPatterns e1
   (q, ints) <- runWriterT (transformM collectIntegerLiteralPatterns p)
@@ -74,7 +83,7 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
       pure (EClause a q (CPlain a1 gs e2 :| []))
 expandClause _ _ _ = error "Implementation error"
 
-numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata () IndexedType -> Expression Metadata () IndexedType
+numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata k IndexedType -> Expression Metadata k IndexedType
 numericLiteral (ll@(Label t _), int) e1 =
   EApplication
     mempty
@@ -89,7 +98,7 @@ numericLiteral (ll@(Label t _), int) e1 =
            ]
     )
 
-fromLiteral :: IndexedType -> Integer -> Expression Metadata () IndexedType
+fromLiteral :: IndexedType -> Integer -> Expression Metadata k IndexedType
 fromLiteral t int
   | int <= fromIntegral (maxBound :: Int32) =
       EApplication mempty t (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` t) "from_int32")) (ELiteral mempty (LInt32 (fromIntegral int)) :| [])
@@ -108,7 +117,7 @@ fromLiteral t int
             :| []
         )
 
-collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata () IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata (ProtoCompilerT m Metadata)) (Pattern Metadata () IndexedType)
+collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata k IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata (ProtoCompilerT m Metadata)) (Pattern Metadata k IndexedType)
 collectIntegerLiteralPatterns =
   \case
     PInteger a t int -> do
@@ -118,6 +127,28 @@ collectIntegerLiteralPatterns =
       pure (PVariable a ll)
     p ->
       pure p
+
+instance TransformContext (ProtoFunctionDefinition Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      ProtoFunctionDefinition{..} -> do
+        newFunctiongDefinitionExpression <- expandIntegerLiteralPatterns protoOfunctionDefinitionExpression
+        return $
+          ProtoFunctionDefinition
+            { protoOfunctionDefinitionExpression = newFunctiongDefinitionExpression
+            , ..
+            }
+
+instance TransformContext (ProtoLetDefinition Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      ProtoLetDefinition{..} -> do
+        newLetDefinitionExpression <- expandIntegerLiteralPatterns protoOletDefinitionExpression
+        return $
+          ProtoLetDefinition
+            { protoOletDefinitionExpression = newLetDefinitionExpression
+            , ..
+            }
 
 instance TransformContext (FunctionDefinition Metadata IndexedType) where
   expandIntegerLiteralPatterns =
@@ -144,6 +175,29 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
           <*> traverse expandIntegerLiteralPatterns fs
       d ->
         pure d
+
+instance TransformContext (ProtoDefinition Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      ProtoDFunction a name def ->
+        ProtoDFunction a name <$> expandIntegerLiteralPatterns def
+      ProtoDLet a name def ->
+        ProtoDLet a name <$> expandIntegerLiteralPatterns def
+      d ->
+        pure d
+
+instance TransformContext (ProtoModule Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      ProtoModule{..} -> do
+        setCompilerCurrentModuleC protoOmodulePath
+        lift $ setCurrentPathC protoOmodulePath
+        newModuleDefinitions <- traverse expandIntegerLiteralPatterns protoOmoduleDefinitions
+        return $
+          ProtoModule
+            { protoOmoduleDefinitions = newModuleDefinitions
+            , ..
+            }
 
 instance TransformContext (Module Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =

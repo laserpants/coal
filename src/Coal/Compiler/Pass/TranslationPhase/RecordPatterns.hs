@@ -33,7 +33,7 @@ passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kin
 passRecordPatterns = Pass{runPass = compileRecordPatterns}
 
 compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => ProtoModule a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind IndexedType)
-compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a Kind (Type TypeIndex Kind))) 
+compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a Kind (Type TypeIndex Kind)))
 
 class RecordDesugarable a p where
   desugarRecordPatterns :: (Monad m) => p -> CompilerT a (ProtoCompilerT m a) p

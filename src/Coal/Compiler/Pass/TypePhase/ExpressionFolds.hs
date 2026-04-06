@@ -8,7 +8,7 @@
 
 module Coal.Compiler.Pass.TypePhase.ExpressionFolds (passExpressionFolds) where
 
-import Coal.AST.Flattening (deepFlattenApplications)
+import Coal.AST.Flattening (flattenApplicationsDeep)
 import Coal.AST.Shorthand
 import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
@@ -133,7 +133,7 @@ expandFoldExpr args clauses = do
   name <- lift $ supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
   pure $
-    deepFlattenApplications $
+    flattenApplicationsDeep $
       letE
         name
         ( lambda1E

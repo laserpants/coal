@@ -4,7 +4,7 @@
 
 module Coal.AST.Normalization (NormalizationContext (..)) where
 
-import Coal.AST.Flattening (flattenLambda)
+import Coal.AST.Flattening (flattenLambdas)
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module (Module (..))
@@ -51,7 +51,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
   normalizeObject =
     \case
       DFunction loc name (FunctionDefinition a w1 (With ts t) ps e :| _) _ ->
-        DConstant loc name (ConstantDefinition a w1 (With ts (foldTypeOf t ps)) (flattenLambda (ELambda mempty ps e))) []
+        DConstant loc name (ConstantDefinition a w1 (With ts (foldTypeOf t ps)) (flattenLambdas (ELambda mempty ps e))) []
       DInstance loc name (InstanceDefinition ts t ds) ->
         DInstance loc name (InstanceDefinition ts t (normalizeObject ds))
       d ->
@@ -133,7 +133,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
               , protoOletDefinitionType =
                   With ts (foldTypeOf t protoOfunctionDefinitionPatterns)
               , protoOletDefinitionExpression =
-                  flattenLambda (ELambda mempty protoOfunctionDefinitionPatterns protoOfunctionDefinitionExpression)
+                  flattenLambdas (ELambda mempty protoOfunctionDefinitionPatterns protoOfunctionDefinitionExpression)
               }
       ProtoDInstance loc ProtoInstanceDefinition{..} ->
         ProtoDInstance

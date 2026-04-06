@@ -1,34 +1,34 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns) where
 
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
-import Coal.ProtoLanguage.ProtoModule
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module (Module (..), fromProtoModule)
 import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
-import Coal.Compiler.Stack (CompilerT)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 
-passExpandAsPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passExpandAsPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passExpandAsPatterns = Pass{runPass = bork}
 
-bork :: (Monad m, Monoid a, Data a) => ProtoModule a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
+bork :: (Monad m, Monoid a, Data a) => ProtoModule a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind IndexedType)
 bork m = do
   let xx = expandAsPatterns m
-  return (fromProtoModule xx)
+  return xx
 
 class TransformContext e where
   expandAsPatterns :: e -> e
@@ -39,7 +39,7 @@ instance (TransformContext e) => TransformContext [e] where
 instance (TransformContext e) => TransformContext (NonEmpty e) where
   expandAsPatterns = fmap expandAsPatterns
 
---instance (Data a, Data t, Monoid a) => TransformContext (Expression a () t) where
+-- instance (Data a, Data t, Monoid a) => TransformContext (Expression a () t) where
 --  expandAsPatterns =
 --    \case
 --      EMatch a t e cs ->
@@ -61,13 +61,13 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (Choice Expressi
       CPlain a gs e ->
         CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
 
---instance (Data a, Data t, Monoid a) => TransformContext (Choice Expression a () t) where
+-- instance (Data a, Data t, Monoid a) => TransformContext (Choice Expression a () t) where
 --  expandAsPatterns =
 --    \case
 --      CPlain a gs e ->
 --        CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
 
---instance (Data a, Data t, Monoid a) => TransformContext (Guard Expression a () t) where
+-- instance (Data a, Data t, Monoid a) => TransformContext (Guard Expression a () t) where
 --  expandAsPatterns =
 --    \case
 --      CGuard e ->
@@ -79,7 +79,7 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (Guard Expressio
       CGuard e ->
         CGuard (expandAsPatterns e)
 
---instance (Data a, Data t, Monoid a) => TransformContext (Binding Expression a () t) where
+-- instance (Data a, Data t, Monoid a) => TransformContext (Binding Expression a () t) where
 --  expandAsPatterns =
 --    \case
 --      BPattern a p e ->
@@ -151,16 +151,16 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (ProtoModule a k
   expandAsPatterns =
     \case
       ProtoModule{..} ->
-        ProtoModule{
-          protoOmoduleDefinitions = fmap expandAsPatterns protoOmoduleDefinitions,
-          ..
-        } 
+        ProtoModule
+          { protoOmoduleDefinitions = fmap expandAsPatterns protoOmoduleDefinitions
+          , ..
+          }
 
 instance (Data a, Data k, Data t, Monoid a) => TransformContext (ProtoDefinition a k t) where
   expandAsPatterns =
     \case
       ProtoDLet loc name def ->
-        ProtoDLet loc name (expandAsPatterns def) 
+        ProtoDLet loc name (expandAsPatterns def)
       d ->
         d
 
@@ -168,7 +168,7 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (ProtoLetDefinit
   expandAsPatterns =
     \case
       ProtoLetDefinition{..} ->
-        ProtoLetDefinition{
-          protoOletDefinitionExpression = expandAsPatterns protoOletDefinitionExpression,
-          ..} 
-      
+        ProtoLetDefinition
+          { protoOletDefinitionExpression = expandAsPatterns protoOletDefinitionExpression
+          , ..
+          }

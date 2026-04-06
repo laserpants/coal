@@ -1,34 +1,35 @@
+-- +
 {-# LANGUAGE LambdaCase #-}
 
 module Coal.AST.Flattening (
-  flattenApplication,
-  flattenLambda,
-  deepFlattenApplications,
-  deepFlattenLambdas,
+  flattenApplications,
+  flattenLambdas,
+  flattenApplicationsDeep,
+  flattenLambdasDeep,
 ) where
 
 import Coal.Language.Expression (Expression (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform)
 
-{-# INLINE deepFlattenApplications #-}
-deepFlattenApplications :: (Data a, Data s, Data t) => Expression a s t -> Expression a s t
-deepFlattenApplications = transform flattenApplication
+{-# INLINE flattenApplicationsDeep #-}
+flattenApplicationsDeep :: (Data a, Data s, Data t) => Expression a s t -> Expression a s t
+flattenApplicationsDeep = transform flattenApplications
 
-{-# INLINE deepFlattenLambdas #-}
-deepFlattenLambdas :: (Data a, Data s, Data t) => Expression a s t -> Expression a s t
-deepFlattenLambdas = transform flattenLambda
+{-# INLINE flattenLambdasDeep #-}
+flattenLambdasDeep :: (Data a, Data s, Data t) => Expression a s t -> Expression a s t
+flattenLambdasDeep = transform flattenLambdas
 
-flattenApplication :: Expression a s t -> Expression a s t
-flattenApplication =
+flattenApplications :: Expression a s t -> Expression a s t
+flattenApplications =
   \case
     EApplication a t (EApplication _ _ e e1) e2 ->
       EApplication a t e (e1 <> e2)
     expr ->
       expr
 
-flattenLambda :: Expression a s t -> Expression a s t
-flattenLambda =
+flattenLambdas :: Expression a s t -> Expression a s t
+flattenLambdas =
   \case
     ELambda a ps (ELambda _ qs e) ->
       ELambda a (ps <> qs) e
