@@ -16,8 +16,9 @@ import Coal.Compiler.Journal (RecordEntry, listenRecordEntry, tellRecordEntry)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module (Module)
+import Coal.Language.Module (Module, fromProtoModule)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.RWS (forM, replicateM)
 import Control.Monad.Trans (lift)
 import Data.Data (Data)
@@ -28,11 +29,11 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import Extras (Name)
 
-passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
+passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kind IndexedType) (ProtoModule a Kind IndexedType)
 passRecordPatterns = Pass{runPass = compileRecordPatterns}
 
-compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Module a Kind IndexedType)
-compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a () (Type TypeIndex Kind)))
+compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => ProtoModule a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind IndexedType)
+compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a Kind (Type TypeIndex Kind))) 
 
 class RecordDesugarable a p where
   desugarRecordPatterns :: (Monad m) => p -> CompilerT a (ProtoCompilerT m a) p
@@ -46,7 +47,7 @@ instance (RecordDesugarable a p) => RecordDesugarable a [p] where
 instance (RecordDesugarable a p) => RecordDesugarable a (NonEmpty p) where
   desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (Data a, Monoid a) => RecordDesugarable a (Expression a () IndexedType) where
+instance (Data a, Monoid a) => RecordDesugarable a (Expression a Kind IndexedType) where
   desugarRecordPatterns =
     \case
       EMatch a t e ks -> do
@@ -66,13 +67,13 @@ instance (Data a, Monoid a) => RecordDesugarable a (Expression a () IndexedType)
       e ->
         pure e
 
-instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a () IndexedType) where
+instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a Kind IndexedType) where
   desugarRecordPatterns =
     \case
       CGuard e ->
         CGuard <$> desugarRecordPatterns e
 
-desugarShorthandPatterns :: Pattern a () IndexedType -> Pattern a () IndexedType
+desugarShorthandPatterns :: Pattern a Kind IndexedType -> Pattern a Kind IndexedType
 desugarShorthandPatterns =
   \case
     PShorthand loc (Label t name) ->
@@ -80,7 +81,7 @@ desugarShorthandPatterns =
     p ->
       p
 
-instance (Data a, Monoid a) => RecordDesugarable a (Pattern a () IndexedType) where
+instance (Data a, Monoid a) => RecordDesugarable a (Pattern a Kind IndexedType) where
   desugarRecordPatterns =
     \case
       PAnnotation a t p ->
@@ -110,7 +111,7 @@ extractRow e =
     _ ->
       error "Implementation error"
 
-extractVarName :: Maybe (Pattern a () t) -> Name
+extractVarName :: Maybe (Pattern a k t) -> Name
 extractVarName =
   \case
     Just (PVariable _ (Label _ name)) ->
@@ -118,7 +119,7 @@ extractVarName =
     _ ->
       "_"
 
-desugar :: (Data a, Monoid a, Monad m) => IndexedType -> Expression a () IndexedType -> [Clause a () IndexedType] -> RecordEntry a -> Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType)
+desugar :: (Data a, Monoid a, Monad m) => IndexedType -> Expression a Kind IndexedType -> [Clause a Kind IndexedType] -> RecordEntry a -> Expression a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a Kind IndexedType)
 desugar t0 e0 rest (name, dict, p1) expr = do
   names <- lift $ replicateM (length fields - 1) (supplied (freshName "row"))
   (_, _, e1) <- foldrM go (v1, r1, e2 expr) (zip fields (name : names))

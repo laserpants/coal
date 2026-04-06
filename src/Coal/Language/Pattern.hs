@@ -4,15 +4,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Pattern (Pattern (..), IndexedPattern) where
+module Coal.Language.Pattern (Pattern (..)) where
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Name (Dictionary, Name)
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (Parameter (..), Type, TypeIndex)
-import Coal.Language.Type.Kind (Kind (..))
+import Coal.Language.Type (Parameter (..), Type)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
@@ -81,5 +80,3 @@ instance (Data a, Data s, Data t) => BoundVars (Pattern a s t) where
         boundIn ll <> boundIn p
       p ->
         Set.fromList (universeBi p)
-
-type IndexedPattern a = Pattern a () (Type TypeIndex Kind)

@@ -21,7 +21,7 @@ module Coal.Compiler.Journal (
 
 import Coal.Common.Name (Dictionary, Name)
 import Coal.Compiler.Error (CompilerError (..))
-import Coal.Language.Pattern (IndexedPattern, Pattern)
+import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait)
 import Coal.Language.Type (IndexedType)
 import Coal.Language.Type.Kind
@@ -29,7 +29,7 @@ import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Set (Set)
 import Data.Tuple.Extra (second)
 
-type RecordEntry a = (Name, Dictionary (IndexedPattern a), Maybe (IndexedPattern a))
+type RecordEntry a = (Name, Dictionary (Pattern a Kind IndexedType), Maybe (Pattern a Kind IndexedType))
 
 data CompilerJournal a = CompilerJournal
   { compilerJournalPatterns :: [(Name, Pattern a Kind IndexedType)]

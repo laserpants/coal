@@ -24,13 +24,13 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Name, traverse_)
 
-passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passPatternExhaustiveCheck = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
 bork m = do
   patternExhaustiveCheckM m
-  return (fromProtoModule m)
+  return m
 
 patternExhaustiveCheckM :: (Monad m) => ProtoModule Metadata k t -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 patternExhaustiveCheckM m = do
