@@ -21,7 +21,7 @@ import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module (Definition, Module)
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (Trait (..), With (..))
+import Coal.Language.Trait (Trait (..), Qualified (..))
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
@@ -94,7 +94,7 @@ instance (Ord k, Data a, Data k, Data s) => TypeIndexed k (CompiledClause a s (T
 instance (Ord k, Data k, Data a, Data s) => TypeIndexed k (Expression a s (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data t, Data k) => TypeIndexed k (With t) where
+instance (Ord k, Data t, Data k) => TypeIndexed k (Qualified t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, Data a, Data k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where

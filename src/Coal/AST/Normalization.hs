@@ -12,7 +12,7 @@ import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
 import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Module.Definition.Instance (InstanceDefinition (..))
-import Coal.Language.Trait (With (..))
+import Coal.Language.Trait (Qualified (..))
 import Coal.Language.Type (Type (..))
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule

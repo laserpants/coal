@@ -5,7 +5,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Language.Trait (Trait (..), With (..)) where
+module Coal.Language.Trait (Trait (..), Qualified (..)) where
 
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
@@ -38,7 +38,7 @@ instance (Pretty t) => Pretty (Trait t) where
     pretty name <> "<" <> pretty t <> ">"
 
 -- | Qualified type
-data With t = With [Trait t] t
+data Qualified t = With [Trait t] t
   deriving
     ( Show
     , Eq
@@ -52,4 +52,4 @@ data With t = With [Trait t] t
     , Generic
     )
 
-instance (Binary t) => Binary (With t)
+instance (Binary t) => Binary (Qualified t)

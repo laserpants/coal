@@ -54,8 +54,8 @@ instance (Binary a, Binary k, Binary t) => Binary (ProtoTypeDefinition a k t)
 
 data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
   { protoOfunctionDefinitionMetadata :: a
-  , protoOfunctionDefinitionAnnotation :: Maybe (With (Type Parameter k))
-  , protoOfunctionDefinitionType :: With t
+  , protoOfunctionDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , protoOfunctionDefinitionType :: Qualified t
   , protoOfunctionDefinitionPatterns :: NonEmpty (Pattern a k t)
   , protoOfunctionDefinitionExpression :: Expression a k t
   }
@@ -76,8 +76,8 @@ instance (Binary a, Binary k, Binary t) => Binary (ProtoFunctionDefinition a k t
 
 data ProtoLetDefinition a k t = ProtoLetDefinition
   { protoOletDefinitionMetadata :: a
-  , protoOletDefinitionAnnotation :: Maybe (With (Type Parameter k))
-  , protoOletDefinitionType :: With t
+  , protoOletDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , protoOletDefinitionType :: Qualified t
   , protoOletDefinitionExpression :: Expression a k t
   }
   deriving
@@ -97,7 +97,7 @@ instance (Binary a, Binary k, Binary t) => Binary (ProtoLetDefinition a k t)
 
 data ProtoFoldDefinition a k t = ProtoFoldDefinition
   { protoOfoldDefinitionMetadata :: a
-  , protoOfoldDefinitionAnnotation :: Maybe (With (Type Parameter k))
+  , protoOfoldDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
   , protoOfoldDefinitionClauses :: NonEmpty (Clause a k t)
   }
   deriving

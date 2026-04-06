@@ -353,7 +353,7 @@ instance (ProtoDot t) => ProtoDot (Trait t) where
         emitEdge dotId traitType
         return dotId
 
-instance (ProtoDot t) => ProtoDot (With t) where
+instance (ProtoDot t) => ProtoDot (Qualified t) where
   toDot (With traits t) = do
     dotId <- emitShape HexagonShape "With"
     case traits of

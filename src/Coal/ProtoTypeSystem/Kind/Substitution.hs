@@ -13,7 +13,7 @@ import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (.
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (Trait (..), With (..))
+import Coal.Language.Trait (Trait (..), Qualified (..))
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
@@ -569,7 +569,7 @@ instance ProtoKindSubstitutable (Guard Expression a Kind ()) where
       CGuard e ->
         CGuard (protoOreplaceVariables e)
 
-instance ProtoKindSubstitutable (With (Type Parameter Kind)) where
+instance ProtoKindSubstitutable (Qualified (Type Parameter Kind)) where
   protoOapplyKinds sub =
     \case
       With ts t ->

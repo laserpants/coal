@@ -18,7 +18,7 @@ import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (With (..))
+import Coal.Language.Trait (Qualified (..))
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State (MonadTrans (lift), State, foldM, forM_, modify, runState)
 import Data.Functor.Foldable (cata)

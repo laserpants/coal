@@ -12,7 +12,7 @@ import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (.
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (Trait (..), With (..))
+import Coal.Language.Trait (Trait (..), Qualified (..))
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
@@ -153,7 +153,7 @@ instance (ToKindIndexed t u) => ToKindIndexed (Trait t) (Trait u) where
         Trait traitName
           <$> toKindIndexed traitType
 
-instance (ToKindIndexed t u) => ToKindIndexed (With t) (With u) where
+instance (ToKindIndexed t u) => ToKindIndexed (Qualified t) (Qualified u) where
   toKindIndexed =
     \case
       With traits t ->

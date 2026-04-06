@@ -14,7 +14,7 @@ import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), With (..))
+import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), Qualified (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.ProtoCompiler.ProtoJournal
 import Coal.ProtoCompiler.ProtoStack

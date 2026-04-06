@@ -55,7 +55,7 @@ instance (AliasTransform c) => AliasTransform (NonEmpty c) where
 instance (AliasTransform t) => AliasTransform (Trait t) where
   aliasTransform = traverse aliasTransform
 
-instance (AliasTransform t) => AliasTransform (With t) where
+instance (AliasTransform t) => AliasTransform (Qualified t) where
   aliasTransform = traverse aliasTransform
 
 instance (AliasTransform t) => AliasTransform (Row o k t) where

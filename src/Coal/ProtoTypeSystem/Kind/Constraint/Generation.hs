@@ -21,7 +21,7 @@ import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.HasKind (HasKind (..))
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (Trait (..), With (..))
+import Coal.Language.Trait (Trait (..), Qualified (..))
 import Coal.Language.Type (Parameter (..), Type (..))
 import Coal.Language.Type.Kind (Kind (..), tupleConstructorKind)
 import Coal.Language.Type.Row (Row (..))
@@ -201,7 +201,7 @@ instance ProtoEmitKinds (ProtoDefinition a Kind ()) where
       ProtoDInstance _ def ->
         protoOemitKindConstraints def
 
-instance ProtoEmitKinds (With (Type Parameter Kind)) where
+instance ProtoEmitKinds (Qualified (Type Parameter Kind)) where
   protoOemitKindConstraints =
     \case
       With traits t ->

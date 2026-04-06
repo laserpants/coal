@@ -13,7 +13,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..))
 import Coal.Language.Pattern
-import Coal.Language.Trait (With (..))
+import Coal.Language.Trait (Qualified (..))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearAssumptionsC, protoOclearNameStoreC, protoOinsertNameC, setCurrentModuleC)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
@@ -113,7 +113,7 @@ var qs
 --    DFunction loc name fs@(FunctionDefinition _ w _ ps _ :| _) gs ->
 --      pure [DConstant loc name e1 gs]
 --     where
---      e1 = ConstantDefinition loc w (With [] ()) (toExpr (length ps) loc (NonEmpty.toList fs))
+--      e1 = ConstantDefinition loc w (Qualified [] ()) (toExpr (length ps) loc (NonEmpty.toList fs))
 --
 -- toExpr :: Int -> Metadata -> [FunctionDefinition Metadata ()] -> Expression Metadata () ()
 -- toExpr n loc fs = ELambda loc (varP <$> args) (matchE (var args) clauses)
