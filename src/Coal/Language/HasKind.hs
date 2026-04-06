@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -39,5 +40,5 @@ instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
         head (universeBi k)
 
 {-# INLINE foldKindOf #-}
-foldKindOf :: (HasKind k, HasKind l, Functor f, Foldable f) => l -> f k -> Kind
-foldKindOf a as = foldKind (kindOf a) (kindOf <$> as)
+foldKindOf :: (HasKind k, HasKind i, Functor f, Foldable f) => i -> f k -> Kind
+foldKindOf t ts = foldKind (kindOf t) (kindOf <$> ts)

@@ -33,13 +33,11 @@ import qualified Data.List.NonEmpty as NonEmpty
 import GHC.Int (Int32, Int64)
 import TextShow (showt)
 
-passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passExpandIntegerLiteralPatterns = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
-bork m = do
-  xx <- expandIntegerLiteralPatterns m
-  return (fromProtoModule xx)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+bork = expandIntegerLiteralPatterns 
 
 class TransformContext e where
   expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) e

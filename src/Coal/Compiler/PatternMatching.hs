@@ -66,7 +66,7 @@ instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Module a () Index
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType))
 
 instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (ProtoModule a Kind IndexedType) where
-  compileMatchExprs = undefined -- transformBiM compileMatchExprsE
+  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a Kind IndexedType))
 
 instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Definition a Kind IndexedType) where
   compileMatchExprs =
