@@ -16,9 +16,9 @@ import Data.List.NonEmpty (NonEmpty (..))
 import Extras (const2)
 
 class TypeProxy t where
-  expressionType :: (Data a) => Expression a () t -> t
-  patternType :: (Data a) => Pattern a () t -> t
-  envelopeExprType :: (Data a) => EnvelopeExpression (Expression a ()) t -> t
+  expressionType :: (Data a, Data k) => Expression a k t -> t
+  patternType :: (Data a, Data k) => Pattern a k t -> t
+  envelopeExprType :: (Data a, Data k) => EnvelopeExpression (Expression a k) t -> t
   arrow :: t -> t -> t
   folded :: t -> [Label t] -> t
   boolean :: t
@@ -53,7 +53,7 @@ instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
 
 infixr 1 `arrow`
 
-compileEnvelope :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeExpression (Expression a ()) t -> Expression a () t
+compileEnvelope :: (Eq a, Eq k, TypeProxy t, Ord t, Data a, Data k, Monoid a) => EnvelopeExpression (Expression a k) t -> Expression a k t
 compileEnvelope =
   \case
     MFail ->
@@ -78,11 +78,11 @@ compileEnvelope =
         (compileEnvelope e2)
         (compileEnvelope e3)
 
-compileEnvelopeClause :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => EnvelopeClause (Expression a ()) t -> CompiledClause a () t
+compileEnvelopeClause :: (Eq a, Eq k, TypeProxy t, Ord t, Data a, Data k, Monoid a) => EnvelopeClause (Expression a k) t -> CompiledClause a k t
 compileEnvelopeClause (EnvelopeClause (Label t name) ls e) =
   ECompiledClause mempty (Label (folded t ls) name :| ls) (compileEnvelope e)
 
-clauseList :: (Eq a, TypeProxy t, Ord t, Data a, Monoid a) => [EnvelopeClause (Expression a ()) t] -> NonEmpty (CompiledClause a () t)
+clauseList :: (Eq a, Eq k, TypeProxy t, Ord t, Data a, Data k, Monoid a) => [EnvelopeClause (Expression a k) t] -> NonEmpty (CompiledClause a k t)
 clauseList ecs =
   case filter (not . fails) ecs of
     c : cs ->
