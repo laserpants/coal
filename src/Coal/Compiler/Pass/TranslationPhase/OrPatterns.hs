@@ -24,13 +24,11 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
 import Extras (Map, traverseM)
 
-passOrPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passOrPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passOrPatterns = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass m = do
-  foo <- transformBiM expandExpression m
-  return (fromProtoModule foo)
+pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
+pass = transformBiM expandExpression
 
 expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =

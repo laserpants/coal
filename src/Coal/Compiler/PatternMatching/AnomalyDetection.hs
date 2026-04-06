@@ -13,7 +13,6 @@ module Coal.Compiler.PatternMatching.AnomalyDetection (
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
@@ -21,8 +20,6 @@ import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearAssumptionsC, protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearNameStoreC, protoOclearTypeAnnotationParamsC, protoOcompilerReportConstraintsGenErrors, protoOcompilerReportKindConstraintsGenErrors, protoOcompilerReportSolverRuleViolations, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertKindConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setCurrentModuleC, setTypeAnnotationParamsC)
 import Control.Monad.Extra (anyM, (||^))
-import Control.Monad.Reader (asks)
-import Control.Monad.State (gets)
 import Control.Monad.Trans (lift)
 import Data.Function ((&))
 import Data.List (sortOn)
@@ -164,7 +161,7 @@ isComplete names@(name : _) = do
       , ("$Record", ["$Record"])
       ]
 
-translatePattern :: Pattern a () t -> Pat
+translatePattern :: Pattern a s t -> Pat
 translatePattern =
   \case
     PAnnotation _ _ p ->
@@ -209,5 +206,5 @@ translatePattern =
 tupleCons :: Int -> Name
 tupleCons n = "%Tuple" <> showt n
 
-listCons :: Pattern a () t -> Pat -> Pat
+listCons :: Pattern a s t -> Pat -> Pat
 listCons p q = Con "::" [translatePattern p, q]
