@@ -28,11 +28,11 @@ translateDefinition2 :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType 
 translateDefinition2 =
   \case
     ProtoDType _ _ ProtoTypeDefinition{..} ->
-      traverse translateConstructor (zip [0 ..] (sortOn constructorName protoOtypeDefinitionConstructors))
+      undefined -- traverse translateConstructor (zip [0 ..] (sortOn constructorName protoOtypeDefinitionConstructors))
     ProtoDFunction loc name (ProtoFunctionDefinition _ _ _ _ _) ->
       undefined
     ProtoDLet loc name (ProtoLetDefinition _ _ _ e) -> do
-      c <- translateExpression e
+      -- c <- translateExpression e
       undefined
     ProtoDTrait loc name ProtoTraitDefinition{..} ->
       undefined
