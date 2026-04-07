@@ -14,7 +14,7 @@ import Coal.Compiler.PatternMatching.Envelope (
  )
 import Coal.Compiler.PatternMatching.Equation
 import Coal.Compiler.Stack (CompilerT)
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, setCurrentPathC)
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Control.Monad.Trans (lift)
 import Extras (foldrM, (<.>))
 
