@@ -14,6 +14,7 @@ module Extras (
   module Extras.Data.Traversable,
   module Extras.Data.List,
   module Extras.Data.Functor,
+  module Extras.Control.Applicative,
   module Extras.Control.Monad,
   module Extras.Control.Monad.State,
   module Extras.Control.Monad.Writer,
@@ -33,6 +34,7 @@ import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
 import Data.Set (Set)
 import Data.Tuple.Extra (first, second)
+import Extras.Control.Applicative
 import Extras.Control.Monad
 import Extras.Control.Monad.State
 import Extras.Control.Monad.Writer

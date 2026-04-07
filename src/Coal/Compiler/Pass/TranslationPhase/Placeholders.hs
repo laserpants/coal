@@ -56,13 +56,13 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Data.Text.Lazy (toStrict)
 import Debug.Trace
-import Extras (Dictionary, Name, concatForM, forM_, traverse_)
+import Extras (Dictionary, Name, concatForM, forM_, traverse_, twice)
 import Text.Pretty.Simple (pPrint, pShowNoColor)
 
-passPlaceholders :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passPlaceholders :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passPlaceholders = Pass{runPass = pass}
 
-pass :: (MonadIO m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
+pass :: (MonadIO m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
 pass m = do
   --  withCurrentModuleC $
   --    \m -> do
@@ -71,7 +71,7 @@ pass m = do
   b <- lift protoOgetCurrentBuildC
   lift $ protoOsetNamesC (typeEnvironment b)
 
-  replicateM_ 2 $ traverse_ cafe2 (protoOmoduleDefinitions m)
+  twice (traverse_ cafe2 (protoOmoduleDefinitions m))
   --  traverse_ cafe2 (protoOmoduleDefinitions m)
 
   names <- lift $ gets protoOcompilerNameStore
@@ -91,7 +91,9 @@ pass m = do
   --      liftIO $ Text.writeFile ("tmp/placeholder_build_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ ProtoBuild{..})
   --      liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
 
-  return $ fromProtoModule $ m{protoOmoduleDefinitions = mm}
+  return m{protoOmoduleDefinitions = mm}
+
+-- TODO: Move
 
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a (ProtoCompilerT m a) ()
 updateNames store =

@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.TranslationPhase.Nats (passCompileNats) where
@@ -13,8 +14,10 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
-import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
+import Coal.Language.Module (Module (..), fromProtoModule)
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad ((<=<))
 import Control.Monad.Trans (lift)
 import Data.Data (Data)
@@ -22,8 +25,13 @@ import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras (Dictionary)
 
-passCompileNats :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passCompileNats = Pass{runPass = compileNats}
+passCompileNats :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passCompileNats = Pass{runPass = bork}
+
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Module Metadata Kind IndexedType)
+bork m = do
+  xx <- compileNats m
+  return (fromProtoModule xx)
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a (ProtoCompilerT m a) e
@@ -58,7 +66,7 @@ convertConstructor =
     t ->
       pure t
 
-instance (Monoid a, Data a) => CompileNatsContext (Expression a () IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (Expression a Kind IndexedType) where
   compileNats = transformM (traverse convertConstructor <=< go)
    where
     go =
@@ -83,7 +91,7 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a () IndexedType) 
         e ->
           pure e
 
-instance (Monoid a) => CompileNatsContext (CompiledClause a () IndexedType) where
+instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) where
   compileNats =
     \case
       ECompiledClause loc (Label _ "Succ" :| [Label _ s]) e -> do
@@ -128,30 +136,70 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a () IndexedType) wher
       c ->
         pure c
 
-instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) where
-  compileNats =
-    \case
-      Module p ns o ->
-        Module p ns <$> compileNats o
+-- instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) where
+--  compileNats =
+--    \case
+--      Module p ns o ->
+--        Module p ns <$> compileNats o
 
-instance (Monoid a, Data a) => CompileNatsContext (FunctionDefinition a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (ProtoModule a Kind IndexedType) where
   compileNats =
     \case
-      FunctionDefinition a u w ps e ->
-        FunctionDefinition a u w ps <$> compileNats e
+      ProtoModule p ns o ->
+        ProtoModule p ns <$> compileNats o
 
-instance (Monoid a, Data a) => CompileNatsContext (ConstantDefinition a IndexedType) where
+instance (Monoid a, Data a) => CompileNatsContext (ProtoLetDefinition a Kind IndexedType) where
   compileNats =
     \case
-      ConstantDefinition a u w e ->
-        ConstantDefinition a u w <$> compileNats e
+      ProtoLetDefinition{..} -> do
+        newLetDefinitionExpression <- compileNats protoOletDefinitionExpression
+        return
+          ProtoLetDefinition
+            { protoOletDefinitionExpression = newLetDefinitionExpression
+            , ..
+            }
 
-instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
+-- instance (Monoid a, Data a) => CompileNatsContext (FunctionDefinition a IndexedType) where
+--  compileNats =
+--    undefined
+----    \case
+----      FunctionDefinition a u w ps e ->
+----        FunctionDefinition a u w ps <$> compileNats e
+
+instance (Monoid a, Data a) => CompileNatsContext (ProtoFunctionDefinition a Kind IndexedType) where
   compileNats =
     \case
-      DFunction loc name f fs ->
-        DFunction loc name <$> compileNats f <*> traverse compileNats fs
-      DConstant loc name g fs ->
-        DConstant loc name <$> compileNats g <*> traverse compileNats fs
+      ProtoFunctionDefinition{..} -> do
+        newLetDefinitionExpression <- compileNats protoOfunctionDefinitionExpression
+        return
+          ProtoFunctionDefinition
+            { protoOfunctionDefinitionExpression = undefined
+            , ..
+            }
+
+-- instance (Monoid a, Data a) => CompileNatsContext (ConstantDefinition a IndexedType) where
+--  compileNats =
+--    undefined
+----         \case
+----           ConstantDefinition a u w e ->
+----             ConstantDefinition a u w <$> compileNats e
+
+-- instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
+--  compileNats =
+--    \case
+--      DFunction loc name f fs ->
+--        DFunction loc name <$> compileNats f <*> traverse compileNats fs
+--      DConstant loc name g fs ->
+--        DConstant loc name <$> compileNats g <*> traverse compileNats fs
+--      o ->
+--        pure o
+
+instance (Monoid a, Data a) => CompileNatsContext (ProtoDefinition a Kind IndexedType) where
+  compileNats =
+    \case
+      ProtoDLet loc name def ->
+        ProtoDLet loc name <$> compileNats def
+      ProtoDFunction loc name def ->
+        ProtoDFunction loc name <$> compileNats def
       o ->
         pure o
