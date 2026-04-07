@@ -13,7 +13,7 @@ import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (.
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Pattern (Pattern (..))
-import Coal.Language.Trait (Trait (..), Qualified (..))
+import Coal.Language.Trait (Qualified (..), Trait (..))
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))

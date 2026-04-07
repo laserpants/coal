@@ -7,7 +7,6 @@
 
 module Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns) where
 
-import Data.Data (Data)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
@@ -26,6 +25,7 @@ import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
 import Control.Monad.Writer
 import qualified Data.ByteString.Char8 as ByteString
+import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM, transformM)
 import Data.List (tails)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -37,7 +37,7 @@ passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (ProtoModule Me
 passExpandIntegerLiteralPatterns = Pass{runPass = bork}
 
 bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
-bork = expandIntegerLiteralPatterns 
+bork = expandIntegerLiteralPatterns
 
 class TransformContext e where
   expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) e

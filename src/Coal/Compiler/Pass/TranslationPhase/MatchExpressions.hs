@@ -9,10 +9,8 @@ import Coal.Language.Module (Module, fromProtoModule)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, setCurrentPathC)
 import Coal.ProtoLanguage.ProtoModule
 
-passMatchExpressions :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passMatchExpressions :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passMatchExpressions = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Module Metadata Kind IndexedType)
-pass m = do
-  xx <- compileMatchExprs m
-  return (fromProtoModule xx)
+pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+pass = compileMatchExprs
