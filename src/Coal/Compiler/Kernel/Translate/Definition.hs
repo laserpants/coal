@@ -21,6 +21,23 @@ import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
 import Debug.Trace
 import Extras (Name, (<.>))
+import Coal.ProtoLanguage.ProtoDefinition
+
+translateDefinition2 :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> CompilerT a m [KernelObject]
+translateDefinition2 =
+  \case
+    ProtoDType loc name def ->
+      undefined
+    ProtoDFunction loc name def ->
+      undefined
+    ProtoDLet loc name def ->
+      undefined
+    ProtoDTrait loc name def ->
+      undefined
+    ProtoDInstance loc def ->
+      undefined
+    _ ->
+      pure []
 
 translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
 translateDefinition =
