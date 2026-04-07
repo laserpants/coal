@@ -194,7 +194,7 @@ instance ProtoEmitKinds (ProtoDefinition a Kind ()) where
         protoOemitKindConstraints def
       ProtoDImport{} ->
         pure []
-      ProtoDQualifiedImport{} ->
+      ProtoDNamespaceImport{} ->
         pure []
       ProtoDTrait _ _ def ->
         protoOemitKindConstraints def

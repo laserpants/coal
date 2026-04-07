@@ -25,13 +25,13 @@ import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras (Dictionary)
 
-passCompileNats :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passCompileNats :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passCompileNats = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Module Metadata Kind IndexedType)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule Metadata Kind IndexedType)
 bork m = do
   xx <- compileNats m
-  return (fromProtoModule xx)
+  return xx
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a (ProtoCompilerT m a) e

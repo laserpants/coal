@@ -64,8 +64,8 @@ instance ToKindIndexed (ProtoDefinition a k ()) (ProtoDefinition a Kind ()) wher
         ProtoDLet loc name <$> toKindIndexed def
       ProtoDImport loc path imports ->
         pure $ ProtoDImport loc path imports
-      ProtoDQualifiedImport loc path ->
-        pure $ ProtoDQualifiedImport loc path
+      ProtoDNamespaceImport loc path ->
+        pure $ ProtoDNamespaceImport loc path
       ProtoDTrait loc name def ->
         ProtoDTrait loc name <$> toKindIndexed def
       ProtoDInstance loc def ->

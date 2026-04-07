@@ -227,7 +227,7 @@ instance (ProtoDot t) => ProtoDot (ProtoDefinition a Kind t) where
         dotId <- emitNamedShape TriangleShape (Just $ principalPath path) "DImport"
         _ <- foldrM connectDots dotId imports
         return dotId
-      ProtoDQualifiedImport _ path -> do
+      ProtoDNamespaceImport _ path -> do
         emitNamedShape TriangleShape (Just $ principalPath path) "DQualifiedImport"
       ProtoDTrait _ name def ->
         emitDefinition name "DTrait" def

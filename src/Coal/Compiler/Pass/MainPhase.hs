@@ -7,10 +7,11 @@ import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Pass.TypePhase (typePhasePasses)
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module)
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.IO.Class (MonadIO)
 
-mainPhasePasses :: (MonadIO m) => Pass Metadata m (BuildUnit (Module Metadata Kind ())) (BuildUnit (Module Metadata Kind IndexedType))
+mainPhasePasses :: (MonadIO m) => Pass Metadata m (BuildUnit (Module Metadata Kind ())) (BuildUnit (ProtoModule Metadata Kind IndexedType))
 mainPhasePasses = liftPass (typePhasePasses >-> overlayEnvironment translationPhasePasses)
 
-mainPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind IndexedType)]
+mainPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata Kind IndexedType)]
 mainPhase = mapPass mainPhasePasses

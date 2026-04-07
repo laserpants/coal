@@ -208,7 +208,7 @@ data ProtoDefinition a k t
   | -- | Import statement
     ProtoDImport a Path [Import a]
   | -- | Namespace (qualified) import
-    ProtoDQualifiedImport a Path
+    ProtoDNamespaceImport a Path
   | -- | Trait
     ProtoDTrait a Name (ProtoTraitDefinition a k)
   | -- | Trait instance

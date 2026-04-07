@@ -252,7 +252,7 @@ instance ProtoKindSubstitutable (ProtoDefinition a Kind ()) where
         ProtoDLet a name (protoOapplyKinds sub def)
       def@ProtoDImport{} ->
         def
-      def@ProtoDQualifiedImport{} ->
+      def@ProtoDNamespaceImport{} ->
         def
       ProtoDTrait a name def ->
         ProtoDTrait a name (protoOapplyKinds sub def)
@@ -274,7 +274,7 @@ instance ProtoKindSubstitutable (ProtoDefinition a Kind ()) where
         ProtoDLet a name (protoOreplaceVariables def)
       def@ProtoDImport{} ->
         def
-      def@ProtoDQualifiedImport{} ->
+      def@ProtoDNamespaceImport{} ->
         def
       ProtoDTrait a name def ->
         ProtoDTrait a name (protoOreplaceVariables def)

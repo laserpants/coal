@@ -63,7 +63,7 @@ moduleKindEnvironment ProtoModule{..} = do
                   Just [(name, kind)]
             _ ->
               pure []
-      ProtoDQualifiedImport _ path -> do
+      ProtoDNamespaceImport _ path -> do
         let qualified name = principalPath path <.> name
         importedModule@ProtoBuild{..} <- importedBuild path
         ps1 <- concatForM (Environment.names protoObuildTypeConstructors) $

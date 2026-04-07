@@ -12,12 +12,12 @@ import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Compiler (KernelExpr)
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language (Expression, IndexedType, Type)
+import Coal.Language (Expression, IndexedType, Kind, Type)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary)
 
-translateRecord :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> Type o k -> Dictionary (Expression a () IndexedType) -> Maybe (Expression a () IndexedType) -> CompilerT a m KernelExpr
+translateRecord :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> Type o k -> Dictionary (Expression a Kind IndexedType) -> Maybe (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 translateRecord translate t d me = do
   exprs <- traverse translate d
   expr0 <- traverse translate me

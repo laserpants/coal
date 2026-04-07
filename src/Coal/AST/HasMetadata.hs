@@ -142,7 +142,7 @@ instance HasMetadata (ProtoDefinition Metadata k ()) where
       ProtoDFold a _ _ -> a
       ProtoDLet a _ _ -> a
       ProtoDImport a _ _ -> a
-      ProtoDQualifiedImport a _ -> a
+      ProtoDNamespaceImport a _ -> a
       ProtoDTrait a _ _ -> a
       ProtoDInstance a _ -> a
 

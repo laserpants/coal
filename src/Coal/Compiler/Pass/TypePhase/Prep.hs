@@ -171,7 +171,7 @@ collectTypeAliases =
                 pure () -- error (show name)
           _ ->
             pure ()
-    ProtoDQualifiedImport loc path ->
+    ProtoDNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()

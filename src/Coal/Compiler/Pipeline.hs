@@ -54,7 +54,7 @@ pipeline =
   parsingPhase
     >-> preflightPhase
     >-> mainPhase
-    >-> Pass extraTicks
+    --    >-> Pass extraTicks
     >-> loweringPhase
     >-> passLinking
 

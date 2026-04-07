@@ -29,4 +29,4 @@ preflightPhase =
     >-> passShadowingRule
     >-> passMainEntrypointRule
     >-> passNoDuplicateParamsRule
-    >-> mapPass (liftPass (generateDebugArtifacts "Preflight"))
+--    >-> mapPass (liftPass (generateDebugArtifacts "Preflight"))

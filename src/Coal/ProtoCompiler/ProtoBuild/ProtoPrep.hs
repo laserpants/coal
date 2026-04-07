@@ -239,7 +239,7 @@ qualifiedImports ProtoBuild{..} =
                           pure [(n, principalPath path <.> n)]
                         _ ->
                           pure mempty
-    ProtoDQualifiedImport _ path -> do
+    ProtoDNamespaceImport _ path -> do
       ProtoBuild{protoObuildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
       concatForM (Set.toList exportedNames) $
         \name ->
@@ -319,7 +319,7 @@ collectTypeConstructors =
                 pure () -- error (show name)
           _ ->
             pure ()
-    ProtoDQualifiedImport loc path ->
+    ProtoDNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
@@ -374,7 +374,7 @@ insertTypeName ProtoBuild{..} loc name =
 --          }
 --    ProtoDImport _ path imports ->
 --      pure ()
---    ProtoDQualifiedImport loc path ->
+--    ProtoDNamespaceImport loc path ->
 --      pure ()
 --    _ ->
 --      pure ()
@@ -428,7 +428,7 @@ collectDataConstructors =
           _ ->
             pure ()
     -- TODO
-    ProtoDQualifiedImport loc path ->
+    ProtoDNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
@@ -513,7 +513,7 @@ collectTraits =
           _ ->
             pure ()
     -- TODO
-    ProtoDQualifiedImport loc path ->
+    ProtoDNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
@@ -598,7 +598,7 @@ collectTraitsInterface =
           _ ->
             pure ()
     -- TODO
-    ProtoDQualifiedImport loc path ->
+    ProtoDNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
@@ -667,7 +667,7 @@ collectInstances =
     ProtoDImport loc path items ->
       pure ()
     -- TODO
-    ProtoDQualifiedImport loc path ->
+    ProtoDNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
@@ -738,7 +738,7 @@ collectImports =
                       pure ()
             | otherwise ->
                 error "TODO"
-    ProtoDQualifiedImport _ path -> do
+    ProtoDNamespaceImport _ path -> do
       ProtoBuild{..} <- lift $ lift $ importedBuild path
       let qualifiedName name = principalPath protoObuildPath <.> name
       forM_ protoObuildExportedNames $

@@ -476,7 +476,7 @@ toProtoModuleDefinition =
     DImport a path imps ->
       ProtoDImport a path imps
     DQualifiedImport a path ->
-      ProtoDQualifiedImport a path
+      ProtoDNamespaceImport a path
     DTrait a name def ->
       toProtoTraitDefinition a name def
     DInstance a name def ->
@@ -508,7 +508,7 @@ fromProtoModuleDefinition =
       DConstant a name (fromProtoLetDefinition def) []
     ProtoDImport a path imps ->
       DImport a path imps
-    ProtoDQualifiedImport a path ->
+    ProtoDNamespaceImport a path ->
       DQualifiedImport a path
     ProtoDTrait a name def ->
       DTrait a name (fromProtoTraitDefinition def)

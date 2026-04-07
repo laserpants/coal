@@ -13,7 +13,7 @@ import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 
-logicalNotOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+logicalNotOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 logicalNotOperator translate es = do
   args <- traverse translate es
   pure $
@@ -24,7 +24,7 @@ logicalNotOperator translate es = do
  where
   t1 = translateType (TIntrinsic IBool)
 
-translateOperator :: (Monad m, Data a) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> Operator -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+translateOperator :: (Monad m, Data a) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> Operator -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 translateOperator translate t =
   \case
     OLogicalNot ->
@@ -46,7 +46,7 @@ translateOperator translate t =
     OStringConcatenation ->
       stringConcatenationOperator translate
 
-stringConcatenationOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+stringConcatenationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 stringConcatenationOperator translate es = do
   args <- traverse translate es
   let t1 = translateType (TIntrinsic IString)
@@ -56,7 +56,7 @@ stringConcatenationOperator translate es = do
       (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator$__string_concatenation"))
       args
 
-listConcatenationOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+listConcatenationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 listConcatenationOperator translate t es = do
   args <- traverse translate es
   let t1 = translateType t
@@ -66,7 +66,7 @@ listConcatenationOperator translate t es = do
       (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator$__list_concatenation"))
       args
 
-reverseCompositionOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+reverseCompositionOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 reverseCompositionOperator translate t es = do
   args <- traverse translate es
   let t1 = translateType t
@@ -76,7 +76,7 @@ reverseCompositionOperator translate t es = do
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
       args
 
-forwardCompositionOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+forwardCompositionOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 forwardCompositionOperator translate t es = do
   args <- traverse translate es
   let t1 = translateType t
@@ -86,7 +86,7 @@ forwardCompositionOperator translate t es = do
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
       args
 
-reverseApplicationOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+reverseApplicationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 reverseApplicationOperator translate t es = do
   args <- traverse translate es
   let t1 = translateType t
@@ -96,7 +96,7 @@ reverseApplicationOperator translate t es = do
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
       args
 
-forwardApplicationOperator :: (Monad m) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+forwardApplicationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 forwardApplicationOperator translate t es = do
   args <- traverse translate es
   let t1 = translateType t
@@ -106,7 +106,7 @@ forwardApplicationOperator translate t es = do
       (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_application"))
       args
 
-binop :: (Monad m, Data a) => (Expression a () IndexedType -> CompilerT a m KernelExpr) -> (KernelExpr -> KernelExpr -> Kernel.Op KernelExpr) -> (IndexedType, IndexedType) -> NonEmpty (Expression a () IndexedType) -> CompilerT a m KernelExpr
+binop :: (Monad m, Data a) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> (KernelExpr -> KernelExpr -> Kernel.Op KernelExpr) -> (IndexedType, IndexedType) -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
 binop translate op (t1, t2) (e1 :| [e2])
   | e1 `hasType` t1 && e2 `hasType` t2 = do
       o1 <- translate e1
@@ -115,5 +115,5 @@ binop translate op (t1, t2) (e1 :| [e2])
 binop _ _ _ _ = error "Implementation error"
 
 {-# INLINE hasType #-}
-hasType :: (Data a) => Expression a () IndexedType -> IndexedType -> Bool
+hasType :: (Data a) => Expression a Kind IndexedType -> IndexedType -> Bool
 hasType e t = typeOf e == t

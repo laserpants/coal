@@ -22,7 +22,7 @@ import Coal.Language.Module (Module)
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.IO.Class (MonadIO)
 
-translationPhasePasses :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+translationPhasePasses :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 translationPhasePasses =
   passNormalizeObjects
     --    >-> generateDebugArtifacts "NormalizeObjects"
