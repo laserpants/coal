@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -26,15 +27,16 @@ import Coal.ProtoLanguage.ProtoDefinition
 translateDefinition2 :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> CompilerT a m [KernelObject]
 translateDefinition2 =
   \case
-    ProtoDType loc name def ->
+    ProtoDType _ _ ProtoTypeDefinition{..} ->
+      traverse translateConstructor (zip [0 ..] (sortOn constructorName protoOtypeDefinitionConstructors))
+    ProtoDFunction loc name (ProtoFunctionDefinition _ _ _ _ _) ->
       undefined
-    ProtoDFunction loc name def ->
+    ProtoDLet loc name (ProtoLetDefinition _ _ _ e) -> do
+      c <- translateExpression e
       undefined
-    ProtoDLet loc name def ->
+    ProtoDTrait loc name ProtoTraitDefinition{..} ->
       undefined
-    ProtoDTrait loc name def ->
-      undefined
-    ProtoDInstance loc def ->
+    ProtoDInstance loc (ProtoInstanceDefinition _ _ _ _ _) ->
       undefined
     _ ->
       pure []
