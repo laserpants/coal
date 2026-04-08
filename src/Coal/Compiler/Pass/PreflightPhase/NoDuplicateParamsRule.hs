@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (
@@ -16,6 +17,10 @@ import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, setCurrentPathC)
+import Coal.ProtoCompiler.ProtoState
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except
 import Control.Monad.State (StateT, evalStateT, get, gets, modify, put)
 import Data.Data (Data)
@@ -25,11 +30,18 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
 
-passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
-passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse (withCurrentModuleC_ detectDuplicateParams)}
+passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
+passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse fork}
+
+fork :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+fork m = do
+  let mm = toProtoModule [] m
+  lift $ setCurrentPathC (protoOmodulePath mm)
+  detectDuplicateParams mm
+  return mm
 
 class RuleContext e where
-  detectDuplicateParams :: (Monad m) => e -> CompilerT Metadata m ()
+  detectDuplicateParams :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 
 instance (RuleContext e) => RuleContext [e] where
   detectDuplicateParams = traverse_ detectDuplicateParams
@@ -40,72 +52,70 @@ instance (RuleContext e) => RuleContext (NonEmpty e) where
 instance (RuleContext e) => RuleContext (Maybe e) where
   detectDuplicateParams = traverse_ detectDuplicateParams
 
-instance (Data t) => RuleContext (Module Metadata Kind t) where
+instance (Data t) => RuleContext (ProtoModule Metadata () t) where
   detectDuplicateParams =
     \case
-      Module _ _ o ->
-        detectDuplicateParams o
+      ProtoModule{..} ->
+        detectDuplicateParams protoOmoduleDefinitions
 
-instance (Data t) => RuleContext (Definition Metadata k t) where
+instance (Data t) => RuleContext (ProtoDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      DFunction _ _ f ws -> do
-        detectDuplicateParams f
-        detectDuplicateParams ws
-      DConstant _ _ c ws -> do
-        detectDuplicateParams c
-        detectDuplicateParams ws
-      DInstance _ _ d ->
-        detectDuplicateParams d
-      DFold _ _ d ->
-        detectDuplicateParams d
+      ProtoDFunction _ _ def ->
+        detectDuplicateParams def
+      ProtoDLet _ _ def ->
+        detectDuplicateParams def
+      ProtoDInstance _ def ->
+        detectDuplicateParams def
+      ProtoDFold _ _ def ->
+        detectDuplicateParams def
       _ ->
         pure ()
 
-instance RuleContext (FunctionDefinition Metadata t) where
+instance RuleContext (ProtoFunctionDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      FunctionDefinition _ _ _ ps e -> do
-        checkPatterns ps
-        detectDuplicateParams e
+      ProtoFunctionDefinition{..} -> do
+        checkPatterns protoOfunctionDefinitionPatterns
+        detectDuplicateParams protoOfunctionDefinitionExpression
 
-instance RuleContext (ConstantDefinition Metadata t) where
+instance RuleContext (ProtoLetDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      ConstantDefinition _ _ _ e ->
-        detectDuplicateParams e
+      ProtoLetDefinition{..} ->
+        detectDuplicateParams protoOletDefinitionExpression
 
-instance (RuleContext (d a k t)) => RuleContext (InstanceDefinition d a k t) where
+instance (Data t) => RuleContext (ProtoInstanceDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      InstanceDefinition _ _ entries ->
-        detectDuplicateParams entries
+      ProtoInstanceDefinition{..} ->
+        detectDuplicateParams protoOinstanceDefinitionImplementations
 
-instance RuleContext (FoldDefinition Metadata t) where
+instance RuleContext (ProtoFoldDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      FoldDefinition _ cs ->
-        detectDuplicateParams cs
+      ProtoFoldDefinition{..} ->
+        detectDuplicateParams protoOfoldDefinitionClauses
 
 instance RuleContext (Clause Metadata () t) where
   detectDuplicateParams =
     \case
-      EClause _ p c -> do
-        checkPatterns (NonEmpty.singleton p)
-        detectDuplicateParams c
+      EClause{..} -> do
+        checkPatterns (NonEmpty.singleton clausePattern)
+        detectDuplicateParams clauseChoices
 
 instance RuleContext (Choice Expression Metadata () t) where
   detectDuplicateParams =
     \case
-      CPlain _ gs e -> do
-        detectDuplicateParams gs
-        detectDuplicateParams e
+      CPlain{..} -> do
+        detectDuplicateParams choiceGuards
+        detectDuplicateParams choiceExpression
 
 instance RuleContext (Guard Expression Metadata () t) where
   detectDuplicateParams =
     \case
-      CGuard e ->
-        detectDuplicateParams e
+      CGuard{..} ->
+        detectDuplicateParams guardExpression
 
 instance RuleContext (Expression Metadata () t) where
   detectDuplicateParams =
@@ -168,10 +178,10 @@ instance RuleContext (Binding Expression Metadata () t) where
         checkPatterns ps
         detectDuplicateParams e
 
-checkPatterns :: (Monad m) => NonEmpty (Pattern Metadata () t) -> CompilerT Metadata m ()
+checkPatterns :: (Monad m) => NonEmpty (Pattern Metadata () t) -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
  where
-  checkPattern :: (Monad m) => Pattern Metadata () t -> StateT (Set Name) (CompilerT Metadata m) ()
+  checkPattern :: (Monad m) => Pattern Metadata () t -> StateT (Set Name) (CompilerT Metadata (ProtoCompilerT m Metadata)) ()
   checkPattern =
     \case
       PAnnotation _ _ p ->
@@ -204,11 +214,11 @@ checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
       _ ->
         pure ()
 
-  checkDup :: (Monad m) => Metadata -> Name -> StateT (Set Name) (CompilerT Metadata m) ()
+  checkDup :: (Monad m) => Metadata -> Name -> StateT (Set Name) (CompilerT Metadata (ProtoCompilerT m Metadata)) ()
   checkDup loc name = do
     s <- get
     when (name `elem` s) $ do
-      path <- lift (gets compilerCurrentModule)
+      path <- lift $ lift $ gets protoOcompilerCurrentPath
       tellErrors [ConflictingParameter name (ErrorLocation (principalPath path) loc)]
       throwError PreflightFailure
     registerName name

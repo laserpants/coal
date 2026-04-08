@@ -38,7 +38,11 @@ instance
   (Binary (e a s t), Binary a, Binary s, Binary t) =>
   Binary (Guard e a s t)
 
-data Choice e a s t = CPlain a [Guard e a s t] (e a s t)
+data Choice e a s t = CPlain
+  { choiceMetadata :: a
+  , choiceGuards :: [Guard e a s t]
+  , choiceExpression :: e a s t
+  }
   deriving
     ( Show
     , Eq

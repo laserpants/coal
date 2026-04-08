@@ -35,21 +35,21 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 
-passPrep :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (ProtoModule Metadata Kind ())
+passPrep :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata () ()) (ProtoModule Metadata Kind ())
 passPrep = Pass{runPass = pass}
 
-pass :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
+pass :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
 pass m = do
-  setCompilerCurrentModuleC (modulePath m)
-  lift $ setCurrentPathC (modulePath m)
+  setCompilerCurrentModuleC (protoOmodulePath m)
+  lift $ setCurrentPathC (protoOmodulePath m)
   prep m
 
 -- withCurrentModuleC prep
 
-prep :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
-prep m = do
+prep :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
+prep modul = do
   m1 <- lift $ do
-    let modul = toProtoModule [] m
+    -- let modul = toProtoModule [] m
     protoOclearAssumptionsC
     protoOclearNameStoreC
     setCurrentModuleC modul

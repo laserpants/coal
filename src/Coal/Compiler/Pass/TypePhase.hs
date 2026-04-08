@@ -19,7 +19,7 @@ import Coal.Language.Module (Module)
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.IO.Class (MonadIO)
 
-typePhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (ProtoModule Metadata Kind IndexedType)
+typePhasePasses :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata () ()) (ProtoModule Metadata Kind IndexedType)
 typePhasePasses =
   passPrep
     >-> passExpandFunctionGroups

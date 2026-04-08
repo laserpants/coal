@@ -16,9 +16,10 @@ import Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule)
 import Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses)
 import Coal.Language (Kind)
 import Coal.Language.Module (Module)
+import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.IO.Class (MonadIO)
 
-preflightPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
+preflightPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
 preflightPhase =
   passImportsTopRule
     >-> passSetup
@@ -29,4 +30,5 @@ preflightPhase =
     >-> passShadowingRule
     >-> passMainEntrypointRule
     >-> passNoDuplicateParamsRule
+
 --    >-> mapPass (liftPass (generateDebugArtifacts "Preflight"))
