@@ -30,12 +30,12 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
 
-passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
+passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse fork}
 
-fork :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
-fork m = do
-  let mm = toProtoModule [] m
+fork :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+fork mm = do
+  --  let mm = toProtoModule [] m
   lift $ setCurrentPathC (protoOmodulePath mm)
   detectDuplicateParams mm
   return mm

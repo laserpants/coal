@@ -2,6 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule) where
@@ -16,6 +17,9 @@ import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kind (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Module
+import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (MonadError (throwError), forM_, when)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
@@ -25,11 +29,18 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 
-passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
-passShadowingRule = mapPass $ Pass{runPass = traverse (detectShadowing mempty)}
+passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passShadowingRule = mapPass $ Pass{runPass = traverse impl}
+
+impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+impl mm = do
+  --  let mm = toProtoModule [] m
+  detectShadowing mempty mm
+
+-- impl = traverse (detectShadowing mempty)
 
 class RuleContext e where
-  detectShadowing :: (Monad m) => Set Name -> e -> CompilerT Metadata m e
+  detectShadowing :: (Monad m) => Set Name -> e -> CompilerT Metadata (ProtoCompilerT m Metadata) e
 
 instance (RuleContext e) => RuleContext [e] where
   detectShadowing = traverse . detectShadowing
@@ -133,41 +144,101 @@ instance (Data t) => RuleContext (Binding Expression Metadata () t) where
         names' <- addNames a (boundIn ps) names
         BFunction a n ps <$> detectShadowing names' e
 
-instance (Data t) => RuleContext (Module Metadata Kind t) where
-  detectShadowing names =
-    \case
-      Module p ns o -> do
-        setCompilerCurrentModuleC p
-        Module p ns <$> detectShadowing names o
+-- instance (Data t) => RuleContext (Module Metadata Kind t) where
+--  detectShadowing names =
+--    \case
+--      Module p ns o -> do
+--        setCompilerCurrentModuleC p
+--        Module p ns <$> detectShadowing names o
 
-instance (Data t) => RuleContext (Definition Metadata k t) where
+instance RuleContext (ProtoModule Metadata () ()) where
   detectShadowing names =
     \case
-      DFunction loc name f fs -> do
+      ProtoModule{..} -> do
+        setCompilerCurrentModuleC protoOmodulePath
+        newModuleDefinitions <- detectShadowing names protoOmoduleDefinitions
+        return $
+          ProtoModule
+            { protoOmoduleDefinitions = newModuleDefinitions
+            , ..
+            }
+
+instance RuleContext (ProtoDefinition Metadata () ()) where
+  detectShadowing names =
+    \case
+      ProtoDFunction loc name def -> do
         names' <- addNames loc (Set.singleton name) names
-        DFunction loc name
-          <$> detectShadowing names' f
-          <*> detectShadowing names' fs
-      DConstant loc name g fs -> do
+        ProtoDFunction loc name <$> detectShadowing names def
+      ProtoDLet loc name def -> do
         names' <- addNames loc (Set.singleton name) names
-        DConstant loc name
-          <$> detectShadowing names' g
-          <*> detectShadowing names' fs
+        ProtoDLet loc name <$> detectShadowing names def
       o ->
         pure o
 
-instance (Data t) => RuleContext (ConstantDefinition Metadata t) where
-  detectShadowing names =
-    \case
-      ConstantDefinition a u w e ->
-        ConstantDefinition a u w <$> detectShadowing names e
+--    \case
+--      DFunction loc name f fs -> do
+--        names' <- addNames loc (Set.singleton name) names
+--        DFunction loc name
+--          <$> detectShadowing names' f
+--          <*> detectShadowing names' fs
+--      DConstant loc name g fs -> do
+--        names' <- addNames loc (Set.singleton name) names
+--        DConstant loc name
+--          <$> detectShadowing names' g
+--          <*> detectShadowing names' fs
+--      o ->
+--        pure o
 
-instance (Data t) => RuleContext (FunctionDefinition Metadata t) where
+-- instance (Data t) => RuleContext (Definition Metadata k t) where
+--  detectShadowing names =
+--    \case
+--      DFunction loc name f fs -> do
+--        names' <- addNames loc (Set.singleton name) names
+--        DFunction loc name
+--          <$> detectShadowing names' f
+--          <*> detectShadowing names' fs
+--      DConstant loc name g fs -> do
+--        names' <- addNames loc (Set.singleton name) names
+--        DConstant loc name
+--          <$> detectShadowing names' g
+--          <*> detectShadowing names' fs
+--      o ->
+--        pure o
+
+instance RuleContext (ProtoLetDefinition Metadata () ()) where
   detectShadowing names =
     \case
-      FunctionDefinition a u w ps e -> do
-        names' <- addNames a (boundIn ps) names
-        FunctionDefinition a u w ps <$> detectShadowing names' e
+      ProtoLetDefinition{..} -> do
+        newLetDefinitionExpression <- detectShadowing names protoOletDefinitionExpression
+        return $
+          ProtoLetDefinition
+            { protoOletDefinitionExpression = newLetDefinitionExpression
+            , ..
+            }
+
+instance RuleContext (ProtoFunctionDefinition Metadata () ()) where
+  detectShadowing names =
+    \case
+      ProtoFunctionDefinition{..} -> do
+        newFunctionDefinitionExpression <- detectShadowing names protoOfunctionDefinitionExpression
+        return $
+          ProtoFunctionDefinition
+            { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
+            , ..
+            }
+
+-- instance (Data t) => RuleContext (ConstantDefinition Metadata t) where
+--  detectShadowing names =
+--    \case
+--      ConstantDefinition a u w e ->
+--        ConstantDefinition a u w <$> detectShadowing names e
+--
+-- instance (Data t) => RuleContext (FunctionDefinition Metadata t) where
+--  detectShadowing names =
+--    \case
+--      FunctionDefinition a u w ps e -> do
+--        names' <- addNames a (boundIn ps) names
+--        FunctionDefinition a u w ps <$> detectShadowing names' e
 
 addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata m (Set Name)
 addNames loc new names = do
