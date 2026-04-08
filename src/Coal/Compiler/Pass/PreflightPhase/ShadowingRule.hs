@@ -7,6 +7,8 @@
 
 module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule) where
 
+import Control.Monad.Trans (lift)
+import Coal.ProtoCompiler.ProtoState
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
@@ -155,7 +157,8 @@ instance RuleContext (ProtoModule Metadata () ()) where
   detectShadowing names =
     \case
       ProtoModule{..} -> do
-        setCompilerCurrentModuleC protoOmodulePath
+        -- setCompilerCurrentModuleC protoOmodulePath
+        lift $ setCurrentPathC protoOmodulePath
         newModuleDefinitions <- detectShadowing names protoOmoduleDefinitions
         return $
           ProtoModule
@@ -220,7 +223,8 @@ instance RuleContext (ProtoFunctionDefinition Metadata () ()) where
   detectShadowing names =
     \case
       ProtoFunctionDefinition{..} -> do
-        newFunctionDefinitionExpression <- detectShadowing names protoOfunctionDefinitionExpression
+        names' <- addNames protoOfunctionDefinitionMetadata (boundIn protoOfunctionDefinitionPatterns) names
+        newFunctionDefinitionExpression <- detectShadowing names' protoOfunctionDefinitionExpression
         return $
           ProtoFunctionDefinition
             { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
@@ -240,11 +244,12 @@ instance RuleContext (ProtoFunctionDefinition Metadata () ()) where
 --        names' <- addNames a (boundIn ps) names
 --        FunctionDefinition a u w ps <$> detectShadowing names' e
 
-addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata m (Set Name)
+addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata (ProtoCompilerT m Metadata) (Set Name)
 addNames loc new names = do
   forM_ new' $
     \name -> do
-      path <- gets compilerCurrentModule
+      --path <- gets compilerCurrentModule
+      path <- lift $ gets protoOcompilerCurrentPath
       when (name `elem` names) $ do
         tellErrors [Shadowing name (ErrorLocation (principalPath path) loc)]
         throwError PreflightFailure
