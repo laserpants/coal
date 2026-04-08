@@ -168,10 +168,10 @@ instance RuleContext (ProtoDefinition Metadata () ()) where
     \case
       ProtoDFunction loc name def -> do
         names' <- addNames loc (Set.singleton name) names
-        ProtoDFunction loc name <$> detectShadowing names def
+        ProtoDFunction loc name <$> detectShadowing names' def
       ProtoDLet loc name def -> do
         names' <- addNames loc (Set.singleton name) names
-        ProtoDLet loc name <$> detectShadowing names def
+        ProtoDLet loc name <$> detectShadowing names' def
       o ->
         pure o
 
