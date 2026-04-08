@@ -11,8 +11,8 @@ import Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing)
 import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
 import Coal.Language (Kind)
 import Coal.Language.Module (Module)
-import Control.Monad.IO.Class (MonadIO)
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
+import Control.Monad.IO.Class (MonadIO)
 
 parsingPhase :: (MonadIO m) => Pass Metadata m [FilePath] [BuildUnit (ProtoModule Metadata () ())]
 parsingPhase =

@@ -32,10 +32,9 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
-  { -- compilerSupply :: Int
-    compilerCurrentModule :: Path
+  { compilerCurrentModule :: Path
   , compilerFreshModules :: Set Name
-  , compilerVerbatimSource :: Environment Text
+  , compilerVerbatimSource :: Environment Text -- TODO: Move to build object?
   , compilerConfig :: CompilerConfig
   , compilerModules :: Environment (ModuleBuild a)
   }
@@ -152,8 +151,7 @@ overCompilerModules fn CompilerState{..} =
 initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
-    { -- compilerSupply = 0
-      compilerCurrentModule = Path mempty
+    { compilerCurrentModule = Path mempty
     , compilerFreshModules = mempty
     , compilerVerbatimSource = mempty
     , compilerConfig = defaultConfig

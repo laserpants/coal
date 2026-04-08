@@ -2,13 +2,13 @@
 
 module Coal.Parser.Module (parseModule, parseModule2) where
 
-import Coal.ProtoLanguage.ProtoModule
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Module (Export (..), Module (..), Path (Path))
 import Coal.Parser.Core (Parser, lexeme_)
 import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Module.Definition (parseDefinition, parseDefinition2)
 import Coal.Parser.Symbol
+import Coal.ProtoLanguage.ProtoModule
 import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)

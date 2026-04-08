@@ -1,9 +1,8 @@
-{-# LANGUAGE StrictData #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule) where
 
-import Coal.ProtoLanguage.ProtoDefinition
 import Coal.AST.HasMetadata (HasMetadata (..))
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Unit (BuildUnit (..))
@@ -13,8 +12,9 @@ import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), toProtoModule)
 import Coal.Language.Module.Path (principalPath)
-import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
+import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
+import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
 
 passImportsTopRule :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passImportsTopRule = Pass{runPass = pass}
@@ -32,11 +32,11 @@ checkImports m = do
     \d ->
       tellErrors [MisplacedImportStatement (ErrorLocation name (getMetadata d))]
   pure mm
-  where
-    mm@(ProtoModule p _ defs) = m
-    name = principalPath p
-    ds = dropWhile isImport defs
-    es = dropWhile (not . isImport) ds
+ where
+  mm@(ProtoModule p _ defs) = m
+  name = principalPath p
+  ds = dropWhile isImport defs
+  es = dropWhile (not . isImport) ds
 
 isImport :: ProtoDefinition a k t -> Bool
 isImport =
@@ -48,8 +48,8 @@ isImport =
     _ ->
       False
 
---checkImports :: (Monad m) => Module Metadata k () -> CompilerT Metadata m (Module Metadata k ())
---checkImports m@(Module p _ defs) = do
+-- checkImports :: (Monad m) => Module Metadata k () -> CompilerT Metadata m (Module Metadata k ())
+-- checkImports m@(Module p _ defs) = do
 --  forM_ (filter isImport es) $
 --    \d ->
 --      tellErrors [MisplacedImportStatement (ErrorLocation name (getMetadata d))]

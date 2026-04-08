@@ -37,9 +37,7 @@ runAnnotationsT :: (Monad m) => a -> TypeAnnotationContext a -> AnnotationsT m a
 runAnnotationsT loc env o = runStateT (runReaderT (runExceptT (withExceptT ($ loc) (annotationsMonad o))) env) mempty
 
 protoOlookupTypeConstructor :: (Monad m) => Name -> AnnotationsT m a (Maybe Kind)
-protoOlookupTypeConstructor name = do
-  env <- asks constraintsGenContextTypeConstructors
-  pure $ Environment.lookup name env
+protoOlookupTypeConstructor name = asks (Environment.lookup name . constraintsGenContextTypeConstructors)
 
 --  case Environment.lookup name env of
 --    Nothing ->

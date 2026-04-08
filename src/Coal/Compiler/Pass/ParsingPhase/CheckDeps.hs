@@ -16,11 +16,11 @@ import Coal.Language.Module (Module (..), toProtoModule)
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (parseModule)
 import Coal.Parser.Core (spaces)
+import Coal.ProtoLanguage.ProtoDefinition
+import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (get)
-import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
-import Coal.ProtoLanguage.ProtoDefinition
 import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)
@@ -32,7 +32,7 @@ pass :: (MonadIO m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT Met
 pass = traverse check
 
 check :: (MonadIO m) => BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildUnit (ProtoModule Metadata () ()))
-check = 
+check =
   \case
     BSource src -> do
       pure (BSource src)
@@ -60,8 +60,8 @@ fromSource name src = do
     Right module_ -> do
       pure $ Right (BSource (toProtoModule [] module_))
 
---check :: (MonadIO m) => BuildUnit (Module Metadata Kind ()) -> CompilerT Metadata m (BuildUnit (Module Metadata Kind ()))
---check =
+-- check :: (MonadIO m) => BuildUnit (Module Metadata Kind ()) -> CompilerT Metadata m (BuildUnit (Module Metadata Kind ()))
+-- check =
 --  \case
 --    BSource src ->
 --      pure (BSource src)

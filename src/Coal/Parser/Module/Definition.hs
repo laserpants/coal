@@ -14,13 +14,13 @@ import Coal.Parser.Metadata (withMetadata)
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
+import Coal.ProtoLanguage.ProtoDefinition
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name, (<$$>))
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
-import Coal.ProtoLanguage.ProtoDefinition
 
 parseDefinition :: Parser (Definition Metadata o ())
 parseDefinition =
@@ -293,7 +293,7 @@ parseFunctionDefinition2 parseName = do
   ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
---  ws <- option [] parseWhereClauses
+  --  ws <- option [] parseWhereClauses
   pure (ProtoDFunction (Metadata start end) fn (ProtoFunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr))
 
 parseWhereClauses :: Parser [Definition Metadata o ()]
@@ -316,7 +316,7 @@ parseLetDefinition2 parseName = do
   ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
---  ws <- option [] parseWhereClauses
+  --  ws <- option [] parseWhereClauses
   pure (ProtoDLet (Metadata start end) c (ProtoLetDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr))
 
 parseTopLevelFold2 :: Parser (ProtoDefinition Metadata () ())

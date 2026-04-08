@@ -44,8 +44,8 @@ parsePath input
 
 validateComponent :: Text -> Maybe Name
 validateComponent t = do
-  (c, rest) <- Text.uncons t
-  if isUpper c && Text.all validChar rest
+  (first, rest) <- Text.uncons t
+  if isUpper first && Text.all validChar rest
     then Just t
     else Nothing
  where
