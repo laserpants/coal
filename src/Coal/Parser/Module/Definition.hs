@@ -41,10 +41,10 @@ parseDefinition2 =
     <|> parseFunctionDefinition2 name
     <|> parseLetDefinition2 name
     <|> try parseTypeAlias2
---    <|> parseTypeDefinition
---    <|> parseTraitDefinition
---    <|> parseTraitInstance
---    <|> parseTopLevelFold
+    <|> parseTypeDefinition2
+    <|> parseTraitDefinition2
+    <|> parseTraitInstance2
+    <|> parseTopLevelFold2
 
 parseTypeAlias2 :: Parser (ProtoDefinition Metadata () ())
 parseTypeAlias2 = do
@@ -70,6 +70,20 @@ parseTypeAlias = do
   end <- getSourcePos
   pure (DTypeAlias (Metadata start end) n (AliasDefinition ps t))
 
+parseTraitDefinition2 :: Parser (ProtoDefinition Metadata () ())
+parseTraitDefinition2 = do
+  start <- getSourcePos
+  lexeme_ "trait"
+  n <- constructor
+  t <- angleBrackets parseParameter
+  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
+  end <- getSourcePos
+  ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
+  pure (ProtoDTrait (Metadata start end) n (ProtoTraitDefinition (Metadata start end) n ts t (toEntry <$> toScheme <$$> ds)))
+
+toEntry :: (Name, Scheme Parameter () ParameterizedType) -> ProtoTraitDefinitionInterfaceEntry ()
+toEntry = uncurry ProtoTraitDefinitionInterfaceEntry
+
 parseTraitDefinition :: Parser (Definition Metadata o ())
 parseTraitDefinition = do
   start <- getSourcePos
@@ -83,6 +97,23 @@ parseTraitDefinition = do
 
 parseParameter :: Parser (Parameter ())
 parseParameter = Parameter () <$> name
+
+parseTraitInstance2 :: Parser (ProtoDefinition Metadata () ())
+parseTraitInstance2 = do
+  start <- getSourcePos
+  lexeme_ "instance"
+  n <- constructor
+  t <- angleBrackets parseType
+  end <- getSourcePos
+  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
+  ds <- braces (some parseMethod)
+  pure (ProtoDInstance (Metadata start end) (ProtoInstanceDefinition (Metadata start end) n ts t ds))
+ where
+  methodName = backtickName <|> name
+  parseMethod =
+    try (parseFunctionGroup2 methodName)
+      <|> parseFunctionDefinition2 methodName
+      <|> parseLetDefinition2 methodName
 
 parseTraitInstance :: Parser (Definition Metadata o ())
 parseTraitInstance = do
@@ -106,6 +137,16 @@ parseTrait p = Trait <$> constructor <*> angleBrackets p
 
 parseParameterList :: Parser [Parameter ()]
 parseParameterList = angleBrackets (commaSep1 (Parameter () <$> name))
+
+parseTypeDefinition2 :: Parser (ProtoDefinition Metadata () ())
+parseTypeDefinition2 = do
+  start <- getSourcePos
+  lexeme_ "type"
+  n <- constructor
+  ps <- option [] parseParameterList
+  end <- getSourcePos
+  cs <- option [] (symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|")
+  pure (ProtoDType (Metadata start end) n (ProtoTypeDefinition ps cs))
 
 parseTypeDefinition :: Parser (Definition Metadata o ())
 parseTypeDefinition = do
@@ -277,6 +318,15 @@ parseLetDefinition2 parseName = do
   expr <- symbol_ "=" *> parseExpression
 --  ws <- option [] parseWhereClauses
   pure (ProtoDLet (Metadata start end) c (ProtoLetDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr))
+
+parseTopLevelFold2 :: Parser (ProtoDefinition Metadata () ())
+parseTopLevelFold2 = do
+  start <- getSourcePos
+  n <- lexeme_ "fold" *> name
+  ann <- optional parseAnnotation
+  end <- getSourcePos
+  cs <- try (nonEmpty (some parseTopLevelFoldClause)) -- <|> braces (nonEmpty (some parseTopLevelFoldClause))
+  pure (ProtoDFold (Metadata start end) n (ProtoFoldDefinition (Metadata start end) (With [] <$> ann) cs))
 
 parseTopLevelFold :: Parser (Definition Metadata o ())
 parseTopLevelFold = do
