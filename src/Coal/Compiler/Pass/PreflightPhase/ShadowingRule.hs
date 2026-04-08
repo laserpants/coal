@@ -39,8 +39,6 @@ impl mm = do
   --  let mm = toProtoModule [] m
   detectShadowing mempty mm
 
--- impl = traverse (detectShadowing mempty)
-
 class RuleContext e where
   detectShadowing :: (Monad m) => Set Name -> e -> CompilerT Metadata (ProtoCompilerT m Metadata) e
 
@@ -146,18 +144,10 @@ instance (Data t) => RuleContext (Binding Expression Metadata () t) where
         names' <- addNames a (boundIn ps) names
         BFunction a n ps <$> detectShadowing names' e
 
--- instance (Data t) => RuleContext (Module Metadata Kind t) where
---  detectShadowing names =
---    \case
---      Module p ns o -> do
---        setCompilerCurrentModuleC p
---        Module p ns <$> detectShadowing names o
-
 instance RuleContext (ProtoModule Metadata () ()) where
   detectShadowing names =
     \case
       ProtoModule{..} -> do
-        -- setCompilerCurrentModuleC protoOmodulePath
         lift $ setCurrentPathC protoOmodulePath
         newModuleDefinitions <- detectShadowing names protoOmoduleDefinitions
         return $
@@ -177,36 +167,6 @@ instance RuleContext (ProtoDefinition Metadata () ()) where
         ProtoDLet loc name <$> detectShadowing names' def
       o ->
         pure o
-
---    \case
---      DFunction loc name f fs -> do
---        names' <- addNames loc (Set.singleton name) names
---        DFunction loc name
---          <$> detectShadowing names' f
---          <*> detectShadowing names' fs
---      DConstant loc name g fs -> do
---        names' <- addNames loc (Set.singleton name) names
---        DConstant loc name
---          <$> detectShadowing names' g
---          <*> detectShadowing names' fs
---      o ->
---        pure o
-
--- instance (Data t) => RuleContext (Definition Metadata k t) where
---  detectShadowing names =
---    \case
---      DFunction loc name f fs -> do
---        names' <- addNames loc (Set.singleton name) names
---        DFunction loc name
---          <$> detectShadowing names' f
---          <*> detectShadowing names' fs
---      DConstant loc name g fs -> do
---        names' <- addNames loc (Set.singleton name) names
---        DConstant loc name
---          <$> detectShadowing names' g
---          <*> detectShadowing names' fs
---      o ->
---        pure o
 
 instance RuleContext (ProtoLetDefinition Metadata () ()) where
   detectShadowing names =
@@ -231,24 +191,10 @@ instance RuleContext (ProtoFunctionDefinition Metadata () ()) where
             , ..
             }
 
--- instance (Data t) => RuleContext (ConstantDefinition Metadata t) where
---  detectShadowing names =
---    \case
---      ConstantDefinition a u w e ->
---        ConstantDefinition a u w <$> detectShadowing names e
---
--- instance (Data t) => RuleContext (FunctionDefinition Metadata t) where
---  detectShadowing names =
---    \case
---      FunctionDefinition a u w ps e -> do
---        names' <- addNames a (boundIn ps) names
---        FunctionDefinition a u w ps <$> detectShadowing names' e
-
 addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata (ProtoCompilerT m Metadata) (Set Name)
 addNames loc new names = do
   forM_ new' $
     \name -> do
-      --path <- gets compilerCurrentModule
       path <- lift $ gets protoOcompilerCurrentPath
       when (name `elem` names) $ do
         tellErrors [Shadowing name (ErrorLocation (principalPath path) loc)]
