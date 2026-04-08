@@ -16,7 +16,6 @@ import Coal.Graphviz.Dot (writeDotFile)
 import Coal.Kernel.Compiler (KernelModule)
 import Coal.Kernel.Language (moduleName)
 import Coal.Language (IndexedType, Kind)
-import Coal.Language.Module (Module)
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (when)
 import Control.Monad.Catch (MonadMask)
