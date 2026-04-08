@@ -13,16 +13,15 @@ import Coal.Language.Module
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Extras (for)
 
-passSetup :: (Monad m) => Pass a m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
+passSetup :: (Monad m) => Pass a m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passSetup = Pass{runPass = pass}
 
-pass :: (Monad m) => [BuildUnit (Module Metadata Kind ())] -> CompilerT a m [BuildUnit (ProtoModule Metadata () ())]
+pass :: (Monad m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT a m [BuildUnit (ProtoModule Metadata () ())]
 pass modules = pure (for modules (fmap setup2))
 
-setup2 :: Module Metadata Kind () -> ProtoModule Metadata () ()
-setup2 m = ProtoModule p x (ins ds) -- overModuleDefinitions ins m
+setup2 :: ProtoModule Metadata () () -> ProtoModule Metadata () ()
+setup2 (ProtoModule p x ds) = ProtoModule p x (ins ds) -- overModuleDefinitions ins m
  where
-  ProtoModule p x ds = toProtoModule [] m
   ins
     | principalPath p `elem` embeddedPaths =
         insertBuiltinDefinitions2

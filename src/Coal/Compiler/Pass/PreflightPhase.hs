@@ -19,7 +19,7 @@ import Coal.Language.Module (Module)
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.IO.Class (MonadIO)
 
-preflightPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
+preflightPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 preflightPhase =
   passImportsTopRule
     >-> passSetup
