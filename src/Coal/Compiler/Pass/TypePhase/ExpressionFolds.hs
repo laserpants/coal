@@ -17,7 +17,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition

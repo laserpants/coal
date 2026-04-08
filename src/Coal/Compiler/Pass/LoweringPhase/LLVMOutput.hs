@@ -20,7 +20,7 @@ import Coal.Debug (writeDebugFile)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Control.Exception (SomeException, try)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except

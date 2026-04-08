@@ -3,7 +3,6 @@
 module Coal.TypeSystem.Kind.InferenceSpec where
 
 import Coal.Language
-import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Type
 import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Identity (runIdentity)
@@ -42,37 +41,37 @@ import qualified Data.Set as Set
 --      )
 --    ]
 
-testTraitDefinition1 =
-  inferTraitKinds
-    mempty
-    ( TraitDefinition
-        []
-        (Parameter () "m")
-        [
-          ( "bind"
-          , Forall
-              (Set.fromList [Parameter () "m", Parameter () "a", Parameter () "b"])
-                mempty
-              ( TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "a")) -- m<a>
-                  ~> (TVariable (Parameter () "a") ~> TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "b"))) -- a -> m<b>
-                  ~> TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "b")) -- m<b>
-              )
-          )
-        ]
-    )
-    == Right
-      ( TraitDefinition
-          []
-          (Parameter (KArrow KType KType) "m")
-          [
-            ( "bind"
-            , Forall
-                (Set.fromList [Parameter (KArrow KType KType) "m", Parameter KType "a", Parameter KType "b"])
-                mempty
-                ( TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "a")) -- m<a>
-                    ~> (TVariable (Parameter KType "a") ~> TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "b"))) -- a -> m<b>
-                    ~> TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "b")) -- m<b>
-                )
-            )
-          ]
-      )
+--testTraitDefinition1 =
+--  inferTraitKinds
+--    mempty
+--    ( TraitDefinition
+--        []
+--        (Parameter () "m")
+--        [
+--          ( "bind"
+--          , Forall
+--              (Set.fromList [Parameter () "m", Parameter () "a", Parameter () "b"])
+--                mempty
+--              ( TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "a")) -- m<a>
+--                  ~> (TVariable (Parameter () "a") ~> TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "b"))) -- a -> m<b>
+--                  ~> TApplication () (TVariable (Parameter () "m")) (TVariable (Parameter () "b")) -- m<b>
+--              )
+--          )
+--        ]
+--    )
+--    == Right
+--      ( TraitDefinition
+--          []
+--          (Parameter (KArrow KType KType) "m")
+--          [
+--            ( "bind"
+--            , Forall
+--                (Set.fromList [Parameter (KArrow KType KType) "m", Parameter KType "a", Parameter KType "b"])
+--                mempty
+--                ( TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "a")) -- m<a>
+--                    ~> (TVariable (Parameter KType "a") ~> TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "b"))) -- a -> m<b>
+--                    ~> TApplication KType (TVariable (Parameter (KArrow KType KType) "m")) (TVariable (Parameter KType "b")) -- m<b>
+--                )
+--            )
+--          ]
+--      )

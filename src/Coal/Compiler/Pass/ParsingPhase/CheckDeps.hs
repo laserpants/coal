@@ -12,7 +12,6 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
-import Coal.Language.Module (Module (..), toProtoModule)
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (parseModule)
 import Coal.Parser.Core (spaces)
@@ -58,4 +57,4 @@ fromSource name src = do
     Left{} ->
       error "Implementation error"
     Right module_ -> do
-      pure $ Right (BSource (toProtoModule [] module_))
+      pure $ Right (BSource module_)

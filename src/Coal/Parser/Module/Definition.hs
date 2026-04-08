@@ -2,11 +2,12 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Module.Definition (parseDefinition, parseDefinition2) where
+module Coal.Parser.Module.Definition (parseDefinition) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module.Import (Import (..))
+import Coal.Language.Module.Path
 import Coal.Parser.Core
 import Coal.Parser.Expression (parseExpression)
 import Coal.Parser.Identifier
@@ -22,7 +23,7 @@ import Extras (Name, (<$$>))
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
 
-parseDefinition :: Parser (Definition Metadata o ())
+parseDefinition :: Parser (ProtoDefinition Metadata () ())
 parseDefinition =
   parseImport
     <|> try (parseFunctionGroup name)
@@ -34,20 +35,8 @@ parseDefinition =
     <|> parseTraitInstance
     <|> parseTopLevelFold
 
-parseDefinition2 :: Parser (ProtoDefinition Metadata () ())
-parseDefinition2 =
-  parseImport2
-    <|> try (parseFunctionGroup2 name)
-    <|> parseFunctionDefinition2 name
-    <|> parseLetDefinition2 name
-    <|> try parseTypeAlias2
-    <|> parseTypeDefinition2
-    <|> parseTraitDefinition2
-    <|> parseTraitInstance2
-    <|> parseTopLevelFold2
-
-parseTypeAlias2 :: Parser (ProtoDefinition Metadata () ())
-parseTypeAlias2 = do
+parseTypeAlias :: Parser (ProtoDefinition Metadata () ())
+parseTypeAlias = do
   start <- getSourcePos
   lexeme_ "type"
   lexeme_ "alias"
@@ -58,20 +47,8 @@ parseTypeAlias2 = do
   end <- getSourcePos
   pure (ProtoDTypeAlias (Metadata start end) n (ProtoAliasDefinition ps t))
 
-parseTypeAlias :: Parser (Definition Metadata o ())
-parseTypeAlias = do
-  start <- getSourcePos
-  lexeme_ "type"
-  lexeme_ "alias"
-  n <- constructor
-  ps <- option [] (angleBrackets (commaSep1 (Parameter () <$> name)))
-  symbol_ "="
-  t <- parseType
-  end <- getSourcePos
-  pure (DTypeAlias (Metadata start end) n (AliasDefinition ps t))
-
-parseTraitDefinition2 :: Parser (ProtoDefinition Metadata () ())
-parseTraitDefinition2 = do
+parseTraitDefinition :: Parser (ProtoDefinition Metadata () ())
+parseTraitDefinition = do
   start <- getSourcePos
   lexeme_ "trait"
   n <- constructor
@@ -84,22 +61,11 @@ parseTraitDefinition2 = do
 toEntry :: (Name, Scheme Parameter () ParameterizedType) -> ProtoTraitDefinitionInterfaceEntry ()
 toEntry = uncurry ProtoTraitDefinitionInterfaceEntry
 
-parseTraitDefinition :: Parser (Definition Metadata o ())
-parseTraitDefinition = do
-  start <- getSourcePos
-  lexeme_ "trait"
-  n <- constructor
-  t <- angleBrackets parseParameter
-  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
-  end <- getSourcePos
-  ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
-  pure (DTrait (Metadata start end) n (TraitDefinition ts t (toScheme <$$> ds)))
-
 parseParameter :: Parser (Parameter ())
 parseParameter = Parameter () <$> name
 
-parseTraitInstance2 :: Parser (ProtoDefinition Metadata () ())
-parseTraitInstance2 = do
+parseTraitInstance :: Parser (ProtoDefinition Metadata () ())
+parseTraitInstance = do
   start <- getSourcePos
   lexeme_ "instance"
   n <- constructor
@@ -108,23 +74,6 @@ parseTraitInstance2 = do
   ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
   ds <- braces (some parseMethod)
   pure (ProtoDInstance (Metadata start end) (ProtoInstanceDefinition (Metadata start end) n ts t ds))
- where
-  methodName = backtickName <|> name
-  parseMethod =
-    try (parseFunctionGroup2 methodName)
-      <|> parseFunctionDefinition2 methodName
-      <|> parseLetDefinition2 methodName
-
-parseTraitInstance :: Parser (Definition Metadata o ())
-parseTraitInstance = do
-  start <- getSourcePos
-  lexeme_ "instance"
-  n <- constructor
-  t <- angleBrackets parseType
-  end <- getSourcePos
-  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseType))
-  ds <- braces (some parseMethod)
-  pure (DInstance (Metadata start end) n (InstanceDefinition ts t ds))
  where
   methodName = backtickName <|> name
   parseMethod =
@@ -138,17 +87,7 @@ parseTrait p = Trait <$> constructor <*> angleBrackets p
 parseParameterList :: Parser [Parameter ()]
 parseParameterList = angleBrackets (commaSep1 (Parameter () <$> name))
 
-parseTypeDefinition2 :: Parser (ProtoDefinition Metadata () ())
-parseTypeDefinition2 = do
-  start <- getSourcePos
-  lexeme_ "type"
-  n <- constructor
-  ps <- option [] parseParameterList
-  end <- getSourcePos
-  cs <- option [] (symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|")
-  pure (ProtoDType (Metadata start end) n (ProtoTypeDefinition ps cs))
-
-parseTypeDefinition :: Parser (Definition Metadata o ())
+parseTypeDefinition :: Parser (ProtoDefinition Metadata () ())
 parseTypeDefinition = do
   start <- getSourcePos
   lexeme_ "type"
@@ -156,7 +95,7 @@ parseTypeDefinition = do
   ps <- option [] parseParameterList
   end <- getSourcePos
   cs <- option [] (symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|")
-  pure (DType (Metadata start end) n (TypeDefinition ps cs))
+  pure (ProtoDType (Metadata start end) n (ProtoTypeDefinition ps cs))
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
@@ -195,47 +134,52 @@ parseNameImport = do
   end <- getSourcePos
   pure (NameImport (Metadata start end) n)
 
-parseImport :: Parser (Definition Metadata o ())
+parseImport :: Parser (ProtoDefinition Metadata o ())
 parseImport = do
   start <- getSourcePos
   lexeme_ "import"
   try (parseQualifiedImport start) <|> parseNormalImport start
 
-parseImport2 :: Parser (ProtoDefinition Metadata o ())
-parseImport2 = do
-  start <- getSourcePos
-  lexeme_ "import"
-  try (parseQualifiedImport2 start) <|> parseNormalImport2 start
-
-parseQualifiedImport2 :: SourcePos -> Parser (ProtoDefinition Metadata o ())
-parseQualifiedImport2 start = do
+parseQualifiedImport :: SourcePos -> Parser (ProtoDefinition Metadata o ())
+parseQualifiedImport start = do
   lexeme_ "namespace"
   path <- identifier upperChar `sepBy1` symbol "."
   end <- getSourcePos
   pure (ProtoDNamespaceImport (Metadata start end) (Path path))
 
-parseNormalImport2 :: SourcePos -> Parser (ProtoDefinition Metadata o ())
-parseNormalImport2 start = do
+parseNormalImport :: SourcePos -> Parser (ProtoDefinition Metadata o ())
+parseNormalImport start = do
   path <- (lexeme "Builtin$" <|> identifier upperChar) `sepBy1` symbol "."
   names <- parens (commaSep parseImportAtom)
   end <- getSourcePos
   pure (ProtoDImport (Metadata start end) (Path path) names)
 
-parseQualifiedImport :: SourcePos -> Parser (Definition Metadata o ())
-parseQualifiedImport start = do
-  lexeme_ "namespace"
-  path <- identifier upperChar `sepBy1` symbol "."
-  end <- getSourcePos
-  pure (DQualifiedImport (Metadata start end) (Path path))
+-- parseQualifiedImport :: SourcePos -> Parser (Definition Metadata o ())
+-- parseQualifiedImport start = do
+--  lexeme_ "namespace"
+--  path <- identifier upperChar `sepBy1` symbol "."
+--  end <- getSourcePos
+--  pure (DQualifiedImport (Metadata start end) (Path path))
 
-parseNormalImport :: SourcePos -> Parser (Definition Metadata o ())
-parseNormalImport start = do
-  path <- (lexeme "Builtin$" <|> identifier upperChar) `sepBy1` symbol "."
-  names <- parens (commaSep parseImportAtom)
-  end <- getSourcePos
-  pure (DImport (Metadata start end) (Path path) names)
+-- parseNormalImport :: SourcePos -> Parser (Definition Metadata o ())
+-- parseNormalImport start = do
+--  path <- (lexeme "Builtin$" <|> identifier upperChar) `sepBy1` symbol "."
+--  names <- parens (commaSep parseImportAtom)
+--  end <- getSourcePos
+--  pure (DImport (Metadata start end) (Path path) names)
 
-parseFunctionGroup :: Parser Name -> Parser (Definition Metadata o ())
+-- parseFunctionGroup :: Parser Name -> Parser (Definition Metadata o ())
+-- parseFunctionGroup parseName = do
+--  start <- getSourcePos
+--  fn <- lexeme_ "fun" *> parseName
+--  ann <- optional parseAnnotation
+--  fns <- some (void pipe *> parseGroupFunctionDefinition ann)
+--  end <- getSourcePos
+--  case fns of
+--    [] -> fail "Empty list"
+--    f : fs -> pure (DFunction (Metadata start end) fn (f :| fs) [])
+
+parseFunctionGroup :: Parser Name -> Parser (ProtoDefinition Metadata () ())
 parseFunctionGroup parseName = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> parseName
@@ -244,49 +188,30 @@ parseFunctionGroup parseName = do
   end <- getSourcePos
   case fns of
     [] -> fail "Empty list"
-    f : fs -> pure (DFunction (Metadata start end) fn (f :| fs) [])
-
-parseFunctionGroup2 :: Parser Name -> Parser (ProtoDefinition Metadata () ())
-parseFunctionGroup2 parseName = do
-  start <- getSourcePos
-  fn <- lexeme_ "fun" *> parseName
-  ann <- optional parseAnnotation
-  fns <- some (void pipe *> parseGroupFunctionDefinition2 ann)
-  end <- getSourcePos
-  case fns of
-    [] -> fail "Empty list"
     fs -> pure (ProtoDFunctionGroup (Metadata start end) fn fs)
 
-parseGroupFunctionDefinition2 :: Maybe ParameterizedType -> Parser (ProtoFunctionDefinition Metadata () ())
-parseGroupFunctionDefinition2 ann = do
+parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (ProtoFunctionDefinition Metadata () ())
+parseGroupFunctionDefinition ann = do
   start <- getSourcePos
   args <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
   expr <- symbol_ "=" *> parseExpression
   end <- getSourcePos
   pure (ProtoFunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
-parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata ())
-parseGroupFunctionDefinition ann = do
-  start <- getSourcePos
-  args <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
-  expr <- symbol_ "=" *> parseExpression
-  end <- getSourcePos
-  pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
-
 -- TODO: DRY
-parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata o ())
-parseFunctionDefinition parseName = do
-  start <- getSourcePos
-  fn <- lexeme_ "fun" *> parseName
-  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
-  ann <- optional parseAnnotation
-  end <- getSourcePos
-  expr <- symbol_ "=" *> parseExpression
-  ws <- option [] parseWhereClauses
-  pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
+-- parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata o ())
+-- parseFunctionDefinition parseName = do
+--  start <- getSourcePos
+--  fn <- lexeme_ "fun" *> parseName
+--  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
+--  ann <- optional parseAnnotation
+--  end <- getSourcePos
+--  expr <- symbol_ "=" *> parseExpression
+--  ws <- option [] parseWhereClauses
+--  pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
 
-parseFunctionDefinition2 :: Parser Name -> Parser (ProtoDefinition Metadata () ())
-parseFunctionDefinition2 parseName = do
+parseFunctionDefinition :: Parser Name -> Parser (ProtoDefinition Metadata () ())
+parseFunctionDefinition parseName = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> parseName
   args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
@@ -296,21 +221,21 @@ parseFunctionDefinition2 parseName = do
   --  ws <- option [] parseWhereClauses
   pure (ProtoDFunction (Metadata start end) fn (ProtoFunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr))
 
-parseWhereClauses :: Parser [Definition Metadata o ()]
-parseWhereClauses = lexeme_ "where" *> braces (some (parseFunctionDefinition name))
+-- parseWhereClauses :: Parser [Definition Metadata o ()]
+-- parseWhereClauses = lexeme_ "where" *> braces (some (parseFunctionDefinition name))
 
-parseLetDefinition :: Parser Name -> Parser (Definition Metadata o ())
+-- parseLetDefinition :: Parser Name -> Parser (Definition Metadata o ())
+-- parseLetDefinition parseName = do
+--  start <- getSourcePos
+--  c <- lexeme_ "let" *> parseName
+--  ann <- optional parseAnnotation
+--  end <- getSourcePos
+--  expr <- symbol_ "=" *> parseExpression
+--  ws <- option [] parseWhereClauses
+--  pure (DConstant (Metadata start end) c (ConstantDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
+
+parseLetDefinition :: Parser Name -> Parser (ProtoDefinition Metadata () ())
 parseLetDefinition parseName = do
-  start <- getSourcePos
-  c <- lexeme_ "let" *> parseName
-  ann <- optional parseAnnotation
-  end <- getSourcePos
-  expr <- symbol_ "=" *> parseExpression
-  ws <- option [] parseWhereClauses
-  pure (DConstant (Metadata start end) c (ConstantDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
-
-parseLetDefinition2 :: Parser Name -> Parser (ProtoDefinition Metadata () ())
-parseLetDefinition2 parseName = do
   start <- getSourcePos
   c <- lexeme_ "let" *> parseName
   ann <- optional parseAnnotation
@@ -319,23 +244,14 @@ parseLetDefinition2 parseName = do
   --  ws <- option [] parseWhereClauses
   pure (ProtoDLet (Metadata start end) c (ProtoLetDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr))
 
-parseTopLevelFold2 :: Parser (ProtoDefinition Metadata () ())
-parseTopLevelFold2 = do
-  start <- getSourcePos
-  n <- lexeme_ "fold" *> name
-  ann <- optional parseAnnotation
-  end <- getSourcePos
-  cs <- try (nonEmpty (some parseTopLevelFoldClause)) -- <|> braces (nonEmpty (some parseTopLevelFoldClause))
-  pure (ProtoDFold (Metadata start end) n (ProtoFoldDefinition (Metadata start end) (With [] <$> ann) cs))
-
-parseTopLevelFold :: Parser (Definition Metadata o ())
+parseTopLevelFold :: Parser (ProtoDefinition Metadata () ())
 parseTopLevelFold = do
   start <- getSourcePos
   n <- lexeme_ "fold" *> name
   ann <- optional parseAnnotation
   end <- getSourcePos
   cs <- try (nonEmpty (some parseTopLevelFoldClause)) -- <|> braces (nonEmpty (some parseTopLevelFoldClause))
-  pure (DFold (Metadata start end) n (FoldDefinition (With [] <$> ann) cs))
+  pure (ProtoDFold (Metadata start end) n (ProtoFoldDefinition (Metadata start end) (With [] <$> ann) cs))
 
 parseTopLevelFoldClause :: Parser (Clause Metadata () ())
 parseTopLevelFoldClause =

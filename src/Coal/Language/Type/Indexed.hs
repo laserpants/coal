@@ -19,7 +19,6 @@ import Coal.Common.Supply (supply)
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
-import Coal.Language.Module (Definition, Module)
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Qualified (..), Trait (..))
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..))
@@ -97,13 +96,7 @@ instance (Ord k, Data k, Data a, Data s) => TypeIndexed k (Expression a s (Type 
 instance (Ord k, Data t, Data k) => TypeIndexed k (Qualified t) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
-  typeIndexesIn = Set.fromList . universeBi
-
 instance (Ord k, Data a, Data k) => TypeIndexed k (ProtoDefinition a k (Type TypeIndex k)) where
-  typeIndexesIn = Set.fromList . universeBi
-
-instance (Ord k, Data a, Data t, Data k) => TypeIndexed k (Module a k t) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where

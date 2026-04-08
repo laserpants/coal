@@ -2,7 +2,6 @@ module Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeOb
 
 import Coal.AST.Normalization (NormalizationContext (denormalizeObject))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Language.Module (Module)
 import Coal.Language.Type (Type (..))
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Data.Data (Data, Typeable)

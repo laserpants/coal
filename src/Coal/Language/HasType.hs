@@ -10,9 +10,6 @@ module Coal.Language.HasType (HasType (..), foldTypeOf) where
 import Coal.Common.Label (Label (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Expression.Choice (Guard (..))
-import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
-import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
@@ -90,16 +87,6 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Expres
         typeOf t
       e ->
         head (universeBi e)
-
-instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
-  typeOf =
-    \case
-      DFunction _ _ (FunctionDefinition _ _ _ ps e :| _) _ ->
-        foldTypeOf e ps
-      DConstant _ _ (ConstantDefinition _ _ _ e) _ ->
-        typeOf e
-      d ->
-        head (universeBi d)
 
 instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (ProtoDefinition a k (Type o k)) where
   typeOf =

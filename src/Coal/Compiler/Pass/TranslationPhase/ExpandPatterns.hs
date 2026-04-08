@@ -17,7 +17,7 @@ import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
-import Coal.Language.Module (Module (..), fromProtoModule)
+import Coal.Language.Module.Path
 import Coal.Language.Pattern (Pattern (..))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition

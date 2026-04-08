@@ -20,9 +20,8 @@ import Coal.Compiler.Build
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Graphviz.Dot (Dot (..), generateDot, writeDotFile)
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoCompiler.ProtoStack

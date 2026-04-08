@@ -5,7 +5,6 @@ module Coal.AST.HasMetadata (HasMetadata (..), metadataSpan) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Expression (Expression (..))
-import Coal.Language.Module.Definition (Definition (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
@@ -118,19 +117,6 @@ instance HasMetadata (Assumption Metadata t) where
   getMetadata =
     \case
       Assumption a _ _ -> a
-
-instance HasMetadata (Definition Metadata k ()) where
-  getMetadata =
-    \case
-      DType a _ _ -> a
-      DFunction a _ _ _ -> a
-      DConstant a _ _ _ -> a
-      DImport a _ _ -> a
-      DQualifiedImport a _ -> a
-      DTrait a _ _ -> a
-      DInstance a _ _ -> a
-      DTypeAlias a _ _ -> a
-      DFold a _ _ -> a
 
 instance HasMetadata (ProtoDefinition Metadata k ()) where
   getMetadata =

@@ -8,16 +8,12 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Coal.TypeSystem.Kind.Inference (
-  KindInferenceError (..),
-  inferTraitKinds,
-  inferTypeKinds,
-) where
+-- TODO: remove???
+module Coal.TypeSystem.Kind.Inference where
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Language.Data.Constructor (DataConstructor (..))
-import Coal.Language.Module.Definition.Trait (TraitDefinition (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (Parameter (Parameter), Type (..))
 import Coal.Language.Type.Kind (Kind (..))
@@ -510,9 +506,6 @@ instance Parameterized (Parameter p) where
 instance (Parameterized p) => Parameterized (Trait p) where
   paramsIn (Trait _ t) = paramsIn t
 
-instance Parameterized (TraitDefinition k) where
-  paramsIn (TraitDefinition ts p _) = paramsIn ts <> paramsIn p
-
 solveKindConstraints :: [KindConstraint] -> KindUnifier KindSubstitution
 solveKindConstraints [] =
   pure mempty
@@ -537,38 +530,40 @@ insertTraitKind params (Trait trait (Parameter () name)) =
     Nothing ->
       error "Implementation error"
 
-inferTraitKinds :: Environment Kind -> TraitDefinition () -> Either [KindInferenceError] (TraitDefinition Kind)
-inferTraitKinds env def@(TraitDefinition ts p defs) =
-  case runStateT go (fmap (insertTraitKind qs) ts, insertKind qs p) of
-    Left errs ->
-      Left errs
-    Right (defs0, (traits0, param0)) ->
-      pure $
-        TraitDefinition
-          (lowerKinds <$> traits0)
-          (lowerKinds param0)
-          defs0
- where
-  qs = zip (Set.toList (paramsIn def)) [IsKVariable n | n <- [1 ..]]
-  go =
-    forM defs $
-      \(n, s) -> do
-        let (r, outs) =
-              runKindConstraintsGen (mapEnvironment liftKind env) $ do
-                forM_ qs (modify . uncurry Environment.insert)
-                let indexed = evalState (indexKinds s) (length qs)
-                emitKindConstraints indexed
-                pure indexed
-        let (errs, cs) = partitionEithers outs
-            KindUnifier res = solveKindConstraints cs
-        unless (null errs) $
-          throwError errs
-        case res of
-          Left err ->
-            throwError [err]
-          Right sub -> do
-            modify (bimap (applyKinds sub) (applyKinds sub))
-            pure (n, lowerKinds (applyKinds sub r))
+inferTraitKinds = undefined
+
+-- inferTraitKinds :: Environment Kind -> TraitDefinition () -> Either [KindInferenceError] (TraitDefinition Kind)
+-- inferTraitKinds env def@(TraitDefinition ts p defs) =
+--  case runStateT go (fmap (insertTraitKind qs) ts, insertKind qs p) of
+--    Left errs ->
+--      Left errs
+--    Right (defs0, (traits0, param0)) ->
+--      pure $
+--        TraitDefinition
+--          (lowerKinds <$> traits0)
+--          (lowerKinds param0)
+--          defs0
+-- where
+--  qs = zip (Set.toList (paramsIn def)) [IsKVariable n | n <- [1 ..]]
+--  go =
+--    forM defs $
+--      \(n, s) -> do
+--        let (r, outs) =
+--              runKindConstraintsGen (mapEnvironment liftKind env) $ do
+--                forM_ qs (modify . uncurry Environment.insert)
+--                let indexed = evalState (indexKinds s) (length qs)
+--                emitKindConstraints indexed
+--                pure indexed
+--        let (errs, cs) = partitionEithers outs
+--            KindUnifier res = solveKindConstraints cs
+--        unless (null errs) $
+--          throwError errs
+--        case res of
+--          Left err ->
+--            throwError [err]
+--          Right sub -> do
+--            modify (bimap (applyKinds sub) (applyKinds sub))
+--            pure (n, lowerKinds (applyKinds sub r))
 
 inferTypeKinds :: Type Parameter () -> Either [KindInferenceError] (Type Parameter Kind)
 inferTypeKinds t = do

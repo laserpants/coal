@@ -16,7 +16,7 @@ import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kind (..))
 import Coal.Language.Expression.Binding (Binding (..))
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition

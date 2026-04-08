@@ -13,7 +13,6 @@ import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -27,9 +26,7 @@ passDoNotation :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadat
 passDoNotation = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
-impl m = do
-  --  let mm = toProtoModule [] m
-  desugarDoNotation m
+impl = desugarDoNotation 
 
 class TransformContext e where
   desugarDoNotation :: (Monad m) => e -> CompilerT a (ProtoCompilerT m Metadata) e
@@ -62,13 +59,6 @@ instance (Data a, Monoid a) => TransformContext (ProtoDefinition a () ()) where
       o ->
         pure o
 
-instance (TransformContext (d a k ())) => TransformContext (InstanceDefinition d a k ()) where
-  desugarDoNotation =
-    \case
-      InstanceDefinition ps t es ->
-        InstanceDefinition ps t
-          <$> traverse desugarDoNotation es
-
 instance (Data a, Monoid a) => TransformContext (ProtoInstanceDefinition a () ()) where
   desugarDoNotation =
     \case
@@ -79,13 +69,6 @@ instance (Data a, Monoid a) => TransformContext (ProtoInstanceDefinition a () ()
             { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
-
-instance (Data a, Monoid a) => TransformContext (FoldDefinition a ()) where
-  desugarDoNotation =
-    \case
-      FoldDefinition a cs ->
-        FoldDefinition a
-          <$> traverse desugarDoNotation cs
 
 instance (Data a, Monoid a) => TransformContext (ProtoFoldDefinition a () ()) where
   desugarDoNotation =

@@ -7,14 +7,12 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
-import Coal.Compiler.Build.Core
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
 import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module
 import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)

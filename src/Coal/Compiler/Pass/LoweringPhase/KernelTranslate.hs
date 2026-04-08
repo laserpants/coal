@@ -13,7 +13,7 @@ import Coal.Compiler.Pass (Pass (..), tickBar)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
-import Coal.Language.Module (Module (..), principalPath)
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, setCurrentPathC)
 import Coal.ProtoLanguage.ProtoModule

@@ -17,7 +17,7 @@ import Coal.Compiler.Build
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry

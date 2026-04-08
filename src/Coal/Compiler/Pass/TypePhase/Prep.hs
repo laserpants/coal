@@ -13,7 +13,6 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
 import Coal.Compiler.Stack
 import Coal.Language (Kind, constructors)
-import Coal.Language.Module (Module (..), fromProtoModule, principalPath, toProtoModule)
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)

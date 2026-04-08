@@ -14,7 +14,7 @@ import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -42,19 +42,19 @@ patternExhaustiveCheckM m = do
 class PatternExhaustiveCheckContext c where
   patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 
-instance PatternExhaustiveCheckContext (Definition Metadata k t) where
-  patternExhaustiveCheck name =
-    \case
-      DFunction loc n f ws -> do
-        traverse_ (patternExhaustiveCheck name) f
-        traverse_ (patternExhaustiveCheck name) ws
-      DConstant loc n c ws -> do
-        patternExhaustiveCheck name c
-        traverse_ (patternExhaustiveCheck name) ws
-      DInstance loc n d ->
-        patternExhaustiveCheck name d
-      _ ->
-        pure ()
+-- instance PatternExhaustiveCheckContext (Definition Metadata k t) where
+--  patternExhaustiveCheck name =
+--    \case
+--      DFunction loc n f ws -> do
+--        traverse_ (patternExhaustiveCheck name) f
+--        traverse_ (patternExhaustiveCheck name) ws
+--      DConstant loc n c ws -> do
+--        patternExhaustiveCheck name c
+--        traverse_ (patternExhaustiveCheck name) ws
+--      DInstance loc n d ->
+--        patternExhaustiveCheck name d
+--      _ ->
+--        pure ()
 
 instance PatternExhaustiveCheckContext (ProtoDefinition Metadata k t) where
   patternExhaustiveCheck name =
@@ -77,11 +77,11 @@ instance PatternExhaustiveCheckContext (ProtoDefinition Metadata k t) where
 --      DInstance loc n d ->
 --        patternExhaustiveCheck name d
 
-instance PatternExhaustiveCheckContext (InstanceDefinition Definition Metadata k t) where
-  patternExhaustiveCheck name =
-    \case
-      InstanceDefinition ts t ds ->
-        traverse_ (patternExhaustiveCheck name) ds
+-- instance PatternExhaustiveCheckContext (InstanceDefinition Definition Metadata k t) where
+--  patternExhaustiveCheck name =
+--    \case
+--      InstanceDefinition ts t ds ->
+--        traverse_ (patternExhaustiveCheck name) ds
 
 --    \case
 --      InstanceDefinition ts t ds ->
@@ -99,23 +99,23 @@ instance PatternExhaustiveCheckContext (ProtoLetDefinition Metadata k t) where
       ProtoLetDefinition{..} ->
         patternExhaustiveCheck name protoOletDefinitionExpression
 
-instance PatternExhaustiveCheckContext (FunctionDefinition Metadata t) where
-  patternExhaustiveCheck name =
-    undefined
-
---    \case
---      FunctionDefinition loc w1 w2 ps e1 ->
---        patternExhaustiveCheck name e1
---        FunctionDefinition loc w1 w2 ps <$> patternExhaustiveCheck name e1
-
-instance PatternExhaustiveCheckContext (ConstantDefinition Metadata t) where
-  patternExhaustiveCheck name =
-    undefined
-
---    \case
---      ConstantDefinition loc w1 w2 e1 ->
---        patternExhaustiveCheck name e1
-----        ConstantDefinition loc w1 w2 <$> patternExhaustiveCheck name e1
+-- instance PatternExhaustiveCheckContext (FunctionDefinition Metadata t) where
+--  patternExhaustiveCheck name =
+--    undefined
+--
+----    \case
+----      FunctionDefinition loc w1 w2 ps e1 ->
+----        patternExhaustiveCheck name e1
+----        FunctionDefinition loc w1 w2 ps <$> patternExhaustiveCheck name e1
+--
+-- instance PatternExhaustiveCheckContext (ConstantDefinition Metadata t) where
+--  patternExhaustiveCheck name =
+--    undefined
+--
+----    \case
+----      ConstantDefinition loc w1 w2 e1 ->
+----        patternExhaustiveCheck name e1
+------        ConstantDefinition loc w1 w2 <$> patternExhaustiveCheck name e1
 
 instance PatternExhaustiveCheckContext (Binding Expression Metadata k t) where
   patternExhaustiveCheck name =

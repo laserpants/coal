@@ -13,7 +13,6 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module, fromProtoModule)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule

@@ -11,9 +11,6 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module (Module (..), fromProtoModule)
-import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -127,25 +124,25 @@ collectAsPatterns =
     p ->
       pure p
 
-instance (Data a, Data t, Monoid a) => TransformContext (ConstantDefinition a t) where
-  expandAsPatterns =
-    \case
-      ConstantDefinition a u w e ->
-        ConstantDefinition a u w (expandAsPatterns e)
-
-instance (Data a, Data t, Monoid a) => TransformContext (Definition a k t) where
-  expandAsPatterns =
-    \case
-      DConstant loc name g fs ->
-        DConstant loc name (expandAsPatterns g) (expandAsPatterns <$> fs)
-      d ->
-        d
-
-instance (Data a, Data t, Monoid a) => TransformContext (Module a k t) where
-  expandAsPatterns =
-    \case
-      Module p ns o ->
-        Module p ns (expandAsPatterns o)
+-- instance (Data a, Data t, Monoid a) => TransformContext (ConstantDefinition a t) where
+--  expandAsPatterns =
+--    \case
+--      ConstantDefinition a u w e ->
+--        ConstantDefinition a u w (expandAsPatterns e)
+--
+-- instance (Data a, Data t, Monoid a) => TransformContext (Definition a k t) where
+--  expandAsPatterns =
+--    \case
+--      DConstant loc name g fs ->
+--        DConstant loc name (expandAsPatterns g) (expandAsPatterns <$> fs)
+--      d ->
+--        d
+--
+-- instance (Data a, Data t, Monoid a) => TransformContext (Module a k t) where
+--  expandAsPatterns =
+--    \case
+--      Module p ns o ->
+--        Module p ns (expandAsPatterns o)
 
 instance (Data a, Data k, Data t, Monoid a) => TransformContext (ProtoModule a k t) where
   expandAsPatterns =

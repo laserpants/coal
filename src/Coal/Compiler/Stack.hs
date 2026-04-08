@@ -30,8 +30,8 @@ module Coal.Compiler.Stack (
   getCurrentBuildC,
   updateCurrentBuildC,
   updateBuildC,
-  withCurrentModuleC_,
-  withCurrentModuleC,
+  --  withCurrentModuleC_,
+  --  withCurrentModuleC,
   setBitcodeC,
   insertFreshModule,
 ) where
@@ -45,8 +45,7 @@ import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal (CompilerJournal (..))
 import Coal.Compiler.State
-import Coal.Language.Module (Module (..), modulePathName, principalPath)
-import Coal.Language.Module.Definition (Path (..))
+import Coal.Language.Module.Path
 import Control.Monad.Catch
 import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT)
 import Control.Monad.RWS (RWST, runRWST)
@@ -93,8 +92,8 @@ evalCompilerT env com = do
 setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
 setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))
 
-setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
-setVerbatimSourceForC module_ = setVerbatimSourceC (modulePathName module_)
+-- setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
+setVerbatimSourceForC module_ = undefined -- setVerbatimSourceC (modulePathName module_)
 
 getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
 getVerbatimSourceC name = do
@@ -149,16 +148,16 @@ updateCurrentBuildC f = do
   path <- gets (principalPath . compilerCurrentModule)
   updateBuildC path f
 
-withCurrentModuleC :: (Monad m) => (Module a k t -> CompilerT a m (Module a k t)) -> Module a k t -> CompilerT a m (Module a k t)
-withCurrentModuleC f m@(Module p _ _) = do
-  setCompilerCurrentModuleC p
-  f m
-
-withCurrentModuleC_ :: (Monad m) => (Module a k t -> CompilerT a m ()) -> Module a k t -> CompilerT a m (Module a k t)
-withCurrentModuleC_ f m@(Module p _ _) = do
-  setCompilerCurrentModuleC p
-  f m
-  pure m
+-- withCurrentModuleC :: (Monad m) => (Module a k t -> CompilerT a m (Module a k t)) -> Module a k t -> CompilerT a m (Module a k t)
+-- withCurrentModuleC f m@(Module p _ _) = do
+--  setCompilerCurrentModuleC p
+--  f m
+--
+-- withCurrentModuleC_ :: (Monad m) => (Module a k t -> CompilerT a m ()) -> Module a k t -> CompilerT a m (Module a k t)
+-- withCurrentModuleC_ f m@(Module p _ _) = do
+--  setCompilerCurrentModuleC p
+--  f m
+--  pure m
 
 setBitcodeC :: (Monad m) => Name -> ByteString -> CompilerT a m ()
 setBitcodeC name bs = modify (overCompilerModules fn)

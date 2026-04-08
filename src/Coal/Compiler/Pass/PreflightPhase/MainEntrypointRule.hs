@@ -10,8 +10,7 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
-import Coal.Language (Kind (..))
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -26,12 +25,9 @@ passMainEntrypointRule = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
 impl mm = do
-  --  let mm = toProtoModule [] m
   lift $ setCurrentPathC (protoOmodulePath mm)
   detectMainEntrypoint mm
   return mm
-
--- impl = traverse (withCurrentModuleC_ detectMainEntrypoint)
 
 class RuleContext e where
   detectMainEntrypoint :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
@@ -42,15 +38,6 @@ instance (RuleContext e) => RuleContext [e] where
 instance (RuleContext e) => RuleContext (NonEmpty e) where
   detectMainEntrypoint = traverse_ detectMainEntrypoint
 
--- instance RuleContext (Module Metadata Kind t) where
---  detectMainEntrypoint =
---    \case
---      Module (Path ["Main"]) _ o -> do
---        unless ("main" `elem` concatMap functionDefinitions o) $
---          throwError MissingMainEntryPoint
---      _ ->
---        pure ()
-
 instance RuleContext (ProtoModule Metadata () ()) where
   detectMainEntrypoint =
     \case
@@ -59,14 +46,6 @@ instance RuleContext (ProtoModule Metadata () ()) where
           throwError MissingMainEntryPoint
       _ ->
         pure ()
-
--- functionDefinitions :: Definition Metadata Kind t -> [Name]
--- functionDefinitions =
---  \case
---    d@DFunction{} ->
---      [definitionName d]
---    _ ->
---      []
 
 functionDefinitions :: ProtoDefinition Metadata () () -> [Name]
 functionDefinitions =

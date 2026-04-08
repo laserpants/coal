@@ -66,7 +66,7 @@ data ProtoBuild a = ProtoBuild
   , protoObuildKernelNames :: Environment Kernel.Type
   , protoObuildKernelIRTypes :: Environment IRType
   , protoObuildKernelConstructors :: Environment Int
---  , protoObuildSource :: Text
+  --  , protoObuildSource :: Text
   --  , protoObuildTypedDefinitions :: [ProtoDefinition a Kind IndexedType]
   }
   deriving (Show, Eq, Ord, Generic)

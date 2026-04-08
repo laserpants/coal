@@ -12,7 +12,7 @@ import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module, fromProtoModule, principalPath)
+import Coal.Language.Module.Path
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (when)
 import Control.Monad.Except (throwError)

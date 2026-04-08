@@ -1,12 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Module (parseModule, parseModule2) where
+module Coal.Parser.Module (parseModule) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Language.Module (Export (..), Module (..), Path (Path))
+import Coal.Language.Module.Export (Export (..))
+import Coal.Language.Module.Path (Path (Path))
 import Coal.Parser.Core (Parser, lexeme_)
 import Coal.Parser.Identifier (constructor, identifier, name)
-import Coal.Parser.Module.Definition (parseDefinition, parseDefinition2)
+import Coal.Parser.Module.Definition (parseDefinition)
 import Coal.Parser.Symbol
 import Coal.ProtoLanguage.ProtoModule
 import Extras (Name)
@@ -37,27 +38,27 @@ parseNameExport = do
   end <- getSourcePos
   pure (NameExport (Metadata start end) n)
 
-{-# INLINE parseModuleExports #-}
-parseModuleExports :: Parser [Export Metadata]
-parseModuleExports = option [] (parens (commaSep parseExportAtom))
+-- {-# INLINE parseModuleExports #-}
+-- parseModuleExports :: Parser [Export Metadata]
+-- parseModuleExports = option [] (parens (commaSep parseExportAtom))
 
-parseModuleExports2 :: Parser (ModuleExportList Metadata)
-parseModuleExports2 = option ExportAll (parens (Exports <$> commaSep parseExportAtom))
+parseModuleExports :: Parser (ModuleExportList Metadata)
+parseModuleExports = option ExportAll (parens (Exports <$> commaSep parseExportAtom))
 
-parseModule :: Parser (Module Metadata o ())
+-- parseModule :: Parser (Module Metadata o ())
+-- parseModule = do
+--  lexeme_ "module"
+--  Module . Path
+--    <$> parseModulePath
+--    <*> parseModuleExports
+--    <*> braces (many parseDefinition)
+--    <* eof
+
+parseModule :: Parser (ProtoModule Metadata () ())
 parseModule = do
-  lexeme_ "module"
-  Module . Path
-    <$> parseModulePath
-    <*> parseModuleExports
-    <*> braces (many parseDefinition)
-    <* eof
-
-parseModule2 :: Parser (ProtoModule Metadata () ())
-parseModule2 = do
   lexeme_ "module"
   ProtoModule . Path
     <$> parseModulePath
-    <*> parseModuleExports2
-    <*> braces (many parseDefinition2)
+    <*> parseModuleExports
+    <*> braces (many parseDefinition)
     <* eof

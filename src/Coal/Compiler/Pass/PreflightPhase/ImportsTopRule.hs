@@ -10,7 +10,6 @@ import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
-import Coal.Language.Module (Module (..), toProtoModule)
 import Coal.Language.Module.Path (principalPath)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))

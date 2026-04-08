@@ -21,7 +21,7 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Build (ModuleBuild)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Language
-import Coal.Language.Module.Definition (Path (..))
+import Coal.Language.Module.Path (Path (..))
 import Coal.TypeSystem
 import Data.Set (Set)
 import Data.Text (Text)

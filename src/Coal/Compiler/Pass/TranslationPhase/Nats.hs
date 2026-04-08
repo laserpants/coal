@@ -14,7 +14,6 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
-import Coal.Language.Module (Module (..), fromProtoModule)
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -29,9 +28,7 @@ passCompileNats :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind Index
 passCompileNats = Pass{runPass = bork}
 
 bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule Metadata Kind IndexedType)
-bork m = do
-  xx <- compileNats m
-  return xx
+bork = compileNats
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a (ProtoCompilerT m a) e

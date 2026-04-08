@@ -49,7 +49,7 @@ import Coal.Compiler.Build.NameEntry
 import Coal.Kernel.LLVM.IRType (IRType)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType)
-import Coal.Language.Module (Path (..))
+import Coal.Language.Module.Path
 import Crypto.Hash
 import Data.Binary
 import Data.ByteString (ByteString)

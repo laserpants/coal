@@ -14,9 +14,8 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
-import Coal.Language.Module (Module (..), modulePathName)
 import Coal.Language.Module.Path (principalPath)
-import Coal.Parser (ParserError, parseModule2)
+import Coal.Parser (ParserError, parseModule)
 import Coal.Parser.Core (spaces)
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
@@ -54,7 +53,7 @@ pass files = do
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildUnit (ProtoModule Metadata () ())))
 parseEmbedded (p, src) = do
   CompilerConfig{..} <- gets compilerConfig
-  case runParser (spaces *> parseModule2 <* eof) "" encodedSrc of
+  case runParser (spaces *> parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
     Right module_ -> do
@@ -77,7 +76,7 @@ parseEmbedded (p, src) = do
 fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
 fromSource name file src = do
   insertFreshModule name
-  case runParser (spaces *> parseModule2 <* eof) "" src of
+  case runParser (spaces *> parseModule <* eof) "" src of
     Left err ->
       pure $ Left (ParserError file err)
     Right module_@(ProtoModule path _ _) -> do

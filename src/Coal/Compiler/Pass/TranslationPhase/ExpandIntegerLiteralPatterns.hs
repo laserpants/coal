@@ -14,10 +14,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module (Module (..), fromProtoModule, principalPath)
-import Coal.Language.Module.Definition (Definition (..))
-import Coal.Language.Module.Definition.Constant (ConstantDefinition (..))
-import Coal.Language.Module.Definition.Function (FunctionDefinition (..))
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, setCurrentPathC)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -148,32 +145,6 @@ instance TransformContext (ProtoLetDefinition Metadata Kind IndexedType) where
             , ..
             }
 
-instance TransformContext (FunctionDefinition Metadata IndexedType) where
-  expandIntegerLiteralPatterns =
-    \case
-      FunctionDefinition a u w ps e ->
-        FunctionDefinition a u w ps <$> expandIntegerLiteralPatterns e
-
-instance TransformContext (ConstantDefinition Metadata IndexedType) where
-  expandIntegerLiteralPatterns =
-    \case
-      ConstantDefinition a u w e ->
-        ConstantDefinition a u w <$> expandIntegerLiteralPatterns e
-
-instance TransformContext (Definition Metadata Kind IndexedType) where
-  expandIntegerLiteralPatterns =
-    \case
-      DConstant loc name g fs ->
-        DConstant loc name
-          <$> expandIntegerLiteralPatterns g
-          <*> traverse expandIntegerLiteralPatterns fs
-      DFunction loc name f fs ->
-        DFunction loc name
-          <$> expandIntegerLiteralPatterns f
-          <*> traverse expandIntegerLiteralPatterns fs
-      d ->
-        pure d
-
 instance TransformContext (ProtoDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
@@ -196,10 +167,3 @@ instance TransformContext (ProtoModule Metadata Kind IndexedType) where
             { protoOmoduleDefinitions = newModuleDefinitions
             , ..
             }
-
-instance TransformContext (Module Metadata Kind IndexedType) where
-  expandIntegerLiteralPatterns =
-    \case
-      Module p ns o -> do
-        setCompilerCurrentModuleC p
-        Module p ns <$> traverse expandIntegerLiteralPatterns o

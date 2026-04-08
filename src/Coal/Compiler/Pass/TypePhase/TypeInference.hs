@@ -8,16 +8,13 @@ module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
-import Coal.Compiler.Builtin.Traits (builtinTraits)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference (generateKindConstraints, protoOdefine, protoOgenerateConstraints, solveX)
-import Coal.Graphviz.Dot (generateDot)
 import Coal.Graphviz.ProtoDot
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), TypeIndex, indexed, instanceLabel, normalizeRowTypes, typeOf)
-import Coal.Language.Module (Module (..), Path (..), fromProtoModule, principalPath, toProtoModule)
-import Coal.Language.Module.Definition (definitionName)
+import Coal.Language.Module.Path
 import Coal.Language.Type (Type (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), protoObuildNames)

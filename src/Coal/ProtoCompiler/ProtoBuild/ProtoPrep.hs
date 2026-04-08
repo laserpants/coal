@@ -13,7 +13,6 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Builtin.Instances (protoObuiltinInstances)
 import Coal.Language
-import Coal.Language.Module (qualified)
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
@@ -112,11 +111,6 @@ builtinNames =
 
 protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
 protoOprepareBuild ProtoModule{..} = do
-  -- ProtoBuild{
-  --  protoObuildAliases = aliases
-  --  protoObuildNames = names
-  --  protoObuildExportedNames = exportedNames
-  -- } <- protoOgetCurrentBuildC
   build <- protoOgetCurrentBuildC
   newBuild <-
     execStateT
@@ -253,6 +247,9 @@ qualifiedImports ProtoBuild{..} =
     --                pure mempty
     _ ->
       pure mempty
+
+qualified :: Name -> Path -> Name
+qualified name path = principalPath path <> "." <> name
 
 expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
 expandExports = do

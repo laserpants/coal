@@ -9,17 +9,14 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (moduleDependencies)
 import Coal.Compiler.Embedded (embeddedPaths)
 import Data.Maybe (mapMaybe)
-
--- import Coal.Compiler.Build.Core (dependencies)
-import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName, unitPathName2)
+import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
-import Coal.Language (Kind)
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
+import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (SCC (..), stronglyConnComp)
@@ -39,26 +36,18 @@ pass units = do
     throwError PreflightFailure
   edges <- traverse (collectEdges names) units
   let sccs = stronglyConnComp edges
-      cyclicSCCs = filter isCyclicSCC2 sccs
+      cyclicSCCs = filter isCyclicSCC sccs
   forM_ cyclicSCCs $
     \scc ->
-      tellErrors [ModuleCycle (unitPathName2 <$> getModulesFromSCC scc)]
+      tellErrors [ModuleCycle (unitPathName <$> getModulesFromSCC scc)]
   if notNull cyclicSCCs
     then throwError PreflightFailure
     else pure $ concatMap getModulesFromSCC sccs
  where
-  names = Set.fromList (unitPathName2 <$> units)
+  names = Set.fromList (unitPathName <$> units)
 
--- isCyclicSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> Bool
--- isCyclicSCC =
---  \case
---    CyclicSCC _ ->
---      True
---    _ ->
---      False
-
-isCyclicSCC2 :: SCC (BuildUnit (ProtoModule Metadata () ())) -> Bool
-isCyclicSCC2 =
+isCyclicSCC :: SCC (BuildUnit (ProtoModule Metadata () ())) -> Bool
+isCyclicSCC =
   \case
     CyclicSCC _ ->
       True
@@ -73,12 +62,6 @@ getModulesFromSCC =
     CyclicSCC units ->
       units
 
--- getModulesFromSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> [BuildUnit (Module Metadata Kind ())]
--- getModulesFromSCC =
---  \case
---    AcyclicSCC u -> [u]
---    CyclicSCC units -> units
-
 unitDependencies :: BuildUnit (ProtoModule Metadata () ()) -> [(Metadata, Path)]
 unitDependencies =
   \case
@@ -92,15 +75,15 @@ dependencies (ProtoModule p _ defs)
   | principalPath p `elem` embeddedPaths = imported
   | otherwise = imported <> extra
  where
-  imported = mapMaybe importPath2 defs
+  imported = mapMaybe importPath defs
   extra =
     [ (mempty, Path ["Coal", "Applicative"])
     , (mempty, Path ["Coal", "Monad"])
     ]
 
 -- TODO: move
-importPath2 :: ProtoDefinition a k t -> Maybe (a, Path)
-importPath2 =
+importPath :: ProtoDefinition a k t -> Maybe (a, Path)
+importPath =
   \case
     ProtoDImport loc p _ ->
       Just (loc, p)
@@ -108,14 +91,6 @@ importPath2 =
       Just (loc, p)
     _ ->
       Nothing
-
--- unitDependencies :: BuildUnit (Module Metadata Kind ()) -> [(Metadata, Path)]
--- unitDependencies =
---  \case
---    BSource m ->
---      dependencies m
---    BCached b ->
---      (mempty,) <$> moduleDependencies b
 
 collectEdges :: (Monad m) => Set Name -> BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildUnit (ProtoModule Metadata () ()), Name, [Name])
 collectEdges names unit = do
@@ -130,18 +105,4 @@ collectEdges names unit = do
   pure (unit, path, unitDependencies')
  where
   deps = for (unitDependencies unit) (second principalPath)
-  path = unitPathName2 unit
-
--- collectEdges :: (Monad m) => Set Name -> BuildUnit (Module Metadata Kind ()) -> CompilerT Metadata m (BuildUnit (Module Metadata Kind ()), Name, [Name])
--- collectEdges names unit = do
---  unitDependencies' <- concatForM deps $
---    \(loc, dep) ->
---      if Set.member dep names
---        then pure [dep]
---        else do
---          tellErrors [ModuleNotFound dep (ErrorLocation path loc)]
---          pure []
---  pure (unit, path, unitDependencies')
--- where
---  deps = for (unitDependencies unit) (second principalPath)
---  path = unitPathName unit
+  path = unitPathName unit

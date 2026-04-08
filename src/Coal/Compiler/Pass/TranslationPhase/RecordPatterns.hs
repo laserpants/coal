@@ -16,7 +16,7 @@ import Coal.Compiler.Journal (RecordEntry, listenRecordEntry, tellRecordEntry)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Module (Module, fromProtoModule)
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.RWS (forM, replicateM)

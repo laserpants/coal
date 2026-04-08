@@ -4,7 +4,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
@@ -23,10 +22,7 @@ import Coal.Compiler.PatternMatching.Equation (patternEquation)
 import Coal.Compiler.PatternMatching.Rule (matchPatterns)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), IndexedType, Kind (..), Pattern (..), Primitive (..))
-import Coal.Language.Module (ConstantDefinition (..), Definition (..), FunctionDefinition (..), Module (..))
-import Coal.Language.Module.Definition.Instance
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
-import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Trans (lift)
 import Data.Data (Data)
@@ -50,93 +46,14 @@ instance (MatchExpressionContext a c) => MatchExpressionContext a (NonEmpty c) w
 instance (MatchExpressionContext a c) => MatchExpressionContext a (Dictionary c) where
   compileMatchExprs = traverse compileMatchExprs
 
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Module a Kind IndexedType) where
-  compileMatchExprs =
-    \case
-      Module{..} -> do
-        xx <- traverse compileMatchExprs moduleDefinitions
-        return $
-          Module
-            { modulePath = modulePath
-            , moduleExports = moduleExports
-            , moduleDefinitions = xx
-            }
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Module a () IndexedType) where
-  compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType))
-
 instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (ProtoModule a Kind IndexedType) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a Kind IndexedType))
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Definition a Kind IndexedType) where
-  compileMatchExprs =
-    -- undefined -- transformBiM compileMatchExprsE
-    \case
-      DFunction loc name defs xx ->
-        DFunction loc name <$> traverse compileMatchExprs defs <*> pure xx
-      DConstant loc name def xx ->
-        DConstant loc name <$> compileMatchExprs def <*> pure xx
-      DInstance a name InstanceDefinition{..} -> do
-        xx <- traverse compileMatchExprs instanceDefinitionEntries
-        return $
-          DInstance a name $
-            InstanceDefinition
-              { instanceDefinitionEntries = xx
-              , ..
-              }
-      d ->
-        return d
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Definition a () IndexedType) where
-  compileMatchExprs =
-    \case
-      DFunction loc name defs xx ->
-        DFunction loc name <$> traverse compileMatchExprs defs <*> pure xx
-      DConstant loc name def xx ->
-        DConstant loc name <$> compileMatchExprs def <*> pure xx
-      DInstance a name InstanceDefinition{..} -> do
-        xx <- traverse compileMatchExprs instanceDefinitionEntries
-        return $
-          DInstance a name $
-            InstanceDefinition
-              { instanceDefinitionEntries = xx
-              , ..
-              }
-      d ->
-        return d
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (ProtoDefinition a Kind IndexedType) where
-  compileMatchExprs = undefined -- transformBiM compileMatchExprsE
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (FunctionDefinition a IndexedType) where
-  compileMatchExprs = undefined -- transformBiM compileMatchExprsE
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (ConstantDefinition a IndexedType) where
-  compileMatchExprs =
-    -- transformBiM compileMatchExprsE
-    \case
-      ConstantDefinition{..} -> do
-        xx <- compileMatchExprs constantDefinitionExpression
-        return $
-          ConstantDefinition
-            { constantDefinitionExpression = xx
-            , ..
-            }
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Clause a Kind IndexedType) where
-  compileMatchExprs = undefined -- transformBiM compileMatchExprsE
 
 instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Clause a () IndexedType) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType))
 
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Binding Expression a Kind IndexedType) where
-  compileMatchExprs = undefined -- transformBiM (compileMatchExprsE :: (Monad m) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType))
-
 instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Binding Expression a () IndexedType) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType))
-
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Expression a Kind IndexedType) where
-  compileMatchExprs = undefined -- transformBiM (compileMatchExprsE :: (Monad m) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType))
 
 instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Expression a () IndexedType) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a () IndexedType -> CompilerT a (ProtoCompilerT m a) (Expression a () IndexedType))

@@ -21,12 +21,10 @@ module Coal.AST.Shorthand (
   constructorP,
   anyP,
   tupleP,
-  funDef,
 ) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.Language.Module (FunctionDefinition (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name)
 
@@ -121,7 +119,3 @@ anyP = PAny mempty ()
 {-# INLINE tupleP #-}
 tupleP :: (Monoid a) => NonEmpty (Pattern a k ()) -> Pattern a k ()
 tupleP = PTuple mempty ()
-
-{-# INLINE funDef #-}
-funDef :: (Monoid a) => NonEmpty (Pattern a () ()) -> Expression a () () -> FunctionDefinition a ()
-funDef = FunctionDefinition mempty Nothing (With [] ())

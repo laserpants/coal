@@ -5,7 +5,6 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.PatternMatching
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (IndexedType, Kind (..))
-import Coal.Language.Module (Module, fromProtoModule)
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC, setCurrentPathC)
 import Coal.ProtoLanguage.ProtoModule
 

@@ -12,7 +12,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.Language.Module
+import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
@@ -33,8 +33,6 @@ impl mm = do
   detectAliasCycles mm
   return mm
 
--- impl = traverse (withCurrentModuleC_ detectAliasCycles)
-
 class TransformContext e where
   detectAliasCycles :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 
@@ -46,20 +44,6 @@ instance (TransformContext e) => TransformContext (NonEmpty e) where
 
 instance (TransformContext e) => TransformContext (Maybe e) where
   detectAliasCycles = traverse_ detectAliasCycles
-
--- instance TransformContext (Module Metadata Kind ()) where
---  detectAliasCycles =
---    \case
---      Module _ _ o -> do
---        traverse_ detectAliasCycles o
---
--- instance TransformContext (Definition Metadata k ()) where
---  detectAliasCycles =
---    \case
---      DTypeAlias loc name (AliasDefinition _ t) ->
---        detectCycles loc name t
---      _ ->
---        pure ()
 
 instance TransformContext (ProtoModule Metadata () ()) where
   detectAliasCycles =
