@@ -5,10 +5,12 @@
 
 module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) where
 
+import Data.Maybe (mapMaybe)
+import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (moduleDependencies)
-import Coal.Compiler.Build.Core (dependencies)
-import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName)
+--import Coal.Compiler.Build.Core (dependencies)
+import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName, unitPathName2)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
@@ -23,60 +25,123 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (second)
 import Extras (Name, concatForM, for, forM_)
+import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
+import Coal.ProtoLanguage.ProtoDefinition
 
-passTopologicalSort :: (Monad m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (Module Metadata Kind ())]
+passTopologicalSort :: (Monad m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
 passTopologicalSort = Pass{runPass = pass}
 
-pass :: (Monad m) => [BuildUnit (Module Metadata Kind ())] -> CompilerT Metadata m [BuildUnit (Module Metadata Kind ())]
+pass :: (Monad m) => [BuildUnit (Module Metadata Kind ())] -> CompilerT Metadata m [BuildUnit (ProtoModule Metadata () ())]
 pass units = do
   unless ("Main" `elem` names) $ do
     tellErrors [NoModuleMain]
     throwError PreflightFailure
-
-  edges <- traverse (collectEdges names) units
+  edges <- traverse (collectEdges names) units_
   let sccs = stronglyConnComp edges
-      cyclicSCCs = filter isCyclicSCC sccs
+      cyclicSCCs = filter isCyclicSCC2 sccs
   forM_ cyclicSCCs $
     \scc ->
-      tellErrors [ModuleCycle (unitPathName <$> getModulesFromSCC scc)]
+      tellErrors [ModuleCycle (unitPathName2 <$> getModulesFromSCC scc)]
   if notNull cyclicSCCs
     then throwError PreflightFailure
     else pure $ concatMap getModulesFromSCC sccs
  where
-  names = Set.fromList (unitPathName <$> units)
+  units_ = fmap (fmap (toProtoModule [])) units
+  names = Set.fromList (unitPathName2 <$> units_)
 
-isCyclicSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> Bool
-isCyclicSCC =
+--isCyclicSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> Bool
+--isCyclicSCC =
+--  \case
+--    CyclicSCC _ ->
+--      True
+--    _ ->
+--      False
+
+isCyclicSCC2 :: SCC (BuildUnit (ProtoModule Metadata () ())) -> Bool
+isCyclicSCC2 =
   \case
     CyclicSCC _ ->
       True
     _ ->
       False
 
-getModulesFromSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> [BuildUnit (Module Metadata Kind ())]
-getModulesFromSCC =
+getModulesFromSCC :: SCC (BuildUnit (ProtoModule Metadata () ())) -> [BuildUnit (ProtoModule Metadata () ())]
+getModulesFromSCC = 
   \case
-    AcyclicSCC u -> [u]
-    CyclicSCC units -> units
+    AcyclicSCC u -> 
+      [u]
+    CyclicSCC units -> 
+      units
 
-unitDependencies :: BuildUnit (Module Metadata Kind ()) -> [(Metadata, Path)]
-unitDependencies =
+--getModulesFromSCC :: SCC (BuildUnit (Module Metadata Kind ())) -> [BuildUnit (Module Metadata Kind ())]
+--getModulesFromSCC =
+--  \case
+--    AcyclicSCC u -> [u]
+--    CyclicSCC units -> units
+
+unitDependencies :: BuildUnit (ProtoModule Metadata () ()) -> [(Metadata, Path)]
+unitDependencies = 
   \case
     BSource m ->
       dependencies m
     BCached b ->
       (mempty,) <$> moduleDependencies b
 
-collectEdges :: (Monad m) => Set Name -> BuildUnit (Module Metadata Kind ()) -> CompilerT Metadata m (BuildUnit (Module Metadata Kind ()), Name, [Name])
+dependencies :: (Monoid a) => ProtoModule a k t -> [(a, Path)]
+dependencies (ProtoModule p _ defs)
+  | principalPath p `elem` embeddedPaths = imported
+  | otherwise = imported <> extra
+ where
+  imported = mapMaybe importPath2 defs
+  extra =
+    [ (mempty, Path ["Coal", "Applicative"])
+    , (mempty, Path ["Coal", "Monad"])
+    ]
+
+-- TODO: move
+importPath2 :: ProtoDefinition a k t -> Maybe (a, Path)
+importPath2 =
+  \case
+    ProtoDImport loc p _ ->
+      Just (loc, p)
+    ProtoDNamespaceImport loc p ->
+      Just (loc, p)
+    _ ->
+      Nothing
+
+--unitDependencies :: BuildUnit (Module Metadata Kind ()) -> [(Metadata, Path)]
+--unitDependencies =
+--  \case
+--    BSource m ->
+--      dependencies m
+--    BCached b ->
+--      (mempty,) <$> moduleDependencies b
+
+collectEdges :: (Monad m) => Set Name -> BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildUnit (ProtoModule Metadata () ()), Name, [Name])
 collectEdges names unit = do
-  unitDependencies' <- concatForM deps $
-    \(loc, dep) ->
-      if Set.member dep names
-        then pure [dep]
-        else do
-          tellErrors [ModuleNotFound dep (ErrorLocation path loc)]
-          pure []
+  unitDependencies' <- 
+    concatForM deps $
+      \(loc, dep) ->
+        if Set.member dep names
+          then pure [dep]
+          else do
+            tellErrors [ModuleNotFound dep (ErrorLocation path loc)]
+            pure []
   pure (unit, path, unitDependencies')
  where
   deps = for (unitDependencies unit) (second principalPath)
-  path = unitPathName unit
+  path = unitPathName2 unit
+
+--collectEdges :: (Monad m) => Set Name -> BuildUnit (Module Metadata Kind ()) -> CompilerT Metadata m (BuildUnit (Module Metadata Kind ()), Name, [Name])
+--collectEdges names unit = do
+--  unitDependencies' <- concatForM deps $
+--    \(loc, dep) ->
+--      if Set.member dep names
+--        then pure [dep]
+--        else do
+--          tellErrors [ModuleNotFound dep (ErrorLocation path loc)]
+--          pure []
+--  pure (unit, path, unitDependencies')
+-- where
+--  deps = for (unitDependencies unit) (second principalPath)
+--  path = unitPathName unit

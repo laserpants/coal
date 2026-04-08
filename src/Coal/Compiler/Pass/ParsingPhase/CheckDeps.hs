@@ -25,18 +25,17 @@ import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)
 
-passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
+passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passCheckDeps = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [BuildUnit (Module Metadata Kind ())] -> CompilerT Metadata m [BuildUnit (ProtoModule Metadata () ())]
+pass :: (MonadIO m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildUnit (ProtoModule Metadata () ())]
 pass = traverse check
 
-check :: (MonadIO m) => BuildUnit (Module Metadata Kind ()) -> CompilerT Metadata m (BuildUnit (ProtoModule Metadata () ()))
+check :: (MonadIO m) => BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildUnit (ProtoModule Metadata () ()))
 check = 
   \case
     BSource src -> do
-      let src_ = toProtoModule [] src
-      pure (BSource src_)
+      pure (BSource src)
     BCached ModuleBuild{..} -> do
       CompilerState{..} <- get
       if any (\dep -> principalPath dep `elem` compilerFreshModules) moduleDependencies

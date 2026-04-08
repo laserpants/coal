@@ -1,12 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Module (parseModule) where
+module Coal.Parser.Module (parseModule, parseModule2) where
 
+import Coal.ProtoLanguage.ProtoModule
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Module (Export (..), Module (..), Path (Path))
 import Coal.Parser.Core (Parser, lexeme_)
 import Coal.Parser.Identifier (constructor, identifier, name)
-import Coal.Parser.Module.Definition (parseDefinition)
+import Coal.Parser.Module.Definition (parseDefinition, parseDefinition2)
 import Coal.Parser.Symbol
 import Extras (Name)
 import Text.Megaparsec
@@ -40,6 +41,9 @@ parseNameExport = do
 parseModuleExports :: Parser [Export Metadata]
 parseModuleExports = option [] (parens (commaSep parseExportAtom))
 
+parseModuleExports2 :: Parser (ModuleExportList Metadata)
+parseModuleExports2 = option ExportAll (parens (Exports <$> commaSep parseExportAtom))
+
 parseModule :: Parser (Module Metadata o ())
 parseModule = do
   lexeme_ "module"
@@ -47,4 +51,13 @@ parseModule = do
     <$> parseModulePath
     <*> parseModuleExports
     <*> braces (many parseDefinition)
+    <* eof
+
+parseModule2 :: Parser (ProtoModule Metadata () ())
+parseModule2 = do
+  lexeme_ "module"
+  ProtoModule . Path
+    <$> parseModulePath
+    <*> parseModuleExports2
+    <*> braces (many parseDefinition2)
     <* eof
