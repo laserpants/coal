@@ -59,23 +59,3 @@ fromSource name src = do
       error "Implementation error"
     Right module_ -> do
       pure $ Right (BSource (toProtoModule [] module_))
-
--- check :: (MonadIO m) => BuildUnit (Module Metadata Kind ()) -> CompilerT Metadata m (BuildUnit (Module Metadata Kind ()))
--- check =
---  \case
---    BSource src ->
---      pure (BSource src)
---    BCached ModuleBuild{..} -> do
---      CompilerState{..} <- get
---      if any (\dep -> principalPath dep `elem` compilerFreshModules) moduleDependencies
---        then do
---          let name = principalPath moduleBuildPath
---          src <- getVerbatimSourceC name
---          res <- fromSource name src
---          case res of
---            Left e -> do
---              tellErrors [e]
---              throwError ParserFailure
---            Right r ->
---              pure r
---        else pure (BCached ModuleBuild{..})
