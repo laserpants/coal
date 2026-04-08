@@ -23,13 +23,13 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
-passDoNotation :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kind ())] [BuildUnit (ProtoModule Metadata () ())]
+passDoNotation :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passDoNotation = mapPass $ Pass{runPass = traverse impl}
 
-impl :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
 impl m = do
-  let mm = toProtoModule [] m
-  desugarDoNotation mm
+  --  let mm = toProtoModule [] m
+  desugarDoNotation m
 
 class TransformContext e where
   desugarDoNotation :: (Monad m) => e -> CompilerT a (ProtoCompilerT m Metadata) e

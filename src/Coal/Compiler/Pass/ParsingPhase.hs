@@ -18,4 +18,5 @@ parsingPhase =
   passParsing
     >-> passTopologicalSort
     >-> passCheckDeps
+
 --    >-> mapPass (liftPass (generateDebugArtifacts "Parsing"))

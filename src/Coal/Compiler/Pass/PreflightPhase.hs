@@ -23,7 +23,7 @@ preflightPhase :: (MonadIO m) => Pass Metadata m [BuildUnit (Module Metadata Kin
 preflightPhase =
   passImportsTopRule
     >-> passSetup
-    >-> mapPass passWhereClauses
+    --    >-> mapPass passWhereClauses
     >-> passDoNotation
     >-> passAliasCycles
     --    >-> mapPass (liftPass (generateDebugArtifacts "DoNotation"))

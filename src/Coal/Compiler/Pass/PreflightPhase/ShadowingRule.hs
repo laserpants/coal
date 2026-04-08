@@ -7,8 +7,6 @@
 
 module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule) where
 
-import Control.Monad.Trans (lift)
-import Coal.ProtoCompiler.ProtoState
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
@@ -20,11 +18,13 @@ import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kin
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Module
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (MonadError (throwError), forM_, when)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
+import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)

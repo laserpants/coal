@@ -4,14 +4,17 @@ module Coal.Compiler.Builtin.Definitions (
   module Coal.Compiler.Builtin.Functions,
   insertBuiltinDefinitions,
   insertExtraDefinitions,
+  insertBuiltinDefinitions2,
+  insertExtraDefinitions2,
   builtinTraitInstances,
 ) where
 
 import Coal.Compiler.Builtin.Functions (builtinFunctions)
-import Coal.Compiler.Builtin.Traits (builtinTraits)
+import Coal.Compiler.Builtin.Traits (builtinTraits, builtinTraits2)
 import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Language
 import Coal.Language.Module
+import Coal.ProtoLanguage.ProtoDefinition
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name, for)
@@ -20,9 +23,17 @@ import Extras (Name, for)
 insertBuiltinDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]
 insertBuiltinDefinitions = (builtinDefinitions <>)
 
+{-# INLINE insertBuiltinDefinitions2 #-}
+insertBuiltinDefinitions2 :: (Monoid a) => [ProtoDefinition a () ()] -> [ProtoDefinition a () ()]
+insertBuiltinDefinitions2 = (builtinDefinitions2 <>)
+
 {-# INLINE insertExtraDefinitions #-}
 insertExtraDefinitions :: (Monoid a) => [Definition a k ()] -> [Definition a k ()]
 insertExtraDefinitions = (extraDefinitions <>)
+
+{-# INLINE insertExtraDefinitions2 #-}
+insertExtraDefinitions2 :: (Monoid a) => [ProtoDefinition a () ()] -> [ProtoDefinition a () ()]
+insertExtraDefinitions2 = (extraDefinitions2 <>)
 
 builtinFunctionNames :: [Name]
 builtinFunctionNames = for builtinFunctions fst
@@ -111,12 +122,96 @@ builtinTraitInstances =
   , instanceLabel (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)"
   ]
 
+extraDefinitions2 :: (Monoid a) => [ProtoDefinition a () ()]
+extraDefinitions2 =
+  [ ProtoDImport mempty (Path ["Coal", "Monad"]) [TypeImport mempty "Monad" ["bind"]]
+  , ProtoDImport mempty (Path ["Coal", "Applicative"]) [TypeImport mempty "Applicative" ["pure"]]
+  ]
+
 -- Needed to support do-notation
 extraDefinitions :: (Monoid a) => [Definition a k ()]
 extraDefinitions =
   [ DImport mempty (Path ["Coal", "Monad"]) [TypeImport mempty "Monad" ["bind"]]
   , DImport mempty (Path ["Coal", "Applicative"]) [TypeImport mempty "Applicative" ["pure"]]
   ]
+
+builtinDefinitions2 :: (Monoid a) => [ProtoDefinition a () ()]
+builtinDefinitions2 =
+  [ ProtoDImport
+      mempty
+      (Path ["Builtin$"])
+      (for (builtinFunctionNames <> builtinTraitInstances) (NameImport mempty))
+  , ProtoDType
+      mempty
+      "Ordering"
+      ( ProtoTypeDefinition
+          []
+          [ DataConstructor "LessThan" 0 (Forall mempty mempty (TConstructor () "Ordering"))
+          , DataConstructor "GreaterThan" 0 (Forall mempty mempty (TConstructor () "Ordering"))
+          , DataConstructor "EqualTo" 0 (Forall mempty mempty (TConstructor () "Ordering"))
+          ]
+      )
+  , ProtoDType
+      mempty
+      "Option"
+      ( ProtoTypeDefinition
+          [Parameter () "a"]
+          [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) mempty (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| mempty)))
+          , DataConstructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) mempty (applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| mempty)))
+          ]
+      )
+  , ProtoDType
+      mempty
+      "Result"
+      ( ProtoTypeDefinition
+          [Parameter () "a", Parameter () "b"]
+          [ DataConstructor "Ok" 1 (Forall (Set.fromList [Parameter () "a"]) mempty (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
+          , DataConstructor "Err" 1 (Forall (Set.fromList [Parameter () "b"]) mempty (TVariable (Parameter () "b") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
+          ]
+      )
+  , ProtoDType
+      mempty
+      "IO"
+      (ProtoTypeDefinition [Parameter () "a"] [])
+  , ProtoDType
+      mempty
+      "Process"
+      ( ProtoTypeDefinition
+          [Parameter () "a", Parameter () "v"]
+          [ DataConstructor
+              "Process"
+              1
+              ( Forall
+                  (Set.fromList [Parameter () "a", Parameter () "v"])
+                  mempty
+                  ( TRecord
+                      ( TRow
+                          ( RExtend
+                              "state"
+                              (TVariable (Parameter () "a"))
+                              ( RExtend
+                                  "step"
+                                  ( TVariable (Parameter () "v")
+                                      `TArrow` TVariable (Parameter () "a")
+                                      `TArrow` applyTypeArgs
+                                        ()
+                                        (TConstructor () "Process")
+                                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
+                                  )
+                                  RNil
+                              )
+                          )
+                      )
+                      `TArrow` applyTypeArgs
+                        ()
+                        (TConstructor () "Process")
+                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
+                  )
+              )
+          ]
+      )
+  ]
+    <> builtinTraits2
 
 builtinDefinitions :: (Monoid a) => [Definition a k ()]
 builtinDefinitions =
