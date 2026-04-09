@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Coal.Common.Environment (
@@ -42,6 +43,9 @@ newtype Environment e = Environment {envDictionary :: Dictionary e}
     , Semigroup
     , Monoid
     , Generic
+    , Functor
+    , Foldable
+    , Traversable
     )
 
 instance (Binary e) => Binary (Environment e)
