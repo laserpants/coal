@@ -19,7 +19,7 @@ import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
-import Coal.Compiler.Error (KindInferenceError (..), errorLocation)
+import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Pass (Pass (..), tickBar, (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
@@ -31,6 +31,7 @@ import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
@@ -162,14 +163,16 @@ prettyConstraintsGenError =
     e ->
       Text.pack ("TODO:" <> show e)
 
-prettyKindInferenceError :: KindInferenceError -> Text
+prettyKindInferenceError :: ProtoKindError -> Text
 prettyKindInferenceError =
   \case
-    ENoTypeConstructor name ->
+    ProtoENoTypeConstructor name ->
       "No type constructor '" <> name <> "' in scope."
-    ECannotUnifyKinds ->
+    ProtoENoTrait name ->
+      "No trait '" <> name <> "' in scope."
+    ProtoECannotUnifyKinds ->
       "Kind unification failed"
-    EInfiniteKind ->
+    ProtoEInfiniteKind ->
       "Infinite kind"
 
 prettyError :: Environment Text -> CompilerError Metadata -> Text

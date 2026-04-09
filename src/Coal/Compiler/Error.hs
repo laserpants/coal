@@ -2,7 +2,6 @@
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Error (
-  KindInferenceError (..),
   ErrorLocation (..),
   CompilerError (..),
   CompilerFailureMode (..),
@@ -12,6 +11,7 @@ module Coal.Compiler.Error (
 import Coal.Language (IndexedType, Kind (..), Trait (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
+import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
 import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError)
 import Data.Set (Set)
@@ -19,13 +19,6 @@ import Extras (Name)
 
 data ErrorLocation a = ErrorLocation Name a
   deriving (Show, Eq)
-
--- TODO: move
-data KindInferenceError
-  = ENoTypeConstructor Name
-  | ECannotUnifyKinds
-  | EInfiniteKind
-  deriving (Show, Eq, Ord, Read)
 
 data CompilerError a
   = ParserError FilePath ParserError
@@ -55,7 +48,7 @@ data CompilerError a
   | MissingTraitDefinition Name Name (ErrorLocation a)
   | UnexpectedTraitDefinition Name Name (ErrorLocation a)
   | MissingRequiredInstance Name IndexedType (ErrorLocation a)
-  | KindError KindInferenceError (ErrorLocation a)
+  | KindError ProtoKindError (ErrorLocation a)
   | OrPatternVariableMismatch (Set Name) (Set Name) (ErrorLocation a)
   deriving (Show, Eq)
 
