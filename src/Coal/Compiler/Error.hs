@@ -2,6 +2,7 @@
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Error (
+  KindInferenceError (..),
   ErrorLocation (..),
   CompilerError (..),
   CompilerFailureMode (..),
@@ -13,12 +14,18 @@ import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
 import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError)
-import Coal.TypeSystem.Kind.Inference (KindInferenceError (..))
 import Data.Set (Set)
 import Extras (Name)
 
 data ErrorLocation a = ErrorLocation Name a
   deriving (Show, Eq)
+
+-- TODO: move
+data KindInferenceError
+  = ENoTypeConstructor Name
+  | ECannotUnifyKinds
+  | EInfiniteKind
+  deriving (Show, Eq, Ord, Read)
 
 data CompilerError a
   = ParserError FilePath ParserError

@@ -7,9 +7,8 @@ module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) whe
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (moduleDependencies)
-import Coal.Compiler.Embedded (embeddedPaths)
-import Data.Maybe (mapMaybe)
 import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName)
+import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
@@ -21,6 +20,7 @@ import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (SCC (..), stronglyConnComp)
 import Data.List.Extra (notNull)
+import Data.Maybe (mapMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Tuple.Extra (second)

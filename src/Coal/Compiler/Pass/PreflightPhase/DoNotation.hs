@@ -26,7 +26,7 @@ passDoNotation :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadat
 passDoNotation = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
-impl = desugarDoNotation 
+impl = desugarDoNotation
 
 class TransformContext e where
   desugarDoNotation :: (Monad m) => e -> CompilerT a (ProtoCompilerT m Metadata) e

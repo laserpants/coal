@@ -11,8 +11,8 @@ module Coal.AST.Type.Parameterized (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..), supplied)
+import Coal.Compiler.Error (KindInferenceError (..))
 import Coal.Language
-import Coal.TypeSystem.Kind.Inference (KindInferenceError (..))
 import Control.Monad.Except
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)

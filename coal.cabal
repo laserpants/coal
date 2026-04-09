@@ -249,7 +249,6 @@ library
       Coal.TypeSystem.Constraint.Generation.Stack
       Coal.TypeSystem.Constraint.Generation.State
       Coal.TypeSystem.Constraint.Solver
-      Coal.TypeSystem.Kind.Inference
       Coal.TypeSystem.Substitution
       Coal.TypeSystem.Unification
       Coal.Utils

@@ -4,7 +4,6 @@ module Coal.TypeSystem.Kind.InferenceSpec where
 
 import Coal.Language
 import Coal.Language.Type
-import Coal.TypeSystem.Kind.Inference
 import Control.Monad.Identity (runIdentity)
 import qualified Data.Set as Set
 
