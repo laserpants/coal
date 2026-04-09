@@ -18,28 +18,28 @@ module Coal.Compiler.Stack (
   evalCompilerT,
   updateSupply,
   setVerbatimSourceC,
-  setVerbatimSourceForC,
+--  setVerbatimSourceForC,
   getVerbatimSourceC,
   setCompilerCurrentModuleC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
   setConfigGenerateLLVMOutputC,
   setConfigC,
-  insertModuleC,
+  --insertModuleC,
   insertCurrentModuleC,
   getCurrentBuildC,
   updateCurrentBuildC,
   updateBuildC,
   --  withCurrentModuleC_,
   --  withCurrentModuleC,
-  setBitcodeC,
+  -- setBitcodeC,
   insertFreshModule,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Build (ModuleBuild, setBitcode)
+import Coal.Compiler.Build (ModuleBuild)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
@@ -93,7 +93,7 @@ setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
 setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))
 
 -- setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
-setVerbatimSourceForC module_ = undefined -- setVerbatimSourceC (modulePathName module_)
+--setVerbatimSourceForC module_ = undefined -- setVerbatimSourceC (modulePathName module_)
 
 getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
 getVerbatimSourceC name = do
@@ -115,8 +115,8 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
 
-insertModuleC :: (Monad m) => Name -> ModuleBuild -> CompilerT a m ()
-insertModuleC name build = modify (overCompilerModules (Environment.insert name build))
+--insertModuleC :: (Monad m) => Name -> ModuleBuild -> CompilerT a m ()
+--insertModuleC name build = modify (overCompilerModules (Environment.insert name build))
 
 insertCurrentModuleC :: (Monad m) => ModuleBuild -> CompilerT a m ()
 insertCurrentModuleC build = do
@@ -159,10 +159,10 @@ updateCurrentBuildC f = do
 --  f m
 --  pure m
 
-setBitcodeC :: (Monad m) => Name -> ByteString -> CompilerT a m ()
-setBitcodeC name bs = modify (overCompilerModules fn)
- where
-  fn (Environment env) = Environment (Map.update (Just . setBitcode bs) name env)
+--setBitcodeC :: (Monad m) => Name -> ByteString -> CompilerT a m ()
+--setBitcodeC name bs = undefined -- modify (overCompilerModules fn)
+-- where
+--  fn (Environment env) = Environment (Map.update (Just . setBitcode bs) name env)
 
 insertFreshModule :: (Monad m) => Name -> CompilerT a m ()
 insertFreshModule path = modify (overCompilerFreshModules (Set.insert path))

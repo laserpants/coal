@@ -68,7 +68,7 @@ unitDependencies =
     BSource m ->
       dependencies m
     BCached b ->
-      (mempty,) <$> moduleDependencies b
+      (mempty,) <$> undefined -- moduleDependencies b
 
 dependencies :: (Monoid a) => ProtoModule a k t -> [(a, Path)]
 dependencies (ProtoModule p _ defs)

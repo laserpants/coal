@@ -31,11 +31,11 @@ module Coal.Compiler.Build (
   --  exportedTypeNames,
   setExports,
   setTypeExports,
-  setPath,
-  setBitcode,
+--  setPath,
+  --  setBitcode,
   setDependencies,
-  setHash,
-  insertHash,
+--  setHash,
+--  insertHash,
   setQualifiedNames,
   setKernelNames,
   setKernelIRTypes,
@@ -63,20 +63,10 @@ import Extras (Name, Set)
 import GHC.Generics (Generic)
 
 data ModuleBuild = ModuleBuild
-  { moduleBuildPath :: Path
-  , --  , moduleFilePath :: Text
-    --  , moduleDataConstructors :: Environment (DataConstructorEntry a)
-    --  , moduleTypeConstructors :: Environment (TypeConstructorEntry a)
-    --  , moduleTraits :: Environment (TraitEntry a)
-    --  , moduleInstances :: Environment (Map IndexedType (InstanceEntry a))
-    --  , moduleAliases :: Environment (AliasEntry a)
-    --  , moduleNames :: [NameEntry]
-    moduleDependencies :: [Path]
+  { moduleDependencies :: [Path]
   , moduleQualifiedNames :: Environment Name
   , moduleExportedNames :: Set Name
   , moduleTypeExports :: Set Name
-  , moduleBitcode :: Maybe ByteString
-  , moduleHash :: Maybe Hash256
   , moduleKernelNames :: Environment Kernel.Type
   , moduleKernelIRTypes :: Environment IRType
   , moduleKernelConstructors :: Environment Int
@@ -106,8 +96,8 @@ memberOf s info = nameOf info `Set.member` s
 emptyModuleBuild :: ModuleBuild
 emptyModuleBuild =
   ModuleBuild
-    { moduleBuildPath = Path []
-    , --    , moduleFilePath = mempty
+    { -- moduleBuildPath = Path []
+      --    , moduleFilePath = mempty
       --    , moduleDataConstructors = mempty
       --    , moduleTypeConstructors = mempty
       --    , moduleTraits = mempty
@@ -118,8 +108,8 @@ emptyModuleBuild =
     , moduleQualifiedNames = mempty
     , moduleExportedNames = mempty
     , moduleTypeExports = mempty
-    , moduleBitcode = Nothing
-    , moduleHash = Nothing
+      --    , moduleBitcode = Nothing
+      -- moduleHash = Nothing
     , moduleKernelNames = mempty
     , moduleKernelIRTypes = mempty
     , moduleKernelConstructors = mempty
@@ -208,19 +198,19 @@ setTypeExports names ModuleBuild{..} =
     , ..
     }
 
-setPath :: Path -> ModuleBuild -> ModuleBuild
-setPath path ModuleBuild{..} =
-  ModuleBuild
-    { moduleBuildPath = path
-    , ..
-    }
+--setPath :: Path -> ModuleBuild -> ModuleBuild
+--setPath path ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleBuildPath = path
+--    , ..
+--    }
 
-setBitcode :: ByteString -> ModuleBuild -> ModuleBuild
-setBitcode code ModuleBuild{..} =
-  ModuleBuild
-    { moduleBitcode = Just code
-    , ..
-    }
+-- setBitcode :: ByteString -> ModuleBuild -> ModuleBuild
+-- setBitcode code ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleBitcode = Just code
+--    , ..
+--    }
 
 setDependencies :: [Path] -> ModuleBuild -> ModuleBuild
 setDependencies paths ModuleBuild{..} =
@@ -229,15 +219,15 @@ setDependencies paths ModuleBuild{..} =
     , ..
     }
 
-setHash :: Hash256 -> ModuleBuild -> ModuleBuild
-setHash hash256 ModuleBuild{..} =
-  ModuleBuild
-    { moduleHash = Just hash256
-    , ..
-    }
+--setHash :: Hash256 -> ModuleBuild -> ModuleBuild
+--setHash hash256 ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleHash = Just hash256
+--    , ..
+--    }
 
-insertHash :: Text -> ModuleBuild -> ModuleBuild
-insertHash source = setHash (Hash256 (hash (Text.encodeUtf8 source)))
+--insertHash :: Text -> ModuleBuild -> ModuleBuild
+--insertHash source = setHash (Hash256 (hash (Text.encodeUtf8 source)))
 
 setQualifiedNames :: Environment Name -> ModuleBuild -> ModuleBuild
 setQualifiedNames names ModuleBuild{..} =

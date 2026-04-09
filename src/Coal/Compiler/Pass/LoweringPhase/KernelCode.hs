@@ -27,6 +27,7 @@ import Control.Monad.State (gets)
 import Control.Monad.Trans (lift)
 import qualified Data.Text as Text
 import Extras (Name, forM, isConstructor, (<$$>))
+import Coal.ProtoCompiler.ProtoBuild
 
 passKernelCode :: (MonadIO m) => Pass Metadata m [BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] [BuildUnit (Name, [IRConstruct [IRLine]])]
 passKernelCode = Pass{runPass = evalPipelineT . pass}
@@ -70,11 +71,11 @@ compileUnits units = do
                     }
 
         pure (BSource (moduleName, out))
-      BCached ModuleBuild{..} -> do
-        pipelineInsertNames (Environment.toList moduleKernelNames)
-        pipelineInsertIRTypes (Environment.toList moduleKernelIRTypes)
-        pipelineInsertConstructors (Environment.toList moduleKernelConstructors)
-        pure (BCached ModuleBuild{..})
+      BCached ProtoBuild{..} -> do
+        pipelineInsertNames (Environment.toList protoObuildKernelNames)
+        pipelineInsertIRTypes (Environment.toList protoObuildKernelIRTypes)
+        pipelineInsertConstructors (Environment.toList protoObuildKernelConstructors)
+        pure (BCached ProtoBuild{..})
 
   cc <- transformInterpreter compileClosureCode
   -- TODO: cache

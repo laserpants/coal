@@ -23,6 +23,7 @@ import Control.Monad.State (get)
 import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)
+import Coal.ProtoCompiler.ProtoBuild
 
 passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passCheckDeps = Pass{runPass = pass}
@@ -35,11 +36,11 @@ check =
   \case
     BSource src -> do
       pure (BSource src)
-    BCached ModuleBuild{..} -> do
+    BCached ProtoBuild{..} -> do
       CompilerState{..} <- get
-      if any (\dep -> principalPath dep `elem` compilerFreshModules) moduleDependencies
+      if any (\dep -> principalPath dep `elem` compilerFreshModules) protoObuildDependencies
         then do
-          let name = principalPath moduleBuildPath
+          let name = principalPath protoObuildPath
           src <- getVerbatimSourceC name
           res <- fromSource name src
           case res of
@@ -48,7 +49,7 @@ check =
               throwError ParserFailure
             Right r ->
               pure r
-        else pure (BCached ModuleBuild{..})
+        else pure (BCached ProtoBuild{..})
 
 fromSource :: (MonadIO m) => Name -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
 fromSource name src = do

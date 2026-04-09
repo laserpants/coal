@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -29,6 +30,7 @@ module Coal.ProtoCompiler.ProtoBuild (
   overBuildDataConstructors,
 ) where
 
+import Data.Text (Text)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
@@ -60,16 +62,17 @@ data ProtoBuild a = ProtoBuild
   , protoObuildTraits :: Environment (ProtoTraitEntry a)
   , protoObuildInstances :: Environment (InstanceMap (ProtoInstanceEntry a))
   , protoObuildAliases :: Environment (ProtoAliasEntry a)
+  , protoObuildDependencies :: [Path]
   , protoObuildQualifiedNames :: Environment Name
   , protoObuildBitcode :: Maybe ByteString
   , protoObuildHash :: Maybe Hash256
+  , protoObuildSource :: Text
   , protoObuildKernelNames :: Environment Kernel.Type
   , protoObuildKernelIRTypes :: Environment IRType
   , protoObuildKernelConstructors :: Environment Int
-  --  , protoObuildSource :: Text
   --  , protoObuildTypedDefinitions :: [ProtoDefinition a Kind IndexedType]
   }
-  deriving (Show, Eq, Ord, Generic)
+  deriving (Show, Eq, Ord, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (ProtoBuild a)
 
@@ -85,9 +88,11 @@ protoOemptyBuild =
     , protoObuildTraits = mempty
     , protoObuildInstances = mempty
     , protoObuildAliases = mempty
+    , protoObuildDependencies = mempty
     , protoObuildQualifiedNames = mempty
     , protoObuildBitcode = Nothing
     , protoObuildHash = Nothing
+    , protoObuildSource = mempty
     , protoObuildKernelNames = mempty
     , protoObuildKernelIRTypes = mempty
     , protoObuildKernelConstructors = mempty

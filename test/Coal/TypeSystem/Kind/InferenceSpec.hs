@@ -40,7 +40,7 @@ import qualified Data.Set as Set
 --      )
 --    ]
 
---testTraitDefinition1 =
+-- testTraitDefinition1 =
 --  inferTraitKinds
 --    mempty
 --    ( TraitDefinition

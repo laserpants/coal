@@ -2,6 +2,7 @@
 
 module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where
 
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (Hash256 (..), ModuleBuild (..))
 import Coal.Compiler.Config (CompilerConfig (..))
@@ -11,7 +12,7 @@ import Control.Monad (unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Crypto.Hash
-import Data.Binary (decodeOrFail, encode)
+import Data.Binary (Binary (..), decodeOrFail, encode)
 import Data.ByteString (ByteString, fromStrict, toStrict)
 import qualified Data.ByteString as ByteString
 import Data.Text (Text)
@@ -19,11 +20,12 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import Extras (Name)
 import System.FilePath ((<.>), (</>))
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 
-cachedData :: (MonadIO m) => Name -> CompilerT Metadata m (Either SomeException ByteString)
+cachedData :: (MonadIO m) => Name -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either SomeException ByteString)
 cachedData name = liftIO $ try $ ByteString.readFile ("./.build" </> Text.unpack name <.> "coal.b")
 
-cachedBuild :: (MonadIO m) => Name -> Text -> CompilerT Metadata m (Maybe (ModuleBuild))
+cachedBuild :: (MonadIO m, Binary a) => Name -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Maybe (ProtoBuild a))
 cachedBuild name src = do
   res <- cachedData name
   case res of
@@ -33,13 +35,13 @@ cachedBuild name src = do
       case decodeOrFail (fromStrict bs) of
         Left{} ->
           pure Nothing
-        Right (_, _, ModuleBuild{..}) ->
+        Right (_, _, ProtoBuild{..}) ->
           pure $
-            if (unHash256 <$> moduleHash) == Just (hash (Text.encodeUtf8 src))
-              then Just ModuleBuild{..}
+            if (unHash256 <$> protoObuildHash) == Just (hash (Text.encodeUtf8 src))
+              then Just ProtoBuild{..}
               else Nothing
 
-writeBuildFile :: (MonadIO m) => FilePath -> Name -> ModuleBuild -> CompilerT Metadata m ()
+writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> ProtoBuild a -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 writeBuildFile buildDir name build = do
   CompilerConfig{..} <- gets compilerConfig
   liftIO $ do

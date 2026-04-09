@@ -8,6 +8,7 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
   generateLLOutput,
 ) where
 
+import Coal.ProtoCompiler.ProtoState
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (ModuleBuild (..))
@@ -21,6 +22,8 @@ import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
 import Coal.Language.Module.Path
+import Coal.ProtoCompiler.ProtoBuild
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOinsertConstraintsC, protoOinsertNameC, protoOsetBitcodeC, protoOupdateSupplyC, setCurrentModuleC)
 import Control.Exception (SomeException, try)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except
@@ -46,7 +49,7 @@ import qualified System.Process.ByteString as ByteString
 passLLVMOutput :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildUnit (Name, [IRConstruct [IRLine]])] [(Name, ByteString)]
 passLLVMOutput = Pass{runPass = pass}
 
-pass :: (MonadIO m, MonadMask m) => [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m [(Name, ByteString)]
+pass :: (MonadIO m, MonadMask m) => [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata (ProtoCompilerT m Metadata) [(Name, ByteString)]
 pass ir = do
   config <- gets compilerConfig
   pb <- asks compilerProgressBar
@@ -55,8 +58,8 @@ pass ir = do
     Left err ->
       throwError err
     Right results -> do
-      forM_ results (uncurry setBitcodeC)
-      modules_ <- gets compilerModules
+      lift $ forM_ results (uncurry protoOsetBitcodeC)
+      modules_ <- lift $ gets protoOcompilerModules 
 
       fresh <- gets compilerFreshModules
       let freshModules = Environment.restrict (Set.toList fresh) modules_
@@ -68,7 +71,7 @@ pass ir = do
 
       pure results
 
-generateLLOutput :: (MonadIO m, MonadMask m) => Maybe ProgressBar -> CompilerConfig -> [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m (Either CompilerFailureMode [(Name, ByteString)])
+generateLLOutput :: (MonadIO m, MonadMask m) => Maybe ProgressBar -> CompilerConfig -> [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata (ProtoCompilerT m a) (Either CompilerFailureMode [(Name, ByteString)])
 generateLLOutput pb CompilerConfig{..} mods = do
   withSystemTempDirectory "coal-build" $
     \tmpDir -> do
@@ -82,7 +85,7 @@ generateLLOutput pb CompilerConfig{..} mods = do
           forM_ errs $ liftIO . print
           pure (Left CompilerError)
 
-irOutput :: (MonadIO m) => Maybe ProgressBar -> CompilerConfig -> FilePath -> BuildUnit (Name, [IRConstruct [IRLine]]) -> CompilerT Metadata m (Either SomeException (Name, ByteString))
+irOutput :: (MonadIO m) => Maybe ProgressBar -> CompilerConfig -> FilePath -> BuildUnit (Name, [IRConstruct [IRLine]]) -> CompilerT Metadata (ProtoCompilerT m a) (Either SomeException (Name, ByteString))
 irOutput pb CompilerConfig{..} tmpDir = do
   \case
     BSource (name, code) -> do
@@ -98,10 +101,10 @@ irOutput pb CompilerConfig{..} tmpDir = do
 
       bs <- runLLVM tmpDir file
       pure (fmap (name,) bs)
-    BCached ModuleBuild{..} ->
-      pure (Right (principalPath moduleBuildPath, fromJust moduleBitcode))
+    BCached ProtoBuild{..} ->
+      pure (Right (principalPath protoObuildPath, fromJust protoObuildBitcode))
 
-runLLVM :: (MonadIO m) => FilePath -> FilePath -> CompilerT Metadata m (Either SomeException ByteString)
+runLLVM :: (MonadIO m) => FilePath -> FilePath -> CompilerT Metadata (ProtoCompilerT m a) (Either SomeException ByteString)
 runLLVM dir src =
   liftIO $
     try $ do
