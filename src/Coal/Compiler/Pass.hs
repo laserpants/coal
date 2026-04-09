@@ -12,22 +12,17 @@ module Coal.Compiler.Pass (
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build
-
--- import Coal.Compiler.Build.Core (typeConstructorEnv)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Environment
-import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
+import Coal.Compiler.Stack (CompilerT)
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (protoOtypeConstructorEntryKind)
 import Coal.ProtoCompiler.ProtoStack
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
-import Control.Monad.State (evalStateT)
 import Control.Monad.Trans (lift)
 import Data.Foldable (for_)
-import Data.Maybe (fromMaybe)
 import System.Console.AsciiProgress
 
 newtype Pass a m i o = Pass {runPass :: i -> CompilerT a (ProtoCompilerT m a) o}

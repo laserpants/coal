@@ -6,7 +6,6 @@ module Coal.Compiler.BuildSpec (buildSpec, runBuild) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
@@ -310,7 +309,7 @@ buildSpec = do
 --      )
 --    ]
 
-runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild])
+--runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild])
 runBuild names = do
   undefined
 

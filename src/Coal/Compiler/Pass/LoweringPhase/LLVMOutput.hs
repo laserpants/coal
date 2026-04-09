@@ -8,10 +8,11 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
   generateLLOutput,
 ) where
 
-import Coal.ProtoCompiler.ProtoState
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build (ModuleBuild (..))
+import Coal.ProtoCompiler.ProtoState
+
+-- import Coal.Compiler.Build (ModuleBuild (..))
 import Coal.Compiler.Build.Cache (writeBuildFile)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..))
@@ -59,7 +60,7 @@ pass ir = do
       throwError err
     Right results -> do
       lift $ forM_ results (uncurry protoOsetBitcodeC)
-      modules_ <- lift $ gets protoOcompilerModules 
+      modules_ <- lift $ gets protoOcompilerModules
 
       fresh <- gets compilerFreshModules
       let freshModules = Environment.restrict (Set.toList fresh) modules_

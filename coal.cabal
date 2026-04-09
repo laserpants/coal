@@ -35,10 +35,8 @@ library
       Coal.Common.Supply
       Coal.Compiler
       Coal.Compiler.Aliases
-      Coal.Compiler.Build
       Coal.Compiler.Build.Cache
       Coal.Compiler.Build.Hash256
-      Coal.Compiler.Build.NameEntry
       Coal.Compiler.Build.Unit
       Coal.Compiler.Builtin.DataConstructors
       Coal.Compiler.Builtin.Definitions

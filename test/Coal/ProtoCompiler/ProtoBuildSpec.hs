@@ -8,7 +8,6 @@ module Coal.ProtoCompiler.ProtoBuildSpec where
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Build
 import Coal.Compiler.TypeInference
 import Coal.Graphviz.ProtoDot
 import Coal.Language

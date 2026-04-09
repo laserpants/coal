@@ -4,8 +4,6 @@
 
 module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, fromSource) where
 
-import Control.Monad.Trans (lift)
-import Coal.ProtoCompiler.ProtoStack 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Cache (cachedBuild)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
@@ -19,10 +17,12 @@ import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseModule)
 import Coal.Parser.Core (spaces)
+import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
+import Control.Monad.Trans (lift)
 import qualified Data.ByteString as B
 import Data.Either (partitionEithers)
 import Data.Text (Text)
@@ -61,21 +61,21 @@ parseEmbedded (p, src) = do
     Right module_ -> do
       let name = principalPath (protoOmodulePath module_)
       -- Check cached build files
---      cached <- cachedBuild name encodedSrc
-      -- TODO:
+      --      cached <- cachedBuild name encodedSrc
       --      setVerbatimSourceForC module_ encodedSrc
+      lift $ protoOsetBuildSourceC name encodedSrc
 
       insertFreshModule name
       pure $ Right (BSource module_)
-
---      case cached of
---        Just mb | not configNoCache -> do
---          lift $ insertBuildC mb
---          pure $ Right (BCached mb)
---        _ -> do
---          insertFreshModule name
---          pure $ Right (BSource module_)
  where
+  --      case cached of
+  --        Just mb | not configNoCache -> do
+  --          lift $ insertBuildC mb
+  --          pure $ Right (BCached mb)
+  --        _ -> do
+  --          insertFreshModule name
+  --          pure $ Right (BSource module_)
+
   encodedSrc :: Text
   encodedSrc = E.decodeUtf8 src
 
@@ -89,8 +89,7 @@ fromSource name file src = do
       if principalPath path == name
         then do
           pure $ Right (BSource module_)
-        else 
-          pure $ Left (BadModuleName file (principalPath path))
+        else pure $ Left (BadModuleName file (principalPath path))
 
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
 parseFile file = do
@@ -100,16 +99,17 @@ parseFile file = do
     Right (fp, _, name) -> do
       src <- liftIO (Text.readFile fp)
       -- Check cached build files
---      cached <- cachedBuild name src
-      setVerbatimSourceC name src
+      --      cached <- cachedBuild name src
+      --      setVerbatimSourceC name src
+      lift $ protoOsetBuildSourceC name src
 
       fromSource name file src
 
-      --case cached of
-      --  Just mb | not configNoCache -> do
-      --    lift $ insertBuildC mb
-      --    pure $ Right (BCached mb)
-      --  _ ->
-      --    fromSource name file src
+    -- case cached of
+    --  Just mb | not configNoCache -> do
+    --    lift $ insertBuildC mb
+    --    pure $ Right (BCached mb)
+    --  _ ->
+    --    fromSource name file src
     Left err -> do
       pure $ Left (BadFilename file err)

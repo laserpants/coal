@@ -17,19 +17,19 @@ module Coal.Compiler.Stack (
   runCompilerT,
   evalCompilerT,
   updateSupply,
-  setVerbatimSourceC,
---  setVerbatimSourceForC,
+  --  setVerbatimSourceC,
+  --  setVerbatimSourceForC,
   getVerbatimSourceC,
   setCompilerCurrentModuleC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
   setConfigGenerateLLVMOutputC,
   setConfigC,
-  --insertModuleC,
-  insertCurrentModuleC,
-  getCurrentBuildC,
-  updateCurrentBuildC,
-  updateBuildC,
+  -- insertModuleC,
+  --  insertCurrentModuleC,
+  --  getCurrentBuildC,
+  --  updateCurrentBuildC,
+  --  updateBuildC,
   --  withCurrentModuleC_,
   --  withCurrentModuleC,
   -- setBitcodeC,
@@ -39,7 +39,8 @@ module Coal.Compiler.Stack (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Build (ModuleBuild)
+
+-- import Coal.Compiler.Build (ModuleBuild)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
@@ -89,11 +90,11 @@ evalCompilerT env com = do
   (c, _, _) <- runCompilerT env com
   pure c
 
-setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
-setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))
+-- setVerbatimSourceC :: (Monad m) => Name -> Text -> CompilerT a m ()
+-- setVerbatimSourceC name src = modify (overCompilerVerbatimSource (Environment.insert name src))
 
 -- setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
---setVerbatimSourceForC module_ = undefined -- setVerbatimSourceC (modulePathName module_)
+-- setVerbatimSourceForC module_ = undefined -- setVerbatimSourceC (modulePathName module_)
 
 getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
 getVerbatimSourceC name = do
@@ -115,38 +116,38 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
 
---insertModuleC :: (Monad m) => Name -> ModuleBuild -> CompilerT a m ()
---insertModuleC name build = modify (overCompilerModules (Environment.insert name build))
+-- insertModuleC :: (Monad m) => Name -> ModuleBuild -> CompilerT a m ()
+-- insertModuleC name build = modify (overCompilerModules (Environment.insert name build))
 
-insertCurrentModuleC :: (Monad m) => ModuleBuild -> CompilerT a m ()
-insertCurrentModuleC build = do
-  path <- gets (principalPath . compilerCurrentModule)
-  modify (overCompilerModules (Environment.insert path build))
+-- insertCurrentModuleC :: (Monad m) => ModuleBuild -> CompilerT a m ()
+-- insertCurrentModuleC build = do
+--  path <- gets (principalPath . compilerCurrentModule)
+--  modify (overCompilerModules (Environment.insert path build))
+--
+-- getBuildC :: (Monad m) => Name -> CompilerT a m (Maybe ModuleBuild)
+-- getBuildC path = do
+--  modules <- gets compilerModules
+--  pure (Environment.lookup path modules)
+--
+-- getCurrentBuildC :: (Monad m) => CompilerT a m ModuleBuild
+-- getCurrentBuildC = do
+--  path <- gets (principalPath . compilerCurrentModule)
+--  fromMaybe (error "Implementation error") <$> getBuildC path
+--
+-- updateBuildC :: (Monad m) => Name -> (ModuleBuild -> CompilerT a m ModuleBuild) -> CompilerT a m ()
+-- updateBuildC path f = do
+--  build <- getBuildC path
+--  case build of
+--    Nothing ->
+--      pure ()
+--    Just b -> do
+--      updatedBuild <- f b
+--      modify (overCompilerModules (Environment.insert path updatedBuild))
 
-getBuildC :: (Monad m) => Name -> CompilerT a m (Maybe ModuleBuild)
-getBuildC path = do
-  modules <- gets compilerModules
-  pure (Environment.lookup path modules)
-
-getCurrentBuildC :: (Monad m) => CompilerT a m ModuleBuild
-getCurrentBuildC = do
-  path <- gets (principalPath . compilerCurrentModule)
-  fromMaybe (error "Implementation error") <$> getBuildC path
-
-updateBuildC :: (Monad m) => Name -> (ModuleBuild -> CompilerT a m ModuleBuild) -> CompilerT a m ()
-updateBuildC path f = do
-  build <- getBuildC path
-  case build of
-    Nothing ->
-      pure ()
-    Just b -> do
-      updatedBuild <- f b
-      modify (overCompilerModules (Environment.insert path updatedBuild))
-
-updateCurrentBuildC :: (Monad m) => (ModuleBuild -> CompilerT a m ModuleBuild) -> CompilerT a m ()
-updateCurrentBuildC f = do
-  path <- gets (principalPath . compilerCurrentModule)
-  updateBuildC path f
+-- updateCurrentBuildC :: (Monad m) => (ModuleBuild -> CompilerT a m ModuleBuild) -> CompilerT a m ()
+-- updateCurrentBuildC f = do
+--  path <- gets (principalPath . compilerCurrentModule)
+--  updateBuildC path f
 
 -- withCurrentModuleC :: (Monad m) => (Module a k t -> CompilerT a m (Module a k t)) -> Module a k t -> CompilerT a m (Module a k t)
 -- withCurrentModuleC f m@(Module p _ _) = do
@@ -159,8 +160,8 @@ updateCurrentBuildC f = do
 --  f m
 --  pure m
 
---setBitcodeC :: (Monad m) => Name -> ByteString -> CompilerT a m ()
---setBitcodeC name bs = undefined -- modify (overCompilerModules fn)
+-- setBitcodeC :: (Monad m) => Name -> ByteString -> CompilerT a m ()
+-- setBitcodeC name bs = undefined -- modify (overCompilerModules fn)
 -- where
 --  fn (Environment env) = Environment (Map.update (Just . setBitcode bs) name env)
 

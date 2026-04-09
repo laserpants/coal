@@ -14,11 +14,7 @@ module Coal.Compiler.Environment (
 ) where
 
 import Coal.Common.Environment (Environment (..))
-import Coal.Compiler.Build
-import Coal.Language (IndexedScheme, IndexedType, Kind)
-import Coal.ProtoCompiler.ProtoBuild (InstanceMap)
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Data.Map.Strict (Map)
+import Coal.Language (Kind)
 import Extras (Name, Over, Set)
 import System.Console.AsciiProgress
 

@@ -17,6 +17,7 @@ module Coal.ProtoCompiler.ProtoBuild (
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
   setQualifiedNames,
+  setBuildSource,
   insertBuildNameEntry,
   removeBuildNamePlaceholder,
   replaceBuildNameEntry,
@@ -30,7 +31,6 @@ module Coal.ProtoCompiler.ProtoBuild (
   overBuildDataConstructors,
 ) where
 
-import Data.Text (Text)
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
@@ -46,6 +46,7 @@ import Data.List (nubBy)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import Data.Text (Text)
 import Extras (Name, Set, forM_)
 import GHC.Generics (Generic)
 
@@ -265,6 +266,13 @@ setQualifiedNames :: Environment Name -> ProtoBuild a -> ProtoBuild a
 setQualifiedNames names ProtoBuild{..} =
   ProtoBuild
     { protoObuildQualifiedNames = names
+    , ..
+    }
+
+setBuildSource :: Text -> ProtoBuild a -> ProtoBuild a
+setBuildSource source ProtoBuild{..} =
+  ProtoBuild
+    { protoObuildSource = source
     , ..
     }
 

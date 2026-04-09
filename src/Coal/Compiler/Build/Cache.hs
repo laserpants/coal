@@ -2,11 +2,12 @@
 
 module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where
 
-import Coal.ProtoCompiler.ProtoBuild
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build (Hash256 (..), ModuleBuild (..))
+import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Stack
+import Coal.ProtoCompiler.ProtoBuild
+import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 import Control.Exception (SomeException (..), try)
 import Control.Monad (unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -20,7 +21,6 @@ import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import Extras (Name)
 import System.FilePath ((<.>), (</>))
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
 
 cachedData :: (MonadIO m) => Name -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either SomeException ByteString)
 cachedData name = liftIO $ try $ ByteString.readFile ("./.build" </> Text.unpack name <.> "coal.b")

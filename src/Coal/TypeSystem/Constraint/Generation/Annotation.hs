@@ -11,7 +11,6 @@ module Coal.TypeSystem.Constraint.Generation.Annotation (
 ) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build (ModuleBuild (..), TypeConstructorEntry (..))
 import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoTypeSystem.Annotations

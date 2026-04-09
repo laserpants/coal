@@ -30,17 +30,17 @@ module Coal.ProtoCompiler.ProtoStack (
   protoOsetNamesC,
   setTypeAnnotationParamsC,
   protoOsetBitcodeC,
+  protoOsetBuildSourceC,
   protoOcompilerReportConstraintsGenErrors,
   protoOcompilerReportKindConstraintsGenErrors,
   protoOcompilerReportSolverRuleViolations,
 ) where
 
-import Debug.Trace
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
 import Coal.Language.Module.Path (Path (..), principalPath)
-import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), setBuildBitcode)
+import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), setBuildBitcode, setBuildSource)
 import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule
@@ -56,6 +56,7 @@ import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
 import Control.Monad.State (get, gets, modify)
 import Data.ByteString (ByteString)
 import Data.Text (Text)
+import Debug.Trace
 import Extras (Dictionary, Name)
 
 type ProtoCompilerStack m a o = ExceptT () (RWST () (ProtoCompilerJournal a) (ProtoCompilerState a) m) o
@@ -128,20 +129,20 @@ protoOgetCurrentBuildC = do
   case maybeBuild of
     Nothing ->
       error "Implementation error"
---      error (show (principalPath protoOcompilerCurrentPath))
+    --      error (show (principalPath protoOcompilerCurrentPath))
     Just build ->
       return build
 
 protoOupdateBuildC :: (Monad m, BuildName p) => p -> (ProtoBuild a -> ProtoCompilerT m a (ProtoBuild a)) -> ProtoCompilerT m a ()
-protoOupdateBuildC path f = do
-  maybeBuild <- protoOgetBuildC path
+protoOupdateBuildC name f = do
+  maybeBuild <- protoOgetBuildC name
   case maybeBuild of
     Nothing ->
---      error (show path)        -- ????
+      --      error (show name)        -- ????
       pure ()
     Just build -> do
       newBuild <- f build
-      modify (overProtoCompilerModules (Environment.insert (buildName path) newBuild))
+      modify (overProtoCompilerModules (Environment.insert (buildName name) newBuild))
 
 protoOupdateCurrentBuildC :: (Monad m) => (ProtoBuild a -> ProtoCompilerT m a (ProtoBuild a)) -> ProtoCompilerT m a ()
 protoOupdateCurrentBuildC f = do
@@ -185,7 +186,10 @@ setTypeAnnotationParamsC :: (Monad m) => Dictionary (a, TypeIndex Kind) -> Proto
 setTypeAnnotationParamsC params = modify (overProtoCompilerTypeAnnotationParams (const params))
 
 protoOsetBitcodeC :: (Monad m, BuildName p) => p -> ByteString -> ProtoCompilerT m a ()
-protoOsetBitcodeC path bs = protoOupdateBuildC path (pure . setBuildBitcode bs)
+protoOsetBitcodeC build bs = protoOupdateBuildC build (pure . setBuildBitcode bs)
+
+protoOsetBuildSourceC :: (Monad m, BuildName p) => p -> Text -> ProtoCompilerT m a ()
+protoOsetBuildSourceC build source = protoOupdateBuildC build (pure . setBuildSource source)
 
 {-# INLINE protoOcompilerReportConstraintsGenErrors #-}
 protoOcompilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> ProtoCompilerT m a ()

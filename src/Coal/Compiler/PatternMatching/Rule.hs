@@ -58,6 +58,7 @@ variableRule (Label _ u : us) eqs ex = matchPatterns us (updateEq <$> eqs) ex
  where
   updateEq (HeadVariableEquation (Label _ name) (PatternEquationBody ps e)) =
     patternEquation ps (replace name u e)
+
 constructorRule :: (Ord t, EnvelopeHost e t, Monad m) => MatchRule a m HeadConstructorEquation e t
 constructorRule [] _ _ = error "Implementation error"
 constructorRule (u@(Label t _) : us) eqs ex = do

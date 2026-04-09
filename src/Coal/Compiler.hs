@@ -1,5 +1,4 @@
 module Coal.Compiler (
-  module Coal.Compiler.Build,
   module Coal.Compiler.Pipeline,
   module Coal.Compiler.Config,
   module Coal.Compiler.Environment,
@@ -13,7 +12,6 @@ module Coal.Compiler (
   module Coal.Compiler.TypeInference,
 ) where
 
-import Coal.Compiler.Build
 import Coal.Compiler.Config
 import Coal.Compiler.Environment
 import Coal.Compiler.Error

@@ -6,7 +6,6 @@
 module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build (moduleDependencies)
 import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName)
 import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
@@ -14,6 +13,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language.Module.Path
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad (unless)
@@ -68,7 +68,7 @@ unitDependencies =
     BSource m ->
       dependencies m
     BCached b ->
-      (mempty,) <$> undefined -- moduleDependencies b
+      (mempty,) <$> protoObuildDependencies b
 
 dependencies :: (Monoid a) => ProtoModule a k t -> [(a, Path)]
 dependencies (ProtoModule p _ defs)

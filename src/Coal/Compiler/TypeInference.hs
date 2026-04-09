@@ -13,7 +13,6 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Build
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Stack
 import Coal.Language
@@ -276,13 +275,13 @@ type ConstraintsGenResult g o a t s =
   , [ConstraintsGenOutput g o a t]
   )
 
--- TODO: remove
-tmpConvert1 :: DataConstructorEntry a -> DataConstructor TypeIndex Kind IndexedType -- ProtoDataConstructorEntry a
-tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = v3 -- ProtoDataConstructorEntry v1 v2 v3 v4
-
--- TODO: remove
-tmpConvert2 :: TypeConstructorEntry a -> Kind -- ProtoTypeConstructorEntry a
-tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- ProtoTypeConstructorEntry v1 v2 v3 v4
+---- TODO: remove
+-- tmpConvert1 :: DataConstructorEntry a -> DataConstructor TypeIndex Kind IndexedType -- ProtoDataConstructorEntry a
+-- tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = v3 -- ProtoDataConstructorEntry v1 v2 v3 v4
+--
+---- TODO: remove
+-- tmpConvert2 :: TypeConstructorEntry a -> Kind -- ProtoTypeConstructorEntry a
+-- tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- ProtoTypeConstructorEntry v1 v2 v3 v4
 
 -- runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 -- runConstraintsGen stack = do

@@ -6,7 +6,6 @@
 module Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build (ModuleBuild (..))
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
@@ -15,6 +14,7 @@ import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (parseModule)
 import Coal.Parser.Core (spaces)
+import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
@@ -23,7 +23,6 @@ import Control.Monad.State (get)
 import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)
-import Coal.ProtoCompiler.ProtoBuild
 
 passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passCheckDeps = Pass{runPass = pass}

@@ -11,14 +11,13 @@ module Coal.Compiler.State (
   overCompilerVerbatimSource,
   overCompilerCurrentModule,
   overCompilerConfig,
-  overCompilerModules,
+  --  overCompilerModules,
   overCompilerFreshModules,
   initialCompilerState,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Build (ModuleBuild)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
@@ -36,7 +35,7 @@ data CompilerState a = CompilerState
   , compilerFreshModules :: Set Name
   , compilerVerbatimSource :: Environment Text -- TODO: Move to build object?
   , compilerConfig :: CompilerConfig
-  , compilerModules :: Environment (ModuleBuild)
+  --  , compilerModules :: Environment (ModuleBuild)
   }
   deriving (Show, Eq, Ord)
 
@@ -140,13 +139,13 @@ overCompilerConfig fn CompilerState{..} =
     , ..
     }
 
-{-# INLINE overCompilerModules #-}
-overCompilerModules :: Over (CompilerState a) (Environment ModuleBuild)
-overCompilerModules fn CompilerState{..} =
-  CompilerState
-    { compilerModules = fn compilerModules
-    , ..
-    }
+-- {-# INLINE overCompilerModules #-}
+-- overCompilerModules :: Over (CompilerState a) (Environment ModuleBuild)
+-- overCompilerModules fn CompilerState{..} =
+--  CompilerState
+--    { compilerModules = fn compilerModules
+--    , ..
+--    }
 
 initialCompilerState :: CompilerState a
 initialCompilerState =
@@ -155,5 +154,5 @@ initialCompilerState =
     , compilerFreshModules = mempty
     , compilerVerbatimSource = mempty
     , compilerConfig = defaultConfig
-    , compilerModules = mempty
+    --    , compilerModules = mempty
     }
