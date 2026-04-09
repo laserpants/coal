@@ -23,7 +23,7 @@ import System.FilePath ((<.>), (</>))
 cachedData :: (MonadIO m) => Name -> CompilerT Metadata m (Either SomeException ByteString)
 cachedData name = liftIO $ try $ ByteString.readFile ("./.build" </> Text.unpack name <.> "coal.b")
 
-cachedBuild :: (MonadIO m) => Name -> Text -> CompilerT Metadata m (Maybe (ModuleBuild Metadata))
+cachedBuild :: (MonadIO m) => Name -> Text -> CompilerT Metadata m (Maybe (ModuleBuild))
 cachedBuild name src = do
   res <- cachedData name
   case res of
@@ -39,7 +39,7 @@ cachedBuild name src = do
               then Just ModuleBuild{..}
               else Nothing
 
-writeBuildFile :: (MonadIO m) => FilePath -> Name -> ModuleBuild Metadata -> CompilerT Metadata m ()
+writeBuildFile :: (MonadIO m) => FilePath -> Name -> ModuleBuild -> CompilerT Metadata m ()
 writeBuildFile buildDir name build = do
   CompilerConfig{..} <- gets compilerConfig
   liftIO $ do

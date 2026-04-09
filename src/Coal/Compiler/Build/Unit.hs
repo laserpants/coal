@@ -12,7 +12,7 @@ import Extras (Name)
 data BuildUnit a
   = BSource a
   | -- TODO: ProtoBuild
-    BCached (ModuleBuild Metadata)
+    BCached ModuleBuild
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
 unitPathName :: BuildUnit (ProtoModule a k ()) -> Name
@@ -23,7 +23,7 @@ unitPathName =
     BCached b ->
       principalPath (moduleBuildPath b)
 
-partitionBuildUnits :: [BuildUnit a] -> ([a], [ModuleBuild Metadata])
+partitionBuildUnits :: [BuildUnit a] -> ([a], [ModuleBuild])
 partitionBuildUnits = foldr (flip go) ([], [])
  where
   go (sources, cached) =

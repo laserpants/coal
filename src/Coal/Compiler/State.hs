@@ -36,7 +36,7 @@ data CompilerState a = CompilerState
   , compilerFreshModules :: Set Name
   , compilerVerbatimSource :: Environment Text -- TODO: Move to build object?
   , compilerConfig :: CompilerConfig
-  , compilerModules :: Environment (ModuleBuild a)
+  , compilerModules :: Environment (ModuleBuild)
   }
   deriving (Show, Eq, Ord)
 
@@ -141,7 +141,7 @@ overCompilerConfig fn CompilerState{..} =
     }
 
 {-# INLINE overCompilerModules #-}
-overCompilerModules :: Over (CompilerState a) (Environment (ModuleBuild a))
+overCompilerModules :: Over (CompilerState a) (Environment ModuleBuild)
 overCompilerModules fn CompilerState{..} =
   CompilerState
     { compilerModules = fn compilerModules

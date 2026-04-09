@@ -115,25 +115,25 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
 
-insertModuleC :: (Monad m) => Name -> ModuleBuild a -> CompilerT a m ()
+insertModuleC :: (Monad m) => Name -> ModuleBuild -> CompilerT a m ()
 insertModuleC name build = modify (overCompilerModules (Environment.insert name build))
 
-insertCurrentModuleC :: (Monad m) => ModuleBuild a -> CompilerT a m ()
+insertCurrentModuleC :: (Monad m) => ModuleBuild -> CompilerT a m ()
 insertCurrentModuleC build = do
   path <- gets (principalPath . compilerCurrentModule)
   modify (overCompilerModules (Environment.insert path build))
 
-getBuildC :: (Monad m) => Name -> CompilerT a m (Maybe (ModuleBuild a))
+getBuildC :: (Monad m) => Name -> CompilerT a m (Maybe ModuleBuild)
 getBuildC path = do
   modules <- gets compilerModules
   pure (Environment.lookup path modules)
 
-getCurrentBuildC :: (Monad m) => CompilerT a m (ModuleBuild a)
+getCurrentBuildC :: (Monad m) => CompilerT a m ModuleBuild
 getCurrentBuildC = do
   path <- gets (principalPath . compilerCurrentModule)
   fromMaybe (error "Implementation error") <$> getBuildC path
 
-updateBuildC :: (Monad m) => Name -> (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
+updateBuildC :: (Monad m) => Name -> (ModuleBuild -> CompilerT a m ModuleBuild) -> CompilerT a m ()
 updateBuildC path f = do
   build <- getBuildC path
   case build of
@@ -143,7 +143,7 @@ updateBuildC path f = do
       updatedBuild <- f b
       modify (overCompilerModules (Environment.insert path updatedBuild))
 
-updateCurrentBuildC :: (Monad m) => (ModuleBuild a -> CompilerT a m (ModuleBuild a)) -> CompilerT a m ()
+updateCurrentBuildC :: (Monad m) => (ModuleBuild -> CompilerT a m ModuleBuild) -> CompilerT a m ()
 updateCurrentBuildC f = do
   path <- gets (principalPath . compilerCurrentModule)
   updateBuildC path f

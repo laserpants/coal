@@ -33,7 +33,7 @@ buildSpec = do
 --  let build : _ = filter (\ModuleBuild{..} -> modulePath == Path ["Main"]) (rights (sequence res))
 --  test134 build
 --
--- test133 :: ModuleBuild Metadata -> Spec
+-- test133 :: ModuleBuild -> Spec
 -- test133 build@ModuleBuild{..} = do
 --  describe "DataConstructors" $ do
 --    it "" $
@@ -59,7 +59,7 @@ buildSpec = do
 --    it "" $
 --      moduleExports == Set.fromList ["Head", "None", "Option", "Some", "Stream", "Tail", "main"]
 --
--- test134 :: ModuleBuild Metadata -> Spec
+-- test134 :: ModuleBuild -> Spec
 -- test134 build@ModuleBuild{..} = do
 --  describe "DataConstructors" $ do
 --    it "" $
@@ -310,7 +310,7 @@ buildSpec = do
 --      )
 --    ]
 
-runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild Metadata])
+runBuild :: [FilePath] -> IO (Either CompilerFailureMode [ModuleBuild])
 runBuild names = do
   undefined
 

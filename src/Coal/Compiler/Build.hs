@@ -15,20 +15,20 @@ module Coal.Compiler.Build (
   NameEntry (..),
   HasName (..),
   emptyModuleBuild,
-  addName,
-  replaceName,
+  --  addName,
+  --  replaceName,
   addExport,
   addTypeExport,
-  insertInstance,
-  insertTrait,
-  insertAlias,
-  insertDataConstructor,
-  insertTypeConstructor,
-  exportedDataConstructors,
-  exportedTypeConstructors,
-  exportedTraits,
-  exportedNames,
-  exportedTypeNames,
+  --  insertInstance,
+  --  insertTrait,
+  --  insertAlias,
+  --  insertDataConstructor,
+  --  insertTypeConstructor,
+  --  exportedDataConstructors,
+  --  exportedTypeConstructors,
+  --  exportedTraits,
+  --  exportedNames,
+  --  exportedTypeNames,
   setExports,
   setTypeExports,
   setPath,
@@ -62,16 +62,16 @@ import qualified Data.Text.Encoding as Text
 import Extras (Name, Set)
 import GHC.Generics (Generic)
 
-data ModuleBuild a = ModuleBuild
+data ModuleBuild = ModuleBuild
   { moduleBuildPath :: Path
-  , moduleFilePath :: Text
-  , moduleDataConstructors :: Environment (DataConstructorEntry a)
-  , moduleTypeConstructors :: Environment (TypeConstructorEntry a)
-  , moduleTraits :: Environment (TraitEntry a)
-  , moduleInstances :: Environment (Map IndexedType (InstanceEntry a))
-  , moduleAliases :: Environment (AliasEntry a)
-  , moduleNames :: [NameEntry]
-  , moduleDependencies :: [Path]
+  , --  , moduleFilePath :: Text
+    --  , moduleDataConstructors :: Environment (DataConstructorEntry a)
+    --  , moduleTypeConstructors :: Environment (TypeConstructorEntry a)
+    --  , moduleTraits :: Environment (TraitEntry a)
+    --  , moduleInstances :: Environment (Map IndexedType (InstanceEntry a))
+    --  , moduleAliases :: Environment (AliasEntry a)
+    --  , moduleNames :: [NameEntry]
+    moduleDependencies :: [Path]
   , moduleQualifiedNames :: Environment Name
   , moduleExportedNames :: Set Name
   , moduleTypeExports :: Set Name
@@ -83,38 +83,38 @@ data ModuleBuild a = ModuleBuild
   }
   deriving (Show, Eq, Ord, Generic)
 
-instance (Binary a) => Binary (ModuleBuild a)
+instance Binary ModuleBuild
 
 memberOf :: (HasName a) => Set Name -> a -> Bool
 memberOf s info = nameOf info `Set.member` s
 
-exportedNames :: ModuleBuild a -> [NameEntry]
-exportedNames ModuleBuild{..} = filter (memberOf moduleExportedNames) moduleNames
+-- exportedNames :: ModuleBuild -> [NameEntry]
+-- exportedNames ModuleBuild{..} = filter (memberOf moduleExportedNames) moduleNames
+--
+-- exportedTypeNames :: ModuleBuild -> [NameEntry]
+-- exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNames
 
-exportedTypeNames :: ModuleBuild a -> [NameEntry]
-exportedTypeNames ModuleBuild{..} = filter (memberOf moduleTypeExports) moduleNames
+-- exportedTypeConstructors :: ModuleBuild -> Environment (TypeConstructorEntry a)
+-- exportedTypeConstructors ModuleBuild{..} = Environment.filter (memberOf moduleTypeExports) moduleTypeConstructors
+--
+-- exportedDataConstructors :: ModuleBuild -> Environment (DataConstructorEntry a)
+-- exportedDataConstructors ModuleBuild{..} = Environment.filter (memberOf moduleExportedNames) moduleDataConstructors
+--
+-- exportedTraits :: ModuleBuild -> [TraitEntry a]
+-- exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTraits)
 
-exportedTypeConstructors :: ModuleBuild a -> Environment (TypeConstructorEntry a)
-exportedTypeConstructors ModuleBuild{..} = Environment.filter (memberOf moduleTypeExports) moduleTypeConstructors
-
-exportedDataConstructors :: ModuleBuild a -> Environment (DataConstructorEntry a)
-exportedDataConstructors ModuleBuild{..} = Environment.filter (memberOf moduleExportedNames) moduleDataConstructors
-
-exportedTraits :: ModuleBuild a -> [TraitEntry a]
-exportedTraits ModuleBuild{..} = snd <$> filter (memberOf moduleTypeExports) (Environment.toList moduleTraits)
-
-emptyModuleBuild :: ModuleBuild a
+emptyModuleBuild :: ModuleBuild
 emptyModuleBuild =
   ModuleBuild
     { moduleBuildPath = Path []
-    , moduleFilePath = mempty
-    , moduleDataConstructors = mempty
-    , moduleTypeConstructors = mempty
-    , moduleTraits = mempty
-    , moduleInstances = mempty
-    , moduleAliases = mempty
-    , moduleNames = mempty
-    , moduleDependencies = mempty
+    , --    , moduleFilePath = mempty
+      --    , moduleDataConstructors = mempty
+      --    , moduleTypeConstructors = mempty
+      --    , moduleTraits = mempty
+      --    , moduleInstances = mempty
+      --    , moduleAliases = mempty
+      --    , moduleNames = mempty
+      moduleDependencies = mempty
     , moduleQualifiedNames = mempty
     , moduleExportedNames = mempty
     , moduleTypeExports = mempty
@@ -125,142 +125,142 @@ emptyModuleBuild =
     , moduleKernelConstructors = mempty
     }
 
-insertDataConstructor :: Name -> DataConstructorEntry a -> ModuleBuild a -> ModuleBuild a
-insertDataConstructor name info ModuleBuild{..} =
-  ModuleBuild
-    { moduleDataConstructors =
-        Environment.insert name info moduleDataConstructors
-    , ..
-    }
+-- insertDataConstructor :: Name -> DataConstructorEntry a -> ModuleBuild -> ModuleBuild
+-- insertDataConstructor name info ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleDataConstructors =
+--        Environment.insert name info moduleDataConstructors
+--    , ..
+--    }
+--
+-- insertTypeConstructor :: Name -> TypeConstructorEntry a -> ModuleBuild -> ModuleBuild
+-- insertTypeConstructor name info ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleTypeConstructors =
+--        Environment.insert name info moduleTypeConstructors
+--    , ..
+--    }
+--
+-- insertTrait :: Name -> TraitEntry a -> ModuleBuild -> ModuleBuild
+-- insertTrait name info ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleTraits =
+--        Environment.insert name info moduleTraits
+--    , ..
+--    }
+--
+-- insertInstance :: Name -> IndexedType -> InstanceEntry a -> ModuleBuild -> ModuleBuild
+-- insertInstance name it info ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleInstances =
+--        Environment.insert name (Map.insert it info entries) moduleInstances
+--    , ..
+--    }
+-- where
+--  entries = fromMaybe mempty (Environment.lookup name moduleInstances)
+--
+-- insertAlias :: Name -> AliasEntry a -> ModuleBuild -> ModuleBuild
+-- insertAlias name info ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleAliases = Environment.insert name info moduleAliases
+--    , ..
+--    }
+--
+-- addName :: NameEntry -> ModuleBuild -> ModuleBuild
+-- addName info ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleNames = info : moduleNames
+--    , ..
+--    }
+--
+-- replaceName :: NameEntry -> ModuleBuild -> ModuleBuild
+-- replaceName info ModuleBuild{..} =
+--  ModuleBuild
+--    { moduleNames = info : filter (\e -> nameOf e /= nameOf info) moduleNames
+--    , ..
+--    }
 
-insertTypeConstructor :: Name -> TypeConstructorEntry a -> ModuleBuild a -> ModuleBuild a
-insertTypeConstructor name info ModuleBuild{..} =
-  ModuleBuild
-    { moduleTypeConstructors =
-        Environment.insert name info moduleTypeConstructors
-    , ..
-    }
-
-insertTrait :: Name -> TraitEntry a -> ModuleBuild a -> ModuleBuild a
-insertTrait name info ModuleBuild{..} =
-  ModuleBuild
-    { moduleTraits =
-        Environment.insert name info moduleTraits
-    , ..
-    }
-
-insertInstance :: Name -> IndexedType -> InstanceEntry a -> ModuleBuild a -> ModuleBuild a
-insertInstance name it info ModuleBuild{..} =
-  ModuleBuild
-    { moduleInstances =
-        Environment.insert name (Map.insert it info entries) moduleInstances
-    , ..
-    }
- where
-  entries = fromMaybe mempty (Environment.lookup name moduleInstances)
-
-insertAlias :: Name -> AliasEntry a -> ModuleBuild a -> ModuleBuild a
-insertAlias name info ModuleBuild{..} =
-  ModuleBuild
-    { moduleAliases = Environment.insert name info moduleAliases
-    , ..
-    }
-
-addName :: NameEntry -> ModuleBuild a -> ModuleBuild a
-addName info ModuleBuild{..} =
-  ModuleBuild
-    { moduleNames = info : moduleNames
-    , ..
-    }
-
-replaceName :: NameEntry -> ModuleBuild a -> ModuleBuild a
-replaceName info ModuleBuild{..} =
-  ModuleBuild
-    { moduleNames = info : filter (\e -> nameOf e /= nameOf info) moduleNames
-    , ..
-    }
-
-addExport :: Name -> ModuleBuild a -> ModuleBuild a
+addExport :: Name -> ModuleBuild -> ModuleBuild
 addExport name ModuleBuild{..} =
   ModuleBuild
     { moduleExportedNames = Set.insert name moduleExportedNames
     , ..
     }
 
-addTypeExport :: Name -> ModuleBuild a -> ModuleBuild a
+addTypeExport :: Name -> ModuleBuild -> ModuleBuild
 addTypeExport name ModuleBuild{..} =
   ModuleBuild
     { moduleTypeExports = Set.insert name moduleTypeExports
     , ..
     }
 
-setExports :: [Name] -> ModuleBuild a -> ModuleBuild a
+setExports :: [Name] -> ModuleBuild -> ModuleBuild
 setExports names ModuleBuild{..} =
   ModuleBuild
     { moduleExportedNames = Set.fromList names
     , ..
     }
 
-setTypeExports :: [Name] -> ModuleBuild a -> ModuleBuild a
+setTypeExports :: [Name] -> ModuleBuild -> ModuleBuild
 setTypeExports names ModuleBuild{..} =
   ModuleBuild
     { moduleTypeExports = Set.fromList names
     , ..
     }
 
-setPath :: Path -> ModuleBuild a -> ModuleBuild a
+setPath :: Path -> ModuleBuild -> ModuleBuild
 setPath path ModuleBuild{..} =
   ModuleBuild
     { moduleBuildPath = path
     , ..
     }
 
-setBitcode :: ByteString -> ModuleBuild a -> ModuleBuild a
+setBitcode :: ByteString -> ModuleBuild -> ModuleBuild
 setBitcode code ModuleBuild{..} =
   ModuleBuild
     { moduleBitcode = Just code
     , ..
     }
 
-setDependencies :: [Path] -> ModuleBuild a -> ModuleBuild a
+setDependencies :: [Path] -> ModuleBuild -> ModuleBuild
 setDependencies paths ModuleBuild{..} =
   ModuleBuild
     { moduleDependencies = paths
     , ..
     }
 
-setHash :: Hash256 -> ModuleBuild a -> ModuleBuild a
+setHash :: Hash256 -> ModuleBuild -> ModuleBuild
 setHash hash256 ModuleBuild{..} =
   ModuleBuild
     { moduleHash = Just hash256
     , ..
     }
 
-insertHash :: Text -> ModuleBuild a -> ModuleBuild a
+insertHash :: Text -> ModuleBuild -> ModuleBuild
 insertHash source = setHash (Hash256 (hash (Text.encodeUtf8 source)))
 
-setQualifiedNames :: Environment Name -> ModuleBuild a -> ModuleBuild a
+setQualifiedNames :: Environment Name -> ModuleBuild -> ModuleBuild
 setQualifiedNames names ModuleBuild{..} =
   ModuleBuild
     { moduleQualifiedNames = names
     , ..
     }
 
-setKernelNames :: Environment Kernel.Type -> ModuleBuild a -> ModuleBuild a
+setKernelNames :: Environment Kernel.Type -> ModuleBuild -> ModuleBuild
 setKernelNames env ModuleBuild{..} =
   ModuleBuild
     { moduleKernelNames = env
     , ..
     }
 
-setKernelIRTypes :: Environment IRType -> ModuleBuild a -> ModuleBuild a
+setKernelIRTypes :: Environment IRType -> ModuleBuild -> ModuleBuild
 setKernelIRTypes env ModuleBuild{..} =
   ModuleBuild
     { moduleKernelIRTypes = env
     , ..
     }
 
-setKernelConstructors :: Environment Int -> ModuleBuild a -> ModuleBuild a
+setKernelConstructors :: Environment Int -> ModuleBuild -> ModuleBuild
 setKernelConstructors env ModuleBuild{..} =
   ModuleBuild
     { moduleKernelConstructors = env
