@@ -1,4 +1,6 @@
+-- +
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
@@ -29,7 +31,7 @@ data ProtoDataConstructorEntry a = ProtoDataConstructorEntry
   , protoOdataConstructorEntryConstructor :: IndexedConstructor
   , protoOdataConstructorEntryConstructorSet :: Set Name
   }
-  deriving (Show, Eq, Ord, Read, Generic)
+  deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (ProtoDataConstructorEntry a)
 
@@ -39,7 +41,7 @@ data ProtoTypeConstructorEntry a = ProtoTypeConstructorEntry
   , protoOtypeConstructorEntryKind :: Kind
   , protoOtypeConstructorEntryDataConstructors :: [Name]
   }
-  deriving (Show, Eq, Ord, Read, Generic)
+  deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (ProtoTypeConstructorEntry a)
 
@@ -50,7 +52,7 @@ data ProtoTraitEntry a = ProtoTraitEntry
   , protoOtraitEntryConstraints :: [Trait (Parameter Kind)]
   , protoOtraitEntryInterface :: Environment (Scheme Parameter Kind (Type Parameter Kind))
   }
-  deriving (Show, Eq, Ord, Read, Generic)
+  deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (ProtoTraitEntry a)
 
@@ -60,7 +62,7 @@ data ProtoInstanceEntry a = ProtoInstanceEntry
   , protoOinstanceEntryIndexedType :: IndexedType
   , protoOinstanceEntryTypeSchemes :: Dictionary IndexedScheme
   }
-  deriving (Show, Eq, Ord, Read, Generic)
+  deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (ProtoInstanceEntry a)
 
@@ -70,7 +72,7 @@ data ProtoAliasEntry a = ProtoAliasEntry
   , protoOaliasEntryParams :: [Parameter Kind]
   , protoOaliasEntryType :: Type Parameter Kind
   }
-  deriving (Show, Eq, Ord, Read, Generic)
+  deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (ProtoAliasEntry a)
 
