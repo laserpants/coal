@@ -8,6 +8,8 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
+import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
 import Control.Monad.State (gets)
@@ -26,9 +28,9 @@ import System.Process
 passLinking :: (MonadIO m) => Pass Metadata m [(Name, ByteString)] ()
 passLinking = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [(Name, ByteString)] -> CompilerT Metadata m ()
+pass :: (MonadIO m) => [(Name, ByteString)] -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 pass bcode = do
-  config <- gets compilerConfig
+  config <- lift $ gets protoOcompilerConfig
   r <- liftIO (compileBitcode config bcode)
   for_ r throwError
 

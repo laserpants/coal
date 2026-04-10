@@ -18,6 +18,7 @@ import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseModule)
 import Coal.Parser.Core (spaces)
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -54,7 +55,7 @@ pass files = do
 
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (Text, ParserError) (BuildUnit (ProtoModule Metadata () ())))
 parseEmbedded (p, src) = do
-  CompilerConfig{..} <- gets compilerConfig
+  CompilerConfig{..} <- lift $ gets protoOcompilerConfig
   case runParser (spaces *> parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
@@ -93,7 +94,7 @@ fromSource name file src = do
 
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
 parseFile file = do
-  CompilerConfig{..} <- gets compilerConfig
+  CompilerConfig{..} <- lift $ gets protoOcompilerConfig
   res <- liftIO $ resolveModule configSourcePaths file
   case res of
     Right (fp, _, name) -> do

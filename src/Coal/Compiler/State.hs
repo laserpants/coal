@@ -10,7 +10,7 @@ module Coal.Compiler.State (
   --  overCompilerStateConstraintsGenErrors,
   overCompilerVerbatimSource,
   --  overCompilerCurrentModule,
-  overCompilerConfig,
+  --  overCompilerConfig,
   --  overCompilerModules,
   overCompilerFreshModules,
   initialCompilerState,
@@ -34,7 +34,7 @@ data CompilerState a = CompilerState
   { -- compilerCurrentModule :: Path
     compilerFreshModules :: Set Name
   , compilerVerbatimSource :: Environment Text -- TODO: Move to build object?
-  , compilerConfig :: CompilerConfig
+  --  , compilerConfig :: CompilerConfig
   --  , compilerModules :: Environment (ModuleBuild)
   }
   deriving (Show, Eq, Ord)
@@ -131,13 +131,13 @@ overCompilerVerbatimSource fn CompilerState{..} =
     , ..
     }
 
-{-# INLINE overCompilerConfig #-}
-overCompilerConfig :: Over (CompilerState a) CompilerConfig
-overCompilerConfig fn CompilerState{..} =
-  CompilerState
-    { compilerConfig = fn compilerConfig
-    , ..
-    }
+-- {-# INLINE overCompilerConfig #-}
+-- overCompilerConfig :: Over (CompilerState a) CompilerConfig
+-- overCompilerConfig fn CompilerState{..} =
+--  CompilerState
+--    { compilerConfig = fn compilerConfig
+--    , ..
+--    }
 
 -- {-# INLINE overCompilerModules #-}
 -- overCompilerModules :: Over (CompilerState a) (Environment ModuleBuild)
@@ -153,6 +153,6 @@ initialCompilerState =
     { -- compilerCurrentModule = Path mempty
       compilerFreshModules = mempty
     , compilerVerbatimSource = mempty
-    , compilerConfig = defaultConfig
+    --    , compilerConfig = defaultConfig
     --    , compilerModules = mempty
     }

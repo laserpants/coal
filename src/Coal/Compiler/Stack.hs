@@ -21,10 +21,10 @@ module Coal.Compiler.Stack (
   --  setVerbatimSourceForC,
   getVerbatimSourceC,
   --  setCompilerCurrentModuleC,
-  setConfigExecutableNameC,
-  setConfigGenerateDotFilesC,
-  setConfigGenerateLLVMOutputC,
-  setConfigC,
+  --  setConfigExecutableNameC,
+  --  setConfigGenerateDotFilesC,
+  --  setConfigGenerateLLVMOutputC,
+  --  setConfigC,
   -- insertModuleC,
   --  insertCurrentModuleC,
   --  getCurrentBuildC,
@@ -104,17 +104,17 @@ getVerbatimSourceC name = do
 -- setCompilerCurrentModuleC :: (Monad m) => Path -> CompilerT a m ()
 -- setCompilerCurrentModuleC path = modify (overCompilerCurrentModule (const path))
 
-setConfigExecutableNameC :: (Monad m) => FilePath -> CompilerT a m ()
-setConfigExecutableNameC name = modify (overCompilerConfig (setConfigExecutableName name))
-
-setConfigGenerateDotFilesC :: (Monad m) => Bool -> CompilerT a m ()
-setConfigGenerateDotFilesC flag = modify (overCompilerConfig (setConfigGenerateDotFiles flag))
-
-setConfigGenerateLLVMOutputC :: (Monad m) => Bool -> CompilerT a m ()
-setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerateLLVMOutput flag))
-
-setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
-setConfigC config = modify (overCompilerConfig (const config))
+-- setConfigExecutableNameC :: (Monad m) => FilePath -> CompilerT a m ()
+-- setConfigExecutableNameC name = modify (overCompilerConfig (setConfigExecutableName name))
+--
+-- setConfigGenerateDotFilesC :: (Monad m) => Bool -> CompilerT a m ()
+-- setConfigGenerateDotFilesC flag = modify (overCompilerConfig (setConfigGenerateDotFiles flag))
+--
+-- setConfigGenerateLLVMOutputC :: (Monad m) => Bool -> CompilerT a m ()
+-- setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerateLLVMOutput flag))
+--
+-- setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
+-- setConfigC config = modify (overCompilerConfig (const config))
 
 -- insertModuleC :: (Monad m) => Name -> ModuleBuild -> CompilerT a m ()
 -- insertModuleC name build = modify (overCompilerModules (Environment.insert name build))

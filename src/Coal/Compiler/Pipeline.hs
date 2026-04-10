@@ -38,6 +38,7 @@ import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad (replicateM_)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except (MonadIO, forM_)
+import Control.Monad.Trans (lift)
 import Data.Either (fromRight)
 import Data.List (nub)
 import Data.Text (Text)
@@ -101,7 +102,7 @@ compileWithCFiles config files cFiles = do
   go progressBar = do
     evalProtoCompilerT $
       runCompilerT (emptyCompilerEnvironment progressBar) $ do
-        setConfigC config{configCFiles = configCFiles config <> cFiles}
+        lift $ setConfigC config{configCFiles = configCFiles config <> cFiles}
         runPass pipeline files
 
 compile :: CompilerConfig -> [FilePath] -> IO ()

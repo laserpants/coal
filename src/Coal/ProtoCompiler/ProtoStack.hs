@@ -34,10 +34,15 @@ module Coal.ProtoCompiler.ProtoStack (
   protoOcompilerReportConstraintsGenErrors,
   protoOcompilerReportKindConstraintsGenErrors,
   protoOcompilerReportSolverRuleViolations,
+  setConfigC,
+  setConfigExecutableNameC,
+  setConfigGenerateDotFilesC,
+  setConfigGenerateLLVMOutputC,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Config
 import Coal.Language
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), setBuildBitcode, setBuildSource)
@@ -202,3 +207,15 @@ protoOcompilerReportKindConstraintsGenErrors errors = modify (overProtoCompilerK
 {-# INLINE protoOcompilerReportSolverRuleViolations #-}
 protoOcompilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> ProtoCompilerT m a ()
 protoOcompilerReportSolverRuleViolations errors = modify (overProtoCompilerSolverRuleViolations (<> errors))
+
+setConfigC :: (Monad m) => CompilerConfig -> ProtoCompilerT m a ()
+setConfigC config = modify (overProtoCompilerConfig (const config))
+
+setConfigExecutableNameC :: (Monad m) => FilePath -> ProtoCompilerT m a ()
+setConfigExecutableNameC name = modify (overProtoCompilerConfig (setConfigExecutableName name))
+
+setConfigGenerateDotFilesC :: (Monad m) => Bool -> ProtoCompilerT m a ()
+setConfigGenerateDotFilesC flag = modify (overProtoCompilerConfig (setConfigGenerateDotFiles flag))
+
+setConfigGenerateLLVMOutputC :: (Monad m) => Bool -> ProtoCompilerT m a ()
+setConfigGenerateLLVMOutputC flag = modify (overProtoCompilerConfig (setConfigGenerateLLVMOutput flag))

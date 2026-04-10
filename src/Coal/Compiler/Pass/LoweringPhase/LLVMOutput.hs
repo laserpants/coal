@@ -10,7 +10,6 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.ProtoCompiler.ProtoState
 import Coal.Compiler.Build.Cache (writeBuildFile)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..))
@@ -23,6 +22,7 @@ import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
 import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOinsertConstraintsC, protoOinsertNameC, protoOsetBitcodeC, protoOupdateSupplyC, setCurrentModuleC)
+import Coal.ProtoCompiler.ProtoState
 import Control.Exception (SomeException, try)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except
@@ -50,7 +50,7 @@ passLLVMOutput = Pass{runPass = pass}
 
 pass :: (MonadIO m, MonadMask m) => [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata (ProtoCompilerT m Metadata) [(Name, ByteString)]
 pass ir = do
-  config <- gets compilerConfig
+  config <- lift $ gets protoOcompilerConfig
   pb <- asks compilerProgressBar
   res <- generateLLOutput pb config ir
   case res of

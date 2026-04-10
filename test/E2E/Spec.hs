@@ -2,6 +2,7 @@
 
 module E2E.Spec (e2eSpec, runSpec) where
 
+import Control.Monad.Trans (lift)
 import Coal.Compiler (pipeline)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment
@@ -1624,7 +1625,7 @@ runSpec srcPath files = do
     evalProtoCompilerT $
       runCompilerT (emptyCompilerEnvironment Nothing) $ do
         -- TODO: cache?
-        setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
+        lift $ setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
         runPass pipeline files
   case q of
     Left _ ->

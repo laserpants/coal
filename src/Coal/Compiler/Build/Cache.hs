@@ -8,10 +8,12 @@ import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Stack
 import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..))
+import Coal.ProtoCompiler.ProtoState
 import Control.Exception (SomeException (..), try)
 import Control.Monad (unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
+import Control.Monad.Trans (lift)
 import Crypto.Hash
 import Data.Binary (Binary (..), decodeOrFail, encode)
 import Data.ByteString (ByteString, fromStrict, toStrict)
@@ -43,7 +45,7 @@ cachedBuild name src = do
 
 writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> ProtoBuild a -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 writeBuildFile buildDir name build = do
-  CompilerConfig{..} <- gets compilerConfig
+  CompilerConfig{..} <- lift $ gets protoOcompilerConfig
   liftIO $ do
     unless configSilent $
       putStrLn file

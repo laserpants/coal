@@ -7,6 +7,7 @@ module Coal.ProtoCompiler.ProtoState (
   CompilerAssumption,
   initialProtoCompilerState,
   overProtoCompilerSupply,
+  overProtoCompilerConfig,
   overProtoCompilerModules,
   overProtoCompilerModuleWithPath,
   overProtoCompilerCurrentPath,
@@ -88,6 +89,14 @@ overProtoCompilerSupply :: Over (ProtoCompilerState a) Int
 overProtoCompilerSupply fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerSupply = fn protoOcompilerSupply
+    , ..
+    }
+
+{-# INLINE overProtoCompilerConfig #-}
+overProtoCompilerConfig :: Over (ProtoCompilerState a) CompilerConfig
+overProtoCompilerConfig fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerConfig = fn protoOcompilerConfig
     , ..
     }
 
