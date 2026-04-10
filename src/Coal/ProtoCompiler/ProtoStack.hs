@@ -48,7 +48,6 @@ import Coal.Compiler.Config
 import Coal.Language
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..), setBuildBitcode, setBuildSource)
-import Coal.ProtoCompiler.ProtoJournal (ProtoCompilerJournal (..))
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
@@ -68,7 +67,7 @@ import Data.Text (Text)
 import Debug.Trace
 import Extras (Dictionary, Name)
 
-type ProtoCompilerStack m a o = ExceptT () (RWST () (ProtoCompilerJournal a) (ProtoCompilerState a) m) o
+type ProtoCompilerStack m a o = ExceptT () (RWST () () (ProtoCompilerState a) m) o
 
 newtype ProtoCompilerT m a o = ProtoCompiler {protoOcompilerStack :: ProtoCompilerStack m a o}
   deriving
@@ -76,7 +75,7 @@ newtype ProtoCompilerT m a o = ProtoCompiler {protoOcompilerStack :: ProtoCompil
     , Applicative
     , Monad
     , MonadReader ()
-    , MonadWriter (ProtoCompilerJournal a)
+    , MonadWriter ()
     , MonadState (ProtoCompilerState a)
     , MonadError ()
     , --    , MonadReader (CompilerEnvironment a)

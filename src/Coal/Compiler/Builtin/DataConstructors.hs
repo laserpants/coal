@@ -6,7 +6,6 @@ import Coal.Language
 import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
-import Extras (Name)
 
 builtinDataConstructors2 :: (Monoid a) => [ProtoDataConstructorEntry a]
 builtinDataConstructors2 =

@@ -28,7 +28,7 @@ partitionBuildUnits = foldr (flip go) ([], [])
  where
   go (sources, cached) =
     \case
-      BSource m ->
-        (m : sources, cached)
+      BSource source ->
+        (source : sources, cached)
       BCached b ->
         (sources, b : cached)

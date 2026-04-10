@@ -12,11 +12,11 @@ import Coal.AST.Shorthand (applicationE, lambda1E, matchE, varE)
 import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), Qualified (..))
 import Coal.Language.Module.Path (principalPath)
-import Coal.ProtoCompiler.ProtoJournal
 import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
@@ -80,11 +80,11 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a Kind ()) where
     \case
       EClause _ (PAtVariable loc _) _ -> do
         ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
-        lift $ tellErrors [ProtoError] -- FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
+        tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause _ (PNamedFold loc _ _) _ -> do
         ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
-        lift $ tellErrors [ProtoError] -- FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
+        tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause{..} -> do
         newClauseChoices <- expandFolds name (atLabels clausePattern) clauseChoices
