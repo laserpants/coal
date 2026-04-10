@@ -38,6 +38,8 @@ module Coal.ProtoCompiler.ProtoStack (
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
   setConfigGenerateLLVMOutputC,
+  getSourceC,
+  toBeRecompiled,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -60,6 +62,8 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
 import Control.Monad.State (get, gets, modify)
 import Data.ByteString (ByteString)
+import Data.Maybe (fromMaybe)
+import qualified Data.Set as Set
 import Data.Text (Text)
 import Debug.Trace
 import Extras (Dictionary, Name)
@@ -219,3 +223,11 @@ setConfigGenerateDotFilesC flag = modify (overProtoCompilerConfig (setConfigGene
 
 setConfigGenerateLLVMOutputC :: (Monad m) => Bool -> ProtoCompilerT m a ()
 setConfigGenerateLLVMOutputC flag = modify (overProtoCompilerConfig (setConfigGenerateLLVMOutput flag))
+
+getSourceC :: (Monad m) => Name -> ProtoCompilerT m a Text
+getSourceC name = do
+  s <- gets protoOcompilerSources
+  pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
+
+toBeRecompiled :: (Monad m, BuildName p) => p -> ProtoCompilerT m a ()
+toBeRecompiled build = modify (overProtoCompilerToBeRecompiled (Set.insert (buildName build)))

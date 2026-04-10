@@ -15,11 +15,14 @@ import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (parseModule)
 import Coal.Parser.Core (spaces)
 import Coal.ProtoCompiler.ProtoBuild
+import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (get)
+import Control.Monad.Trans.Class (lift)
 import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)
@@ -27,20 +30,20 @@ import Text.Megaparsec (eof, runParser)
 passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
 passCheckDeps = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildUnit (ProtoModule Metadata () ())]
+pass :: (MonadIO m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT Metadata (ProtoCompilerT m Metadata) [BuildUnit (ProtoModule Metadata () ())]
 pass = traverse check
 
-check :: (MonadIO m) => BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildUnit (ProtoModule Metadata () ()))
+check :: (MonadIO m) => BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata (ProtoCompilerT m Metadata) (BuildUnit (ProtoModule Metadata () ()))
 check =
   \case
     BSource src -> do
       pure (BSource src)
     BCached ProtoBuild{..} -> do
-      CompilerState{..} <- get
-      if any (\dep -> principalPath dep `elem` compilerFreshModules) protoObuildDependencies
+      ProtoCompilerState{..} <- lift $ get
+      if any (\dep -> principalPath dep `elem` protoOcompilerToBeRecompiled) protoObuildDependencies
         then do
           let name = principalPath protoObuildPath
-          src <- getVerbatimSourceC name
+          src <- lift $ getSourceC name
           res <- fromSource name src
           case res of
             Left e -> do
@@ -50,9 +53,9 @@ check =
               pure r
         else pure (BCached ProtoBuild{..})
 
-fromSource :: (MonadIO m) => Name -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
+fromSource :: (MonadIO m) => Name -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
 fromSource name src = do
-  insertFreshModule name
+  lift $ toBeRecompiled name
   case runParser (spaces *> parseModule <* eof) "" src of
     Left{} ->
       error "Implementation error"

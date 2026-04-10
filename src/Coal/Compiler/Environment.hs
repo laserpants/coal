@@ -6,7 +6,6 @@ module Coal.Compiler.Environment (
   CompilerEnvironment (..),
   KernelEnvironment (..),
   emptyCompilerEnvironment,
-  --  overCompilerDictionaryNameEnvironment,
   overCompilerKernelEnvironment,
   overKernelEnvironmentModule,
   overKernelEnvironmentLocalNames,
@@ -50,41 +49,18 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
     }
 
 data CompilerEnvironment a = CompilerEnvironment
-  { -- compilerDataConstructorEnvironment :: Environment (ProtoDataConstructorEntry a)
-    compilerTypeConstructorEnvironment :: Environment Kind
-  , -- , compilerTraitEnvironment :: Environment (ProtoTraitEntry a)
-    -- , compilerInstanceEnvironment :: Environment (InstanceMap (ProtoInstanceEntry a))
-    -- , compilerAliasEnvironment :: Environment (ProtoAliasEntry a)
-    -- , compilerDictionaryNameEnvironment :: Environment IndexedScheme
-    compilerKernelEnvironment :: KernelEnvironment
+  { compilerTypeConstructorEnvironment :: Environment Kind
+  , compilerKernelEnvironment :: KernelEnvironment
   , compilerProgressBar :: Maybe ProgressBar
   }
 
 emptyCompilerEnvironment :: Maybe ProgressBar -> CompilerEnvironment a
-emptyCompilerEnvironment pb =
+emptyCompilerEnvironment progressBar =
   CompilerEnvironment
-    { -- compilerDataConstructorEnvironment = mempty
-      compilerTypeConstructorEnvironment = mempty
-    , -- , compilerTraitEnvironment = mempty
-      -- , compilerInstanceEnvironment = mempty
-      -- , compilerAliasEnvironment = mempty
-      -- , compilerDictionaryNameEnvironment = mempty
-      compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
-    , compilerProgressBar = pb
+    { compilerTypeConstructorEnvironment = mempty
+    , compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
+    , compilerProgressBar = progressBar
     }
-
--- overCompilerDictionaryNameEnvironment ::
---  ( Environment IndexedScheme ->
---    Environment IndexedScheme
---  ) ->
---  CompilerEnvironment a ->
---  CompilerEnvironment a
--- overCompilerDictionaryNameEnvironment f CompilerEnvironment{..} =
---  CompilerEnvironment
---    { compilerDictionaryNameEnvironment =
---        f compilerDictionaryNameEnvironment
---    , ..
---    }
 
 overCompilerKernelEnvironment ::
   ( KernelEnvironment ->

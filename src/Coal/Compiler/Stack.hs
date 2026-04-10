@@ -10,16 +10,16 @@ module Coal.Compiler.Stack (
   CompilerError (..),
   CompilerFailureMode (..),
   CompilerStack,
-  CompilerState (..),
-  CompilerConstraint,
-  CompilerAssumption,
+  --  CompilerState (..),
+  --  CompilerConstraint,
+  --  CompilerAssumption,
   ErrorLocation (..),
   runCompilerT,
   evalCompilerT,
   updateSupply,
   --  setVerbatimSourceC,
   --  setVerbatimSourceForC,
-  getVerbatimSourceC,
+  --  getVerbatimSourceC,
   --  setCompilerCurrentModuleC,
   --  setConfigExecutableNameC,
   --  setConfigGenerateDotFilesC,
@@ -33,7 +33,7 @@ module Coal.Compiler.Stack (
   --  withCurrentModuleC_,
   --  withCurrentModuleC,
   -- setBitcodeC,
-  insertFreshModule,
+  --  insertFreshModule,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -45,7 +45,6 @@ import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal (CompilerJournal (..))
-import Coal.Compiler.State
 import Coal.Language.Module.Path
 import Control.Monad.Catch
 import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT)
@@ -60,7 +59,7 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import Extras (Name, fromMaybe)
 
-type CompilerStack a m c = ExceptT CompilerFailureMode (RWST (CompilerEnvironment a) (CompilerJournal a) (CompilerState a) m) c
+type CompilerStack a m c = ExceptT CompilerFailureMode (RWST (CompilerEnvironment a) (CompilerJournal a) () m) c
 
 newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
   deriving
@@ -69,7 +68,7 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
     , Monad
     , MonadReader (CompilerEnvironment a)
     , MonadWriter (CompilerJournal a)
-    , MonadState (CompilerState a)
+    , MonadState ()
     , MonadError CompilerFailureMode
     , MonadIO
     , MonadThrow
@@ -80,9 +79,9 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
 instance MonadTrans (CompilerT a) where
   lift = Compiler . lift . lift
 
-runCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])
+runCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c, (), [CompilerError a])
 runCompilerT env com = do
-  (c, s, w) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
+  (c, s, w) <- runRWST (runExceptT (compilerStack com)) env ()
   pure (c, s, compilerJournalErrors w)
 
 evalCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c)
@@ -96,11 +95,11 @@ evalCompilerT env com = do
 -- setVerbatimSourceForC :: (Monad m) => Module a k t -> Text -> CompilerT a m ()
 -- setVerbatimSourceForC module_ = undefined -- setVerbatimSourceC (modulePathName module_)
 
-getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
-getVerbatimSourceC name = do
-  s <- gets compilerVerbatimSource
-  pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
-
+-- getVerbatimSourceC :: (Monad m) => Name -> CompilerT a m Text
+-- getVerbatimSourceC name = do
+--  s <- gets compilerVerbatimSource
+--  pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
+--
 -- setCompilerCurrentModuleC :: (Monad m) => Path -> CompilerT a m ()
 -- setCompilerCurrentModuleC path = modify (overCompilerCurrentModule (const path))
 
@@ -164,6 +163,6 @@ getVerbatimSourceC name = do
 -- setBitcodeC name bs = undefined -- modify (overCompilerModules fn)
 -- where
 --  fn (Environment env) = Environment (Map.update (Just . setBitcode bs) name env)
-
-insertFreshModule :: (Monad m) => Name -> CompilerT a m ()
-insertFreshModule path = modify (overCompilerFreshModules (Set.insert path))
+--
+-- insertFreshModule :: (Monad m) => Name -> CompilerT a m ()
+-- insertFreshModule path = modify (overCompilerFreshModules (Set.insert path))

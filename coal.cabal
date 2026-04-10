@@ -109,7 +109,6 @@ library
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Pipeline
       Coal.Compiler.Stack
-      Coal.Compiler.State
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
       Coal.Debug

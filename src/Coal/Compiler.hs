@@ -8,7 +8,6 @@ module Coal.Compiler (
   module Coal.Compiler.PatternMatching.AnomalyDetection,
   module Coal.Compiler.PatternMatching,
   module Coal.Compiler.Stack,
-  module Coal.Compiler.State,
   module Coal.Compiler.TypeInference,
 ) where
 
@@ -21,5 +20,4 @@ import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Pipeline
 import Coal.Compiler.Stack
-import Coal.Compiler.State
 import Coal.Compiler.TypeInference

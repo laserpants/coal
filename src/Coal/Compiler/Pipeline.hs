@@ -31,6 +31,7 @@ import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
@@ -69,12 +70,12 @@ extraTicks units = do
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
-  (e, CompilerState{..}, es) <-
+  foo <-
     if configSilent config
       then do
-        z <- go Nothing
-        pure $ fromRight (error "???") z
-      else do
+        go2 Nothing
+      else -- pure $ fromRight (error "???") z
+      do
         displayConsoleRegions $ do
           pb <-
             newProgressBar
@@ -83,24 +84,32 @@ compileWithCFiles config files cFiles = do
                 , pgWidth = 100
                 , pgFormat = "Compiling [:bar] :current/:total"
                 }
-          z <- go (Just pb)
-          pure $ fromRight (error "???") z
-  forM_ (nub es) $
-    \err -> do
-      case errorLocation err of
-        Just (ErrorLocation name _) ->
-          putStrLn ("\nIn module '" <> Text.unpack name <> "':\n")
-        Nothing ->
+          go2 (Just pb)
+  -- pure $ fromRight (error "???") z
+
+  case foo of
+    (Right (e, _, es), ProtoCompilerState{..}, _) -> do
+      forM_ (nub es) $
+        \err -> do
+          case errorLocation err of
+            Just (ErrorLocation name _) ->
+              putStrLn ("\nIn module '" <> Text.unpack name <> "':\n")
+            Nothing ->
+              pure ()
+          Text.putStrLn (prettyError protoOcompilerSources err)
+      case e of
+        Left e1 ->
+          print e1
+        Right{} -> do
           pure ()
-      Text.putStrLn (prettyError compilerVerbatimSource err)
-  case e of
-    Left e1 ->
-      print e1
-    Right{} -> do
-      pure ()
  where
-  go progressBar = do
-    evalProtoCompilerT $
+  -- go progressBar = do
+  --  evalProtoCompilerT $
+  --    runCompilerT (emptyCompilerEnvironment progressBar) $ do
+  --      lift $ setConfigC config{configCFiles = configCFiles config <> cFiles}
+  --      runPass pipeline files
+  go2 progressBar = do
+    runProtoCompilerT $
       runCompilerT (emptyCompilerEnvironment progressBar) $ do
         lift $ setConfigC config{configCFiles = configCFiles config <> cFiles}
         runPass pipeline files

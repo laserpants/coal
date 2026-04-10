@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Kernel.Translate.Definition (translateDefinition2) where
+module Coal.Compiler.Kernel.Translate.Definition (translateDefinition) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
@@ -23,8 +23,8 @@ import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
 import Debug.Trace
 import Extras (Name, (<.>))
 
-translateDefinition2 :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> CompilerT a m [KernelObject]
-translateDefinition2 =
+translateDefinition :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> CompilerT a m [KernelObject]
+translateDefinition =
   \case
     ProtoDType _ _ ProtoTypeDefinition{..} ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName protoOtypeDefinitionConstructors))
@@ -45,46 +45,13 @@ translateDefinition2 =
       concatForM ds $
         \case
           ProtoDFunction loc n f ->
-            translateDefinition2 (ProtoDFunction loc (instanceLabel (Trait trait t) n) f)
+            translateDefinition (ProtoDFunction loc (instanceLabel (Trait trait t) n) f)
           ProtoDLet loc n c ->
-            translateDefinition2 (ProtoDLet loc (instanceLabel (Trait trait t) n) c)
+            translateDefinition (ProtoDLet loc (instanceLabel (Trait trait t) n) c)
           _ ->
             pure []
     _ ->
       pure []
-
--- translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
--- translateDefinition =
---  undefined
---  \case
---    DType _ _ (TypeDefinition _ ctors) ->
---      undefined -- traverse translateConstructor (zip [0 ..] (sortOn constructorName ctors))
---    DFunction _ name (FunctionDefinition _ _ _ ps e :| _) _ -> do
---      qs <- traverse translatePattern (toList ps)
---      f <- withLocalNames (labelName <$> qs) (translateExpression e)
---      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
---      pure [Kernel.OFunction (moduleName <.> name) qs f]
---    DConstant _ name (ConstantDefinition _ _ With{} e) _ -> do
---      c <- translateExpression e
---      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
---      pure [Kernel.OConstant (moduleName <.> name) c]
---    DTrait _ name (TraitDefinition _ _ ds) ->
---      forM ds $
---        \(n, Forall _ _ t) ->
---          traitAccessor name n (translateType t)
---    DInstance _ name (InstanceDefinition _ t ds) ->
---      concatForM ds $
---        \case
---          DFunction loc n f _ ->
---            translateDefinition (DFunction loc (instanceLabel trait n) f [])
---          DConstant loc n c _ ->
---            translateDefinition (DConstant loc (instanceLabel trait n) c [])
---          _ ->
---            pure []
---     where
---      trait = Trait name t
---    _ ->
---      pure []
 
 traitAccessor :: (Monad m) => Name -> Name -> Kernel.Type -> CompilerT a m KernelObject
 traitAccessor trait fn t = do

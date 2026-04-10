@@ -60,7 +60,7 @@ pass ir = do
       lift $ forM_ results (uncurry protoOsetBitcodeC)
       modules_ <- lift $ gets protoOcompilerModules
 
-      fresh <- gets compilerFreshModules
+      fresh <- lift $ gets protoOcompilerToBeRecompiled
       let freshModules = Environment.restrict (Set.toList fresh) modules_
 
       let buildDir = "./.build/"

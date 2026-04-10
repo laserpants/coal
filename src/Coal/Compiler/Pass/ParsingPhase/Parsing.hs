@@ -66,7 +66,7 @@ parseEmbedded (p, src) = do
       --      setVerbatimSourceForC module_ encodedSrc
       lift $ protoOsetBuildSourceC name encodedSrc
 
-      insertFreshModule name
+      lift $ toBeRecompiled name
       pure $ Right (BSource module_)
  where
   --      case cached of
@@ -82,7 +82,7 @@ parseEmbedded (p, src) = do
 
 fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
 fromSource name file src = do
-  insertFreshModule name
+  lift $ toBeRecompiled name
   case runParser (spaces *> parseModule <* eof) "" src of
     Left err ->
       pure $ Left (ParserError file err)

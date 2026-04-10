@@ -9,6 +9,8 @@ module Coal.ProtoCompiler.ProtoState (
   overProtoCompilerSupply,
   overProtoCompilerConfig,
   overProtoCompilerModules,
+  overProtoCompilerSources,
+  overProtoCompilerToBeRecompiled,
   overProtoCompilerModuleWithPath,
   overProtoCompilerCurrentPath,
   overProtoCompilerSubstitution,
@@ -37,6 +39,7 @@ import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Substitution
 import Data.Set (Set)
+import Data.Text (Text)
 import Extras (Dictionary, Name, Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
@@ -47,6 +50,7 @@ data ProtoCompilerState a = ProtoCompilerState
   { protoOcompilerSupply :: Int
   , protoOcompilerConfig :: CompilerConfig
   , protoOcompilerModules :: Environment (ProtoBuild a)
+  , protoOcompilerSources :: Environment Text
   , protoOcompilerToBeRecompiled :: Set Name
   , protoOcompilerCurrentPath :: Path
   , protoOcompilerSubstitution :: Substitution
@@ -71,6 +75,7 @@ initialProtoCompilerState =
     { protoOcompilerSupply = 0
     , protoOcompilerConfig = defaultConfig
     , protoOcompilerModules = mempty
+    , protoOcompilerSources = mempty
     , protoOcompilerToBeRecompiled = mempty
     , protoOcompilerCurrentPath = emptyPath
     , protoOcompilerSubstitution = mempty
@@ -113,6 +118,22 @@ overProtoCompilerModuleWithPath :: Path -> Over (ProtoCompilerState a) (ProtoBui
 overProtoCompilerModuleWithPath path fn ProtoCompilerState{..} =
   ProtoCompilerState
     { protoOcompilerModules = Environment.adjust fn (principalPath path) protoOcompilerModules
+    , ..
+    }
+
+{-# INLINE overProtoCompilerSources #-}
+overProtoCompilerSources :: Over (ProtoCompilerState a) (Environment Text)
+overProtoCompilerSources fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerSources = fn protoOcompilerSources
+    , ..
+    }
+
+{-# INLINE overProtoCompilerToBeRecompiled #-}
+overProtoCompilerToBeRecompiled :: Over (ProtoCompilerState a) (Set Name)
+overProtoCompilerToBeRecompiled fn ProtoCompilerState{..} =
+  ProtoCompilerState
+    { protoOcompilerToBeRecompiled = fn protoOcompilerToBeRecompiled
     , ..
     }
 
