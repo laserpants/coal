@@ -14,6 +14,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (throwError)
@@ -59,7 +60,7 @@ instance TransformContext (ProtoDefinition Metadata () ()) where
       _ ->
         pure ()
 
-detectCycles :: (Monad m) => Metadata -> Name -> ParameterizedType -> CompilerT Metadata m ()
+detectCycles :: (Monad m) => Metadata -> Name -> ParameterizedType -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 detectCycles loc name =
   \case
     TApplication _ t1 t2 -> do
@@ -70,7 +71,7 @@ detectCycles loc name =
       detectCycles loc name t2
     TConstructor _ con
       | name == con -> do
-          path <- gets compilerCurrentModule
+          path <- lift $ gets protoOcompilerCurrentPath
           tellErrors [TypeAliasCycle name (ErrorLocation (principalPath path) loc)]
           throwError PreflightFailure
     TRecord t ->
@@ -83,7 +84,7 @@ detectCycles loc name =
     _ ->
       pure ()
 
-detectCyclesInRow :: (Monad m) => Metadata -> Name -> Row Parameter () ParameterizedType -> CompilerT Metadata m ()
+detectCyclesInRow :: (Monad m) => Metadata -> Name -> Row Parameter () ParameterizedType -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
 detectCyclesInRow loc name =
   \case
     RExtend _ t r -> do

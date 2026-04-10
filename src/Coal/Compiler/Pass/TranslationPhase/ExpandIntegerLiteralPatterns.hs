@@ -16,6 +16,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path
 import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, setCurrentPathC)
+import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (throwError)
@@ -63,7 +64,8 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
     ([], _) ->
       pure (EClause a p (CPlain a1 gs e1' :| []))
     (_, []) -> do
-      path <- gets compilerCurrentModule
+      -- path <- gets compilerCurrentModule
+      path <- lift $ gets protoOcompilerCurrentPath
       tellErrors [NonExhaustivePatterns (ErrorLocation (principalPath path) a)]
       throwError PatternAnomaly
     (_, c : cs) -> do
@@ -159,7 +161,8 @@ instance TransformContext (ProtoModule Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       ProtoModule{..} -> do
-        setCompilerCurrentModuleC protoOmodulePath
+        lift $ setCurrentPathC protoOmodulePath
+        -- setCompilerCurrentModuleC protoOmodulePath
         lift $ setCurrentPathC protoOmodulePath
         newModuleDefinitions <- traverse expandIntegerLiteralPatterns protoOmoduleDefinitions
         return $

@@ -24,6 +24,7 @@ module Coal.ProtoCompiler.ProtoState (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
+import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Language
 import Coal.Language.Module.Path (Path (..), emptyPath, principalPath)
 import Coal.ProtoCompiler.ProtoBuild (ProtoBuild (..))
@@ -34,7 +35,8 @@ import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Substitution
-import Extras (Dictionary, Over)
+import Data.Set (Set)
+import Extras (Dictionary, Name, Over)
 
 type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind IndexedType
 
@@ -42,7 +44,9 @@ type CompilerAssumption a = Assumption a IndexedType
 
 data ProtoCompilerState a = ProtoCompilerState
   { protoOcompilerSupply :: Int
+  , protoOcompilerConfig :: CompilerConfig
   , protoOcompilerModules :: Environment (ProtoBuild a)
+  , protoOcompilerToBeRecompiled :: Set Name
   , protoOcompilerCurrentPath :: Path
   , protoOcompilerSubstitution :: Substitution
   , protoOcompilerNameStore :: Environment IndexedScheme
@@ -64,7 +68,9 @@ initialProtoCompilerState :: ProtoCompilerState a
 initialProtoCompilerState =
   ProtoCompilerState
     { protoOcompilerSupply = 0
+    , protoOcompilerConfig = defaultConfig
     , protoOcompilerModules = mempty
+    , protoOcompilerToBeRecompiled = mempty
     , protoOcompilerCurrentPath = emptyPath
     , protoOcompilerSubstitution = mempty
     , protoOcompilerNameStore = mempty

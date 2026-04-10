@@ -39,7 +39,7 @@ passPrep = Pass{runPass = pass}
 
 pass :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
 pass m = do
-  setCompilerCurrentModuleC (protoOmodulePath m)
+  -- setCompilerCurrentModuleC (protoOmodulePath m)
   lift $ setCurrentPathC (protoOmodulePath m)
   prep m
 
@@ -51,7 +51,7 @@ prep modul = do
     -- let modul = toProtoModule [] m
     protoOclearAssumptionsC
     protoOclearNameStoreC
-    setCurrentModuleC modul
+    setCurrentModuleC modul -- ??
     forM_ builtinFunctions $ uncurry protoOinsertNameC
     toKindIndexed modul
 

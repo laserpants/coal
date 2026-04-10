@@ -30,6 +30,7 @@ import Coal.TypeSystem
 import Control.Monad.Except (MonadError (..), forM_)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (evalState, get, gets)
+import Control.Monad.Trans (lift)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
@@ -459,18 +460,19 @@ solveX = do
 --      sub <- solveC
 --      define (definitionName d) (typeOf (apply sub d))
 
-toIndexedScheme :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> CompilerT a m IndexedScheme
-toIndexedScheme loc env p (Forall _ _ t) = scheme mempty <$> toIndexedType loc env p t
-
-toIndexedType :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Type Parameter k -> CompilerT a m IndexedType
-toIndexedType loc env (Parameter k n) t =
-  case evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int) of
-    Left err -> do
-      path <- gets compilerCurrentModule
-      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
-      throwError PreflightFailure
-    Right r ->
-      pure r
+-- toIndexedScheme :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Scheme Parameter k (Type Parameter k) -> CompilerT a m IndexedScheme
+-- toIndexedScheme loc env p (Forall _ _ t) = scheme mempty <$> toIndexedType loc env p t
+--
+-- toIndexedType :: (Monad m) => a -> Environment Kind -> Parameter Kind -> Type Parameter k -> CompilerT a m IndexedType
+-- toIndexedType loc env (Parameter k n) t =
+--  case evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int) of
+--    Left err -> do
+-----      path--  <- gets compilerCurrentModule
+--      path <- gets protoOcompilerCurrentPath
+--      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
+--      throwError PreflightFailure
+--    Right r ->
+--      pure r
 
 -- checkMain :: (Monad m, Data a) => a -> IndexedType -> NonEmpty (Pattern a () IndexedType) -> Name -> CompilerT a m ()
 -- checkMain loc t ps name = undefined -- do

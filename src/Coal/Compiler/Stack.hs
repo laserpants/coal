@@ -20,7 +20,7 @@ module Coal.Compiler.Stack (
   --  setVerbatimSourceC,
   --  setVerbatimSourceForC,
   getVerbatimSourceC,
-  setCompilerCurrentModuleC,
+  --  setCompilerCurrentModuleC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
   setConfigGenerateLLVMOutputC,
@@ -101,8 +101,8 @@ getVerbatimSourceC name = do
   s <- gets compilerVerbatimSource
   pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
 
-setCompilerCurrentModuleC :: (Monad m) => Path -> CompilerT a m ()
-setCompilerCurrentModuleC path = modify (overCompilerCurrentModule (const path))
+-- setCompilerCurrentModuleC :: (Monad m) => Path -> CompilerT a m ()
+-- setCompilerCurrentModuleC path = modify (overCompilerCurrentModule (const path))
 
 setConfigExecutableNameC :: (Monad m) => FilePath -> CompilerT a m ()
 setConfigExecutableNameC name = modify (overCompilerConfig (setConfigExecutableName name))
