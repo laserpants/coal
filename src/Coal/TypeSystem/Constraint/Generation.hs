@@ -17,7 +17,6 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoTypeSystem.Annotations
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
