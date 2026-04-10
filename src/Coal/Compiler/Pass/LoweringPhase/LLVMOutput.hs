@@ -11,8 +11,6 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.ProtoCompiler.ProtoState
-
--- import Coal.Compiler.Build (ModuleBuild (..))
 import Coal.Compiler.Build.Cache (writeBuildFile)
 import Coal.Compiler.Build.Unit (BuildUnit (..))
 import Coal.Compiler.Config (CompilerConfig (..))
