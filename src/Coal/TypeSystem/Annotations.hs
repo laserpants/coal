@@ -37,12 +37,6 @@ runAnnotationsT loc env o = runStateT (runReaderT (runExceptT (withExceptT ($ lo
 lookupTypeConstructor :: (Monad m) => Name -> AnnotationsT m a (Maybe Kind)
 lookupTypeConstructor name = asks (Environment.lookup name . constraintsGenContextTypeConstructors)
 
---  case Environment.lookup name env of
---    Nothing ->
---      pure Nothing
---    Just TypeConstructorEntry{..} ->
---      pure (Just typeConstructorEntryKind)
-
 indexTypeAnnotations :: (Show a, Monad m) => Type Parameter Kind -> AnnotationsT m a IndexedType
 indexTypeAnnotations =
   \case
