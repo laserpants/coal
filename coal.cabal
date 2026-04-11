@@ -218,7 +218,6 @@ library
       Coal.ProtoCompiler.ProtoBuild
       Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
       Coal.ProtoCompiler.ProtoBuild.ProtoPrep
-      Coal.ProtoCompiler.ProtoPipeline
       Coal.ProtoCompiler.ProtoStack
       Coal.ProtoCompiler.ProtoState
       Coal.ProtoLanguage.ProtoDefinition
