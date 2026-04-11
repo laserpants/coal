@@ -4,8 +4,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -13,13 +13,11 @@ module Coal.Language.Type (
   Type (..),
   TypeIndex (..),
   Parameter (..),
-  HasActive (..),
   KindProxy (..),
   IndexedType,
   ParameterizedType,
   foldType,
   unfoldType,
-  activeIdsIn,
   normalizeRowTypes,
   applyTypeArgs,
   listTypeArgs,
@@ -46,8 +44,7 @@ import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
-import Extras (Dictionary, Map, Name, Set)
-import Extras.Data.Set (unionMap)
+import Extras (Dictionary, Name, Set)
 import Extras.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
 import Prettyprinter
@@ -94,6 +91,12 @@ instance (Binary k) => Binary (TypeIndex k)
 instance Pretty (TypeIndex k) where
   pretty (TypeIndex _ i) = pretty (intToVar i)
 
+instance Supply (TypeIndex k) where
+  updateSupply f (TypeIndex k t) = TypeIndex k (f t)
+  getSupply (TypeIndex _ t) = t
+
+type IndexedType = Type TypeIndex Kind
+
 data Parameter k = Parameter
   { parameterKind :: k
   , parameterName :: Name
@@ -110,34 +113,12 @@ data Parameter k = Parameter
     , Generic
     )
 
+instance (Binary k) => Binary (Parameter k)
+
 instance Pretty (Parameter k) where
   pretty (Parameter _ name) = pretty name
 
-instance (Binary k) => Binary (Parameter k)
-
-type IndexedType = Type TypeIndex Kind
-
 type ParameterizedType = Type Parameter ()
-
-instance Supply (TypeIndex k) where
-  updateSupply f (TypeIndex k t) = TypeIndex k (f t)
-  getSupply (TypeIndex _ t) = t
-
-class HasActive k t | t -> k where
-  activeIn :: t -> Set (TypeIndex k)
-
-instance (HasActive Kind t) => HasActive Kind (Map a t) where
-  activeIn = unionMap activeIn
-
-instance (HasActive Kind t) => HasActive Kind [t] where
-  activeIn = unionMap activeIn
-
-instance (HasActive Kind t) => HasActive Kind (NonEmpty t) where
-  activeIn = unionMap activeIn
-
-{-# INLINE activeIdsIn #-}
-activeIdsIn :: (HasActive k t) => t -> Set Int
-activeIdsIn = Set.map typeIndexId . activeIn
 
 {-# INLINE foldType #-}
 foldType :: (Foldable f) => Type o k -> f (Type o k) -> Type o k
@@ -255,17 +236,17 @@ constructors =
     TRecord r ->
       constructors r
     TRow r ->
-      constructorsRow r
+      rowConstructors r
     TVariable{} ->
       mempty
     TAlias name _ t ->
       Set.insert name (constructors t)
 
-constructorsRow :: Row o k (Type o k) -> Set Name
-constructorsRow =
+rowConstructors :: Row o k (Type o k) -> Set Name
+rowConstructors =
   \case
     RExtend _ t r ->
-      constructors t <> constructorsRow r
+      constructors t <> rowConstructors r
     RVariable{} ->
       mempty
     RNil ->

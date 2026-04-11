@@ -3,6 +3,7 @@ module Coal.Language (
   module Coal.Language.Type.Indexed,
   module Coal.Language.HasKind,
   module Coal.Language.HasType,
+  module Coal.Language.HasActive,
   module Coal.Language.Type,
   module Coal.Language.Type.Intrinsic,
   module Coal.Language.Type.Kind,
@@ -23,6 +24,7 @@ import Coal.Language.Expression
 import Coal.Language.Expression.Binding
 import Coal.Language.Expression.Choice
 import Coal.Language.Expression.Operator
+import Coal.Language.HasActive
 import Coal.Language.HasKind
 import Coal.Language.HasType
 import Coal.Language.Pattern
