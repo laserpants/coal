@@ -22,7 +22,7 @@ import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
-import Data.Map.Strict (Map, keysSet, union)
+import Data.Map.Strict (Map, keysSet, union, restrictKeys)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, intersection)
 import qualified Data.Set as Set
@@ -196,5 +196,5 @@ merge (Substitution m1) (Substitution m2)
   | restricted m1 == restricted m2 = Just (Substitution (m1 `union` m2))
   | otherwise = Nothing
  where
-  restricted = (`Map.restrictKeys` keys)
+  restricted = (`restrictKeys` keys)
   keys = keysSet m1 `intersection` keysSet m2

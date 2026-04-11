@@ -1,12 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Coal.TypeSystem.Annotations where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build.NameEntry
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Annotation.Error (TypeAnnotationError (..))
 import Coal.TypeSystem.Constraint.Generation.Context
