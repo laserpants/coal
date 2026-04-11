@@ -1489,7 +1489,7 @@ inferTypes modul = do
   modify (overCompilerAssumptions (apply sub))
   pure $
     Module
-      { moduleDefinitions = fmap (fmap normalizeRowTypes) (apply sub moduleDefinitions)
+      { moduleDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)
       , ..
       }
 

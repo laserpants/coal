@@ -18,7 +18,7 @@ module Coal.Language.Type (
   ParameterizedType,
   foldType,
   unfoldType,
-  normalizeRowTypes,
+  rowNormalize,
   applyTypeArgs,
   listTypeArgs,
   listType,
@@ -132,8 +132,8 @@ unfoldType =
     t ->
       NonEmpty.singleton t
 
-normalizeRowTypes :: (Typeable o, Data k, Data (o k)) => Type o k -> Type o k
-normalizeRowTypes = transform $
+rowNormalize :: (Typeable o, Data k, Data (o k)) => Type o k -> Type o k
+rowNormalize = transform $
   \case
     TRow r ->
       TRow (normalizeRow r)

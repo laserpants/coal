@@ -384,7 +384,7 @@ solveX = do
 --    let t1 = apply sub t
 --    [Explicit (RuleAssumptionExplicit loc t1 s) t1 s | n1 == normalizedName n2]
 --  sub1 <- solveC
---  pure (fmap (fmap normalizeRowTypes) (apply sub1 ds), apply sub1 ams)
+--  pure (fmap (fmap rowNormalize) (apply sub1 ds), apply sub1 ams)
 
 -- typeDefinitionC :: (Monad m, Data a, Show a, Eq a) => Definition a Kind IndexedType -> CompilerT a m ()
 -- typeDefinitionC =

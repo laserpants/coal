@@ -16,7 +16,7 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference (define, generateConstraints, generateKindConstraints, solveX)
 import Coal.Graphviz.Dot
-import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), TypeIndex, indexed, instanceLabel, normalizeRowTypes, typeOf)
+import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), TypeIndex, indexed, instanceLabel, rowNormalize, typeOf)
 import Coal.Language.Definition
 import Coal.Language.Module
 import Coal.Language.Module.Path
@@ -137,7 +137,7 @@ inferTypes modul = do
   sub <- solveX
   modify (overCompilerAssumptions (apply sub))
 
-  let newModuleDefinitions = fmap (fmap normalizeRowTypes) (apply sub moduleDefinitions)
+  let newModuleDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)
   pure $
     Module
       { moduleDefinitions = normalizeTypeIndexes newModuleDefinitions
