@@ -19,7 +19,6 @@ import Coal.Language
 import Coal.TypeSystem.Annotations
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
-import Coal.TypeSystem.Constraint.Generation.Annotation (instantiateAnnotation)
 import Coal.TypeSystem.Constraint.Generation.Context
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Generation.State

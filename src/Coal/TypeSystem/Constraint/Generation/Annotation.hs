@@ -1,13 +1,12 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.TypeSystem.Constraint.Generation.Annotation (
-  TypeAnnotationError,
-  instantiateAnnotation,
+  --  TypeAnnotationError,
+  --  instantiateAnnotation,
   --  protoOinstantiateAnnotation,
   checkTypeAnnotationParameters,
-  runTypeAnnotation,
+  --  runTypeAnnotation,
 ) where
 
 import qualified Coal.Common.Environment as Environment
@@ -32,10 +31,10 @@ import Extras (Dictionary, Name, concatMapM, forM_)
 
 -- type TypeAnnotationContext a = ConstraintsGenContext a TypeIndex Kind IndexedType
 
-lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
-lookupTypeConstructor name = do
-  env <- asks constraintsGenContextTypeConstructors
-  pure $ Environment.lookup name env
+-- lookupTypeConstructor :: (MonadReader (TypeAnnotationContext a) m) => Name -> m (Maybe Kind)
+-- lookupTypeConstructor name = do
+--  env <- asks constraintsGenContextTypeConstructors
+--  pure $ Environment.lookup name env
 
 --  case Environment.lookup name env of
 --    Nothing ->
@@ -43,13 +42,13 @@ lookupTypeConstructor name = do
 --    Just (TypeConstructorEntry _ _ kind _) ->
 --      pure (Just kind)
 
-instantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter () -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
-instantiateAnnotation loc a = do
-  (t, s) <- runTypeAnnotation loc (instantiate a)
-  forM_ (Map.toList s) $
-    \(n, k) ->
-      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
-  return t
+-- instantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter () -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+-- instantiateAnnotation loc a = do
+--  (t, s) <- runTypeAnnotation loc (instantiate a)
+--  forM_ (Map.toList s) $
+--    \(n, k) ->
+--      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
+--  return t
 
 -- protoOinstantiateAnnotation :: (Monad m) => a -> Type Parameter Kind -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
 -- protoOinstantiateAnnotation loc a = do
@@ -61,69 +60,70 @@ instantiateAnnotation loc a = do
 
 type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictionary (TypeIndex Kind)) m)
 
-runTypeAnnotation :: (Monad m) => a -> TypeAnnotation a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
-runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
-
-instantiateTypeApplication :: (MonadReader (TypeAnnotationContext a) m) => Type Parameter () -> NonEmpty (Type Parameter ()) -> TypeAnnotation a m IndexedType
-instantiateTypeApplication con@(TConstructor _ name) ts
-  | isTupleType con =
-      applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
-        <$> traverse instantiate ts
-instantiateTypeApplication (TVariable (Parameter _ v)) ts = do
-  ts' <- traverse instantiate ts
-  t' <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts')) v
-  pure (applyTypeArgs KType t' ts')
-instantiateTypeApplication t ts =
-  applyTypeArgs KType <$> instantiate t <*> traverse instantiate ts
-
-instantiate :: (MonadReader (TypeAnnotationContext a) m) => Type Parameter () -> TypeAnnotation a m IndexedType
-instantiate =
-  \case
-    t@TApplication{} -> do
-      uncurry instantiateTypeApplication (listTypeArgs t)
-    TVariable (Parameter _ v) ->
-      TVariable <$> typeIndex KType v
-    TArrow t1 t2 ->
-      TArrow <$> instantiate t1 <*> instantiate t2
-    TConstructor _ name -> do
-      c <- lookupTypeConstructor name
-      case c of
-        Nothing ->
-          throwError (`EAnnotationConstructor` name)
-        Just k ->
-          pure (TConstructor k name)
-    TIntrinsic t ->
-      pure (TIntrinsic t)
-    TRecord t ->
-      TRecord <$> instantiate t
-    TRow row ->
-      TRow <$> instantiateRow row
-    TAlias name ts t ->
-      TAlias name <$> traverse instantiate ts <*> instantiate t
-
-instantiateRow :: (MonadReader (TypeAnnotationContext a) m) => Row Parameter () (Type Parameter ()) -> TypeAnnotation a m (Row TypeIndex Kind IndexedType)
-instantiateRow =
-  \case
-    RVariable (Parameter _ v) ->
-      RVariable <$> typeIndex KRow v
-    RExtend name t row ->
-      RExtend name <$> instantiate t <*> instantiateRow row
-    RNil ->
-      pure RNil
-
-typeIndex :: (MonadReader (TypeAnnotationContext a) m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
-typeIndex k name = do
-  dict <- get
-  let index = TypeIndex k (negate (lexOrderRank name) - 1)
-  case Map.lookup name dict of
-    Nothing -> do
-      modify (Map.insert name index)
-      pure index
-    Just (TypeIndex k1 _)
-      | k1 /= k ->
-          throwError EAnnotationKindMismatch
-    Just{} ->
-      pure index
+-- runTypeAnnotation :: (Monad m) => a -> TypeAnnotation a m t -> m (Either (TypeAnnotationError a) t, Dictionary (TypeIndex Kind))
+-- runTypeAnnotation loc v = runStateT (runExceptT (withExceptT ($ loc) v)) mempty
+--
+-- instantiateTypeApplication :: (MonadReader (TypeAnnotationContext a) m) => Type Parameter () -> NonEmpty (Type Parameter ()) -> TypeAnnotation a m IndexedType
+-- instantiateTypeApplication con@(TConstructor _ name) ts
+--  | isTupleType con =
+--      applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
+--        <$> traverse instantiate ts
+-- instantiateTypeApplication (TVariable (Parameter _ v)) ts = do
+--  ts' <- traverse instantiate ts
+--  t' <- TVariable <$> typeIndex (foldKind KType (kindOf <$> ts')) v
+--  pure (applyTypeArgs KType t' ts')
+-- instantiateTypeApplication t ts =
+--  applyTypeArgs KType <$> instantiate t <*> traverse instantiate ts
+--
+-- instantiate :: (MonadReader (TypeAnnotationContext a) m) => Type Parameter () -> TypeAnnotation a m IndexedType
+-- instantiate =
+--  undefined
+----  \case
+----    t@TApplication{} -> do
+----      uncurry instantiateTypeApplication (listTypeArgs t)
+----    TVariable (Parameter _ v) ->
+----      TVariable <$> typeIndex KType v
+----    TArrow t1 t2 ->
+----      TArrow <$> instantiate t1 <*> instantiate t2
+----    TConstructor _ name -> do
+----      c <- lookupTypeConstructor name
+----      case c of
+----        Nothing ->
+----          throwError (`EAnnotationConstructor` name)
+----        Just k ->
+----          pure (TConstructor k name)
+----    TIntrinsic t ->
+----      pure (TIntrinsic t)
+----    TRecord t ->
+----      TRecord <$> instantiate t
+----    TRow row ->
+----      TRow <$> instantiateRow row
+----    TAlias name ts t ->
+----      TAlias name <$> traverse instantiate ts <*> instantiate t
+--
+-- instantiateRow :: (MonadReader (TypeAnnotationContext a) m) => Row Parameter () (Type Parameter ()) -> TypeAnnotation a m (Row TypeIndex Kind IndexedType)
+-- instantiateRow =
+--  \case
+--    RVariable (Parameter _ v) ->
+--      RVariable <$> typeIndex KRow v
+--    RExtend name t row ->
+--      RExtend name <$> instantiate t <*> instantiateRow row
+--    RNil ->
+--      pure RNil
+--
+-- typeIndex :: (MonadReader (TypeAnnotationContext a) m) => Kind -> Name -> TypeAnnotation a m (TypeIndex Kind)
+-- typeIndex k name = do
+--  dict <- get
+--  let index = TypeIndex k (negate (lexOrderRank name) - 1)
+--  case Map.lookup name dict of
+--    Nothing -> do
+--      modify (Map.insert name index)
+--      pure index
+--    Just (TypeIndex k1 _)
+--      | k1 /= k ->
+--          throwError EAnnotationKindMismatch
+--    Just{} ->
+--      pure index
 
 checkTypeAnnotationParameters :: (MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
 checkTypeAnnotationParameters ps (Substitution sub) = do
