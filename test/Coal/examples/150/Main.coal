@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_int32)
-  import Eq(Equality, Answer(Yes, No))
+  import Eq(equal, Answer(Yes, No))
 
   fun main() =
     if (equal(Yes, No)) 

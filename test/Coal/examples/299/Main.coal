@@ -3,11 +3,12 @@ module Main {
   import IO(println_int32, println_string)
   import Number(max)
 
-  type Tree<a> = Node(
+  type alias TreeFields<a> =
     { value    : a
     , children : List<Tree<a>>
     }
-  )
+
+  type Tree<a> = Node(TreeFields<a>)
 
   fun leaf(value) =
     Node({ value = value, children = [] })
