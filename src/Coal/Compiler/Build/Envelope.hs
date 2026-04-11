@@ -2,7 +2,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName, partitionBuildEnvelopes) where
+module Coal.Compiler.Build.Envelope (
+  BuildEnvelope (..),
+  envelopePathName,
+  partitionBuildEnvelopes,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Module.Path
