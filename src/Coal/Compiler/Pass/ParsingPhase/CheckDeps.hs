@@ -6,18 +6,18 @@
 module Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoBuild
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language (Kind)
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (parseModule)
 import Coal.Parser.Core (spaces)
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (get)
@@ -26,18 +26,18 @@ import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)
 
-passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passCheckDeps = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [BuildEnvelope (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (ProtoModule Metadata () ())]
+pass :: (MonadIO m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 pass = traverse check
 
-check :: (MonadIO m) => BuildEnvelope (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (ProtoModule Metadata () ()))
+check :: (MonadIO m) => BuildEnvelope (Module Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()))
 check =
   \case
     BSource src -> do
       pure (BSource src)
-    BCached ProtoBuild{..} -> do
+    BCached Build{..} -> do
       CompilerState{..} <- get
       if any (\dep -> principalPath dep `elem` protoOcompilerToBeRecompiled) protoObuildDependencies
         then do
@@ -50,9 +50,9 @@ check =
               throwError ParserFailure
             Right r ->
               pure r
-        else pure (BCached ProtoBuild{..})
+        else pure (BCached Build{..})
 
-fromSource :: (MonadIO m) => Name -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
+fromSource :: (MonadIO m) => Name -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 fromSource name src = do
   toBeRecompiled name
   case runParser (spaces *> parseModule <* eof) "" src of

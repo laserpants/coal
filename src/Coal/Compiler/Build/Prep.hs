@@ -4,26 +4,26 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.ProtoBuild.ProtoPrep (
+module Coal.Compiler.Build.Prep (
   protoOprepareBuild,
   protoOreplacePlaceholders,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build
+import qualified Coal.Compiler.Build as Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (protoObuiltinInstances)
-import Coal.Compiler.ProtoBuild
-import qualified Coal.Compiler.ProtoBuild as Build
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
-import Coal.ProtoTypeSystem.Parameterized
+import Coal.TypeSystem.Parameterized
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless, when)
@@ -38,25 +38,25 @@ import Data.Tuple.Extra (uncurry3)
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
-insertNameEntry :: (Monad m) => ProtoNameEntry -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
 
-insertDataConstructor :: (Monad m) => Name -> ProtoDataConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertDataConstructor :: (Monad m) => Name -> DataConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertDataConstructor name entry = modify (Build.insertBuildDataConstructor name entry)
 
-insertTypeConstructor :: (Monad m) => Name -> ProtoTypeConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertTypeConstructor :: (Monad m) => Name -> TypeConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertTypeConstructor name entry = modify (Build.insertBuildTypeConstructor name entry)
 
-insertTrait :: (Monad m) => Name -> ProtoTraitEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertTrait :: (Monad m) => Name -> TraitEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertTrait name entry = modify (Build.insertBuildTrait name entry)
 
-insertInstance :: (Monad m) => Name -> IndexedType -> ProtoInstanceEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertInstance :: (Monad m) => Name -> IndexedType -> InstanceEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertInstance name t entry = modify (Build.insertBuildInstance name t entry)
 
-insertAlias :: (Monad m) => Name -> ProtoAliasEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
-insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
+insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertExportedName name
   | name `elem` builtinNames =
       pure ()
@@ -109,8 +109,8 @@ builtinNames =
     , "negate"
     ]
 
-protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> CompilerT a m ()
-protoOprepareBuild ProtoModule{..} = do
+protoOprepareBuild :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
+protoOprepareBuild Module{..} = do
   build <- protoOgetCurrentBuildC
   newBuild <-
     execStateT
@@ -120,19 +120,19 @@ protoOprepareBuild ProtoModule{..} = do
         }
   insertBuildC newBuild
 
-protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+protoOprepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 protoOprepareDefinitions defs = do
-  insertNameEntry (ProtoNType "List" (KArrow KType KType))
+  insertNameEntry (NType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
-    ProtoTypeConstructorEntry
+    TypeConstructorEntry
       { protoOtypeConstructorEntryMetadata = mempty
       , protoOtypeConstructorEntryName = "List"
       , protoOtypeConstructorEntryKind = KArrow KType KType
       , protoOtypeConstructorEntryDataConstructors = ["::", "mempty"]
       }
-  insertNameEntry (ProtoNName "Zero" (Forall mempty mempty (TIntrinsic INat)))
+  insertNameEntry (NName "Zero" (Forall mempty mempty (TIntrinsic INat)))
   insertDataConstructor "Zero" $
-    ProtoDataConstructorEntry
+    DataConstructorEntry
       { protoOdataConstructorEntryMetaData = mempty
       , protoOdataConstructorEntryName = "Zero"
       , protoOdataConstructorEntryConstructor =
@@ -143,9 +143,9 @@ protoOprepareDefinitions defs = do
             }
       , protoOdataConstructorEntryConstructorSet = Set.fromList ["Zero", "Succ"]
       }
-  insertNameEntry (ProtoNName "Succ" (Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)))
+  insertNameEntry (NName "Succ" (Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)))
   insertDataConstructor "Succ" $
-    ProtoDataConstructorEntry
+    DataConstructorEntry
       { protoOdataConstructorEntryMetaData = mempty
       , protoOdataConstructorEntryName = "Succ"
       , protoOdataConstructorEntryConstructor =
@@ -185,61 +185,61 @@ protoOprepareDefinitions defs = do
   qualifiedNames <- traverse (qualifiedImports build) defs
   modify (setQualifiedNames (Environment.fromList (concat qualifiedNames)))
 
-qualifiedImports :: (Monad m) => ProtoBuild a -> ProtoDefinition a k t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) [(Name, Name)]
-qualifiedImports ProtoBuild{..} =
+qualifiedImports :: (Monad m) => Build a -> Definition a k t -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) [(Name, Name)]
+qualifiedImports Build{..} =
   \case
-    ProtoDImport _ path imports ->
+    DImport _ path imports ->
       concatForM imports $
         \case
           NameImport _ name ->
             pure [(name, principalPath path <.> name)]
           TypeImport _ name names ->
             case Environment.lookup name protoObuildTypeConstructors of
-              Just ProtoTypeConstructorEntry{..} -> do
+              Just TypeConstructorEntry{..} -> do
                 let dataConstructors =
                       if ["*"] == names
                         then protoOtypeConstructorEntryDataConstructors
                         else names `intersect` protoOtypeConstructorEntryDataConstructors
                     ns1 = [(n, principalPath path <.> n) | n <- dataConstructors]
-                ProtoBuild{protoObuildInstances = importInstances} <- lift $ lift $ importedBuild path
+                Build{protoObuildInstances = importInstances} <- lift $ lift $ importedBuild path
                 ns2 <- qualifiedInstanceNames (typeInstances name importInstances)
                 pure (ns1 <> ns2)
               _ ->
                 case Environment.lookup name protoObuildTraits of
-                  Just ProtoTraitEntry{..} -> do
+                  Just TraitEntry{..} -> do
                     let entries = Environment.names protoOtraitEntryInterface
                         ns1 =
                           [ (n, principalPath path <.> n)
                           | n <- if ["*"] == names then entries else names `intersect` entries
                           ]
-                    ProtoBuild{protoObuildInstances = importInstances} <- lift $ lift $ importedBuild path
+                    Build{protoObuildInstances = importInstances} <- lift $ lift $ importedBuild path
                     ns2 <- qualifiedInstanceNames (traitInstances name importInstances)
                     pure (ns1 <> ns2)
                   _ ->
                     pure mempty
      where
-      -- qualifiedInstanceNames :: (Monad m) => Path -> Environment [ProtoNameEntry] -> [(Name, InstanceMap (ProtoInstanceEntry a))] -> m [(Name, Name)]
+      -- qualifiedInstanceNames :: (Monad m) => Path -> Environment [NameEntry] -> [(Name, InstanceMap (InstanceEntry a))] -> m [(Name, Name)]
       qualifiedInstanceNames instances =
         concatForM instances $
           \(traitName, instanceMap) ->
             concatForM (Map.toList instanceMap) $
-              \(t, ProtoInstanceEntry{..}) -> do
+              \(t, InstanceEntry{..}) -> do
                 concatForM (Map.keys protoOinstanceEntryTypeSchemes) $
                   \member -> do
                     let instanceName = instanceLabel (Trait traitName protoOinstanceEntryType) member
                     concatForM (Environment.lookupWithDefault mempty instanceName protoObuildNames) $
                       \case
-                        ProtoNName n _ -> do
+                        NName n _ -> do
                           pure [(n, principalPath path <.> n)]
                         _ ->
                           pure mempty
-    ProtoDNamespaceImport _ path -> do
-      ProtoBuild{protoObuildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
+    DNamespaceImport _ path -> do
+      Build{protoObuildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
       concatForM (Set.toList exportedNames) $
         \name ->
           --          concatForM (fromMaybe mempty $ Environment.lookup name importedNames) $
           --            \case
-          --              ProtoNName{} -> do
+          --              NName{} -> do
           --                when (Path ["List"] == path) $
           --                  traceShowM (qualified name path)
           pure [(qualified name path, qualified name path)]
@@ -251,10 +251,10 @@ qualifiedImports ProtoBuild{..} =
 qualified :: Name -> Path -> Name
 qualified name path = principalPath path <> "." <> name
 
-expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) (ModuleExportList a)
+expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) (ModuleExportList a)
 expandExports = do
   exportList <- ask
-  ProtoBuild{protoObuildDataConstructors} <- get
+  Build{protoObuildDataConstructors} <- get
   case exportList of
     ExportAll ->
       return ExportAll
@@ -266,24 +266,24 @@ expandExports = do
               case Environment.lookup name protoObuildDataConstructors of
                 Nothing ->
                   error "TODO"
-                Just ProtoDataConstructorEntry{..} ->
+                Just DataConstructorEntry{..} ->
                   return (TypeExport loc name (Set.toList protoOdataConstructorEntryConstructorSet))
             e ->
               return e
       return
         (Exports newExports)
 
-collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+collectTypeConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTypeConstructors =
   \case
-    ProtoDType loc name ProtoTypeDefinition{..} -> do
-      insertNameEntry (ProtoNType name kind)
+    DType loc name TypeDefinition{..} -> do
+      insertNameEntry (NType name kind)
       insertExportedName name
       insertTypeConstructor name entry
      where
       kind = foldKindOf KType protoOtypeDefinitionParameters
       entry =
-        ProtoTypeConstructorEntry
+        TypeConstructorEntry
           { protoOtypeConstructorEntryMetadata = loc
           , protoOtypeConstructorEntryName = name
           , protoOtypeConstructorEntryKind = kind
@@ -292,10 +292,10 @@ collectTypeConstructors =
           }
 
     -- TODO: remove
-    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+    DImport _ (Path ["Builtin$"]) imports -> do
       pure ()
-    ProtoDImport _ path imports -> do
-      ProtoBuild{..} <- lift $ lift $ importedBuild path
+    DImport _ path imports -> do
+      Build{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
           TypeImport loc name _
@@ -316,78 +316,78 @@ collectTypeConstructors =
                 pure () -- error (show name)
           _ ->
             pure ()
-    ProtoDNamespaceImport loc path ->
+    DNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
 
-insertTypeName :: (Monad m) => ProtoBuild a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) Bool
-insertTypeName ProtoBuild{..} loc name =
+insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) Bool
+insertTypeName Build{..} loc name =
   or <$> forM (Environment.lookupWithDefault mempty name protoObuildNames) go
  where
   go =
     \case
-      ProtoNType{} ->
+      NType{} ->
         case Environment.lookup name protoObuildTypeConstructors of
           Nothing ->
             error "TODO"
           Just entry -> do
             insertTypeConstructor name entry
             return True
-      ProtoNTrait{} ->
+      NTrait{} ->
         case Environment.lookup name protoObuildTraits of
           Nothing ->
             error "TODO"
           Just entry -> do
             insertTrait name entry
             return True
-      ProtoNTypeAlias{} ->
+      NTypeAlias{} ->
         case Environment.lookup name protoObuildAliases of
           Nothing ->
             error "TODO"
-          Just ProtoAliasEntry{..} -> do
-            forM_ (constructors protoOaliasEntryType) (insertTypeName ProtoBuild{..} loc)
+          Just AliasEntry{..} -> do
+            forM_ (constructors protoOaliasEntryType) (insertTypeName Build{..} loc)
             return True
-      --            insertAlias name ProtoAliasEntry{..}
-      --            forM_ (constructors protoOaliasEntryType) (insertTypeName ProtoBuild{..} loc)
+      --            insertAlias name AliasEntry{..}
+      --            forM_ (constructors protoOaliasEntryType) (insertTypeName Build{..} loc)
       --            return True
       _ ->
         return False
 
--- collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+-- collectTypeAliases :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 -- collectTypeAliases =
 --  \case
---    ProtoDTypeAlias loc name ProtoAliasDefinition{..} -> do
---      insertNameEntry (ProtoNTypeAlias name)
+--    DTypeAlias loc name AliasDefinition{..} -> do
+--      insertNameEntry (NTypeAlias name)
 --      insertExportedName name
 --      insertAlias name entry
 --     where
 --      entry =
---        ProtoAliasEntry
+--        AliasEntry
 --          { protoOaliasEntryMetadata = loc
 --          , protoOaliasEntryName = name
 --          , protoOaliasEntryParams = protoOaliasDefinitionParameters
 --          , protoOaliasEntryType = protoOaliasDefinitionType
 --          }
---    ProtoDImport _ path imports ->
+--    DImport _ path imports ->
 --      pure ()
---    ProtoDNamespaceImport loc path ->
+--    DNamespaceImport loc path ->
 --      pure ()
 --    _ ->
 --      pure ()
 
-collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+collectDataConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectDataConstructors =
   \case
-    ProtoDType loc _ ProtoTypeDefinition{..} ->
+    DType loc _ TypeDefinition{..} ->
       forM_ protoOtypeDefinitionConstructors $
         \ctor -> do
           entry <- dataConstructorEntry loc ctorSet ctor
           case entry of
-            ProtoDataConstructorEntry
+            DataConstructorEntry
               { protoOdataConstructorEntryConstructor = DataConstructor{..}
               } -> do
-                insertNameEntry (ProtoNName constructorName constructorScheme)
+                insertNameEntry (NName constructorName constructorScheme)
                 insertExportedName constructorName
                 insertDataConstructor constructorName entry
                 lift $ lift $ protoOinsertNameC constructorName constructorScheme
@@ -395,10 +395,10 @@ collectDataConstructors =
       ctorSet = Set.fromList (for protoOtypeDefinitionConstructors constructorName)
 
     -- TODO: remove
-    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+    DImport _ (Path ["Builtin$"]) imports -> do
       pure ()
-    ProtoDImport loc path imports -> do
-      ProtoBuild{..} <- lift $ lift $ importedBuild path
+    DImport loc path imports -> do
+      Build{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
           TypeImport _ name ctors
@@ -407,13 +407,13 @@ collectDataConstructors =
                   Nothing ->
                     pure ()
                   -- error (show (path, name))
-                  Just ProtoTypeConstructorEntry{..} ->
+                  Just TypeConstructorEntry{..} ->
                     forM_ dataConstructors $
                       \ctor ->
                         case Environment.lookup ctor protoObuildDataConstructors of
                           Nothing ->
                             error "TODO"
-                          Just entry@ProtoDataConstructorEntry{protoOdataConstructorEntryConstructor = DataConstructor{..}, ..} -> do
+                          Just entry@DataConstructorEntry{protoOdataConstructorEntryConstructor = DataConstructor{..}, ..} -> do
                             insertDataConstructor ctor entry
                             lift $ lift $ protoOinsertNameC constructorName constructorScheme
                    where
@@ -425,16 +425,16 @@ collectDataConstructors =
           _ ->
             pure ()
     -- TODO
-    ProtoDNamespaceImport loc path ->
+    DNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
 
-dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) (ProtoDataConstructorEntry a)
+dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) (DataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
   (s, _) <- instantiateScheme constructorScheme
   pure $
-    ProtoDataConstructorEntry
+    DataConstructorEntry
       { protoOdataConstructorEntryMetaData = loc
       , protoOdataConstructorEntryName = constructorName
       , protoOdataConstructorEntryConstructor =
@@ -445,16 +445,16 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
 
-collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+collectTraits :: (Monad m) => Definition a Kind t -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTraits =
   \case
-    ProtoDTrait loc name ProtoTraitDefinition{..} -> do
-      insertNameEntry (ProtoNTrait name)
+    DTrait loc name TraitDefinition{..} -> do
+      insertNameEntry (NTrait name)
       insertExportedName name
       insertTrait name entry
      where
       entry =
-        ProtoTraitEntry
+        TraitEntry
           { protoOtraitEntryMetadata = loc
           , protoOtraitEntryName = name
           , protoOtraitEntryParameter = protoOtraitDefinitionParameter
@@ -462,10 +462,10 @@ collectTraits =
           , protoOtraitEntryInterface = Environment.fromList (fmap traitDefinitionInterfaceEntryToPair protoOtraitDefinitionInterface)
           }
     -- TODO
-    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+    DImport _ (Path ["Builtin$"]) imports -> do
       pure ()
-    ProtoDImport _ path imports -> do
-      ProtoBuild{..} <- lift $ lift $ importedBuild path
+    DImport _ path imports -> do
+      Build{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
           TypeImport _ name names
@@ -473,15 +473,15 @@ collectTraits =
                 case Environment.lookup name protoObuildTraits of
                   Nothing ->
                     case Environment.lookup name protoObuildTypeConstructors of
-                      Just ProtoTypeConstructorEntry{} -> do
+                      Just TypeConstructorEntry{} -> do
                         -- traceShowM name
                         qualifiedInstanceNames (typeInstances name protoObuildInstances)
                       Nothing ->
                         pure ()
                   -- error (show (path, name))
-                  Just ProtoTraitEntry{..} -> do
-                    insertNameEntry (ProtoNTrait name)
-                    insertTrait name ProtoTraitEntry{..}
+                  Just TraitEntry{..} -> do
+                    insertNameEntry (NTrait name)
+                    insertTrait name TraitEntry{..}
                     qualifiedInstanceNames (traitInstances name protoObuildInstances)
             | otherwise ->
                 error "TODO"
@@ -490,8 +490,8 @@ collectTraits =
               forM_ instances $
                 \(traitName, instanceMap) ->
                   forM_ (Map.toList instanceMap) $
-                    \(t, ProtoInstanceEntry{..}) -> do
-                      insertInstance traitName t ProtoInstanceEntry{..}
+                    \(t, InstanceEntry{..}) -> do
+                      insertInstance traitName t InstanceEntry{..}
                       let members =
                             if ["*"] == names
                               then Map.keys protoOinstanceEntryTypeSchemes
@@ -502,7 +502,7 @@ collectTraits =
                           let instanceName = instanceLabel (Trait traitName protoOinstanceEntryType) member
                           forM_ (Environment.lookupWithDefault mempty instanceName protoObuildNames) $
                             \case
-                              info@(ProtoNName n s) -> do
+                              info@(NName n s) -> do
                                 insertNameEntry info
                                 lift $ lift $ protoOinsertNameC n s
                               _ ->
@@ -510,7 +510,7 @@ collectTraits =
           _ ->
             pure ()
     -- TODO
-    ProtoDNamespaceImport loc path ->
+    DNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
@@ -518,24 +518,24 @@ collectTraits =
 traitInstances :: Name -> Environment (InstanceMap a) -> [(Name, InstanceMap a)]
 traitInstances name instances = filter ((==) name . fst) (Environment.toList instances)
 
-typeInstances :: Name -> Environment (InstanceMap (ProtoInstanceEntry a)) -> [(Name, InstanceMap (ProtoInstanceEntry a))]
+typeInstances :: Name -> Environment (InstanceMap (InstanceEntry a)) -> [(Name, InstanceMap (InstanceEntry a))]
 typeInstances name instances = fmap (second (instancesForType name)) (Environment.toList instances)
 
-instancesForType :: Name -> InstanceMap (ProtoInstanceEntry a) -> InstanceMap (ProtoInstanceEntry a)
+instancesForType :: Name -> InstanceMap (InstanceEntry a) -> InstanceMap (InstanceEntry a)
 instancesForType name = Map.filter isType
  where
-  isType ProtoInstanceEntry{..} =
+  isType InstanceEntry{..} =
     Just name == headConstructor protoOinstanceEntryType
 
-traitDefinitionInterfaceEntryToPair :: ProtoTraitDefinitionInterfaceEntry Kind -> (Name, Scheme Parameter Kind (Type Parameter Kind))
-traitDefinitionInterfaceEntryToPair ProtoTraitDefinitionInterfaceEntry{..} = (protoOtraitDefinitionInterfaceEntryName, protoOtraitDefinitionInterfaceEntryScheme)
+traitDefinitionInterfaceEntryToPair :: TraitDefinitionInterfaceEntry Kind -> (Name, Scheme Parameter Kind (Type Parameter Kind))
+traitDefinitionInterfaceEntryToPair TraitDefinitionInterfaceEntry{..} = (protoOtraitDefinitionInterfaceEntryName, protoOtraitDefinitionInterfaceEntryScheme)
 
-collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+collectTraitsInterface :: (Monad m) => Definition a Kind t -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTraitsInterface =
   \case
-    ProtoDTrait _ name ProtoTraitDefinition{..} ->
+    DTrait _ name TraitDefinition{..} ->
       forM_ protoOtraitDefinitionInterface $
-        \ProtoTraitDefinitionInterfaceEntry{..} -> do
+        \TraitDefinitionInterfaceEntry{..} -> do
           let Forall{..} = protoOtraitDefinitionInterfaceEntryScheme
           (s, _) <-
             instantiateScheme
@@ -545,7 +545,7 @@ collectTraitsInterface =
                   schemeTypeBody
               )
           let normalizedScheme = normalizeScheme s
-          insertNameEntry (ProtoNName protoOtraitDefinitionInterfaceEntryName normalizedScheme)
+          insertNameEntry (NName protoOtraitDefinitionInterfaceEntryName normalizedScheme)
           lift $ lift $ protoOinsertNameC protoOtraitDefinitionInterfaceEntryName normalizedScheme
 
           exportList <- ask
@@ -561,10 +561,10 @@ collectTraitsInterface =
             _ ->
               pure ()
     -- TODO
-    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+    DImport _ (Path ["Builtin$"]) imports -> do
       pure ()
-    ProtoDImport loc path imports -> do
-      ProtoBuild{..} <- lift $ lift $ importedBuild path
+    DImport loc path imports -> do
+      Build{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
           TypeImport _ name members
@@ -573,13 +573,13 @@ collectTraitsInterface =
                   Nothing ->
                     pure ()
                   -- error (show (path, name))
-                  Just ProtoTraitEntry{..} -> do
+                  Just TraitEntry{..} -> do
                     forM_ names $
                       \case
                         member | member `elem` protoObuildExportedNames -> do
                           forM_ (Environment.lookupWithDefault mempty member protoObuildNames) $
                             \case
-                              info@(ProtoNName _ s) -> do
+                              info@(NName _ s) -> do
                                 modify (insertBuildNameEntry info)
                                 lift $ lift $ protoOinsertNameC member s
                               _ -> do
@@ -595,40 +595,40 @@ collectTraitsInterface =
           _ ->
             pure ()
     -- TODO
-    ProtoDNamespaceImport loc path ->
+    DNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
 
-collectInstances :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+collectInstances :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectInstances =
   \case
-    ProtoDInstance _ ProtoInstanceDefinition{..} -> do
+    DInstance _ InstanceDefinition{..} -> do
       t <- instantiateType protoOinstanceDefinitionType
       forM_ protoOinstanceDefinitionImplementations $
         \case
-          ProtoDLet _ name _ -> do
-            insertNameEntry (ProtoNPlaceholder instanceName)
+          DLet _ name _ -> do
+            insertNameEntry (NPlaceholder instanceName)
             insertExportedName instanceName
            where
             instanceName =
               instanceLabel
-                (instanceDefinitionTrait ProtoInstanceDefinition{..})
+                (instanceDefinitionTrait InstanceDefinition{..})
                 name
-          ProtoDFunction _ name _ -> do
-            insertNameEntry (ProtoNPlaceholder instanceName)
+          DFunction _ name _ -> do
+            insertNameEntry (NPlaceholder instanceName)
             insertExportedName instanceName
            where
             instanceName =
               instanceLabel
-                (instanceDefinitionTrait ProtoInstanceDefinition{..})
+                (instanceDefinitionTrait InstanceDefinition{..})
                 name
           _ ->
             pure ()
 
-      ProtoBuild{protoObuildTraits} <- get
+      Build{protoObuildTraits} <- get
       case Environment.lookup protoOinstanceDefinitionTraitName protoObuildTraits of
-        Just ProtoTraitEntry{..} -> do
+        Just TraitEntry{..} -> do
           Environment env <- flip Environment.mapMEnvironment protoOtraitEntryInterface $
             \entry -> do
               (Forall{..}, env) <- instantiateScheme entry
@@ -651,7 +651,7 @@ collectInstances =
           --        vars = typeIndexesIn newTraits <> typeIndexesIn newTypeBody
           --    pure $ Forall vars newTraits newTypeBody
           let entry =
-                ProtoInstanceEntry
+                InstanceEntry
                   { protoOinstanceEntryMetadata = protoOinstanceDefinitionMetadata
                   , protoOinstanceEntryType = protoOinstanceDefinitionType
                   , protoOinstanceEntryIndexedType = t
@@ -661,30 +661,30 @@ collectInstances =
         Nothing ->
           error "TODO"
     -- TODO
-    ProtoDImport loc path items ->
+    DImport loc path items ->
       pure ()
     -- TODO
-    ProtoDNamespaceImport loc path ->
+    DNamespaceImport loc path ->
       pure ()
     _ ->
       pure ()
 
-collectPlaceholders :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+collectPlaceholders :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectPlaceholders =
   \case
-    ProtoDFunction _ name ProtoFunctionDefinition{..} -> do
-      insertNameEntry (ProtoNPlaceholder name)
+    DFunction _ name FunctionDefinition{..} -> do
+      insertNameEntry (NPlaceholder name)
       insertExportedName name
-    ProtoDLet _ name ProtoLetDefinition{..} -> do
-      insertNameEntry (ProtoNPlaceholder name)
+    DLet _ name LetDefinition{..} -> do
+      insertNameEntry (NPlaceholder name)
       insertExportedName name
-    ProtoDFold _ name ProtoFoldDefinition{..} -> do
-      insertNameEntry (ProtoNPlaceholder name)
+    DFold _ name FoldDefinition{..} -> do
+      insertNameEntry (NPlaceholder name)
       insertExportedName name
     _ ->
       pure ()
 
-instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) (IndexedScheme, [(Name, TypeIndex Kind)])
+instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) (IndexedScheme, [(Name, TypeIndex Kind)])
 instantiateScheme Forall{..} =
   lift $ lift $ do
     env <- protoOinstantiateTypeIndexes schemeTypeVariables
@@ -696,24 +696,24 @@ instantiateScheme Forall{..} =
           <*> toIndexed schemeTypeBody
     return (s, env)
 
-instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) IndexedType
+instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 
-collectImports :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
+collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectImports =
   \case
     -- TODO: remove
-    ProtoDImport _ (Path ["Builtin$"]) imports -> do
+    DImport _ (Path ["Builtin$"]) imports -> do
       pure ()
-    ProtoDImport _ path imports -> do
-      ProtoBuild{..} <- lift $ lift $ importedBuild path
+    DImport _ path imports -> do
+      Build{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
           NameImport _ name
             | name `elem` protoObuildExportedNames -> do
                 forM_ (Environment.lookupWithDefault mempty name protoObuildNames) $
                   \case
-                    info@(ProtoNName _ s) -> do
+                    info@(NName _ s) -> do
                       modify (insertBuildNameEntry info)
                       lift $ lift $ protoOinsertNameC name s
                     _ -> do
@@ -725,38 +725,38 @@ collectImports =
             | name `elem` protoObuildExportedNames ->
                 forM_ (Environment.lookupWithDefault mempty name protoObuildNames) $
                   \case
-                    info@ProtoNType{} ->
+                    info@NType{} ->
                       modify (insertBuildNameEntry info)
-                    info@ProtoNTrait{} ->
+                    info@NTrait{} ->
                       modify (insertBuildNameEntry info)
-                    info@ProtoNTypeAlias{} ->
+                    info@NTypeAlias{} ->
                       modify (insertBuildNameEntry info)
                     _ ->
                       pure ()
             | otherwise ->
                 error "TODO"
-    ProtoDNamespaceImport _ path -> do
-      ProtoBuild{..} <- lift $ lift $ importedBuild path
+    DNamespaceImport _ path -> do
+      Build{..} <- lift $ lift $ importedBuild path
       let qualifiedName name = principalPath protoObuildPath <.> name
       forM_ protoObuildExportedNames $
         \exportedName ->
           forM_ (Environment.lookupWithDefault mempty exportedName protoObuildNames) $
             \case
-              ProtoNName name s -> do
-                modify (insertBuildNameEntry (ProtoNName (qualifiedName name) s))
+              NName name s -> do
+                modify (insertBuildNameEntry (NName (qualifiedName name) s))
                 lift $ lift $ protoOinsertNameC (qualifiedName name) s
-              ProtoNType name k ->
-                modify (insertBuildNameEntry (ProtoNType (qualifiedName name) k))
-              ProtoNTrait name ->
-                modify (insertBuildNameEntry (ProtoNTrait (qualifiedName name)))
-              ProtoNTypeAlias name ->
-                modify (insertBuildNameEntry (ProtoNTypeAlias (qualifiedName name)))
-              ProtoNPlaceholder{} ->
+              NType name k ->
+                modify (insertBuildNameEntry (NType (qualifiedName name) k))
+              NTrait name ->
+                modify (insertBuildNameEntry (NTrait (qualifiedName name)))
+              NTypeAlias name ->
+                modify (insertBuildNameEntry (NTypeAlias (qualifiedName name)))
+              NPlaceholder{} ->
                 pure ()
     _ ->
       pure ()
 
-importedBuild :: (Monad m) => Path -> CompilerT a m (ProtoBuild a)
+importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
 importedBuild path = do
   env <- gets protoOcompilerModules
   case Environment.lookup (principalPath path) env of
@@ -773,5 +773,5 @@ protoOreplacePlaceholders = do
     flip execStateT build $
       forM_ (Environment.toList store) $
         \(name, s) ->
-          modify (replaceBuildNameEntry (ProtoNName name s))
+          modify (replaceBuildNameEntry (NName name s))
   insertBuildC newBuild

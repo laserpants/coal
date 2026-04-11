@@ -14,7 +14,7 @@ import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (passLLVMOutput)
 import Coal.Kernel.Compiler (KernelModule)
 import Coal.Kernel.Language (moduleName)
 import Coal.Language (IndexedType, Kind)
-import Coal.ProtoLanguage.ProtoModule
+import Coal.Language.Module
 import Control.Monad (when)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -33,7 +33,7 @@ import Extras (Name)
 --        writeDotFile (ll <> "_" <> moduleName m) m
 --    pure m
 
-loweringPhase :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata Kind IndexedType)] [(Name, ByteString)]
+loweringPhase :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
 loweringPhase =
   mapPass passKernelTranslate
     --    >-> mapPass (liftPass (generateDebugArtifacts "Kernel"))

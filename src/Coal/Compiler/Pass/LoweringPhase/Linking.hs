@@ -7,8 +7,8 @@ module Coal.Compiler.Pass.LoweringPhase.Linking (passLinking, compileBitcode) wh
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Control.Exception (SomeException, try)
 import Control.Monad.Except
 import Control.Monad.State (gets)

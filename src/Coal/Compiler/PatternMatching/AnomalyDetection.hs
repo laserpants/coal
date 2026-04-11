@@ -13,8 +13,8 @@ module Coal.Compiler.PatternMatching.AnomalyDetection (
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.ProtoBuild
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
@@ -140,7 +140,7 @@ isUseful px@(ps : _) qs =
 isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
-  ProtoBuild{..} <- protoOgetCurrentBuildC
+  Build{..} <- protoOgetCurrentBuildC
   let defined = mapEnvironment protoOdataConstructorEntryConstructorSet protoObuildDataConstructors
   case Environment.lookup name (defined `Environment.union` builtIn) of
     Nothing ->

@@ -11,17 +11,17 @@ module Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (LambdaMatchExpressionT
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
+import Coal.Language.Definition
 import Coal.Language.Expression
+import Coal.Language.Module (Module (..))
 import Coal.Language.Pattern
 import Coal.Language.Type.Kind
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary)
 
-passLambdaMatchExpansion :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kind ()) (ProtoModule a Kind ())
+passLambdaMatchExpansion :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passLambdaMatchExpansion = Pass{runPass = lambdaMatchExpressionTransform}
 
 class LambdaMatchExpressionTransform t where
@@ -36,41 +36,41 @@ instance (LambdaMatchExpressionTransform a) => LambdaMatchExpressionTransform (N
 instance (LambdaMatchExpressionTransform a) => LambdaMatchExpressionTransform (Dictionary a) where
   lambdaMatchExpressionTransform = traverse lambdaMatchExpressionTransform
 
-instance (Monoid a, Data a) => LambdaMatchExpressionTransform (ProtoModule a Kind ()) where
+instance (Monoid a, Data a) => LambdaMatchExpressionTransform (Module a Kind ()) where
   lambdaMatchExpressionTransform =
     \case
-      ProtoModule{..} ->
-        ProtoModule protoOmodulePath protoOmoduleExportList
+      Module{..} ->
+        Module protoOmodulePath protoOmoduleExportList
           <$> lambdaMatchExpressionTransform protoOmoduleDefinitions
 
-instance (Monoid a, Data a) => LambdaMatchExpressionTransform (ProtoDefinition a Kind ()) where
+instance (Monoid a, Data a) => LambdaMatchExpressionTransform (Definition a Kind ()) where
   lambdaMatchExpressionTransform =
     \case
-      ProtoDFunction loc name def ->
-        ProtoDFunction loc name <$> lambdaMatchExpressionTransform def
-      ProtoDLet loc name def ->
-        ProtoDLet loc name <$> lambdaMatchExpressionTransform def
+      DFunction loc name def ->
+        DFunction loc name <$> lambdaMatchExpressionTransform def
+      DLet loc name def ->
+        DLet loc name <$> lambdaMatchExpressionTransform def
       o ->
         pure o
 
-instance (Monoid a, Data a) => LambdaMatchExpressionTransform (ProtoLetDefinition a Kind ()) where
+instance (Monoid a, Data a) => LambdaMatchExpressionTransform (LetDefinition a Kind ()) where
   lambdaMatchExpressionTransform =
     \case
-      ProtoLetDefinition{..} -> do
+      LetDefinition{..} -> do
         newLetDefinitionExpression <- lambdaMatchExpressionTransform protoOletDefinitionExpression
         return $
-          ProtoLetDefinition
+          LetDefinition
             { protoOletDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
-instance (Monoid a, Data a) => LambdaMatchExpressionTransform (ProtoFunctionDefinition a Kind ()) where
+instance (Monoid a, Data a) => LambdaMatchExpressionTransform (FunctionDefinition a Kind ()) where
   lambdaMatchExpressionTransform =
     \case
-      ProtoFunctionDefinition{..} -> do
+      FunctionDefinition{..} -> do
         newFunctionDefinitionExpression <- lambdaMatchExpressionTransform protoOfunctionDefinitionExpression
         return $
-          ProtoFunctionDefinition
+          FunctionDefinition
             { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }

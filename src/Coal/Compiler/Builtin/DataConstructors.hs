@@ -2,14 +2,14 @@
 
 module Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors) where
 
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.Build.NameEntry
 import Coal.Language
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 
-builtinDataConstructors :: (Monoid a) => [ProtoDataConstructorEntry a]
+builtinDataConstructors :: (Monoid a) => [DataConstructorEntry a]
 builtinDataConstructors =
-  [ ProtoDataConstructorEntry
+  [ DataConstructorEntry
       { protoOdataConstructorEntryMetaData = mempty
       , protoOdataConstructorEntryName = "Zero"
       , protoOdataConstructorEntryConstructor =
@@ -20,7 +20,7 @@ builtinDataConstructors =
       , protoOdataConstructorEntryConstructorSet =
           Set.fromList ["Succ", "Zero"]
       }
-  , ProtoDataConstructorEntry
+  , DataConstructorEntry
       { protoOdataConstructorEntryMetaData = mempty
       , protoOdataConstructorEntryName = "Succ"
       , protoOdataConstructorEntryConstructor =
@@ -31,7 +31,7 @@ builtinDataConstructors =
       , protoOdataConstructorEntryConstructorSet =
           Set.fromList ["Succ", "Zero"]
       }
-  , ProtoDataConstructorEntry
+  , DataConstructorEntry
       { protoOdataConstructorEntryMetaData = mempty
       , protoOdataConstructorEntryName = "Process"
       , protoOdataConstructorEntryConstructor =

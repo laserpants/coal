@@ -8,17 +8,17 @@ module Coal.Language.Type.Kind.Indexed (ToKindIndexed (..)) where
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language.Data.Constructor (DataConstructor (..))
+import Coal.Language.Definition
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
+import Coal.Language.Module
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Qualified (..), Trait (..))
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (forM)
 import Control.Monad.State (MonadState)
 import Data.List.NonEmpty (NonEmpty)
@@ -47,95 +47,95 @@ instance (ToKindIndexed t u) => ToKindIndexed (NonEmpty t) (NonEmpty u) where
 instance (ToKindIndexed t u, Ord u) => ToKindIndexed (Set t) (Set u) where
   toKindIndexed s = Set.fromList <$> toKindIndexed (Set.toList s)
 
-instance ToKindIndexed (ProtoDefinition a k ()) (ProtoDefinition a Kind ()) where
+instance ToKindIndexed (Definition a k ()) (Definition a Kind ()) where
   toKindIndexed =
     \case
-      ProtoDType loc name def ->
-        ProtoDType loc name <$> toKindIndexed def
-      ProtoDTypeAlias loc name def ->
-        ProtoDTypeAlias loc name <$> toKindIndexed def
-      ProtoDFunction loc name def ->
-        ProtoDFunction loc name <$> toKindIndexed def
-      ProtoDFunctionGroup loc name defs ->
-        ProtoDFunctionGroup loc name <$> traverse toKindIndexed defs
-      ProtoDFold loc name def ->
-        ProtoDFold loc name <$> toKindIndexed def
-      ProtoDLet loc name def ->
-        ProtoDLet loc name <$> toKindIndexed def
-      ProtoDImport loc path imports ->
-        pure $ ProtoDImport loc path imports
-      ProtoDNamespaceImport loc path ->
-        pure $ ProtoDNamespaceImport loc path
-      ProtoDTrait loc name def ->
-        ProtoDTrait loc name <$> toKindIndexed def
-      ProtoDInstance loc def ->
-        ProtoDInstance loc <$> toKindIndexed def
+      DType loc name def ->
+        DType loc name <$> toKindIndexed def
+      DTypeAlias loc name def ->
+        DTypeAlias loc name <$> toKindIndexed def
+      DFunction loc name def ->
+        DFunction loc name <$> toKindIndexed def
+      DFunctionGroup loc name defs ->
+        DFunctionGroup loc name <$> traverse toKindIndexed defs
+      DFold loc name def ->
+        DFold loc name <$> toKindIndexed def
+      DLet loc name def ->
+        DLet loc name <$> toKindIndexed def
+      DImport loc path imports ->
+        pure $ DImport loc path imports
+      DNamespaceImport loc path ->
+        pure $ DNamespaceImport loc path
+      DTrait loc name def ->
+        DTrait loc name <$> toKindIndexed def
+      DInstance loc def ->
+        DInstance loc <$> toKindIndexed def
 
-instance ToKindIndexed (ProtoTypeDefinition a k t) (ProtoTypeDefinition a Kind u) where
+instance ToKindIndexed (TypeDefinition a k t) (TypeDefinition a Kind u) where
   toKindIndexed =
     \case
-      ProtoTypeDefinition{..} ->
-        ProtoTypeDefinition
+      TypeDefinition{..} ->
+        TypeDefinition
           <$> toKindIndexed protoOtypeDefinitionParameters
           <*> toKindIndexed protoOtypeDefinitionConstructors
 
-instance ToKindIndexed (ProtoFunctionDefinition a k ()) (ProtoFunctionDefinition a Kind ()) where
+instance ToKindIndexed (FunctionDefinition a k ()) (FunctionDefinition a Kind ()) where
   toKindIndexed =
     \case
-      ProtoFunctionDefinition{..} ->
-        ProtoFunctionDefinition protoOfunctionDefinitionMetadata
+      FunctionDefinition{..} ->
+        FunctionDefinition protoOfunctionDefinitionMetadata
           <$> toKindIndexed protoOfunctionDefinitionAnnotation
           <*> toKindIndexed protoOfunctionDefinitionType
           <*> toKindIndexed protoOfunctionDefinitionPatterns
           <*> toKindIndexed protoOfunctionDefinitionExpression
 
-instance ToKindIndexed (ProtoLetDefinition a k ()) (ProtoLetDefinition a Kind ()) where
+instance ToKindIndexed (LetDefinition a k ()) (LetDefinition a Kind ()) where
   toKindIndexed =
     \case
-      ProtoLetDefinition{..} ->
-        ProtoLetDefinition protoOletDefinitionMetadata
+      LetDefinition{..} ->
+        LetDefinition protoOletDefinitionMetadata
           <$> toKindIndexed protoOletDefinitionAnnotation
           <*> toKindIndexed protoOletDefinitionType
           <*> toKindIndexed protoOletDefinitionExpression
 
-instance ToKindIndexed (ProtoTraitDefinition a k) (ProtoTraitDefinition a Kind) where
+instance ToKindIndexed (TraitDefinition a k) (TraitDefinition a Kind) where
   toKindIndexed =
     \case
-      ProtoTraitDefinition{..} ->
-        ProtoTraitDefinition protoOtraitDefinitionMetadata protoOtraitDefinitionTraitName
+      TraitDefinition{..} ->
+        TraitDefinition protoOtraitDefinitionMetadata protoOtraitDefinitionTraitName
           <$> toKindIndexed protoOtraitDefinitionConstraints
           <*> toKindIndexed protoOtraitDefinitionParameter
           <*> toKindIndexed protoOtraitDefinitionInterface
 
-instance ToKindIndexed (ProtoTraitDefinitionInterfaceEntry k) (ProtoTraitDefinitionInterfaceEntry Kind) where
+instance ToKindIndexed (TraitDefinitionInterfaceEntry k) (TraitDefinitionInterfaceEntry Kind) where
   toKindIndexed =
     \case
-      ProtoTraitDefinitionInterfaceEntry{..} ->
-        ProtoTraitDefinitionInterfaceEntry protoOtraitDefinitionInterfaceEntryName
+      TraitDefinitionInterfaceEntry{..} ->
+        TraitDefinitionInterfaceEntry protoOtraitDefinitionInterfaceEntryName
           <$> toKindIndexed protoOtraitDefinitionInterfaceEntryScheme
 
-instance ToKindIndexed (ProtoFoldDefinition a k ()) (ProtoFoldDefinition a Kind ()) where
+instance ToKindIndexed (FoldDefinition a k ()) (FoldDefinition a Kind ()) where
   toKindIndexed =
     \case
-      ProtoFoldDefinition{..} ->
-        ProtoFoldDefinition protoOfoldDefinitionMetadata
+      FoldDefinition{..} ->
+        FoldDefinition protoOfoldDefinitionMetadata
           <$> toKindIndexed protoOfoldDefinitionAnnotation
           <*> toKindIndexed protoOfoldDefinitionClauses
 
-instance ToKindIndexed (ProtoInstanceDefinition a k ()) (ProtoInstanceDefinition a Kind ()) where
+instance ToKindIndexed (InstanceDefinition a k ()) (InstanceDefinition a Kind ()) where
   toKindIndexed =
     \case
-      ProtoInstanceDefinition{..} ->
-        ProtoInstanceDefinition protoOinstanceDefinitionMetadata protoOinstanceDefinitionTraitName
+      InstanceDefinition{..} ->
+        InstanceDefinition protoOinstanceDefinitionMetadata protoOinstanceDefinitionTraitName
           <$> toKindIndexed protoOinstanceDefinitionConstraints
           <*> toKindIndexed protoOinstanceDefinitionType
           <*> toKindIndexed protoOinstanceDefinitionImplementations
 
-instance ToKindIndexed (ProtoAliasDefinition a k) (ProtoAliasDefinition a Kind) where
+instance ToKindIndexed (AliasDefinition a k) (AliasDefinition a Kind) where
   toKindIndexed =
     \case
-      ProtoAliasDefinition{..} ->
-        ProtoAliasDefinition
+      AliasDefinition{..} ->
+        AliasDefinition
           <$> toKindIndexed protoOaliasDefinitionParameters
           <*> toKindIndexed protoOaliasDefinitionType
 
@@ -296,13 +296,13 @@ instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind), Ord u) 
           <*> toKindIndexed schemeTraits
           <*> toKindIndexed schemeTypeBody
 
-instance ToKindIndexed (ProtoModule a k ()) (ProtoModule a Kind ()) where
+instance ToKindIndexed (Module a k ()) (Module a Kind ()) where
   toKindIndexed =
     \case
-      ProtoModule{..} -> do
+      Module{..} -> do
         newModuleDefinitions <- traverse toKindIndexed protoOmoduleDefinitions
         pure $
-          ProtoModule
+          Module
             { protoOmoduleDefinitions = newModuleDefinitions
             , ..
             }

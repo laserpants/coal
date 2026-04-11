@@ -16,6 +16,7 @@ module Coal.Language.Type.Indexed (
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supply)
+import Coal.Language.Definition
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
@@ -26,7 +27,6 @@ import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
-import Coal.ProtoLanguage.ProtoDefinition
 import Control.Monad.State (State)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (universeBi)
@@ -96,7 +96,7 @@ instance (Ord k, Data k, Data a, Data s) => TypeIndexed k (Expression a s (Type 
 instance (Ord k, Data t, Data k) => TypeIndexed k (Qualified t) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data a, Data k) => TypeIndexed k (ProtoDefinition a k (Type TypeIndex k)) where
+instance (Ord k, Data a, Data k) => TypeIndexed k (Definition a k (Type TypeIndex k)) where
   typeIndexesIn = Set.fromList . universeBi
 
 instance (Ord k, TypeIndexed k t) => TypeIndexed k (Scheme TypeIndex k t) where

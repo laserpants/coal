@@ -1,29 +1,29 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.ProtoTypeSystem.Kind.Unification (
-  ProtoKindUnifier (..),
+module Coal.TypeSystem.Kind.Unification (
+  KindUnifier (..),
   unifyKinds,
 )
 where
 
 import Coal.Language.Type.Kind (Kind (..))
-import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
-import Coal.ProtoTypeSystem.Kind.Substitution
+import Coal.TypeSystem.Kind.Error (KindError (..))
+import Coal.TypeSystem.Kind.Substitution
 import Control.Monad.Except (MonadError, throwError)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, member)
 import qualified Data.Set as Set
 
-newtype ProtoKindUnifier a = ProtoKindUnifier {protoOkindUnifierMonad :: Either ProtoKindError a}
+newtype KindUnifier a = KindUnifier {protoOkindUnifierMonad :: Either KindError a}
   deriving
     ( Functor
     , Applicative
     , Monad
-    , MonadError ProtoKindError
+    , MonadError KindError
     )
 
-unifyKinds :: Kind -> Kind -> ProtoKindUnifier ProtoKindSubstitution
+unifyKinds :: Kind -> Kind -> KindUnifier KindSubstitution
 unifyKinds (KArrow k1 k2) (KArrow k3 k4) = do
   sub1 <- unifyKinds k1 k3
   sub2 <- unifyKinds (protoOapplyKinds sub1 k2) (protoOapplyKinds sub1 k4)
@@ -35,9 +35,9 @@ unifyKinds k1 (KVariable k2) =
 unifyKinds k1 k2
   | k1 == k2 = pure mempty
   | otherwise =
-      throwError ProtoECannotUnifyKinds
+      throwError ECannotUnifyKinds
 
-bindKind :: Int -> Kind -> ProtoKindUnifier ProtoKindSubstitution
+bindKind :: Int -> Kind -> KindUnifier KindSubstitution
 bindKind n =
   \case
     KVariable k
@@ -45,9 +45,9 @@ bindKind n =
           pure mempty
     k
       | n `member` kindIdsIn k ->
-          throwError ProtoEInfiniteKind
+          throwError EInfiniteKind
       | otherwise ->
-          pure (ProtoKindSubstitution (Map.singleton n k))
+          pure (KindSubstitution (Map.singleton n k))
 
 kindIdsIn :: Kind -> Set Int
 kindIdsIn =

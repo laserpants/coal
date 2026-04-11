@@ -3,14 +3,14 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoLanguage.ProtoModule (
-  ProtoModule (..),
+module Coal.Language.Module (
+  Module (..),
   ModuleExportList (..),
 ) where
 
+import Coal.Language.Definition (Definition (..))
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Path (Path)
-import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Data.Data (Data, Typeable)
 
 data ModuleExportList a
@@ -25,10 +25,10 @@ data ModuleExportList a
     , Typeable
     )
 
-data ProtoModule a k t = ProtoModule
+data Module a k t = Module
   { protoOmodulePath :: Path
   , protoOmoduleExportList :: ModuleExportList a
-  , protoOmoduleDefinitions :: [ProtoDefinition a k t]
+  , protoOmoduleDefinitions :: [Definition a k t]
   }
   deriving
     ( Show

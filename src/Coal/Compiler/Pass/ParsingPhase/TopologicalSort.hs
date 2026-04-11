@@ -6,16 +6,16 @@
 module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
 import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoBuild
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (SCC (..), stronglyConnComp)
@@ -26,10 +26,10 @@ import qualified Data.Set as Set
 import Data.Tuple.Extra (second)
 import Extras (Name, concatForM, for, forM_)
 
-passTopologicalSort :: (Monad m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passTopologicalSort :: (Monad m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passTopologicalSort = Pass{runPass = pass}
 
-pass :: (Monad m) => [BuildEnvelope (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (ProtoModule Metadata () ())]
+pass :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 pass units = do
   unless ("Main" `elem` names) $ do
     tellErrors [NoModuleMain]
@@ -46,7 +46,7 @@ pass units = do
  where
   names = Set.fromList (envelopePathName <$> units)
 
-isCyclicSCC :: SCC (BuildEnvelope (ProtoModule Metadata () ())) -> Bool
+isCyclicSCC :: SCC (BuildEnvelope (Module Metadata () ())) -> Bool
 isCyclicSCC =
   \case
     CyclicSCC _ ->
@@ -54,7 +54,7 @@ isCyclicSCC =
     _ ->
       False
 
-getModulesFromSCC :: SCC (BuildEnvelope (ProtoModule Metadata () ())) -> [BuildEnvelope (ProtoModule Metadata () ())]
+getModulesFromSCC :: SCC (BuildEnvelope (Module Metadata () ())) -> [BuildEnvelope (Module Metadata () ())]
 getModulesFromSCC =
   \case
     AcyclicSCC u ->
@@ -62,7 +62,7 @@ getModulesFromSCC =
     CyclicSCC units ->
       units
 
-unitDependencies :: BuildEnvelope (ProtoModule Metadata () ()) -> [(Metadata, Path)]
+unitDependencies :: BuildEnvelope (Module Metadata () ()) -> [(Metadata, Path)]
 unitDependencies =
   \case
     BSource m ->
@@ -70,8 +70,8 @@ unitDependencies =
     BCached b ->
       (mempty,) <$> protoObuildDependencies b
 
-dependencies :: (Monoid a) => ProtoModule a k t -> [(a, Path)]
-dependencies (ProtoModule p _ defs)
+dependencies :: (Monoid a) => Module a k t -> [(a, Path)]
+dependencies (Module p _ defs)
   | principalPath p `elem` embeddedPaths = imported
   | otherwise = imported <> extra
  where
@@ -82,17 +82,17 @@ dependencies (ProtoModule p _ defs)
     ]
 
 -- TODO: move
-importPath :: ProtoDefinition a k t -> Maybe (a, Path)
+importPath :: Definition a k t -> Maybe (a, Path)
 importPath =
   \case
-    ProtoDImport loc p _ ->
+    DImport loc p _ ->
       Just (loc, p)
-    ProtoDNamespaceImport loc p ->
+    DNamespaceImport loc p ->
       Just (loc, p)
     _ ->
       Nothing
 
-collectEdges :: (Monad m) => Set Name -> BuildEnvelope (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (ProtoModule Metadata () ()), Name, [Name])
+collectEdges :: (Monad m) => Set Name -> BuildEnvelope (Module Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()), Name, [Name])
 collectEdges names unit = do
   unitDependencies' <-
     concatForM deps $

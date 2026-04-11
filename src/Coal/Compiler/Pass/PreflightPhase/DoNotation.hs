@@ -13,18 +13,18 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
+import Coal.Language.Definition
+import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
-passDoNotation :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passDoNotation :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passDoNotation = mapPass $ Pass{runPass = traverse impl}
 
-impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
+impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 impl = desugarDoNotation
 
 class TransformContext e where
@@ -33,71 +33,71 @@ class TransformContext e where
 instance (TransformContext a) => TransformContext (Maybe a) where
   desugarDoNotation = traverse desugarDoNotation
 
-instance (Data a, Monoid a) => TransformContext (ProtoModule a () ()) where
+instance (Data a, Monoid a) => TransformContext (Module a () ()) where
   desugarDoNotation =
     \case
-      ProtoModule{..} -> do
+      Module{..} -> do
         newModuleDefinitions <- traverse desugarDoNotation protoOmoduleDefinitions
         return $
-          ProtoModule
+          Module
             { protoOmoduleDefinitions = newModuleDefinitions
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (ProtoDefinition a () ()) where
+instance (Data a, Monoid a) => TransformContext (Definition a () ()) where
   desugarDoNotation =
     \case
-      ProtoDFunction loc name def ->
-        ProtoDFunction loc name <$> desugarDoNotation def
-      ProtoDLet loc name def ->
-        ProtoDLet loc name <$> desugarDoNotation def
-      ProtoDInstance loc def ->
-        ProtoDInstance loc <$> desugarDoNotation def
-      ProtoDFold loc name def ->
-        ProtoDFold loc name <$> desugarDoNotation def
+      DFunction loc name def ->
+        DFunction loc name <$> desugarDoNotation def
+      DLet loc name def ->
+        DLet loc name <$> desugarDoNotation def
+      DInstance loc def ->
+        DInstance loc <$> desugarDoNotation def
+      DFold loc name def ->
+        DFold loc name <$> desugarDoNotation def
       o ->
         pure o
 
-instance (Data a, Monoid a) => TransformContext (ProtoInstanceDefinition a () ()) where
+instance (Data a, Monoid a) => TransformContext (InstanceDefinition a () ()) where
   desugarDoNotation =
     \case
-      ProtoInstanceDefinition{..} -> do
+      InstanceDefinition{..} -> do
         newInstanceDefinitionImplementations <- traverse desugarDoNotation protoOinstanceDefinitionImplementations
         return $
-          ProtoInstanceDefinition
+          InstanceDefinition
             { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (ProtoFoldDefinition a () ()) where
+instance (Data a, Monoid a) => TransformContext (FoldDefinition a () ()) where
   desugarDoNotation =
     \case
-      ProtoFoldDefinition{..} -> do
+      FoldDefinition{..} -> do
         newFoldDefinitionClauses <- traverse desugarDoNotation protoOfoldDefinitionClauses
         return $
-          ProtoFoldDefinition
+          FoldDefinition
             { protoOfoldDefinitionClauses = newFoldDefinitionClauses
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (ProtoFunctionDefinition a () ()) where
+instance (Data a, Monoid a) => TransformContext (FunctionDefinition a () ()) where
   desugarDoNotation =
     \case
-      ProtoFunctionDefinition{..} -> do
+      FunctionDefinition{..} -> do
         newFunctionDefinitionExpression <- desugarDoNotation protoOfunctionDefinitionExpression
         return $
-          ProtoFunctionDefinition
+          FunctionDefinition
             { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (ProtoLetDefinition a () ()) where
+instance (Data a, Monoid a) => TransformContext (LetDefinition a () ()) where
   desugarDoNotation =
     \case
-      ProtoLetDefinition{..} -> do
+      LetDefinition{..} -> do
         newLetDefinitionExpression <- desugarDoNotation protoOletDefinitionExpression
         return $
-          ProtoLetDefinition
+          LetDefinition
             { protoOletDefinitionExpression = newLetDefinitionExpression
             , ..
             }

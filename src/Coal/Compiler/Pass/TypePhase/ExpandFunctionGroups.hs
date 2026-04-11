@@ -12,20 +12,20 @@ import Coal.AST.Shorthand (matchE, tupleE, tupleP, varE, varP)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..))
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..))
 import Coal.Language.Pattern
 import Coal.Language.Trait (Qualified (..))
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Trans (lift)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Name)
 import TextShow (showt)
 
-passExpandFunctionGroups :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind ()) (ProtoModule Metadata Kind ())
+passExpandFunctionGroups :: (Monad m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
 passExpandFunctionGroups = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind () -> CompilerT Metadata m (ProtoModule Metadata Kind ())
+pass :: (Monad m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 pass modul = do
   -- withCurrentModuleC expandFunctionGroups
   setCurrentModuleC modul
@@ -40,27 +40,27 @@ instance (FunctionGroupsTransform e) => FunctionGroupsTransform [e] where
 instance (FunctionGroupsTransform e) => FunctionGroupsTransform (NonEmpty e) where
   expandFunctionGroups = traverse expandFunctionGroups
 
-instance FunctionGroupsTransform (ProtoModule Metadata Kind ()) where
+instance FunctionGroupsTransform (Module Metadata Kind ()) where
   expandFunctionGroups =
     \case
-      ProtoModule{..} -> do
+      Module{..} -> do
         newDefinitions <- traverse expandGroups protoOmoduleDefinitions
         return $
-          ProtoModule
+          Module
             { protoOmoduleDefinitions = concat newDefinitions
             , ..
             }
 
 -- TODO: annotations
-expandGroups :: (Monad m) => ProtoDefinition Metadata Kind () -> CompilerT Metadata m [ProtoDefinition Metadata Kind ()]
+expandGroups :: (Monad m) => Definition Metadata Kind () -> CompilerT Metadata m [Definition Metadata Kind ()]
 expandGroups =
   \case
-    ProtoDFunctionGroup loc name defs@(firstDef : _) ->
+    DFunctionGroup loc name defs@(firstDef : _) ->
       return
-        [ ProtoDLet
+        [ DLet
             loc
             name
-            ProtoLetDefinition
+            LetDefinition
               { protoOletDefinitionMetadata = loc
               , protoOletDefinitionAnnotation = Nothing
               , protoOletDefinitionType = With [] ()
@@ -69,15 +69,15 @@ expandGroups =
               }
         ]
      where
-      ProtoFunctionDefinition{..} = firstDef
+      FunctionDefinition{..} = firstDef
       ns = NonEmpty.fromList [1 .. length protoOfunctionDefinitionPatterns]
       args = (<>) "$arg_" . showt <$> ns
-    ProtoDInstance loc ProtoInstanceDefinition{..} -> do
+    DInstance loc InstanceDefinition{..} -> do
       newImplementations <- traverse expandGroups protoOinstanceDefinitionImplementations
       return
-        [ ProtoDInstance
+        [ DInstance
             loc
-            ProtoInstanceDefinition
+            InstanceDefinition
               { protoOinstanceDefinitionImplementations = concat newImplementations
               , ..
               }
@@ -85,10 +85,10 @@ expandGroups =
     o ->
       pure [o]
 
-clauses :: (Monoid a) => [ProtoFunctionDefinition a k ()] -> NonEmpty (Clause a k ())
+clauses :: (Monoid a) => [FunctionDefinition a k ()] -> NonEmpty (Clause a k ())
 clauses defs =
   case [ EClause a (pat ps) (CPlain mempty [] e :| [])
-       | ProtoFunctionDefinition a _ _ ps e <- defs
+       | FunctionDefinition a _ _ ps e <- defs
        ] of
     c : cs ->
       c :| cs

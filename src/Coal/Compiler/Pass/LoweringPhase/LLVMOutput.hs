@@ -10,13 +10,13 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build
 import Coal.Compiler.Build.Cache (writeBuildFile)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoBuild
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Debug (writeDebugFile)
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
@@ -99,7 +99,7 @@ irOutput pb CompilerConfig{..} tmpDir = do
 
       bs <- runLLVM tmpDir file
       pure (fmap (name,) bs)
-    BCached ProtoBuild{..} ->
+    BCached Build{..} ->
       pure (Right (principalPath protoObuildPath, fromJust protoObuildBitcode))
 
 runLLVM :: (MonadIO m) => FilePath -> FilePath -> CompilerT Metadata m (Either SomeException ByteString)

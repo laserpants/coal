@@ -3,8 +3,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.ProtoTypeSystem.Parameterized (
-  ProtoParameterized (..),
+module Coal.TypeSystem.Parameterized (
+  Parameterized (..),
   ToIndexed (..),
   replaceParamInScheme,
 ) where
@@ -79,16 +79,16 @@ instance ToIndexed (Parameter Kind) (TypeIndex Kind) where
           Just index ->
             pure index
 
-class ProtoParameterized p where
+class Parameterized p where
   protoOinstantiateTypeIndexes :: (MonadState s m, Supply s) => p -> m [(Name, TypeIndex Kind)]
 
-instance (ProtoParameterized p) => ProtoParameterized [p] where
+instance (Parameterized p) => Parameterized [p] where
   protoOinstantiateTypeIndexes = concatMapM protoOinstantiateTypeIndexes
 
-instance (ProtoParameterized p) => ProtoParameterized (Set p) where
+instance (Parameterized p) => Parameterized (Set p) where
   protoOinstantiateTypeIndexes = protoOinstantiateTypeIndexes . Set.toList
 
-instance ProtoParameterized (Type Parameter Kind) where
+instance Parameterized (Type Parameter Kind) where
   protoOinstantiateTypeIndexes =
     \case
       TVariable p ->
@@ -108,7 +108,7 @@ instance ProtoParameterized (Type Parameter Kind) where
       TIntrinsic{} ->
         pure []
 
-instance ProtoParameterized (Row Parameter Kind (Type Parameter Kind)) where
+instance Parameterized (Row Parameter Kind (Type Parameter Kind)) where
   protoOinstantiateTypeIndexes =
     \case
       RVariable p ->
@@ -118,7 +118,7 @@ instance ProtoParameterized (Row Parameter Kind (Type Parameter Kind)) where
       RNil ->
         pure []
 
-instance ProtoParameterized (Parameter Kind) where
+instance Parameterized (Parameter Kind) where
   protoOinstantiateTypeIndexes (Parameter kind name) = do
     index <- supplied (TypeIndex kind)
     pure [(name, index)]

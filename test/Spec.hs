@@ -13,7 +13,7 @@ import Coal.Language.Type
 import Coal.Language.Type.Kind
 import Coal.Language.Type.Scheme
 import Coal.Language.TypeSpec
-import Coal.ProtoTypeSystem.Parameterized
+import Coal.TypeSystem.Parameterized
 import Coal.TypeSystemSpec (typeSystemSpec)
 import Control.Monad.Reader
 import Control.Monad.State

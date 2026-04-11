@@ -11,7 +11,7 @@ module Coal.Compiler.Builtin.Traits (
 ) where
 
 import Coal.Language
-import Coal.ProtoLanguage.ProtoDefinition
+import Coal.Language.Definition
 import qualified Data.Set as Set
 
 {-# INLINE numeric #-}
@@ -38,109 +38,109 @@ modulo = Trait "Modulo"
 semigroup :: ParameterizedType -> Trait ParameterizedType
 semigroup = Trait "Semigroup"
 
-builtinTraits :: (Monoid a) => [ProtoDefinition a () ()]
+builtinTraits :: (Monoid a) => [Definition a () ()]
 builtinTraits =
-  [ ProtoDTrait
+  [ DTrait
       mempty
       "Numeric"
-      ( ProtoTraitDefinition
+      ( TraitDefinition
           mempty
           "Numeric"
           []
           (Parameter () "a")
-          [ ProtoTraitDefinitionInterfaceEntry
+          [ TraitDefinitionInterfaceEntry
               "from_int32"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a"))
-          , ProtoTraitDefinitionInterfaceEntry
+          , TraitDefinitionInterfaceEntry
               "from_int64"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
-          , ProtoTraitDefinitionInterfaceEntry
+          , TraitDefinitionInterfaceEntry
               "from_bignum"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a")
               )
-          , ProtoTraitDefinitionInterfaceEntry
+          , TraitDefinitionInterfaceEntry
               "negate"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
               )
-          , ProtoTraitDefinitionInterfaceEntry
+          , TraitDefinitionInterfaceEntry
               "(+)"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
               )
-          , ProtoTraitDefinitionInterfaceEntry
+          , TraitDefinitionInterfaceEntry
               "(-)"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
               )
-          , ProtoTraitDefinitionInterfaceEntry
+          , TraitDefinitionInterfaceEntry
               "(*)"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
               )
           ]
       )
-  , ProtoDTrait
+  , DTrait
       mempty
       "Ordered"
-      ( ProtoTraitDefinition
+      ( TraitDefinition
           mempty
           "Ordered"
           []
           (Parameter () "a")
-          [ ProtoTraitDefinitionInterfaceEntry
+          [ TraitDefinitionInterfaceEntry
               "compare"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
               )
           ]
       )
-  , ProtoDTrait
+  , DTrait
       mempty
       "Comparable"
-      ( ProtoTraitDefinition
+      ( TraitDefinition
           mempty
           "Comparable"
           []
           (Parameter () "a")
-          [ ProtoTraitDefinitionInterfaceEntry
+          [ TraitDefinitionInterfaceEntry
               "(==)"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
               )
           ]
       )
-  , ProtoDTrait
+  , DTrait
       mempty
       "Divisible"
-      ( ProtoTraitDefinition
+      ( TraitDefinition
           mempty
           "Divisible"
           []
           (Parameter () "a")
-          [ ProtoTraitDefinitionInterfaceEntry
+          [ TraitDefinitionInterfaceEntry
               "(/)"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
               )
           ]
       )
-  , ProtoDTrait
+  , DTrait
       mempty
       "Modulo"
-      ( ProtoTraitDefinition
+      ( TraitDefinition
           mempty
           "Modulo"
           []
           (Parameter () "a")
-          [ ProtoTraitDefinitionInterfaceEntry
+          [ TraitDefinitionInterfaceEntry
               "(%)"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
               )
           ]
       )
-  , ProtoDTrait
+  , DTrait
       mempty
       "Semigroup"
-      ( ProtoTraitDefinition
+      ( TraitDefinition
           mempty
           "Semigroup"
           []
           (Parameter () "a")
-          [ ProtoTraitDefinitionInterfaceEntry
+          [ TraitDefinitionInterfaceEntry
               "(<>)"
               ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
               )

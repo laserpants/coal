@@ -10,16 +10,16 @@ module Coal.Compiler.Aliases (AliasTransform (..)) where
 import Coal.Common.Environment (forMEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..), supplied)
+import Coal.Compiler.Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Environment
-import Coal.Compiler.ProtoBuild
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
-import Coal.ProtoTypeSystem.Parameterized
+import Coal.TypeSystem.Parameterized
 import Coal.TypeSystem.Substitution (applyT)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -59,24 +59,24 @@ instance (AliasTransform t) => AliasTransform (Qualified t) where
 instance (AliasTransform t) => AliasTransform (Row o k t) where
   aliasTransform = traverse aliasTransform
 
-instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoModule e a t) where
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (Module e a t) where
   aliasTransform =
     \case
-      ProtoModule{..} -> do
-        m <- ProtoModule protoOmodulePath protoOmoduleExportList <$> aliasTransform protoOmoduleDefinitions
+      Module{..} -> do
+        m <- Module protoOmodulePath protoOmoduleExportList <$> aliasTransform protoOmoduleDefinitions
         updateNames
 
         tempprotoOupdateCurrentBuildC $
-          \ProtoBuild{..} -> do
+          \Build{..} -> do
             newDataConstructors <- forMEnvironment protoObuildDataConstructors aliasTransform
             return
-              ProtoBuild
+              Build
                 { protoObuildDataConstructors = newDataConstructors
                 , ..
                 }
 
-        ProtoBuild{..} <- protoOgetCurrentBuildC
-        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath protoOmodulePath)) (toStrict $ pShowNoColor $ ProtoBuild{..})
+        Build{..} <- protoOgetCurrentBuildC
+        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath protoOmodulePath)) (toStrict $ pShowNoColor $ Build{..})
         liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath protoOmodulePath)) (toStrict $ pShowNoColor $ protoObuildNames)
 
         pure m
@@ -84,17 +84,17 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
 updateNames :: (MonadIO m, Show a) => CompilerT a m ()
 updateNames =
   tempprotoOupdateCurrentBuildC $
-    \build@ProtoBuild{..} ->
+    \build@Build{..} ->
       flip execStateT build $ do
         forM_ (concat $ Environment.elems protoObuildNames) $
           \case
-            ProtoNName name s -> do
+            NName name s -> do
               newScheme <- lift $ aliasTransform s
-              modify (replaceBuildNameEntry (ProtoNName name newScheme))
+              modify (replaceBuildNameEntry (NName name newScheme))
             _ ->
               pure ()
 
-tempprotoOupdateBuildC :: (Monad m) => Path -> (ProtoBuild a -> CompilerT a m (ProtoBuild a)) -> CompilerT a m ()
+tempprotoOupdateBuildC :: (Monad m) => Path -> (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
 tempprotoOupdateBuildC path f = do
   maybeBuild <- protoOgetBuildC path
   case maybeBuild of
@@ -104,75 +104,75 @@ tempprotoOupdateBuildC path f = do
       newBuild <- f build
       modify (overCompilerModules (Environment.insert (principalPath path) newBuild))
 
-tempprotoOupdateCurrentBuildC :: (Monad m) => (ProtoBuild a -> CompilerT a m (ProtoBuild a)) -> CompilerT a m ()
+tempprotoOupdateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
 tempprotoOupdateCurrentBuildC f = do
   CompilerState{..} <- get
   tempprotoOupdateBuildC protoOcompilerCurrentPath f
 
-instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoDefinition e a t) where
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (Definition e a t) where
   aliasTransform =
     \case
-      ProtoDFunction loc name def ->
-        ProtoDFunction loc name <$> aliasTransform def
-      ProtoDLet loc name def ->
-        ProtoDLet loc name <$> aliasTransform def
-      ProtoDInstance loc def ->
-        ProtoDInstance loc <$> aliasTransform def
-      ProtoDType loc name def ->
-        ProtoDType loc name <$> aliasTransform def
-      ProtoDTypeAlias loc name def ->
-        ProtoDTypeAlias loc name <$> aliasTransform def
+      DFunction loc name def ->
+        DFunction loc name <$> aliasTransform def
+      DLet loc name def ->
+        DLet loc name <$> aliasTransform def
+      DInstance loc def ->
+        DInstance loc <$> aliasTransform def
+      DType loc name def ->
+        DType loc name <$> aliasTransform def
+      DTypeAlias loc name def ->
+        DTypeAlias loc name <$> aliasTransform def
       o ->
         pure o
 
-instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoFunctionDefinition e a t) where
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (FunctionDefinition e a t) where
   aliasTransform =
     \case
-      ProtoFunctionDefinition{..} ->
-        ProtoFunctionDefinition protoOfunctionDefinitionMetadata
+      FunctionDefinition{..} ->
+        FunctionDefinition protoOfunctionDefinitionMetadata
           <$> aliasTransform protoOfunctionDefinitionAnnotation
           <*> aliasTransform protoOfunctionDefinitionType
           <*> aliasTransform protoOfunctionDefinitionPatterns
           <*> aliasTransform protoOfunctionDefinitionExpression
 
-instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoLetDefinition e a t) where
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (LetDefinition e a t) where
   aliasTransform =
     \case
-      ProtoLetDefinition{..} ->
-        ProtoLetDefinition protoOletDefinitionMetadata
+      LetDefinition{..} ->
+        LetDefinition protoOletDefinitionMetadata
           <$> aliasTransform protoOletDefinitionAnnotation
           <*> aliasTransform protoOletDefinitionType
           <*> aliasTransform protoOletDefinitionExpression
 
-instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoInstanceDefinition e a t) where
+instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (InstanceDefinition e a t) where
   aliasTransform =
     \case
-      ProtoInstanceDefinition{..} -> do
+      InstanceDefinition{..} -> do
         newInstanceDefinitionImplementations <- aliasTransform protoOinstanceDefinitionImplementations
         pure $
-          ProtoInstanceDefinition
+          InstanceDefinition
             { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
 
-instance (AliasTransform (Type Parameter a)) => AliasTransform (ProtoTypeDefinition e a t) where
+instance (AliasTransform (Type Parameter a)) => AliasTransform (TypeDefinition e a t) where
   aliasTransform =
     \case
-      ProtoTypeDefinition{..} -> do
+      TypeDefinition{..} -> do
         newprotoOTypeDefinitionConstructors <- aliasTransform protoOtypeDefinitionConstructors
         pure $
-          ProtoTypeDefinition
+          TypeDefinition
             { protoOtypeDefinitionConstructors = newprotoOTypeDefinitionConstructors
             , ..
             }
 
-instance (AliasTransform (Type Parameter k)) => AliasTransform (ProtoAliasDefinition a k) where
+instance (AliasTransform (Type Parameter k)) => AliasTransform (AliasDefinition a k) where
   aliasTransform =
     \case
-      ProtoAliasDefinition{..} -> do
+      AliasDefinition{..} -> do
         newprotoOAliasDefinitionType <- aliasTransform protoOaliasDefinitionType
         pure $
-          ProtoAliasDefinition
+          AliasDefinition
             { protoOaliasDefinitionType = newprotoOAliasDefinitionType
             , ..
             }
@@ -270,13 +270,13 @@ instance (AliasTransform t) => AliasTransform (Scheme o k t) where
 instance AliasTransform () where
   aliasTransform _ = pure ()
 
-instance AliasTransform (ProtoDataConstructorEntry a) where
+instance AliasTransform (DataConstructorEntry a) where
   aliasTransform =
     \case
-      ProtoDataConstructorEntry{..} -> do
+      DataConstructorEntry{..} -> do
         newDataConstructorEntryConstructor <- aliasTransform protoOdataConstructorEntryConstructor
         return
-          ProtoDataConstructorEntry
+          DataConstructorEntry
             { protoOdataConstructorEntryConstructor = newDataConstructorEntryConstructor
             , ..
             }
@@ -295,7 +295,7 @@ aliasTransformTypeApplication2 k _ t ts =
 
 lookupAlias :: (MonadIO m, Show a) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a m (Type Parameter Kind)
 lookupAlias t ts name = do
-  ProtoBuild{..} <- protoOgetCurrentBuildC
+  Build{..} <- protoOgetCurrentBuildC
   -- env <- asks compilerAliasEnvironment
   case Environment.lookup name protoObuildAliases of
     Nothing ->
@@ -304,13 +304,13 @@ lookupAlias t ts name = do
           TApplication k <$> aliasTransform t1 <*> aliasTransform t2
         _ ->
           pure t
-    Just ProtoAliasEntry{..} -> do
+    Just AliasEntry{..} -> do
       let t1 = foldr (uncurry substituteAlias) protoOaliasEntryType (protoOaliasEntryParams `zip` ts)
       TAlias name ts <$> aliasTransform t1
 
 lookupAlias2 :: (MonadIO m, Show a) => Type TypeIndex Kind -> [Type TypeIndex Kind] -> Name -> CompilerT a m (Type TypeIndex Kind)
 lookupAlias2 t ts name = do
-  ProtoBuild{..} <- protoOgetCurrentBuildC
+  Build{..} <- protoOgetCurrentBuildC
   -- env <- asks compilerAliasEnvironment
   case Environment.lookup name protoObuildAliases of
     Nothing ->
@@ -319,7 +319,7 @@ lookupAlias2 t ts name = do
           TApplication k <$> aliasTransform t1 <*> aliasTransform t2
         _ ->
           pure t
-    Just ProtoAliasEntry{..} -> do
+    Just AliasEntry{..} -> do
       ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) protoOaliasEntryParams
       let abc = (parameterName <$> protoOaliasEntryParams) `zip` ixs
           sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)

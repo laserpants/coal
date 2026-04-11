@@ -5,16 +5,16 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoLanguage.ProtoDefinition (
-  ProtoDefinition (..),
-  ProtoTypeDefinition (..),
-  ProtoFunctionDefinition (..),
-  ProtoFoldDefinition (..),
-  ProtoLetDefinition (..),
-  ProtoTraitDefinition (..),
-  ProtoInstanceDefinition (..),
-  ProtoAliasDefinition (..),
-  ProtoTraitDefinitionInterfaceEntry (..),
+module Coal.Language.Definition (
+  Definition (..),
+  TypeDefinition (..),
+  FunctionDefinition (..),
+  FoldDefinition (..),
+  LetDefinition (..),
+  TraitDefinition (..),
+  InstanceDefinition (..),
+  AliasDefinition (..),
+  TraitDefinitionInterfaceEntry (..),
   instanceDefinitionTrait,
 ) where
 
@@ -33,7 +33,7 @@ import Data.List.NonEmpty (NonEmpty)
 import Extras (Name)
 import GHC.Generics (Generic)
 
-data ProtoTypeDefinition a k t = ProtoTypeDefinition
+data TypeDefinition a k t = TypeDefinition
   { protoOtypeDefinitionParameters :: [Parameter k]
   , protoOtypeDefinitionConstructors :: [DataConstructor Parameter k (Type Parameter k)]
   }
@@ -50,9 +50,9 @@ data ProtoTypeDefinition a k t = ProtoTypeDefinition
     , Generic
     )
 
-instance (Binary a, Binary k, Binary t) => Binary (ProtoTypeDefinition a k t)
+instance (Binary a, Binary k, Binary t) => Binary (TypeDefinition a k t)
 
-data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
+data FunctionDefinition a k t = FunctionDefinition
   { protoOfunctionDefinitionMetadata :: a
   , protoOfunctionDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
   , protoOfunctionDefinitionType :: Qualified t
@@ -72,9 +72,9 @@ data ProtoFunctionDefinition a k t = ProtoFunctionDefinition
     , Generic
     )
 
-instance (Binary a, Binary k, Binary t) => Binary (ProtoFunctionDefinition a k t)
+instance (Binary a, Binary k, Binary t) => Binary (FunctionDefinition a k t)
 
-data ProtoLetDefinition a k t = ProtoLetDefinition
+data LetDefinition a k t = LetDefinition
   { protoOletDefinitionMetadata :: a
   , protoOletDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
   , protoOletDefinitionType :: Qualified t
@@ -93,9 +93,9 @@ data ProtoLetDefinition a k t = ProtoLetDefinition
     , Generic
     )
 
-instance (Binary a, Binary k, Binary t) => Binary (ProtoLetDefinition a k t)
+instance (Binary a, Binary k, Binary t) => Binary (LetDefinition a k t)
 
-data ProtoFoldDefinition a k t = ProtoFoldDefinition
+data FoldDefinition a k t = FoldDefinition
   { protoOfoldDefinitionMetadata :: a
   , protoOfoldDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
   , protoOfoldDefinitionClauses :: NonEmpty (Clause a k t)
@@ -113,14 +113,14 @@ data ProtoFoldDefinition a k t = ProtoFoldDefinition
     , Generic
     )
 
-instance (Binary a, Binary k, Binary t) => Binary (ProtoFoldDefinition a k t)
+instance (Binary a, Binary k, Binary t) => Binary (FoldDefinition a k t)
 
-data ProtoTraitDefinition a k = ProtoTraitDefinition
+data TraitDefinition a k = TraitDefinition
   { protoOtraitDefinitionMetadata :: a
   , protoOtraitDefinitionTraitName :: Name
   , protoOtraitDefinitionConstraints :: [Trait (Parameter k)]
   , protoOtraitDefinitionParameter :: Parameter k
-  , protoOtraitDefinitionInterface :: [ProtoTraitDefinitionInterfaceEntry k]
+  , protoOtraitDefinitionInterface :: [TraitDefinitionInterfaceEntry k]
   }
   deriving
     ( Show
@@ -132,9 +132,9 @@ data ProtoTraitDefinition a k = ProtoTraitDefinition
     , Generic
     )
 
-instance (Binary a, Binary k) => Binary (ProtoTraitDefinition a k)
+instance (Binary a, Binary k) => Binary (TraitDefinition a k)
 
-data ProtoTraitDefinitionInterfaceEntry k = ProtoTraitDefinitionInterfaceEntry
+data TraitDefinitionInterfaceEntry k = TraitDefinitionInterfaceEntry
   { protoOtraitDefinitionInterfaceEntryName :: Name
   , protoOtraitDefinitionInterfaceEntryScheme :: Scheme Parameter k (Type Parameter k)
   }
@@ -148,14 +148,14 @@ data ProtoTraitDefinitionInterfaceEntry k = ProtoTraitDefinitionInterfaceEntry
     , Generic
     )
 
-instance (Binary k) => Binary (ProtoTraitDefinitionInterfaceEntry k)
+instance (Binary k) => Binary (TraitDefinitionInterfaceEntry k)
 
-data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
+data InstanceDefinition a k t = InstanceDefinition
   { protoOinstanceDefinitionMetadata :: a
   , protoOinstanceDefinitionTraitName :: Name
   , protoOinstanceDefinitionConstraints :: [Trait (Parameter k)]
   , protoOinstanceDefinitionType :: Type Parameter k
-  , protoOinstanceDefinitionImplementations :: [ProtoDefinition a k t]
+  , protoOinstanceDefinitionImplementations :: [Definition a k t]
   }
   deriving
     ( Show
@@ -170,13 +170,13 @@ data ProtoInstanceDefinition a k t = ProtoInstanceDefinition
     , Generic
     )
 
-instance (Binary a, Binary k, Binary t) => Binary (ProtoInstanceDefinition a k t)
+instance (Binary a, Binary k, Binary t) => Binary (InstanceDefinition a k t)
 
-instanceDefinitionTrait :: ProtoInstanceDefinition a Kind t -> Trait (Type Parameter Kind)
-instanceDefinitionTrait ProtoInstanceDefinition{..} =
+instanceDefinitionTrait :: InstanceDefinition a Kind t -> Trait (Type Parameter Kind)
+instanceDefinitionTrait InstanceDefinition{..} =
   Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
 
-data ProtoAliasDefinition a k = ProtoAliasDefinition
+data AliasDefinition a k = AliasDefinition
   { protoOaliasDefinitionParameters :: [Parameter k]
   , protoOaliasDefinitionType :: Type Parameter k
   }
@@ -190,29 +190,29 @@ data ProtoAliasDefinition a k = ProtoAliasDefinition
     , Generic
     )
 
-instance (Binary a, Binary k) => Binary (ProtoAliasDefinition a k)
+instance (Binary a, Binary k) => Binary (AliasDefinition a k)
 
-data ProtoDefinition a k t
+data Definition a k t
   = -- | Type definition
-    ProtoDType a Name (ProtoTypeDefinition a k t)
+    DType a Name (TypeDefinition a k t)
   | -- | Type alias
-    ProtoDTypeAlias a Name (ProtoAliasDefinition a k)
+    DTypeAlias a Name (AliasDefinition a k)
   | -- | Function definition
-    ProtoDFunction a Name (ProtoFunctionDefinition a k t)
+    DFunction a Name (FunctionDefinition a k t)
   | -- | Function
-    ProtoDFunctionGroup a Name [ProtoFunctionDefinition a k t]
+    DFunctionGroup a Name [FunctionDefinition a k t]
   | -- | Top-level fold
-    ProtoDFold a Name (ProtoFoldDefinition a k t)
+    DFold a Name (FoldDefinition a k t)
   | -- | Top-level let-binding
-    ProtoDLet a Name (ProtoLetDefinition a k t)
+    DLet a Name (LetDefinition a k t)
   | -- | Import statement
-    ProtoDImport a Path [Import a]
+    DImport a Path [Import a]
   | -- | Namespace (qualified) import
-    ProtoDNamespaceImport a Path
+    DNamespaceImport a Path
   | -- | Trait
-    ProtoDTrait a Name (ProtoTraitDefinition a k)
+    DTrait a Name (TraitDefinition a k)
   | -- | Trait instance
-    ProtoDInstance a (ProtoInstanceDefinition a k t)
+    DInstance a (InstanceDefinition a k t)
   deriving
     ( Show
     , Eq
@@ -226,4 +226,4 @@ data ProtoDefinition a k t
     , Generic
     )
 
-instance (Binary a, Binary k, Binary t) => Binary (ProtoDefinition a k t)
+instance (Binary a, Binary k, Binary t) => Binary (Definition a k t)

@@ -11,10 +11,10 @@ import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
-import Coal.Compiler.ProtoBuild
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Stack
-import Coal.Compiler.ProtoState
+import Coal.Compiler.State
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (lift, modify, put)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -107,12 +107,12 @@ example20 =
   , Con "Fez" [Lit (LBool False), Con "B" mempty]
   ]
 
-testEnv :: Environment (ProtoDataConstructorEntry Metadata)
+testEnv :: Environment (DataConstructorEntry Metadata)
 testEnv =
   Environment.fromList
     [
       ( "Cons"
-      , ProtoDataConstructorEntry
+      , DataConstructorEntry
           mempty
           "Cons"
           ( DataConstructor
@@ -124,7 +124,7 @@ testEnv =
       )
     ,
       ( "Nil"
-      , ProtoDataConstructorEntry
+      , DataConstructorEntry
           mempty
           "Nil"
           ( DataConstructor
@@ -136,7 +136,7 @@ testEnv =
       )
     ,
       ( "A"
-      , ProtoDataConstructorEntry
+      , DataConstructorEntry
           mempty
           "A"
           ( DataConstructor
@@ -148,7 +148,7 @@ testEnv =
       )
     ,
       ( "B"
-      , ProtoDataConstructorEntry
+      , DataConstructorEntry
           mempty
           "B"
           ( DataConstructor
@@ -160,7 +160,7 @@ testEnv =
       )
     ,
       ( "Fez"
-      , ProtoDataConstructorEntry
+      , DataConstructorEntry
           mempty
           "Fez"
           ( DataConstructor

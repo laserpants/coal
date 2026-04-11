@@ -16,7 +16,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
-import Coal.ProtoTypeSystem.Annotations
+import Coal.TypeSystem.Annotations
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Annotation (instantiateAnnotation)
@@ -41,7 +41,7 @@ lookupDataConstructor name = do
 --  case Environment.lookup name env of
 --    Nothing ->
 --      pure Nothing
---    Just (ProtoDataConstructorEntry _ _ ctor _) ->
+--    Just (DataConstructorEntry _ _ ctor _) ->
 --      pure (Just ctor)
 
 assertEqualityAssumptions :: a -> IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()

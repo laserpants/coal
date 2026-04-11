@@ -11,9 +11,9 @@ module Coal.Compiler.Error (
 import Coal.Language (IndexedType, Kind (..), Trait (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
-import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
 import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError)
+import Coal.TypeSystem.Kind.Error (KindError (..))
 import Data.Set (Set)
 import Extras (Name)
 
@@ -48,7 +48,7 @@ data CompilerError a
   | MissingTraitDefinition Name Name (ErrorLocation a)
   | UnexpectedTraitDefinition Name Name (ErrorLocation a)
   | MissingRequiredInstance Name IndexedType (ErrorLocation a)
-  | KindError ProtoKindError (ErrorLocation a)
+  | KindError KindError (ErrorLocation a)
   | OrPatternVariableMismatch (Set Name) (Set Name) (ErrorLocation a)
   deriving (Show, Eq)
 

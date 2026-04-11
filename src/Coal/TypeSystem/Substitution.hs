@@ -17,7 +17,7 @@ module Coal.TypeSystem.Substitution (
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Language
-import Coal.ProtoLanguage.ProtoDefinition
+import Coal.Language.Definition
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
@@ -113,13 +113,13 @@ instance (Data a, Data s) => Substitutable (Pattern a s IndexedType) where
 instance (Data a, Data s) => Substitutable (Expression a s IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (ProtoFunctionDefinition a Kind IndexedType) where
+instance (Data a) => Substitutable (FunctionDefinition a Kind IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (ProtoLetDefinition a Kind IndexedType) where
+instance (Data a) => Substitutable (LetDefinition a Kind IndexedType) where
   apply = transformBi . applyT
 
-instance (Data a) => Substitutable (ProtoDefinition a Kind IndexedType) where
+instance (Data a) => Substitutable (Definition a Kind IndexedType) where
   apply = transformBi . applyT
 
 instance (Data a, Data s) => Substitutable (Binding Expression a s IndexedType) where

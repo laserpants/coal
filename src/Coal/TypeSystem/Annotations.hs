@@ -3,10 +3,10 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.ProtoTypeSystem.Annotations where
+module Coal.TypeSystem.Annotations where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.Build.NameEntry
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Annotation.Error (TypeAnnotationError (..))
 import Coal.TypeSystem.Constraint.Generation.Context
@@ -42,7 +42,7 @@ protoOlookupTypeConstructor name = asks (Environment.lookup name . constraintsGe
 --  case Environment.lookup name env of
 --    Nothing ->
 --      pure Nothing
---    Just ProtoTypeConstructorEntry{..} ->
+--    Just TypeConstructorEntry{..} ->
 --      pure (Just protoOtypeConstructorEntryKind)
 
 indexTypeAnnotations :: (Show a, Monad m) => Type Parameter Kind -> AnnotationsT m a IndexedType

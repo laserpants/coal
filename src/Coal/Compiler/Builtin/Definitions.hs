@@ -11,19 +11,19 @@ import Coal.Compiler.Builtin.Functions (builtinFunctions)
 import Coal.Compiler.Builtin.Traits (builtinTraits)
 import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Language
+import Coal.Language.Definition
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name, for)
 
 {-# INLINE insertBuiltinDefinitions #-}
-insertBuiltinDefinitions :: (Monoid a) => [ProtoDefinition a () ()] -> [ProtoDefinition a () ()]
+insertBuiltinDefinitions :: (Monoid a) => [Definition a () ()] -> [Definition a () ()]
 insertBuiltinDefinitions = (builtinDefinitions <>)
 
 {-# INLINE insertExtraDefinitions #-}
-insertExtraDefinitions :: (Monoid a) => [ProtoDefinition a () ()] -> [ProtoDefinition a () ()]
+insertExtraDefinitions :: (Monoid a) => [Definition a () ()] -> [Definition a () ()]
 insertExtraDefinitions = (extraDefinitions <>)
 
 builtinFunctionNames :: [Name]
@@ -114,54 +114,54 @@ builtinTraitInstances =
   ]
 
 -- Needed to support do-notation
-extraDefinitions :: (Monoid a) => [ProtoDefinition a () ()]
+extraDefinitions :: (Monoid a) => [Definition a () ()]
 extraDefinitions =
-  [ ProtoDImport mempty (Path ["Coal", "Monad"]) [TypeImport mempty "Monad" ["bind"]]
-  , ProtoDImport mempty (Path ["Coal", "Applicative"]) [TypeImport mempty "Applicative" ["pure"]]
+  [ DImport mempty (Path ["Coal", "Monad"]) [TypeImport mempty "Monad" ["bind"]]
+  , DImport mempty (Path ["Coal", "Applicative"]) [TypeImport mempty "Applicative" ["pure"]]
   ]
 
-builtinDefinitions :: (Monoid a) => [ProtoDefinition a () ()]
+builtinDefinitions :: (Monoid a) => [Definition a () ()]
 builtinDefinitions =
-  [ ProtoDImport
+  [ DImport
       mempty
       (Path ["Builtin$"])
       (for (builtinFunctionNames <> builtinTraitInstances) (NameImport mempty))
-  , ProtoDType
+  , DType
       mempty
       "Ordering"
-      ( ProtoTypeDefinition
+      ( TypeDefinition
           []
           [ DataConstructor "LessThan" 0 (Forall mempty mempty (TConstructor () "Ordering"))
           , DataConstructor "GreaterThan" 0 (Forall mempty mempty (TConstructor () "Ordering"))
           , DataConstructor "EqualTo" 0 (Forall mempty mempty (TConstructor () "Ordering"))
           ]
       )
-  , ProtoDType
+  , DType
       mempty
       "Option"
-      ( ProtoTypeDefinition
+      ( TypeDefinition
           [Parameter () "a"]
           [ DataConstructor "Some" 1 (Forall (Set.fromList [Parameter () "a"]) mempty (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| mempty)))
           , DataConstructor "None" 0 (Forall (Set.fromList [Parameter () "a"]) mempty (applyTypeArgs () (TConstructor () "Option") (TVariable (Parameter () "a") :| mempty)))
           ]
       )
-  , ProtoDType
+  , DType
       mempty
       "Result"
-      ( ProtoTypeDefinition
+      ( TypeDefinition
           [Parameter () "a", Parameter () "b"]
           [ DataConstructor "Ok" 1 (Forall (Set.fromList [Parameter () "a"]) mempty (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
           , DataConstructor "Err" 1 (Forall (Set.fromList [Parameter () "b"]) mempty (TVariable (Parameter () "b") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
           ]
       )
-  , ProtoDType
+  , DType
       mempty
       "IO"
-      (ProtoTypeDefinition [Parameter () "a"] [])
-  , ProtoDType
+      (TypeDefinition [Parameter () "a"] [])
+  , DType
       mempty
       "Process"
-      ( ProtoTypeDefinition
+      ( TypeDefinition
           [Parameter () "a", Parameter () "v"]
           [ DataConstructor
               "Process"

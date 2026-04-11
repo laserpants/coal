@@ -17,10 +17,10 @@ import Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternEx
 import Coal.Compiler.Pass.TranslationPhase.Placeholders (passPlaceholders)
 import Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns)
 import Coal.Language (IndexedType, Kind)
-import Coal.ProtoLanguage.ProtoModule
+import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
 
-translationPhasePasses :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+translationPhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 translationPhasePasses =
   passNormalizeObjects
     --    >-> generateDebugArtifacts "NormalizeObjects"

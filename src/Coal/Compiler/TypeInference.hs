@@ -13,19 +13,19 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
+import Coal.Compiler.Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
-import Coal.Compiler.ProtoBuild
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
-import Coal.ProtoTypeSystem.Kind.Constraint.Generation
-import Coal.ProtoTypeSystem.Parameterized
 import Coal.TypeSystem
+import Coal.TypeSystem.Kind.Constraint.Generation
+import Coal.TypeSystem.Parameterized
 import Control.Monad.Except (MonadError (..), forM_)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (evalState, get, gets)
@@ -37,18 +37,18 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name)
 
-generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> CompilerT a m ()
+generateKindConstraints :: (Monad m) => Module a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do
   env <- moduleKindEnvironment modul
-  (_, result) <- runProtoKindConstraintsGen env (protoOemitKindConstraints modul)
+  (_, result) <- runKindConstraintsGen env (protoOemitKindConstraints modul)
   let (errors, constraints) = partitionEithers result
   protoOinsertKindConstraintsC constraints
   protoOcompilerReportKindConstraintsGenErrors errors
 
-class ProtoGenerateConstraints a c where
+class GenerateConstraints a c where
   protoOgenerateConstraints :: (Monad m) => c -> CompilerT a m ()
 
-instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind IndexedType) where
+instance (Data a, Show a) => GenerateConstraints a (Expression a Kind IndexedType) where
   protoOgenerateConstraints expr = do
     (asms1, cs1) <- protoOgenerateExpressionConstraints expr
     (asms2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints asms1
@@ -56,13 +56,13 @@ instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind Index
     protoOinsertAssumptionsC (apply sub asms2)
     protoOinsertConstraintsC (cs1 <> cs2)
 
-instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind IndexedType) where
+instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedType) where
   protoOgenerateConstraints =
     \case
-      ProtoDFunction
+      DFunction
         _
         name
-        ProtoFunctionDefinition
+        FunctionDefinition
           { protoOfunctionDefinitionMetadata = loc
           , protoOfunctionDefinitionType = With _ functionType
           , ..
@@ -88,10 +88,10 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                 protoOfunctionDefinitionExpression
               Just (With _ annotationType) ->
                 EAnnotation loc annotationType protoOfunctionDefinitionExpression
-      ProtoDLet
+      DLet
         _
         name
-        ProtoLetDefinition
+        LetDefinition
           { protoOletDefinitionMetadata = loc
           , protoOletDefinitionType = With _ letType
           , ..
@@ -116,30 +116,30 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
                 protoOletDefinitionExpression
               Just (With _ annotationType) ->
                 EAnnotation loc annotationType protoOletDefinitionExpression
-      ProtoDInstance _ ProtoInstanceDefinition{..} -> do
-        ProtoBuild{..} <- protoOgetCurrentBuildC
+      DInstance _ InstanceDefinition{..} -> do
+        Build{..} <- protoOgetCurrentBuildC
         case Environment.lookup protoOinstanceDefinitionTraitName protoObuildTraits of
           Nothing ->
             error "TODO"
-          Just ProtoTraitEntry{..} ->
+          Just TraitEntry{..} ->
             forM_ protoOinstanceDefinitionImplementations $
               \case
-                d@(ProtoDFunction loc name def) ->
+                d@(DFunction loc name def) ->
                   case Environment.lookup name protoOtraitEntryInterface of
                     Nothing ->
                       error "TODO"
                     Just sig -> do
                       s <- protoOtoIndexedScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType sig)
                       protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
-                      protoOgenerateConstraints $ ProtoDFunction loc (instanceLabel trait name) def
-                d@(ProtoDLet loc name def) ->
+                      protoOgenerateConstraints $ DFunction loc (instanceLabel trait name) def
+                d@(DLet loc name def) ->
                   case Environment.lookup name protoOtraitEntryInterface of
                     Nothing ->
                       error "TODO"
                     Just sig -> do
                       s <- protoOtoIndexedScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType sig)
                       protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
-                      protoOgenerateConstraints $ ProtoDLet loc (instanceLabel trait name) def
+                      protoOgenerateConstraints $ DLet loc (instanceLabel trait name) def
                 _ ->
                   pure ()
            where
@@ -170,7 +170,7 @@ protoOgenerateExpressionConstraints expr = do
 protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
 protoOrunConstraintsGen stack = do
   CompilerState{..} <- get
-  ProtoBuild{..} <- protoOgetCurrentBuildC
+  Build{..} <- protoOgetCurrentBuildC
   let (result, ConstraintsGenState{..}, output) =
         runConstraintsGenStack
           protoOcompilerSupply
@@ -276,12 +276,12 @@ type ConstraintsGenResult g o a t s =
   )
 
 ---- TODO: remove
--- tmpConvert1 :: DataConstructorEntry a -> DataConstructor TypeIndex Kind IndexedType -- ProtoDataConstructorEntry a
--- tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = v3 -- ProtoDataConstructorEntry v1 v2 v3 v4
+-- tmpConvert1 :: DataConstructorEntry a -> DataConstructor TypeIndex Kind IndexedType -- DataConstructorEntry a
+-- tmpConvert1 (DataConstructorEntry v1 v2 v3 v4) = v3 -- DataConstructorEntry v1 v2 v3 v4
 --
 ---- TODO: remove
--- tmpConvert2 :: TypeConstructorEntry a -> Kind -- ProtoTypeConstructorEntry a
--- tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- ProtoTypeConstructorEntry v1 v2 v3 v4
+-- tmpConvert2 :: TypeConstructorEntry a -> Kind -- TypeConstructorEntry a
+-- tmpConvert2 (TypeConstructorEntry v1 v2 v3 v4) = v3 -- TypeConstructorEntry v1 v2 v3 v4
 
 -- runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (ConstraintsGenResult a TypeIndex Kind IndexedType r)
 -- runConstraintsGen stack = do
@@ -325,7 +325,7 @@ protoOassumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a 
 protoOassumptionConstraints Assumption{..} = do
   names <- gets protoOcompilerNameStore
   pure $
-    case Environment.lookup (normalizedName assumptionName) names of
+    case Environment.lookup assumptionName names of
       Nothing ->
         Left Assumption{..}
       Just s ->
@@ -420,7 +420,7 @@ solveX = do
 --        Nothing ->
 --          -- TODO: Handle error
 --          error ("Missing trait: " <> Text.unpack trait)
---        Just (ProtoTraitEntry _ _ p@(Parameter k _) _ traitInfoEntries) ->
+--        Just (TraitEntry _ _ p@(Parameter k _) _ traitInfoEntries) ->
 --          forM_ ds $
 --            \d -> do
 --              case Environment.lookup (definitionName d) traitInfoEntries of

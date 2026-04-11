@@ -13,13 +13,13 @@ import Coal.Common.Name (isConstructor)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kind (..))
+import Coal.Language.Definition
 import Coal.Language.Expression.Binding (Binding (..))
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (MonadError (throwError), forM_, when)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
@@ -30,12 +30,12 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 
-passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passShadowingRule = mapPass $ Pass{runPass = traverse impl}
 
-impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
+impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 impl mm = do
-  --  let mm = toProtoModule [] m
+  --  let mm = toModule [] m
   detectShadowing mempty mm
 
 class RuleContext e where
@@ -143,49 +143,49 @@ instance (Data t) => RuleContext (Binding Expression Metadata () t) where
         names' <- addNames a (boundIn ps) names
         BFunction a n ps <$> detectShadowing names' e
 
-instance RuleContext (ProtoModule Metadata () ()) where
+instance RuleContext (Module Metadata () ()) where
   detectShadowing names =
     \case
-      ProtoModule{..} -> do
+      Module{..} -> do
         setCurrentPathC protoOmodulePath
         newModuleDefinitions <- detectShadowing names protoOmoduleDefinitions
         return $
-          ProtoModule
+          Module
             { protoOmoduleDefinitions = newModuleDefinitions
             , ..
             }
 
-instance RuleContext (ProtoDefinition Metadata () ()) where
+instance RuleContext (Definition Metadata () ()) where
   detectShadowing names =
     \case
-      ProtoDFunction loc name def -> do
+      DFunction loc name def -> do
         names' <- addNames loc (Set.singleton name) names
-        ProtoDFunction loc name <$> detectShadowing names' def
-      ProtoDLet loc name def -> do
+        DFunction loc name <$> detectShadowing names' def
+      DLet loc name def -> do
         names' <- addNames loc (Set.singleton name) names
-        ProtoDLet loc name <$> detectShadowing names' def
+        DLet loc name <$> detectShadowing names' def
       o ->
         pure o
 
-instance RuleContext (ProtoLetDefinition Metadata () ()) where
+instance RuleContext (LetDefinition Metadata () ()) where
   detectShadowing names =
     \case
-      ProtoLetDefinition{..} -> do
+      LetDefinition{..} -> do
         newLetDefinitionExpression <- detectShadowing names protoOletDefinitionExpression
         return $
-          ProtoLetDefinition
+          LetDefinition
             { protoOletDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
-instance RuleContext (ProtoFunctionDefinition Metadata () ()) where
+instance RuleContext (FunctionDefinition Metadata () ()) where
   detectShadowing names =
     \case
-      ProtoFunctionDefinition{..} -> do
+      FunctionDefinition{..} -> do
         names' <- addNames protoOfunctionDefinitionMetadata (boundIn protoOfunctionDefinitionPatterns) names
         newFunctionDefinitionExpression <- detectShadowing names' protoOfunctionDefinitionExpression
         return $
-          ProtoFunctionDefinition
+          FunctionDefinition
             { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }

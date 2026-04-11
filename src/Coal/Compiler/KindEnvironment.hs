@@ -6,40 +6,40 @@ module Coal.Compiler.KindEnvironment (moduleKindEnvironment) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.ProtoBuild
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
-import Coal.Compiler.ProtoState
+import Coal.Compiler.Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Stack
+import Coal.Compiler.State
+import Coal.Language.Definition
 import Coal.Language.HasKind (HasKind (..), foldKindOf)
+import Coal.Language.Module
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind (Kind (..))
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Applicative ((<|>))
 import Control.Monad.State (get)
 import Data.Maybe (fromMaybe)
 import Extras (Name, concatForM, forM, (<.>))
 
-moduleKindEnvironment :: (Monad m) => ProtoModule a Kind () -> CompilerT b m (Environment Kind)
-moduleKindEnvironment ProtoModule{..} = do
+moduleKindEnvironment :: (Monad m) => Module a Kind () -> CompilerT b m (Environment Kind)
+moduleKindEnvironment Module{..} = do
   res <- forM protoOmoduleDefinitions $
     \case
-      ProtoDTrait _ name ProtoTraitDefinition{..} ->
+      DTrait _ name TraitDefinition{..} ->
         pure
           [
             ( name
             , KArrow (kindOf protoOtraitDefinitionParameter) KTrait
             )
           ]
-      ProtoDType _ name ProtoTypeDefinition{..} ->
+      DType _ name TypeDefinition{..} ->
         pure
           [
             ( name
             , foldKindOf KType protoOtypeDefinitionParameters
             )
           ]
-      ProtoDTypeAlias _ name ProtoAliasDefinition{..} ->
+      DTypeAlias _ name AliasDefinition{..} ->
         pure
           [
             ( name
@@ -47,9 +47,9 @@ moduleKindEnvironment ProtoModule{..} = do
             )
           ]
       -- TODO: temp
-      ProtoDImport _ (Path ["Builtin$"]) items -> do
+      DImport _ (Path ["Builtin$"]) items -> do
         pure []
-      ProtoDImport _ path items -> do
+      DImport _ path items -> do
         importedModule <- importedBuild path
         concatForM items $
           \case
@@ -63,9 +63,9 @@ moduleKindEnvironment ProtoModule{..} = do
                   Just [(name, kind)]
             _ ->
               pure []
-      ProtoDNamespaceImport _ path -> do
+      DNamespaceImport _ path -> do
         let qualified name = principalPath path <.> name
-        importedModule@ProtoBuild{..} <- importedBuild path
+        importedModule@Build{..} <- importedBuild path
         ps1 <- concatForM (Environment.names protoObuildTypeConstructors) $
           \name ->
             pure $
@@ -96,34 +96,34 @@ nameKindPairs name maybeKind =
     kind <- maybeKind
     pure [(name, kind)]
 
-exports :: ProtoBuild a -> Name -> Bool
-exports ProtoBuild{..} name = name `elem` protoObuildExportedNames
+exports :: Build a -> Name -> Bool
+exports Build{..} name = name `elem` protoObuildExportedNames
 
-typeConstructorKind :: Name -> ProtoBuild a -> Maybe Kind
-typeConstructorKind name ProtoBuild{..} =
+typeConstructorKind :: Name -> Build a -> Maybe Kind
+typeConstructorKind name Build{..} =
   case Environment.lookup name protoObuildTypeConstructors of
     Nothing ->
       Nothing
-    Just ProtoTypeConstructorEntry{..} ->
+    Just TypeConstructorEntry{..} ->
       Just protoOtypeConstructorEntryKind
 
-traitKind :: Name -> ProtoBuild a -> Maybe Kind
-traitKind name ProtoBuild{..} =
+traitKind :: Name -> Build a -> Maybe Kind
+traitKind name Build{..} =
   case Environment.lookup name protoObuildTraits of
     Nothing ->
       Nothing
-    Just ProtoTraitEntry{..} ->
+    Just TraitEntry{..} ->
       Just (KArrow (kindOf protoOtraitEntryParameter) KTrait)
 
-aliasKind :: Name -> ProtoBuild a -> Maybe Kind
-aliasKind name ProtoBuild{..} =
+aliasKind :: Name -> Build a -> Maybe Kind
+aliasKind name Build{..} =
   case Environment.lookup name protoObuildAliases of
     Nothing ->
       Nothing
-    Just ProtoAliasEntry{..} ->
+    Just AliasEntry{..} ->
       Just (kindOf protoOaliasEntryType)
 
-importedBuild :: (Monad m) => Path -> CompilerT a m (ProtoBuild a)
+importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
 importedBuild path = do
   CompilerState{..} <- get
   case Environment.lookup (principalPath path) protoOcompilerModules of

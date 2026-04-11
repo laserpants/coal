@@ -13,8 +13,8 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
+import Coal.Language.Definition
+import Coal.Language.Module
 import Control.Monad.Trans (lift)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
@@ -22,10 +22,10 @@ import Data.List.NonEmpty (NonEmpty (..), tails)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Map, traverseM)
 
-passExpandGuards :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+passExpandGuards :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandGuards = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
+pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass = bork
 
 trivial :: Clause a Kind t -> Bool
@@ -71,30 +71,30 @@ instance (ExpandGuards a) => ExpandGuards (Map k a) where
 instance (ExpandGuards a) => ExpandGuards (Maybe a) where
   expandGuards = traverseM expandGuards
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 bork =
   \case
-    ProtoModule{..} -> do
+    Module{..} -> do
       newModuleDefinitions <- traverse fnork protoOmoduleDefinitions
       return $
-        ProtoModule
+        Module
           { protoOmoduleDefinitions = newModuleDefinitions
           , ..
           }
 
-fnork :: (Monad m) => ProtoDefinition Metadata Kind IndexedType -> CompilerT Metadata m (ProtoDefinition Metadata Kind IndexedType)
+fnork :: (Monad m) => Definition Metadata Kind IndexedType -> CompilerT Metadata m (Definition Metadata Kind IndexedType)
 fnork =
   \case
-    ProtoDFunction loc name def -> do
-      ProtoDFunction loc name <$> transformBiM expandExpression def
-    ProtoDLet loc name def ->
-      ProtoDLet loc name <$> transformBiM expandExpression def
-    ProtoDInstance loc ProtoInstanceDefinition{..} -> do
+    DFunction loc name def -> do
+      DFunction loc name <$> transformBiM expandExpression def
+    DLet loc name def ->
+      DLet loc name <$> transformBiM expandExpression def
+    DInstance loc InstanceDefinition{..} -> do
       newInstanceDefinitionImplementations <- traverse fnork protoOinstanceDefinitionImplementations
       return $
-        ProtoDInstance
+        DInstance
           loc
-          ProtoInstanceDefinition
+          InstanceDefinition
             { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }

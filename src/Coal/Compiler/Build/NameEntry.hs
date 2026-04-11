@@ -5,14 +5,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.ProtoBuild.ProtoNameEntry (
-  ProtoDataConstructorEntry (..),
-  ProtoTypeConstructorEntry (..),
-  ProtoTraitEntry (..),
-  ProtoInstanceEntry (..),
-  ProtoAliasEntry (..),
-  ProtoNameEntry (..),
-  ProtoHasName (..),
+module Coal.Compiler.Build.NameEntry (
+  DataConstructorEntry (..),
+  TypeConstructorEntry (..),
+  TraitEntry (..),
+  InstanceEntry (..),
+  AliasEntry (..),
+  NameEntry (..),
+  HasName (..),
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -25,7 +25,7 @@ import GHC.Generics (Generic)
 
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
-data ProtoDataConstructorEntry a = ProtoDataConstructorEntry
+data DataConstructorEntry a = DataConstructorEntry
   { protoOdataConstructorEntryMetaData :: a
   , protoOdataConstructorEntryName :: Name
   , protoOdataConstructorEntryConstructor :: IndexedConstructor
@@ -33,9 +33,9 @@ data ProtoDataConstructorEntry a = ProtoDataConstructorEntry
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
-instance (Binary a) => Binary (ProtoDataConstructorEntry a)
+instance (Binary a) => Binary (DataConstructorEntry a)
 
-data ProtoTypeConstructorEntry a = ProtoTypeConstructorEntry
+data TypeConstructorEntry a = TypeConstructorEntry
   { protoOtypeConstructorEntryMetadata :: a
   , protoOtypeConstructorEntryName :: Name
   , protoOtypeConstructorEntryKind :: Kind
@@ -43,9 +43,9 @@ data ProtoTypeConstructorEntry a = ProtoTypeConstructorEntry
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
-instance (Binary a) => Binary (ProtoTypeConstructorEntry a)
+instance (Binary a) => Binary (TypeConstructorEntry a)
 
-data ProtoTraitEntry a = ProtoTraitEntry
+data TraitEntry a = TraitEntry
   { protoOtraitEntryMetadata :: a
   , protoOtraitEntryName :: Name
   , protoOtraitEntryParameter :: Parameter Kind
@@ -54,9 +54,9 @@ data ProtoTraitEntry a = ProtoTraitEntry
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
-instance (Binary a) => Binary (ProtoTraitEntry a)
+instance (Binary a) => Binary (TraitEntry a)
 
-data ProtoInstanceEntry a = ProtoInstanceEntry
+data InstanceEntry a = InstanceEntry
   { protoOinstanceEntryMetadata :: a
   , protoOinstanceEntryType :: Type Parameter Kind
   , protoOinstanceEntryIndexedType :: IndexedType
@@ -64,9 +64,9 @@ data ProtoInstanceEntry a = ProtoInstanceEntry
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
-instance (Binary a) => Binary (ProtoInstanceEntry a)
+instance (Binary a) => Binary (InstanceEntry a)
 
-data ProtoAliasEntry a = ProtoAliasEntry
+data AliasEntry a = AliasEntry
   { protoOaliasEntryMetadata :: a
   , protoOaliasEntryName :: Name
   , protoOaliasEntryParams :: [Parameter Kind]
@@ -74,36 +74,36 @@ data ProtoAliasEntry a = ProtoAliasEntry
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
-instance (Binary a) => Binary (ProtoAliasEntry a)
+instance (Binary a) => Binary (AliasEntry a)
 
-data ProtoNameEntry
-  = ProtoNName Name IndexedScheme
-  | ProtoNType Name Kind
-  | ProtoNTrait Name
-  | ProtoNTypeAlias Name
-  | ProtoNPlaceholder Name
+data NameEntry
+  = NName Name IndexedScheme
+  | NType Name Kind
+  | NTrait Name
+  | NTypeAlias Name
+  | NPlaceholder Name
   deriving (Show, Eq, Ord, Read, Generic)
 
-instance Binary ProtoNameEntry
+instance Binary NameEntry
 
-class ProtoHasName a where
+class HasName a where
   protoOnameOf :: a -> Name
 
-instance ProtoHasName ProtoNameEntry where
+instance HasName NameEntry where
   protoOnameOf =
     \case
-      ProtoNName name _ ->
+      NName name _ ->
         name
-      ProtoNType name _ ->
+      NType name _ ->
         name
-      ProtoNTrait name ->
+      NTrait name ->
         name
-      ProtoNTypeAlias name ->
+      NTypeAlias name ->
         name
-      ProtoNPlaceholder name ->
+      NPlaceholder name ->
         name
 
-instance ProtoHasName (Import a) where
+instance HasName (Import a) where
   protoOnameOf =
     \case
       NameImport _ name ->
@@ -111,7 +111,7 @@ instance ProtoHasName (Import a) where
       TypeImport _ name _ ->
         name
 
-instance ProtoHasName (Export a) where
+instance HasName (Export a) where
   protoOnameOf =
     \case
       NameExport _ name ->
@@ -119,6 +119,6 @@ instance ProtoHasName (Export a) where
       TypeExport _ name _ ->
         name
 
-instance ProtoHasName (ProtoDataConstructorEntry a) where
+instance HasName (DataConstructorEntry a) where
   protoOnameOf =
     protoOdataConstructorEntryName

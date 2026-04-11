@@ -1,19 +1,19 @@
 module Coal.Compiler.Pass.TypePhase.Prep2 (passPrep2) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Build.Prep
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoBuild.ProtoPrep
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
+import Coal.Language.Module (Module (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadIO)
 import Control.Monad.Trans (lift)
 
-passPrep2 :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind ()) (ProtoModule Metadata Kind ())
+passPrep2 :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
 passPrep2 = Pass{runPass = pass}
 
-pass :: (MonadIO m) => ProtoModule Metadata Kind () -> CompilerT Metadata m (ProtoModule Metadata Kind ())
+pass :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 pass m = do
   --  setCompilerCurrentModuleC (modulePath m)
   --  lift $ setCurrentPathC (modulePath m)
@@ -21,10 +21,10 @@ pass m = do
 
 -- withCurrentModuleC prep
 
-prep :: (MonadIO m) => ProtoModule Metadata Kind () -> CompilerT Metadata m (ProtoModule Metadata Kind ())
+prep :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 prep m = do
   --  m1 <- lift $ do
-  --    let modul = toProtoModule [] m
+  --    let modul = toModule [] m
   --    protoOclearAssumptionsC
   --    protoOclearNameStoreC
   --    setCurrentModuleC modul

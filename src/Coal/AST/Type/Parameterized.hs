@@ -12,7 +12,7 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
-import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
+import Coal.TypeSystem.Kind.Error (KindError (..))
 import Control.Monad.Except
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState)
@@ -20,12 +20,12 @@ import Control.Monad.Writer (WriterT, execWriterT, tell)
 import Data.List.NonEmpty (NonEmpty, toList)
 import Extras (Name, traverse_)
 
-instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter k -> m (Either ProtoKindError IndexedType)
+instantiateVars :: (MonadState s m, Supply s) => [(Name, TypeIndex Kind)] -> Environment Kind -> Type Parameter k -> m (Either KindError IndexedType)
 instantiateVars ts0 env t = do
   ts1 <- execWriterT (instantiateTypeIndexes t)
   runReaderT (runExceptT (instantiateTypeVars t)) (Environment.fromList (ts0 <> ts1), env)
 
-instantiateTypeApplication :: (MonadState s m, Supply s) => Type Parameter k -> NonEmpty (Type Parameter k) -> ExceptT ProtoKindError (ReaderT (Environment (TypeIndex Kind), Environment Kind) m) IndexedType
+instantiateTypeApplication :: (MonadState s m, Supply s) => Type Parameter k -> NonEmpty (Type Parameter k) -> ExceptT KindError (ReaderT (Environment (TypeIndex Kind), Environment Kind) m) IndexedType
 instantiateTypeApplication con@(TConstructor _ name) ts
   | isTupleType con =
       applyTypeArgs KType (TConstructor (tupleKind (length ts)) name)
@@ -35,11 +35,11 @@ instantiateTypeApplication t ts = do
   us <- traverse instantiateTypeVars ts
   case applyKind (kindOf <$> toList us) (kindOf u) of
     Nothing ->
-      throwError ProtoECannotUnifyKinds
+      throwError ECannotUnifyKinds
     Just k ->
       pure (applyTypeArgs k u us)
 
-instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter k -> ExceptT ProtoKindError (ReaderT (Environment (TypeIndex Kind), Environment Kind) m) IndexedType
+instantiateTypeVars :: (MonadState s m, Supply s) => Type Parameter k -> ExceptT KindError (ReaderT (Environment (TypeIndex Kind), Environment Kind) m) IndexedType
 instantiateTypeVars =
   \case
     TVariable (Parameter _ n) -> do
@@ -69,9 +69,9 @@ instantiateTypeVars =
         Just k ->
           pure (TConstructor k name)
         Nothing ->
-          throwError (ProtoENoTypeConstructor name)
+          throwError (ENoTypeConstructor name)
 
-instantiateRowVars :: (MonadState s m, Supply s) => Row Parameter k (Type Parameter k) -> ExceptT ProtoKindError (ReaderT (Environment (TypeIndex Kind), Environment Kind) m) (Row TypeIndex Kind IndexedType)
+instantiateRowVars :: (MonadState s m, Supply s) => Row Parameter k (Type Parameter k) -> ExceptT KindError (ReaderT (Environment (TypeIndex Kind), Environment Kind) m) (Row TypeIndex Kind IndexedType)
 instantiateRowVars =
   \case
     RVariable (Parameter _ n) -> do

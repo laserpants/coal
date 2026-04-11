@@ -35,9 +35,12 @@ library
       Coal.Common.Supply
       Coal.Compiler
       Coal.Compiler.Aliases
+      Coal.Compiler.Build
       Coal.Compiler.Build.Cache
       Coal.Compiler.Build.Envelope
       Coal.Compiler.Build.Hash256
+      Coal.Compiler.Build.NameEntry
+      Coal.Compiler.Build.Prep
       Coal.Compiler.Builtin.DataConstructors
       Coal.Compiler.Builtin.Definitions
       Coal.Compiler.Builtin.Functions
@@ -109,16 +112,12 @@ library
       Coal.Compiler.PatternMatching.Equation
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Pipeline
-      Coal.Compiler.ProtoBuild
-      Coal.Compiler.ProtoBuild.ProtoNameEntry
-      Coal.Compiler.ProtoBuild.ProtoPrep
-      Coal.Compiler.ProtoState
       Coal.Compiler.Stack
+      Coal.Compiler.State
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
       Coal.Debug
       Coal.Graphviz.Dot
-      Coal.Graphviz.ProtoDot
       Coal.Kernel.Builtin.Constructors
       Coal.Kernel.Builtin.Objects
       Coal.Kernel.Compiler
@@ -186,12 +185,14 @@ library
       Coal.Kernel.Parser.Type
       Coal.Language
       Coal.Language.Data.Constructor
+      Coal.Language.Definition
       Coal.Language.Expression
       Coal.Language.Expression.Binding
       Coal.Language.Expression.Choice
       Coal.Language.Expression.Operator
       Coal.Language.HasKind
       Coal.Language.HasType
+      Coal.Language.Module
       Coal.Language.Module.Export
       Coal.Language.Module.Import
       Coal.Language.Module.Path
@@ -219,17 +220,8 @@ library
       Coal.Parser.Type
       Coal.Parser.Type.Intrinsic
       Coal.Parser.Utils
-      Coal.ProtoLanguage.ProtoDefinition
-      Coal.ProtoLanguage.ProtoModule
-      Coal.ProtoTypeSystem.Annotations
-      Coal.ProtoTypeSystem.Kind.Constraint
-      Coal.ProtoTypeSystem.Kind.Constraint.Generation
-      Coal.ProtoTypeSystem.Kind.Constraint.Solver
-      Coal.ProtoTypeSystem.Kind.Error
-      Coal.ProtoTypeSystem.Kind.Substitution
-      Coal.ProtoTypeSystem.Kind.Unification
-      Coal.ProtoTypeSystem.Parameterized
       Coal.TypeSystem
+      Coal.TypeSystem.Annotations
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption
       Coal.TypeSystem.Constraint.Generation
@@ -241,6 +233,13 @@ library
       Coal.TypeSystem.Constraint.Generation.Stack
       Coal.TypeSystem.Constraint.Generation.State
       Coal.TypeSystem.Constraint.Solver
+      Coal.TypeSystem.Kind.Constraint
+      Coal.TypeSystem.Kind.Constraint.Generation
+      Coal.TypeSystem.Kind.Constraint.Solver
+      Coal.TypeSystem.Kind.Error
+      Coal.TypeSystem.Kind.Substitution
+      Coal.TypeSystem.Kind.Unification
+      Coal.TypeSystem.Parameterized
       Coal.TypeSystem.Substitution
       Coal.TypeSystem.Unification
       Coal.Utils
@@ -369,7 +368,6 @@ test-suite coal-test
   other-modules:
       Coal.Compiler.BuildSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
-      Coal.Compiler.ProtoBuildSpec
       Coal.Language.TypeSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec

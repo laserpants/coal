@@ -10,39 +10,39 @@ import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Path (principalPath)
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
 
-passImportsTopRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passImportsTopRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passImportsTopRule = Pass{runPass = pass}
 
-pass :: (Monad m) => [BuildEnvelope (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (ProtoModule Metadata () ())]
+pass :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 pass ms = do
   (ps, errors) <- listenErrors $ traverse (traverse checkImports) ms
   unless (null errors) $
     throwError PreflightFailure
   pure ps
 
-checkImports :: (Monad m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
+checkImports :: (Monad m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 checkImports m = do
   forM_ (filter isImport es) $
     \d ->
       tellErrors [MisplacedImportStatement (ErrorLocation name (getMetadata d))]
   pure mm
  where
-  mm@(ProtoModule p _ defs) = m
+  mm@(Module p _ defs) = m
   name = principalPath p
   ds = dropWhile isImport defs
   es = dropWhile (not . isImport) ds
 
-isImport :: ProtoDefinition a k t -> Bool
+isImport :: Definition a k t -> Bool
 isImport =
   \case
-    ProtoDImport{} ->
+    DImport{} ->
       True
-    ProtoDNamespaceImport{} ->
+    DNamespaceImport{} ->
       True
     _ ->
       False

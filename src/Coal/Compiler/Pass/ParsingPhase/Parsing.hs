@@ -12,13 +12,13 @@ import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language (Kind)
+import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseModule)
 import Coal.Parser.Core (spaces)
-import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
@@ -32,10 +32,10 @@ import qualified Data.Text.IO as Text
 import Extras (Name, forM, forM_)
 import Text.Megaparsec (eof, runParser)
 
-passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildEnvelope (ProtoModule Metadata () ())]
+passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildEnvelope (Module Metadata () ())]
 passParsing = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildEnvelope (ProtoModule Metadata () ())]
+pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 pass files = do
   embeddedFiles <- traverse parseEmbedded embedded
   case partitionEithers embeddedFiles of
@@ -52,7 +52,7 @@ pass files = do
         \(p, e) ->
           error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
 
-parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildEnvelope (ProtoModule Metadata () ())))
+parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildEnvelope (Module Metadata () ())))
 parseEmbedded (p, src) = do
   CompilerConfig{..} <- gets protoOcompilerConfig
   case runParser (spaces *> parseModule <* eof) "" encodedSrc of
@@ -79,19 +79,19 @@ parseEmbedded (p, src) = do
   encodedSrc :: Text
   encodedSrc = E.decodeUtf8 src
 
-fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
+fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 fromSource name file src = do
   toBeRecompiled name
   case runParser (spaces *> parseModule <* eof) "" src of
     Left err ->
       pure $ Left (ParserError file err)
-    Right module_@(ProtoModule path _ _) -> do
+    Right module_@(Module path _ _) -> do
       if principalPath path == name
         then do
           pure $ Right (BSource module_)
         else pure $ Left (BadModuleName file (principalPath path))
 
-parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
+parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 parseFile file = do
   CompilerConfig{..} <- gets protoOcompilerConfig
   res <- liftIO $ resolveModule configSourcePaths file

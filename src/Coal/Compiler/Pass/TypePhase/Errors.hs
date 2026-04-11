@@ -4,22 +4,22 @@ import Coal.AST.HasMetadata (getMetadata)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language (IndexedType, Kind)
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (forM_, unless)
 import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift)
 import Data.List (nub)
 
-passTypePhaseErrors :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+passTypePhaseErrors :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passTypePhaseErrors = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
-pass m@(ProtoModule path _ _) = do
+pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+pass m@(Module path _ _) = do
   constraintsGenErrors <- gets protoOcompilerConstraintsGenErrors
   let errs1 = nub constraintsGenErrors
   forM_ errs1 $

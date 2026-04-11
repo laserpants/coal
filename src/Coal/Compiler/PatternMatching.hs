@@ -22,7 +22,7 @@ import Coal.Compiler.PatternMatching.Equation (patternEquation)
 import Coal.Compiler.PatternMatching.Rule (matchPatterns)
 import Coal.Compiler.Stack (CompilerT (..))
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), IndexedType, Kind (..), Pattern (..), Primitive (..))
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
+import Coal.Language.Module (Module (..))
 import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM, transformM)
@@ -45,7 +45,7 @@ instance (MatchExpressionContext a c) => MatchExpressionContext a (NonEmpty c) w
 instance (MatchExpressionContext a c) => MatchExpressionContext a (Dictionary c) where
   compileMatchExprs = traverse compileMatchExprs
 
-instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (ProtoModule a Kind IndexedType) where
+instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Module a Kind IndexedType) where
   compileMatchExprs = transformBiM (compileMatchExprsE :: (Monad m) => Expression a Kind IndexedType -> CompilerT a m (Expression a Kind IndexedType))
 
 instance (Eq a, Data a, Monoid a) => MatchExpressionContext a (Clause a () IndexedType) where

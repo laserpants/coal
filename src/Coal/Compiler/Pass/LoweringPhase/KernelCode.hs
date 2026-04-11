@@ -8,9 +8,9 @@ module Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode, compileUnits
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoBuild
 import Coal.Compiler.Stack
 import Coal.Kernel.Builtin.Objects (builtinObjects)
 import Coal.Kernel.Compiler (KernelExpr, compile, compileClosureCode)
@@ -60,9 +60,9 @@ compileUnits units = do
         lift $
           unless (moduleName == "Builtin$") $ do
             protoOupdateBuildC moduleName $
-              \ProtoBuild{..} ->
+              \Build{..} ->
                 pure
-                  ProtoBuild
+                  Build
                     { protoObuildKernelNames = Environment.fromList kernelNames
                     , protoObuildKernelIRTypes = Environment.fromList irTypes
                     , protoObuildKernelConstructors = Environment.fromList kernelConstructors
@@ -70,11 +70,11 @@ compileUnits units = do
                     }
 
         pure (BSource (moduleName, out))
-      BCached ProtoBuild{..} -> do
+      BCached Build{..} -> do
         pipelineInsertNames (Environment.toList protoObuildKernelNames)
         pipelineInsertIRTypes (Environment.toList protoObuildKernelIRTypes)
         pipelineInsertConstructors (Environment.toList protoObuildKernelConstructors)
-        pure (BCached ProtoBuild{..})
+        pure (BCached Build{..})
 
   cc <- transformInterpreter compileClosureCode
   -- TODO: cache

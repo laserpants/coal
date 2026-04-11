@@ -13,23 +13,23 @@ import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind (..))
+import Coal.Language.Definition
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
+import Coal.Language.Module
 import Coal.Language.Module.Path
 import Coal.Language.Pattern (Pattern (..))
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Trans (lift)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extras (Name)
 
-passExpandPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+passExpandPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandPatterns = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 bork = desugarPatterns
 
 class TransformContext s where
@@ -141,44 +141,44 @@ unrollMatch loc (name, p) e =
 --      Module p ns ds ->
 --        Module p ns <$> traverse desugarPatterns ds
 
-instance TransformContext (ProtoModule Metadata Kind IndexedType) where
+instance TransformContext (Module Metadata Kind IndexedType) where
   desugarPatterns =
     \case
-      ProtoModule{..} -> do
+      Module{..} -> do
         newModuleDefinitions <- traverse desugarPatterns protoOmoduleDefinitions
         pure
-          ProtoModule
+          Module
             { protoOmoduleDefinitions = newModuleDefinitions
             , ..
             }
 
-instance TransformContext (ProtoDefinition Metadata Kind IndexedType) where
+instance TransformContext (Definition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
-      ProtoDFunction loc name def ->
-        ProtoDFunction loc name <$> desugarPatterns def
-      ProtoDLet loc name def ->
-        ProtoDLet loc name <$> desugarPatterns def
-      ProtoDInstance loc ProtoInstanceDefinition{..} -> do
+      DFunction loc name def ->
+        DFunction loc name <$> desugarPatterns def
+      DLet loc name def ->
+        DLet loc name <$> desugarPatterns def
+      DInstance loc InstanceDefinition{..} -> do
         newInstanceDefinitionImplementations <- traverse desugarPatterns protoOinstanceDefinitionImplementations
         pure $
-          ProtoDInstance
+          DInstance
             loc
-            ProtoInstanceDefinition
+            InstanceDefinition
               { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
               , ..
               }
       d ->
         pure d
 
-instance TransformContext (ProtoFunctionDefinition Metadata Kind IndexedType) where
+instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
-      ProtoFunctionDefinition{..} -> do
+      FunctionDefinition{..} -> do
         newFunctionDefinitionExpression <- desugarPatterns protoOfunctionDefinitionExpression
         (qs, rs) <- listenPatterns (traverse desugarPatterns protoOfunctionDefinitionPatterns)
         pure $
-          ProtoFunctionDefinition
+          FunctionDefinition
             { protoOfunctionDefinitionPatterns =
                 qs
             , protoOfunctionDefinitionExpression =
@@ -186,13 +186,13 @@ instance TransformContext (ProtoFunctionDefinition Metadata Kind IndexedType) wh
             , ..
             }
 
-instance TransformContext (ProtoLetDefinition Metadata Kind IndexedType) where
+instance TransformContext (LetDefinition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
-      ProtoLetDefinition{..} -> do
+      LetDefinition{..} -> do
         newLetDefinitionExpression <- desugarPatterns protoOletDefinitionExpression
         pure $
-          ProtoLetDefinition
+          LetDefinition
             { protoOletDefinitionExpression = newLetDefinitionExpression
             , ..
             }

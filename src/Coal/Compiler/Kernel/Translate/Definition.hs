@@ -13,7 +13,7 @@ import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Language.Object (KernelObject)
 import Coal.Language
-import Coal.ProtoLanguage.ProtoDefinition
+import Coal.Language.Definition
 import Control.Monad (forM)
 import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (asks)
@@ -23,31 +23,31 @@ import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
 import Debug.Trace
 import Extras (Name, (<.>))
 
-translateDefinition :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> CompilerT a m [KernelObject]
+translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
 translateDefinition =
   \case
-    ProtoDType _ _ ProtoTypeDefinition{..} ->
+    DType _ _ TypeDefinition{..} ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName protoOtypeDefinitionConstructors))
-    ProtoDFunction loc name (ProtoFunctionDefinition _ _ _ ps e) -> do
+    DFunction loc name (FunctionDefinition _ _ _ ps e) -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OFunction (moduleName <.> name) qs f]
-    ProtoDLet loc name (ProtoLetDefinition _ _ With{} e) -> do
+    DLet loc name (LetDefinition _ _ With{} e) -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    ProtoDTrait loc name ProtoTraitDefinition{..} ->
+    DTrait loc name TraitDefinition{..} ->
       forM protoOtraitDefinitionInterface $
-        \(ProtoTraitDefinitionInterfaceEntry n (Forall _ _ t)) ->
+        \(TraitDefinitionInterfaceEntry n (Forall _ _ t)) ->
           traitAccessor name n (translateType t)
-    ProtoDInstance _ (ProtoInstanceDefinition _ trait _ t ds) ->
+    DInstance _ (InstanceDefinition _ trait _ t ds) ->
       concatForM ds $
         \case
-          ProtoDFunction loc n f ->
-            translateDefinition (ProtoDFunction loc (instanceLabel (Trait trait t) n) f)
-          ProtoDLet loc n c ->
-            translateDefinition (ProtoDLet loc (instanceLabel (Trait trait t) n) c)
+          DFunction loc n f ->
+            translateDefinition (DFunction loc (instanceLabel (Trait trait t) n) f)
+          DLet loc n c ->
+            translateDefinition (DLet loc (instanceLabel (Trait trait t) n) c)
           _ ->
             pure []
     _ ->

@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.ProtoState (
+module Coal.Compiler.State (
   CompilerState (..),
   CompilerConstraint,
   CompilerAssumption,
@@ -28,16 +28,16 @@ module Coal.Compiler.ProtoState (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
+import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
-import Coal.Compiler.ProtoBuild (ProtoBuild (..))
 import Coal.Language
 import Coal.Language.Module.Path (Path (..), emptyPath, principalPath)
-import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
-import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
+import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution
 import Data.Set (Set)
 import Data.Text (Text)
@@ -50,7 +50,7 @@ type CompilerAssumption a = Assumption a IndexedType
 data CompilerState a = CompilerState
   { protoOcompilerSupply :: Int
   , protoOcompilerConfig :: CompilerConfig
-  , protoOcompilerModules :: Environment (ProtoBuild a)
+  , protoOcompilerModules :: Environment (Build a)
   , protoOcompilerSources :: Environment Text
   , protoOcompilerToBeRecompiled :: Set Name
   , protoOcompilerCurrentPath :: Path
@@ -59,9 +59,9 @@ data CompilerState a = CompilerState
   , protoOcompilerConstraints :: [CompilerConstraint a]
   , protoOcompilerAssumptions :: [CompilerAssumption a]
   , protoOcompilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
-  , protoOcompilerKindConstraints :: [ProtoKindConstraint]
+  , protoOcompilerKindConstraints :: [KindConstraint]
   , protoOcompilerConstraintsGenErrors :: [ConstraintsGenError a]
-  , protoOcompilerKindConstraintsGenErrors :: [ProtoKindError]
+  , protoOcompilerKindConstraintsGenErrors :: [KindError]
   , protoOcompilerSolverRuleViolations :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord)
@@ -107,7 +107,7 @@ overCompilerConfig fn CompilerState{..} =
     }
 
 {-# INLINE overCompilerModules #-}
-overCompilerModules :: Over (CompilerState a) (Environment (ProtoBuild a))
+overCompilerModules :: Over (CompilerState a) (Environment (Build a))
 overCompilerModules fn CompilerState{..} =
   CompilerState
     { protoOcompilerModules = fn protoOcompilerModules
@@ -115,7 +115,7 @@ overCompilerModules fn CompilerState{..} =
     }
 
 {-# INLINE overCompilerModuleWithPath #-}
-overCompilerModuleWithPath :: Path -> Over (CompilerState a) (ProtoBuild a)
+overCompilerModuleWithPath :: Path -> Over (CompilerState a) (Build a)
 overCompilerModuleWithPath path fn CompilerState{..} =
   CompilerState
     { protoOcompilerModules = Environment.adjust fn (principalPath path) protoOcompilerModules
@@ -171,7 +171,7 @@ overCompilerConstraints fn CompilerState{..} =
     }
 
 {-# INLINE overCompilerKindConstraints #-}
-overCompilerKindConstraints :: Over (CompilerState a) [ProtoKindConstraint]
+overCompilerKindConstraints :: Over (CompilerState a) [KindConstraint]
 overCompilerKindConstraints fn CompilerState{..} =
   CompilerState
     { protoOcompilerKindConstraints = fn protoOcompilerKindConstraints
@@ -203,7 +203,7 @@ overCompilerConstraintsGenErrors fn CompilerState{..} =
     }
 
 {-# INLINE overCompilerKindConstraintsGenErrors #-}
-overCompilerKindConstraintsGenErrors :: Over (CompilerState a) [ProtoKindError]
+overCompilerKindConstraintsGenErrors :: Over (CompilerState a) [KindError]
 overCompilerKindConstraintsGenErrors fn CompilerState{..} =
   CompilerState
     { protoOcompilerKindConstraintsGenErrors = fn protoOcompilerKindConstraintsGenErrors

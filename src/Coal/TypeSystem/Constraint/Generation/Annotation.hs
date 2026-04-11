@@ -11,12 +11,12 @@ module Coal.TypeSystem.Constraint.Generation.Annotation (
 ) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.Build.NameEntry
 import Coal.Language
-import Coal.ProtoTypeSystem.Annotations
-import Coal.ProtoTypeSystem.Parameterized
+import Coal.TypeSystem.Annotations
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
+import Coal.TypeSystem.Parameterized
 import Coal.TypeSystem.Substitution (Substitution (..))
 import Coal.Utils (lexOrderRank)
 import Control.Arrow ((>>>))
@@ -40,7 +40,7 @@ lookupTypeConstructor name = do
 --  case Environment.lookup name env of
 --    Nothing ->
 --      pure Nothing
---    Just (ProtoTypeConstructorEntry _ _ kind _) ->
+--    Just (TypeConstructorEntry _ _ kind _) ->
 --      pure (Just kind)
 
 instantiateAnnotation :: (MonadReader (TypeAnnotationContext a) m, MonadState (ConstraintsGenState a) m) => a -> Type Parameter () -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))

@@ -26,14 +26,14 @@ import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
 import Coal.Compiler.Pass.MainPhase (mainPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
 import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
-import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
+import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad (replicateM_)
 import Control.Monad.Catch (MonadMask)
@@ -171,16 +171,16 @@ prettyConstraintsGenError =
     e ->
       Text.pack ("TODO:" <> show e)
 
-prettyKindInferenceError :: ProtoKindError -> Text
+prettyKindInferenceError :: KindError -> Text
 prettyKindInferenceError =
   \case
-    ProtoENoTypeConstructor name ->
+    ENoTypeConstructor name ->
       "No type constructor '" <> name <> "' in scope."
-    ProtoENoTrait name ->
+    ENoTrait name ->
       "No trait '" <> name <> "' in scope."
-    ProtoECannotUnifyKinds ->
+    ECannotUnifyKinds ->
       "Kind unification failed"
-    ProtoEInfiniteKind ->
+    EInfiniteKind ->
       "Infinite kind"
 
 prettyError :: Environment Text -> CompilerError Metadata -> Text

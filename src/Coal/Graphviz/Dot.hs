@@ -1,668 +1,750 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Coal.Graphviz.Dot where
+module Coal.Graphviz.Dot (generateDotSyntax) where
 
--- import Coal.Common.Label (Label (..))
--- import Coal.Common.Name (Name)
--- import Coal.Common.Supply (Supply (..), supplied)
--- import Coal.Debug (writeDebugFile)
--- import qualified Coal.Kernel.Language as Kernel
--- import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
--- import Coal.Language.Expression.Binding (Binding (..))
--- import Coal.Language.Expression.Choice (Choice (..), Guard (..))
--- import Coal.Language.Module
--- import Coal.Language.Pattern (Pattern (..))
--- import Coal.Language.Trait (Qualified (..))
--- import Control.Monad.Reader (ReaderT, ask, runReaderT)
--- import Control.Monad.State (MonadTrans (lift), State, foldM, forM_, modify, runState)
--- import Data.Functor.Foldable (cata)
--- import qualified Data.Map.Strict as Map
--- import Data.Text (Text)
--- import qualified Data.Text as Text
--- import Extras (traverse_)
--- import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty)
--- import Prettyprinter.Render.Text (renderStrict)
--- import System.FilePath ((<.>), (</>))
--- import TextShow (showt)
---
--- data Shape
---  = Rectangle
---  | Ellipse
---  | Parallelogram
---  | Hexagon
---  | Folder
---  | Triangle
---  | Diamond
---  | House
---  | Note
---  deriving (Show, Eq, Read)
---
--- type Node t = (Int, Text, Maybe t, Shape)
--- type Edge = (Int, Int, Maybe Text)
---
--- data DotState t = DotState
---  { supply :: Int
---  , nodes :: [Node t]
---  , edges :: [Edge]
---  }
---  deriving (Show, Eq, Read)
---
--- instance Supply (DotState t) where
---  updateSupply f DotState{..} = DotState{supply = f supply, ..}
---  getSupply = supply
---
--- type DotGen t = State (DotState t)
---
--- class Dot t a | a -> t where
---  toDot :: a -> DotGen t Int
---
--- freshId :: DotGen t Int
--- freshId = supplied id
---
--- emitNode :: Node t -> DotGen t ()
--- emitNode node = modify $ \st -> st{nodes = node : nodes st}
---
--- emitEdgeWithLabel :: Text -> Int -> Int -> DotGen t ()
--- emitEdgeWithLabel label from to = modify $ \st -> st{edges = (from, to, Just label) : edges st}
---
--- emitEdge :: Int -> Int -> DotGen t ()
--- emitEdge from to = modify $ \st -> st{edges = (from, to, Nothing) : edges st}
---
--- emitShape :: Shape -> Text -> Maybe t -> DotGen t Int
--- emitShape shape txt t = do
---  nid <- freshId
---  emitNode (nid, txt, t, shape)
---  return nid
---
--- emitRectangle
---  , emitEllipse
---  , emitDiamond
---  , emitHexagon
---  , emitNote
---  , emitParallelogram
---  , emitHouse
---  , emitTriangle ::
---    Text -> Maybe t -> DotGen t Int
--- emitRectangle = emitShape Rectangle
--- emitEllipse = emitShape Ellipse
--- emitDiamond = emitShape Diamond
--- emitHexagon = emitShape Hexagon
--- emitNote = emitShape Note
--- emitParallelogram = emitShape Parallelogram
--- emitHouse = emitShape House
--- emitTriangle = emitShape Triangle
---
--- fromNode :: DotGen t Int -> ReaderT Int (DotGen t) () -> DotGen t Int
--- fromNode f g = do
---  nid <- f
---  runReaderT g nid
---  return nid
---
--- emitEdgeTo :: (Dot t a) => a -> ReaderT Int (DotGen t) ()
--- emitEdgeTo d = do
---  nid <- ask
---  id1 <- lift (toDot d)
---  lift (emitEdge nid id1)
---
--- emitEdgeWithLabelTo :: (Dot t a) => Text -> a -> ReaderT Int (DotGen t) ()
--- emitEdgeWithLabelTo label d = do
---  nid <- ask
---  id1 <- lift (toDot d)
---  lift (emitEdgeWithLabel label nid id1)
---
--- emitEdgeToFields :: (Dot t a) => [(Name, a)] -> ReaderT Int (DotGen t) Int
--- emitEdgeToFields f = do
---  nid <- ask
---  lift (emitFields nid f)
---
--- {-# INLINE emitEdgesTo #-}
--- emitEdgesTo :: (Foldable f, Dot t a) => f a -> ReaderT Int (DotGen t) ()
--- emitEdgesTo = traverse_ emitEdgeTo
---
--- emitFields :: (Dot t a) => Int -> [(Name, a)] -> DotGen t Int
--- emitFields = foldM go
--- where
---  go id1 (name, expr) = do
---    id2 <- emitHexagon ("Field\\n" <> name) Nothing
---    id3 <- toDot expr
---    emitEdge id1 id2
---    emitEdge id2 id3
---    return id2
---
--- instance (Dot t a) => Dot t (Maybe a) where
---  toDot =
---    \case
---      Nothing -> do
---        emitRectangle "Nothing" Nothing
---      Just d -> do
---        nid <- emitRectangle "Just" Nothing
---        cid <- toDot d
---        emitEdge nid cid
---        pure nid
---
--- instance Dot t (Label t) where
---  toDot =
---    \case
---      Label t name ->
---        emitNote ("Label\\n" <> name) (Just t)
---
--- instance (Pretty t, Show t) => Dot t (Binding Expression a () t) where
---  toDot =
---    \case
---      BPattern _ pat rhs -> do
---        fromNode (emitRectangle "BPattern\\n" Nothing) $ do
---          emitEdgeTo pat
---          emitEdgeWithLabelTo "=" rhs
---      BFunction _ name ps e ->
---        fromNode (emitRectangle ("BFunction\\n" <> name) Nothing) $ do
---          emitEdgesTo ps
---          emitEdgeTo e
---
--- instance (Pretty t, Show t) => Dot t (Expression a () t) where
---  toDot =
---    \case
---      EAnnotation _ t inner -> do
---        fromNode (emitRectangle ("EAnnotation\\n" <> prettyType t) Nothing) $ do
---          emitEdgeTo inner
---      EApplication _ t fun args -> do
---        fromNode (emitDiamond "EApplication" (Just t)) $ do
---          emitEdgeTo fun
---          emitEdgesTo args
---      ELambda _ patterns body -> do
---        fromNode (emitHouse "ELambda" Nothing) $ do
---          emitEdgesTo patterns
---          emitEdgeTo body
---      ELet _ bnds body -> do
---        fromNode (emitRectangle "ELet" Nothing) $ do
---          emitEdgesTo bnds
---          emitEdgeWithLabelTo "in" body
---      ERecursiveLet _ pat rhs body -> do
---        fromNode (emitRectangle "ERecursiveLet" Nothing) $ do
---          emitEdgeTo pat
---          emitEdgeWithLabelTo "=" rhs
---          emitEdgeWithLabelTo "in" body
---      EVariable _ (Label t name) ->
---        emitRectangle ("EVariable\\n" <> name) (Just t)
---      EConstructor _ (Label t name) ->
---        emitRectangle ("EConstructor\\n" <> name) (Just t)
---      ELiteral _ prim ->
---        emitRectangle ("ELiteral\\n" <> Text.pack (show prim)) Nothing
---      EIf _ t e1 e2 e3 -> do
---        fromNode (emitRectangle "EIf" (Just t)) $ do
---          emitEdgeTo e1
---          emitEdgeWithLabelTo "then" e2
---          emitEdgeWithLabelTo "else" e3
---      EOperator _ t op ->
---        emitRectangle ("EOperator\\n" <> Text.pack (show op)) (Just t)
---      ERecord _ t fields mtail -> do
---        fromNode (emitRectangle "ERecord" (Just t)) $ do
---          id1 <- emitEdgeToFields (Map.toList fields)
---          lift $ do
---            id2 <- toDot mtail
---            emitEdge id1 id2
---      EListCons _ t e1 e2 ->
---        fromNode (emitRectangle "EListCons" (Just t)) $ do
---          emitEdgeTo e1
---          emitEdgeTo e2
---      EListLiteral _ t es -> do
---        fromNode (emitRectangle "EListLiteral" (Just t)) $
---          emitEdgesTo es
---      ETuple _ t es -> do
---        fromNode (emitRectangle "ETuple" (Just t)) $
---          emitEdgesTo es
---      EMatch _ t e cs -> do
---        fromNode (emitRectangle "EMatch" (Just t)) $ do
---          emitEdgeTo e
---          emitEdgesTo cs
---      ECompiledMatch _ t e cs -> do
---        fromNode (emitRectangle "ECompiledMatch" (Just t)) $ do
---          emitEdgeTo e
---          emitEdgesTo cs
---      EFold _ t es cs -> do
---        fromNode (emitRectangle "EFold" (Just t)) $ do
---          emitEdgesTo es
---          emitEdgesTo cs
---      ESelect _ (Label t name) e -> do
---        fromNode (emitRectangle ("ESelect\\n" <> name) (Just t)) $ do
---          emitEdgeTo e
---      EFocus _ name ll1 ll2 e1 e2 -> do
---        fromNode (emitRectangle ("EFocus\\n" <> name) Nothing) $ do
---          emitEdgeTo ll1
---          emitEdgeTo ll2
---          emitEdgeTo e1
---          emitEdgeTo e2
---      ETraitInstance _ t _ ->
---        emitRectangle "ETraitInstance" (Just t)
---      ELambdaMatch _ t cs ->
---        fromNode (emitRectangle "ELambdaMatch" (Just t)) $ do
---          emitEdgesTo cs
---      EFFICall _ _ (Label _ name) es e ->
---        fromNode (emitRectangle ("EFFICall\\n" <> name) Nothing) $ do
---          emitEdgesTo es
---          emitEdgeTo e
---      EDoBlock{} ->
---        emitRectangle "EDoBlock" Nothing
---
--- instance (Pretty t, Show t) => Dot t (Pattern a () t) where
---  toDot =
---    \case
---      PAnnotation _ t inner -> do
---        fromNode (emitEllipse ("PAnnotation\\n" <> prettyType t) Nothing) $ do
---          emitEdgeTo inner
---      PAny _ t ->
---        emitEllipse "PAny" (Just t)
---      PVariable _ (Label t name) ->
---        emitEllipse ("PVariable\\n" <> name) (Just t)
---      PConstructor _ (Label t name) ps -> do
---        fromNode (emitEllipse ("PConstructor\\n" <> name) (Just t)) $
---          emitEdgesTo ps
---      PInteger _ _ int ->
---        emitEllipse ("PInteger\\n" <> escapeQuotes (Text.pack (show int))) Nothing
---      PLiteral _ prim ->
---        emitEllipse ("PLiteral\\n" <> escapeQuotes (Text.pack (show prim))) Nothing
---      PRecord _ t fields mtail -> do
---        fromNode (emitEllipse "PRecord" (Just t)) $ do
---          id1 <- emitEdgeToFields (Map.toList fields)
---          lift $ do
---            id2 <- toDot mtail
---            emitEdge id1 id2
---      PListCons _ t p1 p2 -> do
---        fromNode (emitEllipse "PListCons" (Just t)) $ do
---          emitEdgeTo p1
---          emitEdgeTo p2
---      PListLiteral _ t ps -> do
---        fromNode (emitEllipse "PListLiteral" (Just t)) $
---          emitEdgesTo ps
---      PTuple _ t ps -> do
---        fromNode (emitEllipse "PTuple" (Just t)) $
---          emitEdgesTo ps
---      POr _ t p1 p2 -> do
---        fromNode (emitEllipse "POr" (Just t)) $ do
---          emitEdgeTo p1
---          emitEdgeTo p2
---      PAs _ (Label t name) p -> do
---        fromNode (emitEllipse ("PAs\\n" <> name) (Just t)) $
---          emitEdgeTo p
---      PShorthand _ (Label t name) ->
---        emitEllipse ("PShorthand\\n" <> name) (Just t)
---      PAtVariable _ ll ->
---        fromNode (emitEllipse "PAtVariable" Nothing) $
---          emitEdgeTo ll
---      PNamedFold _ name ll ->
---        fromNode (emitEllipse ("PNamedFold\\n" <> name) Nothing) $
---          emitEdgeTo ll
---      PTraitInstance _ t _ ->
---        emitEllipse "PTraitInstance" (Just t)
---
--- instance (Pretty t, Show t) => Dot t (Clause a () t) where
---  toDot =
---    \case
---      EClause _ p cs -> do
---        fromNode (emitRectangle "EClause" Nothing) $ do
---          emitEdgeTo p
---          emitEdgesTo cs
---
--- instance (Pretty t, Show t) => Dot t (Choice Expression a () t) where
---  toDot =
---    \case
---      CPlain _ gs e -> do
---        fromNode (emitRectangle "CPlain" Nothing) $ do
---          emitEdgesTo gs
---          emitEdgeTo e
---
--- instance (Pretty t, Show t) => Dot t (Guard Expression a () t) where
---  toDot =
---    \case
---      CGuard e -> do
---        fromNode (emitRectangle "CGuard" Nothing) $ do
---          emitEdgeTo e
---
--- instance (Pretty t, Show t) => Dot t (CompiledClause a () t) where
---  toDot =
---    \case
---      ECompiledClause _ lls e -> do
---        fromNode (emitRectangle "ECompiledClause" Nothing) $ do
---          emitEdgesTo lls
---          emitEdgeTo e
---
--- instance (Show t, Pretty t) => Dot t (FunctionDefinition a t) where
---  toDot =
---    \case
---      FunctionDefinition _ (Just (With _ u)) (With _ t) ps e ->
---        fromNode (emitParallelogram ("FunctionDefinition\\n" <> prettyType u) (Just t)) $ do
---          emitEdgesTo ps
---          emitEdgeTo e
---      FunctionDefinition _ _ (With _ t) ps e ->
---        fromNode (emitParallelogram "FunctionDefinition" (Just t)) $ do
---          emitEdgesTo ps
---          emitEdgeTo e
---
--- instance (Show t, Pretty t) => Dot t (ConstantDefinition a t) where
---  toDot =
---    \case
---      ConstantDefinition _ (Just (With _ u)) (With _ t) e ->
---        fromNode (emitParallelogram ("ConstantDefinition\\n" <> prettyType u) (Just t)) $ do
---          emitEdgeTo e
---      ConstantDefinition _ _ (With _ t) e ->
---        fromNode (emitParallelogram "ConstantDefinition" (Just t)) $ do
---          emitEdgeTo e
---
--- instance (Show t, Pretty t) => Dot t (Definition a k t) where
---  toDot =
---    \case
---      DFunction _ name f ws ->
---        fromNode (emitParallelogram ("DFunction\\n" <> name) Nothing) $ do
---          forM_ f emitEdgeTo
---          emitEdgesTo ws
---      DConstant _ name c ws ->
---        fromNode (emitParallelogram ("DConstant\\n" <> name) Nothing) $ do
---          emitEdgeTo c
---          emitEdgesTo ws
---      DImport _ (Path _) _ ->
---        emitParallelogram "DImport" Nothing
---      DType _ name _ ->
---        emitParallelogram ("DType\\n" <> name) Nothing
---      DTypeAlias _ name (AliasDefinition ps t) ->
---        emitParallelogram ("DTypeAlias\\n" <> name <> "\\n" <> prettyType t) Nothing
---      DTrait _ name (TraitDefinition _ ps ds) ->
---        fromNode (emitParallelogram ("DTrait\\n" <> name) Nothing) $ do
---          nid <- ask
---          lift $ do
---            forM_ ps $
---              \p -> do
---                id1 <- emitRectangle (prettyType p) Nothing
---                emitEdge nid id1
---          lift $
---            forM_ ds $
---              \(n, t) -> do
---                id1 <- emitRectangle (n <> "\\n" <> prettyType t) Nothing
---                emitEdge nid id1
---      DInstance _ name (InstanceDefinition ts t ds) ->
---        fromNode (emitParallelogram ("DInstance\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
---          nid <- ask
---          lift $ do
---            forM_ ts $
---              \tr -> do
---                id1 <- emitTriangle ("Trait\\n" <> prettyType tr) Nothing
---                emitEdge nid id1
---          emitEdgesTo ds
---      DFold _ name (FoldDefinition (Just (With _ t)) cs) ->
---        fromNode (emitParallelogram ("DFold\\n" <> name <> "\\n" <> prettyType t) Nothing) $ do
---          emitEdgesTo cs
---      DFold _ name (FoldDefinition _ cs) ->
---        fromNode (emitParallelogram ("DFold\\n" <> name) Nothing) $ do
---          emitEdgesTo cs
---      _ ->
---        emitParallelogram "TODO" Nothing
---
--- instance (Show t, Pretty t) => Dot t (Module a k t) where
---  toDot =
---    \case
---      Module path _ ds -> do
---        nid <- emitEllipse (principalPath path) Nothing
---        traverse_ toDot ds
---        return nid
---
--- generateDot :: (Pretty t, Dot t a) => a -> Text
--- generateDot ast =
---  Text.unlines $
---    [ "digraph AST {"
---    , "  node [shape=box];"
---    , "  edge [arrowhead=none];"
---    ]
---      ++ map ("  " <>) (reverse dotNodes ++ dotEdges)
---      ++ ["}"]
--- where
---  initialState = DotState 0 [] []
---  (_, finalState) = runState (toDot ast) initialState
---  dotNodes = [showt nid <> " [shape=" <> renderShape shape <> ", label=\"" <> escapeQuotes label <> "\\n" <> maybe "" prettyType tinfo <> "\"];" | (nid, label, tinfo, shape) <- nodes finalState]
---  dotEdges = [showt from <> " -> " <> showt to <> renderEdgeLabel label <> ";" | (from, to, label) <- edges finalState]
---  renderEdgeLabel =
---    \case
---      Nothing ->
---        ""
---      Just ll ->
---        " [label=\"  " <> ll <> "\", labeldistance=2]"
---  renderShape =
---    \case
---      Rectangle ->
---        "rectangle"
---      Ellipse ->
---        "ellipse"
---      Parallelogram ->
---        "parallelogram"
---      Hexagon ->
---        "hexagon"
---      Folder ->
---        "folder"
---      Triangle ->
---        "triangle"
---      Diamond ->
---        "diamond"
---      House ->
---        "house"
---      Note ->
---        "note"
---
--- {-# INLINE prettyType #-}
--- prettyType :: (Pretty t) => t -> Text
--- prettyType p = renderStrict . layoutPretty defaultLayoutOptions $ pretty p
---
--- {-# INLINE escapeQuotes #-}
--- escapeQuotes :: Text -> Text
--- escapeQuotes = Text.replace "\"" "\\\""
---
--- {-# INLINE writeDotFile #-}
--- writeDotFile :: (Pretty t, Dot t a) => Text -> a -> IO ()
--- writeDotFile fname a = writeDebugFile ("./.debug" </> Text.unpack fname <.> "gv") (generateDot a)
---
--- instance Dot Kernel.Type (DotGen Kernel.Type Int) where
---  toDot = id
---
--- instance Dot Kernel.Type (Kernel.Binding Kernel.Type (DotGen Kernel.Type Int)) where
---  toDot =
---    \case
---      Kernel.Binding (Label t name) e ->
---        fromNode (emitRectangle ("Binding\\n" <> name) (Just t)) $ do
---          emitEdgeWithLabelTo "=" e
---
--- instance Dot Kernel.Type (Kernel.Clause Kernel.Type (DotGen Kernel.Type Int)) where
---  toDot =
---    \case
---      Kernel.Clause lls e ->
---        fromNode (emitRectangle "Clause" Nothing) $ do
---          emitEdgesTo lls
---          emitEdgeTo e
---
--- instance Dot Kernel.Type (Kernel.Focus Kernel.Type) where
---  toDot =
---    \case
---      Kernel.Focus name ll1 ll2 ->
---        fromNode (emitRectangle ("Focus\\n" <> name) Nothing) $ do
---          emitEdgeTo ll1
---          emitEdgeTo ll2
---
--- emitOp :: (Dot t a) => Text -> [a] -> DotGen t Int
--- emitOp text = fromNode (emitRectangle text Nothing) . emitEdgesTo
---
--- instance Dot Kernel.Type (Kernel.Op (DotGen Kernel.Type Int)) where
---  toDot =
---    \case
---      Kernel.OEqInt32 op1 op2 ->
---        emitOp "OEqInt32" [op1, op2]
---      Kernel.OEqInt64 op1 op2 ->
---        emitOp "OEqInt64" [op1, op2]
---      Kernel.OEqFloat op1 op2 ->
---        emitOp "OEqFloat" [op1, op2]
---      Kernel.OEqDouble op1 op2 ->
---        emitOp "OEqDouble" [op1, op2]
---      Kernel.OEqChar op1 op2 ->
---        emitOp "OEqChar" [op1, op2]
---      Kernel.OEqBool op1 op2 ->
---        emitOp "OEqBool" [op1, op2]
---      Kernel.ONeInt32 op1 op2 ->
---        emitOp "ONeInt32" [op1, op2]
---      Kernel.ONeInt64 op1 op2 ->
---        emitOp "ONeInt64" [op1, op2]
---      Kernel.ONeFloat op1 op2 ->
---        emitOp "ONeFloat" [op1, op2]
---      Kernel.ONeDouble op1 op2 ->
---        emitOp "ONeDouble" [op1, op2]
---      Kernel.ONeChar op1 op2 ->
---        emitOp "ONeChar" [op1, op2]
---      Kernel.ONeBool op1 op2 ->
---        emitOp "ONeBool" [op1, op2]
---      Kernel.OLtInt32 op1 op2 ->
---        emitOp "OLtInt32" [op1, op2]
---      Kernel.OLtInt64 op1 op2 ->
---        emitOp "OLtInt64" [op1, op2]
---      Kernel.OLtFloat op1 op2 ->
---        emitOp "OLtFloat" [op1, op2]
---      Kernel.OLtDouble op1 op2 ->
---        emitOp "OLtDouble" [op1, op2]
---      Kernel.OGtInt32 op1 op2 ->
---        emitOp "OGtInt32" [op1, op2]
---      Kernel.OGtInt64 op1 op2 ->
---        emitOp "OGtInt64" [op1, op2]
---      Kernel.OGtFloat op1 op2 ->
---        emitOp "OGtFloat" [op1, op2]
---      Kernel.OGtDouble op1 op2 ->
---        emitOp "OGtDouble" [op1, op2]
---      Kernel.OLteInt32 op1 op2 ->
---        emitOp "OLteInt32" [op1, op2]
---      Kernel.OLteInt64 op1 op2 ->
---        emitOp "OLteInt64" [op1, op2]
---      Kernel.OLteFloat op1 op2 ->
---        emitOp "OLteFloat" [op1, op2]
---      Kernel.OLteDouble op1 op2 ->
---        emitOp "OLteDouble" [op1, op2]
---      Kernel.OGteInt32 op1 op2 ->
---        emitOp "OGteInt32" [op1, op2]
---      Kernel.OGteInt64 op1 op2 ->
---        emitOp "OGteInt64" [op1, op2]
---      Kernel.OGteFloat op1 op2 ->
---        emitOp "OGteFloat" [op1, op2]
---      Kernel.OGteDouble op1 op2 ->
---        emitOp "OGteDouble" [op1, op2]
---      Kernel.OAddInt32 op1 op2 ->
---        emitOp "OAddInt32" [op1, op2]
---      Kernel.OAddInt64 op1 op2 ->
---        emitOp "OAddInt64" [op1, op2]
---      Kernel.OAddFloat op1 op2 ->
---        emitOp "OAddFloat" [op1, op2]
---      Kernel.OAddDouble op1 op2 ->
---        emitOp "OAddDouble" [op1, op2]
---      Kernel.OSubInt32 op1 op2 ->
---        emitOp "OSubInt32" [op1, op2]
---      Kernel.OSubInt64 op1 op2 ->
---        emitOp "OSubInt64" [op1, op2]
---      Kernel.OSubFloat op1 op2 ->
---        emitOp "OSubFloat" [op1, op2]
---      Kernel.OSubDouble op1 op2 ->
---        emitOp "OSubDouble" [op1, op2]
---      Kernel.OMulInt32 op1 op2 ->
---        emitOp "OMulInt32" [op1, op2]
---      Kernel.OMulInt64 op1 op2 ->
---        emitOp "OMulInt64" [op1, op2]
---      Kernel.OMulFloat op1 op2 ->
---        emitOp "OMulFloat" [op1, op2]
---      Kernel.OMulDouble op1 op2 ->
---        emitOp "OMulDouble" [op1, op2]
---      Kernel.ODivInt32 op1 op2 ->
---        emitOp "ODivInt32" [op1, op2]
---      Kernel.ODivInt64 op1 op2 ->
---        emitOp "ODivInt64" [op1, op2]
---      Kernel.ODivFloat op1 op2 ->
---        emitOp "ODivFloat" [op1, op2]
---      Kernel.ODivDouble op1 op2 ->
---        emitOp "ODivDouble" [op1, op2]
---      Kernel.OOr op1 op2 ->
---        emitOp "OOr" [op1, op2]
---      Kernel.OAnd op1 op2 ->
---        emitOp "OAnd" [op1, op2]
---      Kernel.ONot op1 ->
---        emitOp "ONot" [op1]
---      Kernel.ONegFloat op1 ->
---        emitOp "ONegFloat" [op1]
---      Kernel.ONegDouble op1 ->
---        emitOp "ONegDouble" [op1]
---
--- instance Dot Kernel.Type (Kernel.Expr Kernel.Type) where
---  toDot =
---    cata $
---      \case
---        Kernel.EVar (Label t name) ->
---          emitRectangle ("EVar\\n" <> name) (Just t)
---        Kernel.ELet bs e ->
---          fromNode (emitRectangle "ELet" Nothing) $ do
---            emitEdgesTo bs
---            emitEdgeWithLabelTo "in" e
---        Kernel.ELit p ->
---          emitRectangle ("ELit\\n" <> Text.pack (show p)) Nothing
---        Kernel.ELam lls e -> do
---          fromNode (emitHouse "ELam" Nothing) $ do
---            emitEdgesTo lls
---            emitEdgeTo e
---        Kernel.EApp t e es ->
---          fromNode (emitDiamond "EApp" (Just t)) $ do
---            emitEdgeTo e
---            emitEdgesTo es
---        Kernel.EIf e1 e2 e3 ->
---          fromNode (emitRectangle "EIf" Nothing) $ do
---            emitEdgeTo e1
---            emitEdgeWithLabelTo "then" e2
---            emitEdgeWithLabelTo "else" e3
---        Kernel.EOp op ->
---          fromNode (emitRectangle "EOp\\n" Nothing) $ do
---            emitEdgeTo op
---        Kernel.EMat t e cs ->
---          fromNode (emitRectangle "EMat" (Just t)) $ do
---            emitEdgeTo e
---            emitEdgesTo cs
---        Kernel.EExt fname e1 e2 ->
---          fromNode (emitHexagon ("EExt\\n" <> fname) Nothing) $ do
---            emitEdgeTo e1
---            emitEdgeTo e2
---        Kernel.ENil ->
---          emitHexagon "ENil" Nothing
---        Kernel.ESel f e1 e2 ->
---          fromNode (emitHexagon "ESel" Nothing) $ do
---            emitEdgeTo f
---            emitEdgeTo e1
---            emitEdgeTo e2
---        Kernel.ECall (Label t name) es e ->
---          fromNode (emitHexagon ("ECall\\n" <> name) (Just t)) $ do
---            emitEdgesTo es
---            emitEdgeTo e
---        Kernel.EMem e ->
---          fromNode (emitHexagon "EMem" Nothing) $
---            emitEdgeTo e
---
--- instance Dot Kernel.Type (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)) where
---  toDot =
---    \case
---      Kernel.OFunction name lls e ->
---        fromNode (emitParallelogram ("OFunction\\n" <> name) Nothing) $ do
---          emitEdgesTo lls
---          emitEdgeTo e
---      Kernel.OConstant name e ->
---        fromNode (emitParallelogram ("OConstant\\n" <> name) Nothing) $ do
---          emitEdgeTo e
---      Kernel.OExternal{} ->
---        emitParallelogram "TODO" Nothing
---      Kernel.OData{} ->
---        emitParallelogram "TODO" Nothing
---
--- instance Dot Kernel.Type (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)) where
---  toDot =
---    \case
---      Kernel.Module{..} -> do
---        nid <- emitEllipse moduleName Nothing
---        traverse_ toDot moduleObjects
---        return nid
+import Coal.Common.Label (Label (..))
+import Coal.Common.Supply (Supply (..), supplied)
+import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..), ModuleExportList (..))
+import Coal.Language.Module.Export (Export (..))
+import Coal.Language.Module.Import (Import (..))
+import Coal.Language.Module.Path (principalPath)
+import Control.Monad.State
+import Data.Foldable (foldrM)
+import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
+import Data.Text (Text)
+import qualified Data.Text as Text
+import Extras (Dictionary, Name)
+import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty)
+import Prettyprinter.Render.Text (renderStrict)
+import TextShow (showt)
+
+data DotShape
+  = RectangleShape
+  | EllipseShape
+  | ParallelogramShape
+  | HexagonShape
+  | FolderShape
+  | TriangleShape
+  | DiamondShape
+  | HouseShape
+  | NoteShape
+  deriving (Show, Eq, Read)
+
+data DotNode = DotNode
+  { dotNodeId :: Int
+  , dotNodeLabel :: Text
+  , dotNodeName :: Maybe Text
+  , dotNodeShape :: DotShape
+  }
+  deriving (Show, Eq, Read)
+
+data DotEdge = DotEdge
+  { dotEdgeFrom :: Int
+  , dotEdgeTo :: Int
+  , dotEdgeLabel :: Maybe Text
+  }
+  deriving (Show, Eq, Read)
+
+data DotState = DotState
+  { dotStateSupply :: Int
+  , dotStateNodes :: [DotNode]
+  , dotStateEdges :: [DotEdge]
+  }
+  deriving (Show, Eq, Read)
+
+instance Supply DotState where
+  updateSupply f DotState{..} = DotState{dotStateSupply = f dotStateSupply, ..}
+  getSupply = dotStateSupply
+
+insertNode :: DotNode -> DotState -> DotState
+insertNode node DotState{..} =
+  DotState
+    { dotStateNodes = node : dotStateNodes
+    , ..
+    }
+
+insertEdge :: Int -> Int -> Maybe Text -> DotState -> DotState
+insertEdge from to label DotState{..} =
+  DotState
+    { dotStateEdges = DotEdge from to label : dotStateEdges
+    , ..
+    }
+
+type DotGen = State DotState
+
+freshId :: DotGen Int
+freshId = supplied id
+
+emitNode :: DotNode -> DotGen ()
+emitNode = modify . insertNode
+
+emitEdge :: (Dot a) => Int -> a -> DotGen ()
+emitEdge dotId to = do
+  toId <- toDot to
+  modify (insertEdge dotId toId Nothing)
+
+emitEdgeWithLabel :: (Dot a) => Text -> Int -> a -> DotGen ()
+emitEdgeWithLabel label dotId to = do
+  toId <- toDot to
+  modify (insertEdge dotId toId (Just label))
+
+emitEdges :: (Traversable f, Dot a) => Int -> f a -> DotGen ()
+emitEdges from tos = do
+  ids <- forM tos toDot
+  forM_ ids $ emitEdge from
+
+emitEdgesWithLabels :: (Dot a) => [Text] -> Int -> [a] -> DotGen ()
+emitEdgesWithLabels labels from tos = do
+  ids <- forM tos toDot
+  forM_ (zip labels ids) $
+    \(ll, to) ->
+      emitEdgeWithLabel ll from to
+
+emitNamedShape :: DotShape -> Maybe Text -> Text -> DotGen Int
+emitNamedShape shape name label = do
+  nid <- freshId
+  emitNode (DotNode nid label name shape)
+  return nid
+
+emitShape :: DotShape -> Text -> DotGen Int
+emitShape shape = emitNamedShape shape Nothing
+
+class Dot a where
+  toDot :: a -> DotGen Int
+
+instance Dot () where
+  toDot () = emitShape EllipseShape "()"
+
+instance Dot Name where
+  toDot = emitShape RectangleShape
+
+instance Dot Int where
+  toDot = pure
+
+instance Dot (DotGen Int) where
+  toDot = id
+
+instance (Dot v) => Dot (Dictionary v) where
+  toDot m = do
+    dotId <- emitShape RectangleShape "Dictionary"
+    forM_ (Map.toList m) $
+      \(k, v) -> do
+        id1 <- emitNamedShape RectangleShape (Just k) "Key"
+        emitEdge dotId id1
+        emitEdge id1 v
+    return dotId
+
+instance (Dot a) => Dot (Maybe a) where
+  toDot =
+    \case
+      Nothing -> do
+        emitShape RectangleShape "Nothing"
+      Just d -> do
+        dotId <- emitShape RectangleShape "Just"
+        emitEdge dotId d
+        return dotId
+
+instance (Dot t) => Dot (Label t) where
+  toDot =
+    \case
+      Label t name -> do
+        (id1, _) <- withTypeInfo t $ emitNamedShape NoteShape (Just name) "Label"
+        return id1
+
+instance Dot (Import a) where
+  toDot =
+    \case
+      NameImport _ name ->
+        emitNamedShape RectangleShape (Just name) "NameImport"
+      TypeImport _ name names -> do
+        dotId <- emitNamedShape RectangleShape (Just name) "TypeImport"
+        _ <- foldrM connectDots dotId names
+        return dotId
+
+instance Dot (Export a) where
+  toDot =
+    \case
+      NameExport _ name ->
+        emitNamedShape RectangleShape (Just name) "NameExport"
+      TypeExport _ name names -> do
+        dotId <- emitNamedShape RectangleShape (Just name) "TypeExport"
+        _ <- foldrM connectDots dotId names
+        return dotId
+
+instance Dot (ModuleExportList a) where
+  toDot =
+    \case
+      Exports exports -> do
+        dotId <- emitShape FolderShape "Exports"
+        emitEdges dotId exports
+        return dotId
+      ExportAll ->
+        emitShape FolderShape "ExportsAll"
+
+instance (Dot t) => Dot (Module a Kind t) where
+  toDot =
+    \case
+      Module{..} -> do
+        dotId <- emitNamedShape RectangleShape (Just $ principalPath protoOmodulePath) "Module"
+        emitEdge dotId protoOmoduleExportList
+        emitEdges dotId protoOmoduleDefinitions
+        return dotId
+
+emitDefinition :: (Dot t) => Text -> Text -> t -> DotGen Int
+emitDefinition name label def = do
+  dotId <- emitNamedShape TriangleShape (Just name) label
+  emitEdge dotId def
+  return dotId
+
+instance (Dot t) => Dot (Definition a Kind t) where
+  toDot =
+    \case
+      DType _ name def ->
+        emitDefinition name "DType" def
+      DTypeAlias _ name def ->
+        emitDefinition name "DTypeAlias" def
+      DFunction _ name def ->
+        emitDefinition name "DFunction" def
+      DLet _ name def ->
+        emitDefinition name "DLet" def
+      DFunctionGroup _ name defs -> do
+        dotId <- emitNamedShape TriangleShape (Just name) "DFunctionGroup"
+        emitEdges dotId defs
+        return dotId
+      DFold _ name def -> do
+        emitDefinition name "DFold" def
+      DImport _ path imports -> do
+        dotId <- emitNamedShape TriangleShape (Just $ principalPath path) "DImport"
+        _ <- foldrM connectDots dotId imports
+        return dotId
+      DNamespaceImport _ path -> do
+        emitNamedShape TriangleShape (Just $ principalPath path) "DQualifiedImport"
+      DTrait _ name def ->
+        emitDefinition name "DTrait" def
+      DInstance _ def -> do
+        dotId <- emitShape TriangleShape "DInstance"
+        emitEdge dotId def
+        return dotId
+
+connectDots :: (Dot a) => a -> Int -> DotGen Int
+connectDots a from = do
+  dotId <- toDot a
+  emitEdge from dotId
+  return dotId
+
+instance Dot (TypeDefinition a Kind t) where
+  toDot =
+    \case
+      TypeDefinition{..} -> do
+        dotId <- emitShape EllipseShape "TypeDefinition"
+        emitEdges dotId protoOtypeDefinitionParameters
+        emitEdges dotId protoOtypeDefinitionConstructors
+        return dotId
+
+annotation :: (Dot t) => t -> DotGen Int
+annotation t = do
+  dotId <- emitShape RectangleShape "Annotation"
+  emitEdge dotId t
+  return dotId
+
+instance (Dot t) => Dot (FunctionDefinition a Kind t) where
+  toDot =
+    \case
+      FunctionDefinition{..} -> do
+        dotId <- emitShape EllipseShape "FunctionDefinition"
+        emitEdge dotId (annotation protoOfunctionDefinitionAnnotation)
+        emitEdge dotId protoOfunctionDefinitionType
+        emitEdgesWithLabels numberedList dotId (NonEmpty.toList protoOfunctionDefinitionPatterns)
+        emitEdge dotId protoOfunctionDefinitionExpression
+        return dotId
+
+instance (Dot t) => Dot (LetDefinition a Kind t) where
+  toDot =
+    \case
+      LetDefinition{..} -> do
+        dotId <- emitShape EllipseShape "LetDefinition"
+        emitEdge dotId (annotation protoOletDefinitionAnnotation)
+        emitEdge dotId protoOletDefinitionType
+        emitEdge dotId protoOletDefinitionExpression
+        return dotId
+
+instance (Dot t) => Dot (FoldDefinition a Kind t) where
+  toDot =
+    \case
+      FoldDefinition{..} -> do
+        dotId <- emitShape EllipseShape "FoldDefinition"
+        emitEdge dotId (annotation protoOfoldDefinitionAnnotation)
+        emitEdges dotId protoOfoldDefinitionClauses
+        return dotId
+
+instance Dot (TraitDefinition a Kind) where
+  toDot =
+    \case
+      TraitDefinition{..} -> do
+        dotId <- emitNamedShape EllipseShape (Just protoOtraitDefinitionTraitName) "TraitDefinition"
+        emitEdges dotId protoOtraitDefinitionConstraints
+        emitEdge dotId protoOtraitDefinitionParameter
+        forM_ protoOtraitDefinitionInterface $
+          \TraitDefinitionInterfaceEntry{..} -> do
+            id1 <- emitNamedShape EllipseShape (Just protoOtraitDefinitionInterfaceEntryName) "Member"
+            emitEdge dotId id1
+            emitEdge id1 protoOtraitDefinitionInterfaceEntryScheme
+        return dotId
+
+instance (Dot t) => Dot (InstanceDefinition a Kind t) where
+  toDot =
+    \case
+      InstanceDefinition{..} -> do
+        dotId <- emitNamedShape EllipseShape (Just protoOinstanceDefinitionTraitName) "InstanceDefinition"
+        emitEdges dotId protoOinstanceDefinitionConstraints
+        emitEdge dotId protoOinstanceDefinitionType
+        emitEdges dotId protoOinstanceDefinitionImplementations
+        return dotId
+
+instance Dot (AliasDefinition a Kind) where
+  toDot =
+    \case
+      AliasDefinition{..} -> do
+        dotId <- emitShape EllipseShape "AliasDefinition"
+        emitEdges dotId protoOaliasDefinitionParameters
+        emitEdge dotId protoOaliasDefinitionType
+        return dotId
+
+instance (Dot t, Dot (o k)) => Dot (DataConstructor o k t) where
+  toDot =
+    \case
+      DataConstructor{..} -> do
+        dotId <- emitNamedShape EllipseShape (Just constructorName) "DataConstructor"
+        emitEdge dotId constructorScheme
+        return dotId
+
+instance (Dot k) => Dot (Parameter k) where
+  toDot =
+    \case
+      Parameter{..} -> do
+        (id1, _) <- withTypeInfo parameterKind $ emitNamedShape RectangleShape (Just parameterName) "Parameter"
+        return id1
+
+instance (Dot t, Dot (o k)) => Dot (Scheme o k t) where
+  toDot =
+    \case
+      Forall{..} -> do
+        dotId <- emitShape RectangleShape "Scheme"
+        emitEdges dotId (Set.toList schemeTypeVariables)
+        emitEdges dotId (Set.toList schemeTraits)
+        emitEdge dotId schemeTypeBody
+        return dotId
+
+instance (Dot t) => Dot (Trait t) where
+  toDot =
+    \case
+      Trait{..} -> do
+        dotId <- emitNamedShape HexagonShape (Just traitName) "Trait"
+        emitEdge dotId traitType
+        return dotId
+
+instance (Dot t) => Dot (Qualified t) where
+  toDot (With traits t) = do
+    dotId <- emitShape HexagonShape "With"
+    case traits of
+      [] -> do
+        toId <- emitShape HexagonShape "[]"
+        emitEdge dotId toId
+      _ -> emitEdges dotId traits
+    emitEdge dotId t
+    return dotId
+
+instance (Show k, Pretty k, HasKind (Type TypeIndex k)) => Dot (Type TypeIndex k) where
+  toDot t = do
+    (id1, _) <- withTypeInfo (kindOf t) $ emitShape HexagonShape (prettyType t)
+    return id1
+
+instance (Show k, Pretty k, HasKind (Type Parameter k)) => Dot (Type Parameter k) where
+  toDot t = do
+    (id1, _) <- withTypeInfo (kindOf t) $ emitShape HexagonShape (prettyType t)
+    return id1
+
+instance Dot Kind where
+  toDot k = do
+    emitShape HexagonShape (Text.pack $ show k)
+
+instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Binding Expression a k t) where
+  toDot =
+    \case
+      BPattern _ p e -> do
+        dotId <- emitShape RectangleShape "BPattern"
+        emitEdgeWithLabel "let" dotId p
+        emitEdgeWithLabel "=" dotId e
+        return dotId
+      BFunction _ name ps e -> do
+        dotId <- emitNamedShape RectangleShape (Just name) "BFunction"
+        emitEdges dotId ps
+        emitEdge dotId e
+        return dotId
+
+withTypeInfo :: (Dot t) => t -> DotGen Int -> DotGen (Int, Int)
+withTypeInfo t e = do
+  id1 <- toDot e
+  id2 <- toDot t
+  emitEdge id1 id2
+  return (id1, id2)
+
+instance Dot Primitive where
+  toDot =
+    \case
+      LUnit ->
+        emitShape RectangleShape "LUnit"
+      LBool b ->
+        emitNamedShape RectangleShape (Just $ showt b) "LBool"
+      LInt32 int ->
+        emitNamedShape RectangleShape (Just $ showt int) "LInt32"
+      LInt64 int ->
+        emitNamedShape RectangleShape (Just $ showt int) "LInt64"
+      LBignum int ->
+        emitNamedShape RectangleShape (Just $ showt int) "LBignum"
+      LFloat float ->
+        emitNamedShape RectangleShape (Just $ showt float) "LFloat"
+      LDouble double ->
+        emitNamedShape RectangleShape (Just $ showt double) "LDouble"
+      LChar c ->
+        emitNamedShape RectangleShape (Just $ showt c) "LChar"
+      LString str ->
+        emitNamedShape RectangleShape (Just $ showt str) "LString"
+
+instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Expression a k t) where
+  toDot =
+    \case
+      EAnnotation _ t e -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EAnnotation"
+        emitEdge id2 e
+        return id1
+      EApplication _ t e es -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EApplication"
+        emitEdgeWithLabel "@f" id2 e
+        emitEdgesWithLabels numberedList id2 (NonEmpty.toList es)
+        return id1
+      ELambda _ ps e -> do
+        dotId <- emitShape HouseShape "ELambda"
+        emitEdgesWithLabels numberedList dotId (NonEmpty.toList ps)
+        emitEdge dotId e
+        return dotId
+      ELet _ bs e -> do
+        dotId <- emitShape HouseShape "ELet"
+        emitEdges dotId bs
+        emitEdge dotId e
+        return dotId
+      ERecursiveLet _ p e1 e2 -> do
+        dotId <- emitShape HouseShape "ERecursiveLet"
+        emitEdge dotId p
+        emitEdgeWithLabel "=" dotId e1
+        emitEdgeWithLabel "in" dotId e2
+        return dotId
+      EVariable _ (Label t name) -> do
+        (id1, _) <- withTypeInfo t $ emitNamedShape HouseShape (Just name) "EVariable"
+        return id1
+      EConstructor _ (Label t name) -> do
+        (id1, _) <- withTypeInfo t $ emitNamedShape HouseShape (Just name) "EConstructor"
+        return id1
+      ELiteral _ p -> do
+        dotId <- emitShape HouseShape "ELiteral"
+        emitEdge dotId p
+        return dotId
+      EIf _ t e1 e2 e3 -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EIf"
+        emitEdge id2 e1
+        emitEdgeWithLabel "then" id2 e2
+        emitEdgeWithLabel "else" id2 e3
+        return id1
+      EOperator _ t op -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EOperator"
+        emitEdge id2 op
+        return id1
+      ERecord _ t d me -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "ERecord"
+        emitEdge id2 d
+        emitEdge id2 me
+        return id1
+      EListCons _ t e1 e2 -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EListCons"
+        emitEdge id2 e1
+        emitEdge id2 e2
+        return id1
+      EListLiteral _ t [] -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "EListLiteral"
+        emitEdge id2 (emitShape HexagonShape "[]")
+        return id1
+      EListLiteral _ t es -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EListLiteral"
+        emitEdges id2 es
+        return id1
+      ETuple _ t es -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "ETuple"
+        emitEdges id2 es
+        return id1
+      EMatch _ t e cs -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EMatch"
+        emitEdge id2 e
+        emitEdgesWithLabels numberedList id2 (NonEmpty.toList cs)
+        return id1
+      ELambdaMatch _ t cs -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "ELambdaMatch"
+        emitEdges id2 cs
+        return id1
+      ECompiledMatch _ t e cs -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "ECompiledMatch"
+        emitEdge id2 e
+        emitEdges id2 cs
+        return id1
+      EFold _ t es cs -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EFold"
+        emitEdges id2 es
+        emitEdges id2 cs
+        return id1
+      ESelect _ (Label t name) e -> do
+        (id1, id2) <- withTypeInfo t $ emitNamedShape HouseShape (Just name) "ESelect"
+        emitEdge id2 e
+        return id1
+      EFocus _ name ll1 ll2 e1 e2 -> do
+        dotId <- emitNamedShape HouseShape (Just name) "EFocus"
+        emitEdge dotId ll1
+        emitEdge dotId ll2
+        emitEdge dotId e1
+        emitEdge dotId e2
+        return dotId
+      ETraitInstance _ t tr -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "ETraitInstance"
+        emitEdge id2 tr
+        return id1
+      EFFICall _ t ll es e -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EFFICall"
+        emitEdge id2 ll
+        emitEdges id2 es
+        emitEdge id2 e
+        return id1
+      EDoBlock _ is -> do
+        dotId <- emitShape HouseShape "EDoBlock"
+        forM_ is $
+          \(p, e) -> do
+            id1 <- toDot p
+            emitEdge dotId id1
+            emitEdge id1 e
+        return dotId
+
+instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Pattern a k t) where
+  toDot =
+    \case
+      PAnnotation _ t p -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PAnnotation"
+        emitEdge id2 p
+        return id1
+      PAny _ t -> do
+        (id1, _) <- withTypeInfo t $ emitShape ParallelogramShape "PAny"
+        return id1
+      PVariable _ (Label t name) -> do
+        (id1, _) <- withTypeInfo t $ emitNamedShape ParallelogramShape (Just name) "PVariable"
+        return id1
+      PConstructor _ (Label t name) ps -> do
+        (id1, id2) <- withTypeInfo t $ emitNamedShape ParallelogramShape (Just name) "PConstructor"
+        emitEdges id2 ps
+        return id1
+      PInteger _ t n -> do
+        (id1, _) <- withTypeInfo t $ emitNamedShape ParallelogramShape (Just $ showt n) "PInteger"
+        return id1
+      PLiteral _ p -> do
+        dotId <- emitShape ParallelogramShape "PLiteral"
+        emitEdge dotId p
+        return dotId
+      PRecord _ t d mp -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PRecord"
+        emitEdge id2 d
+        emitEdge id2 mp
+        return id1
+      PListCons _ t p1 p2 -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PListCons"
+        emitEdge id2 p1
+        emitEdge id2 p2
+        return id1
+      PListLiteral _ t [] -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PListLiteral"
+        emitEdge id2 (emitShape HexagonShape "[]")
+        return id1
+      PListLiteral _ t ps -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PListLiteral"
+        emitEdges id2 ps
+        return id1
+      PTuple _ t ps -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PTuple"
+        emitEdges id2 ps
+        return id1
+      POr _ t p1 p2 -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "POr"
+        emitEdges id2 p1
+        emitEdges id2 p2
+        return id1
+      PAs _ (Label t name) p -> do
+        (id1, id2) <- withTypeInfo t $ emitNamedShape ParallelogramShape (Just name) "PAs"
+        emitEdge id2 p
+        return id1
+      PShorthand _ (Label t name) -> do
+        (id1, _) <- withTypeInfo t $ emitNamedShape ParallelogramShape (Just name) "PShorthand"
+        return id1
+      PAtVariable _ (Label t name) -> do
+        (id1, _) <- withTypeInfo t $ emitNamedShape ParallelogramShape (Just name) "PAtVariable"
+        return id1
+      PNamedFold _ name ll -> do
+        dotId <- emitNamedShape ParallelogramShape (Just name) "PNamedFold"
+        emitEdge dotId ll
+        return dotId
+      PTraitInstance _ t tr -> do
+        (id1, id2) <- withTypeInfo t $ emitShape ParallelogramShape "PTraitInstance"
+        emitEdge id2 tr
+        return id1
+
+instance Dot Operator where
+  toDot =
+    \case
+      OLogicalNot ->
+        emitShape RectangleShape "OLogicalNot"
+      OLogicalOr ->
+        emitShape RectangleShape "OLogicalOr"
+      OLogicalAnd ->
+        emitShape RectangleShape "OLogicalAnd"
+      OForwardApplication ->
+        emitShape RectangleShape "OForwardApplication"
+      OReverseApplication ->
+        emitShape RectangleShape "OReverseApplication"
+      OForwardComposition ->
+        emitShape RectangleShape "OForwardComposition"
+      OReverseComposition ->
+        emitShape RectangleShape "OReverseComposition"
+      OStringConcatenation ->
+        emitShape RectangleShape "OStringConcatenation"
+      OListConcatenation ->
+        emitShape RectangleShape "OListConcatenation"
+
+instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Clause a k t) where
+  toDot =
+    \case
+      EClause{..} -> do
+        dotId <- emitShape RectangleShape "EClause"
+        emitEdge dotId clausePattern
+        emitEdges dotId clauseChoices
+        return dotId
+
+instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Choice Expression a k t) where
+  toDot =
+    \case
+      CPlain _ gs e -> do
+        dotId <- emitShape RectangleShape "CPlain"
+        emitEdges dotId gs
+        emitEdge dotId e
+        return dotId
+
+instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Guard Expression a k t) where
+  toDot =
+    \case
+      CGuard e -> do
+        dotId <- emitShape RectangleShape "CGuard"
+        emitEdge dotId e
+        return dotId
+
+instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (CompiledClause a k t) where
+  toDot =
+    \case
+      ECompiledClause{..} -> do
+        dotId <- emitShape RectangleShape "ECompiledClause"
+        emitEdges dotId compiledClauseSegments
+        emitEdge dotId compiledClauseExpression
+        return dotId
+
+numberedList :: [Text]
+numberedList = ["#" <> showt i | i <- [1 :: Int ..]]
+
+shapeToDotSyntax :: DotShape -> Text
+shapeToDotSyntax =
+  \case
+    RectangleShape ->
+      "rectangle"
+    EllipseShape ->
+      "ellipse"
+    ParallelogramShape ->
+      "parallelogram"
+    HexagonShape ->
+      "hexagon"
+    FolderShape ->
+      "folder"
+    TriangleShape ->
+      "triangle"
+    DiamondShape ->
+      "diamond"
+    HouseShape ->
+      "house"
+    NoteShape ->
+      "note"
+
+edgeLabelToDotSyntax :: Maybe Text -> Text
+edgeLabelToDotSyntax =
+  \case
+    Nothing ->
+      ""
+    Just ll ->
+      " [label=\"  " <> ll <> "\", labeldistance=2]"
+
+labelToDotSyntax :: Text -> Maybe Text -> Text
+labelToDotSyntax label Nothing = "\"" <> escapeQuotes label <> "\""
+labelToDotSyntax label (Just name) = "<" <> escapeHtmlEntities (escapeHtmlEntities label) <> "<BR/>" <> inBold (escapeHtmlEntities name) <> "<BR/>" <> ">"
+
+escapeHtmlEntities :: Text -> Text
+escapeHtmlEntities = Text.replace "<" "&lt;" . Text.replace ">" "&gt;"
+
+{-# INLINE escapeQuotes #-}
+escapeQuotes :: Text -> Text
+escapeQuotes = Text.replace "\"" "\\\""
+
+{-# INLINE inBold #-}
+inBold :: Text -> Text
+inBold text = "<B>" <> text <> "</B>"
+
+generateDotSyntax :: (Dot a) => a -> Text
+generateDotSyntax ast =
+  Text.unlines $
+    [ "digraph AST {"
+    , "  node [shape=box];"
+    , "  edge [arrowhead=none];"
+    ]
+      <> map ("  " <>) (reverse dotNodes ++ dotEdges)
+      <> ["}"]
+ where
+  initialState = DotState 0 [] []
+  (_, finalState) = runState (toDot ast) initialState
+  dotNodes =
+    [ showt dotNodeId
+      <> " [shape="
+      <> shapeToDotSyntax dotNodeShape
+      <> ", label="
+      <> labelToDotSyntax dotNodeLabel dotNodeName
+      <> "];"
+    | DotNode{..} <- dotStateNodes finalState
+    ]
+  dotEdges =
+    [ showt dotEdgeFrom
+      <> " -> "
+      <> showt dotEdgeTo
+      <> edgeLabelToDotSyntax dotEdgeLabel
+      <> ";"
+    | DotEdge{..} <- dotStateEdges finalState
+    ]
+
+-- TODO
+prettyType :: (Pretty t) => t -> Text
+prettyType p = Text.replace "->" "→" (renderStrict $ layoutPretty defaultLayoutOptions $ pretty p)

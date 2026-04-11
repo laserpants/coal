@@ -5,9 +5,9 @@
 module Coal.AST.HasMetadata (HasMetadata (..), metadataSpan) where
 
 import Coal.AST.Metadata (Metadata (..))
+import Coal.Language.Definition (Definition (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Pattern (Pattern (..))
-import Coal.ProtoLanguage.ProtoDefinition (ProtoDefinition (..))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenError (..), TypeAnnotationError (..))
@@ -119,19 +119,19 @@ instance HasMetadata (Assumption Metadata t) where
     \case
       Assumption a _ _ -> a
 
-instance HasMetadata (ProtoDefinition Metadata k ()) where
+instance HasMetadata (Definition Metadata k ()) where
   getMetadata =
     \case
-      ProtoDType a _ _ -> a
-      ProtoDTypeAlias a _ _ -> a
-      ProtoDFunction a _ _ -> a
-      ProtoDFunctionGroup a _ _ -> a
-      ProtoDFold a _ _ -> a
-      ProtoDLet a _ _ -> a
-      ProtoDImport a _ _ -> a
-      ProtoDNamespaceImport a _ -> a
-      ProtoDTrait a _ _ -> a
-      ProtoDInstance a _ -> a
+      DType a _ _ -> a
+      DTypeAlias a _ _ -> a
+      DFunction a _ _ -> a
+      DFunctionGroup a _ _ -> a
+      DFold a _ _ -> a
+      DLet a _ _ -> a
+      DImport a _ _ -> a
+      DNamespaceImport a _ -> a
+      DTrait a _ _ -> a
+      DInstance a _ -> a
 
 metadataSpan :: (HasMetadata a) => a -> a -> Metadata
 metadataSpan lhs rhs =

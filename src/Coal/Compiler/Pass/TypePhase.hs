@@ -14,10 +14,10 @@ import Coal.Compiler.Pass.TypePhase.Prep2 (passPrep2)
 import Coal.Compiler.Pass.TypePhase.TopLevelFolds (passTopLevelFolds)
 import Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference)
 import Coal.Language (IndexedType, Kind)
-import Coal.ProtoLanguage.ProtoModule
+import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
 
-typePhasePasses :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata () ()) (ProtoModule Metadata Kind IndexedType)
+typePhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind IndexedType)
 typePhasePasses =
   passPrep
     >-> passExpandFunctionGroups

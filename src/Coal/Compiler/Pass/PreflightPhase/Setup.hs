@@ -8,18 +8,18 @@ import Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions, insertExtraD
 import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Extras (for)
 
-passSetup :: (Monad m) => Pass a m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passSetup :: (Monad m) => Pass a m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passSetup = Pass{runPass = pass}
 
-pass :: (Monad m) => [BuildEnvelope (ProtoModule Metadata () ())] -> CompilerT a m [BuildEnvelope (ProtoModule Metadata () ())]
+pass :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT a m [BuildEnvelope (Module Metadata () ())]
 pass modules = pure (for modules (fmap setup))
 
-setup :: ProtoModule Metadata () () -> ProtoModule Metadata () ()
-setup (ProtoModule p x ds) = ProtoModule p x (ins ds) -- overModuleDefinitions ins m
+setup :: Module Metadata () () -> Module Metadata () ()
+setup (Module p x ds) = Module p x (ins ds) -- overModuleDefinitions ins m
  where
   ins
     | principalPath p `elem` embeddedPaths =

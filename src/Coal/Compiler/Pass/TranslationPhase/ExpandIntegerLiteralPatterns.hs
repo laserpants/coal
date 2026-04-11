@@ -12,12 +12,12 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
 import Control.Monad.Writer
@@ -30,10 +30,10 @@ import qualified Data.List.NonEmpty as NonEmpty
 import GHC.Int (Int32, Int64)
 import TextShow (showt)
 
-passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandIntegerLiteralPatterns = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 bork = expandIntegerLiteralPatterns
 
 class TransformContext e where
@@ -124,48 +124,48 @@ collectIntegerLiteralPatterns =
     p ->
       pure p
 
-instance TransformContext (ProtoFunctionDefinition Metadata Kind IndexedType) where
+instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
-      ProtoFunctionDefinition{..} -> do
+      FunctionDefinition{..} -> do
         newFunctiongDefinitionExpression <- expandIntegerLiteralPatterns protoOfunctionDefinitionExpression
         return $
-          ProtoFunctionDefinition
+          FunctionDefinition
             { protoOfunctionDefinitionExpression = newFunctiongDefinitionExpression
             , ..
             }
 
-instance TransformContext (ProtoLetDefinition Metadata Kind IndexedType) where
+instance TransformContext (LetDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
-      ProtoLetDefinition{..} -> do
+      LetDefinition{..} -> do
         newLetDefinitionExpression <- expandIntegerLiteralPatterns protoOletDefinitionExpression
         return $
-          ProtoLetDefinition
+          LetDefinition
             { protoOletDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
-instance TransformContext (ProtoDefinition Metadata Kind IndexedType) where
+instance TransformContext (Definition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
-      ProtoDFunction a name def ->
-        ProtoDFunction a name <$> expandIntegerLiteralPatterns def
-      ProtoDLet a name def ->
-        ProtoDLet a name <$> expandIntegerLiteralPatterns def
+      DFunction a name def ->
+        DFunction a name <$> expandIntegerLiteralPatterns def
+      DLet a name def ->
+        DLet a name <$> expandIntegerLiteralPatterns def
       d ->
         pure d
 
-instance TransformContext (ProtoModule Metadata Kind IndexedType) where
+instance TransformContext (Module Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
-      ProtoModule{..} -> do
+      Module{..} -> do
         setCurrentPathC protoOmodulePath
         -- setCompilerCurrentModuleC protoOmodulePath
         setCurrentPathC protoOmodulePath
         newModuleDefinitions <- traverse expandIntegerLiteralPatterns protoOmoduleDefinitions
         return $
-          ProtoModule
+          Module
             { protoOmoduleDefinitions = newModuleDefinitions
             , ..
             }

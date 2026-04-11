@@ -14,12 +14,12 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except
 import Control.Monad.State (StateT, evalStateT, get, gets, modify, put)
 import Data.Data (Data)
@@ -29,12 +29,12 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
 
-passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse fork}
 
-fork :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
+fork :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 fork mm = do
-  --  let mm = toProtoModule [] m
+  --  let mm = toModule [] m
   setCurrentPathC (protoOmodulePath mm)
   detectDuplicateParams mm
   return mm
@@ -51,49 +51,49 @@ instance (RuleContext e) => RuleContext (NonEmpty e) where
 instance (RuleContext e) => RuleContext (Maybe e) where
   detectDuplicateParams = traverse_ detectDuplicateParams
 
-instance (Data t) => RuleContext (ProtoModule Metadata () t) where
+instance (Data t) => RuleContext (Module Metadata () t) where
   detectDuplicateParams =
     \case
-      ProtoModule{..} ->
+      Module{..} ->
         detectDuplicateParams protoOmoduleDefinitions
 
-instance (Data t) => RuleContext (ProtoDefinition Metadata () t) where
+instance (Data t) => RuleContext (Definition Metadata () t) where
   detectDuplicateParams =
     \case
-      ProtoDFunction _ _ def ->
+      DFunction _ _ def ->
         detectDuplicateParams def
-      ProtoDLet _ _ def ->
+      DLet _ _ def ->
         detectDuplicateParams def
-      ProtoDInstance _ def ->
+      DInstance _ def ->
         detectDuplicateParams def
-      ProtoDFold _ _ def ->
+      DFold _ _ def ->
         detectDuplicateParams def
       _ ->
         pure ()
 
-instance RuleContext (ProtoFunctionDefinition Metadata () t) where
+instance RuleContext (FunctionDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      ProtoFunctionDefinition{..} -> do
+      FunctionDefinition{..} -> do
         checkPatterns protoOfunctionDefinitionPatterns
         detectDuplicateParams protoOfunctionDefinitionExpression
 
-instance RuleContext (ProtoLetDefinition Metadata () t) where
+instance RuleContext (LetDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      ProtoLetDefinition{..} ->
+      LetDefinition{..} ->
         detectDuplicateParams protoOletDefinitionExpression
 
-instance (Data t) => RuleContext (ProtoInstanceDefinition Metadata () t) where
+instance (Data t) => RuleContext (InstanceDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      ProtoInstanceDefinition{..} ->
+      InstanceDefinition{..} ->
         detectDuplicateParams protoOinstanceDefinitionImplementations
 
-instance RuleContext (ProtoFoldDefinition Metadata () t) where
+instance RuleContext (FoldDefinition Metadata () t) where
   detectDuplicateParams =
     \case
-      ProtoFoldDefinition{..} ->
+      FoldDefinition{..} ->
         detectDuplicateParams protoOfoldDefinitionClauses
 
 instance RuleContext (Clause Metadata () t) where

@@ -72,20 +72,20 @@ module Coal.Compiler.Stack (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
+import Coal.Compiler.Build (Build (..), setBuildBitcode, setBuildSource)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal (CompilerJournal (..))
-import Coal.Compiler.ProtoBuild (ProtoBuild (..), setBuildBitcode, setBuildSource)
-import Coal.Compiler.ProtoState
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Module
 import Coal.Language.Module.Path
 import Coal.Language.Module.Path (Path (..), principalPath)
-import Coal.ProtoLanguage.ProtoModule
-import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))
-import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
+import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (Substitution)
 import Control.Monad.Catch
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
@@ -137,16 +137,16 @@ evalCompilerT env com = do
 protoOupdateSupplyC :: (Monad m) => Int -> CompilerT a m ()
 protoOupdateSupplyC supply = modify (overCompilerSupply (const supply))
 
-insertBuildC :: (Monad m) => ProtoBuild a -> CompilerT a m ()
-insertBuildC ProtoBuild{..} = modify (overCompilerModules (Environment.insert principalName ProtoBuild{..}))
+insertBuildC :: (Monad m) => Build a -> CompilerT a m ()
+insertBuildC Build{..} = modify (overCompilerModules (Environment.insert principalName Build{..}))
  where
   principalName = principalPath protoObuildPath
 
 setCurrentPathC :: (Monad m) => Path -> CompilerT a m ()
 setCurrentPathC path = modify (overCompilerCurrentPath (const path))
 
-setCurrentModuleC :: (Monad m) => ProtoModule a s t -> CompilerT a m ()
-setCurrentModuleC ProtoModule{..} = setCurrentPathC protoOmodulePath
+setCurrentModuleC :: (Monad m) => Module a s t -> CompilerT a m ()
+setCurrentModuleC Module{..} = setCurrentPathC protoOmodulePath
 
 protoOsetSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 protoOsetSubstitutionC sub = modify (overCompilerSubstitution (const sub))
@@ -160,12 +160,12 @@ instance BuildName Path where
 instance BuildName Text where
   buildName = id
 
-protoOgetBuildC :: (Monad m, BuildName p) => p -> CompilerT a m (Maybe (ProtoBuild a))
+protoOgetBuildC :: (Monad m, BuildName p) => p -> CompilerT a m (Maybe (Build a))
 protoOgetBuildC path = do
   modules <- gets protoOcompilerModules
   pure (Environment.lookup (buildName path) modules)
 
-protoOgetCurrentBuildC :: (Monad m) => CompilerT a m (ProtoBuild a)
+protoOgetCurrentBuildC :: (Monad m) => CompilerT a m (Build a)
 protoOgetCurrentBuildC = do
   CompilerState{..} <- get
   maybeBuild <- protoOgetBuildC protoOcompilerCurrentPath
@@ -176,7 +176,7 @@ protoOgetCurrentBuildC = do
     Just build ->
       return build
 
-protoOupdateBuildC :: (Monad m, BuildName p) => p -> (ProtoBuild a -> CompilerT a m (ProtoBuild a)) -> CompilerT a m ()
+protoOupdateBuildC :: (Monad m, BuildName p) => p -> (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
 protoOupdateBuildC name f = do
   maybeBuild <- protoOgetBuildC name
   case maybeBuild of
@@ -187,7 +187,7 @@ protoOupdateBuildC name f = do
       newBuild <- f build
       modify (overCompilerModules (Environment.insert (buildName name) newBuild))
 
-protoOupdateCurrentBuildC :: (Monad m) => (ProtoBuild a -> CompilerT a m (ProtoBuild a)) -> CompilerT a m ()
+protoOupdateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
 protoOupdateCurrentBuildC f = do
   CompilerState{..} <- get
   protoOupdateBuildC protoOcompilerCurrentPath f
@@ -198,7 +198,7 @@ protoOinsertConstraintsC constraints = modify (overCompilerConstraints (<> const
 protoOclearConstraintsC :: (Monad m) => CompilerT a m ()
 protoOclearConstraintsC = modify (overCompilerConstraints (const mempty))
 
-protoOinsertKindConstraintsC :: (Monad m) => [ProtoKindConstraint] -> CompilerT a m ()
+protoOinsertKindConstraintsC :: (Monad m) => [KindConstraint] -> CompilerT a m ()
 protoOinsertKindConstraintsC constraints = modify (overCompilerKindConstraints (<> constraints))
 
 protoOclearKindConstraintsC :: (Monad m) => CompilerT a m ()
@@ -239,7 +239,7 @@ protoOcompilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a]
 protoOcompilerReportConstraintsGenErrors errors = modify (overCompilerConstraintsGenErrors (<> errors))
 
 {-# INLINE protoOcompilerReportKindConstraintsGenErrors #-}
-protoOcompilerReportKindConstraintsGenErrors :: (Monad m) => [ProtoKindError] -> CompilerT a m ()
+protoOcompilerReportKindConstraintsGenErrors :: (Monad m) => [KindError] -> CompilerT a m ()
 protoOcompilerReportKindConstraintsGenErrors errors = modify (overCompilerKindConstraintsGenErrors (<> errors))
 
 {-# INLINE protoOcompilerReportSolverRuleViolations #-}

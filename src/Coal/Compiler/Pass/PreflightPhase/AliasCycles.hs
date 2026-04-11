@@ -10,12 +10,12 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
@@ -23,12 +23,12 @@ import Control.Monad.Trans (lift)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
-passAliasCycles :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
+passAliasCycles :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passAliasCycles = mapPass $ Pass{runPass = traverse impl}
 
-impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
+impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 impl mm = do
-  --  let mm = toProtoModule [] m
+  --  let mm = toModule [] m
   setCurrentPathC (protoOmodulePath mm)
   detectAliasCycles mm
   return mm
@@ -45,16 +45,16 @@ instance (TransformContext e) => TransformContext (NonEmpty e) where
 instance (TransformContext e) => TransformContext (Maybe e) where
   detectAliasCycles = traverse_ detectAliasCycles
 
-instance TransformContext (ProtoModule Metadata () ()) where
+instance TransformContext (Module Metadata () ()) where
   detectAliasCycles =
     \case
-      ProtoModule _ _ o -> do
+      Module _ _ o -> do
         traverse_ detectAliasCycles o
 
-instance TransformContext (ProtoDefinition Metadata () ()) where
+instance TransformContext (Definition Metadata () ()) where
   detectAliasCycles =
     \case
-      ProtoDTypeAlias loc name (ProtoAliasDefinition _ t) ->
+      DTypeAlias loc name (AliasDefinition _ t) ->
         detectCycles loc name t
       _ ->
         pure ()

@@ -11,27 +11,27 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.PatternMatching.AnomalyDetection (exhaustive, translatePattern)
 import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind (..))
+import Coal.Language.Definition
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Name, traverse_)
 
-passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPatternExhaustiveCheck = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 bork m = do
   patternExhaustiveCheckM m
   return m
 
-patternExhaustiveCheckM :: (Monad m) => ProtoModule Metadata k t -> CompilerT Metadata m ()
+patternExhaustiveCheckM :: (Monad m) => Module Metadata k t -> CompilerT Metadata m ()
 patternExhaustiveCheckM m = do
   (_, es) <-
     listenErrors $
@@ -55,14 +55,14 @@ class PatternExhaustiveCheckContext c where
 --      _ ->
 --        pure ()
 
-instance PatternExhaustiveCheckContext (ProtoDefinition Metadata k t) where
+instance PatternExhaustiveCheckContext (Definition Metadata k t) where
   patternExhaustiveCheck name =
     \case
-      ProtoDFunction _ name def ->
+      DFunction _ name def ->
         patternExhaustiveCheck name def
-      ProtoDLet _ name def ->
+      DLet _ name def ->
         patternExhaustiveCheck name def
-      ProtoDInstance _ ProtoInstanceDefinition{..} ->
+      DInstance _ InstanceDefinition{..} ->
         traverse_ (patternExhaustiveCheck name) protoOinstanceDefinitionImplementations
       _ ->
         pure ()
@@ -86,16 +86,16 @@ instance PatternExhaustiveCheckContext (ProtoDefinition Metadata k t) where
 --      InstanceDefinition ts t ds ->
 --        InstanceDefinition ts t <$> traverse (patternExhaustiveCheck name) ds
 
-instance PatternExhaustiveCheckContext (ProtoFunctionDefinition Metadata k t) where
+instance PatternExhaustiveCheckContext (FunctionDefinition Metadata k t) where
   patternExhaustiveCheck name =
     \case
-      ProtoFunctionDefinition{..} ->
+      FunctionDefinition{..} ->
         patternExhaustiveCheck name protoOfunctionDefinitionExpression
 
-instance PatternExhaustiveCheckContext (ProtoLetDefinition Metadata k t) where
+instance PatternExhaustiveCheckContext (LetDefinition Metadata k t) where
   patternExhaustiveCheck name =
     \case
-      ProtoLetDefinition{..} ->
+      LetDefinition{..} ->
         patternExhaustiveCheck name protoOletDefinitionExpression
 
 -- instance PatternExhaustiveCheckContext (FunctionDefinition Metadata t) where

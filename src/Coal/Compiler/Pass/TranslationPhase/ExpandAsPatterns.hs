@@ -11,17 +11,17 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
+import Coal.Language.Definition
+import Coal.Language.Module
 import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 
-passExpandAsPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+passExpandAsPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandAsPatterns = Pass{runPass = bork}
 
-bork :: (Monad m, Monoid a, Data a) => ProtoModule a Kind IndexedType -> CompilerT a m (ProtoModule a Kind IndexedType)
+bork :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 bork m = do
   let xx = expandAsPatterns m
   return xx
@@ -143,28 +143,28 @@ collectAsPatterns =
 --      Module p ns o ->
 --        Module p ns (expandAsPatterns o)
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (ProtoModule a k t) where
+instance (Data a, Data k, Data t, Monoid a) => TransformContext (Module a k t) where
   expandAsPatterns =
     \case
-      ProtoModule{..} ->
-        ProtoModule
+      Module{..} ->
+        Module
           { protoOmoduleDefinitions = fmap expandAsPatterns protoOmoduleDefinitions
           , ..
           }
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (ProtoDefinition a k t) where
+instance (Data a, Data k, Data t, Monoid a) => TransformContext (Definition a k t) where
   expandAsPatterns =
     \case
-      ProtoDLet loc name def ->
-        ProtoDLet loc name (expandAsPatterns def)
+      DLet loc name def ->
+        DLet loc name (expandAsPatterns def)
       d ->
         d
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (ProtoLetDefinition a k t) where
+instance (Data a, Data k, Data t, Monoid a) => TransformContext (LetDefinition a k t) where
   expandAsPatterns =
     \case
-      ProtoLetDefinition{..} ->
-        ProtoLetDefinition
+      LetDefinition{..} ->
+        LetDefinition
           { protoOletDefinitionExpression = expandAsPatterns protoOletDefinitionExpression
           , ..
           }

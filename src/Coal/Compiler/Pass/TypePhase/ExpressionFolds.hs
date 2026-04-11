@@ -15,12 +15,12 @@ import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadError (throwError), void)
 import Control.Monad.State (get)
 import Control.Monad.Trans (lift)
@@ -30,10 +30,10 @@ import Data.Generics.Uniplate.Data (descendM, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary, Name, const2, traverse_)
 
-passExpressionFolds :: (Monad m, Monoid a, Data a, Data k) => Pass a m (ProtoModule a k ()) (ProtoModule a k ())
+passExpressionFolds :: (Monad m, Monoid a, Data a, Data k) => Pass a m (Module a k ()) (Module a k ())
 passExpressionFolds = Pass{runPass = pass}
 
-pass :: (Monad m, Monoid a, Data a, Data k) => ProtoModule a k () -> CompilerT a m (ProtoModule a k ())
+pass :: (Monad m, Monoid a, Data a, Data k) => Module a k () -> CompilerT a m (Module a k ())
 pass = compileFolds
 
 class ExpressionFoldTransform a e where
@@ -153,59 +153,59 @@ instance (CompileFoldsContext a e) => CompileFoldsContext a (NonEmpty e) where
 instance (CompileFoldsContext a e) => CompileFoldsContext a (Dictionary e) where
   compileFolds = traverse compileFolds
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (ProtoModule a k ()) where
+instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Module a k ()) where
   compileFolds =
     \case
-      ProtoModule{..} -> do
+      Module{..} -> do
         setCurrentPathC protoOmodulePath
         newModuleDefinitions <- compileFolds protoOmoduleDefinitions
         return $
-          ProtoModule
+          Module
             { protoOmoduleDefinitions = newModuleDefinitions
             , ..
             }
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (ProtoDefinition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Definition a k ()) where
   compileFolds =
     \case
-      ProtoDFunction a name def ->
-        ProtoDFunction a name <$> compileFolds def
-      ProtoDLet a name def ->
-        ProtoDLet a name <$> compileFolds def
-      ProtoDInstance a def ->
-        ProtoDInstance a <$> compileFolds def
+      DFunction a name def ->
+        DFunction a name <$> compileFolds def
+      DLet a name def ->
+        DLet a name <$> compileFolds def
+      DInstance a def ->
+        DInstance a <$> compileFolds def
       o ->
         pure o
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (ProtoFunctionDefinition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileFoldsContext a (FunctionDefinition a k ()) where
   compileFolds =
     \case
-      ProtoFunctionDefinition{..} -> do
+      FunctionDefinition{..} -> do
         newFunctionDefinitionExpression <- compileFolds protoOfunctionDefinitionExpression
         return $
-          ProtoFunctionDefinition
+          FunctionDefinition
             { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (ProtoLetDefinition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileFoldsContext a (LetDefinition a k ()) where
   compileFolds =
     \case
-      ProtoLetDefinition{..} -> do
+      LetDefinition{..} -> do
         newLetDefinitionExpression <- compileFolds protoOletDefinitionExpression
         return $
-          ProtoLetDefinition
+          LetDefinition
             { protoOletDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (ProtoInstanceDefinition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileFoldsContext a (InstanceDefinition a k ()) where
   compileFolds =
     \case
-      ProtoInstanceDefinition{..} -> do
+      InstanceDefinition{..} -> do
         newInstanceDefinitionImplementations <- compileFolds protoOinstanceDefinitionImplementations
         return $
-          ProtoInstanceDefinition
+          InstanceDefinition
             { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }

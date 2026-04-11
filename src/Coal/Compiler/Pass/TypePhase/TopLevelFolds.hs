@@ -14,12 +14,12 @@ import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), Qualified (..))
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadError, throwError)
 import Control.Monad.State (get, gets)
 import Control.Monad.Trans (lift)
@@ -29,33 +29,33 @@ import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, foldrM)
 
-passTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kind ()) (ProtoModule a Kind ())
+passTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passTopLevelFolds = Pass{runPass = pass}
 
-pass :: (Monad m, Monoid a, Data a) => ProtoModule a Kind () -> CompilerT a m (ProtoModule a Kind ())
-pass ProtoModule{..} = do
+pass :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+pass Module{..} = do
   setCurrentPathC protoOmodulePath
   -- withCurrentModuleC (overModuleDefinitionsM (traverse compileTopLevelFolds))
   newModuleDefinitions <- traverse compileTopLevelFolds protoOmoduleDefinitions
   return $
-    ProtoModule
+    Module
       { protoOmoduleDefinitions = newModuleDefinitions
       , ..
       }
 
-compileTopLevelFolds :: (Monad m, Monoid a, Data a) => ProtoDefinition a Kind () -> CompilerT a m (ProtoDefinition a Kind ())
+compileTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a Kind () -> CompilerT a m (Definition a Kind ())
 compileTopLevelFolds =
   \case
-    ProtoDFold loc name ProtoFoldDefinition{..} -> do
+    DFold loc name FoldDefinition{..} -> do
       newExpression <- expandClauses protoOfoldDefinitionClauses
       let def =
-            ProtoLetDefinition
+            LetDefinition
               { protoOletDefinitionMetadata = loc
               , protoOletDefinitionAnnotation = protoOfoldDefinitionAnnotation
               , protoOletDefinitionType = With [] ()
               , protoOletDefinitionExpression = newExpression
               }
-      return (ProtoDLet loc name def)
+      return (DLet loc name def)
     o ->
       return o
 

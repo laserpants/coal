@@ -5,12 +5,12 @@
 module Coal.AST.Normalization (NormalizationContext (..)) where
 
 import Coal.AST.Flattening (flattenLambdas)
+import Coal.Language.Definition
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
+import Coal.Language.Module
 import Coal.Language.Trait (Qualified (..))
 import Coal.Language.Type (Type (..))
-import Coal.ProtoLanguage.ProtoDefinition
-import Coal.ProtoLanguage.ProtoModule
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Map.Strict (Map)
@@ -32,55 +32,55 @@ instance (NormalizationContext a) => NormalizationContext (Map k a) where
   normalizeObject = fmap normalizeObject
   denormalizeObject = fmap denormalizeObject
 
-denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> ProtoLetDefinition a k (Type o k) -> ProtoDefinition a k (Type o k)
+denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> LetDefinition a k (Type o k) -> Definition a k (Type o k)
 denormalizeConstant name =
   \case
-    ProtoLetDefinition loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
-      denormalizeConstant name (ProtoLetDefinition loc w1 w2 (ELambda a1 (ps <> qs) e))
-    ProtoLetDefinition loc w1 (With ts _) (ELambda _ ps e) ->
-      ProtoDFunction
+    LetDefinition loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
+      denormalizeConstant name (LetDefinition loc w1 w2 (ELambda a1 (ps <> qs) e))
+    LetDefinition loc w1 (With ts _) (ELambda _ ps e) ->
+      DFunction
         loc
         name
-        ProtoFunctionDefinition
+        FunctionDefinition
           { protoOfunctionDefinitionMetadata = loc
           , protoOfunctionDefinitionAnnotation = w1
           , protoOfunctionDefinitionType = With ts (typeOf e)
           , protoOfunctionDefinitionPatterns = ps
           , protoOfunctionDefinitionExpression = e
           }
-    def@(ProtoLetDefinition loc _ _ _) ->
-      ProtoDLet loc name def
+    def@(LetDefinition loc _ _ _) ->
+      DLet loc name def
 
-instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (ProtoModule a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Module a k (Type o k)) where
   normalizeObject =
     \case
-      ProtoModule{..} ->
-        ProtoModule
+      Module{..} ->
+        Module
           { protoOmoduleDefinitions = normalizeObject protoOmoduleDefinitions
           , ..
           }
   denormalizeObject =
     \case
-      ProtoModule{..} ->
-        ProtoModule
+      Module{..} ->
+        Module
           { protoOmoduleDefinitions = denormalizeObject protoOmoduleDefinitions
           , ..
           }
 
-instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (ProtoDefinition a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Definition a k (Type o k)) where
   normalizeObject =
     \case
-      ProtoDFunction
+      DFunction
         loc
         name
-        ProtoFunctionDefinition
+        FunctionDefinition
           { protoOfunctionDefinitionType = With ts t
           , ..
           } ->
-          ProtoDLet
+          DLet
             loc
             name
-            ProtoLetDefinition
+            LetDefinition
               { protoOletDefinitionMetadata =
                   loc
               , protoOletDefinitionAnnotation =
@@ -90,10 +90,10 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
               , protoOletDefinitionExpression =
                   flattenLambdas (ELambda mempty protoOfunctionDefinitionPatterns protoOfunctionDefinitionExpression)
               }
-      ProtoDInstance loc ProtoInstanceDefinition{..} ->
-        ProtoDInstance
+      DInstance loc InstanceDefinition{..} ->
+        DInstance
           loc
-          ProtoInstanceDefinition
+          InstanceDefinition
             { protoOinstanceDefinitionImplementations =
                 normalizeObject protoOinstanceDefinitionImplementations
             , ..
@@ -102,12 +102,12 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
         d
   denormalizeObject =
     \case
-      ProtoDLet _ name def ->
+      DLet _ name def ->
         denormalizeConstant name def
-      ProtoDInstance loc ProtoInstanceDefinition{..} ->
-        ProtoDInstance
+      DInstance loc InstanceDefinition{..} ->
+        DInstance
           loc
-          ProtoInstanceDefinition
+          InstanceDefinition
             { protoOinstanceDefinitionImplementations =
                 denormalizeObject protoOinstanceDefinitionImplementations
             , ..

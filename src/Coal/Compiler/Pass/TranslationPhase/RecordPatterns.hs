@@ -16,8 +16,8 @@ import Coal.Compiler.Journal (RecordEntry, listenRecordEntry, tellRecordEntry)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.RWS (forM, replicateM)
 import Control.Monad.Trans (lift)
 import Data.Data (Data)
@@ -28,10 +28,10 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import Extras (Name)
 
-passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kind IndexedType) (ProtoModule a Kind IndexedType)
+passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
 passRecordPatterns = Pass{runPass = compileRecordPatterns}
 
-compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => ProtoModule a Kind IndexedType -> CompilerT a m (ProtoModule a Kind IndexedType)
+compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a Kind (Type TypeIndex Kind)))
 
 class RecordDesugarable a p where

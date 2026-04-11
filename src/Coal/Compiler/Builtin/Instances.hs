@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Builtin.Instances (protoObuiltinInstances) where
 
-import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.Build.NameEntry
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs, tupleType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
@@ -11,12 +11,12 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Name)
 
-protoObuiltinInstances :: (Monoid a) => [(Name, IndexedType, ProtoInstanceEntry a)]
+protoObuiltinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
 protoObuiltinInstances =
   [
     ( "Numeric"
     , TIntrinsic IInt32
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -55,7 +55,7 @@ protoObuiltinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IInt64
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -94,7 +94,7 @@ protoObuiltinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IFloat
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -133,7 +133,7 @@ protoObuiltinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IDouble
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -172,7 +172,7 @@ protoObuiltinInstances =
   ,
     ( "Numeric"
     , TIntrinsic INat
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -211,7 +211,7 @@ protoObuiltinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IBignum
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -250,7 +250,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IInt32
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -265,7 +265,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IInt64
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -280,7 +280,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IBool
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IBool)
         (TIntrinsic IBool)
@@ -295,7 +295,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic INat
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -310,7 +310,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IFloat
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -325,7 +325,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IDouble
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -340,7 +340,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IChar
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IChar)
         (TIntrinsic IChar)
@@ -355,7 +355,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IString
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IString)
         (TIntrinsic IString)
@@ -370,7 +370,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IBignum
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -385,7 +385,7 @@ protoObuiltinInstances =
   ,
     ( "Ordered"
     , tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "#Tuple2") (TVariable (Parameter KType "a") :| [TVariable (Parameter KType "b")]))
         (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]))
@@ -400,7 +400,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IInt32
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -415,7 +415,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IInt64
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -430,7 +430,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IBool
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IBool)
         (TIntrinsic IBool)
@@ -445,7 +445,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic INat
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -460,7 +460,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IFloat
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -475,7 +475,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IDouble
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -490,7 +490,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IChar
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IChar)
         (TIntrinsic IChar)
@@ -505,7 +505,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IBignum
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -520,7 +520,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IString
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IString)
         (TIntrinsic IString)
@@ -535,7 +535,7 @@ protoObuiltinInstances =
   ,
     ( "Comparable"
     , tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "#Tuple2") (TVariable (Parameter KType "a") :| [TVariable (Parameter KType "b")]))
         (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]))
@@ -550,7 +550,7 @@ protoObuiltinInstances =
   ,
     ( "Divisible"
     , TIntrinsic IFloat
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -565,7 +565,7 @@ protoObuiltinInstances =
   ,
     ( "Divisible"
     , TIntrinsic IDouble
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -580,7 +580,7 @@ protoObuiltinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IInt32
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -595,7 +595,7 @@ protoObuiltinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IInt64
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -610,7 +610,7 @@ protoObuiltinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IBignum
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -625,7 +625,7 @@ protoObuiltinInstances =
   ,
     ( "Semigroup"
     , TIntrinsic IString
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (TIntrinsic IString)
         (TIntrinsic IString)
@@ -640,7 +640,7 @@ protoObuiltinInstances =
   ,
     ( "Semigroup"
     , applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
-    , ProtoInstanceEntry
+    , InstanceEntry
         mempty
         (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (Parameter KType "a") :| mempty))
         (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty))

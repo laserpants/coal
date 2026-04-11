@@ -8,6 +8,7 @@
 module Coal.Language.HasType (HasType (..), foldTypeOf) where
 
 import Coal.Common.Label (Label (..))
+import Coal.Language.Definition
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Expression.Choice (Guard (..))
 import Coal.Language.Pattern (Pattern (..))
@@ -16,7 +17,6 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (KindProxy (..), Type (..), applyTypeArgs, foldType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
-import Coal.ProtoLanguage.ProtoDefinition
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty ((:|)))
@@ -88,12 +88,12 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Expres
       e ->
         head (universeBi e)
 
-instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (ProtoDefinition a k (Type o k)) where
+instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
   typeOf =
     \case
-      ProtoDFunction _ _ ProtoFunctionDefinition{..} ->
+      DFunction _ _ FunctionDefinition{..} ->
         foldTypeOf protoOfunctionDefinitionExpression protoOfunctionDefinitionPatterns
-      ProtoDLet _ _ ProtoLetDefinition{..} ->
+      DLet _ _ LetDefinition{..} ->
         typeOf protoOletDefinitionExpression
       d ->
         error "TODO"

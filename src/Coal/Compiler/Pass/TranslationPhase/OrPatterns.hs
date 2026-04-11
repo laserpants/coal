@@ -11,11 +11,11 @@ import Coal.Common.FreeVars (boundIn)
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
+import Coal.Language.Module
 import Coal.Language.Module.Path
-import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (when)
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
@@ -27,13 +27,13 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
 import Extras (Map, traverseM)
 
-passOrPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
+passOrPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passOrPatterns = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
-pass ProtoModule{..} = do
+pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+pass Module{..} = do
   setCurrentPathC protoOmodulePath
-  transformBiM expandExpression ProtoModule{..}
+  transformBiM expandExpression Module{..}
 
 expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =
