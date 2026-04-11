@@ -6,5 +6,5 @@ import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
 
-passDenormalizeObjects :: (Monad m, Monoid a, Data a, Data k, Data (o k), Typeable o) => Pass a m (Module a k (Type o k)) (Module a k (Type o k))
+passDenormalizeObjects :: (Monad m, Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Pass a m (Module a k (Type o k)) (Module a k (Type o k))
 passDenormalizeObjects = Pass{runPass = pure . denormalizeObject}

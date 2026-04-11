@@ -32,7 +32,7 @@ instance (NormalizationContext a) => NormalizationContext (Map k a) where
   normalizeObject = fmap normalizeObject
   denormalizeObject = fmap denormalizeObject
 
-denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o) => Name -> LetDefinition a k (Type o k) -> Definition a k (Type o k)
+denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o, Ord k) => Name -> LetDefinition a k (Type o k) -> Definition a k (Type o k)
 denormalizeConstant name =
   \case
     LetDefinition loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
@@ -51,7 +51,7 @@ denormalizeConstant name =
     def@(LetDefinition loc _ _ _) ->
       DLet loc name def
 
-instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Module a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => NormalizationContext (Module a k (Type o k)) where
   normalizeObject =
     \case
       Module{..} ->
@@ -67,7 +67,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationCont
           , ..
           }
 
-instance (Monoid a, Data a, Data k, Data (o k), Typeable o) => NormalizationContext (Definition a k (Type o k)) where
+instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => NormalizationContext (Definition a k (Type o k)) where
   normalizeObject =
     \case
       DFunction

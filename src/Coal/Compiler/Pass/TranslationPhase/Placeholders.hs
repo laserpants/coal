@@ -397,7 +397,7 @@ transformScope2 e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
   case Set.toList traits of
     [] -> pure (expr, traits)
-    tr : trs -> pure (dictionaryLambda2 tr trs expr, traits)
+    tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
 -- transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a m (Expression a () IndexedType, Set (Trait IndexedType))
 -- transformScope e = do
@@ -476,12 +476,12 @@ expandLetDefinitionTraits name =
                   ( EApplication
                       mempty
                       t
-                      (dictionaryLambda2 tr trs expr)
+                      (dictionaryLambda tr trs expr)
                       recs
                   )
             else
               pure $
-                LetDefinition loc with (With (tr : trs) t) (dictionaryLambda2 tr trs expr)
+                LetDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
 
 -- expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a m (ConstantDefinition a IndexedType)
 -- expandConstantDefinitionTraits name =
@@ -535,13 +535,13 @@ isVariable _ = False
 -- where
 --  dict t = PTraitInstance mempty (typeOf t) t
 
-dictionaryLambda2 ::
+dictionaryLambda ::
   (Monoid a, HasType o k (Trait (Type o k))) =>
   Trait (Type o k) ->
   [Trait (Type o k)] ->
   Expression a i (Type o k) ->
   Expression a i (Type o k)
-dictionaryLambda2 tr trs = ELambda mempty (dict <$> (tr :| trs))
+dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
  where
   dict t = PTraitInstance mempty (typeOf t) t
 

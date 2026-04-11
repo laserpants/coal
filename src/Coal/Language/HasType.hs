@@ -49,7 +49,7 @@ instance HasType o k Primitive where
       LBignum{} ->
         TIntrinsic IBignum
 
-instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Pattern a s (Type o k)) where
+instance (Data a, Data s, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Pattern a s (Type o k)) where
   typeOf =
     \case
       PLiteral _ t ->
@@ -66,7 +66,7 @@ instance (HasType o k t) => HasType o k (Label t) where
   typeOf (Label t _) =
     typeOf t
 
-instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Expression a s (Type o k)) where
+instance (Data a, Data s, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Expression a s (Type o k)) where
   typeOf =
     \case
       ELiteral _ t ->
@@ -88,7 +88,7 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Expres
       e ->
         head (universeBi e)
 
-instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k (Type o k)) where
+instance (Data a, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Definition a k (Type o k)) where
   typeOf =
     \case
       DFunction _ _ FunctionDefinition{..} ->
@@ -96,7 +96,7 @@ instance (Data a, Data k, Data (o k), Typeable o) => HasType o k (Definition a k
       DLet _ _ LetDefinition{..} ->
         typeOf protoOletDefinitionExpression
       d ->
-        error "TODO"
+        head (universeBi d)
 
 instance (KindProxy o Kind) => HasType o Kind (Trait (Type o Kind)) where
   typeOf (Trait name t) =

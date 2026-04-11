@@ -66,8 +66,8 @@ pass m@(Module path _ _) = do
 --
 --  pure next
 
-isFoldAssumption :: Assumption a t -> Bool
-isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
+-- isFoldAssumption :: Assumption a t -> Bool
+-- isFoldAssumption Assumption{..} = "!" `Text.isPrefixOf` assumptionName
 
 indexTypes :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexTypes ds = undefined -- run (indexed ds) =<< gets compilerSupply

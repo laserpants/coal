@@ -37,7 +37,7 @@ instance TypeProxy () where
   folded =
     const2 ()
 
-instance (Data k, Data (o k), Typeable o) => TypeProxy (Type o k) where
+instance (Data k, Data (o k), Typeable o, Ord k) => TypeProxy (Type o k) where
   expressionType =
     typeOf
   patternType =
