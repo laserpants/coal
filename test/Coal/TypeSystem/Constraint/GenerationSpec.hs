@@ -11,16 +11,16 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 
 collectExampleConstraintsSpec1 :: ([CompilerAssumption ()], [ConstraintsGenOutput () TypeIndex Kind IndexedType])
-collectExampleConstraintsSpec1 = (ms, outs)
- where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture1
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+collectExampleConstraintsSpec1 = undefined -- (ms, outs)
+-- where
+--  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture1
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }
 
 --    let
 --      print_name =

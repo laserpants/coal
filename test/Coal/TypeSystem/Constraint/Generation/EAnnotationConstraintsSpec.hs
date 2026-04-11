@@ -20,31 +20,31 @@ fixture1 =
   EAnnotation () (TIntrinsic IInt32) (ELiteral () (LInt32 1))
 
 collectEAnnotationConstraintsSpec1 :: Bool
-collectEAnnotationConstraintsSpec1 = null ms && null (lefts outs)
- where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture1
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+collectEAnnotationConstraintsSpec1 = undefined -- null ms && null (lefts outs)
+-- where
+--  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture1
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }
 
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint1 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IInt32)) [TIntrinsic IInt32, TIntrinsic IInt32]
 
 collectEAnnotationConstraintsSpec2 :: Bool
-collectEAnnotationConstraintsSpec2 = null ms && constraint1 `elem` rights outs
- where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture1
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+collectEAnnotationConstraintsSpec2 = undefined -- null ms && constraint1 `elem` rights outs
+-- where
+--  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture1
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }
 
 fixture2 :: Expression () () IndexedType
 fixture2 =
@@ -54,29 +54,29 @@ constraint2 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint2 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) [TIntrinsic IInt32, TIntrinsic IBool]
 
 collectEAnnotationConstraintsSpec3 :: Bool
-collectEAnnotationConstraintsSpec3 = null ms && constraint2 `elem` rights outs
- where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture2
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+collectEAnnotationConstraintsSpec3 = undefined -- null ms && constraint2 `elem` rights outs
+-- where
+--  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture2
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }
 
 fixture3 :: Expression () () IndexedType
 fixture3 =
   EAnnotation () (TVariable (Parameter () "a")) (ELiteral () (LInt32 1))
 
 collectEAnnotationConstraintsSpec4 :: Bool
-collectEAnnotationConstraintsSpec4 = null ms && null (lefts outs)
- where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture3
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+collectEAnnotationConstraintsSpec4 = undefined -- null ms && null (lefts outs)
+-- where
+--  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture3
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }

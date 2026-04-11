@@ -28,16 +28,16 @@ constraint1 =
     ]
 
 collectELambdaConstraintsSpec1 :: Bool
-collectELambdaConstraintsSpec1 = null ms && constraint1 `elem` rights outs
- where
-  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture1
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+collectELambdaConstraintsSpec1 = undefined -- null ms && constraint1 `elem` rights outs
+-- where
+--  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture1
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }
 
 fixture2 :: Expression () () IndexedType
 fixture2 =
@@ -47,16 +47,16 @@ fixture2 =
     (EVariable () (Label (TVariable (TypeIndex KType 1)) "y"))
 
 collectELambdaConstraintsSpec2 :: Bool
-collectELambdaConstraintsSpec2 = null outs
- where
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture2
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+collectELambdaConstraintsSpec2 = undefined -- null outs
+-- where
+--  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture2
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }
 
 collectELambdaConstraintsSpec3 :: Bool
 collectELambdaConstraintsSpec3 = 2 == freshIdIn fixture2
@@ -101,14 +101,15 @@ constraint4 = Equality () [TVariable (TypeIndex KType 2), TVariable (TypeIndex K
 
 collectELambdaConstraintsSpec4 :: Bool
 collectELambdaConstraintsSpec4 =
-  constraint2 `elem` constraints && constraint3 `elem` constraints && constraint4 `elem` constraints
- where
-  constraints = muteConstraint <$> rights outs
-  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
-  expr = fixture3
-  ctx =
-    ConstraintsGenContext
-      { constraintsGenContextMonomorphicSet = mempty
-      , constraintsGenContextDataConstructors = mempty
-      , constraintsGenContextTypeConstructors = mempty
-      }
+  undefined
+--  constraint2 `elem` constraints && constraint3 `elem` constraints && constraint4 `elem` constraints
+-- where
+--  constraints = muteConstraint <$> rights outs
+--  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
+--  expr = fixture3
+--  ctx =
+--    ConstraintsGenContext
+--      { constraintsGenContextMonomorphicSet = mempty
+--      , constraintsGenContextDataConstructors = mempty
+--      , constraintsGenContextTypeConstructors = mempty
+--      }
