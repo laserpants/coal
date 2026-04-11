@@ -12,7 +12,7 @@ module Coal.Compiler.Pass (
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack (CompilerT)
 import Coal.ProtoCompiler.ProtoBuild
@@ -43,7 +43,7 @@ p1 >-> p2 = Pass{runPass = runPassAndTickBar p1 >=> runPassAndTickBar p2}
 mapPass :: (MonadIO m) => Pass a m i o -> Pass a m [i] [o]
 mapPass p = Pass{runPass = traverse (runPassAndTickBar p)}
 
-liftPass :: (Monad m) => Pass a m i o -> Pass a m (BuildUnit i) (BuildUnit o)
+liftPass :: (Monad m) => Pass a m i o -> Pass a m (BuildEnvelope i) (BuildEnvelope o)
 liftPass (Pass p) = Pass (traverse p)
 
 overlayEnvironment :: (MonadIO m) => Pass Metadata m a b -> Pass Metadata m a b

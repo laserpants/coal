@@ -6,14 +6,14 @@ module Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Transform
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Data.Data (Data)
 import Extras (Name)
 
--- passWhereClauses :: (Monad m, Data t, Ord t) => Pass Metadata m (BuildUnit (Module Metadata k t)) (BuildUnit (Module Metadata k t))
+-- passWhereClauses :: (Monad m, Data t, Ord t) => Pass Metadata m (BuildEnvelope (Module Metadata k t)) (BuildEnvelope (Module Metadata k t))
 passWhereClauses = undefined -- Pass{runPass = traverse expandWhereClausesModule}
 
 -- liftWhereClause :: (Monad m) => Name -> Definition Metadata k t -> CompilerT Metadata m (Definition Metadata k t)

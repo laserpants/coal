@@ -5,7 +5,7 @@ module Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule) whe
 
 import Coal.AST.HasMetadata (HasMetadata (..))
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
@@ -15,10 +15,10 @@ import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
 
-passImportsTopRule :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passImportsTopRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passImportsTopRule = Pass{runPass = pass}
 
-pass :: (Monad m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildUnit (ProtoModule Metadata () ())]
+pass :: (Monad m) => [BuildEnvelope (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (ProtoModule Metadata () ())]
 pass ms = do
   (ps, errors) <- listenErrors $ traverse (traverse checkImports) ms
   unless (null errors) $

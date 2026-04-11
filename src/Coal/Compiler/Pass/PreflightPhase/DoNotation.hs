@@ -9,7 +9,7 @@ module Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
@@ -22,7 +22,7 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
-passDoNotation :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passDoNotation :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passDoNotation = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())

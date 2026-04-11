@@ -6,7 +6,7 @@ module Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate) wh
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)
 import Coal.Compiler.Kernel.Translate.Definition (translateDefinition)
 import Coal.Compiler.Pass (Pass (..), tickBar)
@@ -21,7 +21,7 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Trans (lift)
 import Extras (Name)
 
-passKernelTranslate :: (MonadIO m) => Pass Metadata m (BuildUnit (ProtoModule Metadata Kind IndexedType)) (BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)))
+passKernelTranslate :: (MonadIO m) => Pass Metadata m (BuildEnvelope (ProtoModule Metadata Kind IndexedType)) (BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)))
 passKernelTranslate = Pass{runPass = \p -> tickBar >> traverse pass p}
 
 pass :: (MonadIO m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))

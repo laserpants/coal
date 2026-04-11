@@ -7,7 +7,7 @@
 module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointRule) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language.Module.Path
@@ -20,7 +20,7 @@ import Control.Monad.Trans (lift)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
-passMainEntrypointRule :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passMainEntrypointRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passMainEntrypointRule = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())

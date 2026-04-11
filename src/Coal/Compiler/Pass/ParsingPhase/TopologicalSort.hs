@@ -6,7 +6,7 @@
 module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName)
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
 import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
@@ -26,10 +26,10 @@ import qualified Data.Set as Set
 import Data.Tuple.Extra (second)
 import Extras (Name, concatForM, for, forM_)
 
-passTopologicalSort :: (Monad m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passTopologicalSort :: (Monad m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passTopologicalSort = Pass{runPass = pass}
 
-pass :: (Monad m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildUnit (ProtoModule Metadata () ())]
+pass :: (Monad m) => [BuildEnvelope (ProtoModule Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (ProtoModule Metadata () ())]
 pass units = do
   unless ("Main" `elem` names) $ do
     tellErrors [NoModuleMain]
@@ -39,14 +39,14 @@ pass units = do
       cyclicSCCs = filter isCyclicSCC sccs
   forM_ cyclicSCCs $
     \scc ->
-      tellErrors [ModuleCycle (unitPathName <$> getModulesFromSCC scc)]
+      tellErrors [ModuleCycle (envelopePathName <$> getModulesFromSCC scc)]
   if notNull cyclicSCCs
     then throwError PreflightFailure
     else pure $ concatMap getModulesFromSCC sccs
  where
-  names = Set.fromList (unitPathName <$> units)
+  names = Set.fromList (envelopePathName <$> units)
 
-isCyclicSCC :: SCC (BuildUnit (ProtoModule Metadata () ())) -> Bool
+isCyclicSCC :: SCC (BuildEnvelope (ProtoModule Metadata () ())) -> Bool
 isCyclicSCC =
   \case
     CyclicSCC _ ->
@@ -54,7 +54,7 @@ isCyclicSCC =
     _ ->
       False
 
-getModulesFromSCC :: SCC (BuildUnit (ProtoModule Metadata () ())) -> [BuildUnit (ProtoModule Metadata () ())]
+getModulesFromSCC :: SCC (BuildEnvelope (ProtoModule Metadata () ())) -> [BuildEnvelope (ProtoModule Metadata () ())]
 getModulesFromSCC =
   \case
     AcyclicSCC u ->
@@ -62,7 +62,7 @@ getModulesFromSCC =
     CyclicSCC units ->
       units
 
-unitDependencies :: BuildUnit (ProtoModule Metadata () ()) -> [(Metadata, Path)]
+unitDependencies :: BuildEnvelope (ProtoModule Metadata () ()) -> [(Metadata, Path)]
 unitDependencies =
   \case
     BSource m ->
@@ -92,7 +92,7 @@ importPath =
     _ ->
       Nothing
 
-collectEdges :: (Monad m) => Set Name -> BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildUnit (ProtoModule Metadata () ()), Name, [Name])
+collectEdges :: (Monad m) => Set Name -> BuildEnvelope (ProtoModule Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (ProtoModule Metadata () ()), Name, [Name])
 collectEdges names unit = do
   unitDependencies' <-
     concatForM deps $
@@ -105,4 +105,4 @@ collectEdges names unit = do
   pure (unit, path, unitDependencies')
  where
   deps = for (unitDependencies unit) (second principalPath)
-  path = unitPathName unit
+  path = envelopePathName unit

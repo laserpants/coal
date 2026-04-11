@@ -7,7 +7,7 @@
 module Coal.Compiler.Pass.PreflightPhase.AliasCycles (passAliasCycles) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
@@ -24,7 +24,7 @@ import Control.Monad.Trans (lift)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
-passAliasCycles :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passAliasCycles :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passAliasCycles = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())

@@ -6,7 +6,7 @@ module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, fromSource) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Cache (cachedBuild)
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
@@ -33,10 +33,10 @@ import qualified Data.Text.IO as Text
 import Extras (Name, forM, forM_)
 import Text.Megaparsec (eof, runParser)
 
-passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildUnit (ProtoModule Metadata () ())]
+passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildEnvelope (ProtoModule Metadata () ())]
 passParsing = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata (ProtoCompilerT m Metadata) [BuildUnit (ProtoModule Metadata () ())]
+pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata (ProtoCompilerT m Metadata) [BuildEnvelope (ProtoModule Metadata () ())]
 pass files = do
   embeddedFiles <- traverse parseEmbedded embedded
   case partitionEithers embeddedFiles of
@@ -53,7 +53,7 @@ pass files = do
         \(p, e) ->
           error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
 
-parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (Text, ParserError) (BuildUnit (ProtoModule Metadata () ())))
+parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (Text, ParserError) (BuildEnvelope (ProtoModule Metadata () ())))
 parseEmbedded (p, src) = do
   CompilerConfig{..} <- lift $ gets protoOcompilerConfig
   case runParser (spaces *> parseModule <* eof) "" encodedSrc of
@@ -80,7 +80,7 @@ parseEmbedded (p, src) = do
   encodedSrc :: Text
   encodedSrc = E.decodeUtf8 src
 
-fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
+fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
 fromSource name file src = do
   lift $ toBeRecompiled name
   case runParser (spaces *> parseModule <* eof) "" src of
@@ -92,7 +92,7 @@ fromSource name file src = do
           pure $ Right (BSource module_)
         else pure $ Left (BadModuleName file (principalPath path))
 
-parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
+parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
 parseFile file = do
   CompilerConfig{..} <- lift $ gets protoOcompilerConfig
   res <- liftIO $ resolveModule configSourcePaths file

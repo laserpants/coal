@@ -11,7 +11,7 @@ module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Cache (writeBuildFile)
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
@@ -45,10 +45,10 @@ import System.IO.Temp (withSystemTempDirectory)
 import System.Process
 import qualified System.Process.ByteString as ByteString
 
-passLLVMOutput :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildUnit (Name, [IRConstruct [IRLine]])] [(Name, ByteString)]
+passLLVMOutput :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Name, [IRConstruct [IRLine]])] [(Name, ByteString)]
 passLLVMOutput = Pass{runPass = pass}
 
-pass :: (MonadIO m, MonadMask m) => [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata (ProtoCompilerT m Metadata) [(Name, ByteString)]
+pass :: (MonadIO m, MonadMask m) => [BuildEnvelope (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata (ProtoCompilerT m Metadata) [(Name, ByteString)]
 pass ir = do
   config <- lift $ gets protoOcompilerConfig
   pb <- asks compilerProgressBar
@@ -70,7 +70,7 @@ pass ir = do
 
       pure results
 
-generateLLOutput :: (MonadIO m, MonadMask m) => Maybe ProgressBar -> CompilerConfig -> [BuildUnit (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata (ProtoCompilerT m a) (Either CompilerFailureMode [(Name, ByteString)])
+generateLLOutput :: (MonadIO m, MonadMask m) => Maybe ProgressBar -> CompilerConfig -> [BuildEnvelope (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata (ProtoCompilerT m a) (Either CompilerFailureMode [(Name, ByteString)])
 generateLLOutput pb CompilerConfig{..} mods = do
   withSystemTempDirectory "coal-build" $
     \tmpDir -> do
@@ -84,7 +84,7 @@ generateLLOutput pb CompilerConfig{..} mods = do
           forM_ errs $ liftIO . print
           pure (Left CompilerError)
 
-irOutput :: (MonadIO m) => Maybe ProgressBar -> CompilerConfig -> FilePath -> BuildUnit (Name, [IRConstruct [IRLine]]) -> CompilerT Metadata (ProtoCompilerT m a) (Either SomeException (Name, ByteString))
+irOutput :: (MonadIO m) => Maybe ProgressBar -> CompilerConfig -> FilePath -> BuildEnvelope (Name, [IRConstruct [IRLine]]) -> CompilerT Metadata (ProtoCompilerT m a) (Either SomeException (Name, ByteString))
 irOutput pb CompilerConfig{..} tmpDir = do
   \case
     BSource (name, code) -> do

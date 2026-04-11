@@ -10,7 +10,7 @@ module Coal.Compiler.Pass.PreflightPhase.ShadowingRule (passShadowingRule) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Name (isConstructor)
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
@@ -31,7 +31,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name)
 
-passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passShadowingRule = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())

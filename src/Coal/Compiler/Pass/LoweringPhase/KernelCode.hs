@@ -8,7 +8,7 @@ module Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode, compileUnits
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Builtin.Objects (builtinObjects)
@@ -29,13 +29,13 @@ import Control.Monad.Trans (lift)
 import qualified Data.Text as Text
 import Extras (Name, forM, isConstructor, (<$$>))
 
-passKernelCode :: (MonadIO m) => Pass Metadata m [BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] [BuildUnit (Name, [IRConstruct [IRLine]])]
+passKernelCode :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] [BuildEnvelope (Name, [IRConstruct [IRLine]])]
 passKernelCode = Pass{runPass = evalPipelineT . pass}
 
-pass :: (MonadIO m) => [BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata (ProtoCompilerT m a)) [BuildUnit (Name, [IRConstruct [IRLine]])]
+pass :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata (ProtoCompilerT m a)) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
 pass ms = compileUnits (builtin : ms)
 
-compileUnits :: (MonadIO m) => [BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata (ProtoCompilerT m a)) [BuildUnit (Name, [IRConstruct [IRLine]])]
+compileUnits :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata (ProtoCompilerT m a)) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
 compileUnits units = do
   mods <- forM units $
     \case
@@ -112,5 +112,5 @@ compileUnits units = do
         OExternal name it t
 
 -- TODO: cache
-builtin :: BuildUnit (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
+builtin :: BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 builtin = BSource builtinObjects

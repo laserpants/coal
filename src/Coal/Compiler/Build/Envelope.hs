@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Build.Unit (BuildUnit (..), unitPathName, partitionBuildUnits) where
+module Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName, partitionBuildEnvelopes) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Module.Path
@@ -10,21 +10,21 @@ import Coal.ProtoCompiler.ProtoBuild
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Extras (Name)
 
-data BuildUnit a
+data BuildEnvelope a
   = BSource a
   | BCached (ProtoBuild Metadata)
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
 
-unitPathName :: BuildUnit (ProtoModule a k ()) -> Name
-unitPathName =
+envelopePathName :: BuildEnvelope (ProtoModule a k ()) -> Name
+envelopePathName =
   \case
     BSource ProtoModule{..} ->
       principalPath protoOmodulePath
     BCached ProtoBuild{..} ->
       principalPath protoObuildPath
 
-partitionBuildUnits :: [BuildUnit a] -> ([a], [ProtoBuild Metadata])
-partitionBuildUnits = foldr (flip go) ([], [])
+partitionBuildEnvelopes :: [BuildEnvelope a] -> ([a], [ProtoBuild Metadata])
+partitionBuildEnvelopes = foldr (flip go) ([], [])
  where
   go (sources, cached) =
     \case

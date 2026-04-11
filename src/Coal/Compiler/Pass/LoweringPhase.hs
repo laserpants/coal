@@ -5,7 +5,7 @@
 module Coal.Compiler.Pass.LoweringPhase (loweringPhase) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode)
@@ -33,7 +33,7 @@ import Extras (Name)
 --        writeDotFile (ll <> "_" <> moduleName m) m
 --    pure m
 
-loweringPhase :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildUnit (ProtoModule Metadata Kind IndexedType)] [(Name, ByteString)]
+loweringPhase :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata Kind IndexedType)] [(Name, ByteString)]
 loweringPhase =
   mapPass passKernelTranslate
     --    >-> mapPass (liftPass (generateDebugArtifacts "Kernel"))

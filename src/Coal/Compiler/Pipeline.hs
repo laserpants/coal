@@ -15,7 +15,7 @@ module Coal.Compiler.Pipeline (
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
@@ -60,7 +60,7 @@ pipeline =
     >-> loweringPhase
     >-> passLinking
 
-extraTicks :: (MonadIO m) => [BuildUnit a] -> CompilerT Metadata m [BuildUnit a]
+extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
 extraTicks units = do
   forM_ units $
     \case

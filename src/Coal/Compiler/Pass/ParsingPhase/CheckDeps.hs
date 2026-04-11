@@ -6,7 +6,7 @@
 module Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Unit (BuildUnit (..))
+import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
@@ -27,13 +27,13 @@ import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)
 
-passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildUnit (ProtoModule Metadata () ())] [BuildUnit (ProtoModule Metadata () ())]
+passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passCheckDeps = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [BuildUnit (ProtoModule Metadata () ())] -> CompilerT Metadata (ProtoCompilerT m Metadata) [BuildUnit (ProtoModule Metadata () ())]
+pass :: (MonadIO m) => [BuildEnvelope (ProtoModule Metadata () ())] -> CompilerT Metadata (ProtoCompilerT m Metadata) [BuildEnvelope (ProtoModule Metadata () ())]
 pass = traverse check
 
-check :: (MonadIO m) => BuildUnit (ProtoModule Metadata () ()) -> CompilerT Metadata (ProtoCompilerT m Metadata) (BuildUnit (ProtoModule Metadata () ()))
+check :: (MonadIO m) => BuildEnvelope (ProtoModule Metadata () ()) -> CompilerT Metadata (ProtoCompilerT m Metadata) (BuildEnvelope (ProtoModule Metadata () ()))
 check =
   \case
     BSource src -> do
@@ -53,7 +53,7 @@ check =
               pure r
         else pure (BCached ProtoBuild{..})
 
-fromSource :: (MonadIO m) => Name -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildUnit (ProtoModule Metadata () ())))
+fromSource :: (MonadIO m) => Name -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
 fromSource name src = do
   lift $ toBeRecompiled name
   case runParser (spaces *> parseModule <* eof) "" src of
