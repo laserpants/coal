@@ -94,8 +94,8 @@ updateNames =
             _ ->
               pure ()
 
---updateBuildC :: (Monad m) => Path -> (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
---updateBuildC path f = do
+-- updateBuildC :: (Monad m) => Path -> (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
+-- updateBuildC path f = do
 --  maybeBuild <- getBuildC path
 --  case maybeBuild of
 --    Nothing ->
@@ -104,8 +104,8 @@ updateNames =
 --      newBuild <- f build
 --      modify (overCompilerModules (Environment.insert (principalPath path) newBuild))
 --
---updateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
---updateCurrentBuildC f = do
+-- updateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
+-- updateCurrentBuildC f = do
 --  CompilerState{..} <- get
 --  updateBuildC compilerCurrentPath f
 
@@ -210,10 +210,11 @@ instance (AliasTransform (Type Parameter a)) => AliasTransform (DataConstructor 
     \case
       DataConstructor{..} -> do
         newConstructorScheme <- aliasTransform constructorScheme
-        pure DataConstructor{
-          constructorScheme = newConstructorScheme
-          , ..
-          }
+        pure
+          DataConstructor
+            { constructorScheme = newConstructorScheme
+            , ..
+            }
 
 -- TODO: DRY
 instance AliasTransform (DataConstructor TypeIndex Kind (Type TypeIndex Kind)) where
@@ -221,10 +222,11 @@ instance AliasTransform (DataConstructor TypeIndex Kind (Type TypeIndex Kind)) w
     \case
       DataConstructor{..} -> do
         newConstructorScheme <- aliasTransform constructorScheme
-        pure DataConstructor{
-          constructorScheme = newConstructorScheme
-          , 
-          ..}
+        pure
+          DataConstructor
+            { constructorScheme = newConstructorScheme
+            , ..
+            }
 
 instance AliasTransform (Type Parameter Kind) where
   aliasTransform =
