@@ -12,10 +12,10 @@ import Data.Data (Data)
 import Data.Tuple.Extra (secondM)
 import Extras (Name, const2, (<$$>))
 
-class Transformable e where
+class RewriteContext e where
   rewrite :: (Monad m, Data a, Data s, Data t, Ord t) => Name -> (a -> t -> m (Expression a s t)) -> e a s t -> m (e a s t)
 
-instance Transformable (Binding Expression) where
+instance RewriteContext (Binding Expression) where
   rewrite name f =
     \case
       BPattern a p e ->
@@ -23,13 +23,13 @@ instance Transformable (Binding Expression) where
       BFunction a n ps e ->
         BFunction a name ps <$> rewrite n f e
 
-instance Transformable (Guard Expression) where
+instance RewriteContext (Guard Expression) where
   rewrite name f =
     \case
       CGuard e ->
         CGuard <$> rewrite name f e
 
-instance Transformable (Choice Expression) where
+instance RewriteContext (Choice Expression) where
   rewrite name f =
     \case
       CPlain a gs e ->
@@ -37,7 +37,7 @@ instance Transformable (Choice Expression) where
           <$> traverse (rewrite name f) gs
           <*> rewrite name f e
 
-instance Transformable Clause where
+instance RewriteContext Clause where
   rewrite name f =
     \case
       EClause a ps cs
@@ -46,7 +46,7 @@ instance Transformable Clause where
         | otherwise ->
             pure (EClause a ps cs)
 
-instance Transformable CompiledClause where
+instance RewriteContext CompiledClause where
   rewrite name f =
     \case
       ECompiledClause loc lls e
@@ -55,7 +55,7 @@ instance Transformable CompiledClause where
         | otherwise ->
             pure (ECompiledClause loc lls e)
 
-instance Transformable Expression where
+instance RewriteContext Expression where
   rewrite name f =
     \case
       EAnnotation _ _ e ->
