@@ -30,7 +30,7 @@ import Coal.TypeSystem.Kind.Substitution
 import Coal.TypeSystem.Kind.Unification
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Control.Monad.Except
-import Control.Monad.State (gets, modify, runState)
+import Control.Monad.State (get, gets, modify, runState)
 import Data.Data (Data)
 import Data.List (nub)
 import qualified Data.Map as Map
@@ -40,6 +40,7 @@ import Data.Text.Lazy (toStrict)
 import Debug.Trace
 import Text.Pretty.Simple (pPrint, pShowNoColor)
 import TextShow (showt)
+import qualified Coal.Common.Environment as Environment 
 
 passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference = Pass{runPass = pass}
@@ -117,24 +118,28 @@ ti modul = do
 
 inferTypes :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 inferTypes modul = do
+
   Module{..} <- indexTypes modul
+
   forM_ moduleDefinitions $
     \def -> do
       generateConstraints def
       sub <- solveX
       defineName (apply sub def)
 
-  sub <- gets compilerSubstitution
-  assumptions <- gets compilerAssumptions
+  CompilerState{..} <- get
 
-  Environment env <- gets compilerNameStore
-  insertConstraintsC $ do
-    (n, s) <- Map.toList env
-    Assumption{..} <- assumptions
-    let t = apply sub assumptionType
-    [Explicit (RuleAssumptionExplicit assumptionMetadata t s) t s | n == assumptionName]
+  forM compilerAssumptions $
+    \Assumption{..} ->
+      case Environment.lookup assumptionName compilerNameStore of
+        Nothing ->
+          error "!!??"
+        Just s -> do
+          insertConstraintsC [Explicit (RuleAssumptionExplicit assumptionMetadata t s) t s]
+         where
+          t = apply compilerSubstitution assumptionType
 
-  sub <- solveX
+  sub <- solveX -- again?
   modify (overCompilerAssumptions (apply sub))
 
   let newModuleDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)

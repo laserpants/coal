@@ -189,6 +189,7 @@ library
       Coal.Language.Expression.Binding
       Coal.Language.Expression.Choice
       Coal.Language.Expression.Operator
+      Coal.Language.HasActive
       Coal.Language.HasKind
       Coal.Language.HasType
       Coal.Language.Module
