@@ -145,10 +145,10 @@ instance TransformContext (Module Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       Module{..} -> do
-        newModuleDefinitions <- traverse desugarPatterns protoOmoduleDefinitions
+        newModuleDefinitions <- traverse desugarPatterns moduleDefinitions
         pure
           Module
-            { protoOmoduleDefinitions = newModuleDefinitions
+            { moduleDefinitions = newModuleDefinitions
             , ..
             }
 
@@ -160,12 +160,12 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
       DLet loc name def ->
         DLet loc name <$> desugarPatterns def
       DInstance loc InstanceDefinition{..} -> do
-        newInstanceDefinitionImplementations <- traverse desugarPatterns protoOinstanceDefinitionImplementations
+        newInstanceDefinitionImplementations <- traverse desugarPatterns instanceDefinitionImplementations
         pure $
           DInstance
             loc
             InstanceDefinition
-              { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
+              { instanceDefinitionImplementations = newInstanceDefinitionImplementations
               , ..
               }
       d ->
@@ -175,14 +175,14 @@ instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       FunctionDefinition{..} -> do
-        newFunctionDefinitionExpression <- desugarPatterns protoOfunctionDefinitionExpression
-        (qs, rs) <- listenPatterns (traverse desugarPatterns protoOfunctionDefinitionPatterns)
+        newFunctionDefinitionExpression <- desugarPatterns functionDefinitionExpression
+        (qs, rs) <- listenPatterns (traverse desugarPatterns functionDefinitionPatterns)
         pure $
           FunctionDefinition
-            { protoOfunctionDefinitionPatterns =
+            { functionDefinitionPatterns =
                 qs
-            , protoOfunctionDefinitionExpression =
-                foldr (unrollMatch protoOfunctionDefinitionMetadata) newFunctionDefinitionExpression rs
+            , functionDefinitionExpression =
+                foldr (unrollMatch functionDefinitionMetadata) newFunctionDefinitionExpression rs
             , ..
             }
 
@@ -190,9 +190,9 @@ instance TransformContext (LetDefinition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       LetDefinition{..} -> do
-        newLetDefinitionExpression <- desugarPatterns protoOletDefinitionExpression
+        newLetDefinitionExpression <- desugarPatterns letDefinitionExpression
         pure $
           LetDefinition
-            { protoOletDefinitionExpression = newLetDefinitionExpression
+            { letDefinitionExpression = newLetDefinitionExpression
             , ..
             }

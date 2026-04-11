@@ -29,7 +29,7 @@ passLinking = Pass{runPass = pass}
 
 pass :: (MonadIO m) => [(Name, ByteString)] -> CompilerT Metadata m ()
 pass bcode = do
-  config <- gets protoOcompilerConfig
+  config <- gets compilerConfig
   r <- liftIO (compileBitcode config bcode)
   for_ r throwError
 

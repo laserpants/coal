@@ -17,13 +17,13 @@ import Coal.Language.Type (Parameter (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
 import Coal.Compiler.Build
-import Coal.Compiler.Build.Prep (protoOprepareBuild, protoOreplacePlaceholders)
+import Coal.Compiler.Build.Prep (prepareBuild, replacePlaceholders)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language.Definition
 import Coal.Language.Module (ModuleExportList (..), Module (..))
 import Coal.TypeSystem.Kind.Constraint.Generation
-import Coal.TypeSystem.Kind.Constraint.Solver (protoOsolveKindConstraints)
+import Coal.TypeSystem.Kind.Constraint.Solver (solveKindConstraints)
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Kind.Substitution
 import Coal.TypeSystem.Kind.Unification
@@ -46,30 +46,30 @@ import Text.Pretty.Simple (pPrint)
 testModuleBuiltinsPreKinds :: (Monoid a) => Module a () ()
 testModuleBuiltinsPreKinds =
   Module
-    { protoOmodulePath = Path ["Builtin"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["Builtin"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DType
             mempty
             "IO"
             ( TypeDefinition
-                { protoOtypeDefinitionParameters = [Parameter () "a"]
-                , protoOtypeDefinitionConstructors = mempty
+                { typeDefinitionParameters = [Parameter () "a"]
+                , typeDefinitionConstructors = mempty
                 }
             )
         , DTrait
             mempty
             "Numeric"
             ( TraitDefinition
-                { protoOtraitDefinitionMetadata =
+                { traitDefinitionMetadata =
                     mempty
-                , protoOtraitDefinitionTraitName =
+                , traitDefinitionTraitName =
                     "Numeric"
-                , protoOtraitDefinitionConstraints =
+                , traitDefinitionConstraints =
                     mempty
-                , protoOtraitDefinitionParameter =
+                , traitDefinitionParameter =
                     Parameter () "a"
-                , protoOtraitDefinitionInterface =
+                , traitDefinitionInterface =
                     [ TraitDefinitionInterfaceEntry
                         "from_int32"
                         ( Forall
@@ -125,28 +125,28 @@ testModuleBuiltinsPreKinds =
         , DInstance
             mempty
             ( InstanceDefinition
-                { protoOinstanceDefinitionMetadata =
+                { instanceDefinitionMetadata =
                     mempty
-                , protoOinstanceDefinitionConstraints =
+                , instanceDefinitionConstraints =
                     mempty
-                , protoOinstanceDefinitionTraitName =
+                , instanceDefinitionTraitName =
                     "Numeric"
-                , protoOinstanceDefinitionType =
+                , instanceDefinitionType =
                     TIntrinsic IInt32
-                , protoOinstanceDefinitionImplementations =
+                , instanceDefinitionImplementations =
                     [ DFunction
                         mempty
                         "from_int32"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EVariable mempty (Label () "n")
                             }
                         )
@@ -154,15 +154,15 @@ testModuleBuiltinsPreKinds =
                         mempty
                         "from_int64"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -176,15 +176,15 @@ testModuleBuiltinsPreKinds =
                         mempty
                         "from_bignum"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -198,15 +198,15 @@ testModuleBuiltinsPreKinds =
                         mempty
                         "negate"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -220,15 +220,15 @@ testModuleBuiltinsPreKinds =
                         mempty
                         "(+)"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -243,15 +243,15 @@ testModuleBuiltinsPreKinds =
                         mempty
                         "(-)"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -266,15 +266,15 @@ testModuleBuiltinsPreKinds =
                         mempty
                         "(*)"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -294,30 +294,30 @@ testModuleBuiltinsPreKinds =
 testModuleBuiltins :: (Monoid a) => Module a Kind ()
 testModuleBuiltins =
   Module
-    { protoOmodulePath = Path ["Builtin"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["Builtin"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DType
             mempty
             "IO"
             ( TypeDefinition
-                { protoOtypeDefinitionParameters = [Parameter KType "a"]
-                , protoOtypeDefinitionConstructors = mempty
+                { typeDefinitionParameters = [Parameter KType "a"]
+                , typeDefinitionConstructors = mempty
                 }
             )
         , DTrait
             mempty
             "Numeric"
             ( TraitDefinition
-                { protoOtraitDefinitionMetadata =
+                { traitDefinitionMetadata =
                     mempty
-                , protoOtraitDefinitionTraitName =
+                , traitDefinitionTraitName =
                     "Numeric"
-                , protoOtraitDefinitionConstraints =
+                , traitDefinitionConstraints =
                     mempty
-                , protoOtraitDefinitionParameter =
+                , traitDefinitionParameter =
                     Parameter KType "a"
-                , protoOtraitDefinitionInterface =
+                , traitDefinitionInterface =
                     [ TraitDefinitionInterfaceEntry
                         "from_int32"
                         ( Forall
@@ -373,28 +373,28 @@ testModuleBuiltins =
         , DInstance
             mempty
             ( InstanceDefinition
-                { protoOinstanceDefinitionMetadata =
+                { instanceDefinitionMetadata =
                     mempty
-                , protoOinstanceDefinitionConstraints =
+                , instanceDefinitionConstraints =
                     mempty
-                , protoOinstanceDefinitionTraitName =
+                , instanceDefinitionTraitName =
                     "Numeric"
-                , protoOinstanceDefinitionType =
+                , instanceDefinitionType =
                     TIntrinsic IInt32
-                , protoOinstanceDefinitionImplementations =
+                , instanceDefinitionImplementations =
                     [ DFunction
                         mempty
                         "from_int32"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EVariable mempty (Label () "n")
                             }
                         )
@@ -402,15 +402,15 @@ testModuleBuiltins =
                         mempty
                         "from_int64"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -424,15 +424,15 @@ testModuleBuiltins =
                         mempty
                         "from_bignum"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -446,15 +446,15 @@ testModuleBuiltins =
                         mempty
                         "negate"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -468,15 +468,15 @@ testModuleBuiltins =
                         mempty
                         "(+)"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -491,15 +491,15 @@ testModuleBuiltins =
                         mempty
                         "(-)"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -514,15 +514,15 @@ testModuleBuiltins =
                         mempty
                         "(*)"
                         ( FunctionDefinition
-                            { protoOfunctionDefinitionMetadata =
+                            { functionDefinitionMetadata =
                                 mempty
-                            , protoOfunctionDefinitionAnnotation =
+                            , functionDefinitionAnnotation =
                                 Nothing
-                            , protoOfunctionDefinitionType =
+                            , functionDefinitionType =
                                 With mempty ()
-                            , protoOfunctionDefinitionPatterns =
+                            , functionDefinitionPatterns =
                                 PVariable mempty (Label () "m") <| PVariable mempty (Label () "n") :| mempty
-                            , protoOfunctionDefinitionExpression =
+                            , functionDefinitionExpression =
                                 EApplication
                                   mempty
                                   ()
@@ -544,9 +544,9 @@ testModuleBuiltins =
 testModule0PreKinds :: (Monoid a) => Module a () ()
 testModule0PreKinds =
   Module
-    { protoOmodulePath = Path ["IO"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["IO"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DImport
             mempty
             (Path ["Builtin"])
@@ -556,8 +556,8 @@ testModule0PreKinds =
             mempty
             "println_int32"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation =
+                { functionDefinitionMetadata = mempty
+                , functionDefinitionAnnotation =
                     Just
                       ( With
                           mempty
@@ -567,14 +567,14 @@ testModule0PreKinds =
                               (TIntrinsic IUnit)
                           )
                       )
-                , protoOfunctionDefinitionType = With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                , functionDefinitionType = With mempty ()
+                , functionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
                       :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     EApplication
                       mempty
                       ()
@@ -590,9 +590,9 @@ testModule0PreKinds =
 testModule0 :: (Monoid a) => Module a Kind ()
 testModule0 =
   Module
-    { protoOmodulePath = Path ["IO"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["IO"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DImport
             mempty
             (Path ["Builtin"])
@@ -602,8 +602,8 @@ testModule0 =
             mempty
             "println_int32"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation =
+                { functionDefinitionMetadata = mempty
+                , functionDefinitionAnnotation =
                     Just
                       ( With
                           mempty
@@ -613,14 +613,14 @@ testModule0 =
                               (TIntrinsic IUnit)
                           )
                       )
-                , protoOfunctionDefinitionType = With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                , functionDefinitionType = With mempty ()
+                , functionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
                       :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     EApplication
                       mempty
                       ()
@@ -636,15 +636,15 @@ testModule0 =
 testModule1PreKinds :: (Monoid a) => Module a () ()
 testModule1PreKinds =
   Module
-    { protoOmodulePath = Path ["Main"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["Main"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DType
             mempty
             "IO"
             ( TypeDefinition
-                { protoOtypeDefinitionParameters = [Parameter () "a"]
-                , protoOtypeDefinitionConstructors = mempty
+                { typeDefinitionParameters = [Parameter () "a"]
+                , typeDefinitionConstructors = mempty
                 }
             )
         , DImport
@@ -661,12 +661,12 @@ testModule1PreKinds =
             mempty
             "main"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation = Nothing
-                , protoOfunctionDefinitionType = With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                { functionDefinitionMetadata = mempty
+                , functionDefinitionAnnotation = Nothing
+                , functionDefinitionType = With mempty ()
+                , functionDefinitionPatterns =
                     PLiteral mempty LUnit :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     EApplication
                       mempty
                       ()
@@ -694,9 +694,9 @@ testModule1PreKinds =
 -- testModule1 :: (Monoid a) => Module a Kind ()
 -- testModule1 =
 --  Module
---    { protoOmodulePath = Path ["Main"]
---    , protoOmoduleExportList = ExportAll
---    , protoOmoduleDefinitions =
+--    { modulePath = Path ["Main"]
+--    , moduleExportList = ExportAll
+--    , moduleDefinitions =
 --        [ DImport
 --            mempty
 --            (Path ["Math"])
@@ -711,12 +711,12 @@ testModule1PreKinds =
 --            mempty
 --            "main"
 --            ( FunctionDefinition
---                { protoOfunctionDefinitionMetadata = mempty
---                , protoOfunctionDefinitionAnnotation = Nothing
---                , protoOfunctionDefinitionType = With mempty ()
---                , protoOfunctionDefinitionPatterns =
+--                { functionDefinitionMetadata = mempty
+--                , functionDefinitionAnnotation = Nothing
+--                , functionDefinitionType = With mempty ()
+--                , functionDefinitionPatterns =
 --                    PLiteral mempty LUnit :| mempty
---                , protoOfunctionDefinitionExpression =
+--                , functionDefinitionExpression =
 --                    EApplication
 --                      mempty
 --                      ()
@@ -744,9 +744,9 @@ testModule1PreKinds =
 testModule2PreKinds :: (Monoid a) => Module a () ()
 testModule2PreKinds =
   Module
-    { protoOmodulePath = Path ["Math"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["Math"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DImport
             mempty
             (Path ["Nat"])
@@ -762,19 +762,19 @@ testModule2PreKinds =
             mempty
             "factorial"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata =
+                { functionDefinitionMetadata =
                     mempty
-                , protoOfunctionDefinitionAnnotation =
+                , functionDefinitionAnnotation =
                     Just (With mempty (TIntrinsic IInt32))
-                , protoOfunctionDefinitionType =
+                , functionDefinitionType =
                     With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                , functionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
                       :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     ERecursiveLet
                       mempty
                       (PVariable mempty (Label () "$fold"))
@@ -921,9 +921,9 @@ testModule2PreKinds =
 -- testModule2 :: (Monoid a) => Module a Kind ()
 -- testModule2 =
 --  Module
---    { protoOmodulePath = Path ["Math"]
---    , protoOmoduleExportList = ExportAll
---    , protoOmoduleDefinitions =
+--    { modulePath = Path ["Math"]
+--    , moduleExportList = ExportAll
+--    , moduleDefinitions =
 --        [ DImport
 --            mempty
 --            (Path ["Nat"])
@@ -934,19 +934,19 @@ testModule2PreKinds =
 --            mempty
 --            "factorial"
 --            ( FunctionDefinition
---                { protoOfunctionDefinitionMetadata =
+--                { functionDefinitionMetadata =
 --                    mempty
---                , protoOfunctionDefinitionAnnotation =
+--                , functionDefinitionAnnotation =
 --                    Just (With mempty (TIntrinsic IInt32))
---                , protoOfunctionDefinitionType =
+--                , functionDefinitionType =
 --                    With mempty ()
---                , protoOfunctionDefinitionPatterns =
+--                , functionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic IInt32)
 --                      (PVariable mempty (Label () "n"))
 --                      :| mempty
---                , protoOfunctionDefinitionExpression =
+--                , functionDefinitionExpression =
 --                    EFold
 --                      mempty
 --                      ()
@@ -1017,15 +1017,15 @@ testModule2PreKinds =
 testModule3PreKinds :: (Monoid a) => Module a () ()
 testModule3PreKinds =
   Module
-    { protoOmodulePath = Path ["Nat"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["Nat"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DType
             mempty
             "Nat"
             ( TypeDefinition
-                { protoOtypeDefinitionParameters = mempty
-                , protoOtypeDefinitionConstructors =
+                { typeDefinitionParameters = mempty
+                , typeDefinitionConstructors =
                     [ DataConstructor
                         { constructorName = "Succ"
                         , constructorArity = 1
@@ -1043,22 +1043,22 @@ testModule3PreKinds =
             mempty
             "pack"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation =
+                { functionDefinitionMetadata = mempty
+                , functionDefinitionAnnotation =
                     Just
                       ( With
                           mempty
                           (TIntrinsic INat)
                       )
-                , protoOfunctionDefinitionType =
+                , functionDefinitionType =
                     With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                , functionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "m"))
                       :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     EApplication
                       mempty
                       ()
@@ -1072,22 +1072,22 @@ testModule3PreKinds =
             mempty
             "unpack"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation =
+                { functionDefinitionMetadata = mempty
+                , functionDefinitionAnnotation =
                     Just
                       ( With
                           mempty
                           (TIntrinsic IInt32)
                       )
-                , protoOfunctionDefinitionType =
+                , functionDefinitionType =
                     With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                , functionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic INat)
                       (PVariable mempty (Label () "n"))
                       :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     EApplication
                       mempty
                       ()
@@ -1103,19 +1103,19 @@ testModule3PreKinds =
 testModule4PreKinds :: (Monoid a) => Module a () ()
 testModule4PreKinds =
   Module
-    { protoOmodulePath = Path ["Main"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["Main"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DFunction
             mempty
             "some_fun"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation = Nothing
-                , protoOfunctionDefinitionType = With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                { functionDefinitionMetadata = mempty
+                , functionDefinitionAnnotation = Nothing
+                , functionDefinitionType = With mempty ()
+                , functionDefinitionPatterns =
                     PVariable mempty (Label () "m") :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     ELiteral mempty (LInt32 1)
                 }
             )
@@ -1125,29 +1125,29 @@ testModule4PreKinds =
 -- testModule3 :: (Monoid a) => Module a Kind ()
 -- testModule3 =
 --  Module
---    { protoOmodulePath = Path ["Nat"]
---    , protoOmoduleExportList = ExportAll
---    , protoOmoduleDefinitions =
+--    { modulePath = Path ["Nat"]
+--    , moduleExportList = ExportAll
+--    , moduleDefinitions =
 --        [ DFunction
 --            mempty
 --            "pack"
 --            ( FunctionDefinition
---                { protoOfunctionDefinitionMetadata = mempty
---                , protoOfunctionDefinitionAnnotation =
+--                { functionDefinitionMetadata = mempty
+--                , functionDefinitionAnnotation =
 --                    Just
 --                      ( With
 --                          mempty
 --                          (TIntrinsic INat)
 --                      )
---                , protoOfunctionDefinitionType =
+--                , functionDefinitionType =
 --                    With mempty ()
---                , protoOfunctionDefinitionPatterns =
+--                , functionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic IInt32)
 --                      (PVariable mempty (Label () "m"))
 --                      :| mempty
---                , protoOfunctionDefinitionExpression =
+--                , functionDefinitionExpression =
 --                    EApplication
 --                      mempty
 --                      ()
@@ -1161,22 +1161,22 @@ testModule4PreKinds =
 --            mempty
 --            "unpack"
 --            ( FunctionDefinition
---                { protoOfunctionDefinitionMetadata = mempty
---                , protoOfunctionDefinitionAnnotation =
+--                { functionDefinitionMetadata = mempty
+--                , functionDefinitionAnnotation =
 --                    Just
 --                      ( With
 --                          mempty
 --                          (TIntrinsic IInt32)
 --                      )
---                , protoOfunctionDefinitionType =
+--                , functionDefinitionType =
 --                    With mempty ()
---                , protoOfunctionDefinitionPatterns =
+--                , functionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic INat)
 --                      (PVariable mempty (Label () "n"))
 --                      :| mempty
---                , protoOfunctionDefinitionExpression =
+--                , functionDefinitionExpression =
 --                    EApplication
 --                      mempty
 --                      ()
@@ -1194,9 +1194,9 @@ testModule4PreKinds =
 -- testModule2B :: (Monoid a) => Module a Kind ()
 -- testModule2B =
 --  Module
---    { protoOmodulePath = Path ["Math"]
---    , protoOmoduleExportList = ExportAll
---    , protoOmoduleDefinitions =
+--    { modulePath = Path ["Math"]
+--    , moduleExportList = ExportAll
+--    , moduleDefinitions =
 --        [ DImport
 --            mempty
 --            (Path ["Nat"])
@@ -1207,19 +1207,19 @@ testModule4PreKinds =
 --            mempty
 --            "factorial"
 --            ( FunctionDefinition
---                { protoOfunctionDefinitionMetadata =
+--                { functionDefinitionMetadata =
 --                    mempty
---                , protoOfunctionDefinitionAnnotation =
+--                , functionDefinitionAnnotation =
 --                    Just (With mempty (TIntrinsic IInt32))
---                , protoOfunctionDefinitionType =
+--                , functionDefinitionType =
 --                    With mempty ()
---                , protoOfunctionDefinitionPatterns =
+--                , functionDefinitionPatterns =
 --                    PAnnotation
 --                      mempty
 --                      (TIntrinsic IInt32)
 --                      (PVariable mempty (Label () "n"))
 --                      :| mempty
---                , protoOfunctionDefinitionExpression =
+--                , functionDefinitionExpression =
 --                    ERecursiveLet
 --                      mempty
 --                      (PVariable mempty (Label () "$fold-70cdac64"))
@@ -1310,24 +1310,24 @@ testModule4PreKinds =
 --    }
 
 -- testA :: (Monoid a) => IO (Either () (Build a))
--- testA = evalCompilerT (protoOprepareBuild testModuleBuiltins)
+-- testA = evalCompilerT (prepareBuild testModuleBuiltins)
 
 --  testB :: Module () Kind ()
 --  testB = evalStateT (toKindIndexed (testModuleBuiltinsPreKinds :: Module () () ())) 0
 
 -- testC :: ([(Name, Kind)], [KindConstraintsGenOutput])
--- testC = runKindConstraintsGen env (protoOemitKindConstraints testB)
+-- testC = runKindConstraintsGen env (emitKindConstraints testB)
 -- where
 --  env =
 --    Environment.fromList
 --      [ ("Numeric", KArrow KType KTrait)
 --      ]
 
--- testD = protoOapplyKinds sub testB
+-- testD = applyKinds sub testB
 -- where
 --  Right sub = res
 --  res :: Either KindError KindSubstitution
---  res = protoOkindUnifierMonad (protoOsolveKindConstraints constraints)
+--  res = kindUnifierMonad (solveKindConstraints constraints)
 --  constraints = rights (snd testC)
 
 testE :: IO (Either CompilerFailureMode (Build ())) -- CompilerT a m ()
@@ -1335,56 +1335,56 @@ testE = do
   evalCompilerT undefined $ do
     kindIndexedModule <- toKindIndexed (testModuleBuiltinsPreKinds :: Module () () ())
     env <- moduleKindEnvironment kindIndexedModule
-    (_, res1) <- runKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
+    (_, res1) <- runKindConstraintsGen env (emitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either KindError KindSubstitution
-        res3 = protoOapplyKinds sub kindIndexedModule :: Module () Kind ()
+        Right sub = kindUnifierMonad (solveKindConstraints constraints) :: Either KindError KindSubstitution
+        res3 = applyKinds sub kindIndexedModule :: Module () Kind ()
     traceShowM errs
     traceShowM res3
     traceShowM (res3 == testModuleBuiltins)
-    protoOprepareBuild res3
-    protoOgetCurrentBuildC
+    prepareBuild res3
+    getCurrentBuildC
 
 testF :: IO (Either CompilerFailureMode (Build ())) -- CompilerT a m ()
 testF = do
   evalCompilerT undefined $ do
     kindIndexedModule <- toKindIndexed (testModule0PreKinds :: Module () () ())
     env <- moduleKindEnvironment kindIndexedModule
-    (_, res1) <- runKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
+    (_, res1) <- runKindConstraintsGen env (emitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either KindError KindSubstitution
-        res3 = protoOapplyKinds sub kindIndexedModule :: Module () Kind ()
+        Right sub = kindUnifierMonad (solveKindConstraints constraints) :: Either KindError KindSubstitution
+        res3 = applyKinds sub kindIndexedModule :: Module () Kind ()
     traceShowM errs
     traceShowM (res3 == testModule0)
-    protoOprepareBuild res3
-    protoOgetCurrentBuildC
+    prepareBuild res3
+    getCurrentBuildC
 
 testG :: IO (Either CompilerFailureMode (Build ())) -- CompilerT a m ()
 testG = do
   evalCompilerT undefined $ do
     kindIndexedModule <- toKindIndexed (testModuleBuiltinsPreKinds :: Module () () ())
     env <- moduleKindEnvironment kindIndexedModule
-    (_, res1) <- runKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
+    (_, res1) <- runKindConstraintsGen env (emitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either KindError KindSubstitution
-        res3 = protoOapplyKinds sub kindIndexedModule :: Module () Kind ()
-    protoOprepareBuild res3
+        Right sub = kindUnifierMonad (solveKindConstraints constraints) :: Either KindError KindSubstitution
+        res3 = applyKinds sub kindIndexedModule :: Module () Kind ()
+    prepareBuild res3
     --
     kindIndexedModule <- toKindIndexed (testModule0PreKinds :: Module () () ())
     env <- moduleKindEnvironment kindIndexedModule
-    (_, res1) <- runKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
+    (_, res1) <- runKindConstraintsGen env (emitKindConstraints kindIndexedModule)
     let constraints = rights res1
         errs = lefts res1
-        Right sub = protoOkindUnifierMonad (protoOsolveKindConstraints constraints) :: Either KindError KindSubstitution
-        res3 = protoOapplyKinds sub kindIndexedModule :: Module () Kind ()
+        Right sub = kindUnifierMonad (solveKindConstraints constraints) :: Either KindError KindSubstitution
+        res3 = applyKinds sub kindIndexedModule :: Module () Kind ()
     traceShowM errs
     traceShowM res3
     traceShowM (res3 == testModule0)
-    protoOprepareBuild res3
-    protoOgetCurrentBuildC
+    prepareBuild res3
+    getCurrentBuildC
 
 -- updateNames :: (Monad m, Data a) => [Definition a Kind IndexedType] -> CompilerT a m ()
 -- updateNames defs =
@@ -1394,18 +1394,18 @@ defineName :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a 
 defineName =
   \case
     def@(DFunction _ name FunctionDefinition{..}) ->
-      protoOdefine name (typeOf def)
+      define name (typeOf def)
     def@(DLet _ name LetDefinition{..}) ->
-      protoOdefine name (typeOf def)
+      define name (typeOf def)
     DInstance _ InstanceDefinition{..} -> do
-      let trait = Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
-      forM_ protoOinstanceDefinitionImplementations $
+      let trait = Trait instanceDefinitionTraitName instanceDefinitionType
+      forM_ instanceDefinitionImplementations $
         \case
           def@(DFunction _ name _) -> do
             let to = (typeOf def)
-            protoOdefine (instanceLabel trait name) to
+            define (instanceLabel trait name) to
           def@(DLet _ name _) ->
-            protoOdefine (instanceLabel trait name) (typeOf def)
+            define (instanceLabel trait name) (typeOf def)
     _ ->
       pure ()
 
@@ -1414,21 +1414,21 @@ xyz modules = do
   (_, r, _) <- runCompilerT undefined $ do
     forM_ modules $
       \modul -> do
-        protoOclearAssumptionsC
-        protoOclearNameStoreC
+        clearAssumptionsC
+        clearNameStoreC
         setCurrentModuleC modul
 
         res3 <- inferKinds modul
-        protoOprepareBuild res3
+        prepareBuild res3
 
         Module _ _ defs1 <- inferTypes res3
-        protoOreplacePlaceholders
+        replacePlaceholders
 
-        c <- protoOgetCurrentBuildC
+        c <- getCurrentBuildC
         pPrint c
 
-        --        p <- gets protoOcompilerCurrentPath
-        --        xxx <- gets protoOcompilerModules
+        --        p <- gets compilerCurrentPath
+        --        xxx <- gets compilerModules
         --        pPrint p
         --        pPrint xxx
         --        traceShowM "-----------"
@@ -1437,11 +1437,11 @@ xyz modules = do
 
         --        pPrint defs1
 
-        let mm = modul{protoOmoduleDefinitions = defs1}
+        let mm = modul{moduleDefinitions = defs1}
         let qq = generateDotSyntax mm
 
         --        pPrint errors
-        -- sub1 <- gets protoOcompilerSubstitution
+        -- sub1 <- gets compilerSubstitution
         --        traceShowM sub1
         pPrint qq
 
@@ -1459,37 +1459,37 @@ xyz modules = do
   pure ()
 
 indexTypes :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
-indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
+indexTypes ds = run (indexed ds) =<< gets compilerSupply
  where
   run s m = do
     let (r, n) = runState s m
-    protoOupdateSupplyC n
+    updateSupplyC n
     pure r
 
 inferKinds :: (Monad m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
 inferKinds modul = do
   indexed <- toKindIndexed modul
   generateKindConstraints indexed
-  constraints <- gets protoOcompilerKindConstraints
-  case protoOkindUnifierMonad (protoOsolveKindConstraints constraints) of
+  constraints <- gets compilerKindConstraints
+  case kindUnifierMonad (solveKindConstraints constraints) of
     Left err ->
       error "TODO"
     Right sub ->
-      return (protoOapplyKinds sub indexed)
+      return (applyKinds sub indexed)
 
 inferTypes :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 inferTypes modul = do
   Module{..} <- indexTypes modul
-  forM_ protoOmoduleDefinitions $
+  forM_ moduleDefinitions $
     \def -> do
-      protoOgenerateConstraints def
+      generateConstraints def
       sub <- solveX
       defineName (apply sub def)
-  sub <- gets protoOcompilerSubstitution
+  sub <- gets compilerSubstitution
   modify (overCompilerAssumptions (apply sub))
   pure $
     Module
-      { protoOmoduleDefinitions = fmap (fmap normalizeRowTypes) (apply sub protoOmoduleDefinitions)
+      { moduleDefinitions = fmap (fmap normalizeRowTypes) (apply sub moduleDefinitions)
       , ..
       }
 
@@ -1497,7 +1497,7 @@ inferTypes modul = do
 -- typeDefinition1 =
 --  \case
 --    DFunction _ name FunctionDefinition { .. } -> do
---      protoOgenerateConstraints protoOfunctionDefinitionExpression
+--      generateConstraints functionDefinitionExpression
 --
 --    -- define name (typeOf (apply sub def))
 --    DLet _ name LetDefinition{..} ->
@@ -1507,7 +1507,7 @@ inferTypes modul = do
 --    -- define name (typeOf (apply sub def))
 --
 --    DInstance a InstanceDefinition{..} ->
---      forM_ protoOinstanceDefinitionImplementations $
+--      forM_ instanceDefinitionImplementations $
 --        \case
 --          DFunction _ name FunctionDefinition{..} ->
 --            pure ()
@@ -1519,23 +1519,23 @@ inferTypes modul = do
 testModule9 :: (Monoid a) => Module a () ()
 testModule9 =
   Module
-    { protoOmodulePath = Path ["IO"]
-    , protoOmoduleExportList = ExportAll
-    , protoOmoduleDefinitions =
+    { modulePath = Path ["IO"]
+    , moduleExportList = ExportAll
+    , moduleDefinitions =
         [ DType
             mempty
             "IO"
             ( TypeDefinition
-                { protoOtypeDefinitionParameters = [Parameter () "a"]
-                , protoOtypeDefinitionConstructors = mempty
+                { typeDefinitionParameters = [Parameter () "a"]
+                , typeDefinitionConstructors = mempty
                 }
             )
         , DFunction
             mempty
             "println_int32"
             ( FunctionDefinition
-                { protoOfunctionDefinitionMetadata = mempty
-                , protoOfunctionDefinitionAnnotation =
+                { functionDefinitionMetadata = mempty
+                , functionDefinitionAnnotation =
                     Just
                       ( With
                           mempty
@@ -1545,14 +1545,14 @@ testModule9 =
                               (TIntrinsic IUnit)
                           )
                       )
-                , protoOfunctionDefinitionType = With mempty ()
-                , protoOfunctionDefinitionPatterns =
+                , functionDefinitionType = With mempty ()
+                , functionDefinitionPatterns =
                     PAnnotation
                       mempty
                       (TIntrinsic IInt32)
                       (PVariable mempty (Label () "n"))
                       :| mempty
-                , protoOfunctionDefinitionExpression =
+                , functionDefinitionExpression =
                     EApplication
                       mempty
                       ()

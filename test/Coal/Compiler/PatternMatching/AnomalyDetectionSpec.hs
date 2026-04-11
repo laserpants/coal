@@ -177,16 +177,16 @@ runTest px = r2
  where
   Right r2 = runIdentity (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive px))
   setupEnv = do
-    -- lift $ protoOupdateCurrentBuildC (pure . overBuildDataConstructors (const testEnv))
+    -- lift $ updateCurrentBuildC (pure . overBuildDataConstructors (const testEnv))
     put
         initialCompilerState
-          { protoOcompilerCurrentPath = Path ["Test"]
-          , protoOcompilerModules =
+          { compilerCurrentPath = Path ["Test"]
+          , compilerModules =
               Environment.fromList
                 [
                   ( "Test"
-                  , protoOemptyBuild
-                      { protoObuildDataConstructors = testEnv
+                  , emptyBuild
+                      { buildDataConstructors = testEnv
                       }
                   )
                 ]
@@ -240,13 +240,13 @@ runTest2 px = r2
   setupEnv = do
     put
         initialCompilerState
-          { protoOcompilerCurrentPath = Path ["Test"]
-          , protoOcompilerModules =
+          { compilerCurrentPath = Path ["Test"]
+          , compilerModules =
               Environment.fromList
                 [
                   ( "Test"
-                  , protoOemptyBuild
-                      { protoObuildDataConstructors = testEnv
+                  , emptyBuild
+                      { buildDataConstructors = testEnv
                       }
                   )
                 ]

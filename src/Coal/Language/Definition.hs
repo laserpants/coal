@@ -34,8 +34,8 @@ import Extras (Name)
 import GHC.Generics (Generic)
 
 data TypeDefinition a k t = TypeDefinition
-  { protoOtypeDefinitionParameters :: [Parameter k]
-  , protoOtypeDefinitionConstructors :: [DataConstructor Parameter k (Type Parameter k)]
+  { typeDefinitionParameters :: [Parameter k]
+  , typeDefinitionConstructors :: [DataConstructor Parameter k (Type Parameter k)]
   }
   deriving
     ( Show
@@ -53,11 +53,11 @@ data TypeDefinition a k t = TypeDefinition
 instance (Binary a, Binary k, Binary t) => Binary (TypeDefinition a k t)
 
 data FunctionDefinition a k t = FunctionDefinition
-  { protoOfunctionDefinitionMetadata :: a
-  , protoOfunctionDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
-  , protoOfunctionDefinitionType :: Qualified t
-  , protoOfunctionDefinitionPatterns :: NonEmpty (Pattern a k t)
-  , protoOfunctionDefinitionExpression :: Expression a k t
+  { functionDefinitionMetadata :: a
+  , functionDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , functionDefinitionType :: Qualified t
+  , functionDefinitionPatterns :: NonEmpty (Pattern a k t)
+  , functionDefinitionExpression :: Expression a k t
   }
   deriving
     ( Show
@@ -75,10 +75,10 @@ data FunctionDefinition a k t = FunctionDefinition
 instance (Binary a, Binary k, Binary t) => Binary (FunctionDefinition a k t)
 
 data LetDefinition a k t = LetDefinition
-  { protoOletDefinitionMetadata :: a
-  , protoOletDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
-  , protoOletDefinitionType :: Qualified t
-  , protoOletDefinitionExpression :: Expression a k t
+  { letDefinitionMetadata :: a
+  , letDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , letDefinitionType :: Qualified t
+  , letDefinitionExpression :: Expression a k t
   }
   deriving
     ( Show
@@ -96,9 +96,9 @@ data LetDefinition a k t = LetDefinition
 instance (Binary a, Binary k, Binary t) => Binary (LetDefinition a k t)
 
 data FoldDefinition a k t = FoldDefinition
-  { protoOfoldDefinitionMetadata :: a
-  , protoOfoldDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
-  , protoOfoldDefinitionClauses :: NonEmpty (Clause a k t)
+  { foldDefinitionMetadata :: a
+  , foldDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , foldDefinitionClauses :: NonEmpty (Clause a k t)
   }
   deriving
     ( Show
@@ -116,11 +116,11 @@ data FoldDefinition a k t = FoldDefinition
 instance (Binary a, Binary k, Binary t) => Binary (FoldDefinition a k t)
 
 data TraitDefinition a k = TraitDefinition
-  { protoOtraitDefinitionMetadata :: a
-  , protoOtraitDefinitionTraitName :: Name
-  , protoOtraitDefinitionConstraints :: [Trait (Parameter k)]
-  , protoOtraitDefinitionParameter :: Parameter k
-  , protoOtraitDefinitionInterface :: [TraitDefinitionInterfaceEntry k]
+  { traitDefinitionMetadata :: a
+  , traitDefinitionTraitName :: Name
+  , traitDefinitionConstraints :: [Trait (Parameter k)]
+  , traitDefinitionParameter :: Parameter k
+  , traitDefinitionInterface :: [TraitDefinitionInterfaceEntry k]
   }
   deriving
     ( Show
@@ -135,8 +135,8 @@ data TraitDefinition a k = TraitDefinition
 instance (Binary a, Binary k) => Binary (TraitDefinition a k)
 
 data TraitDefinitionInterfaceEntry k = TraitDefinitionInterfaceEntry
-  { protoOtraitDefinitionInterfaceEntryName :: Name
-  , protoOtraitDefinitionInterfaceEntryScheme :: Scheme Parameter k (Type Parameter k)
+  { traitDefinitionInterfaceEntryName :: Name
+  , traitDefinitionInterfaceEntryScheme :: Scheme Parameter k (Type Parameter k)
   }
   deriving
     ( Show
@@ -151,11 +151,11 @@ data TraitDefinitionInterfaceEntry k = TraitDefinitionInterfaceEntry
 instance (Binary k) => Binary (TraitDefinitionInterfaceEntry k)
 
 data InstanceDefinition a k t = InstanceDefinition
-  { protoOinstanceDefinitionMetadata :: a
-  , protoOinstanceDefinitionTraitName :: Name
-  , protoOinstanceDefinitionConstraints :: [Trait (Parameter k)]
-  , protoOinstanceDefinitionType :: Type Parameter k
-  , protoOinstanceDefinitionImplementations :: [Definition a k t]
+  { instanceDefinitionMetadata :: a
+  , instanceDefinitionTraitName :: Name
+  , instanceDefinitionConstraints :: [Trait (Parameter k)]
+  , instanceDefinitionType :: Type Parameter k
+  , instanceDefinitionImplementations :: [Definition a k t]
   }
   deriving
     ( Show
@@ -174,11 +174,11 @@ instance (Binary a, Binary k, Binary t) => Binary (InstanceDefinition a k t)
 
 instanceDefinitionTrait :: InstanceDefinition a Kind t -> Trait (Type Parameter Kind)
 instanceDefinitionTrait InstanceDefinition{..} =
-  Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
+  Trait instanceDefinitionTraitName instanceDefinitionType
 
 data AliasDefinition a k = AliasDefinition
-  { protoOaliasDefinitionParameters :: [Parameter k]
-  , protoOaliasDefinitionType :: Type Parameter k
+  { aliasDefinitionParameters :: [Parameter k]
+  , aliasDefinitionType :: Type Parameter k
   }
   deriving
     ( Show

@@ -148,10 +148,10 @@ instance (Monoid a, Data a) => CompileNatsContext (LetDefinition a Kind IndexedT
   compileNats =
     \case
       LetDefinition{..} -> do
-        newLetDefinitionExpression <- compileNats protoOletDefinitionExpression
+        newLetDefinitionExpression <- compileNats letDefinitionExpression
         return
           LetDefinition
-            { protoOletDefinitionExpression = newLetDefinitionExpression
+            { letDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
@@ -166,10 +166,10 @@ instance (Monoid a, Data a) => CompileNatsContext (FunctionDefinition a Kind Ind
   compileNats =
     \case
       FunctionDefinition{..} -> do
-        newLetDefinitionExpression <- compileNats protoOfunctionDefinitionExpression
+        newLetDefinitionExpression <- compileNats functionDefinitionExpression
         return
           FunctionDefinition
-            { protoOfunctionDefinitionExpression = undefined
+            { functionDefinitionExpression = undefined
             , ..
             }
 

@@ -59,21 +59,21 @@ compileUnits units = do
 
         lift $
           unless (moduleName == "Builtin$") $ do
-            protoOupdateBuildC moduleName $
+            updateBuildC moduleName $
               \Build{..} ->
                 pure
                   Build
-                    { protoObuildKernelNames = Environment.fromList kernelNames
-                    , protoObuildKernelIRTypes = Environment.fromList irTypes
-                    , protoObuildKernelConstructors = Environment.fromList kernelConstructors
+                    { buildKernelNames = Environment.fromList kernelNames
+                    , buildKernelIRTypes = Environment.fromList irTypes
+                    , buildKernelConstructors = Environment.fromList kernelConstructors
                     , ..
                     }
 
         pure (BSource (moduleName, out))
       BCached Build{..} -> do
-        pipelineInsertNames (Environment.toList protoObuildKernelNames)
-        pipelineInsertIRTypes (Environment.toList protoObuildKernelIRTypes)
-        pipelineInsertConstructors (Environment.toList protoObuildKernelConstructors)
+        pipelineInsertNames (Environment.toList buildKernelNames)
+        pipelineInsertIRTypes (Environment.toList buildKernelIRTypes)
+        pipelineInsertConstructors (Environment.toList buildKernelConstructors)
         pure (BCached Build{..})
 
   cc <- transformInterpreter compileClosureCode

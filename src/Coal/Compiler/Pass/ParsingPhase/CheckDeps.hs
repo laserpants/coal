@@ -39,9 +39,9 @@ check =
       pure (BSource src)
     BCached Build{..} -> do
       CompilerState{..} <- get
-      if any (\dep -> principalPath dep `elem` protoOcompilerToBeRecompiled) protoObuildDependencies
+      if any (\dep -> principalPath dep `elem` compilerToBeRecompiled) buildDependencies
         then do
-          let name = principalPath protoObuildPath
+          let name = principalPath buildPath
           src <- getSourceC name
           res <- fromSource name src
           case res of

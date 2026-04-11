@@ -32,7 +32,7 @@ passOrPatterns = Pass{runPass = pass}
 
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass Module{..} = do
-  setCurrentPathC protoOmodulePath
+  setCurrentPathC modulePath
   transformBiM expandExpression Module{..}
 
 expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
@@ -72,7 +72,7 @@ instance (Data t) => OrPattern (Pattern Metadata Kind t) where
     \case
       POr loc _ p1 p2 -> do
         --        this <- gets (principalPath . compilerCurrentModule)
-        this <- gets (principalPath . protoOcompilerCurrentPath)
+        this <- gets (principalPath . compilerCurrentPath)
         let vars1 = boundIn p1
             vars2 = boundIn p2
         when (vars1 /= vars2) $ do

@@ -44,7 +44,7 @@ import Extras.Control.Monad.Writer (tellLeft, tellRight)
 type KindConstraintsGenOutput = Either KindError KindConstraint
 
 newtype KindConstraintsGen m a = KindConstraintsGen
-  { protoOkindConstraintsGenMonad :: RWST (Environment Kind) [KindConstraintsGenOutput] () m a
+  { kindConstraintsGenMonad :: RWST (Environment Kind) [KindConstraintsGenOutput] () m a
   }
   deriving
     ( Functor
@@ -58,7 +58,7 @@ newtype KindConstraintsGen m a = KindConstraintsGen
 
 runKindConstraintsGen :: (Monad m) => Environment Kind -> KindConstraintsGen m a -> m (a, [KindConstraintsGenOutput])
 runKindConstraintsGen env gen = do
-  (s, _, w) <- runRWST (protoOkindConstraintsGenMonad gen) env mempty
+  (s, _, w) <- runRWST (kindConstraintsGenMonad gen) env mempty
   pure (s, w)
 
 parameterMap :: [(Name, Kind)] -> Dictionary [Kind]
@@ -72,37 +72,37 @@ tellParameterConstraints :: (Monad m) => [(Name, Kind)] -> KindConstraintsGen m 
 tellParameterConstraints = mapM_ tellTransitive . parameterMap
 
 class EmitKinds k where
-  protoOemitKindConstraints :: (Monad m) => k -> KindConstraintsGen m [(Name, Kind)]
+  emitKindConstraints :: (Monad m) => k -> KindConstraintsGen m [(Name, Kind)]
 
 instance (EmitKinds k) => EmitKinds [k] where
-  protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
+  emitKindConstraints = concat <$$> traverse emitKindConstraints
 
 instance (EmitKinds k) => EmitKinds (Maybe k) where
-  protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
+  emitKindConstraints = concat <$$> traverse emitKindConstraints
 
 instance (EmitKinds k) => EmitKinds (Map a k) where
-  protoOemitKindConstraints = concat <$$> traverse protoOemitKindConstraints
+  emitKindConstraints = concat <$$> traverse emitKindConstraints
 
 instance (EmitKinds k) => EmitKinds (Set k) where
-  protoOemitKindConstraints = protoOemitKindConstraints . Set.toList
+  emitKindConstraints = emitKindConstraints . Set.toList
 
 instance (EmitKinds k) => EmitKinds (NonEmpty k) where
-  protoOemitKindConstraints = protoOemitKindConstraints . NonEmpty.toList
+  emitKindConstraints = emitKindConstraints . NonEmpty.toList
 
 instance EmitKinds (DataConstructor Parameter Kind (Type Parameter Kind)) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       DataConstructor{..} ->
-        protoOemitKindConstraints constructorScheme
+        emitKindConstraints constructorScheme
 
 instance EmitKinds (Type Parameter Kind) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       TApplication k t1 t2 -> do
         tellRight [KEquality (kindOf t1) (KArrow (kindOf t2) k)]
-        protoOemitKindConstraints t1 <>^ protoOemitKindConstraints t2
+        emitKindConstraints t1 <>^ emitKindConstraints t2
       TArrow t1 t2 ->
-        protoOemitKindConstraints t1 <>^ protoOemitKindConstraints t2
+        emitKindConstraints t1 <>^ emitKindConstraints t2
       TConstructor k "List" -> do
         tellRight [KEquality k (KArrow KType KType)]
         pure []
@@ -121,19 +121,19 @@ instance EmitKinds (Type Parameter Kind) where
       TIntrinsic{} ->
         pure []
       TRecord t ->
-        protoOemitKindConstraints t
+        emitKindConstraints t
       TRow row ->
-        protoOemitKindConstraints row
+        emitKindConstraints row
       TVariable p ->
-        protoOemitKindConstraints p
+        emitKindConstraints p
       TAlias _ ts t ->
-        protoOemitKindConstraints ts <>^ protoOemitKindConstraints t
+        emitKindConstraints ts <>^ emitKindConstraints t
 
 instance EmitKinds (Row Parameter Kind (Type Parameter Kind)) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       RExtend _ t row ->
-        protoOemitKindConstraints t <>^ protoOemitKindConstraints row
+        emitKindConstraints t <>^ emitKindConstraints row
       RVariable Parameter{..} ->
         pure
           [ (parameterName, KRow)
@@ -143,24 +143,24 @@ instance EmitKinds (Row Parameter Kind (Type Parameter Kind)) where
         pure []
 
 instance EmitKinds (Scheme Parameter Kind (Type Parameter Kind)) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       Forall{..} -> do
         ps <-
-          protoOemitKindConstraints schemeTypeVariables
-            <>^ protoOemitKindConstraints schemeTraits
-            <>^ protoOemitKindConstraints schemeTypeBody
+          emitKindConstraints schemeTypeVariables
+            <>^ emitKindConstraints schemeTraits
+            <>^ emitKindConstraints schemeTypeBody
         tellParameterConstraints ps
         pure ps
 
 instance EmitKinds (Parameter Kind) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       Parameter{..} ->
         pure [(parameterName, parameterKind)]
 
 instance (EmitKinds t, HasKind t) => EmitKinds (Trait t) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       Trait{..} -> do
         env <- ask
@@ -169,233 +169,233 @@ instance (EmitKinds t, HasKind t) => EmitKinds (Trait t) where
             tellLeft [ENoTrait traitName]
           Just k ->
             tellRight [KEquality k (kindOf traitType `KArrow` KTrait)]
-        protoOemitKindConstraints traitType
+        emitKindConstraints traitType
 
 instance EmitKinds (Module a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       Module{..} ->
-        protoOemitKindConstraints protoOmoduleDefinitions
+        emitKindConstraints moduleDefinitions
 
 instance EmitKinds (Definition a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       DType _ _ def ->
-        protoOemitKindConstraints def
+        emitKindConstraints def
       DTypeAlias _ _ def ->
-        protoOemitKindConstraints def
+        emitKindConstraints def
       DFunction _ _ def ->
-        protoOemitKindConstraints def
+        emitKindConstraints def
       DFunctionGroup _ _ defs ->
-        concat <$> traverse protoOemitKindConstraints defs
+        concat <$> traverse emitKindConstraints defs
       DFold _ _ def ->
-        protoOemitKindConstraints def
+        emitKindConstraints def
       DLet _ _ def ->
-        protoOemitKindConstraints def
+        emitKindConstraints def
       DImport{} ->
         pure []
       DNamespaceImport{} ->
         pure []
       DTrait _ _ def ->
-        protoOemitKindConstraints def
+        emitKindConstraints def
       DInstance _ def ->
-        protoOemitKindConstraints def
+        emitKindConstraints def
 
 instance EmitKinds (Qualified (Type Parameter Kind)) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       With traits t ->
-        protoOemitKindConstraints traits <>^ protoOemitKindConstraints t
+        emitKindConstraints traits <>^ emitKindConstraints t
 
 instance EmitKinds (Label (Type Parameter Kind)) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       Label{..} ->
-        protoOemitKindConstraints labelTag
+        emitKindConstraints labelTag
 
 instance EmitKinds (Expression a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       EAnnotation _ t e ->
-        protoOemitKindConstraints t <>^ protoOemitKindConstraints e
+        emitKindConstraints t <>^ emitKindConstraints e
       EApplication _ () e es ->
-        protoOemitKindConstraints e <>^ protoOemitKindConstraints es
+        emitKindConstraints e <>^ emitKindConstraints es
       ELambda _ ps e ->
-        protoOemitKindConstraints ps <>^ protoOemitKindConstraints e
+        emitKindConstraints ps <>^ emitKindConstraints e
       ELet _ bs e ->
-        protoOemitKindConstraints bs <>^ protoOemitKindConstraints e
+        emitKindConstraints bs <>^ emitKindConstraints e
       ERecursiveLet _ p e1 e2 ->
-        protoOemitKindConstraints p
-          <>^ protoOemitKindConstraints e1
-          <>^ protoOemitKindConstraints e2
+        emitKindConstraints p
+          <>^ emitKindConstraints e1
+          <>^ emitKindConstraints e2
       EIf _ () e1 e2 e3 ->
-        protoOemitKindConstraints e1
-          <>^ protoOemitKindConstraints e2
-          <>^ protoOemitKindConstraints e3
+        emitKindConstraints e1
+          <>^ emitKindConstraints e2
+          <>^ emitKindConstraints e3
       ERecord _ () d e ->
-        protoOemitKindConstraints d
-          <>^ protoOemitKindConstraints e
+        emitKindConstraints d
+          <>^ emitKindConstraints e
       EListCons _ () e1 e2 ->
-        protoOemitKindConstraints e1
-          <>^ protoOemitKindConstraints e2
+        emitKindConstraints e1
+          <>^ emitKindConstraints e2
       EListLiteral _ () es ->
-        protoOemitKindConstraints es
+        emitKindConstraints es
       ETuple _ () es ->
-        protoOemitKindConstraints es
+        emitKindConstraints es
       EMatch _ () e cs ->
-        protoOemitKindConstraints e
-          <>^ protoOemitKindConstraints cs
+        emitKindConstraints e
+          <>^ emitKindConstraints cs
       ELambdaMatch _ () cs ->
-        protoOemitKindConstraints cs
+        emitKindConstraints cs
       ECompiledMatch _ () e cs ->
-        protoOemitKindConstraints e
-          <>^ protoOemitKindConstraints cs
+        emitKindConstraints e
+          <>^ emitKindConstraints cs
       EFold _ () es cs ->
-        protoOemitKindConstraints es
-          <>^ protoOemitKindConstraints cs
+        emitKindConstraints es
+          <>^ emitKindConstraints cs
       ESelect _ _ e ->
-        protoOemitKindConstraints e
+        emitKindConstraints e
       EFocus _ _ _ _ e1 e2 ->
-        protoOemitKindConstraints e1
-          <>^ protoOemitKindConstraints e2
+        emitKindConstraints e1
+          <>^ emitKindConstraints e2
       EFFICall _ t _ es e ->
-        --        protoOemitKindConstraints t
-        protoOemitKindConstraints es <>^ protoOemitKindConstraints e
+        --        emitKindConstraints t
+        emitKindConstraints es <>^ emitKindConstraints e
       EDoBlock _ is -> do
         concatForM is $
           \(x, y) ->
-            protoOemitKindConstraints x
-              <>^ protoOemitKindConstraints y
+            emitKindConstraints x
+              <>^ emitKindConstraints y
       _ ->
         pure []
 
 instance EmitKinds (Clause a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       EClause _ p cs ->
-        protoOemitKindConstraints p
-          <>^ protoOemitKindConstraints cs
+        emitKindConstraints p
+          <>^ emitKindConstraints cs
 
 instance EmitKinds (Choice Expression a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       CPlain _ gs e ->
-        protoOemitKindConstraints gs
-          <>^ protoOemitKindConstraints e
+        emitKindConstraints gs
+          <>^ emitKindConstraints e
 
 instance EmitKinds (Guard Expression a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       CGuard e ->
-        protoOemitKindConstraints e
+        emitKindConstraints e
 
 instance EmitKinds (CompiledClause a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       ECompiledClause _ _ e ->
-        protoOemitKindConstraints e
+        emitKindConstraints e
 
 instance EmitKinds (Binding Expression a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       BPattern _ p e ->
-        protoOemitKindConstraints p <>^ protoOemitKindConstraints e
+        emitKindConstraints p <>^ emitKindConstraints e
       BFunction _ _ ps e ->
-        protoOemitKindConstraints ps <>^ protoOemitKindConstraints e
+        emitKindConstraints ps <>^ emitKindConstraints e
 
 instance EmitKinds (Pattern a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       PAnnotation _ t p ->
-        protoOemitKindConstraints t <>^ protoOemitKindConstraints p
+        emitKindConstraints t <>^ emitKindConstraints p
       PConstructor _ _ ps ->
-        protoOemitKindConstraints ps
+        emitKindConstraints ps
       PRecord _ () d p ->
-        protoOemitKindConstraints d <>^ protoOemitKindConstraints p
+        emitKindConstraints d <>^ emitKindConstraints p
       PListCons _ () p1 p2 ->
-        protoOemitKindConstraints p1 <>^ protoOemitKindConstraints p2
+        emitKindConstraints p1 <>^ emitKindConstraints p2
       PListLiteral _ () ps ->
-        protoOemitKindConstraints ps
+        emitKindConstraints ps
       PTuple _ () ps ->
-        protoOemitKindConstraints ps
+        emitKindConstraints ps
       POr _ () p1 p2 ->
-        protoOemitKindConstraints p1 <>^ protoOemitKindConstraints p2
+        emitKindConstraints p1 <>^ emitKindConstraints p2
       PAs _ _ p ->
-        protoOemitKindConstraints p
+        emitKindConstraints p
       _ ->
         pure []
 
 instance EmitKinds (TypeDefinition a Kind t) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       TypeDefinition{..} ->
-        protoOemitKindConstraints protoOtypeDefinitionParameters
-          <>^ protoOemitKindConstraints protoOtypeDefinitionConstructors
+        emitKindConstraints typeDefinitionParameters
+          <>^ emitKindConstraints typeDefinitionConstructors
 
 instance EmitKinds (FunctionDefinition a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       FunctionDefinition{..} -> do
         ps <-
-          protoOemitKindConstraints protoOfunctionDefinitionAnnotation
-            <>^ protoOemitKindConstraints protoOfunctionDefinitionPatterns
-            <>^ protoOemitKindConstraints protoOfunctionDefinitionExpression
+          emitKindConstraints functionDefinitionAnnotation
+            <>^ emitKindConstraints functionDefinitionPatterns
+            <>^ emitKindConstraints functionDefinitionExpression
         tellParameterConstraints ps
         pure ps
 
 instance EmitKinds (LetDefinition a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       LetDefinition{..} -> do
         ps <-
-          protoOemitKindConstraints protoOletDefinitionAnnotation
-            <>^ protoOemitKindConstraints protoOletDefinitionExpression
+          emitKindConstraints letDefinitionAnnotation
+            <>^ emitKindConstraints letDefinitionExpression
         tellParameterConstraints ps
         pure ps
 
 instance EmitKinds (TraitDefinition a Kind) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       TraitDefinition{..} -> do
         ps1 <-
-          protoOemitKindConstraints protoOtraitDefinitionConstraints
-            <>^ protoOemitKindConstraints protoOtraitDefinitionParameter
-            <>^ protoOemitKindConstraints (Trait protoOtraitDefinitionTraitName protoOtraitDefinitionParameter)
-        forM_ protoOtraitDefinitionInterface $
+          emitKindConstraints traitDefinitionConstraints
+            <>^ emitKindConstraints traitDefinitionParameter
+            <>^ emitKindConstraints (Trait traitDefinitionTraitName traitDefinitionParameter)
+        forM_ traitDefinitionInterface $
           \(TraitDefinitionInterfaceEntry _ Forall{..}) -> do
             ps2 <-
-              protoOemitKindConstraints schemeTypeVariables
-                <>^ protoOemitKindConstraints schemeTraits
-                <>^ protoOemitKindConstraints schemeTypeBody
+              emitKindConstraints schemeTypeVariables
+                <>^ emitKindConstraints schemeTraits
+                <>^ emitKindConstraints schemeTypeBody
             tellParameterConstraints (ps1 <> ps2)
         pure []
 
 instance EmitKinds (InstanceDefinition a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       InstanceDefinition{..} -> do
-        ps1 <- protoOemitKindConstraints (Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType)
-        ps2 <- protoOemitKindConstraints protoOinstanceDefinitionConstraints
+        ps1 <- emitKindConstraints (Trait instanceDefinitionTraitName instanceDefinitionType)
+        ps2 <- emitKindConstraints instanceDefinitionConstraints
         tellParameterConstraints (ps1 <> ps2)
-        forM_ protoOinstanceDefinitionImplementations protoOemitKindConstraints
+        forM_ instanceDefinitionImplementations emitKindConstraints
         pure []
 
 instance EmitKinds (FoldDefinition a Kind ()) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       FoldDefinition{..} -> do
         ps <-
-          protoOemitKindConstraints protoOfoldDefinitionAnnotation
-            <>^ protoOemitKindConstraints protoOfoldDefinitionClauses
+          emitKindConstraints foldDefinitionAnnotation
+            <>^ emitKindConstraints foldDefinitionClauses
         tellParameterConstraints ps
         pure ps
 
 instance EmitKinds (AliasDefinition a Kind) where
-  protoOemitKindConstraints =
+  emitKindConstraints =
     \case
       AliasDefinition{..} -> do
         ps <-
-          protoOemitKindConstraints protoOaliasDefinitionParameters
-            <>^ protoOemitKindConstraints protoOaliasDefinitionType
+          emitKindConstraints aliasDefinitionParameters
+            <>^ emitKindConstraints aliasDefinitionType
         tellParameterConstraints ps
         pure ps

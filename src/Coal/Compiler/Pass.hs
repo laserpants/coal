@@ -14,7 +14,7 @@ import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Build.NameEntry (protoOtypeConstructorEntryKind)
+import Coal.Compiler.Build.NameEntry (typeConstructorEntryKind)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Control.Monad ((>=>))
@@ -49,12 +49,12 @@ overlayEnvironment :: (MonadIO m) => Pass Metadata m a b -> Pass Metadata m a b
 overlayEnvironment p = Pass{runPass = pass}
  where
   pass i = do
-    Build{..} <- protoOgetCurrentBuildC
+    Build{..} <- getCurrentBuildC
     local
       ( \env ->
           env
             { compilerTypeConstructorEnvironment =
-                Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
+                Environment.mapEnvironment typeConstructorEntryKind buildTypeConstructors
             , compilerKernelEnvironment =
                 KernelEnvironment mempty mempty mempty
             }

@@ -38,13 +38,13 @@ cachedBuild name src = do
           pure Nothing
         Right (_, _, Build{..}) ->
           pure $
-            if (unHash256 <$> protoObuildHash) == Just (hash (Text.encodeUtf8 src))
+            if (unHash256 <$> buildHash) == Just (hash (Text.encodeUtf8 src))
               then Just Build{..}
               else Nothing
 
 writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> Build a -> CompilerT Metadata m ()
 writeBuildFile buildDir name build = do
-  CompilerConfig{..} <- gets protoOcompilerConfig
+  CompilerConfig{..} <- gets compilerConfig
   liftIO $ do
     unless configSilent $
       putStrLn file

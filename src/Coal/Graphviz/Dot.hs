@@ -195,9 +195,9 @@ instance (Dot t) => Dot (Module a Kind t) where
   toDot =
     \case
       Module{..} -> do
-        dotId <- emitNamedShape RectangleShape (Just $ principalPath protoOmodulePath) "Module"
-        emitEdge dotId protoOmoduleExportList
-        emitEdges dotId protoOmoduleDefinitions
+        dotId <- emitNamedShape RectangleShape (Just $ principalPath modulePath) "Module"
+        emitEdge dotId moduleExportList
+        emitEdges dotId moduleDefinitions
         return dotId
 
 emitDefinition :: (Dot t) => Text -> Text -> t -> DotGen Int
@@ -247,8 +247,8 @@ instance Dot (TypeDefinition a Kind t) where
     \case
       TypeDefinition{..} -> do
         dotId <- emitShape EllipseShape "TypeDefinition"
-        emitEdges dotId protoOtypeDefinitionParameters
-        emitEdges dotId protoOtypeDefinitionConstructors
+        emitEdges dotId typeDefinitionParameters
+        emitEdges dotId typeDefinitionConstructors
         return dotId
 
 annotation :: (Dot t) => t -> DotGen Int
@@ -262,10 +262,10 @@ instance (Dot t) => Dot (FunctionDefinition a Kind t) where
     \case
       FunctionDefinition{..} -> do
         dotId <- emitShape EllipseShape "FunctionDefinition"
-        emitEdge dotId (annotation protoOfunctionDefinitionAnnotation)
-        emitEdge dotId protoOfunctionDefinitionType
-        emitEdgesWithLabels numberedList dotId (NonEmpty.toList protoOfunctionDefinitionPatterns)
-        emitEdge dotId protoOfunctionDefinitionExpression
+        emitEdge dotId (annotation functionDefinitionAnnotation)
+        emitEdge dotId functionDefinitionType
+        emitEdgesWithLabels numberedList dotId (NonEmpty.toList functionDefinitionPatterns)
+        emitEdge dotId functionDefinitionExpression
         return dotId
 
 instance (Dot t) => Dot (LetDefinition a Kind t) where
@@ -273,9 +273,9 @@ instance (Dot t) => Dot (LetDefinition a Kind t) where
     \case
       LetDefinition{..} -> do
         dotId <- emitShape EllipseShape "LetDefinition"
-        emitEdge dotId (annotation protoOletDefinitionAnnotation)
-        emitEdge dotId protoOletDefinitionType
-        emitEdge dotId protoOletDefinitionExpression
+        emitEdge dotId (annotation letDefinitionAnnotation)
+        emitEdge dotId letDefinitionType
+        emitEdge dotId letDefinitionExpression
         return dotId
 
 instance (Dot t) => Dot (FoldDefinition a Kind t) where
@@ -283,32 +283,32 @@ instance (Dot t) => Dot (FoldDefinition a Kind t) where
     \case
       FoldDefinition{..} -> do
         dotId <- emitShape EllipseShape "FoldDefinition"
-        emitEdge dotId (annotation protoOfoldDefinitionAnnotation)
-        emitEdges dotId protoOfoldDefinitionClauses
+        emitEdge dotId (annotation foldDefinitionAnnotation)
+        emitEdges dotId foldDefinitionClauses
         return dotId
 
 instance Dot (TraitDefinition a Kind) where
   toDot =
     \case
       TraitDefinition{..} -> do
-        dotId <- emitNamedShape EllipseShape (Just protoOtraitDefinitionTraitName) "TraitDefinition"
-        emitEdges dotId protoOtraitDefinitionConstraints
-        emitEdge dotId protoOtraitDefinitionParameter
-        forM_ protoOtraitDefinitionInterface $
+        dotId <- emitNamedShape EllipseShape (Just traitDefinitionTraitName) "TraitDefinition"
+        emitEdges dotId traitDefinitionConstraints
+        emitEdge dotId traitDefinitionParameter
+        forM_ traitDefinitionInterface $
           \TraitDefinitionInterfaceEntry{..} -> do
-            id1 <- emitNamedShape EllipseShape (Just protoOtraitDefinitionInterfaceEntryName) "Member"
+            id1 <- emitNamedShape EllipseShape (Just traitDefinitionInterfaceEntryName) "Member"
             emitEdge dotId id1
-            emitEdge id1 protoOtraitDefinitionInterfaceEntryScheme
+            emitEdge id1 traitDefinitionInterfaceEntryScheme
         return dotId
 
 instance (Dot t) => Dot (InstanceDefinition a Kind t) where
   toDot =
     \case
       InstanceDefinition{..} -> do
-        dotId <- emitNamedShape EllipseShape (Just protoOinstanceDefinitionTraitName) "InstanceDefinition"
-        emitEdges dotId protoOinstanceDefinitionConstraints
-        emitEdge dotId protoOinstanceDefinitionType
-        emitEdges dotId protoOinstanceDefinitionImplementations
+        dotId <- emitNamedShape EllipseShape (Just instanceDefinitionTraitName) "InstanceDefinition"
+        emitEdges dotId instanceDefinitionConstraints
+        emitEdge dotId instanceDefinitionType
+        emitEdges dotId instanceDefinitionImplementations
         return dotId
 
 instance Dot (AliasDefinition a Kind) where
@@ -316,8 +316,8 @@ instance Dot (AliasDefinition a Kind) where
     \case
       AliasDefinition{..} -> do
         dotId <- emitShape EllipseShape "AliasDefinition"
-        emitEdges dotId protoOaliasDefinitionParameters
-        emitEdge dotId protoOaliasDefinitionType
+        emitEdges dotId aliasDefinitionParameters
+        emitEdge dotId aliasDefinitionType
         return dotId
 
 instance (Dot t, Dot (o k)) => Dot (DataConstructor o k t) where

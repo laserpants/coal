@@ -26,9 +26,9 @@ data ModuleExportList a
     )
 
 data Module a k t = Module
-  { protoOmodulePath :: Path
-  , protoOmoduleExportList :: ModuleExportList a
-  , protoOmoduleDefinitions :: [Definition a k t]
+  { modulePath :: Path
+  , moduleExportList :: ModuleExportList a
+  , moduleDefinitions :: [Definition a k t]
   }
   deriving
     ( Show

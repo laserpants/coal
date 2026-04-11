@@ -52,7 +52,7 @@ instance (Monoid a, Data a, Data k) => ExpressionFoldTransform a (Clause a k ())
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
-        CompilerState{protoOcompilerCurrentPath = path} <- get
+        CompilerState{compilerCurrentPath = path} <- get
         -- path <- gets compilerCurrentModule
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
@@ -68,7 +68,7 @@ checkPatterns :: (Monoid a, Data a, Data k, Monad m) => Pattern a k () -> Compil
 checkPatterns =
   \case
     PAtVariable loc _ -> do
-      CompilerState{protoOcompilerCurrentPath = path} <- get
+      CompilerState{compilerCurrentPath = path} <- get
       -- path <- gets compilerCurrentModule
       tellErrors [FoldPatternInRegularMatch (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
@@ -106,7 +106,7 @@ eliminateAtPatterns :: (Monad m) => Pattern a k () -> CompilerT a m (Pattern a k
 eliminateAtPatterns =
   \case
     PNamedFold loc _ _ -> do
-      CompilerState{protoOcompilerCurrentPath = path} <- get
+      CompilerState{compilerCurrentPath = path} <- get
       -- path <- gets compilerCurrentModule
       tellErrors [NamedFoldNotAllowed (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
@@ -157,11 +157,11 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Module a k ()) whe
   compileFolds =
     \case
       Module{..} -> do
-        setCurrentPathC protoOmodulePath
-        newModuleDefinitions <- compileFolds protoOmoduleDefinitions
+        setCurrentPathC modulePath
+        newModuleDefinitions <- compileFolds moduleDefinitions
         return $
           Module
-            { protoOmoduleDefinitions = newModuleDefinitions
+            { moduleDefinitions = newModuleDefinitions
             , ..
             }
 
@@ -181,10 +181,10 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (FunctionDefinition
   compileFolds =
     \case
       FunctionDefinition{..} -> do
-        newFunctionDefinitionExpression <- compileFolds protoOfunctionDefinitionExpression
+        newFunctionDefinitionExpression <- compileFolds functionDefinitionExpression
         return $
           FunctionDefinition
-            { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
+            { functionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
 
@@ -192,10 +192,10 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (LetDefinition a k 
   compileFolds =
     \case
       LetDefinition{..} -> do
-        newLetDefinitionExpression <- compileFolds protoOletDefinitionExpression
+        newLetDefinitionExpression <- compileFolds letDefinitionExpression
         return $
           LetDefinition
-            { protoOletDefinitionExpression = newLetDefinitionExpression
+            { letDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
@@ -203,10 +203,10 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (InstanceDefinition
   compileFolds =
     \case
       InstanceDefinition{..} -> do
-        newInstanceDefinitionImplementations <- compileFolds protoOinstanceDefinitionImplementations
+        newInstanceDefinitionImplementations <- compileFolds instanceDefinitionImplementations
         return $
           InstanceDefinition
-            { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
+            { instanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
 

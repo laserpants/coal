@@ -39,8 +39,8 @@ passPrep = Pass{runPass = pass}
 
 pass :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
 pass m = do
-  -- setCompilerCurrentModuleC (protoOmodulePath m)
-  setCurrentPathC (protoOmodulePath m)
+  -- setCompilerCurrentModuleC (modulePath m)
+  setCurrentPathC (modulePath m)
   prep m
 
 -- withCurrentModuleC prep
@@ -49,27 +49,27 @@ prep :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Met
 prep modul = do
   m1 <- do
     -- let modul = toModule [] m
-    protoOclearAssumptionsC
-    protoOclearNameStoreC
+    clearAssumptionsC
+    clearNameStoreC
     setCurrentModuleC modul -- ??
-    forM_ builtinFunctions $ uncurry protoOinsertNameC
+    forM_ builtinFunctions $ uncurry insertNameC
     toKindIndexed modul
 
-  protoOprepareBuildAliases m1
+  prepareBuildAliases m1
 
   expandFunctionGroups m1
 
-protoOprepareBuildAliases Module{..} = do
+prepareBuildAliases Module{..} = do
   build <-
     execStateT
-      (runReaderT (protoOprepareDefinitions protoOmoduleDefinitions) protoOmoduleExportList)
-      protoOemptyBuild
-        { protoObuildPath = protoOmodulePath
+      (runReaderT (prepareDefinitions moduleDefinitions) moduleExportList)
+      emptyBuild
+        { buildPath = modulePath
         }
   insertBuildC build
 
-protoOprepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
-protoOprepareDefinitions = traverse_ collectTypeAliases
+prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+prepareDefinitions = traverse_ collectTypeAliases
 
 -- TODO: DRY
 insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
@@ -82,7 +82,7 @@ insertExportedName name
         ExportAll ->
           insertName
         Exports exports
-          | name `elem` (protoOnameOf <$> exports) ->
+          | name `elem` (nameOf <$> exports) ->
               insertName
         _ ->
           pure ()
@@ -141,10 +141,10 @@ collectTypeAliases =
      where
       entry =
         AliasEntry
-          { protoOaliasEntryMetadata = loc
-          , protoOaliasEntryName = name
-          , protoOaliasEntryParams = protoOaliasDefinitionParameters
-          , protoOaliasEntryType = protoOaliasDefinitionType
+          { aliasEntryMetadata = loc
+          , aliasEntryName = name
+          , aliasEntryParams = aliasDefinitionParameters
+          , aliasEntryType = aliasDefinitionType
           }
     DImport _ (Path ["Builtin$"]) imports -> do
       pure ()
@@ -153,7 +153,7 @@ collectTypeAliases =
       forM_ imports $
         \case
           TypeImport loc name _
-            | name `elem` protoObuildExportedNames -> do
+            | name `elem` buildExportedNames -> do
                 build <- lift $ lift $ importedBuild path
                 found <- insertTypeName build loc name
                 pure ()
@@ -177,24 +177,24 @@ collectTypeAliases =
 
 insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) Bool
 insertTypeName Build{..} loc name =
-  or <$> forM (Environment.lookupWithDefault [] name protoObuildNames) go
+  or <$> forM (Environment.lookupWithDefault [] name buildNames) go
  where
   go =
     \case
       NTypeAlias{} ->
-        case Environment.lookup name protoObuildAliases of
+        case Environment.lookup name buildAliases of
           Nothing ->
             error "TODO"
           Just AliasEntry{..} -> do
             insertAlias name AliasEntry{..}
-            forM_ (constructors protoOaliasEntryType) (insertTypeName Build{..} loc)
+            forM_ (constructors aliasEntryType) (insertTypeName Build{..} loc)
             return True
       _ ->
         return False
 
 importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
 importedBuild path = do
-  env <- gets protoOcompilerModules
+  env <- gets compilerModules
   case Environment.lookup (principalPath path) env of
     Nothing ->
       error (show path) -- "TODO"
@@ -202,7 +202,7 @@ importedBuild path = do
       return build
 
 --  y <- expandFunctionGroups m1
---  lift $ protoOprepareBuild y
+--  lift $ prepareBuild y
 --
 --  --  clearAssumptionsC
 --  --  clearNameStoreC

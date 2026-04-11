@@ -80,46 +80,46 @@ instance ToIndexed (Parameter Kind) (TypeIndex Kind) where
             pure index
 
 class Parameterized p where
-  protoOinstantiateTypeIndexes :: (MonadState s m, Supply s) => p -> m [(Name, TypeIndex Kind)]
+  instantiateTypeIndexes :: (MonadState s m, Supply s) => p -> m [(Name, TypeIndex Kind)]
 
 instance (Parameterized p) => Parameterized [p] where
-  protoOinstantiateTypeIndexes = concatMapM protoOinstantiateTypeIndexes
+  instantiateTypeIndexes = concatMapM instantiateTypeIndexes
 
 instance (Parameterized p) => Parameterized (Set p) where
-  protoOinstantiateTypeIndexes = protoOinstantiateTypeIndexes . Set.toList
+  instantiateTypeIndexes = instantiateTypeIndexes . Set.toList
 
 instance Parameterized (Type Parameter Kind) where
-  protoOinstantiateTypeIndexes =
+  instantiateTypeIndexes =
     \case
       TVariable p ->
-        protoOinstantiateTypeIndexes p
+        instantiateTypeIndexes p
       TApplication _ t1 t2 ->
-        protoOinstantiateTypeIndexes t1 <>^ protoOinstantiateTypeIndexes t2
+        instantiateTypeIndexes t1 <>^ instantiateTypeIndexes t2
       TArrow t1 t2 ->
-        protoOinstantiateTypeIndexes t1 <>^ protoOinstantiateTypeIndexes t2
+        instantiateTypeIndexes t1 <>^ instantiateTypeIndexes t2
       TRecord t ->
-        protoOinstantiateTypeIndexes t
+        instantiateTypeIndexes t
       TRow r ->
-        protoOinstantiateTypeIndexes r
+        instantiateTypeIndexes r
       TAlias _ _ t ->
-        protoOinstantiateTypeIndexes t
+        instantiateTypeIndexes t
       TConstructor{} ->
         pure []
       TIntrinsic{} ->
         pure []
 
 instance Parameterized (Row Parameter Kind (Type Parameter Kind)) where
-  protoOinstantiateTypeIndexes =
+  instantiateTypeIndexes =
     \case
       RVariable p ->
-        protoOinstantiateTypeIndexes p
+        instantiateTypeIndexes p
       RExtend _ t r ->
-        protoOinstantiateTypeIndexes t <>^ protoOinstantiateTypeIndexes r
+        instantiateTypeIndexes t <>^ instantiateTypeIndexes r
       RNil ->
         pure []
 
 instance Parameterized (Parameter Kind) where
-  protoOinstantiateTypeIndexes (Parameter kind name) = do
+  instantiateTypeIndexes (Parameter kind name) = do
     index <- supplied (TypeIndex kind)
     pure [(name, index)]
 

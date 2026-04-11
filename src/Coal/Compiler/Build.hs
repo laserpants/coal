@@ -7,7 +7,7 @@
 module Coal.Compiler.Build (
   Build (..),
   InstanceMap,
-  protoOemptyBuild,
+  emptyBuild,
   overBuildNames,
   setBuildPath,
   --  setBuildFile,
@@ -53,71 +53,71 @@ import GHC.Generics (Generic)
 type InstanceMap a = Map IndexedType a
 
 data Build a = Build
-  { protoObuildPath :: Path
-  , --  , protoObuildFile :: FilePath
-    protoObuildNames :: Environment [NameEntry]
-  , protoObuildExportedNames :: Set Name
-  , protoObuildDataConstructors :: Environment (DataConstructorEntry a)
+  { buildPath :: Path
+  , --  , buildFile :: FilePath
+    buildNames :: Environment [NameEntry]
+  , buildExportedNames :: Set Name
+  , buildDataConstructors :: Environment (DataConstructorEntry a)
   , -- folds?
-    protoObuildTypeConstructors :: Environment (TypeConstructorEntry a)
-  , protoObuildTraits :: Environment (TraitEntry a)
-  , protoObuildInstances :: Environment (InstanceMap (InstanceEntry a))
-  , protoObuildAliases :: Environment (AliasEntry a)
-  , protoObuildDependencies :: [Path]
-  , protoObuildQualifiedNames :: Environment Name
-  , protoObuildBitcode :: Maybe ByteString
-  , protoObuildHash :: Maybe Hash256
-  , protoObuildSource :: Text
-  , protoObuildKernelNames :: Environment Kernel.Type
-  , protoObuildKernelIRTypes :: Environment IRType
-  , protoObuildKernelConstructors :: Environment Int
-  --  , protoObuildTypedDefinitions :: [Definition a Kind IndexedType]
+    buildTypeConstructors :: Environment (TypeConstructorEntry a)
+  , buildTraits :: Environment (TraitEntry a)
+  , buildInstances :: Environment (InstanceMap (InstanceEntry a))
+  , buildAliases :: Environment (AliasEntry a)
+  , buildDependencies :: [Path]
+  , buildQualifiedNames :: Environment Name
+  , buildBitcode :: Maybe ByteString
+  , buildHash :: Maybe Hash256
+  , buildSource :: Text
+  , buildKernelNames :: Environment Kernel.Type
+  , buildKernelIRTypes :: Environment IRType
+  , buildKernelConstructors :: Environment Int
+  --  , buildTypedDefinitions :: [Definition a Kind IndexedType]
   }
   deriving (Show, Eq, Ord, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (Build a)
 
-protoOemptyBuild :: Build a
-protoOemptyBuild =
+emptyBuild :: Build a
+emptyBuild =
   Build
-    { protoObuildPath = Path []
-    , --    , protoObuildFile = mempty
-      protoObuildNames = mempty
-    , protoObuildExportedNames = mempty
-    , protoObuildDataConstructors = mempty
-    , protoObuildTypeConstructors = mempty
-    , protoObuildTraits = mempty
-    , protoObuildInstances = mempty
-    , protoObuildAliases = mempty
-    , protoObuildDependencies = mempty
-    , protoObuildQualifiedNames = mempty
-    , protoObuildBitcode = Nothing
-    , protoObuildHash = Nothing
-    , protoObuildSource = mempty
-    , protoObuildKernelNames = mempty
-    , protoObuildKernelIRTypes = mempty
-    , protoObuildKernelConstructors = mempty
-    --   , protoObuildTypedDefinitions = mempty
+    { buildPath = Path []
+    , --    , buildFile = mempty
+      buildNames = mempty
+    , buildExportedNames = mempty
+    , buildDataConstructors = mempty
+    , buildTypeConstructors = mempty
+    , buildTraits = mempty
+    , buildInstances = mempty
+    , buildAliases = mempty
+    , buildDependencies = mempty
+    , buildQualifiedNames = mempty
+    , buildBitcode = Nothing
+    , buildHash = Nothing
+    , buildSource = mempty
+    , buildKernelNames = mempty
+    , buildKernelIRTypes = mempty
+    , buildKernelConstructors = mempty
+    --   , buildTypedDefinitions = mempty
     }
 
 setBuildPath :: Path -> Build a -> Build a
 setBuildPath newBuildPath Build{..} =
   Build
-    { protoObuildPath = newBuildPath
+    { buildPath = newBuildPath
     , ..
     }
 
 -- setBuildFile :: FilePath -> Build a -> Build a
 -- setBuildFile newBuildFile Build{..} =
 --  Build
---    { protoObuildFile = newBuildFile
+--    { buildFile = newBuildFile
 --    , ..
 --    }
 
 overBuildNames :: (Environment [NameEntry] -> Environment [NameEntry]) -> Build a -> Build a
 overBuildNames f Build{..} =
   Build
-    { protoObuildNames = f protoObuildNames
+    { buildNames = f buildNames
     , ..
     }
 
@@ -141,7 +141,7 @@ insertBuildNameEntry :: NameEntry -> Build a -> Build a
 insertBuildNameEntry entry =
   overBuildNames (Environment.adjust (nubBy nameEntryEquality) name . Environment.insertWith (<>) name [entry])
  where
-  name = protoOnameOf entry
+  name = nameOf entry
 
 removeBuildNamePlaceholder :: Name -> Build a -> Build a
 removeBuildNamePlaceholder name =
@@ -151,12 +151,12 @@ replaceBuildNameEntry :: NameEntry -> Build a -> Build a
 replaceBuildNameEntry entry =
   removeBuildNamePlaceholder name . insertBuildNameEntry entry
  where
-  name = protoOnameOf entry
+  name = nameOf entry
 
 overBuildExportedNames :: (Set Name -> Set Name) -> Build a -> Build a
 overBuildExportedNames f Build{..} =
   Build
-    { protoObuildExportedNames = f protoObuildExportedNames
+    { buildExportedNames = f buildExportedNames
     , ..
     }
 
@@ -166,7 +166,7 @@ insertBuildExportedName name = overBuildExportedNames (Set.insert name)
 overBuildDataConstructors :: (Environment (DataConstructorEntry a) -> Environment (DataConstructorEntry a)) -> Build a -> Build a
 overBuildDataConstructors f Build{..} =
   Build
-    { protoObuildDataConstructors = f protoObuildDataConstructors
+    { buildDataConstructors = f buildDataConstructors
     , ..
     }
 
@@ -176,7 +176,7 @@ insertBuildDataConstructor name = overBuildDataConstructors . Environment.insert
 overBuildTypeConstructors :: (Environment (TypeConstructorEntry a) -> Environment (TypeConstructorEntry a)) -> Build a -> Build a
 overBuildTypeConstructors f Build{..} =
   Build
-    { protoObuildTypeConstructors = f protoObuildTypeConstructors
+    { buildTypeConstructors = f buildTypeConstructors
     , ..
     }
 
@@ -186,7 +186,7 @@ insertBuildTypeConstructor name = overBuildTypeConstructors . Environment.insert
 overBuildTraits :: (Environment (TraitEntry a) -> Environment (TraitEntry a)) -> Build a -> Build a
 overBuildTraits f Build{..} =
   Build
-    { protoObuildTraits = f protoObuildTraits
+    { buildTraits = f buildTraits
     , ..
     }
 
@@ -196,7 +196,7 @@ insertBuildTrait name = overBuildTraits . Environment.insert name
 overBuildInstances :: (Environment (InstanceMap (InstanceEntry a)) -> Environment (InstanceMap (InstanceEntry a))) -> Build a -> Build a
 overBuildInstances f Build{..} =
   Build
-    { protoObuildInstances = f protoObuildInstances
+    { buildInstances = f buildInstances
     , ..
     }
 
@@ -213,14 +213,14 @@ insertBuildInstance name t entry = overBuildInstances (Environment.alter (Just .
 overBuildAliases :: (Environment (AliasEntry a) -> Environment (AliasEntry a)) -> Build a -> Build a
 overBuildAliases f Build{..} =
   Build
-    { protoObuildAliases = f protoObuildAliases
+    { buildAliases = f buildAliases
     , ..
     }
 
 -- overBuildQualifiedNames :: (Environment Name -> Environment Name) -> Build a -> Build a
 -- overBuildQualifiedNames f Build{..} =
 --  Build
---    { protoObuildQualifiedNames = f protoObuildQualifiedNames
+--    { buildQualifiedNames = f buildQualifiedNames
 --    , ..
 --    }
 
@@ -230,49 +230,49 @@ insertBuildAlias name = overBuildAliases . Environment.insert name
 setBuildBitcode :: ByteString -> Build a -> Build a
 setBuildBitcode newBuildBitcode Build{..} =
   Build
-    { protoObuildBitcode = Just newBuildBitcode
+    { buildBitcode = Just newBuildBitcode
     , ..
     }
 
 setBuildHash :: Hash256 -> Build a -> Build a
 setBuildHash newBuildHash Build{..} =
   Build
-    { protoObuildHash = Just newBuildHash
+    { buildHash = Just newBuildHash
     , ..
     }
 
 setBuildKernelNames :: Environment Kernel.Type -> Build a -> Build a
 setBuildKernelNames env Build{..} =
   Build
-    { protoObuildKernelNames = env
+    { buildKernelNames = env
     , ..
     }
 
 setBuildKernelIRTypes :: Environment IRType -> Build a -> Build a
 setBuildKernelIRTypes env Build{..} =
   Build
-    { protoObuildKernelIRTypes = env
+    { buildKernelIRTypes = env
     , ..
     }
 
 setBuildKernelConstructors :: Environment Int -> Build a -> Build a
 setBuildKernelConstructors env Build{..} =
   Build
-    { protoObuildKernelConstructors = env
+    { buildKernelConstructors = env
     , ..
     }
 
 setQualifiedNames :: Environment Name -> Build a -> Build a
 setQualifiedNames names Build{..} =
   Build
-    { protoObuildQualifiedNames = names
+    { buildQualifiedNames = names
     , ..
     }
 
 setBuildSource :: Text -> Build a -> Build a
 setBuildSource source Build{..} =
   Build
-    { protoObuildSource = source
+    { buildSource = source
     , ..
     }
 
@@ -280,7 +280,7 @@ setBuildSource source Build{..} =
 typeEnvironment :: Build a -> Environment IndexedScheme
 typeEnvironment Build{..} =
   flip execState mempty $ do
-    forM_ (concat $ Environment.elems protoObuildNames) $
+    forM_ (concat $ Environment.elems buildNames) $
       \case
         NName name s ->
           modify (Environment.insert name s)

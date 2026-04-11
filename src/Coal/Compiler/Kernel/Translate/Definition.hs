@@ -27,7 +27,7 @@ translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> Com
 translateDefinition =
   \case
     DType _ _ TypeDefinition{..} ->
-      traverse translateConstructor (zip [0 ..] (sortOn constructorName protoOtypeDefinitionConstructors))
+      traverse translateConstructor (zip [0 ..] (sortOn constructorName typeDefinitionConstructors))
     DFunction loc name (FunctionDefinition _ _ _ ps e) -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
@@ -38,7 +38,7 @@ translateDefinition =
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
     DTrait loc name TraitDefinition{..} ->
-      forM protoOtraitDefinitionInterface $
+      forM traitDefinitionInterface $
         \(TraitDefinitionInterfaceEntry n (Forall _ _ t)) ->
           traitAccessor name n (translateType t)
     DInstance _ (InstanceDefinition _ trait _ t ds) ->

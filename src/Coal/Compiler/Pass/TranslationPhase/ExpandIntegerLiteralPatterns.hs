@@ -64,7 +64,7 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
       pure (EClause a p (CPlain a1 gs e1' :| []))
     (_, []) -> do
       -- path <- gets compilerCurrentModule
-      path <- gets protoOcompilerCurrentPath
+      path <- gets compilerCurrentPath
       tellErrors [NonExhaustivePatterns (ErrorLocation (principalPath path) a)]
       throwError PatternAnomaly
     (_, c : cs) -> do
@@ -128,10 +128,10 @@ instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       FunctionDefinition{..} -> do
-        newFunctiongDefinitionExpression <- expandIntegerLiteralPatterns protoOfunctionDefinitionExpression
+        newFunctiongDefinitionExpression <- expandIntegerLiteralPatterns functionDefinitionExpression
         return $
           FunctionDefinition
-            { protoOfunctionDefinitionExpression = newFunctiongDefinitionExpression
+            { functionDefinitionExpression = newFunctiongDefinitionExpression
             , ..
             }
 
@@ -139,10 +139,10 @@ instance TransformContext (LetDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       LetDefinition{..} -> do
-        newLetDefinitionExpression <- expandIntegerLiteralPatterns protoOletDefinitionExpression
+        newLetDefinitionExpression <- expandIntegerLiteralPatterns letDefinitionExpression
         return $
           LetDefinition
-            { protoOletDefinitionExpression = newLetDefinitionExpression
+            { letDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
@@ -160,12 +160,12 @@ instance TransformContext (Module Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       Module{..} -> do
-        setCurrentPathC protoOmodulePath
-        -- setCompilerCurrentModuleC protoOmodulePath
-        setCurrentPathC protoOmodulePath
-        newModuleDefinitions <- traverse expandIntegerLiteralPatterns protoOmoduleDefinitions
+        setCurrentPathC modulePath
+        -- setCompilerCurrentModuleC modulePath
+        setCurrentPathC modulePath
+        newModuleDefinitions <- traverse expandIntegerLiteralPatterns moduleDefinitions
         return $
           Module
-            { protoOmoduleDefinitions = newModuleDefinitions
+            { moduleDefinitions = newModuleDefinitions
             , ..
             }

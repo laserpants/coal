@@ -49,17 +49,17 @@ passLLVMOutput = Pass{runPass = pass}
 
 pass :: (MonadIO m, MonadMask m) => [BuildEnvelope (Name, [IRConstruct [IRLine]])] -> CompilerT Metadata m [(Name, ByteString)]
 pass ir = do
-  config <- gets protoOcompilerConfig
+  config <- gets compilerConfig
   pb <- asks compilerProgressBar
   res <- generateLLOutput pb config ir
   case res of
     Left err ->
       throwError err
     Right results -> do
-      forM_ results (uncurry protoOsetBitcodeC)
-      modules_ <- gets protoOcompilerModules
+      forM_ results (uncurry setBitcodeC)
+      modules_ <- gets compilerModules
 
-      fresh <- gets protoOcompilerToBeRecompiled
+      fresh <- gets compilerToBeRecompiled
       let freshModules = Environment.restrict (Set.toList fresh) modules_
 
       let buildDir = "./.build/"
@@ -100,7 +100,7 @@ irOutput pb CompilerConfig{..} tmpDir = do
       bs <- runLLVM tmpDir file
       pure (fmap (name,) bs)
     BCached Build{..} ->
-      pure (Right (principalPath protoObuildPath, fromJust protoObuildBitcode))
+      pure (Right (principalPath buildPath, fromJust buildBitcode))
 
 runLLVM :: (MonadIO m) => FilePath -> FilePath -> CompilerT Metadata m (Either SomeException ByteString)
 runLLVM dir src =

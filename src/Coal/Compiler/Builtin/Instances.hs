@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Builtin.Instances (protoObuiltinInstances) where
+module Coal.Compiler.Builtin.Instances (builtinInstances) where
 
 import Coal.Compiler.Build.NameEntry
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs, tupleType)
@@ -11,8 +11,8 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Name)
 
-protoObuiltinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
-protoObuiltinInstances =
+builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
+builtinInstances =
   [
     ( "Numeric"
     , TIntrinsic IInt32

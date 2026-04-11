@@ -24,7 +24,7 @@ passMainEntrypointRule = mapPass $ Pass{runPass = traverse impl}
 
 impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 impl mm = do
-  setCurrentPathC (protoOmodulePath mm)
+  setCurrentPathC (modulePath mm)
   detectMainEntrypoint mm
   return mm
 

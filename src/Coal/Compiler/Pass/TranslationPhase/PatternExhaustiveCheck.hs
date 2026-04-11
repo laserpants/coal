@@ -35,7 +35,7 @@ patternExhaustiveCheckM :: (Monad m) => Module Metadata k t -> CompilerT Metadat
 patternExhaustiveCheckM m = do
   (_, es) <-
     listenErrors $
-      traverse_ (patternExhaustiveCheck (principalPath $ protoOmodulePath m)) (protoOmoduleDefinitions m)
+      traverse_ (patternExhaustiveCheck (principalPath $ modulePath m)) (moduleDefinitions m)
   unless (null es) (throwError PatternAnomaly)
 
 class PatternExhaustiveCheckContext c where
@@ -63,7 +63,7 @@ instance PatternExhaustiveCheckContext (Definition Metadata k t) where
       DLet _ name def ->
         patternExhaustiveCheck name def
       DInstance _ InstanceDefinition{..} ->
-        traverse_ (patternExhaustiveCheck name) protoOinstanceDefinitionImplementations
+        traverse_ (patternExhaustiveCheck name) instanceDefinitionImplementations
       _ ->
         pure ()
 
@@ -90,13 +90,13 @@ instance PatternExhaustiveCheckContext (FunctionDefinition Metadata k t) where
   patternExhaustiveCheck name =
     \case
       FunctionDefinition{..} ->
-        patternExhaustiveCheck name protoOfunctionDefinitionExpression
+        patternExhaustiveCheck name functionDefinitionExpression
 
 instance PatternExhaustiveCheckContext (LetDefinition Metadata k t) where
   patternExhaustiveCheck name =
     \case
       LetDefinition{..} ->
-        patternExhaustiveCheck name protoOletDefinitionExpression
+        patternExhaustiveCheck name letDefinitionExpression
 
 -- instance PatternExhaustiveCheckContext (FunctionDefinition Metadata t) where
 --  patternExhaustiveCheck name =

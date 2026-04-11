@@ -48,53 +48,53 @@ type CompilerConstraint a = Constraint (InferenceRule Kind a) TypeIndex Kind Ind
 type CompilerAssumption a = Assumption a IndexedType
 
 data CompilerState a = CompilerState
-  { protoOcompilerSupply :: Int
-  , protoOcompilerConfig :: CompilerConfig
-  , protoOcompilerModules :: Environment (Build a)
-  , protoOcompilerSources :: Environment Text
-  , protoOcompilerToBeRecompiled :: Set Name
-  , protoOcompilerCurrentPath :: Path
-  , protoOcompilerSubstitution :: Substitution
-  , protoOcompilerNameStore :: Environment IndexedScheme
-  , protoOcompilerConstraints :: [CompilerConstraint a]
-  , protoOcompilerAssumptions :: [CompilerAssumption a]
-  , protoOcompilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
-  , protoOcompilerKindConstraints :: [KindConstraint]
-  , protoOcompilerConstraintsGenErrors :: [ConstraintsGenError a]
-  , protoOcompilerKindConstraintsGenErrors :: [KindError]
-  , protoOcompilerSolverRuleViolations :: [InferenceRule Kind a]
+  { compilerSupply :: Int
+  , compilerConfig :: CompilerConfig
+  , compilerModules :: Environment (Build a)
+  , compilerSources :: Environment Text
+  , compilerToBeRecompiled :: Set Name
+  , compilerCurrentPath :: Path
+  , compilerSubstitution :: Substitution
+  , compilerNameStore :: Environment IndexedScheme
+  , compilerConstraints :: [CompilerConstraint a]
+  , compilerAssumptions :: [CompilerAssumption a]
+  , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
+  , compilerKindConstraints :: [KindConstraint]
+  , compilerConstraintsGenErrors :: [ConstraintsGenError a]
+  , compilerKindConstraintsGenErrors :: [KindError]
+  , compilerSolverRuleViolations :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord)
 
 instance Supply (CompilerState a) where
   updateSupply = overCompilerSupply
-  getSupply = protoOcompilerSupply
+  getSupply = compilerSupply
 
 initialCompilerState :: CompilerState a
 initialCompilerState =
   CompilerState
-    { protoOcompilerSupply = 0
-    , protoOcompilerConfig = defaultConfig
-    , protoOcompilerModules = mempty
-    , protoOcompilerSources = mempty
-    , protoOcompilerToBeRecompiled = mempty
-    , protoOcompilerCurrentPath = emptyPath
-    , protoOcompilerSubstitution = mempty
-    , protoOcompilerNameStore = mempty
-    , protoOcompilerConstraints = mempty
-    , protoOcompilerAssumptions = mempty
-    , protoOcompilerTypeAnnotationParams = mempty
-    , protoOcompilerKindConstraints = mempty
-    , protoOcompilerConstraintsGenErrors = []
-    , protoOcompilerKindConstraintsGenErrors = []
-    , protoOcompilerSolverRuleViolations = []
+    { compilerSupply = 0
+    , compilerConfig = defaultConfig
+    , compilerModules = mempty
+    , compilerSources = mempty
+    , compilerToBeRecompiled = mempty
+    , compilerCurrentPath = emptyPath
+    , compilerSubstitution = mempty
+    , compilerNameStore = mempty
+    , compilerConstraints = mempty
+    , compilerAssumptions = mempty
+    , compilerTypeAnnotationParams = mempty
+    , compilerKindConstraints = mempty
+    , compilerConstraintsGenErrors = []
+    , compilerKindConstraintsGenErrors = []
+    , compilerSolverRuleViolations = []
     }
 
 {-# INLINE overCompilerSupply #-}
 overCompilerSupply :: Over (CompilerState a) Int
 overCompilerSupply fn CompilerState{..} =
   CompilerState
-    { protoOcompilerSupply = fn protoOcompilerSupply
+    { compilerSupply = fn compilerSupply
     , ..
     }
 
@@ -102,7 +102,7 @@ overCompilerSupply fn CompilerState{..} =
 overCompilerConfig :: Over (CompilerState a) CompilerConfig
 overCompilerConfig fn CompilerState{..} =
   CompilerState
-    { protoOcompilerConfig = fn protoOcompilerConfig
+    { compilerConfig = fn compilerConfig
     , ..
     }
 
@@ -110,7 +110,7 @@ overCompilerConfig fn CompilerState{..} =
 overCompilerModules :: Over (CompilerState a) (Environment (Build a))
 overCompilerModules fn CompilerState{..} =
   CompilerState
-    { protoOcompilerModules = fn protoOcompilerModules
+    { compilerModules = fn compilerModules
     , ..
     }
 
@@ -118,7 +118,7 @@ overCompilerModules fn CompilerState{..} =
 overCompilerModuleWithPath :: Path -> Over (CompilerState a) (Build a)
 overCompilerModuleWithPath path fn CompilerState{..} =
   CompilerState
-    { protoOcompilerModules = Environment.adjust fn (principalPath path) protoOcompilerModules
+    { compilerModules = Environment.adjust fn (principalPath path) compilerModules
     , ..
     }
 
@@ -126,7 +126,7 @@ overCompilerModuleWithPath path fn CompilerState{..} =
 overCompilerSources :: Over (CompilerState a) (Environment Text)
 overCompilerSources fn CompilerState{..} =
   CompilerState
-    { protoOcompilerSources = fn protoOcompilerSources
+    { compilerSources = fn compilerSources
     , ..
     }
 
@@ -134,7 +134,7 @@ overCompilerSources fn CompilerState{..} =
 overCompilerToBeRecompiled :: Over (CompilerState a) (Set Name)
 overCompilerToBeRecompiled fn CompilerState{..} =
   CompilerState
-    { protoOcompilerToBeRecompiled = fn protoOcompilerToBeRecompiled
+    { compilerToBeRecompiled = fn compilerToBeRecompiled
     , ..
     }
 
@@ -142,7 +142,7 @@ overCompilerToBeRecompiled fn CompilerState{..} =
 overCompilerCurrentPath :: Over (CompilerState a) Path
 overCompilerCurrentPath fn CompilerState{..} =
   CompilerState
-    { protoOcompilerCurrentPath = fn protoOcompilerCurrentPath
+    { compilerCurrentPath = fn compilerCurrentPath
     , ..
     }
 
@@ -150,7 +150,7 @@ overCompilerCurrentPath fn CompilerState{..} =
 overCompilerSubstitution :: Over (CompilerState a) Substitution
 overCompilerSubstitution fn CompilerState{..} =
   CompilerState
-    { protoOcompilerSubstitution = fn protoOcompilerSubstitution
+    { compilerSubstitution = fn compilerSubstitution
     , ..
     }
 
@@ -158,7 +158,7 @@ overCompilerSubstitution fn CompilerState{..} =
 overCompilerNameStore :: Over (CompilerState a) (Environment IndexedScheme)
 overCompilerNameStore fn CompilerState{..} =
   CompilerState
-    { protoOcompilerNameStore = fn protoOcompilerNameStore
+    { compilerNameStore = fn compilerNameStore
     , ..
     }
 
@@ -166,7 +166,7 @@ overCompilerNameStore fn CompilerState{..} =
 overCompilerConstraints :: Over (CompilerState a) [CompilerConstraint a]
 overCompilerConstraints fn CompilerState{..} =
   CompilerState
-    { protoOcompilerConstraints = fn protoOcompilerConstraints
+    { compilerConstraints = fn compilerConstraints
     , ..
     }
 
@@ -174,7 +174,7 @@ overCompilerConstraints fn CompilerState{..} =
 overCompilerKindConstraints :: Over (CompilerState a) [KindConstraint]
 overCompilerKindConstraints fn CompilerState{..} =
   CompilerState
-    { protoOcompilerKindConstraints = fn protoOcompilerKindConstraints
+    { compilerKindConstraints = fn compilerKindConstraints
     , ..
     }
 
@@ -182,7 +182,7 @@ overCompilerKindConstraints fn CompilerState{..} =
 overCompilerAssumptions :: Over (CompilerState a) [CompilerAssumption a]
 overCompilerAssumptions fn CompilerState{..} =
   CompilerState
-    { protoOcompilerAssumptions = fn protoOcompilerAssumptions
+    { compilerAssumptions = fn compilerAssumptions
     , ..
     }
 
@@ -190,7 +190,7 @@ overCompilerAssumptions fn CompilerState{..} =
 overCompilerTypeAnnotationParams :: Over (CompilerState a) (Dictionary (a, TypeIndex Kind))
 overCompilerTypeAnnotationParams fn CompilerState{..} =
   CompilerState
-    { protoOcompilerTypeAnnotationParams = fn protoOcompilerTypeAnnotationParams
+    { compilerTypeAnnotationParams = fn compilerTypeAnnotationParams
     , ..
     }
 
@@ -198,7 +198,7 @@ overCompilerTypeAnnotationParams fn CompilerState{..} =
 overCompilerConstraintsGenErrors :: Over (CompilerState a) [ConstraintsGenError a]
 overCompilerConstraintsGenErrors fn CompilerState{..} =
   CompilerState
-    { protoOcompilerConstraintsGenErrors = fn protoOcompilerConstraintsGenErrors
+    { compilerConstraintsGenErrors = fn compilerConstraintsGenErrors
     , ..
     }
 
@@ -206,7 +206,7 @@ overCompilerConstraintsGenErrors fn CompilerState{..} =
 overCompilerKindConstraintsGenErrors :: Over (CompilerState a) [KindError]
 overCompilerKindConstraintsGenErrors fn CompilerState{..} =
   CompilerState
-    { protoOcompilerKindConstraintsGenErrors = fn protoOcompilerKindConstraintsGenErrors
+    { compilerKindConstraintsGenErrors = fn compilerKindConstraintsGenErrors
     , ..
     }
 
@@ -214,6 +214,6 @@ overCompilerKindConstraintsGenErrors fn CompilerState{..} =
 overCompilerSolverRuleViolations :: Over (CompilerState a) [InferenceRule Kind a]
 overCompilerSolverRuleViolations fn CompilerState{..} =
   CompilerState
-    { protoOcompilerSolverRuleViolations = fn protoOcompilerSolverRuleViolations
+    { compilerSolverRuleViolations = fn compilerSolverRuleViolations
     , ..
     }

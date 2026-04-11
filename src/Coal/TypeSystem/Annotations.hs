@@ -36,14 +36,14 @@ newtype AnnotationsT m a o = AnnotationsT
 runAnnotationsT :: (Monad m) => a -> TypeAnnotationContext a -> AnnotationsT m a t -> m (Either (TypeAnnotationError a) t, TypeIndexMap)
 runAnnotationsT loc env o = runStateT (runReaderT (runExceptT (withExceptT ($ loc) (annotationsMonad o))) env) mempty
 
-protoOlookupTypeConstructor :: (Monad m) => Name -> AnnotationsT m a (Maybe Kind)
-protoOlookupTypeConstructor name = asks (Environment.lookup name . constraintsGenContextTypeConstructors)
+lookupTypeConstructor :: (Monad m) => Name -> AnnotationsT m a (Maybe Kind)
+lookupTypeConstructor name = asks (Environment.lookup name . constraintsGenContextTypeConstructors)
 
 --  case Environment.lookup name env of
 --    Nothing ->
 --      pure Nothing
 --    Just TypeConstructorEntry{..} ->
---      pure (Just protoOtypeConstructorEntryKind)
+--      pure (Just typeConstructorEntryKind)
 
 indexTypeAnnotations :: (Show a, Monad m) => Type Parameter Kind -> AnnotationsT m a IndexedType
 indexTypeAnnotations =
@@ -51,11 +51,11 @@ indexTypeAnnotations =
     t@TApplication{} -> do
       uncurry indexTypeApplicationTypeAnnotations (listTypeArgs t)
     TVariable (Parameter k v) ->
-      TVariable <$> protoOtypeIndex k v
+      TVariable <$> typeIndex k v
     TArrow t1 t2 ->
       TArrow <$> indexTypeAnnotations t1 <*> indexTypeAnnotations t2
     TConstructor _ name -> do
-      maybeKind <- protoOlookupTypeConstructor name
+      maybeKind <- lookupTypeConstructor name
       case maybeKind of
         Nothing ->
           throwError (`EAnnotationConstructor` name)
@@ -74,7 +74,7 @@ indexTypeAnnotationsInRow :: (Show a, Monad m) => Row Parameter Kind (Type Param
 indexTypeAnnotationsInRow =
   \case
     RVariable (Parameter k v) ->
-      RVariable <$> protoOtypeIndex k v
+      RVariable <$> typeIndex k v
     RExtend name t row ->
       RExtend name <$> indexTypeAnnotations t <*> indexTypeAnnotationsInRow row
     RNil ->
@@ -87,13 +87,13 @@ indexTypeApplicationTypeAnnotations con@(TConstructor _ name) ts
         <$> traverse indexTypeAnnotations ts
 indexTypeApplicationTypeAnnotations (TVariable (Parameter _ v)) ts = do
   us <- traverse indexTypeAnnotations ts
-  u <- TVariable <$> protoOtypeIndex (foldKind KType (kindOf <$> us)) v
+  u <- TVariable <$> typeIndex (foldKind KType (kindOf <$> us)) v
   pure (applyTypeArgs KType u us)
 indexTypeApplicationTypeAnnotations t ts =
   applyTypeArgs KType <$> indexTypeAnnotations t <*> traverse indexTypeAnnotations ts
 
-protoOtypeIndex :: (Monad m) => Kind -> Name -> AnnotationsT m a (TypeIndex Kind)
-protoOtypeIndex kind name = do
+typeIndex :: (Monad m) => Kind -> Name -> AnnotationsT m a (TypeIndex Kind)
+typeIndex kind name = do
   dict <- get
   case Map.lookup name dict of
     Just (TypeIndex k1 _)

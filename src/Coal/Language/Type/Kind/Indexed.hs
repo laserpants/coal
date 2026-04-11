@@ -76,68 +76,68 @@ instance ToKindIndexed (TypeDefinition a k t) (TypeDefinition a Kind u) where
     \case
       TypeDefinition{..} ->
         TypeDefinition
-          <$> toKindIndexed protoOtypeDefinitionParameters
-          <*> toKindIndexed protoOtypeDefinitionConstructors
+          <$> toKindIndexed typeDefinitionParameters
+          <*> toKindIndexed typeDefinitionConstructors
 
 instance ToKindIndexed (FunctionDefinition a k ()) (FunctionDefinition a Kind ()) where
   toKindIndexed =
     \case
       FunctionDefinition{..} ->
-        FunctionDefinition protoOfunctionDefinitionMetadata
-          <$> toKindIndexed protoOfunctionDefinitionAnnotation
-          <*> toKindIndexed protoOfunctionDefinitionType
-          <*> toKindIndexed protoOfunctionDefinitionPatterns
-          <*> toKindIndexed protoOfunctionDefinitionExpression
+        FunctionDefinition functionDefinitionMetadata
+          <$> toKindIndexed functionDefinitionAnnotation
+          <*> toKindIndexed functionDefinitionType
+          <*> toKindIndexed functionDefinitionPatterns
+          <*> toKindIndexed functionDefinitionExpression
 
 instance ToKindIndexed (LetDefinition a k ()) (LetDefinition a Kind ()) where
   toKindIndexed =
     \case
       LetDefinition{..} ->
-        LetDefinition protoOletDefinitionMetadata
-          <$> toKindIndexed protoOletDefinitionAnnotation
-          <*> toKindIndexed protoOletDefinitionType
-          <*> toKindIndexed protoOletDefinitionExpression
+        LetDefinition letDefinitionMetadata
+          <$> toKindIndexed letDefinitionAnnotation
+          <*> toKindIndexed letDefinitionType
+          <*> toKindIndexed letDefinitionExpression
 
 instance ToKindIndexed (TraitDefinition a k) (TraitDefinition a Kind) where
   toKindIndexed =
     \case
       TraitDefinition{..} ->
-        TraitDefinition protoOtraitDefinitionMetadata protoOtraitDefinitionTraitName
-          <$> toKindIndexed protoOtraitDefinitionConstraints
-          <*> toKindIndexed protoOtraitDefinitionParameter
-          <*> toKindIndexed protoOtraitDefinitionInterface
+        TraitDefinition traitDefinitionMetadata traitDefinitionTraitName
+          <$> toKindIndexed traitDefinitionConstraints
+          <*> toKindIndexed traitDefinitionParameter
+          <*> toKindIndexed traitDefinitionInterface
 
 instance ToKindIndexed (TraitDefinitionInterfaceEntry k) (TraitDefinitionInterfaceEntry Kind) where
   toKindIndexed =
     \case
       TraitDefinitionInterfaceEntry{..} ->
-        TraitDefinitionInterfaceEntry protoOtraitDefinitionInterfaceEntryName
-          <$> toKindIndexed protoOtraitDefinitionInterfaceEntryScheme
+        TraitDefinitionInterfaceEntry traitDefinitionInterfaceEntryName
+          <$> toKindIndexed traitDefinitionInterfaceEntryScheme
 
 instance ToKindIndexed (FoldDefinition a k ()) (FoldDefinition a Kind ()) where
   toKindIndexed =
     \case
       FoldDefinition{..} ->
-        FoldDefinition protoOfoldDefinitionMetadata
-          <$> toKindIndexed protoOfoldDefinitionAnnotation
-          <*> toKindIndexed protoOfoldDefinitionClauses
+        FoldDefinition foldDefinitionMetadata
+          <$> toKindIndexed foldDefinitionAnnotation
+          <*> toKindIndexed foldDefinitionClauses
 
 instance ToKindIndexed (InstanceDefinition a k ()) (InstanceDefinition a Kind ()) where
   toKindIndexed =
     \case
       InstanceDefinition{..} ->
-        InstanceDefinition protoOinstanceDefinitionMetadata protoOinstanceDefinitionTraitName
-          <$> toKindIndexed protoOinstanceDefinitionConstraints
-          <*> toKindIndexed protoOinstanceDefinitionType
-          <*> toKindIndexed protoOinstanceDefinitionImplementations
+        InstanceDefinition instanceDefinitionMetadata instanceDefinitionTraitName
+          <$> toKindIndexed instanceDefinitionConstraints
+          <*> toKindIndexed instanceDefinitionType
+          <*> toKindIndexed instanceDefinitionImplementations
 
 instance ToKindIndexed (AliasDefinition a k) (AliasDefinition a Kind) where
   toKindIndexed =
     \case
       AliasDefinition{..} ->
         AliasDefinition
-          <$> toKindIndexed protoOaliasDefinitionParameters
-          <*> toKindIndexed protoOaliasDefinitionType
+          <$> toKindIndexed aliasDefinitionParameters
+          <*> toKindIndexed aliasDefinitionType
 
 instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind), Ord u) => ToKindIndexed (DataConstructor o k t) (DataConstructor o Kind u) where
   toKindIndexed =
@@ -300,10 +300,10 @@ instance ToKindIndexed (Module a k ()) (Module a Kind ()) where
   toKindIndexed =
     \case
       Module{..} -> do
-        newModuleDefinitions <- traverse toKindIndexed protoOmoduleDefinitions
+        newModuleDefinitions <- traverse toKindIndexed moduleDefinitions
         pure $
           Module
-            { protoOmoduleDefinitions = newModuleDefinitions
+            { moduleDefinitions = newModuleDefinitions
             , ..
             }
 

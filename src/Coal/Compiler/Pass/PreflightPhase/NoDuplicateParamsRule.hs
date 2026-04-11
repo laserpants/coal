@@ -35,7 +35,7 @@ passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse fork}
 fork :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 fork mm = do
   --  let mm = toModule [] m
-  setCurrentPathC (protoOmodulePath mm)
+  setCurrentPathC (modulePath mm)
   detectDuplicateParams mm
   return mm
 
@@ -55,7 +55,7 @@ instance (Data t) => RuleContext (Module Metadata () t) where
   detectDuplicateParams =
     \case
       Module{..} ->
-        detectDuplicateParams protoOmoduleDefinitions
+        detectDuplicateParams moduleDefinitions
 
 instance (Data t) => RuleContext (Definition Metadata () t) where
   detectDuplicateParams =
@@ -75,26 +75,26 @@ instance RuleContext (FunctionDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       FunctionDefinition{..} -> do
-        checkPatterns protoOfunctionDefinitionPatterns
-        detectDuplicateParams protoOfunctionDefinitionExpression
+        checkPatterns functionDefinitionPatterns
+        detectDuplicateParams functionDefinitionExpression
 
 instance RuleContext (LetDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       LetDefinition{..} ->
-        detectDuplicateParams protoOletDefinitionExpression
+        detectDuplicateParams letDefinitionExpression
 
 instance (Data t) => RuleContext (InstanceDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       InstanceDefinition{..} ->
-        detectDuplicateParams protoOinstanceDefinitionImplementations
+        detectDuplicateParams instanceDefinitionImplementations
 
 instance RuleContext (FoldDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       FoldDefinition{..} ->
-        detectDuplicateParams protoOfoldDefinitionClauses
+        detectDuplicateParams foldDefinitionClauses
 
 instance RuleContext (Clause Metadata () t) where
   detectDuplicateParams =
@@ -217,7 +217,7 @@ checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
   checkDup loc name = do
     s <- get
     when (name `elem` s) $ do
-      path <- lift $ gets protoOcompilerCurrentPath
+      path <- lift $ gets compilerCurrentPath
       tellErrors [ConflictingParameter name (ErrorLocation (principalPath path) loc)]
       throwError PreflightFailure
     registerName name

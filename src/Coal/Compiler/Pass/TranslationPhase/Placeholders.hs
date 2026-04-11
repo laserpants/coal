@@ -64,41 +64,41 @@ pass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m 
 pass m = do
   --  withCurrentModuleC $
   --    \m -> do
-  setCurrentPathC (protoOmodulePath m)
+  setCurrentPathC (modulePath m)
 
-  b <- protoOgetCurrentBuildC
-  protoOsetNamesC (typeEnvironment b)
+  b <- getCurrentBuildC
+  setNamesC (typeEnvironment b)
 
-  twice (traverse_ cafe2 (protoOmoduleDefinitions m))
-  --  traverse_ cafe2 (protoOmoduleDefinitions m)
+  twice (traverse_ cafe2 (moduleDefinitions m))
+  --  traverse_ cafe2 (moduleDefinitions m)
 
-  names <- gets protoOcompilerNameStore
+  names <- gets compilerNameStore
   updateNames names
 
-  --      Build{..} <- lift $ protoOgetCurrentBuildC
-  --      liftIO $ Text.writeFile ("tmp/placeholder_1names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ protoObuildNames)
+  --      Build{..} <- lift $ getCurrentBuildC
+  --      liftIO $ Text.writeFile ("tmp/placeholder_1names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ buildNames)
   --      liftIO $ Text.writeFile ("tmp/placeholder_1build_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ Build{..})
   --      liftIO $ Text.writeFile ("tmp/placeholder_1defs_" <> Text.unpack (principalPath (modulePath m))) (generateDot m)
 
   -- mm <- overModuleDefinitionsM (traverse insertPlaceholders) m
 
-  mm <- traverse insertPlaceholders2 (protoOmoduleDefinitions m)
+  mm <- traverse insertPlaceholders2 (moduleDefinitions m)
 
-  --      Build{..} <- lift $ protoOgetCurrentBuildC
-  --      liftIO $ Text.writeFile ("tmp/placeholder_names_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ protoObuildNames)
+  --      Build{..} <- lift $ getCurrentBuildC
+  --      liftIO $ Text.writeFile ("tmp/placeholder_names_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ buildNames)
   --      liftIO $ Text.writeFile ("tmp/placeholder_build_" <> Text.unpack (principalPath (modulePath mm))) (toStrict $ pShowNoColor $ Build{..})
   --      liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
 
-  return m{protoOmoduleDefinitions = mm}
+  return m{moduleDefinitions = mm}
 
 -- TODO: Move
 
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 updateNames store =
-  protoOupdateCurrentBuildC $
+  updateCurrentBuildC $
     \build@Build{..} ->
       flip execStateT build $
-        forM_ (concat $ Environment.elems protoObuildNames) $
+        forM_ (concat $ Environment.elems buildNames) $
           \case
             NName name _ ->
               case Environment.lookup name store of
@@ -115,12 +115,12 @@ insertPlaceholders2 =
     def@DLet{} ->
       expandTraits def
     DInstance loc InstanceDefinition{..} -> do
-      newInstanceDefinitionImplementations <- forM protoOinstanceDefinitionImplementations insertPlaceholdersInDef2
+      newInstanceDefinitionImplementations <- forM instanceDefinitionImplementations insertPlaceholdersInDef2
       return $
         DInstance
           loc
           InstanceDefinition
-            { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
+            { instanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
     d ->
@@ -164,18 +164,18 @@ insertPlaceholdersInDef2 =
 -- insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
 -- insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
 --  let s = Forall (typeIndexesIn t) (Set.fromList ts) t
---  lift $ protoOinsertNameC name s
+--  lift $ insertNameC name s
 -- insertName _ _ = error "Implementation error"
 
 insertName2 :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
 insertName2 (DLet _ _ (LetDefinition _ _ (With ts t) _)) name = do
   let s = Forall (typeIndexesIn t) (Set.fromList ts) t
-  protoOinsertNameC name s
+  insertNameC name s
 insertName2 _ _ = error "Implementation error"
 
 collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m (Set (Trait IndexedType))
 collectTraits u name = do
-  env <- gets protoOcompilerNameStore
+  env <- gets compilerNameStore
   case Environment.lookup name env of
     Nothing ->
       pure mempty
@@ -202,8 +202,8 @@ tryMatch t u = do
 
 findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
-  Build{protoObuildInstances} <- protoOgetCurrentBuildC
-  case Environment.lookup name protoObuildInstances of
+  Build{buildInstances} <- getCurrentBuildC
+  case Environment.lookup name buildInstances of
     Nothing ->
       pure Nothing
     Just env1 -> do
@@ -221,7 +221,7 @@ findFirstMatch (Trait name t) = do
         Left{} ->
           pure Nothing
         Right sub ->
-          pure $ Just (protoOinstanceEntryType, k, Map.map (substituteInScheme sub) protoOinstanceEntryTypeSchemes)
+          pure $ Just (instanceEntryType, k, Map.map (substituteInScheme sub) instanceEntryTypeSchemes)
 
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
@@ -233,7 +233,7 @@ lookupTraitInstance2 loc trait@(Trait name _) = do
     Nothing -> do
       if isConcrete trait
         then do
-          path <- gets protoOcompilerCurrentPath
+          path <- gets compilerCurrentPath
           tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
           throwError TraitError
         else pure Nothing
@@ -251,7 +251,7 @@ lookupTraitInstance2 loc trait@(Trait name _) = do
 --    Nothing -> do
 --      if isConcrete trait
 --        then do
---          path <- lift $ gets protoOcompilerCurrentPath
+--          path <- lift $ gets compilerCurrentPath
 --          tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
 --          throwError TraitError
 --        else pure Nothing
@@ -278,7 +278,7 @@ applyTraits loc (Label t name) traits =
     fields <- lookupTraitInstance2 loc trait
     case fields of
       Nothing | not (isVariable trait) -> do
-        path <- gets protoOcompilerCurrentPath
+        path <- gets compilerCurrentPath
         tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
         throwError TraitError
       Nothing -> do
@@ -297,7 +297,7 @@ expandRecursiveLet _ = error "Implementation error"
 withLocalEnvironment :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m r -> CompilerT a m r
 withLocalEnvironment xs action = do
   old <- get
-  protoOinsertNamesC xs
+  insertNamesC xs
   r <- action
   put old
   return r
@@ -312,7 +312,7 @@ instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Expression a k In
         let xs = concat (toList (snd <$> as))
 
         old <- get
-        protoOinsertNamesC xs
+        insertNamesC xs
 
         r <- ELet a (fst <$> as) <$> expandTraits e
 
@@ -341,7 +341,7 @@ instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Expression a k In
 --        let xs = concat (toList (snd <$> as))
 --
 --        old <- lift get
---        lift $ protoOinsertNamesC xs
+--        lift $ insertNamesC xs
 --
 --        r <- ELet a (fst <$> as) <$> expandTraits e
 --
@@ -423,12 +423,12 @@ instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Definition a k In
         newLetDefinition <- expandLetDefinitionTraits name letDefinition
         return $ DLet loc name newLetDefinition
       DInstance loc InstanceDefinition{..} -> do
-        newInstanceDefinitionImplementations <- traverse expandTraits protoOinstanceDefinitionImplementations
+        newInstanceDefinitionImplementations <- traverse expandTraits instanceDefinitionImplementations
         return $
           DInstance
             loc
             InstanceDefinition
-              { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
+              { instanceDefinitionImplementations = newInstanceDefinitionImplementations
               , ..
               }
       d ->
@@ -455,7 +455,7 @@ expandLetDefinitionTraits name =
           pure $ LetDefinition loc with (With [] t) expr
         tr : trs -> do
           -- path <- gets compilerCurrentModule
-          path <- gets protoOcompilerCurrentPath
+          path <- gets compilerCurrentPath
           -- Insert default int32 instance for Numeric and Ordered traits
           if "main" == name && Path ["Main"] == path
             then do
@@ -493,7 +493,7 @@ expandLetDefinitionTraits name =
 --          pure $ ConstantDefinition loc with (With [] t) expr
 --        tr : trs -> do
 --          -- path <- gets compilerCurrentModule
---          path <- lift $ gets protoOcompilerCurrentPath
+--          path <- lift $ gets compilerCurrentPath
 --          -- Insert default int32 instance for Numeric and Ordered traits
 --          if "main" == name && Path ["Main"] == path
 --            then do
@@ -556,7 +556,7 @@ dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
 --        [] ->
 --          pure $ ConstantDefinition loc with (With [] t) e
 --        tr : trs -> do
---          path <- lift $ gets protoOcompilerCurrentPath
+--          path <- lift $ gets compilerCurrentPath
 --          pure $ ConstantDefinition loc with (With (tr : trs) t) e
 
 passiveOexpandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> LetDefinition a Kind IndexedType -> CompilerT a m (LetDefinition a Kind IndexedType)
@@ -568,7 +568,7 @@ passiveOexpandLetDefinitionTraits name =
         [] ->
           pure $ LetDefinition loc with (With [] t) e
         tr : trs -> do
-          path <- gets protoOcompilerCurrentPath
+          path <- gets compilerCurrentPath
           pure $ LetDefinition loc with (With (tr : trs) t) e
 
 passiveOexpandTraitsInExpr :: (Monad m, Monoid a, Data a, Data k, Show a) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType)
@@ -580,7 +580,7 @@ passiveOexpandTraitsInExpr =
       as <- censorDictionaryTraits (const mempty) (traverse transformBinding2 bs)
       let xs = concat (toList (snd <$> as))
       old <- get
-      protoOinsertNamesC xs
+      insertNamesC xs
       r <- ELet a (fst <$> as) <$> passiveOexpandTraitsInExpr e
       put old
       return r
@@ -628,13 +628,13 @@ cafe2 =
       d <- passiveOexpandLetDefinitionTraits name def
       insertName2 (DLet a name d) name
     DInstance a InstanceDefinition{..} ->
-      forM_ protoOinstanceDefinitionImplementations $
+      forM_ instanceDefinitionImplementations $
         \case
           DLet a name def -> do
             d <- passiveOexpandLetDefinitionTraits instanceName def
             insertName2 (DLet a name d) instanceName
            where
-            instanceName = instanceLabel (Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType) name
+            instanceName = instanceLabel (Trait instanceDefinitionTraitName instanceDefinitionType) name
           _ ->
             pure ()
     _ ->

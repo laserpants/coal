@@ -38,685 +38,685 @@ newtype KindSubstitution = KindSubstitution
 instance Semigroup KindSubstitution where
   s1 <> s2 = KindSubstitution (s3 <> kindSubstitutionMap s1)
    where
-    s3 = protoOapplyKinds s1 (kindSubstitutionMap s2)
+    s3 = applyKinds s1 (kindSubstitutionMap s2)
 
 instance Monoid KindSubstitution where
   mempty = KindSubstitution mempty
 
 class KindSubstitutable k where
-  protoOapplyKinds :: KindSubstitution -> k -> k
-  protoOreplaceVariables :: k -> k
+  applyKinds :: KindSubstitution -> k -> k
+  replaceVariables :: k -> k
 
 instance (KindSubstitutable k) => KindSubstitutable [k] where
-  protoOapplyKinds = fmap . protoOapplyKinds
-  protoOreplaceVariables = fmap protoOreplaceVariables
+  applyKinds = fmap . applyKinds
+  replaceVariables = fmap replaceVariables
 
 instance (KindSubstitutable k) => KindSubstitutable (NonEmpty k) where
-  protoOapplyKinds = fmap . protoOapplyKinds
-  protoOreplaceVariables = fmap protoOreplaceVariables
+  applyKinds = fmap . applyKinds
+  replaceVariables = fmap replaceVariables
 
 instance (KindSubstitutable k) => KindSubstitutable (Maybe k) where
-  protoOapplyKinds = fmap . protoOapplyKinds
-  protoOreplaceVariables = fmap protoOreplaceVariables
+  applyKinds = fmap . applyKinds
+  replaceVariables = fmap replaceVariables
 
 instance (KindSubstitutable k) => KindSubstitutable (Map Name k) where
-  protoOapplyKinds = fmap . protoOapplyKinds
-  protoOreplaceVariables = fmap protoOreplaceVariables
+  applyKinds = fmap . applyKinds
+  replaceVariables = fmap replaceVariables
 
 instance (KindSubstitutable k) => KindSubstitutable (Environment k) where
-  protoOapplyKinds = mapEnvironment . protoOapplyKinds
-  protoOreplaceVariables = mapEnvironment protoOreplaceVariables
+  applyKinds = mapEnvironment . applyKinds
+  replaceVariables = mapEnvironment replaceVariables
 
 instance (Ord k, KindSubstitutable k) => KindSubstitutable (Set k) where
-  protoOapplyKinds = Set.map . protoOapplyKinds
-  protoOreplaceVariables = Set.map protoOreplaceVariables
+  applyKinds = Set.map . applyKinds
+  replaceVariables = Set.map replaceVariables
 
 instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (n, k) where
-  protoOapplyKinds sub (a, b) = (protoOapplyKinds sub a, protoOapplyKinds sub b)
-  protoOreplaceVariables = fmap protoOreplaceVariables
+  applyKinds sub (a, b) = (applyKinds sub a, applyKinds sub b)
+  replaceVariables = fmap replaceVariables
 
 instance (Ord (o k), Ord t, KindSubstitutable (o k), KindSubstitutable t) => KindSubstitutable (Scheme o k t) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       Forall{..} ->
         Forall
-          { schemeTypeVariables = protoOapplyKinds sub schemeTypeVariables
-          , schemeTraits = protoOapplyKinds sub schemeTraits
-          , schemeTypeBody = protoOapplyKinds sub schemeTypeBody
+          { schemeTypeVariables = applyKinds sub schemeTypeVariables
+          , schemeTraits = applyKinds sub schemeTraits
+          , schemeTypeBody = applyKinds sub schemeTypeBody
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       Forall{..} ->
         Forall
-          { schemeTypeVariables = protoOreplaceVariables schemeTypeVariables
-          , schemeTraits = protoOreplaceVariables schemeTraits
-          , schemeTypeBody = protoOreplaceVariables schemeTypeBody
+          { schemeTypeVariables = replaceVariables schemeTypeVariables
+          , schemeTraits = replaceVariables schemeTraits
+          , schemeTypeBody = replaceVariables schemeTypeBody
           }
 
 instance (KindSubstitutable k) => KindSubstitutable (Trait k) where
-  protoOapplyKinds = fmap . protoOapplyKinds
-  protoOreplaceVariables = fmap protoOreplaceVariables
+  applyKinds = fmap . applyKinds
+  replaceVariables = fmap replaceVariables
 
 instance KindSubstitutable (Map Int Kind) where
-  protoOapplyKinds = fmap . protoOapplyKinds
-  protoOreplaceVariables = fmap protoOreplaceVariables
+  applyKinds = fmap . applyKinds
+  replaceVariables = fmap replaceVariables
 
 instance KindSubstitutable KindConstraint where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       KEquality k1 k2 ->
-        KEquality (protoOapplyKinds sub k1) (protoOapplyKinds sub k2)
-  protoOreplaceVariables =
+        KEquality (applyKinds sub k1) (applyKinds sub k2)
+  replaceVariables =
     \case
       KEquality k1 k2 ->
-        KEquality (protoOreplaceVariables k1) (protoOreplaceVariables k2)
+        KEquality (replaceVariables k1) (replaceVariables k2)
 
 instance KindSubstitutable Kind where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       KArrow k1 k2 ->
-        KArrow (protoOapplyKinds sub k1) (protoOapplyKinds sub k2)
+        KArrow (applyKinds sub k1) (applyKinds sub k2)
       KVariable n ->
         fromMaybe (KVariable n) (Map.lookup n (kindSubstitutionMap sub))
       k ->
         k
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       KArrow k1 k2 ->
-        KArrow (protoOreplaceVariables k1) (protoOreplaceVariables k2)
+        KArrow (replaceVariables k1) (replaceVariables k2)
       KVariable{} ->
         KType
       k ->
         k
 
 instance (KindSubstitutable k) => KindSubstitutable (Parameter k) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       Parameter k name ->
-        Parameter (protoOapplyKinds sub k) name
-  protoOreplaceVariables =
+        Parameter (applyKinds sub k) name
+  replaceVariables =
     \case
       Parameter k name ->
-        Parameter (protoOreplaceVariables k) name
+        Parameter (replaceVariables k) name
 
 instance (KindSubstitutable k) => KindSubstitutable (TypeIndex k) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       TypeIndex{..} ->
         TypeIndex
-          { typeIndexKind = protoOapplyKinds sub typeIndexKind
+          { typeIndexKind = applyKinds sub typeIndexKind
           , ..
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       TypeIndex{..} ->
         TypeIndex
-          { typeIndexKind = protoOreplaceVariables typeIndexKind
+          { typeIndexKind = replaceVariables typeIndexKind
           , ..
           }
 
 instance (KindSubstitutable (o Kind)) => KindSubstitutable (Type o Kind) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       TApplication k t1 t2 ->
-        TApplication (protoOapplyKinds sub k) (protoOapplyKinds sub t1) (protoOapplyKinds sub t2)
+        TApplication (applyKinds sub k) (applyKinds sub t1) (applyKinds sub t2)
       TArrow t1 t2 ->
-        TArrow (protoOapplyKinds sub t1) (protoOapplyKinds sub t2)
+        TArrow (applyKinds sub t1) (applyKinds sub t2)
       TConstructor k name ->
-        TConstructor (protoOapplyKinds sub k) name
+        TConstructor (applyKinds sub k) name
       TIntrinsic i ->
         TIntrinsic i
       TRecord t ->
-        TRecord (protoOapplyKinds sub t)
+        TRecord (applyKinds sub t)
       TRow row ->
-        TRow (protoOapplyKinds sub row)
+        TRow (applyKinds sub row)
       TVariable param ->
-        TVariable (protoOapplyKinds sub param)
+        TVariable (applyKinds sub param)
       TAlias name ts t ->
-        TAlias name (fmap (protoOapplyKinds sub) ts) (protoOapplyKinds sub t)
-  protoOreplaceVariables =
+        TAlias name (fmap (applyKinds sub) ts) (applyKinds sub t)
+  replaceVariables =
     \case
       TApplication k t1 t2 ->
-        TApplication (protoOreplaceVariables k) (protoOreplaceVariables t1) (protoOreplaceVariables t2)
+        TApplication (replaceVariables k) (replaceVariables t1) (replaceVariables t2)
       TArrow t1 t2 ->
-        TArrow (protoOreplaceVariables t1) (protoOreplaceVariables t2)
+        TArrow (replaceVariables t1) (replaceVariables t2)
       TConstructor k name ->
-        TConstructor (protoOreplaceVariables k) name
+        TConstructor (replaceVariables k) name
       TIntrinsic i ->
         TIntrinsic i
       TRecord t ->
-        TRecord (protoOreplaceVariables t)
+        TRecord (replaceVariables t)
       TRow row ->
-        TRow (protoOreplaceVariables row)
+        TRow (replaceVariables row)
       TVariable var ->
-        TVariable (protoOreplaceVariables var)
+        TVariable (replaceVariables var)
       TAlias name ts t ->
-        TAlias name (fmap protoOreplaceVariables ts) (protoOreplaceVariables t)
+        TAlias name (fmap replaceVariables ts) (replaceVariables t)
 
 instance (KindSubstitutable n, KindSubstitutable (o n), KindSubstitutable k) => KindSubstitutable (Row o n k) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       RExtend name t row ->
-        RExtend name (protoOapplyKinds sub t) (protoOapplyKinds sub row)
+        RExtend name (applyKinds sub t) (applyKinds sub row)
       RVariable var ->
-        RVariable (protoOapplyKinds sub var)
+        RVariable (applyKinds sub var)
       RNil ->
         RNil
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       RExtend name t row ->
-        RExtend name (protoOreplaceVariables t) (protoOreplaceVariables row)
+        RExtend name (replaceVariables t) (replaceVariables row)
       RVariable var ->
-        RVariable (protoOreplaceVariables var)
+        RVariable (replaceVariables var)
       RNil ->
         RNil
 
 instance (KindSubstitutable k, KindSubstitutable t, Ord k, Ord t) => KindSubstitutable (DataConstructor Parameter k t) where
-  protoOapplyKinds sub DataConstructor{..} =
-    DataConstructor{constructorScheme = protoOapplyKinds sub constructorScheme, ..}
-  protoOreplaceVariables DataConstructor{..} =
-    DataConstructor{constructorScheme = protoOreplaceVariables constructorScheme, ..}
+  applyKinds sub DataConstructor{..} =
+    DataConstructor{constructorScheme = applyKinds sub constructorScheme, ..}
+  replaceVariables DataConstructor{..} =
+    DataConstructor{constructorScheme = replaceVariables constructorScheme, ..}
 
 instance KindSubstitutable (DataConstructor TypeIndex Kind (Type TypeIndex Kind)) where
-  protoOapplyKinds sub DataConstructor{..} =
-    DataConstructor{constructorScheme = protoOapplyKinds sub constructorScheme, ..}
-  protoOreplaceVariables DataConstructor{..} =
-    DataConstructor{constructorScheme = protoOreplaceVariables constructorScheme, ..}
+  applyKinds sub DataConstructor{..} =
+    DataConstructor{constructorScheme = applyKinds sub constructorScheme, ..}
+  replaceVariables DataConstructor{..} =
+    DataConstructor{constructorScheme = replaceVariables constructorScheme, ..}
 
 instance KindSubstitutable (Module a Kind ()) where
-  protoOapplyKinds sub Module{..} =
+  applyKinds sub Module{..} =
     Module
-      { protoOmoduleDefinitions = protoOapplyKinds sub protoOmoduleDefinitions
+      { moduleDefinitions = applyKinds sub moduleDefinitions
       , ..
       }
-  protoOreplaceVariables Module{..} =
+  replaceVariables Module{..} =
     Module
-      { protoOmoduleDefinitions = protoOreplaceVariables protoOmoduleDefinitions
+      { moduleDefinitions = replaceVariables moduleDefinitions
       , ..
       }
 
 instance KindSubstitutable (Definition a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       DType a name def ->
-        DType a name (protoOapplyKinds sub def)
+        DType a name (applyKinds sub def)
       DTypeAlias a name def ->
-        DTypeAlias a name (protoOapplyKinds sub def)
+        DTypeAlias a name (applyKinds sub def)
       DFunction a name def ->
-        DFunction a name (protoOapplyKinds sub def)
+        DFunction a name (applyKinds sub def)
       DFunctionGroup a name defs ->
-        DFunctionGroup a name (protoOapplyKinds sub <$> defs)
+        DFunctionGroup a name (applyKinds sub <$> defs)
       DFold a name def ->
-        DFold a name (protoOapplyKinds sub def)
+        DFold a name (applyKinds sub def)
       DLet a name def ->
-        DLet a name (protoOapplyKinds sub def)
+        DLet a name (applyKinds sub def)
       def@DImport{} ->
         def
       def@DNamespaceImport{} ->
         def
       DTrait a name def ->
-        DTrait a name (protoOapplyKinds sub def)
+        DTrait a name (applyKinds sub def)
       DInstance a def ->
-        DInstance a (protoOapplyKinds sub def)
-  protoOreplaceVariables =
+        DInstance a (applyKinds sub def)
+  replaceVariables =
     \case
       DType a name def ->
-        DType a name (protoOreplaceVariables def)
+        DType a name (replaceVariables def)
       DTypeAlias a name def ->
-        DTypeAlias a name (protoOreplaceVariables def)
+        DTypeAlias a name (replaceVariables def)
       DFunction a name def ->
-        DFunction a name (protoOreplaceVariables def)
+        DFunction a name (replaceVariables def)
       DFunctionGroup a name defs ->
-        DFunctionGroup a name (protoOreplaceVariables <$> defs)
+        DFunctionGroup a name (replaceVariables <$> defs)
       DFold a name def ->
-        DFold a name (protoOreplaceVariables def)
+        DFold a name (replaceVariables def)
       DLet a name def ->
-        DLet a name (protoOreplaceVariables def)
+        DLet a name (replaceVariables def)
       def@DImport{} ->
         def
       def@DNamespaceImport{} ->
         def
       DTrait a name def ->
-        DTrait a name (protoOreplaceVariables def)
+        DTrait a name (replaceVariables def)
       DInstance a def ->
-        DInstance a (protoOreplaceVariables def)
+        DInstance a (replaceVariables def)
 
 instance KindSubstitutable (Expression a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       EAnnotation a t e ->
-        EAnnotation a t (protoOapplyKinds sub e)
+        EAnnotation a t (applyKinds sub e)
       EApplication a () e es ->
-        EApplication a () (protoOapplyKinds sub e) (protoOapplyKinds sub es)
+        EApplication a () (applyKinds sub e) (applyKinds sub es)
       ELambda a ps e ->
-        ELambda a (protoOapplyKinds sub ps) (protoOapplyKinds sub e)
+        ELambda a (applyKinds sub ps) (applyKinds sub e)
       ELet a bs e ->
-        ELet a (protoOapplyKinds sub bs) (protoOapplyKinds sub e)
+        ELet a (applyKinds sub bs) (applyKinds sub e)
       ERecursiveLet a p e1 e2 ->
-        ERecursiveLet a (protoOapplyKinds sub p) (protoOapplyKinds sub e1) (protoOapplyKinds sub e2)
+        ERecursiveLet a (applyKinds sub p) (applyKinds sub e1) (applyKinds sub e2)
       EIf a () e1 e2 e3 ->
-        EIf a () (protoOapplyKinds sub e1) (protoOapplyKinds sub e2) (protoOapplyKinds sub e3)
+        EIf a () (applyKinds sub e1) (applyKinds sub e2) (applyKinds sub e3)
       ERecord a () d e ->
-        ERecord a () (protoOapplyKinds sub d) (protoOapplyKinds sub e)
+        ERecord a () (applyKinds sub d) (applyKinds sub e)
       EListCons a () e1 e2 ->
-        EListCons a () (protoOapplyKinds sub e1) (protoOapplyKinds sub e2)
+        EListCons a () (applyKinds sub e1) (applyKinds sub e2)
       EListLiteral a () es ->
-        EListLiteral a () (protoOapplyKinds sub es)
+        EListLiteral a () (applyKinds sub es)
       ETuple a () es ->
-        ETuple a () (protoOapplyKinds sub es)
+        ETuple a () (applyKinds sub es)
       EMatch a () e cs ->
-        EMatch a () (protoOapplyKinds sub e) (protoOapplyKinds sub cs)
+        EMatch a () (applyKinds sub e) (applyKinds sub cs)
       ELambdaMatch a () cs ->
-        ELambdaMatch a () (protoOapplyKinds sub cs)
+        ELambdaMatch a () (applyKinds sub cs)
       ECompiledMatch a () e cs ->
-        ECompiledMatch a () (protoOapplyKinds sub e) (protoOapplyKinds sub cs)
+        ECompiledMatch a () (applyKinds sub e) (applyKinds sub cs)
       EFold a () es cs ->
-        EFold a () (protoOapplyKinds sub es) (protoOapplyKinds sub cs)
+        EFold a () (applyKinds sub es) (applyKinds sub cs)
       ESelect a ll e ->
-        ESelect a ll (protoOapplyKinds sub e)
+        ESelect a ll (applyKinds sub e)
       EFocus a name ll1 ll2 e1 e2 ->
-        EFocus a name ll1 ll2 (protoOapplyKinds sub e1) (protoOapplyKinds sub e2)
+        EFocus a name ll1 ll2 (applyKinds sub e1) (applyKinds sub e2)
       EFFICall a () ll es e ->
-        EFFICall a () ll (protoOapplyKinds sub es) (protoOapplyKinds sub e)
+        EFFICall a () ll (applyKinds sub es) (applyKinds sub e)
       EDoBlock a is ->
-        EDoBlock a (protoOapplyKinds sub is)
+        EDoBlock a (applyKinds sub is)
       e ->
         e
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       EAnnotation a t e ->
-        EAnnotation a t (protoOreplaceVariables e)
+        EAnnotation a t (replaceVariables e)
       EApplication a () e es ->
-        EApplication a () (protoOreplaceVariables e) (protoOreplaceVariables es)
+        EApplication a () (replaceVariables e) (replaceVariables es)
       ELambda a ps e ->
-        ELambda a (protoOreplaceVariables ps) (protoOreplaceVariables e)
+        ELambda a (replaceVariables ps) (replaceVariables e)
       ELet a bs e ->
-        ELet a (protoOreplaceVariables bs) (protoOreplaceVariables e)
+        ELet a (replaceVariables bs) (replaceVariables e)
       ERecursiveLet a p e1 e2 ->
-        ERecursiveLet a (protoOreplaceVariables p) (protoOreplaceVariables e1) (protoOreplaceVariables e2)
+        ERecursiveLet a (replaceVariables p) (replaceVariables e1) (replaceVariables e2)
       EIf a () e1 e2 e3 ->
-        EIf a () (protoOreplaceVariables e1) (protoOreplaceVariables e2) (protoOreplaceVariables e3)
+        EIf a () (replaceVariables e1) (replaceVariables e2) (replaceVariables e3)
       ERecord a () d e ->
-        ERecord a () (protoOreplaceVariables d) (protoOreplaceVariables e)
+        ERecord a () (replaceVariables d) (replaceVariables e)
       EListCons a () e1 e2 ->
-        EListCons a () (protoOreplaceVariables e1) (protoOreplaceVariables e2)
+        EListCons a () (replaceVariables e1) (replaceVariables e2)
       EListLiteral a () es ->
-        EListLiteral a () (protoOreplaceVariables es)
+        EListLiteral a () (replaceVariables es)
       ETuple a () es ->
-        ETuple a () (protoOreplaceVariables es)
+        ETuple a () (replaceVariables es)
       EMatch a () e cs ->
-        EMatch a () (protoOreplaceVariables e) (protoOreplaceVariables cs)
+        EMatch a () (replaceVariables e) (replaceVariables cs)
       ELambdaMatch a () cs ->
-        ELambdaMatch a () (protoOreplaceVariables cs)
+        ELambdaMatch a () (replaceVariables cs)
       ECompiledMatch a () e cs ->
-        ECompiledMatch a () (protoOreplaceVariables e) (protoOreplaceVariables cs)
+        ECompiledMatch a () (replaceVariables e) (replaceVariables cs)
       EFold a () es cs ->
-        EFold a () (protoOreplaceVariables es) (protoOreplaceVariables cs)
+        EFold a () (replaceVariables es) (replaceVariables cs)
       ESelect a ll e ->
-        ESelect a ll (protoOreplaceVariables e)
+        ESelect a ll (replaceVariables e)
       EFocus a name ll1 ll2 e1 e2 ->
-        EFocus a name ll1 ll2 (protoOreplaceVariables e1) (protoOreplaceVariables e2)
+        EFocus a name ll1 ll2 (replaceVariables e1) (replaceVariables e2)
       EFFICall a () ll es e ->
-        EFFICall a () ll (protoOreplaceVariables es) (protoOreplaceVariables e)
+        EFFICall a () ll (replaceVariables es) (replaceVariables e)
       EDoBlock a is ->
-        EDoBlock a (protoOreplaceVariables is)
+        EDoBlock a (replaceVariables is)
       e ->
         e
 
 instance KindSubstitutable (Binding Expression a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       BPattern a p e ->
-        BPattern a (protoOapplyKinds sub p) (protoOapplyKinds sub e)
+        BPattern a (applyKinds sub p) (applyKinds sub e)
       BFunction a name ps e ->
-        BFunction a name (protoOapplyKinds sub ps) (protoOapplyKinds sub e)
-  protoOreplaceVariables =
+        BFunction a name (applyKinds sub ps) (applyKinds sub e)
+  replaceVariables =
     \case
       BPattern a p e ->
-        BPattern a (protoOreplaceVariables p) (protoOreplaceVariables e)
+        BPattern a (replaceVariables p) (replaceVariables e)
       BFunction a name ps e ->
-        BFunction a name (protoOreplaceVariables ps) (protoOreplaceVariables e)
+        BFunction a name (replaceVariables ps) (replaceVariables e)
 
 instance KindSubstitutable (Pattern a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       PAnnotation a t p ->
-        PAnnotation a (protoOapplyKinds sub t) (protoOapplyKinds sub p)
+        PAnnotation a (applyKinds sub t) (applyKinds sub p)
       PConstructor a t ps ->
-        PConstructor a t (protoOapplyKinds sub ps)
+        PConstructor a t (applyKinds sub ps)
       PRecord a () d p ->
-        PRecord a () (protoOapplyKinds sub d) (protoOapplyKinds sub p)
+        PRecord a () (applyKinds sub d) (applyKinds sub p)
       PListCons a () p1 p2 ->
-        PListCons a () (protoOapplyKinds sub p1) (protoOapplyKinds sub p2)
+        PListCons a () (applyKinds sub p1) (applyKinds sub p2)
       PListLiteral a () ps ->
-        PListLiteral a () (protoOapplyKinds sub ps)
+        PListLiteral a () (applyKinds sub ps)
       PTuple a () ps ->
-        PTuple a () (protoOapplyKinds sub ps)
+        PTuple a () (applyKinds sub ps)
       POr a () p1 p2 ->
-        POr a () (protoOapplyKinds sub p1) (protoOapplyKinds sub p2)
+        POr a () (applyKinds sub p1) (applyKinds sub p2)
       PAs a t p ->
-        PAs a t (protoOapplyKinds sub p)
+        PAs a t (applyKinds sub p)
       p ->
         p
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       PAnnotation a t p ->
-        PAnnotation a (protoOreplaceVariables t) (protoOreplaceVariables p)
+        PAnnotation a (replaceVariables t) (replaceVariables p)
       PConstructor a t ps ->
-        PConstructor a t (protoOreplaceVariables ps)
+        PConstructor a t (replaceVariables ps)
       PRecord a () d p ->
-        PRecord a () (protoOreplaceVariables d) (protoOreplaceVariables p)
+        PRecord a () (replaceVariables d) (replaceVariables p)
       PListCons a () p1 p2 ->
-        PListCons a () (protoOreplaceVariables p1) (protoOreplaceVariables p2)
+        PListCons a () (replaceVariables p1) (replaceVariables p2)
       PListLiteral a () ps ->
-        PListLiteral a () (protoOreplaceVariables ps)
+        PListLiteral a () (replaceVariables ps)
       PTuple a () ps ->
-        PTuple a () (protoOreplaceVariables ps)
+        PTuple a () (replaceVariables ps)
       POr a () p1 p2 ->
-        POr a () (protoOreplaceVariables p1) (protoOreplaceVariables p2)
+        POr a () (replaceVariables p1) (replaceVariables p2)
       PAs a t p ->
-        PAs a t (protoOreplaceVariables p)
+        PAs a t (replaceVariables p)
       p ->
         p
 
 instance KindSubstitutable (TypeDefinition a Kind ()) where
-  protoOapplyKinds sub TypeDefinition{..} =
+  applyKinds sub TypeDefinition{..} =
     TypeDefinition
-      { protoOtypeDefinitionParameters = protoOapplyKinds sub protoOtypeDefinitionParameters
-      , protoOtypeDefinitionConstructors = protoOapplyKinds sub protoOtypeDefinitionConstructors
+      { typeDefinitionParameters = applyKinds sub typeDefinitionParameters
+      , typeDefinitionConstructors = applyKinds sub typeDefinitionConstructors
       }
-  protoOreplaceVariables TypeDefinition{..} =
+  replaceVariables TypeDefinition{..} =
     TypeDefinition
-      { protoOtypeDefinitionParameters = protoOreplaceVariables protoOtypeDefinitionParameters
-      , protoOtypeDefinitionConstructors = protoOreplaceVariables protoOtypeDefinitionConstructors
+      { typeDefinitionParameters = replaceVariables typeDefinitionParameters
+      , typeDefinitionConstructors = replaceVariables typeDefinitionConstructors
       }
 
 instance KindSubstitutable (FunctionDefinition a Kind ()) where
-  protoOapplyKinds sub FunctionDefinition{..} =
+  applyKinds sub FunctionDefinition{..} =
     FunctionDefinition
-      { protoOfunctionDefinitionAnnotation = protoOapplyKinds sub protoOfunctionDefinitionAnnotation
-      , protoOfunctionDefinitionPatterns = protoOapplyKinds sub protoOfunctionDefinitionPatterns
-      , protoOfunctionDefinitionExpression = protoOapplyKinds sub protoOfunctionDefinitionExpression
+      { functionDefinitionAnnotation = applyKinds sub functionDefinitionAnnotation
+      , functionDefinitionPatterns = applyKinds sub functionDefinitionPatterns
+      , functionDefinitionExpression = applyKinds sub functionDefinitionExpression
       , ..
       }
-  protoOreplaceVariables FunctionDefinition{..} =
+  replaceVariables FunctionDefinition{..} =
     FunctionDefinition
-      { protoOfunctionDefinitionAnnotation = protoOreplaceVariables protoOfunctionDefinitionAnnotation
-      , protoOfunctionDefinitionPatterns = protoOreplaceVariables protoOfunctionDefinitionPatterns
-      , protoOfunctionDefinitionExpression = protoOreplaceVariables protoOfunctionDefinitionExpression
+      { functionDefinitionAnnotation = replaceVariables functionDefinitionAnnotation
+      , functionDefinitionPatterns = replaceVariables functionDefinitionPatterns
+      , functionDefinitionExpression = replaceVariables functionDefinitionExpression
       , ..
       }
 
 instance KindSubstitutable (LetDefinition a Kind ()) where
-  protoOapplyKinds sub LetDefinition{..} =
+  applyKinds sub LetDefinition{..} =
     LetDefinition
-      { protoOletDefinitionAnnotation = protoOapplyKinds sub protoOletDefinitionAnnotation
-      , protoOletDefinitionExpression = protoOapplyKinds sub protoOletDefinitionExpression
+      { letDefinitionAnnotation = applyKinds sub letDefinitionAnnotation
+      , letDefinitionExpression = applyKinds sub letDefinitionExpression
       , ..
       }
-  protoOreplaceVariables LetDefinition{..} =
+  replaceVariables LetDefinition{..} =
     LetDefinition
-      { protoOletDefinitionAnnotation = protoOreplaceVariables protoOletDefinitionAnnotation
-      , protoOletDefinitionExpression = protoOreplaceVariables protoOletDefinitionExpression
+      { letDefinitionAnnotation = replaceVariables letDefinitionAnnotation
+      , letDefinitionExpression = replaceVariables letDefinitionExpression
       , ..
       }
 
 instance KindSubstitutable (TraitDefinition a Kind) where
-  protoOapplyKinds sub TraitDefinition{..} =
+  applyKinds sub TraitDefinition{..} =
     TraitDefinition
-      { protoOtraitDefinitionConstraints = protoOapplyKinds sub protoOtraitDefinitionConstraints
-      , protoOtraitDefinitionParameter = protoOapplyKinds sub protoOtraitDefinitionParameter
-      , protoOtraitDefinitionInterface = protoOapplyKinds sub protoOtraitDefinitionInterface
+      { traitDefinitionConstraints = applyKinds sub traitDefinitionConstraints
+      , traitDefinitionParameter = applyKinds sub traitDefinitionParameter
+      , traitDefinitionInterface = applyKinds sub traitDefinitionInterface
       , ..
       }
-  protoOreplaceVariables TraitDefinition{..} =
+  replaceVariables TraitDefinition{..} =
     TraitDefinition
-      { protoOtraitDefinitionConstraints = protoOreplaceVariables protoOtraitDefinitionConstraints
-      , protoOtraitDefinitionParameter = protoOreplaceVariables protoOtraitDefinitionParameter
-      , protoOtraitDefinitionInterface = protoOreplaceVariables protoOtraitDefinitionInterface
+      { traitDefinitionConstraints = replaceVariables traitDefinitionConstraints
+      , traitDefinitionParameter = replaceVariables traitDefinitionParameter
+      , traitDefinitionInterface = replaceVariables traitDefinitionInterface
       , ..
       }
 
 instance KindSubstitutable (TraitDefinitionInterfaceEntry Kind) where
-  protoOapplyKinds sub TraitDefinitionInterfaceEntry{..} =
+  applyKinds sub TraitDefinitionInterfaceEntry{..} =
     TraitDefinitionInterfaceEntry
-      protoOtraitDefinitionInterfaceEntryName
-      (protoOapplyKinds sub protoOtraitDefinitionInterfaceEntryScheme)
-  protoOreplaceVariables TraitDefinitionInterfaceEntry{..} =
+      traitDefinitionInterfaceEntryName
+      (applyKinds sub traitDefinitionInterfaceEntryScheme)
+  replaceVariables TraitDefinitionInterfaceEntry{..} =
     TraitDefinitionInterfaceEntry
-      protoOtraitDefinitionInterfaceEntryName
-      (protoOreplaceVariables protoOtraitDefinitionInterfaceEntryScheme)
+      traitDefinitionInterfaceEntryName
+      (replaceVariables traitDefinitionInterfaceEntryScheme)
 
 instance KindSubstitutable (InstanceDefinition a Kind ()) where
-  protoOapplyKinds sub InstanceDefinition{..} =
+  applyKinds sub InstanceDefinition{..} =
     InstanceDefinition
-      { protoOinstanceDefinitionConstraints = protoOapplyKinds sub protoOinstanceDefinitionConstraints
-      , protoOinstanceDefinitionType = protoOapplyKinds sub protoOinstanceDefinitionType
-      , protoOinstanceDefinitionImplementations = protoOapplyKinds sub protoOinstanceDefinitionImplementations
+      { instanceDefinitionConstraints = applyKinds sub instanceDefinitionConstraints
+      , instanceDefinitionType = applyKinds sub instanceDefinitionType
+      , instanceDefinitionImplementations = applyKinds sub instanceDefinitionImplementations
       , ..
       }
-  protoOreplaceVariables InstanceDefinition{..} =
+  replaceVariables InstanceDefinition{..} =
     InstanceDefinition
-      { protoOinstanceDefinitionConstraints = protoOreplaceVariables protoOinstanceDefinitionConstraints
-      , protoOinstanceDefinitionType = protoOreplaceVariables protoOinstanceDefinitionType
-      , protoOinstanceDefinitionImplementations = protoOreplaceVariables protoOinstanceDefinitionImplementations
+      { instanceDefinitionConstraints = replaceVariables instanceDefinitionConstraints
+      , instanceDefinitionType = replaceVariables instanceDefinitionType
+      , instanceDefinitionImplementations = replaceVariables instanceDefinitionImplementations
       , ..
       }
 
 instance KindSubstitutable (FoldDefinition a Kind ()) where
-  protoOapplyKinds sub FoldDefinition{..} =
+  applyKinds sub FoldDefinition{..} =
     FoldDefinition
-      { protoOfoldDefinitionAnnotation = protoOapplyKinds sub protoOfoldDefinitionAnnotation
-      , protoOfoldDefinitionClauses = protoOapplyKinds sub protoOfoldDefinitionClauses
+      { foldDefinitionAnnotation = applyKinds sub foldDefinitionAnnotation
+      , foldDefinitionClauses = applyKinds sub foldDefinitionClauses
       , ..
       }
-  protoOreplaceVariables FoldDefinition{..} =
+  replaceVariables FoldDefinition{..} =
     FoldDefinition
-      { protoOfoldDefinitionAnnotation = protoOreplaceVariables protoOfoldDefinitionAnnotation
-      , protoOfoldDefinitionClauses = protoOreplaceVariables protoOfoldDefinitionClauses
+      { foldDefinitionAnnotation = replaceVariables foldDefinitionAnnotation
+      , foldDefinitionClauses = replaceVariables foldDefinitionClauses
       , ..
       }
 
 instance KindSubstitutable (AliasDefinition a Kind) where
-  protoOapplyKinds sub AliasDefinition{..} =
+  applyKinds sub AliasDefinition{..} =
     AliasDefinition
-      { protoOaliasDefinitionParameters = protoOapplyKinds sub protoOaliasDefinitionParameters
-      , protoOaliasDefinitionType = protoOapplyKinds sub protoOaliasDefinitionType
+      { aliasDefinitionParameters = applyKinds sub aliasDefinitionParameters
+      , aliasDefinitionType = applyKinds sub aliasDefinitionType
       }
-  protoOreplaceVariables AliasDefinition{..} =
+  replaceVariables AliasDefinition{..} =
     AliasDefinition
-      { protoOaliasDefinitionParameters = protoOreplaceVariables protoOaliasDefinitionParameters
-      , protoOaliasDefinitionType = protoOreplaceVariables protoOaliasDefinitionType
+      { aliasDefinitionParameters = replaceVariables aliasDefinitionParameters
+      , aliasDefinitionType = replaceVariables aliasDefinitionType
       }
 
 instance KindSubstitutable (Clause a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       EClause a p cs ->
-        EClause a (protoOapplyKinds sub p) (protoOapplyKinds sub cs)
-  protoOreplaceVariables =
+        EClause a (applyKinds sub p) (applyKinds sub cs)
+  replaceVariables =
     \case
       EClause a p cs ->
-        EClause a (protoOreplaceVariables p) (protoOreplaceVariables cs)
+        EClause a (replaceVariables p) (replaceVariables cs)
 
 instance KindSubstitutable (CompiledClause a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       ECompiledClause a lls e ->
-        ECompiledClause a lls (protoOapplyKinds sub e)
-  protoOreplaceVariables =
+        ECompiledClause a lls (applyKinds sub e)
+  replaceVariables =
     \case
       ECompiledClause a lls e ->
-        ECompiledClause a lls (protoOreplaceVariables e)
+        ECompiledClause a lls (replaceVariables e)
 
 instance KindSubstitutable (Choice Expression a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       CPlain a gs e ->
-        CPlain a (protoOapplyKinds sub gs) (protoOapplyKinds sub e)
-  protoOreplaceVariables =
+        CPlain a (applyKinds sub gs) (applyKinds sub e)
+  replaceVariables =
     \case
       CPlain a gs e ->
-        CPlain a (protoOreplaceVariables gs) (protoOreplaceVariables e)
+        CPlain a (replaceVariables gs) (replaceVariables e)
 
 instance KindSubstitutable (Guard Expression a Kind ()) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       CGuard e ->
-        CGuard (protoOapplyKinds sub e)
-  protoOreplaceVariables =
+        CGuard (applyKinds sub e)
+  replaceVariables =
     \case
       CGuard e ->
-        CGuard (protoOreplaceVariables e)
+        CGuard (replaceVariables e)
 
 instance KindSubstitutable (Qualified (Type Parameter Kind)) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       With ts t ->
-        With (protoOapplyKinds sub ts) (protoOapplyKinds sub t)
-  protoOreplaceVariables =
+        With (applyKinds sub ts) (applyKinds sub t)
+  replaceVariables =
     \case
       With ts t ->
-        With (protoOreplaceVariables ts) (protoOreplaceVariables t)
+        With (replaceVariables ts) (replaceVariables t)
 
 instance KindSubstitutable (Build a) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       Build{..} ->
         Build
-          { protoObuildNames = protoOapplyKinds sub protoObuildNames
-          , protoObuildDataConstructors = protoOapplyKinds sub protoObuildDataConstructors
-          , protoObuildTypeConstructors = protoOapplyKinds sub protoObuildTypeConstructors
-          , protoObuildTraits = protoOapplyKinds sub protoObuildTraits
-          , protoObuildInstances = mapEnvironment (Map.mapKeys (protoOapplyKinds sub) . Map.map (protoOapplyKinds sub)) protoObuildInstances
-          , protoObuildAliases = protoOapplyKinds sub protoObuildAliases
+          { buildNames = applyKinds sub buildNames
+          , buildDataConstructors = applyKinds sub buildDataConstructors
+          , buildTypeConstructors = applyKinds sub buildTypeConstructors
+          , buildTraits = applyKinds sub buildTraits
+          , buildInstances = mapEnvironment (Map.mapKeys (applyKinds sub) . Map.map (applyKinds sub)) buildInstances
+          , buildAliases = applyKinds sub buildAliases
           , ..
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       Build{..} ->
         Build
-          { protoObuildNames = protoOreplaceVariables protoObuildNames
-          , protoObuildDataConstructors = protoOreplaceVariables protoObuildDataConstructors
-          , protoObuildTypeConstructors = protoOreplaceVariables protoObuildTypeConstructors
-          , protoObuildTraits = protoOreplaceVariables protoObuildTraits
-          , protoObuildInstances = mapEnvironment (Map.mapKeys protoOreplaceVariables . Map.map protoOreplaceVariables) protoObuildInstances
-          , protoObuildAliases = protoOreplaceVariables protoObuildAliases
+          { buildNames = replaceVariables buildNames
+          , buildDataConstructors = replaceVariables buildDataConstructors
+          , buildTypeConstructors = replaceVariables buildTypeConstructors
+          , buildTraits = replaceVariables buildTraits
+          , buildInstances = mapEnvironment (Map.mapKeys replaceVariables . Map.map replaceVariables) buildInstances
+          , buildAliases = replaceVariables buildAliases
           , ..
           }
 
 instance (KindSubstitutable a) => KindSubstitutable (InstanceMap a) where
-  protoOapplyKinds = Map.map . protoOapplyKinds
-  protoOreplaceVariables = Map.map protoOreplaceVariables
+  applyKinds = Map.map . applyKinds
+  replaceVariables = Map.map replaceVariables
 
 instance KindSubstitutable (DataConstructorEntry a) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       DataConstructorEntry{..} ->
         DataConstructorEntry
-          { protoOdataConstructorEntryConstructor =
-              protoOapplyKinds sub protoOdataConstructorEntryConstructor
+          { dataConstructorEntryConstructor =
+              applyKinds sub dataConstructorEntryConstructor
           , ..
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       DataConstructorEntry{..} ->
         DataConstructorEntry
-          { protoOdataConstructorEntryConstructor =
-              protoOreplaceVariables protoOdataConstructorEntryConstructor
+          { dataConstructorEntryConstructor =
+              replaceVariables dataConstructorEntryConstructor
           , ..
           }
 
 instance KindSubstitutable (TypeConstructorEntry a) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       TypeConstructorEntry{..} ->
         TypeConstructorEntry
-          { protoOtypeConstructorEntryKind =
-              protoOapplyKinds sub protoOtypeConstructorEntryKind
+          { typeConstructorEntryKind =
+              applyKinds sub typeConstructorEntryKind
           , ..
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       TypeConstructorEntry{..} ->
         TypeConstructorEntry
-          { protoOtypeConstructorEntryKind =
-              protoOreplaceVariables protoOtypeConstructorEntryKind
+          { typeConstructorEntryKind =
+              replaceVariables typeConstructorEntryKind
           , ..
           }
 
 instance KindSubstitutable (TraitEntry a) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       TraitEntry{..} ->
         TraitEntry
-          { protoOtraitEntryParameter = protoOapplyKinds sub protoOtraitEntryParameter
-          , protoOtraitEntryConstraints = protoOapplyKinds sub protoOtraitEntryConstraints
-          , protoOtraitEntryInterface = protoOapplyKinds sub protoOtraitEntryInterface
+          { traitEntryParameter = applyKinds sub traitEntryParameter
+          , traitEntryConstraints = applyKinds sub traitEntryConstraints
+          , traitEntryInterface = applyKinds sub traitEntryInterface
           , ..
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       TraitEntry{..} ->
         TraitEntry
-          { protoOtraitEntryParameter = protoOreplaceVariables protoOtraitEntryParameter
-          , protoOtraitEntryConstraints = protoOreplaceVariables protoOtraitEntryConstraints
-          , protoOtraitEntryInterface = protoOreplaceVariables protoOtraitEntryInterface
+          { traitEntryParameter = replaceVariables traitEntryParameter
+          , traitEntryConstraints = replaceVariables traitEntryConstraints
+          , traitEntryInterface = replaceVariables traitEntryInterface
           , ..
           }
 
 instance KindSubstitutable (InstanceEntry a) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       InstanceEntry{..} ->
         InstanceEntry
-          { protoOinstanceEntryType = protoOapplyKinds sub protoOinstanceEntryType
-          , protoOinstanceEntryIndexedType = protoOapplyKinds sub protoOinstanceEntryIndexedType
-          , protoOinstanceEntryTypeSchemes = protoOapplyKinds sub protoOinstanceEntryTypeSchemes
+          { instanceEntryType = applyKinds sub instanceEntryType
+          , instanceEntryIndexedType = applyKinds sub instanceEntryIndexedType
+          , instanceEntryTypeSchemes = applyKinds sub instanceEntryTypeSchemes
           , ..
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       InstanceEntry{..} ->
         InstanceEntry
-          { protoOinstanceEntryType = protoOreplaceVariables protoOinstanceEntryType
-          , protoOinstanceEntryIndexedType = protoOreplaceVariables protoOinstanceEntryIndexedType
-          , protoOinstanceEntryTypeSchemes = protoOreplaceVariables protoOinstanceEntryTypeSchemes
+          { instanceEntryType = replaceVariables instanceEntryType
+          , instanceEntryIndexedType = replaceVariables instanceEntryIndexedType
+          , instanceEntryTypeSchemes = replaceVariables instanceEntryTypeSchemes
           , ..
           }
 
 instance KindSubstitutable (AliasEntry a) where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       AliasEntry{..} ->
         AliasEntry
-          { protoOaliasEntryType = protoOapplyKinds sub protoOaliasEntryType
-          , protoOaliasEntryParams = protoOapplyKinds sub protoOaliasEntryParams
+          { aliasEntryType = applyKinds sub aliasEntryType
+          , aliasEntryParams = applyKinds sub aliasEntryParams
           , ..
           }
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       AliasEntry{..} ->
         AliasEntry
-          { protoOaliasEntryType = protoOreplaceVariables protoOaliasEntryType
-          , protoOaliasEntryParams = protoOreplaceVariables protoOaliasEntryParams
+          { aliasEntryType = replaceVariables aliasEntryType
+          , aliasEntryParams = replaceVariables aliasEntryParams
           , ..
           }
 
 instance KindSubstitutable NameEntry where
-  protoOapplyKinds sub =
+  applyKinds sub =
     \case
       NName n s ->
-        NName n (protoOapplyKinds sub s)
+        NName n (applyKinds sub s)
       NType n k ->
-        NType n (protoOapplyKinds sub k)
+        NType n (applyKinds sub k)
       entry ->
         entry
-  protoOreplaceVariables =
+  replaceVariables =
     \case
       NName n s ->
-        NName n (protoOreplaceVariables s)
+        NName n (replaceVariables s)
       NType n k ->
-        NType n (protoOreplaceVariables k)
+        NType n (replaceVariables k)
       entry ->
         entry

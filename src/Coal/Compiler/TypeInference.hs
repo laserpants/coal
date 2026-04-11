@@ -39,70 +39,70 @@ import Extras (Dictionary, Name)
 generateKindConstraints :: (Monad m) => Module a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do
   env <- moduleKindEnvironment modul
-  (_, result) <- runKindConstraintsGen env (protoOemitKindConstraints modul)
+  (_, result) <- runKindConstraintsGen env (emitKindConstraints modul)
   let (errors, constraints) = partitionEithers result
-  protoOinsertKindConstraintsC constraints
-  protoOcompilerReportKindConstraintsGenErrors errors
+  insertKindConstraintsC constraints
+  compilerReportKindConstraintsGenErrors errors
 
 class GenerateConstraints a c where
-  protoOgenerateConstraints :: (Monad m) => c -> CompilerT a m ()
+  generateConstraints :: (Monad m) => c -> CompilerT a m ()
 
 instance (Data a, Show a) => GenerateConstraints a (Expression a Kind IndexedType) where
-  protoOgenerateConstraints expr = do
-    (asms1, cs1) <- protoOgenerateExpressionConstraints expr
-    (asms2, cs2) <- partitionEithers <$> traverse protoOassumptionConstraints asms1
-    sub <- gets protoOcompilerSubstitution
-    protoOinsertAssumptionsC (apply sub asms2)
-    protoOinsertConstraintsC (cs1 <> cs2)
+  generateConstraints expr = do
+    (asms1, cs1) <- generateExpressionConstraints expr
+    (asms2, cs2) <- partitionEithers <$> traverse assumptionConstraints asms1
+    sub <- gets compilerSubstitution
+    insertAssumptionsC (apply sub asms2)
+    insertConstraintsC (cs1 <> cs2)
 
 instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedType) where
-  protoOgenerateConstraints =
+  generateConstraints =
     \case
       DFunction
         _
         name
         FunctionDefinition
-          { protoOfunctionDefinitionMetadata = loc
-          , protoOfunctionDefinitionType = With _ functionType
+          { functionDefinitionMetadata = loc
+          , functionDefinitionType = With _ functionType
           , ..
           } -> do
-          protoOinsertConstraintsC
+          insertConstraintsC
             [ Equality
                 (RuleTopLevelFunction loc)
                 [ functionType
-                , typeOf protoOfunctionDefinitionExpression
+                , typeOf functionDefinitionExpression
                 ]
             ]
           expressionType <- freshTypeVariable
-          protoOgenerateConstraints $
+          generateConstraints $
             ELet
               loc
-              (BFunction loc placeholder protoOfunctionDefinitionPatterns functionExpr :| mempty)
+              (BFunction loc placeholder functionDefinitionPatterns functionExpr :| mempty)
               (EVariable loc (Label expressionType placeholder))
          where
           placeholder = "#_function__" <> name
           functionExpr =
-            case protoOfunctionDefinitionAnnotation of
+            case functionDefinitionAnnotation of
               Nothing ->
-                protoOfunctionDefinitionExpression
+                functionDefinitionExpression
               Just (With _ annotationType) ->
-                EAnnotation loc annotationType protoOfunctionDefinitionExpression
+                EAnnotation loc annotationType functionDefinitionExpression
       DLet
         _
         name
         LetDefinition
-          { protoOletDefinitionMetadata = loc
-          , protoOletDefinitionType = With _ letType
+          { letDefinitionMetadata = loc
+          , letDefinitionType = With _ letType
           , ..
           } -> do
-          protoOinsertConstraintsC
+          insertConstraintsC
             [ Equality
                 (RuleTopLevelConstant loc)
                 [ letType
-                , typeOf protoOletDefinitionExpression
+                , typeOf letDefinitionExpression
                 ]
             ]
-          protoOgenerateConstraints $
+          generateConstraints $
             ELet
               loc
               (BPattern loc (PVariable loc (Label letType placeholder)) letExpr :| mempty)
@@ -110,45 +110,45 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
          where
           placeholder = "#_constant__" <> name
           letExpr =
-            case protoOletDefinitionAnnotation of
+            case letDefinitionAnnotation of
               Nothing ->
-                protoOletDefinitionExpression
+                letDefinitionExpression
               Just (With _ annotationType) ->
-                EAnnotation loc annotationType protoOletDefinitionExpression
+                EAnnotation loc annotationType letDefinitionExpression
       DInstance _ InstanceDefinition{..} -> do
-        Build{..} <- protoOgetCurrentBuildC
-        case Environment.lookup protoOinstanceDefinitionTraitName protoObuildTraits of
+        Build{..} <- getCurrentBuildC
+        case Environment.lookup instanceDefinitionTraitName buildTraits of
           Nothing ->
             error "TODO"
           Just TraitEntry{..} ->
-            forM_ protoOinstanceDefinitionImplementations $
+            forM_ instanceDefinitionImplementations $
               \case
                 d@(DFunction loc name def) ->
-                  case Environment.lookup name protoOtraitEntryInterface of
+                  case Environment.lookup name traitEntryInterface of
                     Nothing ->
                       error "TODO"
                     Just sig -> do
-                      s <- protoOtoIndexedScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType sig)
-                      protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
-                      protoOgenerateConstraints $ DFunction loc (instanceLabel trait name) def
+                      s <- toIndexedScheme (replaceParamInScheme traitEntryParameter instanceDefinitionType sig)
+                      insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
+                      generateConstraints $ DFunction loc (instanceLabel trait name) def
                 d@(DLet loc name def) ->
-                  case Environment.lookup name protoOtraitEntryInterface of
+                  case Environment.lookup name traitEntryInterface of
                     Nothing ->
                       error "TODO"
                     Just sig -> do
-                      s <- protoOtoIndexedScheme (replaceParamInScheme protoOtraitEntryParameter protoOinstanceDefinitionType sig)
-                      protoOinsertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
-                      protoOgenerateConstraints $ DLet loc (instanceLabel trait name) def
+                      s <- toIndexedScheme (replaceParamInScheme traitEntryParameter instanceDefinitionType sig)
+                      insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
+                      generateConstraints $ DLet loc (instanceLabel trait name) def
                 _ ->
                   pure ()
            where
-            trait = Trait protoOinstanceDefinitionTraitName protoOinstanceDefinitionType
+            trait = Trait instanceDefinitionTraitName instanceDefinitionType
       _ ->
         pure ()
 
-protoOtoIndexedScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> CompilerT a m (Scheme TypeIndex Kind IndexedType)
-protoOtoIndexedScheme Forall{..} = do
-  env <- protoOinstantiateTypeIndexes schemeTypeVariables
+toIndexedScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> CompilerT a m (Scheme TypeIndex Kind IndexedType)
+toIndexedScheme Forall{..} = do
+  env <- instantiateTypeIndexes schemeTypeVariables
   flip runReaderT (Environment.fromList env) $
     Forall
       <$> toIndexed schemeTypeVariables
@@ -158,35 +158,35 @@ protoOtoIndexedScheme Forall{..} = do
 freshTypeVariable :: (Monad m) => CompilerT a m (Type TypeIndex Kind)
 freshTypeVariable = supplied (TVariable . TypeIndex KType)
 
-protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
-protoOgenerateExpressionConstraints expr = do
-  (assumptions, params, result) <- protoOrunConstraintsGen (protoOemitConstraints expr)
+generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
+generateExpressionConstraints expr = do
+  (assumptions, params, result) <- runConstraintsGen (emitConstraints expr)
   let (errors, constraints) = partitionEithers result
-  protoOcompilerReportConstraintsGenErrors errors
+  compilerReportConstraintsGenErrors errors
   setTypeAnnotationParamsC params
   pure (assumptions, constraints)
 
-protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
-protoOrunConstraintsGen stack = do
+runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
+runConstraintsGen stack = do
   CompilerState{..} <- get
-  Build{..} <- protoOgetCurrentBuildC
+  Build{..} <- getCurrentBuildC
   let (result, ConstraintsGenState{..}, output) =
         runConstraintsGenStack
-          protoOcompilerSupply
+          compilerSupply
           ( emptyConstraintsGenContext
               { constraintsGenContextDataConstructors =
-                  Environment.mapEnvironment protoOdataConstructorEntryConstructor protoObuildDataConstructors
+                  Environment.mapEnvironment dataConstructorEntryConstructor buildDataConstructors
               , constraintsGenContextTypeConstructors =
-                  Environment.mapEnvironment protoOtypeConstructorEntryKind protoObuildTypeConstructors
-                    <> Environment.mapEnvironment (kindOf . protoOaliasEntryType) protoObuildAliases
+                  Environment.mapEnvironment typeConstructorEntryKind buildTypeConstructors
+                    <> Environment.mapEnvironment (kindOf . aliasEntryType) buildAliases
               }
           )
           stack
-  protoOupdateSupplyC constraintsGenStateSupply
+  updateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
 
-protoOdefine :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
-protoOdefine name t = protoOinsertNameC name (Forall (typeIndexesIn s) mempty s)
+define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
+define name t = insertNameC name (Forall (typeIndexesIn s) mempty s)
  where
   s = normalizeTypeIndexes t
 
@@ -320,9 +320,9 @@ type ConstraintsGenResult g o a t s =
 --      Just s ->
 --        Right (Explicit (RuleTypeConstraint assumptionMetadata assumptionName assumptionType s) assumptionType s)
 
-protoOassumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
-protoOassumptionConstraints Assumption{..} = do
-  names <- gets protoOcompilerNameStore
+assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
+assumptionConstraints Assumption{..} = do
+  names <- gets compilerNameStore
   pure $
     case Environment.lookup assumptionName names of
       Nothing ->
@@ -344,13 +344,13 @@ protoOassumptionConstraints Assumption{..} = do
 
 solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsX constraints = do
-  dict <- gets protoOcompilerTypeAnnotationParams
-  n <- gets protoOcompilerSupply
+  dict <- gets compilerTypeAnnotationParams
+  n <- gets compilerSupply
   let (sub, m, rs) = solveConstraints n constraints
-  protoOupdateSupplyC m
+  updateSupplyC m
   let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
-  protoOcompilerReportSolverRuleViolations (apply sub rs)
-  protoOcompilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
+  compilerReportSolverRuleViolations (apply sub rs)
+  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
 -- solveC :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
@@ -366,14 +366,14 @@ solveConstraintsX constraints = do
 
 solveX :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveX = do
-  constraints <- gets protoOcompilerConstraints
-  sub1 <- gets protoOcompilerSubstitution
+  constraints <- gets compilerConstraints
+  sub1 <- gets compilerSubstitution
   sub2 <- solveConstraintsX constraints
-  protoOclearConstraintsC
-  protoOclearKindConstraintsC
-  protoOclearTypeAnnotationParamsC
-  protoOsetSubstitutionC (sub2 <> sub1)
-  gets protoOcompilerSubstitution
+  clearConstraintsC
+  clearKindConstraintsC
+  clearTypeAnnotationParamsC
+  setSubstitutionC (sub2 <> sub1)
+  gets compilerSubstitution
 
 -- typeDefinitionsC :: (Monad m, Data a, Show a, Eq a) => [Definition a Kind IndexedType] -> CompilerT a m ([Definition a Kind IndexedType], [CompilerAssumption a])
 -- typeDefinitionsC ds = do
@@ -466,7 +466,7 @@ solveX = do
 --  case evalState (instantiateVars [(n, TypeIndex k 0)] env t) (1 :: Int) of
 --    Left err -> do
 -----      path--  <- gets compilerCurrentModule
---      path <- gets protoOcompilerCurrentPath
+--      path <- gets compilerCurrentPath
 --      tellErrors [KindError err (ErrorLocation (principalPath path) loc)]
 --      throwError PreflightFailure
 --    Right r ->

@@ -40,8 +40,8 @@ instance (Monoid a, Data a) => LambdaMatchExpressionTransform (Module a Kind ())
   lambdaMatchExpressionTransform =
     \case
       Module{..} ->
-        Module protoOmodulePath protoOmoduleExportList
-          <$> lambdaMatchExpressionTransform protoOmoduleDefinitions
+        Module modulePath moduleExportList
+          <$> lambdaMatchExpressionTransform moduleDefinitions
 
 instance (Monoid a, Data a) => LambdaMatchExpressionTransform (Definition a Kind ()) where
   lambdaMatchExpressionTransform =
@@ -57,10 +57,10 @@ instance (Monoid a, Data a) => LambdaMatchExpressionTransform (LetDefinition a K
   lambdaMatchExpressionTransform =
     \case
       LetDefinition{..} -> do
-        newLetDefinitionExpression <- lambdaMatchExpressionTransform protoOletDefinitionExpression
+        newLetDefinitionExpression <- lambdaMatchExpressionTransform letDefinitionExpression
         return $
           LetDefinition
-            { protoOletDefinitionExpression = newLetDefinitionExpression
+            { letDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
@@ -68,10 +68,10 @@ instance (Monoid a, Data a) => LambdaMatchExpressionTransform (FunctionDefinitio
   lambdaMatchExpressionTransform =
     \case
       FunctionDefinition{..} -> do
-        newFunctionDefinitionExpression <- lambdaMatchExpressionTransform protoOfunctionDefinitionExpression
+        newFunctionDefinitionExpression <- lambdaMatchExpressionTransform functionDefinitionExpression
         return $
           FunctionDefinition
-            { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
+            { functionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
 

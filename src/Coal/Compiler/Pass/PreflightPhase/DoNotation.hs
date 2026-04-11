@@ -37,10 +37,10 @@ instance (Data a, Monoid a) => TransformContext (Module a () ()) where
   desugarDoNotation =
     \case
       Module{..} -> do
-        newModuleDefinitions <- traverse desugarDoNotation protoOmoduleDefinitions
+        newModuleDefinitions <- traverse desugarDoNotation moduleDefinitions
         return $
           Module
-            { protoOmoduleDefinitions = newModuleDefinitions
+            { moduleDefinitions = newModuleDefinitions
             , ..
             }
 
@@ -62,10 +62,10 @@ instance (Data a, Monoid a) => TransformContext (InstanceDefinition a () ()) whe
   desugarDoNotation =
     \case
       InstanceDefinition{..} -> do
-        newInstanceDefinitionImplementations <- traverse desugarDoNotation protoOinstanceDefinitionImplementations
+        newInstanceDefinitionImplementations <- traverse desugarDoNotation instanceDefinitionImplementations
         return $
           InstanceDefinition
-            { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
+            { instanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
 
@@ -73,10 +73,10 @@ instance (Data a, Monoid a) => TransformContext (FoldDefinition a () ()) where
   desugarDoNotation =
     \case
       FoldDefinition{..} -> do
-        newFoldDefinitionClauses <- traverse desugarDoNotation protoOfoldDefinitionClauses
+        newFoldDefinitionClauses <- traverse desugarDoNotation foldDefinitionClauses
         return $
           FoldDefinition
-            { protoOfoldDefinitionClauses = newFoldDefinitionClauses
+            { foldDefinitionClauses = newFoldDefinitionClauses
             , ..
             }
 
@@ -84,10 +84,10 @@ instance (Data a, Monoid a) => TransformContext (FunctionDefinition a () ()) whe
   desugarDoNotation =
     \case
       FunctionDefinition{..} -> do
-        newFunctionDefinitionExpression <- desugarDoNotation protoOfunctionDefinitionExpression
+        newFunctionDefinitionExpression <- desugarDoNotation functionDefinitionExpression
         return $
           FunctionDefinition
-            { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
+            { functionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
 
@@ -95,10 +95,10 @@ instance (Data a, Monoid a) => TransformContext (LetDefinition a () ()) where
   desugarDoNotation =
     \case
       LetDefinition{..} -> do
-        newLetDefinitionExpression <- desugarDoNotation protoOletDefinitionExpression
+        newLetDefinitionExpression <- desugarDoNotation letDefinitionExpression
         return $
           LetDefinition
-            { protoOletDefinitionExpression = newLetDefinitionExpression
+            { letDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 

@@ -35,32 +35,32 @@ module Coal.Compiler.Stack (
   --  withCurrentModuleC,
   -- setBitcodeC,
   --  insertFreshModule,
-  protoOupdateSupplyC,
+  updateSupplyC,
   insertBuildC,
   setCurrentPathC,
   setCurrentModuleC,
-  protoOsetSubstitutionC,
-  protoOgetBuildC,
-  protoOgetCurrentBuildC,
-  protoOupdateBuildC,
-  protoOupdateCurrentBuildC,
-  protoOinsertConstraintsC,
-  protoOclearConstraintsC,
-  protoOinsertKindConstraintsC,
-  protoOclearKindConstraintsC,
-  protoOinsertAssumptionsC,
-  protoOclearAssumptionsC,
-  protoOclearTypeAnnotationParamsC,
-  protoOclearNameStoreC,
-  protoOinsertNameC,
-  protoOinsertNamesC,
-  protoOsetNamesC,
+  setSubstitutionC,
+  getBuildC,
+  getCurrentBuildC,
+  updateBuildC,
+  updateCurrentBuildC,
+  insertConstraintsC,
+  clearConstraintsC,
+  insertKindConstraintsC,
+  clearKindConstraintsC,
+  insertAssumptionsC,
+  clearAssumptionsC,
+  clearTypeAnnotationParamsC,
+  clearNameStoreC,
+  insertNameC,
+  insertNamesC,
+  setNamesC,
   setTypeAnnotationParamsC,
-  protoOsetBitcodeC,
-  protoOsetBuildSourceC,
-  protoOcompilerReportConstraintsGenErrors,
-  protoOcompilerReportKindConstraintsGenErrors,
-  protoOcompilerReportSolverRuleViolations,
+  setBitcodeC,
+  setBuildSourceC,
+  compilerReportConstraintsGenErrors,
+  compilerReportKindConstraintsGenErrors,
+  compilerReportSolverRuleViolations,
   setConfigC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
@@ -134,22 +134,22 @@ evalCompilerT env com = do
   (c, _, _) <- runCompilerT env com
   pure c
 
-protoOupdateSupplyC :: (Monad m) => Int -> CompilerT a m ()
-protoOupdateSupplyC supply = modify (overCompilerSupply (const supply))
+updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
+updateSupplyC supply = modify (overCompilerSupply (const supply))
 
 insertBuildC :: (Monad m) => Build a -> CompilerT a m ()
 insertBuildC Build{..} = modify (overCompilerModules (Environment.insert principalName Build{..}))
  where
-  principalName = principalPath protoObuildPath
+  principalName = principalPath buildPath
 
 setCurrentPathC :: (Monad m) => Path -> CompilerT a m ()
 setCurrentPathC path = modify (overCompilerCurrentPath (const path))
 
 setCurrentModuleC :: (Monad m) => Module a s t -> CompilerT a m ()
-setCurrentModuleC Module{..} = setCurrentPathC protoOmodulePath
+setCurrentModuleC Module{..} = setCurrentPathC modulePath
 
-protoOsetSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
-protoOsetSubstitutionC sub = modify (overCompilerSubstitution (const sub))
+setSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
+setSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
 class (Show p) => BuildName p where
   buildName :: p -> Name
@@ -160,25 +160,25 @@ instance BuildName Path where
 instance BuildName Text where
   buildName = id
 
-protoOgetBuildC :: (Monad m, BuildName p) => p -> CompilerT a m (Maybe (Build a))
-protoOgetBuildC path = do
-  modules <- gets protoOcompilerModules
+getBuildC :: (Monad m, BuildName p) => p -> CompilerT a m (Maybe (Build a))
+getBuildC path = do
+  modules <- gets compilerModules
   pure (Environment.lookup (buildName path) modules)
 
-protoOgetCurrentBuildC :: (Monad m) => CompilerT a m (Build a)
-protoOgetCurrentBuildC = do
+getCurrentBuildC :: (Monad m) => CompilerT a m (Build a)
+getCurrentBuildC = do
   CompilerState{..} <- get
-  maybeBuild <- protoOgetBuildC protoOcompilerCurrentPath
+  maybeBuild <- getBuildC compilerCurrentPath
   case maybeBuild of
     Nothing ->
       error "Implementation error"
-    --      error (show (principalPath protoOcompilerCurrentPath))
+    --      error (show (principalPath compilerCurrentPath))
     Just build ->
       return build
 
-protoOupdateBuildC :: (Monad m, BuildName p) => p -> (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
-protoOupdateBuildC name f = do
-  maybeBuild <- protoOgetBuildC name
+updateBuildC :: (Monad m, BuildName p) => p -> (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
+updateBuildC name f = do
+  maybeBuild <- getBuildC name
   case maybeBuild of
     Nothing ->
       --      error (show name)        -- ????
@@ -187,64 +187,64 @@ protoOupdateBuildC name f = do
       newBuild <- f build
       modify (overCompilerModules (Environment.insert (buildName name) newBuild))
 
-protoOupdateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
-protoOupdateCurrentBuildC f = do
+updateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
+updateCurrentBuildC f = do
   CompilerState{..} <- get
-  protoOupdateBuildC protoOcompilerCurrentPath f
+  updateBuildC compilerCurrentPath f
 
-protoOinsertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
-protoOinsertConstraintsC constraints = modify (overCompilerConstraints (<> constraints))
+insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
+insertConstraintsC constraints = modify (overCompilerConstraints (<> constraints))
 
-protoOclearConstraintsC :: (Monad m) => CompilerT a m ()
-protoOclearConstraintsC = modify (overCompilerConstraints (const mempty))
+clearConstraintsC :: (Monad m) => CompilerT a m ()
+clearConstraintsC = modify (overCompilerConstraints (const mempty))
 
-protoOinsertKindConstraintsC :: (Monad m) => [KindConstraint] -> CompilerT a m ()
-protoOinsertKindConstraintsC constraints = modify (overCompilerKindConstraints (<> constraints))
+insertKindConstraintsC :: (Monad m) => [KindConstraint] -> CompilerT a m ()
+insertKindConstraintsC constraints = modify (overCompilerKindConstraints (<> constraints))
 
-protoOclearKindConstraintsC :: (Monad m) => CompilerT a m ()
-protoOclearKindConstraintsC = modify (overCompilerKindConstraints (const mempty))
+clearKindConstraintsC :: (Monad m) => CompilerT a m ()
+clearKindConstraintsC = modify (overCompilerKindConstraints (const mempty))
 
-protoOinsertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
-protoOinsertAssumptionsC assumptions = modify (overCompilerAssumptions (<> assumptions))
+insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
+insertAssumptionsC assumptions = modify (overCompilerAssumptions (<> assumptions))
 
-protoOclearAssumptionsC :: (Monad m) => CompilerT a m ()
-protoOclearAssumptionsC = modify (overCompilerAssumptions (const mempty))
+clearAssumptionsC :: (Monad m) => CompilerT a m ()
+clearAssumptionsC = modify (overCompilerAssumptions (const mempty))
 
-protoOclearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
-protoOclearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
+clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
+clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
 
-protoOclearNameStoreC :: (Monad m) => CompilerT a m ()
-protoOclearNameStoreC = modify (overCompilerNameStore (const mempty))
+clearNameStoreC :: (Monad m) => CompilerT a m ()
+clearNameStoreC = modify (overCompilerNameStore (const mempty))
 
-protoOinsertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
-protoOinsertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
+insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
+insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
 
-protoOinsertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
-protoOinsertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
+insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
+insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
 
-protoOsetNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
-protoOsetNamesC names = modify (overCompilerNameStore (const names))
+setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+setNamesC names = modify (overCompilerNameStore (const names))
 
 setTypeAnnotationParamsC :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
 setTypeAnnotationParamsC params = modify (overCompilerTypeAnnotationParams (const params))
 
-protoOsetBitcodeC :: (Monad m, BuildName p) => p -> ByteString -> CompilerT a m ()
-protoOsetBitcodeC build bs = protoOupdateBuildC build (pure . setBuildBitcode bs)
+setBitcodeC :: (Monad m, BuildName p) => p -> ByteString -> CompilerT a m ()
+setBitcodeC build bs = updateBuildC build (pure . setBuildBitcode bs)
 
-protoOsetBuildSourceC :: (Monad m, BuildName p) => p -> Text -> CompilerT a m ()
-protoOsetBuildSourceC build source = protoOupdateBuildC build (pure . setBuildSource source)
+setBuildSourceC :: (Monad m, BuildName p) => p -> Text -> CompilerT a m ()
+setBuildSourceC build source = updateBuildC build (pure . setBuildSource source)
 
-{-# INLINE protoOcompilerReportConstraintsGenErrors #-}
-protoOcompilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
-protoOcompilerReportConstraintsGenErrors errors = modify (overCompilerConstraintsGenErrors (<> errors))
+{-# INLINE compilerReportConstraintsGenErrors #-}
+compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
+compilerReportConstraintsGenErrors errors = modify (overCompilerConstraintsGenErrors (<> errors))
 
-{-# INLINE protoOcompilerReportKindConstraintsGenErrors #-}
-protoOcompilerReportKindConstraintsGenErrors :: (Monad m) => [KindError] -> CompilerT a m ()
-protoOcompilerReportKindConstraintsGenErrors errors = modify (overCompilerKindConstraintsGenErrors (<> errors))
+{-# INLINE compilerReportKindConstraintsGenErrors #-}
+compilerReportKindConstraintsGenErrors :: (Monad m) => [KindError] -> CompilerT a m ()
+compilerReportKindConstraintsGenErrors errors = modify (overCompilerKindConstraintsGenErrors (<> errors))
 
-{-# INLINE protoOcompilerReportSolverRuleViolations #-}
-protoOcompilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
-protoOcompilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
+{-# INLINE compilerReportSolverRuleViolations #-}
+compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
+compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
 
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
@@ -260,7 +260,7 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 
 getSourceC :: (Monad m) => Name -> CompilerT a m Text
 getSourceC name = do
-  s <- gets protoOcompilerSources
+  s <- gets compilerSources
   pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
 
 toBeRecompiled :: (Monad m, BuildName p) => p -> CompilerT a m ()

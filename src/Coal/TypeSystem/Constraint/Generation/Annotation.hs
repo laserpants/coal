@@ -4,7 +4,7 @@
 module Coal.TypeSystem.Constraint.Generation.Annotation (
   --  TypeAnnotationError,
   --  instantiateAnnotation,
-  --  protoOinstantiateAnnotation,
+  --  instantiateAnnotation,
   checkTypeAnnotationParameters,
   --  runTypeAnnotation,
 ) where
@@ -50,8 +50,8 @@ import Extras (Dictionary, Name, concatMapM, forM_)
 --      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
 --  return t
 
--- protoOinstantiateAnnotation :: (Monad m) => a -> Type Parameter Kind -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
--- protoOinstantiateAnnotation loc a = do
+-- instantiateAnnotation :: (Monad m) => a -> Type Parameter Kind -> m (Either (TypeAnnotationError a) (Type TypeIndex Kind))
+-- instantiateAnnotation loc a = do
 --  (t, s) <- runAnnotationsT loc undefined undefined -- (instantiate a)
 --  forM_ (Map.toList s) $
 --    \(n, k) ->

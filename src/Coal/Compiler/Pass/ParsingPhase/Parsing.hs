@@ -54,16 +54,16 @@ pass files = do
 
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildEnvelope (Module Metadata () ())))
 parseEmbedded (p, src) = do
-  CompilerConfig{..} <- gets protoOcompilerConfig
+  CompilerConfig{..} <- gets compilerConfig
   case runParser (spaces *> parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
     Right module_ -> do
-      let name = principalPath (protoOmodulePath module_)
+      let name = principalPath (modulePath module_)
       -- Check cached build files
       --      cached <- cachedBuild name encodedSrc
       --      setVerbatimSourceForC module_ encodedSrc
-      protoOsetBuildSourceC name encodedSrc
+      setBuildSourceC name encodedSrc
 
       toBeRecompiled name
       pure $ Right (BSource module_)
@@ -93,7 +93,7 @@ fromSource name file src = do
 
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 parseFile file = do
-  CompilerConfig{..} <- gets protoOcompilerConfig
+  CompilerConfig{..} <- gets compilerConfig
   res <- liftIO $ resolveModule configSourcePaths file
   case res of
     Right (fp, _, name) -> do
@@ -101,7 +101,7 @@ parseFile file = do
       -- Check cached build files
       --      cached <- cachedBuild name src
       --      setVerbatimSourceC name src
-      protoOsetBuildSourceC name src
+      setBuildSourceC name src
 
       fromSource name file src
 

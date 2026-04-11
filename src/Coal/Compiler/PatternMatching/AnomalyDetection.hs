@@ -140,8 +140,8 @@ isUseful px@(ps : _) qs =
 isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
-  Build{..} <- protoOgetCurrentBuildC
-  let defined = mapEnvironment protoOdataConstructorEntryConstructorSet protoObuildDataConstructors
+  Build{..} <- getCurrentBuildC
+  let defined = mapEnvironment dataConstructorEntryConstructorSet buildDataConstructors
   case Environment.lookup name (defined `Environment.union` builtIn) of
     Nothing ->
       pure ("%Tuple" `Text.isPrefixOf` name)

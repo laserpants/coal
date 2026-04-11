@@ -23,27 +23,27 @@ import Extras (Name, concatForM, forM, (<.>))
 
 moduleKindEnvironment :: (Monad m) => Module a Kind () -> CompilerT b m (Environment Kind)
 moduleKindEnvironment Module{..} = do
-  res <- forM protoOmoduleDefinitions $
+  res <- forM moduleDefinitions $
     \case
       DTrait _ name TraitDefinition{..} ->
         pure
           [
             ( name
-            , KArrow (kindOf protoOtraitDefinitionParameter) KTrait
+            , KArrow (kindOf traitDefinitionParameter) KTrait
             )
           ]
       DType _ name TypeDefinition{..} ->
         pure
           [
             ( name
-            , foldKindOf KType protoOtypeDefinitionParameters
+            , foldKindOf KType typeDefinitionParameters
             )
           ]
       DTypeAlias _ name AliasDefinition{..} ->
         pure
           [
             ( name
-            , kindOf protoOaliasDefinitionType
+            , kindOf aliasDefinitionType
             )
           ]
       -- TODO: temp
@@ -66,19 +66,19 @@ moduleKindEnvironment Module{..} = do
       DNamespaceImport _ path -> do
         let qualified name = principalPath path <.> name
         importedModule@Build{..} <- importedBuild path
-        ps1 <- concatForM (Environment.names protoObuildTypeConstructors) $
+        ps1 <- concatForM (Environment.names buildTypeConstructors) $
           \name ->
             pure $
               if importedModule `exports` name
                 then nameKindPairs (qualified name) (typeConstructorKind name importedModule)
                 else []
-        ps2 <- concatForM (Environment.names protoObuildTraits) $
+        ps2 <- concatForM (Environment.names buildTraits) $
           \name ->
             pure $
               if importedModule `exports` name
                 then nameKindPairs (qualified name) (traitKind name importedModule)
                 else []
-        ps3 <- concatForM (Environment.names protoObuildAliases) $
+        ps3 <- concatForM (Environment.names buildAliases) $
           \name ->
             pure $
               if importedModule `exports` name
@@ -97,36 +97,36 @@ nameKindPairs name maybeKind =
     pure [(name, kind)]
 
 exports :: Build a -> Name -> Bool
-exports Build{..} name = name `elem` protoObuildExportedNames
+exports Build{..} name = name `elem` buildExportedNames
 
 typeConstructorKind :: Name -> Build a -> Maybe Kind
 typeConstructorKind name Build{..} =
-  case Environment.lookup name protoObuildTypeConstructors of
+  case Environment.lookup name buildTypeConstructors of
     Nothing ->
       Nothing
     Just TypeConstructorEntry{..} ->
-      Just protoOtypeConstructorEntryKind
+      Just typeConstructorEntryKind
 
 traitKind :: Name -> Build a -> Maybe Kind
 traitKind name Build{..} =
-  case Environment.lookup name protoObuildTraits of
+  case Environment.lookup name buildTraits of
     Nothing ->
       Nothing
     Just TraitEntry{..} ->
-      Just (KArrow (kindOf protoOtraitEntryParameter) KTrait)
+      Just (KArrow (kindOf traitEntryParameter) KTrait)
 
 aliasKind :: Name -> Build a -> Maybe Kind
 aliasKind name Build{..} =
-  case Environment.lookup name protoObuildAliases of
+  case Environment.lookup name buildAliases of
     Nothing ->
       Nothing
     Just AliasEntry{..} ->
-      Just (kindOf protoOaliasEntryType)
+      Just (kindOf aliasEntryType)
 
 importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
 importedBuild path = do
   CompilerState{..} <- get
-  case Environment.lookup (principalPath path) protoOcompilerModules of
+  case Environment.lookup (principalPath path) compilerModules of
     Nothing ->
       -- TODO
       error ("No module: " <> show path)

@@ -34,12 +34,12 @@ passTopLevelFolds = Pass{runPass = pass}
 
 pass :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 pass Module{..} = do
-  setCurrentPathC protoOmodulePath
+  setCurrentPathC modulePath
   -- withCurrentModuleC (overModuleDefinitionsM (traverse compileTopLevelFolds))
-  newModuleDefinitions <- traverse compileTopLevelFolds protoOmoduleDefinitions
+  newModuleDefinitions <- traverse compileTopLevelFolds moduleDefinitions
   return $
     Module
-      { protoOmoduleDefinitions = newModuleDefinitions
+      { moduleDefinitions = newModuleDefinitions
       , ..
       }
 
@@ -47,13 +47,13 @@ compileTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a Kind () -> C
 compileTopLevelFolds =
   \case
     DFold loc name FoldDefinition{..} -> do
-      newExpression <- expandClauses protoOfoldDefinitionClauses
+      newExpression <- expandClauses foldDefinitionClauses
       let def =
             LetDefinition
-              { protoOletDefinitionMetadata = loc
-              , protoOletDefinitionAnnotation = protoOfoldDefinitionAnnotation
-              , protoOletDefinitionType = With [] ()
-              , protoOletDefinitionExpression = newExpression
+              { letDefinitionMetadata = loc
+              , letDefinitionAnnotation = foldDefinitionAnnotation
+              , letDefinitionType = With [] ()
+              , letDefinitionExpression = newExpression
               }
       return (DLet loc name def)
     o ->
@@ -78,11 +78,11 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a Kind ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
-        CompilerState{protoOcompilerCurrentPath = path} <- get
+        CompilerState{compilerCurrentPath = path} <- get
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause _ (PNamedFold loc _ _) _ -> do
-        CompilerState{protoOcompilerCurrentPath = path} <- get
+        CompilerState{compilerCurrentPath = path} <- get
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause{..} -> do

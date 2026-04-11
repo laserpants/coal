@@ -42,11 +42,11 @@ denormalizeConstant name =
         loc
         name
         FunctionDefinition
-          { protoOfunctionDefinitionMetadata = loc
-          , protoOfunctionDefinitionAnnotation = w1
-          , protoOfunctionDefinitionType = With ts (typeOf e)
-          , protoOfunctionDefinitionPatterns = ps
-          , protoOfunctionDefinitionExpression = e
+          { functionDefinitionMetadata = loc
+          , functionDefinitionAnnotation = w1
+          , functionDefinitionType = With ts (typeOf e)
+          , functionDefinitionPatterns = ps
+          , functionDefinitionExpression = e
           }
     def@(LetDefinition loc _ _ _) ->
       DLet loc name def
@@ -56,14 +56,14 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Normalizat
     \case
       Module{..} ->
         Module
-          { protoOmoduleDefinitions = normalizeObject protoOmoduleDefinitions
+          { moduleDefinitions = normalizeObject moduleDefinitions
           , ..
           }
   denormalizeObject =
     \case
       Module{..} ->
         Module
-          { protoOmoduleDefinitions = denormalizeObject protoOmoduleDefinitions
+          { moduleDefinitions = denormalizeObject moduleDefinitions
           , ..
           }
 
@@ -74,28 +74,28 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Normalizat
         loc
         name
         FunctionDefinition
-          { protoOfunctionDefinitionType = With ts t
+          { functionDefinitionType = With ts t
           , ..
           } ->
           DLet
             loc
             name
             LetDefinition
-              { protoOletDefinitionMetadata =
+              { letDefinitionMetadata =
                   loc
-              , protoOletDefinitionAnnotation =
-                  protoOfunctionDefinitionAnnotation
-              , protoOletDefinitionType =
-                  With ts (foldTypeOf t protoOfunctionDefinitionPatterns)
-              , protoOletDefinitionExpression =
-                  flattenLambdas (ELambda mempty protoOfunctionDefinitionPatterns protoOfunctionDefinitionExpression)
+              , letDefinitionAnnotation =
+                  functionDefinitionAnnotation
+              , letDefinitionType =
+                  With ts (foldTypeOf t functionDefinitionPatterns)
+              , letDefinitionExpression =
+                  flattenLambdas (ELambda mempty functionDefinitionPatterns functionDefinitionExpression)
               }
       DInstance loc InstanceDefinition{..} ->
         DInstance
           loc
           InstanceDefinition
-            { protoOinstanceDefinitionImplementations =
-                normalizeObject protoOinstanceDefinitionImplementations
+            { instanceDefinitionImplementations =
+                normalizeObject instanceDefinitionImplementations
             , ..
             }
       d ->
@@ -108,8 +108,8 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Normalizat
         DInstance
           loc
           InstanceDefinition
-            { protoOinstanceDefinitionImplementations =
-                denormalizeObject protoOinstanceDefinitionImplementations
+            { instanceDefinitionImplementations =
+                denormalizeObject instanceDefinitionImplementations
             , ..
             }
       d ->

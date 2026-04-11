@@ -75,10 +75,10 @@ bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (M
 bork =
   \case
     Module{..} -> do
-      newModuleDefinitions <- traverse fnork protoOmoduleDefinitions
+      newModuleDefinitions <- traverse fnork moduleDefinitions
       return $
         Module
-          { protoOmoduleDefinitions = newModuleDefinitions
+          { moduleDefinitions = newModuleDefinitions
           , ..
           }
 
@@ -90,12 +90,12 @@ fnork =
     DLet loc name def ->
       DLet loc name <$> transformBiM expandExpression def
     DInstance loc InstanceDefinition{..} -> do
-      newInstanceDefinitionImplementations <- traverse fnork protoOinstanceDefinitionImplementations
+      newInstanceDefinitionImplementations <- traverse fnork instanceDefinitionImplementations
       return $
         DInstance
           loc
           InstanceDefinition
-            { protoOinstanceDefinitionImplementations = newInstanceDefinitionImplementations
+            { instanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
             }
     d ->

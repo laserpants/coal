@@ -148,7 +148,7 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (Module a k t) w
     \case
       Module{..} ->
         Module
-          { protoOmoduleDefinitions = fmap expandAsPatterns protoOmoduleDefinitions
+          { moduleDefinitions = fmap expandAsPatterns moduleDefinitions
           , ..
           }
 
@@ -165,6 +165,6 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (LetDefinition a
     \case
       LetDefinition{..} ->
         LetDefinition
-          { protoOletDefinitionExpression = expandAsPatterns protoOletDefinitionExpression
+          { letDefinitionExpression = expandAsPatterns letDefinitionExpression
           , ..
           }

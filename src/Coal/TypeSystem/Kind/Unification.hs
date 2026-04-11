@@ -15,7 +15,7 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set, member)
 import qualified Data.Set as Set
 
-newtype KindUnifier a = KindUnifier {protoOkindUnifierMonad :: Either KindError a}
+newtype KindUnifier a = KindUnifier {kindUnifierMonad :: Either KindError a}
   deriving
     ( Functor
     , Applicative
@@ -26,7 +26,7 @@ newtype KindUnifier a = KindUnifier {protoOkindUnifierMonad :: Either KindError 
 unifyKinds :: Kind -> Kind -> KindUnifier KindSubstitution
 unifyKinds (KArrow k1 k2) (KArrow k3 k4) = do
   sub1 <- unifyKinds k1 k3
-  sub2 <- unifyKinds (protoOapplyKinds sub1 k2) (protoOapplyKinds sub1 k4)
+  sub2 <- unifyKinds (applyKinds sub1 k2) (applyKinds sub1 k4)
   pure (sub2 <> sub1)
 unifyKinds (KVariable k1) k2 =
   bindKind k1 k2

@@ -24,9 +24,9 @@ envelopePathName :: BuildEnvelope (Module a k ()) -> Name
 envelopePathName =
   \case
     BSource Module{..} ->
-      principalPath protoOmodulePath
+      principalPath modulePath
     BCached Build{..} ->
-      principalPath protoObuildPath
+      principalPath buildPath
 
 partitionBuildEnvelopes :: [BuildEnvelope a] -> ([a], [Build Metadata])
 partitionBuildEnvelopes = foldr (flip go) ([], [])

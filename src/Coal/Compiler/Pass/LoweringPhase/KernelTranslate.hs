@@ -28,12 +28,12 @@ pass =
   \case
     Module path _ defs -> do
       setCurrentPathC path
-      Build{..} <- protoOgetCurrentBuildC
-      insertQualifiedNames protoObuildQualifiedNames $
+      Build{..} <- getCurrentBuildC
+      insertQualifiedNames buildQualifiedNames $
         withModuleName name $
           Kernel.Module
             name
-            (Environment.elems protoObuildQualifiedNames)
+            (Environment.elems buildQualifiedNames)
             . concat
             <$> traverse translateDefinition defs
      where
@@ -44,12 +44,12 @@ pass =
 --  \case
 --    Module path _ defs -> do
 --      lift $ setCurrentPathC path
---      Build{..} <- lift protoOgetCurrentBuildC
---      insertQualifiedNames protoObuildQualifiedNames $
+--      Build{..} <- lift getCurrentBuildC
+--      insertQualifiedNames buildQualifiedNames $
 --        withModuleName name $
 --          Kernel.Module
 --            name
---            (Environment.elems protoObuildQualifiedNames)
+--            (Environment.elems buildQualifiedNames)
 --            . concat
 --            <$> traverse translateDefinition defs
 --     where

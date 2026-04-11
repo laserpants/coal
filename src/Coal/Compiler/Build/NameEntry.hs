@@ -26,51 +26,51 @@ import GHC.Generics (Generic)
 type IndexedConstructor = DataConstructor TypeIndex Kind IndexedType
 
 data DataConstructorEntry a = DataConstructorEntry
-  { protoOdataConstructorEntryMetaData :: a
-  , protoOdataConstructorEntryName :: Name
-  , protoOdataConstructorEntryConstructor :: IndexedConstructor
-  , protoOdataConstructorEntryConstructorSet :: Set Name
+  { dataConstructorEntryMetaData :: a
+  , dataConstructorEntryName :: Name
+  , dataConstructorEntryConstructor :: IndexedConstructor
+  , dataConstructorEntryConstructorSet :: Set Name
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (DataConstructorEntry a)
 
 data TypeConstructorEntry a = TypeConstructorEntry
-  { protoOtypeConstructorEntryMetadata :: a
-  , protoOtypeConstructorEntryName :: Name
-  , protoOtypeConstructorEntryKind :: Kind
-  , protoOtypeConstructorEntryDataConstructors :: [Name]
+  { typeConstructorEntryMetadata :: a
+  , typeConstructorEntryName :: Name
+  , typeConstructorEntryKind :: Kind
+  , typeConstructorEntryDataConstructors :: [Name]
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (TypeConstructorEntry a)
 
 data TraitEntry a = TraitEntry
-  { protoOtraitEntryMetadata :: a
-  , protoOtraitEntryName :: Name
-  , protoOtraitEntryParameter :: Parameter Kind
-  , protoOtraitEntryConstraints :: [Trait (Parameter Kind)]
-  , protoOtraitEntryInterface :: Environment (Scheme Parameter Kind (Type Parameter Kind))
+  { traitEntryMetadata :: a
+  , traitEntryName :: Name
+  , traitEntryParameter :: Parameter Kind
+  , traitEntryConstraints :: [Trait (Parameter Kind)]
+  , traitEntryInterface :: Environment (Scheme Parameter Kind (Type Parameter Kind))
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (TraitEntry a)
 
 data InstanceEntry a = InstanceEntry
-  { protoOinstanceEntryMetadata :: a
-  , protoOinstanceEntryType :: Type Parameter Kind
-  , protoOinstanceEntryIndexedType :: IndexedType
-  , protoOinstanceEntryTypeSchemes :: Dictionary IndexedScheme
+  { instanceEntryMetadata :: a
+  , instanceEntryType :: Type Parameter Kind
+  , instanceEntryIndexedType :: IndexedType
+  , instanceEntryTypeSchemes :: Dictionary IndexedScheme
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
 instance (Binary a) => Binary (InstanceEntry a)
 
 data AliasEntry a = AliasEntry
-  { protoOaliasEntryMetadata :: a
-  , protoOaliasEntryName :: Name
-  , protoOaliasEntryParams :: [Parameter Kind]
-  , protoOaliasEntryType :: Type Parameter Kind
+  { aliasEntryMetadata :: a
+  , aliasEntryName :: Name
+  , aliasEntryParams :: [Parameter Kind]
+  , aliasEntryType :: Type Parameter Kind
   }
   deriving (Show, Eq, Ord, Read, Generic, Functor, Foldable, Traversable)
 
@@ -87,10 +87,10 @@ data NameEntry
 instance Binary NameEntry
 
 class HasName a where
-  protoOnameOf :: a -> Name
+  nameOf :: a -> Name
 
 instance HasName NameEntry where
-  protoOnameOf =
+  nameOf =
     \case
       NName name _ ->
         name
@@ -104,7 +104,7 @@ instance HasName NameEntry where
         name
 
 instance HasName (Import a) where
-  protoOnameOf =
+  nameOf =
     \case
       NameImport _ name ->
         name
@@ -112,7 +112,7 @@ instance HasName (Import a) where
         name
 
 instance HasName (Export a) where
-  protoOnameOf =
+  nameOf =
     \case
       NameExport _ name ->
         name
@@ -120,5 +120,5 @@ instance HasName (Export a) where
         name
 
 instance HasName (DataConstructorEntry a) where
-  protoOnameOf =
-    protoOdataConstructorEntryName
+  nameOf =
+    dataConstructorEntryName

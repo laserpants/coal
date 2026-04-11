@@ -29,7 +29,7 @@ passAliasCycles = mapPass $ Pass{runPass = traverse impl}
 impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 impl mm = do
   --  let mm = toModule [] m
-  setCurrentPathC (protoOmodulePath mm)
+  setCurrentPathC (modulePath mm)
   detectAliasCycles mm
   return mm
 
@@ -70,7 +70,7 @@ detectCycles loc name =
       detectCycles loc name t2
     TConstructor _ con
       | name == con -> do
-          path <- gets protoOcompilerCurrentPath
+          path <- gets compilerCurrentPath
           tellErrors [TypeAliasCycle name (ErrorLocation (principalPath path) loc)]
           throwError PreflightFailure
     TRecord t ->

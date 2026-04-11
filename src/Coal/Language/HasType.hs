@@ -92,9 +92,9 @@ instance (Data a, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Definit
   typeOf =
     \case
       DFunction _ _ FunctionDefinition{..} ->
-        foldTypeOf protoOfunctionDefinitionExpression protoOfunctionDefinitionPatterns
+        foldTypeOf functionDefinitionExpression functionDefinitionPatterns
       DLet _ _ LetDefinition{..} ->
-        typeOf protoOletDefinitionExpression
+        typeOf letDefinitionExpression
       d ->
         head (universeBi d)
 

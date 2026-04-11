@@ -10,31 +10,31 @@ import qualified Data.Set as Set
 builtinDataConstructors :: (Monoid a) => [DataConstructorEntry a]
 builtinDataConstructors =
   [ DataConstructorEntry
-      { protoOdataConstructorEntryMetaData = mempty
-      , protoOdataConstructorEntryName = "Zero"
-      , protoOdataConstructorEntryConstructor =
+      { dataConstructorEntryMetaData = mempty
+      , dataConstructorEntryName = "Zero"
+      , dataConstructorEntryConstructor =
           DataConstructor
             "Zero"
             0
             (Forall mempty mempty (TIntrinsic INat))
-      , protoOdataConstructorEntryConstructorSet =
+      , dataConstructorEntryConstructorSet =
           Set.fromList ["Succ", "Zero"]
       }
   , DataConstructorEntry
-      { protoOdataConstructorEntryMetaData = mempty
-      , protoOdataConstructorEntryName = "Succ"
-      , protoOdataConstructorEntryConstructor =
+      { dataConstructorEntryMetaData = mempty
+      , dataConstructorEntryName = "Succ"
+      , dataConstructorEntryConstructor =
           DataConstructor
             "Succ"
             1
             (Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat))
-      , protoOdataConstructorEntryConstructorSet =
+      , dataConstructorEntryConstructorSet =
           Set.fromList ["Succ", "Zero"]
       }
   , DataConstructorEntry
-      { protoOdataConstructorEntryMetaData = mempty
-      , protoOdataConstructorEntryName = "Process"
-      , protoOdataConstructorEntryConstructor =
+      { dataConstructorEntryMetaData = mempty
+      , dataConstructorEntryName = "Process"
+      , dataConstructorEntryConstructor =
           DataConstructor
             "Process"
             1
@@ -85,7 +85,7 @@ builtinDataConstructors =
         --          (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
         --    )
         -- )
-        protoOdataConstructorEntryConstructorSet =
+        dataConstructorEntryConstructorSet =
           Set.fromList ["Process"]
       }
   ]

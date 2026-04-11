@@ -20,13 +20,13 @@ passTypePhaseErrors = Pass{runPass = pass}
 
 pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass m@(Module path _ _) = do
-  constraintsGenErrors <- gets protoOcompilerConstraintsGenErrors
+  constraintsGenErrors <- gets compilerConstraintsGenErrors
   let errs1 = nub constraintsGenErrors
   forM_ errs1 $
     \err ->
       tellErrors [ConstraintsError err (ErrorLocation (principalPath path) (getMetadata err))]
 
-  solverRuleViolations <- gets protoOcompilerSolverRuleViolations
+  solverRuleViolations <- gets compilerSolverRuleViolations
   let errs2 = nub solverRuleViolations
   forM_ errs2 $
     \err ->

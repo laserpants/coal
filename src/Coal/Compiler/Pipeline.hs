@@ -95,7 +95,7 @@ compileWithCFiles config files cFiles = do
               putStrLn ("\nIn module '" <> Text.unpack name <> "':\n")
             Nothing ->
               pure ()
-          Text.putStrLn (prettyError protoOcompilerSources err)
+          Text.putStrLn (prettyError compilerSources err)
       case e of
         Left e1 ->
           print e1

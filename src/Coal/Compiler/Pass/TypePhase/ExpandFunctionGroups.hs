@@ -44,10 +44,10 @@ instance FunctionGroupsTransform (Module Metadata Kind ()) where
   expandFunctionGroups =
     \case
       Module{..} -> do
-        newDefinitions <- traverse expandGroups protoOmoduleDefinitions
+        newDefinitions <- traverse expandGroups moduleDefinitions
         return $
           Module
-            { protoOmoduleDefinitions = concat newDefinitions
+            { moduleDefinitions = concat newDefinitions
             , ..
             }
 
@@ -61,24 +61,24 @@ expandGroups =
             loc
             name
             LetDefinition
-              { protoOletDefinitionMetadata = loc
-              , protoOletDefinitionAnnotation = Nothing
-              , protoOletDefinitionType = With [] ()
-              , protoOletDefinitionExpression =
+              { letDefinitionMetadata = loc
+              , letDefinitionAnnotation = Nothing
+              , letDefinitionType = With [] ()
+              , letDefinitionExpression =
                   ELambda loc (varP <$> args) (matchE (var args) (clauses defs))
               }
         ]
      where
       FunctionDefinition{..} = firstDef
-      ns = NonEmpty.fromList [1 .. length protoOfunctionDefinitionPatterns]
+      ns = NonEmpty.fromList [1 .. length functionDefinitionPatterns]
       args = (<>) "$arg_" . showt <$> ns
     DInstance loc InstanceDefinition{..} -> do
-      newImplementations <- traverse expandGroups protoOinstanceDefinitionImplementations
+      newImplementations <- traverse expandGroups instanceDefinitionImplementations
       return
         [ DInstance
             loc
             InstanceDefinition
-              { protoOinstanceDefinitionImplementations = concat newImplementations
+              { instanceDefinitionImplementations = concat newImplementations
               , ..
               }
         ]

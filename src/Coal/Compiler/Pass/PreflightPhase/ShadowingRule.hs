@@ -147,11 +147,11 @@ instance RuleContext (Module Metadata () ()) where
   detectShadowing names =
     \case
       Module{..} -> do
-        setCurrentPathC protoOmodulePath
-        newModuleDefinitions <- detectShadowing names protoOmoduleDefinitions
+        setCurrentPathC modulePath
+        newModuleDefinitions <- detectShadowing names moduleDefinitions
         return $
           Module
-            { protoOmoduleDefinitions = newModuleDefinitions
+            { moduleDefinitions = newModuleDefinitions
             , ..
             }
 
@@ -171,10 +171,10 @@ instance RuleContext (LetDefinition Metadata () ()) where
   detectShadowing names =
     \case
       LetDefinition{..} -> do
-        newLetDefinitionExpression <- detectShadowing names protoOletDefinitionExpression
+        newLetDefinitionExpression <- detectShadowing names letDefinitionExpression
         return $
           LetDefinition
-            { protoOletDefinitionExpression = newLetDefinitionExpression
+            { letDefinitionExpression = newLetDefinitionExpression
             , ..
             }
 
@@ -182,11 +182,11 @@ instance RuleContext (FunctionDefinition Metadata () ()) where
   detectShadowing names =
     \case
       FunctionDefinition{..} -> do
-        names' <- addNames protoOfunctionDefinitionMetadata (boundIn protoOfunctionDefinitionPatterns) names
-        newFunctionDefinitionExpression <- detectShadowing names' protoOfunctionDefinitionExpression
+        names' <- addNames functionDefinitionMetadata (boundIn functionDefinitionPatterns) names
+        newFunctionDefinitionExpression <- detectShadowing names' functionDefinitionExpression
         return $
           FunctionDefinition
-            { protoOfunctionDefinitionExpression = newFunctionDefinitionExpression
+            { functionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
 
@@ -194,7 +194,7 @@ addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata 
 addNames loc new names = do
   forM_ new' $
     \name -> do
-      path <- gets protoOcompilerCurrentPath
+      path <- gets compilerCurrentPath
       when (name `elem` names) $ do
         tellErrors [Shadowing name (ErrorLocation (principalPath path) loc)]
         throwError PreflightFailure
