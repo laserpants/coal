@@ -1,9 +1,7 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Coal.Compiler.Pass.TypePhase (typePhasePasses) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), overlayEnvironment, (>->))
+import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors)
 import Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases)
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGroups)
@@ -29,6 +27,6 @@ typePhasePasses =
     >-> passExpressionFolds
     ----    >-> generateDebugArtifacts "Folds"
     >-> passLambdaMatchExpansion
-    >-> overlayEnvironment passTypeInference
+    >-> passTypeInference
     --    >-> generateDebugArtifacts "TypeInference"
     >-> passTypePhaseErrors

@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Compiler.Pass (
@@ -6,7 +5,7 @@ module Coal.Compiler.Pass (
   (>->),
   mapPass,
   liftPass,
-  overlayEnvironment,
+--  overlayEnvironment,
   tickBar,
 ) where
 
@@ -44,16 +43,16 @@ mapPass p = Pass{runPass = traverse (runPassAndTickBar p)}
 liftPass :: (Monad m) => Pass a m i o -> Pass a m (BuildEnvelope i) (BuildEnvelope o)
 liftPass (Pass p) = Pass (traverse p)
 
-overlayEnvironment :: (MonadIO m) => Pass Metadata m a b -> Pass Metadata m a b
-overlayEnvironment p = Pass{runPass = pass}
- where
-  pass i = do
-    Build{..} <- getCurrentBuildC
-    local
-      ( \env ->
-          env
-            { compilerTypeConstructorEnvironment =
-                Environment.mapEnvironment typeConstructorEntryKind buildTypeConstructors
-            }
-      )
-      (runPassAndTickBar p i)
+--overlayEnvironment :: (MonadIO m) => Pass Metadata m a b -> Pass Metadata m a b
+--overlayEnvironment p = Pass{runPass = pass}
+-- where
+--  pass i = do
+--    Build{..} <- getCurrentBuildC
+--    local
+--      ( \env ->
+--          env
+--            { compilerTypeConstructorEnvironment =
+--                Environment.mapEnvironment typeConstructorEntryKind buildTypeConstructors
+--            }
+--      )
+--      (runPassAndTickBar p i)
