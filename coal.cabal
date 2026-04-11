@@ -56,6 +56,7 @@ library
       Coal.Compiler.Kernel.Translate.Primitive
       Coal.Compiler.Kernel.Translate.Record
       Coal.Compiler.Kernel.Translate.Type
+      Coal.Compiler.KindEnvironment
       Coal.Compiler.Pass
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.LoweringPhase
@@ -108,6 +109,10 @@ library
       Coal.Compiler.PatternMatching.Equation
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Pipeline
+      Coal.Compiler.ProtoBuild
+      Coal.Compiler.ProtoBuild.ProtoNameEntry
+      Coal.Compiler.ProtoBuild.ProtoPrep
+      Coal.Compiler.ProtoState
       Coal.Compiler.Stack
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
@@ -214,12 +219,6 @@ library
       Coal.Parser.Type
       Coal.Parser.Type.Intrinsic
       Coal.Parser.Utils
-      Coal.ProtoCompiler.KindEnvironment
-      Coal.ProtoCompiler.ProtoBuild
-      Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-      Coal.ProtoCompiler.ProtoBuild.ProtoPrep
-      Coal.ProtoCompiler.ProtoStack
-      Coal.ProtoCompiler.ProtoState
       Coal.ProtoLanguage.ProtoDefinition
       Coal.ProtoLanguage.ProtoModule
       Coal.ProtoTypeSystem.Annotations
@@ -370,8 +369,8 @@ test-suite coal-test
   other-modules:
       Coal.Compiler.BuildSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
+      Coal.Compiler.ProtoBuildSpec
       Coal.Language.TypeSpec
-      Coal.ProtoCompiler.ProtoBuildSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec

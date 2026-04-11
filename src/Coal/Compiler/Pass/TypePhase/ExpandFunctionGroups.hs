@@ -10,11 +10,10 @@ module Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (FunctionGroupsTransfor
 import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Shorthand (matchE, tupleE, tupleP, varE, varP)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..))
 import Coal.Language.Pattern
 import Coal.Language.Trait (Qualified (..))
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearAssumptionsC, protoOclearNameStoreC, protoOinsertNameC, setCurrentModuleC)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Trans (lift)
@@ -26,14 +25,14 @@ import TextShow (showt)
 passExpandFunctionGroups :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind ()) (ProtoModule Metadata Kind ())
 passExpandFunctionGroups = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
+pass :: (Monad m) => ProtoModule Metadata Kind () -> CompilerT Metadata m (ProtoModule Metadata Kind ())
 pass modul = do
   -- withCurrentModuleC expandFunctionGroups
-  lift $ setCurrentModuleC modul
+  setCurrentModuleC modul
   expandFunctionGroups modul
 
 class FunctionGroupsTransform e where
-  expandFunctionGroups :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) e
+  expandFunctionGroups :: (Monad m) => e -> CompilerT Metadata m e
 
 instance (FunctionGroupsTransform e) => FunctionGroupsTransform [e] where
   expandFunctionGroups = traverse expandFunctionGroups
@@ -53,7 +52,7 @@ instance FunctionGroupsTransform (ProtoModule Metadata Kind ()) where
             }
 
 -- TODO: annotations
-expandGroups :: (Monad m) => ProtoDefinition Metadata Kind () -> CompilerT Metadata (ProtoCompilerT m Metadata) [ProtoDefinition Metadata Kind ()]
+expandGroups :: (Monad m) => ProtoDefinition Metadata Kind () -> CompilerT Metadata m [ProtoDefinition Metadata Kind ()]
 expandGroups =
   \case
     ProtoDFunctionGroup loc name defs@(firstDef : _) ->

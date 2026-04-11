@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.ProtoCompiler.ProtoBuildSpec where
+module Coal.Compiler.ProtoBuildSpec where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
@@ -15,11 +15,11 @@ import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Language.Type (Parameter (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild.ProtoPrep (protoOprepareBuild, protoOreplacePlaceholders)
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
+import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.ProtoBuild.ProtoPrep (protoOprepareBuild, protoOreplacePlaceholders)
+import Coal.Compiler.Stack
+import Coal.Compiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Kind.Constraint.Generation
@@ -1310,7 +1310,7 @@ testModule4PreKinds =
 --    }
 
 -- testA :: (Monoid a) => IO (Either () (ProtoBuild a))
--- testA = evalProtoCompilerT (protoOprepareBuild testModuleBuiltins)
+-- testA = evalCompilerT (protoOprepareBuild testModuleBuiltins)
 
 --  testB :: ProtoModule () Kind ()
 --  testB = evalStateT (toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())) 0
@@ -1330,9 +1330,9 @@ testModule4PreKinds =
 --  res = protoOkindUnifierMonad (protoOsolveKindConstraints constraints)
 --  constraints = rights (snd testC)
 
-testE :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
+testE :: IO (Either CompilerFailureMode (ProtoBuild ())) -- CompilerT a m ()
 testE = do
-  evalProtoCompilerT $ do
+  evalCompilerT undefined $ do
     kindIndexedModule <- toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())
     env <- moduleKindEnvironment kindIndexedModule
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
@@ -1346,9 +1346,9 @@ testE = do
     protoOprepareBuild res3
     protoOgetCurrentBuildC
 
-testF :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
+testF :: IO (Either CompilerFailureMode (ProtoBuild ())) -- CompilerT a m ()
 testF = do
-  evalProtoCompilerT $ do
+  evalCompilerT undefined $ do
     kindIndexedModule <- toKindIndexed (testModule0PreKinds :: ProtoModule () () ())
     env <- moduleKindEnvironment kindIndexedModule
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
@@ -1361,9 +1361,9 @@ testF = do
     protoOprepareBuild res3
     protoOgetCurrentBuildC
 
-testG :: IO (Either () (ProtoBuild ())) -- ProtoCompilerT m a ()
+testG :: IO (Either CompilerFailureMode (ProtoBuild ())) -- CompilerT a m ()
 testG = do
-  evalProtoCompilerT $ do
+  evalCompilerT undefined $ do
     kindIndexedModule <- toKindIndexed (testModuleBuiltinsPreKinds :: ProtoModule () () ())
     env <- moduleKindEnvironment kindIndexedModule
     (_, res1) <- runProtoKindConstraintsGen env (protoOemitKindConstraints kindIndexedModule)
@@ -1386,11 +1386,11 @@ testG = do
     protoOprepareBuild res3
     protoOgetCurrentBuildC
 
--- updateNames :: (Monad m, Data a) => [ProtoDefinition a Kind IndexedType] -> ProtoCompilerT m a ()
+-- updateNames :: (Monad m, Data a) => [ProtoDefinition a Kind IndexedType] -> CompilerT a m ()
 -- updateNames defs =
 --  forM_ defs $
 
-defineName :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
+defineName :: (Monad m, Data a) => ProtoDefinition a Kind IndexedType -> CompilerT a m ()
 defineName =
   \case
     def@(ProtoDFunction _ name ProtoFunctionDefinition{..}) ->
@@ -1411,7 +1411,7 @@ defineName =
 
 xyz :: [ProtoModule Metadata () ()] -> IO ()
 xyz modules = do
-  (_, r, _) <- runProtoCompilerT $ do
+  (_, r, _) <- runCompilerT undefined $ do
     forM_ modules $
       \modul -> do
         protoOclearAssumptionsC
@@ -1458,7 +1458,7 @@ xyz modules = do
 
   pure ()
 
-indexTypes :: (Monad m, Traversable t) => t e -> ProtoCompilerT m a (t IndexedType)
+indexTypes :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
  where
   run s m = do
@@ -1466,7 +1466,7 @@ indexTypes ds = run (indexed ds) =<< gets protoOcompilerSupply
     protoOupdateSupplyC n
     pure r
 
-inferKinds :: (Monad m) => ProtoModule Metadata () () -> ProtoCompilerT m Metadata (ProtoModule Metadata Kind ())
+inferKinds :: (Monad m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata Kind ())
 inferKinds modul = do
   indexed <- toKindIndexed modul
   generateKindConstraints indexed
@@ -1477,7 +1477,7 @@ inferKinds modul = do
     Right sub ->
       return (protoOapplyKinds sub indexed)
 
-inferTypes :: (MonadIO m, Data a, Show a, Eq a) => ProtoModule a Kind () -> ProtoCompilerT m a (ProtoModule a Kind IndexedType)
+inferTypes :: (MonadIO m, Data a, Show a, Eq a) => ProtoModule a Kind () -> CompilerT a m (ProtoModule a Kind IndexedType)
 inferTypes modul = do
   ProtoModule{..} <- indexTypes modul
   forM_ protoOmoduleDefinitions $
@@ -1486,14 +1486,14 @@ inferTypes modul = do
       sub <- solveX
       defineName (apply sub def)
   sub <- gets protoOcompilerSubstitution
-  modify (overProtoCompilerAssumptions (apply sub))
+  modify (overCompilerAssumptions (apply sub))
   pure $
     ProtoModule
       { protoOmoduleDefinitions = fmap (fmap normalizeRowTypes) (apply sub protoOmoduleDefinitions)
       , ..
       }
 
--- typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> ProtoCompilerT m a ()
+-- typeDefinition1 :: (Monad m, Data a, Show a) => ProtoDefinition a Kind IndexedType -> CompilerT a m ()
 -- typeDefinition1 =
 --  \case
 --    ProtoDFunction _ name ProtoFunctionDefinition { .. } -> do

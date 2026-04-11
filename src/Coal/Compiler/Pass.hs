@@ -14,10 +14,9 @@ import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Environment
-import Coal.Compiler.Stack (CompilerT)
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (protoOtypeConstructorEntryKind)
-import Coal.ProtoCompiler.ProtoStack
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.ProtoBuild.ProtoNameEntry (protoOtypeConstructorEntryKind)
+import Coal.Compiler.Stack
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
@@ -25,14 +24,14 @@ import Control.Monad.Trans (lift)
 import Data.Foldable (for_)
 import System.Console.AsciiProgress
 
-newtype Pass a m i o = Pass {runPass :: i -> CompilerT a (ProtoCompilerT m a) o}
+newtype Pass a m i o = Pass {runPass :: i -> CompilerT a m o}
 
 tickBar :: (MonadIO m) => CompilerT a m ()
 tickBar = do
   pb <- asks compilerProgressBar
   liftIO (for_ pb tick)
 
-runPassAndTickBar :: (MonadIO m) => Pass a m i b -> i -> CompilerT a (ProtoCompilerT m a) b
+runPassAndTickBar :: (MonadIO m) => Pass a m i b -> i -> CompilerT a m b
 runPassAndTickBar p i = do
   tickBar
   runPass p i
@@ -50,7 +49,7 @@ overlayEnvironment :: (MonadIO m) => Pass Metadata m a b -> Pass Metadata m a b
 overlayEnvironment p = Pass{runPass = pass}
  where
   pass i = do
-    ProtoBuild{..} <- lift protoOgetCurrentBuildC
+    ProtoBuild{..} <- protoOgetCurrentBuildC
     local
       ( \env ->
           env

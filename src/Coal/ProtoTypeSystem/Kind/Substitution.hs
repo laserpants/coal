@@ -8,6 +8,8 @@ module Coal.ProtoTypeSystem.Kind.Substitution (
 ) where
 
 import Coal.Common.Environment (Environment (..), mapEnvironment)
+import Coal.Compiler.ProtoBuild (InstanceMap, ProtoBuild (..))
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -18,8 +20,6 @@ import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
-import Coal.ProtoCompiler.ProtoBuild (InstanceMap, ProtoBuild (..))
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint (ProtoKindConstraint (..))

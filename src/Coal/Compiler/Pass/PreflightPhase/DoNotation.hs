@@ -11,9 +11,8 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Stack
 import Coal.Language
-import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.IO.Class (MonadIO)
@@ -25,11 +24,11 @@ import qualified Data.List.NonEmpty as NonEmpty
 passDoNotation :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passDoNotation = mapPass $ Pass{runPass = traverse impl}
 
-impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
 impl = desugarDoNotation
 
 class TransformContext e where
-  desugarDoNotation :: (Monad m) => e -> CompilerT a (ProtoCompilerT m Metadata) e
+  desugarDoNotation :: (Monad m) => e -> CompilerT Metadata m e
 
 instance (TransformContext a) => TransformContext (Maybe a) where
   desugarDoNotation = traverse desugarDoNotation

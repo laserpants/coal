@@ -6,8 +6,8 @@
 module Coal.ProtoTypeSystem.Annotations where
 
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
 import Coal.Language
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Coal.TypeSystem.Constraint.Generation.Annotation.Error (TypeAnnotationError (..))
 import Coal.TypeSystem.Constraint.Generation.Context
 import Coal.Utils (lexOrderRank)

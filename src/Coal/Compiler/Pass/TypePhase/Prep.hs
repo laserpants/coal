@@ -11,18 +11,17 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
+import Coal.Compiler.ProtoBuild
+import qualified Coal.Compiler.ProtoBuild as Build
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.ProtoBuild.ProtoPrep
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language (Kind, constructors)
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Coal.ProtoCompiler.ProtoBuild
-import qualified Coal.ProtoCompiler.ProtoBuild as Build
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoBuild.ProtoPrep
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), insertBuildC, protoOclearAssumptionsC, protoOclearNameStoreC, protoOgetCurrentBuildC, protoOinsertConstraintsC, protoOinsertNameC, protoOupdateSupplyC, setCurrentModuleC, setCurrentPathC)
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad (unless)
@@ -37,17 +36,17 @@ import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 passPrep :: (MonadIO m) => Pass Metadata m (ProtoModule Metadata () ()) (ProtoModule Metadata Kind ())
 passPrep = Pass{runPass = pass}
 
-pass :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
+pass :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata Kind ())
 pass m = do
   -- setCompilerCurrentModuleC (protoOmodulePath m)
-  lift $ setCurrentPathC (protoOmodulePath m)
+  setCurrentPathC (protoOmodulePath m)
   prep m
 
 -- withCurrentModuleC prep
 
-prep :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind ())
+prep :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata Kind ())
 prep modul = do
-  m1 <- lift $ do
+  m1 <- do
     -- let modul = toProtoModule [] m
     protoOclearAssumptionsC
     protoOclearNameStoreC
@@ -55,7 +54,7 @@ prep modul = do
     forM_ builtinFunctions $ uncurry protoOinsertNameC
     toKindIndexed modul
 
-  lift $ protoOprepareBuildAliases m1
+  protoOprepareBuildAliases m1
 
   expandFunctionGroups m1
 
@@ -68,7 +67,7 @@ protoOprepareBuildAliases ProtoModule{..} = do
         }
   insertBuildC build
 
-protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 protoOprepareDefinitions = traverse_ collectTypeAliases
 
 -- TODO: DRY
@@ -131,7 +130,7 @@ insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
 insertAlias :: (Monad m) => Name -> ProtoAliasEntry a -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) m) ()
 insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
-collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectTypeAliases =
   \case
     ProtoDTypeAlias loc name ProtoAliasDefinition{..} -> do
@@ -175,7 +174,7 @@ collectTypeAliases =
     _ ->
       pure ()
 
-insertTypeName :: (Monad m) => ProtoBuild a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) Bool
+insertTypeName :: (Monad m) => ProtoBuild a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) Bool
 insertTypeName ProtoBuild{..} loc name =
   or <$> forM (Environment.lookupWithDefault [] name protoObuildNames) go
  where
@@ -192,7 +191,7 @@ insertTypeName ProtoBuild{..} loc name =
       _ ->
         return False
 
-importedBuild :: (Monad m) => Path -> ProtoCompilerT m a (ProtoBuild a)
+importedBuild :: (Monad m) => Path -> CompilerT a m (ProtoBuild a)
 importedBuild path = do
   env <- gets protoOcompilerModules
   case Environment.lookup (principalPath path) env of

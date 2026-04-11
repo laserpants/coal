@@ -2,18 +2,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment) where
+module Coal.Compiler.KindEnvironment (moduleKindEnvironment) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.ProtoState
+import Coal.Compiler.Stack
 import Coal.Language.HasKind (HasKind (..), foldKindOf)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind (Kind (..))
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Applicative ((<|>))
@@ -21,7 +21,7 @@ import Control.Monad.State (get)
 import Data.Maybe (fromMaybe)
 import Extras (Name, concatForM, forM, (<.>))
 
-moduleKindEnvironment :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m b (Environment Kind)
+moduleKindEnvironment :: (Monad m) => ProtoModule a Kind () -> CompilerT b m (Environment Kind)
 moduleKindEnvironment ProtoModule{..} = do
   res <- forM protoOmoduleDefinitions $
     \case
@@ -123,9 +123,9 @@ aliasKind name ProtoBuild{..} =
     Just ProtoAliasEntry{..} ->
       Just (kindOf protoOaliasEntryType)
 
-importedBuild :: (Monad m) => Path -> ProtoCompilerT m a (ProtoBuild a)
+importedBuild :: (Monad m) => Path -> CompilerT a m (ProtoBuild a)
 importedBuild path = do
-  ProtoCompilerState{..} <- get
+  CompilerState{..} <- get
   case Environment.lookup (principalPath path) protoOcompilerModules of
     Nothing ->
       -- TODO

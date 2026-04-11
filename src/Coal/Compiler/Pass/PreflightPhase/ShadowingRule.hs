@@ -13,12 +13,11 @@ import Coal.Common.Name (isConstructor)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..), Kind (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (MonadError (throwError), forM_, when)
@@ -34,13 +33,13 @@ import Extras (Name)
 passShadowingRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passShadowingRule = mapPass $ Pass{runPass = traverse impl}
 
-impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
 impl mm = do
   --  let mm = toProtoModule [] m
   detectShadowing mempty mm
 
 class RuleContext e where
-  detectShadowing :: (Monad m) => Set Name -> e -> CompilerT Metadata (ProtoCompilerT m Metadata) e
+  detectShadowing :: (Monad m) => Set Name -> e -> CompilerT Metadata m e
 
 instance (RuleContext e) => RuleContext [e] where
   detectShadowing = traverse . detectShadowing
@@ -148,7 +147,7 @@ instance RuleContext (ProtoModule Metadata () ()) where
   detectShadowing names =
     \case
       ProtoModule{..} -> do
-        lift $ setCurrentPathC protoOmodulePath
+        setCurrentPathC protoOmodulePath
         newModuleDefinitions <- detectShadowing names protoOmoduleDefinitions
         return $
           ProtoModule
@@ -191,11 +190,11 @@ instance RuleContext (ProtoFunctionDefinition Metadata () ()) where
             , ..
             }
 
-addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata (ProtoCompilerT m Metadata) (Set Name)
+addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata m (Set Name)
 addNames loc new names = do
   forM_ new' $
     \name -> do
-      path <- lift $ gets protoOcompilerCurrentPath
+      path <- gets protoOcompilerCurrentPath
       when (name `elem` names) $ do
         tellErrors [Shadowing name (ErrorLocation (principalPath path) loc)]
         throwError PreflightFailure

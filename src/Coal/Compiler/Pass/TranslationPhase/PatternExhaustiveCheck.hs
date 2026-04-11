@@ -15,7 +15,6 @@ import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (unless)
@@ -27,12 +26,12 @@ import Extras (Name, traverse_)
 passPatternExhaustiveCheck :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passPatternExhaustiveCheck = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
 bork m = do
   patternExhaustiveCheckM m
   return m
 
-patternExhaustiveCheckM :: (Monad m) => ProtoModule Metadata k t -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+patternExhaustiveCheckM :: (Monad m) => ProtoModule Metadata k t -> CompilerT Metadata m ()
 patternExhaustiveCheckM m = do
   (_, es) <-
     listenErrors $
@@ -40,7 +39,7 @@ patternExhaustiveCheckM m = do
   unless (null es) (throwError PatternAnomaly)
 
 class PatternExhaustiveCheckContext c where
-  patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+  patternExhaustiveCheck :: (Monad m) => Name -> c -> CompilerT Metadata m ()
 
 -- instance PatternExhaustiveCheckContext (Definition Metadata k t) where
 --  patternExhaustiveCheck name =
@@ -280,7 +279,7 @@ instance PatternExhaustiveCheckContext (Expression Metadata k t) where
 --      e@EFold{} ->
 --        pure e
 
-checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata k t) -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata k t) -> CompilerT Metadata m ()
 checkExhaustive name loc cs = do
   isExhaustive <- exhaustive patterns
   unless isExhaustive $ do

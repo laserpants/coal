@@ -14,11 +14,10 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT, setCurrentPathC)
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except
@@ -33,15 +32,15 @@ import Extras (Name, traverse_)
 passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse fork}
 
-fork :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+fork :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
 fork mm = do
   --  let mm = toProtoModule [] m
-  lift $ setCurrentPathC (protoOmodulePath mm)
+  setCurrentPathC (protoOmodulePath mm)
   detectDuplicateParams mm
   return mm
 
 class RuleContext e where
-  detectDuplicateParams :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+  detectDuplicateParams :: (Monad m) => e -> CompilerT Metadata m ()
 
 instance (RuleContext e) => RuleContext [e] where
   detectDuplicateParams = traverse_ detectDuplicateParams
@@ -178,10 +177,10 @@ instance RuleContext (Binding Expression Metadata () t) where
         checkPatterns ps
         detectDuplicateParams e
 
-checkPatterns :: (Monad m) => NonEmpty (Pattern Metadata () t) -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+checkPatterns :: (Monad m) => NonEmpty (Pattern Metadata () t) -> CompilerT Metadata m ()
 checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
  where
-  checkPattern :: (Monad m) => Pattern Metadata () t -> StateT (Set Name) (CompilerT Metadata (ProtoCompilerT m Metadata)) ()
+  checkPattern :: (Monad m) => Pattern Metadata () t -> StateT (Set Name) (CompilerT Metadata m) ()
   checkPattern =
     \case
       PAnnotation _ _ p ->
@@ -214,11 +213,11 @@ checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
       _ ->
         pure ()
 
-  checkDup :: (Monad m) => Metadata -> Name -> StateT (Set Name) (CompilerT Metadata (ProtoCompilerT m Metadata)) ()
+  checkDup :: (Monad m) => Metadata -> Name -> StateT (Set Name) (CompilerT Metadata m) ()
   checkDup loc name = do
     s <- get
     when (name `elem` s) $ do
-      path <- lift $ lift $ gets protoOcompilerCurrentPath
+      path <- lift $ gets protoOcompilerCurrentPath
       tellErrors [ConflictingParameter name (ErrorLocation (principalPath path) loc)]
       throwError PreflightFailure
     registerName name

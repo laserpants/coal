@@ -10,7 +10,8 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.Stack
 import Coal.Kernel.Builtin.Objects (builtinObjects)
 import Coal.Kernel.Compiler (KernelExpr, compile, compileClosureCode)
 import Coal.Kernel.Compiler.EntryPoint (entryPoint)
@@ -20,8 +21,6 @@ import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..))
 import Coal.Kernel.LLVM
 import Coal.Kernel.Language
 import qualified Coal.Kernel.Language as Kernel
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoStack
 import Control.Monad (unless)
 import Control.Monad.IO.Class (MonadIO (..))
 import Control.Monad.State (gets)
@@ -32,10 +31,10 @@ import Extras (Name, forM, isConstructor, (<$$>))
 passKernelCode :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] [BuildEnvelope (Name, [IRConstruct [IRLine]])]
 passKernelCode = Pass{runPass = evalPipelineT . pass}
 
-pass :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata (ProtoCompilerT m a)) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
+pass :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata m) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
 pass ms = compileUnits (builtin : ms)
 
-compileUnits :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata (ProtoCompilerT m a)) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
+compileUnits :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata m) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
 compileUnits units = do
   mods <- forM units $
     \case
@@ -60,16 +59,15 @@ compileUnits units = do
 
         lift $
           unless (moduleName == "Builtin$") $ do
-            lift $
-              protoOupdateBuildC moduleName $
-                \ProtoBuild{..} ->
-                  pure
-                    ProtoBuild
-                      { protoObuildKernelNames = Environment.fromList kernelNames
-                      , protoObuildKernelIRTypes = Environment.fromList irTypes
-                      , protoObuildKernelConstructors = Environment.fromList kernelConstructors
-                      , ..
-                      }
+            protoOupdateBuildC moduleName $
+              \ProtoBuild{..} ->
+                pure
+                  ProtoBuild
+                    { protoObuildKernelNames = Environment.fromList kernelNames
+                    , protoObuildKernelIRTypes = Environment.fromList irTypes
+                    , protoObuildKernelConstructors = Environment.fromList kernelConstructors
+                    , ..
+                    }
 
         pure (BSource (moduleName, out))
       BCached ProtoBuild{..} -> do

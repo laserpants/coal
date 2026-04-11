@@ -11,13 +11,12 @@ import Coal.Common.Environment (forMEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Compiler.Environment
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.ProtoState
+import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized
@@ -37,7 +36,7 @@ import Extras (Dictionary, Name, forM_)
 import Text.Pretty.Simple (pPrint, pShowNoColor)
 
 class AliasTransform c where
-  aliasTransform :: (MonadIO m, Show a) => c -> CompilerT a (ProtoCompilerT m a) c
+  aliasTransform :: (MonadIO m, Show a) => c -> CompilerT a m c
 
 instance (AliasTransform c) => AliasTransform [c] where
   aliasTransform = traverse aliasTransform
@@ -76,13 +75,13 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
                 , ..
                 }
 
-        ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+        ProtoBuild{..} <- protoOgetCurrentBuildC
         liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath protoOmodulePath)) (toStrict $ pShowNoColor $ ProtoBuild{..})
         liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath protoOmodulePath)) (toStrict $ pShowNoColor $ protoObuildNames)
 
         pure m
 
-updateNames :: (MonadIO m, Show a) => CompilerT a (ProtoCompilerT m a) ()
+updateNames :: (MonadIO m, Show a) => CompilerT a m ()
 updateNames =
   tempprotoOupdateCurrentBuildC $
     \build@ProtoBuild{..} ->
@@ -95,19 +94,19 @@ updateNames =
             _ ->
               pure ()
 
-tempprotoOupdateBuildC :: (Monad m) => Path -> (ProtoBuild a -> CompilerT a (ProtoCompilerT m a) (ProtoBuild a)) -> CompilerT a (ProtoCompilerT m a) ()
+tempprotoOupdateBuildC :: (Monad m) => Path -> (ProtoBuild a -> CompilerT a m (ProtoBuild a)) -> CompilerT a m ()
 tempprotoOupdateBuildC path f = do
-  maybeBuild <- lift $ protoOgetBuildC path
+  maybeBuild <- protoOgetBuildC path
   case maybeBuild of
     Nothing ->
       error "Implementation error"
     Just build -> do
       newBuild <- f build
-      lift $ modify (overProtoCompilerModules (Environment.insert (principalPath path) newBuild))
+      modify (overCompilerModules (Environment.insert (principalPath path) newBuild))
 
-tempprotoOupdateCurrentBuildC :: (Monad m) => (ProtoBuild a -> CompilerT a (ProtoCompilerT m a) (ProtoBuild a)) -> CompilerT a (ProtoCompilerT m a) ()
+tempprotoOupdateCurrentBuildC :: (Monad m) => (ProtoBuild a -> CompilerT a m (ProtoBuild a)) -> CompilerT a m ()
 tempprotoOupdateCurrentBuildC f = do
-  ProtoCompilerState{..} <- lift get
+  CompilerState{..} <- get
   tempprotoOupdateBuildC protoOcompilerCurrentPath f
 
 instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (ProtoDefinition e a t) where
@@ -282,21 +281,21 @@ instance AliasTransform (ProtoDataConstructorEntry a) where
             , ..
             }
 
-aliasTransformTypeApplication :: (MonadIO m, Show a) => Kind -> Type Parameter Kind -> Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
+aliasTransformTypeApplication :: (MonadIO m, Show a) => Kind -> Type Parameter Kind -> Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> CompilerT a m (Type Parameter Kind)
 aliasTransformTypeApplication _ t (TConstructor _ name) ts =
   lookupAlias t (toList ts) name
 aliasTransformTypeApplication k _ t ts =
   applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
 
-aliasTransformTypeApplication2 :: (MonadIO m, Show a) => Kind -> Type TypeIndex Kind -> Type TypeIndex Kind -> NonEmpty (Type TypeIndex Kind) -> CompilerT a (ProtoCompilerT m a) (Type TypeIndex Kind)
+aliasTransformTypeApplication2 :: (MonadIO m, Show a) => Kind -> Type TypeIndex Kind -> Type TypeIndex Kind -> NonEmpty (Type TypeIndex Kind) -> CompilerT a m (Type TypeIndex Kind)
 aliasTransformTypeApplication2 _ t (TConstructor _ name) ts =
   lookupAlias2 t (toList ts) name
 aliasTransformTypeApplication2 k _ t ts =
   applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
 
-lookupAlias :: (MonadIO m, Show a) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type Parameter Kind)
+lookupAlias :: (MonadIO m, Show a) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a m (Type Parameter Kind)
 lookupAlias t ts name = do
-  ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+  ProtoBuild{..} <- protoOgetCurrentBuildC
   -- env <- asks compilerAliasEnvironment
   case Environment.lookup name protoObuildAliases of
     Nothing ->
@@ -309,9 +308,9 @@ lookupAlias t ts name = do
       let t1 = foldr (uncurry substituteAlias) protoOaliasEntryType (protoOaliasEntryParams `zip` ts)
       TAlias name ts <$> aliasTransform t1
 
-lookupAlias2 :: (MonadIO m, Show a) => Type TypeIndex Kind -> [Type TypeIndex Kind] -> Name -> CompilerT a (ProtoCompilerT m a) (Type TypeIndex Kind)
+lookupAlias2 :: (MonadIO m, Show a) => Type TypeIndex Kind -> [Type TypeIndex Kind] -> Name -> CompilerT a m (Type TypeIndex Kind)
 lookupAlias2 t ts name = do
-  ProtoBuild{..} <- lift $ protoOgetCurrentBuildC
+  ProtoBuild{..} <- protoOgetCurrentBuildC
   -- env <- asks compilerAliasEnvironment
   case Environment.lookup name protoObuildAliases of
     Nothing ->
@@ -321,10 +320,10 @@ lookupAlias2 t ts name = do
         _ ->
           pure t
     Just ProtoAliasEntry{..} -> do
-      ixs <- traverse (\Parameter{..} -> lift $ supplied (TypeIndex parameterKind)) protoOaliasEntryParams
+      ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) protoOaliasEntryParams
       let abc = (parameterName <$> protoOaliasEntryParams) `zip` ixs
           sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)
-      t1 <- lift $ runReaderT (toIndexed protoOaliasEntryType) (Environment.fromList abc)
+      t1 <- runReaderT (toIndexed protoOaliasEntryType) (Environment.fromList abc)
       TAlias name ts <$> aliasTransform (applyT sub t1)
 
 substituteAlias :: Parameter k -> Type Parameter k -> Type Parameter k -> Type Parameter k

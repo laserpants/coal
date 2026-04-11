@@ -11,7 +11,6 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
@@ -22,7 +21,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 passExpandAsPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passExpandAsPatterns = Pass{runPass = bork}
 
-bork :: (Monad m, Monoid a, Data a) => ProtoModule a Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind IndexedType)
+bork :: (Monad m, Monoid a, Data a) => ProtoModule a Kind IndexedType -> CompilerT a m (ProtoModule a Kind IndexedType)
 bork m = do
   let xx = expandAsPatterns m
   return xx

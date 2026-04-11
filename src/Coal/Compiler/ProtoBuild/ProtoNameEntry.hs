@@ -5,7 +5,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry (
+module Coal.Compiler.ProtoBuild.ProtoNameEntry (
   ProtoDataConstructorEntry (..),
   ProtoTypeConstructorEntry (..),
   ProtoTraitEntry (..),

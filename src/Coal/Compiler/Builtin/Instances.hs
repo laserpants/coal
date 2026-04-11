@@ -2,11 +2,11 @@
 
 module Coal.Compiler.Builtin.Instances (protoObuiltinInstances) where
 
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs, tupleType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
 import Coal.Language.Type.Scheme (Scheme (Forall))
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Name)

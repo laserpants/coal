@@ -17,7 +17,7 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Parser (spaces)
 import Coal.Kernel.Parser.Module (module_)
-import Coal.ProtoCompiler.ProtoStack
+import Coal.Compiler.Stack
 import Control.Monad (void)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)
@@ -156,10 +156,10 @@ e2eKernelSpec = do
 expectOutput :: String -> [FilePath] -> Spec
 expectOutput expt files =
   it ("\"" <> expt <> "\"") $ do
-    res <- evalProtoCompilerT (evalCompilerT (emptyCompilerEnvironment Nothing) (runKernelSpec files))
-    res `shouldBe` Right (Right expt)
+    res <- evalCompilerT (emptyCompilerEnvironment Nothing) (runKernelSpec files)
+    res `shouldBe` Right expt
 
-runKernelSpec :: [FilePath] -> CompilerT Metadata (ProtoCompilerT IO a) String -- (Either CompilerFailureMode String)
+runKernelSpec :: [FilePath] -> CompilerT Metadata IO String -- (Either CompilerFailureMode String)
 runKernelSpec files = do
   ir <- evalPipelineT (compileUnits (BSource builtinObjects : mods))
   res <- generateLLOutput Nothing config ir

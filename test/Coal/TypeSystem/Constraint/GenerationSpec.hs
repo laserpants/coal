@@ -2,7 +2,7 @@
 
 module Coal.TypeSystem.Constraint.GenerationSpec (collectExampleConstraintsSpec1) where
 
-import Coal.ProtoCompiler.ProtoState
+import Coal.Compiler.ProtoState
 import Coal.Common.Label (Label (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation

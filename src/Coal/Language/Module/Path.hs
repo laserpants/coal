@@ -42,6 +42,7 @@ parsePath input
  where
   comps = Text.splitOn "." input
 
+-- TODO: Combine this with code in Path.Resolve
 validateComponent :: Text -> Maybe Name
 validateComponent t = do
   (first, rest) <- Text.uncons t

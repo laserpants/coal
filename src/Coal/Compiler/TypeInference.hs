@@ -14,14 +14,13 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.KindEnvironment (moduleKindEnvironment)
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOclearConstraintsC, protoOclearKindConstraintsC, protoOclearTypeAnnotationParamsC, protoOcompilerReportConstraintsGenErrors, protoOcompilerReportKindConstraintsGenErrors, protoOcompilerReportSolverRuleViolations, protoOgetCurrentBuildC, protoOinsertAssumptionsC, protoOinsertConstraintsC, protoOinsertKindConstraintsC, protoOinsertNameC, protoOsetSubstitutionC, protoOupdateSupplyC, setTypeAnnotationParamsC)
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Coal.ProtoTypeSystem.Kind.Constraint.Generation
@@ -38,7 +37,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name)
 
-generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> ProtoCompilerT m a ()
+generateKindConstraints :: (Monad m) => ProtoModule a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do
   env <- moduleKindEnvironment modul
   (_, result) <- runProtoKindConstraintsGen env (protoOemitKindConstraints modul)
@@ -47,7 +46,7 @@ generateKindConstraints modul = do
   protoOcompilerReportKindConstraintsGenErrors errors
 
 class ProtoGenerateConstraints a c where
-  protoOgenerateConstraints :: (Monad m) => c -> ProtoCompilerT m a ()
+  protoOgenerateConstraints :: (Monad m) => c -> CompilerT a m ()
 
 instance (Data a, Show a) => ProtoGenerateConstraints a (Expression a Kind IndexedType) where
   protoOgenerateConstraints expr = do
@@ -148,7 +147,7 @@ instance (Show a, Data a) => ProtoGenerateConstraints a (ProtoDefinition a Kind 
       _ ->
         pure ()
 
-protoOtoIndexedScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ProtoCompilerT m a (Scheme TypeIndex Kind IndexedType)
+protoOtoIndexedScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> CompilerT a m (Scheme TypeIndex Kind IndexedType)
 protoOtoIndexedScheme Forall{..} = do
   env <- protoOinstantiateTypeIndexes schemeTypeVariables
   flip runReaderT (Environment.fromList env) $
@@ -157,10 +156,10 @@ protoOtoIndexedScheme Forall{..} = do
       <*> toIndexed schemeTraits
       <*> toIndexed schemeTypeBody
 
-freshTypeVariable :: (Monad m) => ProtoCompilerT m a (Type TypeIndex Kind)
+freshTypeVariable :: (Monad m) => CompilerT a m (Type TypeIndex Kind)
 freshTypeVariable = supplied (TVariable . TypeIndex KType)
 
-protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> ProtoCompilerT m a ([CompilerAssumption a], [CompilerConstraint a])
+protoOgenerateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind IndexedType -> CompilerT a m ([CompilerAssumption a], [CompilerConstraint a])
 protoOgenerateExpressionConstraints expr = do
   (assumptions, params, result) <- protoOrunConstraintsGen (protoOemitConstraints expr)
   let (errors, constraints) = partitionEithers result
@@ -168,9 +167,9 @@ protoOgenerateExpressionConstraints expr = do
   setTypeAnnotationParamsC params
   pure (assumptions, constraints)
 
-protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> ProtoCompilerT m a (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
+protoOrunConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
 protoOrunConstraintsGen stack = do
-  ProtoCompilerState{..} <- get
+  CompilerState{..} <- get
   ProtoBuild{..} <- protoOgetCurrentBuildC
   let (result, ConstraintsGenState{..}, output) =
         runConstraintsGenStack
@@ -187,7 +186,7 @@ protoOrunConstraintsGen stack = do
   protoOupdateSupplyC constraintsGenStateSupply
   pure (result, constraintsGenStateTypeIndexes, output)
 
-protoOdefine :: (Monad m) => Name -> IndexedType -> ProtoCompilerT m a ()
+protoOdefine :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
 protoOdefine name t = protoOinsertNameC name (Forall (typeIndexesIn s) mempty s)
  where
   s = normalizeTypeIndexes t
@@ -322,7 +321,7 @@ type ConstraintsGenResult g o a t s =
 --      Just s ->
 --        Right (Explicit (RuleTypeConstraint assumptionMetadata assumptionName assumptionType s) assumptionType s)
 
-protoOassumptionConstraints :: (Monad m) => CompilerAssumption a -> ProtoCompilerT m a (Either (CompilerAssumption a) (CompilerConstraint a))
+protoOassumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
 protoOassumptionConstraints Assumption{..} = do
   names <- gets protoOcompilerNameStore
   pure $
@@ -344,7 +343,7 @@ protoOassumptionConstraints Assumption{..} = do
 --  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
 --  pure sub
 
-solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> ProtoCompilerT m a Substitution
+solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
 solveConstraintsX constraints = do
   dict <- gets protoOcompilerTypeAnnotationParams
   n <- gets protoOcompilerSupply
@@ -366,7 +365,7 @@ solveConstraintsX constraints = do
 --  setSubstitutionC (sub2 <> sub1)
 --  gets compilerSubstitution
 
-solveX :: (Monad m, Data a, Eq a) => ProtoCompilerT m a Substitution
+solveX :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveX = do
   constraints <- gets protoOcompilerConstraints
   sub1 <- gets protoOcompilerSubstitution

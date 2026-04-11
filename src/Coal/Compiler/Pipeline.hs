@@ -26,12 +26,11 @@ import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
 import Coal.Compiler.Pass.MainPhase (mainPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
 import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoTypeSystem.Kind.Error (ProtoKindError (..))
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
@@ -88,7 +87,7 @@ compileWithCFiles config files cFiles = do
   -- pure $ fromRight (error "???") z
 
   case foo of
-    (Right (e, _, es), ProtoCompilerState{..}, _) -> do
+    (e, CompilerState{..}, es) -> do
       forM_ (nub es) $
         \err -> do
           case errorLocation err of
@@ -104,15 +103,14 @@ compileWithCFiles config files cFiles = do
           pure ()
  where
   -- go progressBar = do
-  --  evalProtoCompilerT $
+  --  evalCompilerT $
   --    runCompilerT (emptyCompilerEnvironment progressBar) $ do
   --      lift $ setConfigC config{configCFiles = configCFiles config <> cFiles}
   --      runPass pipeline files
   go2 progressBar = do
-    runProtoCompilerT $
-      runCompilerT (emptyCompilerEnvironment progressBar) $ do
-        lift $ setConfigC config{configCFiles = configCFiles config <> cFiles}
-        runPass pipeline files
+    runCompilerT (emptyCompilerEnvironment progressBar) $ do
+      setConfigC config{configCFiles = configCFiles config <> cFiles}
+      runPass pipeline files
 
 compile :: CompilerConfig -> [FilePath] -> IO ()
 compile config files = compileWithCFiles config files []

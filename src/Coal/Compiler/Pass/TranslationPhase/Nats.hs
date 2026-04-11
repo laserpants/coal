@@ -11,10 +11,9 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Stack
 import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
-import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad ((<=<))
@@ -27,11 +26,11 @@ import Extras (Dictionary)
 passCompileNats :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passCompileNats = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT a (ProtoCompilerT m a) (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT a m (ProtoModule Metadata Kind IndexedType)
 bork = compileNats
 
 class CompileNatsContext e where
-  compileNats :: (Monad m) => e -> CompilerT a (ProtoCompilerT m a) e
+  compileNats :: (Monad m) => e -> CompilerT a m e
 
 instance (CompileNatsContext a) => CompileNatsContext [a] where
   compileNats = traverse compileNats
@@ -92,7 +91,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
   compileNats =
     \case
       ECompiledClause loc (Label _ "Succ" :| [Label _ s]) e -> do
-        name <- lift $ supplied (freshName "nats")
+        name <- supplied (freshName "nats")
         pure $
           ECompiledClause loc (Label (natType `TArrow` natType) "$Succ" :| [Label (TIntrinsic IInt32) name]) $
             ERecursiveLet

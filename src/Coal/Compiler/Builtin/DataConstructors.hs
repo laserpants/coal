@@ -2,8 +2,8 @@
 
 module Coal.Compiler.Builtin.DataConstructors (builtinDataConstructors) where
 
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
 import Coal.Language
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 

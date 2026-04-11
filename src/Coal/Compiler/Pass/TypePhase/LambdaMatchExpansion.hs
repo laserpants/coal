@@ -10,11 +10,10 @@ module Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (LambdaMatchExpressionT
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Stack
 import Coal.Language.Expression
 import Coal.Language.Pattern
 import Coal.Language.Type.Kind
-import Coal.ProtoCompiler.ProtoStack
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Data.Data (Data)
@@ -26,7 +25,7 @@ passLambdaMatchExpansion :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule
 passLambdaMatchExpansion = Pass{runPass = lambdaMatchExpressionTransform}
 
 class LambdaMatchExpressionTransform t where
-  lambdaMatchExpressionTransform :: (Monad m) => t -> CompilerT a (ProtoCompilerT m a) t
+  lambdaMatchExpressionTransform :: (Monad m) => t -> CompilerT a m t
 
 instance (LambdaMatchExpressionTransform a) => LambdaMatchExpressionTransform [a] where
   lambdaMatchExpressionTransform = traverse lambdaMatchExpressionTransform

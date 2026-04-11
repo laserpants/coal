@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (
+module Coal.Compiler.ProtoBuild.ProtoPrep (
   protoOprepareBuild,
   protoOreplacePlaceholders,
 ) where
@@ -12,15 +12,15 @@ module Coal.ProtoCompiler.ProtoBuild.ProtoPrep (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Builtin.Instances (protoObuiltinInstances)
+import Coal.Compiler.ProtoBuild
+import qualified Coal.Compiler.ProtoBuild as Build
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.ProtoState
+import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
-import Coal.ProtoCompiler.ProtoBuild
-import qualified Coal.ProtoCompiler.ProtoBuild as Build
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), insertBuildC, protoOgetCurrentBuildC, protoOinsertNameC)
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Coal.ProtoTypeSystem.Parameterized
@@ -109,7 +109,7 @@ builtinNames =
     , "negate"
     ]
 
-protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> ProtoCompilerT m a ()
+protoOprepareBuild :: (Monad m, Monoid a) => ProtoModule a Kind () -> CompilerT a m ()
 protoOprepareBuild ProtoModule{..} = do
   build <- protoOgetCurrentBuildC
   newBuild <-
@@ -120,7 +120,7 @@ protoOprepareBuild ProtoModule{..} = do
         }
   insertBuildC newBuild
 
-protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+protoOprepareDefinitions :: (Monad m, Monoid a) => [ProtoDefinition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 protoOprepareDefinitions defs = do
   insertNameEntry (ProtoNType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
@@ -185,7 +185,7 @@ protoOprepareDefinitions defs = do
   qualifiedNames <- traverse (qualifiedImports build) defs
   modify (setQualifiedNames (Environment.fromList (concat qualifiedNames)))
 
-qualifiedImports :: (Monad m) => ProtoBuild a -> ProtoDefinition a k t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) [(Name, Name)]
+qualifiedImports :: (Monad m) => ProtoBuild a -> ProtoDefinition a k t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) [(Name, Name)]
 qualifiedImports ProtoBuild{..} =
   \case
     ProtoDImport _ path imports ->
@@ -251,7 +251,7 @@ qualifiedImports ProtoBuild{..} =
 qualified :: Name -> Path -> Name
 qualified name path = principalPath path <> "." <> name
 
-expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ModuleExportList a)
+expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) (ModuleExportList a)
 expandExports = do
   exportList <- ask
   ProtoBuild{protoObuildDataConstructors} <- get
@@ -273,7 +273,7 @@ expandExports = do
       return
         (Exports newExports)
 
-collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTypeConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectTypeConstructors =
   \case
     ProtoDType loc name ProtoTypeDefinition{..} -> do
@@ -321,7 +321,7 @@ collectTypeConstructors =
     _ ->
       pure ()
 
-insertTypeName :: (Monad m) => ProtoBuild a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) Bool
+insertTypeName :: (Monad m) => ProtoBuild a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) Bool
 insertTypeName ProtoBuild{..} loc name =
   or <$> forM (Environment.lookupWithDefault mempty name protoObuildNames) go
  where
@@ -354,7 +354,7 @@ insertTypeName ProtoBuild{..} loc name =
       _ ->
         return False
 
--- collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+-- collectTypeAliases :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 -- collectTypeAliases =
 --  \case
 --    ProtoDTypeAlias loc name ProtoAliasDefinition{..} -> do
@@ -376,7 +376,7 @@ insertTypeName ProtoBuild{..} loc name =
 --    _ ->
 --      pure ()
 
-collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectDataConstructors :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectDataConstructors =
   \case
     ProtoDType loc _ ProtoTypeDefinition{..} ->
@@ -430,7 +430,7 @@ collectDataConstructors =
     _ ->
       pure ()
 
-dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (ProtoDataConstructorEntry a)
+dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) (ProtoDataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
   (s, _) <- instantiateScheme constructorScheme
   pure $
@@ -445,7 +445,7 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , protoOdataConstructorEntryConstructorSet = constructorSet
       }
 
-collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTraits :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectTraits =
   \case
     ProtoDTrait loc name ProtoTraitDefinition{..} -> do
@@ -530,7 +530,7 @@ instancesForType name = Map.filter isType
 traitDefinitionInterfaceEntryToPair :: ProtoTraitDefinitionInterfaceEntry Kind -> (Name, Scheme Parameter Kind (Type Parameter Kind))
 traitDefinitionInterfaceEntryToPair ProtoTraitDefinitionInterfaceEntry{..} = (protoOtraitDefinitionInterfaceEntryName, protoOtraitDefinitionInterfaceEntryScheme)
 
-collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectTraitsInterface :: (Monad m) => ProtoDefinition a Kind t -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectTraitsInterface =
   \case
     ProtoDTrait _ name ProtoTraitDefinition{..} ->
@@ -600,7 +600,7 @@ collectTraitsInterface =
     _ ->
       pure ()
 
-collectInstances :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectInstances :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectInstances =
   \case
     ProtoDInstance _ ProtoInstanceDefinition{..} -> do
@@ -669,7 +669,7 @@ collectInstances =
     _ ->
       pure ()
 
-collectPlaceholders :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectPlaceholders :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectPlaceholders =
   \case
     ProtoDFunction _ name ProtoFunctionDefinition{..} -> do
@@ -684,7 +684,7 @@ collectPlaceholders =
     _ ->
       pure ()
 
-instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) (IndexedScheme, [(Name, TypeIndex Kind)])
+instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) (IndexedScheme, [(Name, TypeIndex Kind)])
 instantiateScheme Forall{..} =
   lift $ lift $ do
     env <- protoOinstantiateTypeIndexes schemeTypeVariables
@@ -696,10 +696,10 @@ instantiateScheme Forall{..} =
           <*> toIndexed schemeTypeBody
     return (s, env)
 
-instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) IndexedType
+instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 
-collectImports :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (ProtoCompilerT m a)) ()
+collectImports :: (Monad m) => ProtoDefinition a Kind () -> ReaderT (ModuleExportList a) (StateT (ProtoBuild a) (CompilerT a m)) ()
 collectImports =
   \case
     -- TODO: remove
@@ -756,7 +756,7 @@ collectImports =
     _ ->
       pure ()
 
-importedBuild :: (Monad m) => Path -> ProtoCompilerT m a (ProtoBuild a)
+importedBuild :: (Monad m) => Path -> CompilerT a m (ProtoBuild a)
 importedBuild path = do
   env <- gets protoOcompilerModules
   case Environment.lookup (principalPath path) env of
@@ -765,7 +765,7 @@ importedBuild path = do
     Just build ->
       return build
 
-protoOreplacePlaceholders :: (Monad m) => ProtoCompilerT m a ()
+protoOreplacePlaceholders :: (Monad m) => CompilerT a m ()
 protoOreplacePlaceholders = do
   build <- protoOgetCurrentBuildC
   store <- gets protoOcompilerNameStore

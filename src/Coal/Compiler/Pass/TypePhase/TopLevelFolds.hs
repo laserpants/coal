@@ -14,11 +14,10 @@ import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), Qualified (..))
 import Coal.Language.Module.Path (principalPath)
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadError, throwError)
@@ -33,9 +32,9 @@ import Extras (Name, foldrM)
 passTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (ProtoModule a Kind ()) (ProtoModule a Kind ())
 passTopLevelFolds = Pass{runPass = pass}
 
-pass :: (Monad m, Monoid a, Data a) => ProtoModule a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a Kind ())
+pass :: (Monad m, Monoid a, Data a) => ProtoModule a Kind () -> CompilerT a m (ProtoModule a Kind ())
 pass ProtoModule{..} = do
-  lift $ setCurrentPathC protoOmodulePath
+  setCurrentPathC protoOmodulePath
   -- withCurrentModuleC (overModuleDefinitionsM (traverse compileTopLevelFolds))
   newModuleDefinitions <- traverse compileTopLevelFolds protoOmoduleDefinitions
   return $
@@ -44,7 +43,7 @@ pass ProtoModule{..} = do
       , ..
       }
 
-compileTopLevelFolds :: (Monad m, Monoid a, Data a) => ProtoDefinition a Kind () -> CompilerT a (ProtoCompilerT m a) (ProtoDefinition a Kind ())
+compileTopLevelFolds :: (Monad m, Monoid a, Data a) => ProtoDefinition a Kind () -> CompilerT a m (ProtoDefinition a Kind ())
 compileTopLevelFolds =
   \case
     ProtoDFold loc name ProtoFoldDefinition{..} -> do
@@ -60,14 +59,14 @@ compileTopLevelFolds =
     o ->
       return o
 
-expandClauses :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a Kind ()) -> CompilerT a (ProtoCompilerT m a) (Expression a Kind ())
+expandClauses :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a Kind ()) -> CompilerT a m (Expression a Kind ())
 expandClauses clauses = do
-  name <- lift $ supplied (freshName "fold")
+  name <- supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
   pure $ lambda1E (name <> ".expr") (matchE (varE (name <> ".expr")) expr)
 
 class TopLevelFoldContext a e where
-  expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> CompilerT a (ProtoCompilerT m a) e
+  expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> CompilerT a m e
 
 instance (TopLevelFoldContext a e) => TopLevelFoldContext a [e] where
   expandFolds name = traverse . expandFolds name
@@ -79,11 +78,11 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Clause a Kind ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
-        ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
+        CompilerState{protoOcompilerCurrentPath = path} <- get
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause _ (PNamedFold loc _ _) _ -> do
-        ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
+        CompilerState{protoOcompilerCurrentPath = path} <- get
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause{..} -> do
@@ -116,7 +115,7 @@ instance (Monoid a, Data a) => TopLevelFoldContext a (Choice Expression a Kind (
 instance (Monoid a, Data a) => TopLevelFoldContext a (Expression a Kind ()) where
   expandFolds = flip . foldrM . const (uncurry updateName)
 
-updateName :: (Monad m, Monoid a, Data a) => Name -> Label () -> Expression a Kind () -> CompilerT a (ProtoCompilerT m a) (Expression a Kind ())
+updateName :: (Monad m, Monoid a, Data a) => Name -> Label () -> Expression a Kind () -> CompilerT a m (Expression a Kind ())
 updateName name label =
   pure
     . replace

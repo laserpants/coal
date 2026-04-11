@@ -11,11 +11,10 @@ import Coal.Common.FreeVars (boundIn)
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad (when)
 import Control.Monad.Except (throwError)
@@ -31,12 +30,12 @@ import Extras (Map, traverseM)
 passOrPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passOrPatterns = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
 pass ProtoModule{..} = do
-  lift $ setCurrentPathC protoOmodulePath
+  setCurrentPathC protoOmodulePath
   transformBiM expandExpression ProtoModule{..}
 
-expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Expression Metadata Kind IndexedType)
+expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =
   \case
     EMatch a t e cs ->
@@ -47,7 +46,7 @@ expandExpression =
       pure e
 
 class OrPattern a where
-  expandOrPatterns :: (Monad m) => a -> CompilerT Metadata (ProtoCompilerT m Metadata) (NonEmpty a)
+  expandOrPatterns :: (Monad m) => a -> CompilerT Metadata m (NonEmpty a)
 
 instance (OrPattern a) => OrPattern [a] where
   expandOrPatterns = traverseM expandOrPatterns
@@ -73,7 +72,7 @@ instance (Data t) => OrPattern (Pattern Metadata Kind t) where
     \case
       POr loc _ p1 p2 -> do
         --        this <- gets (principalPath . compilerCurrentModule)
-        this <- lift $ gets (principalPath . protoOcompilerCurrentPath)
+        this <- gets (principalPath . protoOcompilerCurrentPath)
         let vars1 = boundIn p1
             vars2 = boundIn p2
         when (vars1 /= vars2) $ do

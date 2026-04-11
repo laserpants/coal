@@ -12,13 +12,12 @@ import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseModule)
 import Coal.Parser.Core (spaces)
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoModule (ModuleExportList (..), ProtoModule (..))
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -36,7 +35,7 @@ import Text.Megaparsec (eof, runParser)
 passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildEnvelope (ProtoModule Metadata () ())]
 passParsing = Pass{runPass = pass}
 
-pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata (ProtoCompilerT m Metadata) [BuildEnvelope (ProtoModule Metadata () ())]
+pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildEnvelope (ProtoModule Metadata () ())]
 pass files = do
   embeddedFiles <- traverse parseEmbedded embedded
   case partitionEithers embeddedFiles of
@@ -53,9 +52,9 @@ pass files = do
         \(p, e) ->
           error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
 
-parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (Text, ParserError) (BuildEnvelope (ProtoModule Metadata () ())))
+parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildEnvelope (ProtoModule Metadata () ())))
 parseEmbedded (p, src) = do
-  CompilerConfig{..} <- lift $ gets protoOcompilerConfig
+  CompilerConfig{..} <- gets protoOcompilerConfig
   case runParser (spaces *> parseModule <* eof) "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
@@ -64,9 +63,9 @@ parseEmbedded (p, src) = do
       -- Check cached build files
       --      cached <- cachedBuild name encodedSrc
       --      setVerbatimSourceForC module_ encodedSrc
-      lift $ protoOsetBuildSourceC name encodedSrc
+      protoOsetBuildSourceC name encodedSrc
 
-      lift $ toBeRecompiled name
+      toBeRecompiled name
       pure $ Right (BSource module_)
  where
   --      case cached of
@@ -80,9 +79,9 @@ parseEmbedded (p, src) = do
   encodedSrc :: Text
   encodedSrc = E.decodeUtf8 src
 
-fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
+fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
 fromSource name file src = do
-  lift $ toBeRecompiled name
+  toBeRecompiled name
   case runParser (spaces *> parseModule <* eof) "" src of
     Left err ->
       pure $ Left (ParserError file err)
@@ -92,9 +91,9 @@ fromSource name file src = do
           pure $ Right (BSource module_)
         else pure $ Left (BadModuleName file (principalPath path))
 
-parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata (ProtoCompilerT m Metadata) (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
+parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (ProtoModule Metadata () ())))
 parseFile file = do
-  CompilerConfig{..} <- lift $ gets protoOcompilerConfig
+  CompilerConfig{..} <- gets protoOcompilerConfig
   res <- liftIO $ resolveModule configSourcePaths file
   case res of
     Right (fp, _, name) -> do
@@ -102,7 +101,7 @@ parseFile file = do
       -- Check cached build files
       --      cached <- cachedBuild name src
       --      setVerbatimSourceC name src
-      lift $ protoOsetBuildSourceC name src
+      protoOsetBuildSourceC name src
 
       fromSource name file src
 

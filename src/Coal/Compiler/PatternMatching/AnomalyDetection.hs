@@ -13,12 +13,11 @@ module Coal.Compiler.PatternMatching.AnomalyDetection (
 import Coal.Common.Environment (Environment (..), mapEnvironment)
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
 import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT (..), protoOgetCurrentBuildC)
 import Control.Monad.Extra (anyM, (||^))
 import Control.Monad.Trans (lift)
 import Data.Function ((&))
@@ -41,7 +40,7 @@ data Pat
   | Any
   deriving (Show, Eq, Ord, Read)
 
-exhaustive :: (Monad m) => [Pat] -> CompilerT a (ProtoCompilerT m a) Bool
+exhaustive :: (Monad m) => [Pat] -> CompilerT a m Bool
 exhaustive ps = not <$> isUseful ((: []) <$> ps) [Any]
 
 specialized :: Name -> Int -> [[Pat]] -> [[Pat]]
@@ -116,7 +115,7 @@ prim =
     LString{} ->
       "%String"
 
-isUseful :: (Monad m) => [[Pat]] -> [Pat] -> CompilerT a (ProtoCompilerT m a) Bool
+isUseful :: (Monad m) => [[Pat]] -> [Pat] -> CompilerT a m Bool
 isUseful [] _ = pure True -- zero rows (0x0 matrix)
 isUseful px@(ps : _) qs =
   case (qs, length ps) of
@@ -138,10 +137,10 @@ isUseful px@(ps : _) qs =
   cs = headCons px
   go name n = isUseful (specialized name n px) (head (specialized name n [qs]))
 
-isComplete :: (Monad m) => [Name] -> CompilerT a (ProtoCompilerT m a) Bool
+isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False
 isComplete names@(name : _) = do
-  ProtoBuild{..} <- lift protoOgetCurrentBuildC
+  ProtoBuild{..} <- protoOgetCurrentBuildC
   let defined = mapEnvironment protoOdataConstructorEntryConstructorSet protoObuildDataConstructors
   case Environment.lookup name (defined `Environment.union` builtIn) of
     Nothing ->

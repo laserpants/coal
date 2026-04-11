@@ -13,7 +13,6 @@ import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Trans (lift)
@@ -26,14 +25,14 @@ import Extras (Map, traverseM)
 passExpandGuards :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passExpandGuards = Pass{runPass = pass}
 
-pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+pass :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
 pass = bork
 
 trivial :: Clause a Kind t -> Bool
 trivial (EClause _ _ (CPlain _ [] _ :| [])) = True
 trivial _ = False
 
-expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (Expression Metadata Kind IndexedType)
+expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =
   \case
     e@(EMatch _ _ _ cs)
@@ -41,7 +40,7 @@ expandExpression =
           pure e
     EMatch a t e cs -> do
       e' <- expandExpression e
-      name <- lift $ supplied (freshName "scr")
+      name <- supplied (freshName "scr")
       let ll = Label (typeOf e) name
           var = EVariable a ll
       cs' <- traverse (expandClauseGuards a t var) (NonEmpty.init $ tails cs)
@@ -72,7 +71,7 @@ instance (ExpandGuards a) => ExpandGuards (Map k a) where
 instance (ExpandGuards a) => ExpandGuards (Maybe a) where
   expandGuards = traverseM expandGuards
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
 bork =
   \case
     ProtoModule{..} -> do
@@ -83,7 +82,7 @@ bork =
           , ..
           }
 
-fnork :: (Monad m) => ProtoDefinition Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoDefinition Metadata Kind IndexedType)
+fnork :: (Monad m) => ProtoDefinition Metadata Kind IndexedType -> CompilerT Metadata m (ProtoDefinition Metadata Kind IndexedType)
 fnork =
   \case
     ProtoDFunction loc name def -> do
@@ -102,7 +101,7 @@ fnork =
     d ->
       return d
 
-expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata Kind IndexedType -> [Clause Metadata Kind IndexedType] -> CompilerT Metadata (ProtoCompilerT m Metadata) (Clause Metadata Kind IndexedType)
+expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata Kind IndexedType -> [Clause Metadata Kind IndexedType] -> CompilerT Metadata m (Clause Metadata Kind IndexedType)
 expandClauseGuards _ _ _ (c@(EClause _ _ (CPlain _ [] _ :| [])) : _) =
   pure c
 expandClauseGuards a1 t var (EClause a2 p choices : clauses) = do

@@ -15,11 +15,10 @@ import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule (ProtoModule (..))
 import Control.Monad.Except (MonadError (throwError), void)
@@ -34,12 +33,12 @@ import Extras (Dictionary, Name, const2, traverse_)
 passExpressionFolds :: (Monad m, Monoid a, Data a, Data k) => Pass a m (ProtoModule a k ()) (ProtoModule a k ())
 passExpressionFolds = Pass{runPass = pass}
 
-pass :: (Monad m, Monoid a, Data a, Data k) => ProtoModule a k () -> CompilerT a (ProtoCompilerT m a) (ProtoModule a k ())
+pass :: (Monad m, Monoid a, Data a, Data k) => ProtoModule a k () -> CompilerT a m (ProtoModule a k ())
 pass = compileFolds
 
 class ExpressionFoldTransform a e where
-  expandFolds :: (Monad m) => Name -> [Label ()] -> e -> CompilerT a (ProtoCompilerT m a) e
-  expandMatch :: (Monad m) => e -> CompilerT a (ProtoCompilerT m a) ()
+  expandFolds :: (Monad m) => Name -> [Label ()] -> e -> CompilerT a m e
+  expandMatch :: (Monad m) => e -> CompilerT a m ()
 
 instance (ExpressionFoldTransform a e) => ExpressionFoldTransform a [e] where
   expandFolds name = traverse . expandFolds name
@@ -53,7 +52,7 @@ instance (Monoid a, Data a, Data k) => ExpressionFoldTransform a (Clause a k ())
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
-        ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
+        CompilerState{protoOcompilerCurrentPath = path} <- get
         -- path <- gets compilerCurrentModule
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
@@ -65,11 +64,11 @@ instance (Monoid a, Data a, Data k) => ExpressionFoldTransform a (Clause a k ())
     void (checkPatterns clausePattern)
     expandMatch clauseChoices
 
-checkPatterns :: (Monoid a, Data a, Data k, Monad m) => Pattern a k () -> CompilerT a (ProtoCompilerT m a) (Pattern a k ())
+checkPatterns :: (Monoid a, Data a, Data k, Monad m) => Pattern a k () -> CompilerT a m (Pattern a k ())
 checkPatterns =
   \case
     PAtVariable loc _ -> do
-      ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
+      CompilerState{protoOcompilerCurrentPath = path} <- get
       -- path <- gets compilerCurrentModule
       tellErrors [FoldPatternInRegularMatch (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
@@ -103,11 +102,11 @@ updateName name label =
         )
     )
 
-eliminateAtPatterns :: (Monad m) => Pattern a k () -> CompilerT a (ProtoCompilerT m a) (Pattern a k ())
+eliminateAtPatterns :: (Monad m) => Pattern a k () -> CompilerT a m (Pattern a k ())
 eliminateAtPatterns =
   \case
     PNamedFold loc _ _ -> do
-      ProtoCompilerState{protoOcompilerCurrentPath = path} <- lift get
+      CompilerState{protoOcompilerCurrentPath = path} <- get
       -- path <- gets compilerCurrentModule
       tellErrors [NamedFoldNotAllowed (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
@@ -128,9 +127,9 @@ atLabels = execWriter . go
         p ->
           pure p
 
-expandFoldExpr :: (Monad m, Monoid a, Data a, Data k) => NonEmpty (Expression a k ()) -> NonEmpty (Clause a k ()) -> CompilerT a (ProtoCompilerT m a) (Expression a k ())
+expandFoldExpr :: (Monad m, Monoid a, Data a, Data k) => NonEmpty (Expression a k ()) -> NonEmpty (Clause a k ()) -> CompilerT a m (Expression a k ())
 expandFoldExpr args clauses = do
-  name <- lift $ supplied (freshName "fold")
+  name <- supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
   pure $
     flattenApplicationsDeep $
@@ -143,7 +142,7 @@ expandFoldExpr args clauses = do
         (applicationE (varE name) args)
 
 class CompileFoldsContext a e where
-  compileFolds :: (Monad m) => e -> CompilerT a (ProtoCompilerT m a) e
+  compileFolds :: (Monad m) => e -> CompilerT a m e
 
 instance (CompileFoldsContext a e) => CompileFoldsContext a [e] where
   compileFolds = traverse compileFolds
@@ -158,7 +157,7 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (ProtoModule a k ()
   compileFolds =
     \case
       ProtoModule{..} -> do
-        lift $ setCurrentPathC protoOmodulePath
+        setCurrentPathC protoOmodulePath
         newModuleDefinitions <- compileFolds protoOmoduleDefinitions
         return $
           ProtoModule

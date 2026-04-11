@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.ProtoCompiler.ProtoBuild (
+module Coal.Compiler.ProtoBuild (
   ProtoBuild (..),
   InstanceMap,
   protoOemptyBuild,
@@ -34,11 +34,11 @@ module Coal.ProtoCompiler.ProtoBuild (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
 import Coal.Kernel.LLVM.IRType (IRType)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
 import Control.Monad.State (execState, modify)
 import Data.Binary
 import Data.ByteString (ByteString)
@@ -217,12 +217,12 @@ overBuildAliases f ProtoBuild{..} =
     , ..
     }
 
-overBuildQualifiedNames :: (Environment Name -> Environment Name) -> ProtoBuild a -> ProtoBuild a
-overBuildQualifiedNames f ProtoBuild{..} =
-  ProtoBuild
-    { protoObuildQualifiedNames = f protoObuildQualifiedNames
-    , ..
-    }
+--overBuildQualifiedNames :: (Environment Name -> Environment Name) -> ProtoBuild a -> ProtoBuild a
+--overBuildQualifiedNames f ProtoBuild{..} =
+--  ProtoBuild
+--    { protoObuildQualifiedNames = f protoObuildQualifiedNames
+--    , ..
+--    }
 
 insertBuildAlias :: Name -> ProtoAliasEntry a -> ProtoBuild a -> ProtoBuild a
 insertBuildAlias name = overBuildAliases . Environment.insert name

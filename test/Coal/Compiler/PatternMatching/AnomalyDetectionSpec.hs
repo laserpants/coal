@@ -11,10 +11,10 @@ import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
-import Coal.ProtoCompiler.ProtoBuild
-import Coal.ProtoCompiler.ProtoBuild.ProtoNameEntry
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
+import Coal.Compiler.ProtoBuild
+import Coal.Compiler.ProtoBuild.ProtoNameEntry
+import Coal.Compiler.Stack
+import Coal.Compiler.ProtoState
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (lift, modify, put)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -173,16 +173,13 @@ testEnv =
     ]
 
 runTest :: [Pat] -> Bool
-runTest px = r3
+runTest px = r2
  where
-  Right r3 = r2
-  Right r2 = res
-  Right res = evalProtoCompilerT (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive px))
+  Right r2 = runIdentity (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive px))
   setupEnv = do
     -- lift $ protoOupdateCurrentBuildC (pure . overBuildDataConstructors (const testEnv))
-    lift $
-      put
-        initialProtoCompilerState
+    put
+        initialCompilerState
           { protoOcompilerCurrentPath = Path ["Test"]
           , protoOcompilerModules =
               Environment.fromList
@@ -237,15 +234,12 @@ example11 =
   ]
 
 runTest2 :: [Pattern a () t] -> Bool
-runTest2 px = r3
+runTest2 px = r2
  where
-  Right r3 = r2
-  Right r2 = res
-  Right res = evalProtoCompilerT (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive (translatePattern <$> px)))
+  Right r2 = runIdentity (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive (translatePattern <$> px)))
   setupEnv = do
-    lift $
-      put
-        initialProtoCompilerState
+    put
+        initialCompilerState
           { protoOcompilerCurrentPath = Path ["Test"]
           , protoOcompilerModules =
               Environment.fromList

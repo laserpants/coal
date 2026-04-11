@@ -10,11 +10,10 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
+import Coal.Compiler.ProtoState
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module.Path
-import Coal.ProtoCompiler.ProtoStack
-import Coal.ProtoCompiler.ProtoState
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Except (throwError)
@@ -27,15 +26,15 @@ import Extras (Name, traverse_)
 passAliasCycles :: (MonadIO m) => Pass Metadata m [BuildEnvelope (ProtoModule Metadata () ())] [BuildEnvelope (ProtoModule Metadata () ())]
 passAliasCycles = mapPass $ Pass{runPass = traverse impl}
 
-impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata () ())
+impl :: (MonadIO m) => ProtoModule Metadata () () -> CompilerT Metadata m (ProtoModule Metadata () ())
 impl mm = do
   --  let mm = toProtoModule [] m
-  lift $ setCurrentPathC (protoOmodulePath mm)
+  setCurrentPathC (protoOmodulePath mm)
   detectAliasCycles mm
   return mm
 
 class TransformContext e where
-  detectAliasCycles :: (Monad m) => e -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+  detectAliasCycles :: (Monad m) => e -> CompilerT Metadata m ()
 
 instance (TransformContext e) => TransformContext [e] where
   detectAliasCycles = traverse_ detectAliasCycles
@@ -60,7 +59,7 @@ instance TransformContext (ProtoDefinition Metadata () ()) where
       _ ->
         pure ()
 
-detectCycles :: (Monad m) => Metadata -> Name -> ParameterizedType -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+detectCycles :: (Monad m) => Metadata -> Name -> ParameterizedType -> CompilerT Metadata m ()
 detectCycles loc name =
   \case
     TApplication _ t1 t2 -> do
@@ -71,7 +70,7 @@ detectCycles loc name =
       detectCycles loc name t2
     TConstructor _ con
       | name == con -> do
-          path <- lift $ gets protoOcompilerCurrentPath
+          path <- gets protoOcompilerCurrentPath
           tellErrors [TypeAliasCycle name (ErrorLocation (principalPath path) loc)]
           throwError PreflightFailure
     TRecord t ->
@@ -84,7 +83,7 @@ detectCycles loc name =
     _ ->
       pure ()
 
-detectCyclesInRow :: (Monad m) => Metadata -> Name -> Row Parameter () ParameterizedType -> CompilerT Metadata (ProtoCompilerT m Metadata) ()
+detectCyclesInRow :: (Monad m) => Metadata -> Name -> Row Parameter () ParameterizedType -> CompilerT Metadata m ()
 detectCyclesInRow loc name =
   \case
     RExtend _ t r -> do

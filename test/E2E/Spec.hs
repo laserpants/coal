@@ -8,7 +8,6 @@ import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.ProtoCompiler.ProtoStack
 import System.Process
 import Test.Hspec
 
@@ -1621,17 +1620,12 @@ expectOutput expt srcPath files =
 
 runSpec :: FilePath -> [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec srcPath files = do
-  q <-
-    evalProtoCompilerT $
-      runCompilerT (emptyCompilerEnvironment Nothing) $ do
+  e <-
+    evalCompilerT (emptyCompilerEnvironment Nothing) $ do
         -- TODO: cache?
-        lift $ setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
+        setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
         runPass pipeline files
-  case q of
-    Left _ ->
-      error "!!?"
-    Right (e, _, _) ->
-      case e of
+  case e of
         Left e1 ->
           pure (Left e1)
         Right{} -> do

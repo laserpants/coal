@@ -11,7 +11,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
@@ -19,7 +19,6 @@ import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
 import Coal.Language.Module.Path
 import Coal.Language.Pattern (Pattern (..))
-import Coal.ProtoCompiler.ProtoStack (ProtoCompilerT)
 import Coal.ProtoLanguage.ProtoDefinition
 import Coal.ProtoLanguage.ProtoModule
 import Control.Monad.Trans (lift)
@@ -30,11 +29,11 @@ import Extras (Name)
 passExpandPatterns :: (Monad m) => Pass Metadata m (ProtoModule Metadata Kind IndexedType) (ProtoModule Metadata Kind IndexedType)
 passExpandPatterns = Pass{runPass = bork}
 
-bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata (ProtoCompilerT m Metadata) (ProtoModule Metadata Kind IndexedType)
+bork :: (Monad m) => ProtoModule Metadata Kind IndexedType -> CompilerT Metadata m (ProtoModule Metadata Kind IndexedType)
 bork = desugarPatterns
 
 class TransformContext s where
-  desugarPatterns :: (Monad m) => s -> CompilerT Metadata (ProtoCompilerT m Metadata) s
+  desugarPatterns :: (Monad m) => s -> CompilerT Metadata m s
 
 instance TransformContext (Pattern Metadata Kind IndexedType) where
   desugarPatterns =
@@ -46,7 +45,7 @@ instance TransformContext (Pattern Metadata Kind IndexedType) where
       PShorthand loc (Label t name) ->
         desugarPatterns (PVariable loc (Label t name))
       p -> do
-        name <- lift $ supplied (freshName "v")
+        name <- supplied (freshName "v")
         tellPatterns [(name, p)]
         pure (PVariable mempty (Label (typeOf p) name))
 
