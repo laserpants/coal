@@ -12,7 +12,6 @@ import Control.Exception (SomeException (..), try)
 import Control.Monad (unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
-import Control.Monad.Trans (lift)
 import Crypto.Hash
 import Data.Binary (Binary (..), decodeOrFail, encode)
 import Data.ByteString (ByteString, fromStrict, toStrict)
