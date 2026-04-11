@@ -11,6 +11,7 @@ module Coal.Language.Module.Path (
   toFilePath,
 ) where
 
+import Control.Monad (unless)
 import Data.Binary (Binary)
 import Data.Char (isAlphaNum, isUpper)
 import Data.Data (Data, Typeable)
@@ -33,24 +34,34 @@ emptyPath = Path []
 principalPath :: Path -> Name
 principalPath Path{..} = Text.intercalate "." pathComponents
 
--- | Parse and validate a module path
-parsePath :: Text -> Maybe Path
-parsePath input
-  | Text.null input = Nothing
-  | null comps = Nothing
-  | otherwise = Path <$> traverse validateComponent comps
- where
-  comps = Text.splitOn "." input
+data PathError
+  = EmptyComponent
+  | InvalidStart Char
+  | InvalidChar Char
+  deriving (Show, Eq)
 
--- TODO: Combine this with code in Path.Resolve
-validateComponent :: Text -> Maybe Name
+validateComponent :: Text -> Either PathError Name
 validateComponent t = do
-  (first, rest) <- Text.uncons t
-  if isUpper first && Text.all validChar rest
-    then Just t
-    else Nothing
+  (first, rest) <- maybe (Left EmptyComponent) Right (Text.uncons t)
+  unless (isUpper first) $
+    Left (InvalidStart first)
+  case Text.find (not . validChar) rest of
+    Just c ->
+      Left (InvalidChar c)
+    Nothing ->
+      Right t
  where
   validChar c = isAlphaNum c || c == '_'
+
+-- | Parse and validate a module path
+parsePath :: Text -> Either PathError Path
+parsePath input
+  | Text.null input =
+      Left EmptyComponent
+  | otherwise = do
+      let comps = Text.splitOn "." input
+      names <- traverse validateComponent comps
+      pure (Path names)
 
 toFilePath :: Path -> FilePath
 toFilePath Path{..} = Text.unpack (parts <.> "coal")

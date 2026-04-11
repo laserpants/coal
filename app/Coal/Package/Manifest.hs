@@ -30,6 +30,7 @@ import Extras (Name)
 import GHC.Generics (Generic)
 import System.Directory
 import System.FilePath
+import Data.Either.Extra (eitherToMaybe)
 
 data PackageManifest = PackageManifest
   { name :: Text
@@ -90,4 +91,4 @@ filePaths names fail_ = ExceptT $ pure $ traverse go names
     maybe
       (throwError (fail_ name))
       (Right . toFilePath)
-      (parsePath name)
+      (eitherToMaybe $ parsePath name)

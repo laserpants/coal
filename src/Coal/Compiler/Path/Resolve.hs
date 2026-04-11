@@ -13,6 +13,7 @@ import qualified Data.Text as Text
 import System.Directory (canonicalizePath, doesFileExist)
 import System.FilePath
 
+-- TODO: Use validateComponent in Path
 validateComponent :: String -> Either String ()
 validateComponent s
   | null s =
