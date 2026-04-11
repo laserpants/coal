@@ -106,12 +106,12 @@ protoOemitPConstructorConstraints loc (Label t name) ps = do
       let t1 = foldTypeOf t ps
       tellRight [Explicit (RuleDataConstructor loc constructorName t1 constructorScheme) t1 constructorScheme]
 
-emitPOrConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
-emitPOrConstraints loc t p1 p2 = do
-  tellRight [Equality (RuleOrConstraint loc t1 t2) [t, t1, t2]]
- where
-  t1 = typeOf p1
-  t2 = typeOf p2
+--emitPOrConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
+--emitPOrConstraints loc t p1 p2 = do
+--  tellRight [Equality (RuleOrConstraint loc t1 t2) [t, t1, t2]]
+-- where
+--  t1 = typeOf p1
+--  t2 = typeOf p2
 
 protoOemitPOrConstraints :: (Data a) => a -> IndexedType -> Pattern a Kind IndexedType -> Pattern a Kind IndexedType -> ConstraintsGen a ()
 protoOemitPOrConstraints loc t p1 p2 = do
@@ -120,28 +120,28 @@ protoOemitPOrConstraints loc t p1 p2 = do
   t1 = typeOf p1
   t2 = typeOf p2
 
-emitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
-emitPListConsConstraints loc t p1 p2 = do
-  let t1 = foldTypeOf t [p1, p2]
-  tellRight [Explicit (RuleListConstructor loc t1 listConstructorScheme) t1 listConstructorScheme]
+--emitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
+--emitPListConsConstraints loc t p1 p2 = do
+--  let t1 = foldTypeOf t [p1, p2]
+--  tellRight [Explicit (RuleListConstructor loc t1 listConstructorScheme) t1 listConstructorScheme]
 
 protoOemitPListConsConstraints :: (Data a) => a -> IndexedType -> Pattern a Kind IndexedType -> Pattern a Kind IndexedType -> ConstraintsGen a ()
 protoOemitPListConsConstraints loc t p1 p2 = do
   let t1 = foldTypeOf t [p1, p2]
   tellRight [Explicit (RuleListConstructor loc t1 listConstructorScheme) t1 listConstructorScheme]
 
-emitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a () IndexedType] -> ConstraintsGen a ()
-emitPListLiteralConstraints loc t ps =
-  case ts of
-    t1 : _ ->
-      tellRight
-        [ Equality (RuleListLiteral loc ts) ts
-        , Equality (RuleAssumption loc t t1) [t, t1]
-        ]
-    _ ->
-      pure ()
- where
-  ts = listType . typeOf <$> ps
+--emitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a () IndexedType] -> ConstraintsGen a ()
+--emitPListLiteralConstraints loc t ps =
+--  case ts of
+--    t1 : _ ->
+--      tellRight
+--        [ Equality (RuleListLiteral loc ts) ts
+--        , Equality (RuleAssumption loc t t1) [t, t1]
+--        ]
+--    _ ->
+--      pure ()
+-- where
+--  ts = listType . typeOf <$> ps
 
 protoOemitPListLiteralConstraints :: (Data a) => a -> IndexedType -> [Pattern a Kind IndexedType] -> ConstraintsGen a ()
 protoOemitPListLiteralConstraints loc t ps =
@@ -156,13 +156,13 @@ protoOemitPListLiteralConstraints loc t ps =
  where
   ts = listType . typeOf <$> ps
 
-emitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a () IndexedType) -> ConstraintsGen a ()
-emitPTupleConstraints loc t ps =
-  tellRight
-    [ Equality (RuleTuple loc t t1) [t, t1]
-    ]
- where
-  t1 = tupleType (typeOf <$> ps)
+--emitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a () IndexedType) -> ConstraintsGen a ()
+--emitPTupleConstraints loc t ps =
+--  tellRight
+--    [ Equality (RuleTuple loc t t1) [t, t1]
+--    ]
+-- where
+--  t1 = tupleType (typeOf <$> ps)
 
 protoOemitPTupleConstraints :: (Data a) => a -> IndexedType -> NonEmpty (Pattern a Kind IndexedType) -> ConstraintsGen a ()
 protoOemitPTupleConstraints loc t ps =
@@ -172,24 +172,24 @@ protoOemitPTupleConstraints loc t ps =
  where
   t1 = tupleType (typeOf <$> ps)
 
-emitPAsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
-emitPAsConstraints loc t p = tellRight [Equality (RuleAsConstraint loc) [t, typeOf p]]
+--emitPAsConstraints :: (Data a) => a -> IndexedType -> Pattern a () IndexedType -> ConstraintsGen a ()
+--emitPAsConstraints loc t p = tellRight [Equality (RuleAsConstraint loc) [t, typeOf p]]
 
 protoOemitPAsConstraints :: (Data a) => a -> IndexedType -> Pattern a Kind IndexedType -> ConstraintsGen a ()
 protoOemitPAsConstraints loc t p = tellRight [Equality (RuleAsConstraint loc) [t, typeOf p]]
 
-emitPRecordConstraints :: (Data a) => a -> IndexedType -> Dictionary (Pattern a () IndexedType) -> Maybe (Pattern a () IndexedType) -> ConstraintsGen a ()
-emitPRecordConstraints loc t fields p = do
-  row <- tailRow loc p
-  let t1 = fieldsRecordType (typeOf <$> fields) row
-  tellRight [Equality (RuleRecordEquality loc t t1) [t, t1]]
-  case row of
-    r@RVariable{} ->
-      forM_ (Map.keys fields) $
-        \field ->
-          tellRight [Lacks (RuleRecordField loc field (TRow r)) (TRow r) field]
-    _ ->
-      pure ()
+--emitPRecordConstraints :: (Data a) => a -> IndexedType -> Dictionary (Pattern a () IndexedType) -> Maybe (Pattern a () IndexedType) -> ConstraintsGen a ()
+--emitPRecordConstraints loc t fields p = do
+--  row <- tailRow loc p
+--  let t1 = fieldsRecordType (typeOf <$> fields) row
+--  tellRight [Equality (RuleRecordEquality loc t t1) [t, t1]]
+--  case row of
+--    r@RVariable{} ->
+--      forM_ (Map.keys fields) $
+--        \field ->
+--          tellRight [Lacks (RuleRecordField loc field (TRow r)) (TRow r) field]
+--    _ ->
+--      pure ()
 
 protoOemitPRecordConstraints :: (Data a) => a -> IndexedType -> Dictionary (Pattern a Kind IndexedType) -> Maybe (Pattern a Kind IndexedType) -> ConstraintsGen a ()
 protoOemitPRecordConstraints loc t fields p = do
