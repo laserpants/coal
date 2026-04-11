@@ -27,7 +27,6 @@ library
       Coal.AST.Normalization
       Coal.AST.Shorthand
       Coal.AST.Transform
-      Coal.AST.Type.Parameterized
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label

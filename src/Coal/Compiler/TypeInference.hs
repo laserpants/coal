@@ -8,7 +8,6 @@
 
 module Coal.Compiler.TypeInference where -- (typeDefinitionsC, toIndexedType, toIndexedScheme) where
 
-import Coal.AST.Type.Parameterized
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))

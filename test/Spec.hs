@@ -2,12 +2,7 @@
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (..), applyTypeArgs, tupleType)
-
 import Coal.TypeSystem.Constraint.Solver
-
--- import Coal.Compiler.BuildSpec (buildSpec)
-
-import Coal.AST.Type.Parameterized
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Language.Type
 import Coal.Language.Type.Kind
