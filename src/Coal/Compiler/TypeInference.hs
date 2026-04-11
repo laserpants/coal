@@ -8,27 +8,23 @@
 
 module Coal.Compiler.TypeInference where -- (typeDefinitionsC, toIndexedType, toIndexedScheme) where
 
-import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
-import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module
-import Coal.Language.Module.Path
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Constraint.Generation
 import Coal.TypeSystem.Parameterized
 import Control.Monad.Except (MonadError (..), forM_)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (evalState, get, gets)
-import Control.Monad.Trans (lift)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)

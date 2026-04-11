@@ -20,7 +20,6 @@ import Coal.Compiler.Stack
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks, local)
-import Control.Monad.Trans (lift)
 import Data.Foldable (for_)
 import System.Console.AsciiProgress
 
@@ -55,8 +54,6 @@ overlayEnvironment p = Pass{runPass = pass}
           env
             { compilerTypeConstructorEnvironment =
                 Environment.mapEnvironment typeConstructorEntryKind buildTypeConstructors
-            , compilerKernelEnvironment =
-                KernelEnvironment mempty mempty mempty
             }
       )
       (runPassAndTickBar p i)

@@ -19,7 +19,6 @@ import Coal.Compiler.Stack
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Control.Monad.Extra (anyM, (||^))
-import Control.Monad.Trans (lift)
 import Data.Function ((&))
 import Data.List (sortOn)
 import qualified Data.List.NonEmpty as NonEmpty

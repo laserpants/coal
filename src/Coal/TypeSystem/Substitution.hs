@@ -22,7 +22,7 @@ import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)
 import Data.List.NonEmpty (NonEmpty)
-import Data.Map.Strict (Map, keysSet, union, restrictKeys)
+import Data.Map.Strict (Map, keysSet, restrictKeys, union)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, intersection)
 import qualified Data.Set as Set
