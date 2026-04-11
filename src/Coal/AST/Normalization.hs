@@ -99,8 +99,8 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Normalizat
                 normalizeObject instanceDefinitionImplementations
             , ..
             }
-      d ->
-        d
+      def ->
+        def
   denormalizeObject =
     \case
       DLet _ name def ->
@@ -113,5 +113,5 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Normalizat
                 denormalizeObject instanceDefinitionImplementations
             , ..
             }
-      d ->
-        d
+      def ->
+        def

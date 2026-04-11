@@ -22,7 +22,7 @@ typePhasePasses =
   passPrep
     >-> passExpandFunctionGroups
     ----    >-> generateDebugArtifacts "IntegerLiteralPatterns"
-    >-> overlayEnvironment passExpandAliases
+    >-> passExpandAliases
     >-> passPrep2
     ----    >-> generateDebugArtifacts "ExpandAliases"
     >-> passTopLevelFolds
