@@ -7,6 +7,7 @@ module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..), mapEnvironment)
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..), buildNames)
 import Coal.Compiler.Build.Prep
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
@@ -40,7 +41,6 @@ import Data.Text.Lazy (toStrict)
 import Debug.Trace
 import Text.Pretty.Simple (pPrint, pShowNoColor)
 import TextShow (showt)
-import qualified Coal.Common.Environment as Environment 
 
 passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference = Pass{runPass = pass}
@@ -118,7 +118,6 @@ ti modul = do
 
 inferTypes :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 inferTypes modul = do
-
   Module{..} <- indexTypes modul
 
   forM_ moduleDefinitions $

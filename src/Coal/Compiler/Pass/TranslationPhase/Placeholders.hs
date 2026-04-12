@@ -87,7 +87,7 @@ pass m = do
   Build{..} <- getCurrentBuildC
   liftIO $ Text.writeFile ("tmp/placeholder_names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ buildNames)
   liftIO $ Text.writeFile ("tmp/placeholder_build_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ Build{..})
---  liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
+  --  liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
 
   return m{moduleDefinitions = mm}
 

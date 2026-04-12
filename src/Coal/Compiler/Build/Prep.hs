@@ -35,6 +35,7 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set, (\\))
 import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
+import Debug.Trace
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
@@ -188,11 +189,76 @@ prepareDefinitions defs = do
 qualifiedImports :: (Monad m) => Build a -> Definition a k t -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) [(Name, Name)]
 qualifiedImports Build{..} =
   \case
+    --    DImport _ (Path ["Builtin$"]) imports -> do
+    --      pure mempty
+
     DImport _ path imports ->
       concatForM imports $
         \case
-          NameImport _ name ->
-            pure [(name, principalPath path <.> name)]
+          NameImport _ name -> do
+            nsa <- pure [(name, principalPath path <.> name)]
+
+            nsb <- concatForM (Environment.lookupWithDefault mempty name buildNames) $
+              \case
+                info@(NName _ s) -> do
+                  concatForM (Set.toList (schemeTraits s)) $
+                    \Trait{..} -> do
+                      if (Path ["Builtin$"] == path)
+                        then pure []
+                        else do
+                          Build{buildTraits = importTraits, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+                          case Environment.lookup traitName importTraits of
+                            Just TraitEntry{..} -> do
+                              let entries = Environment.names traitEntryInterface
+                                  ns1 =
+                                    [ (n, principalPath path <.> n)
+                                    | -- \| n <- if ["*"] == names then entries else names `intersect` entries
+                                    n <- entries
+                                    ]
+
+                              -- Build{buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+
+                              let
+                                -- TODO: DRY
+                                qualifiedInstanceNames instances =
+                                  concatForM instances $
+                                    \(traitName, instanceMap) ->
+                                      concatForM (Map.toList instanceMap) $
+                                        \(t, InstanceEntry{..}) -> do
+                                          concatForM (Map.keys instanceEntryTypeSchemes) $
+                                            \member -> do
+                                              let instanceName = instanceLabel (Trait traitName instanceEntryType) member
+                                              concatForM (Environment.lookupWithDefault mempty instanceName importNames) $
+                                                \case
+                                                  NName n _ -> do
+                                                    pure [(n, principalPath path <.> n)]
+                                                  _ ->
+                                                    pure mempty
+
+                              ns2 <- qualifiedInstanceNames (traitInstances traitName importInstances)
+
+                              pure (ns1 <> ns2)
+                            _ ->
+                              pure mempty
+
+                -- forM_ (Environment.lookupWithDefault mempty traitName buildNames) $
+                --  \case
+                --    info@NTrait{} -> do
+                --      --traceShowM info
+
+                --      case Environment.lookup name buildTraits of
+                --        Nothing ->
+                --          pure ()
+                --        -- error (show (path, name))
+                --        Just TraitEntry{..} -> do
+                --          insertNameEntry (NTrait name)
+                --          insertTrait name TraitEntry{..}
+                --            qualifiedInstanceNames (traitInstances name buildInstances)
+
+                _ ->
+                  pure mempty
+
+            return (nsa <> nsb)
           TypeImport _ name names ->
             case Environment.lookup name buildTypeConstructors of
               Just TypeConstructorEntry{..} -> do
@@ -715,6 +781,23 @@ collectImports =
                   \case
                     info@(NName _ s) -> do
                       modify (insertBuildNameEntry info)
+
+                      --                      forM_ (schemeTraits s) $
+                      --                        \Trait{..} -> do
+                      --                          forM_ (Environment.lookupWithDefault mempty traitName buildNames) $
+                      --                            \case
+                      --                              info@NTrait{} -> do
+                      --                                case Environment.lookup name buildTraits of
+                      --                                  Nothing ->
+                      --                                    pure ()
+                      --                                  -- error (show (path, name))
+                      --                                  Just TraitEntry{..} -> do
+                      --                                    insertNameEntry (NTrait name)
+                      --                                    insertTrait name TraitEntry{..}
+                      --
+                      --                              _ ->
+                      --                                pure ()
+
                       lift $ lift $ insertNameC name s
                     _ -> do
                       pure ()
