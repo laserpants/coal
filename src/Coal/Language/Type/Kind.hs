@@ -8,6 +8,7 @@
 
 module Coal.Language.Type.Kind (
   Kind (..),
+  KindProxy (..),
   foldKind,
   unfoldKind,
   applyKind,
@@ -17,6 +18,7 @@ module Coal.Language.Type.Kind (
 
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
+import Data.Generics.Uniplate.Data (universeBi)
 import Data.List (isPrefixOf)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -65,6 +67,20 @@ tupleKind n = foldKind KType (replicate n KType)
 
 tupleConstructorKind :: Name -> Kind
 tupleConstructorKind con = tupleKind (read (drop 6 (Text.unpack con)))
+
+class KindProxy t k where
+  tailKind :: t -> k
+
+instance (Data t) => KindProxy t Kind where
+  tailKind t =
+    case head (universeBi t) of
+      KArrow _ k ->
+        k
+      _ ->
+        error "Invalid kind"
+
+instance KindProxy a () where
+  tailKind _ = ()
 
 precKArrow :: Int
 precKArrow = 1 -- a -> b

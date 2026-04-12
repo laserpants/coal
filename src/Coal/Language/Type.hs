@@ -34,12 +34,12 @@ module Coal.Language.Type (
 
 import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
-import Coal.Language.Type.Kind (Kind (..), tupleKind)
+import Coal.Language.Type.Kind (Kind (..), KindProxy (..), tupleKind)
 import Coal.Language.Type.Row (Row (..), fromDictionary, normalizeRow)
 import Coal.Utils (intToVar)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (transform, universeBi)
+import Data.Generics.Uniplate.Data (transform)
 import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
@@ -140,27 +140,7 @@ rowNormalize = transform $
     t ->
       t
 
-class KindProxy o k where
-  tailKind :: Type o k -> k
-
-instance KindProxy TypeIndex Kind where
-  tailKind = typeVarTailKind
-
-instance KindProxy Parameter Kind where
-  tailKind = typeVarTailKind
-
-typeVarTailKind :: (Data a) => a -> Kind
-typeVarTailKind t =
-  case head (universeBi t) of
-    KArrow _ k ->
-      k
-    _ ->
-      error "Invalid kind"
-
-instance KindProxy a () where
-  tailKind _ = ()
-
-applyTypeArgs :: (KindProxy o k) => k -> Type o k -> NonEmpty (Type o k) -> Type o k
+applyTypeArgs :: (KindProxy (Type o k) k) => k -> Type o k -> NonEmpty (Type o k) -> Type o k
 applyTypeArgs k ty = go ty . NonEmpty.toList
  where
   go t =

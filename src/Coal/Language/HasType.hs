@@ -98,7 +98,7 @@ instance (Data a, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Definit
       d ->
         head (universeBi d)
 
-instance (KindProxy o Kind) => HasType o Kind (Trait (Type o Kind)) where
+instance (Data (o Kind), Typeable o) => HasType o Kind (Trait (Type o Kind)) where
   typeOf (Trait name t) =
     applyTypeArgs KTrait (TConstructor (KType `KArrow` KTrait) name) (t :| [])
 
