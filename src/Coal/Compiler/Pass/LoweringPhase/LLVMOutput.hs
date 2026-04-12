@@ -56,7 +56,7 @@ pass ir = do
     Left err ->
       throwError err
     Right results -> do
-      forM_ results (uncurry setBitcodeC)
+      forM_ results (uncurry setBitcodeC) -- ???
       modules_ <- gets compilerModules
 
       fresh <- gets compilerToBeRecompiled
