@@ -283,6 +283,7 @@ library
     , memory
     , mtl
     , parser-combinators
+    , pretty-simple
     , prettyprinter
     , process
     , process-extras
@@ -348,6 +349,7 @@ executable coal
     , mtl
     , optparse-applicative
     , parser-combinators
+    , pretty-simple
     , prettyprinter
     , process
     , process-extras

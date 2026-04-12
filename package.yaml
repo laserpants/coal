@@ -50,6 +50,7 @@ dependencies:
 - process-extras
 - exceptions >= 0.10.5
 - transformers
+- pretty-simple
 
 ghc-options:
 - -Wall
@@ -93,4 +94,3 @@ tests:
     dependencies:
     - coal
     - hspec
-    - pretty-simple
