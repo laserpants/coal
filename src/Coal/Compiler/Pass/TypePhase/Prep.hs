@@ -55,7 +55,7 @@ prep modul = do
 
   prepareBuildAliases m1
 
-  hashBuild
+  insertBuildHash
 
   expandFunctionGroups m1
 
@@ -68,21 +68,14 @@ prepareBuildAliases Module{..} = do
         }
   insertBuildC build
 
-hashBuild :: (Monad m) => CompilerT a m ()
-hashBuild = do
-  Build{..} <- getCurrentBuildC
-  env <- gets compilerSources
-
-  case Environment.lookup (principalPath buildPath) env of
-    Nothing -> do
+insertBuildHash :: (Monad m) => CompilerT a m ()
+insertBuildHash = do
+  CompilerState{..} <- get
+  case Environment.lookup (principalPath compilerCurrentPath) compilerSources of
+    Nothing ->
       pure ()
-    Just source -> do
-
-      -- TODO: modifyBuild ??
-      newBuild <-
-        flip execStateT Build{..} $ do
-          modify (insertHash source)
-      insertBuildC newBuild
+    Just source ->
+      updateCurrentBuildPureC (insertHash source)
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions = traverse_ collectTypeAliases

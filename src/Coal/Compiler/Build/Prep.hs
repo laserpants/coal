@@ -110,15 +110,14 @@ builtinNames =
     ]
 
 prepareBuild :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
-prepareBuild Module{..} = do
-  build <- getCurrentBuildC
-  newBuild <-
-    execStateT
-      (runReaderT (prepareDefinitions moduleDefinitions) moduleExportList)
-      build
-        { buildPath = modulePath
-        }
-  insertBuildC newBuild
+prepareBuild Module{..} =
+  updateCurrentBuildC $
+    \build ->
+      execStateT
+        (runReaderT (prepareDefinitions moduleDefinitions) moduleExportList)
+        build
+          { buildPath = modulePath
+          }
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions defs = do
@@ -849,12 +848,10 @@ importedBuild path = do
 
 replacePlaceholders :: (Monad m) => CompilerT a m ()
 replacePlaceholders = do
-  -- TODO: modifyBuild ??
-  build <- getCurrentBuildC
   store <- gets compilerNameStore
-  newBuild <-
-    flip execStateT build $
-      forM_ (Environment.toList store) $
-        \(name, s) ->
-          modify (replaceBuildNameEntry (NName name s))
-  insertBuildC newBuild
+  updateCurrentBuildC $
+    \build ->
+      flip execStateT build $
+        forM_ (Environment.toList store) $
+          \(name, s) ->
+            modify (replaceBuildNameEntry (NName name s))

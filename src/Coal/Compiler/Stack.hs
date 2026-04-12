@@ -27,6 +27,7 @@ module Coal.Compiler.Stack (
   getCurrentBuildC,
   updateBuildC,
   updateCurrentBuildC,
+  updateCurrentBuildPureC,
   insertConstraintsC,
   clearConstraintsC,
   insertKindConstraintsC,
@@ -174,6 +175,9 @@ updateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> Comp
 updateCurrentBuildC f = do
   CompilerState{..} <- get
   updateBuildC compilerCurrentPath f
+
+updateCurrentBuildPureC :: (Monad m) => (Build a -> Build a) -> CompilerT a m ()
+updateCurrentBuildPureC f = updateCurrentBuildC (pure . f)
 
 insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
 insertConstraintsC constraints = modify (overCompilerConstraints (<> constraints))
