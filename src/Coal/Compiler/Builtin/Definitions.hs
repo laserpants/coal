@@ -13,7 +13,7 @@ import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module.Import (Import (..))
-import Coal.Language.Module.Path
+import Coal.Language.Module.Path (Path (Path))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name, for)

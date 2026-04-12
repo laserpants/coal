@@ -12,8 +12,6 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
-import Coal.Language (Kind)
-import Coal.Language.Definition
 import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (parseModule)
@@ -21,7 +19,6 @@ import Coal.Parser.Core (spaces)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (get)
-import Control.Monad.Trans.Class (lift)
 import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec (eof, runParser)

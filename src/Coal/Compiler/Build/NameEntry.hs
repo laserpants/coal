@@ -16,16 +16,17 @@ module Coal.Compiler.Build.NameEntry (
 ) where
 
 import Coal.Common.Environment (Environment (..))
-import Coal.Language
-    ( Trait,
-      Kind,
-      Parameter,
-      IndexedType,
-      TypeIndex,
-      Type,
-      IndexedScheme,
-      Scheme,
-      DataConstructor )
+import Coal.Language (
+  DataConstructor,
+  IndexedScheme,
+  IndexedType,
+  Kind,
+  Parameter,
+  Scheme,
+  Trait,
+  Type,
+  TypeIndex,
+ )
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Data.Binary (Binary)

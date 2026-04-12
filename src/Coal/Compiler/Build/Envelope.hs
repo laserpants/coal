@@ -10,9 +10,9 @@ module Coal.Compiler.Build.Envelope (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build ( Build(..) )
+import Coal.Compiler.Build (Build (..))
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Path ( principalPath )
+import Coal.Language.Module.Path (principalPath)
 import Extras (Name)
 
 data BuildEnvelope a

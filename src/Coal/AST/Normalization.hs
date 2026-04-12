@@ -9,7 +9,7 @@ import Coal.AST.Flattening (flattenLambdas)
 import Coal.Language.Definition
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
-import Coal.Language.Module
+import Coal.Language.Module (Module (..))
 import Coal.Language.Trait (Qualified (..))
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
