@@ -96,8 +96,6 @@ fromSource name file src = do
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 parseFile file = do
 
-  traceShowM file
-
   CompilerConfig{..} <- gets compilerConfig
   res <- liftIO $ resolveModule configSourcePaths file
   case res of
@@ -109,8 +107,6 @@ parseFile file = do
       setBuildSourceC name src
 
       --fromSource name file src
-
-      traceShowM (name, cached)
 
       case cached of
          Just mb | not configNoCache -> do

@@ -18,23 +18,6 @@ module Coal.Compiler.Stack (
   runCompilerT,
   evalCompilerT,
   updateSupply,
-  --  setVerbatimSourceC,
-  --  setVerbatimSourceForC,
-  --  getVerbatimSourceC,
-  --  setCompilerCurrentModuleC,
-  --  setConfigExecutableNameC,
-  --  setConfigGenerateDotFilesC,
-  --  setConfigGenerateLLVMOutputC,
-  --  setConfigC,
-  -- insertModuleC,
-  --  insertCurrentModuleC,
-  --  getCurrentBuildC,
-  --  updateCurrentBuildC,
-  --  updateBuildC,
-  --  withCurrentModuleC_,
-  --  withCurrentModuleC,
-  -- setBitcodeC,
-  --  insertFreshModule,
   updateSupplyC,
   insertBuildC,
   setCurrentPathC,
@@ -72,7 +55,7 @@ module Coal.Compiler.Stack (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
-import Coal.Compiler.Build (Build (..), setBuildBitcode, setBuildSource)
+import Coal.Compiler.Build (Build (..), setBuildBitcode)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error
@@ -181,7 +164,7 @@ updateBuildC name f = do
   maybeBuild <- getBuildC name
   case maybeBuild of
     Nothing ->
-      --      error (show name)        -- ????
+      --error (show name)        -- ????
       pure ()
     Just build -> do
       newBuild <- f build
@@ -232,7 +215,7 @@ setBitcodeC :: (Monad m, BuildName p) => p -> ByteString -> CompilerT a m ()
 setBitcodeC build bs = updateBuildC build (pure . setBuildBitcode bs)
 
 setBuildSourceC :: (Monad m, BuildName p) => p -> Text -> CompilerT a m ()
-setBuildSourceC build source = updateBuildC build (pure . setBuildSource source)
+setBuildSourceC build source = modify (overCompilerSources (Environment.insert ((buildName build)) source))
 
 {-# INLINE compilerReportConstraintsGenErrors #-}
 compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()

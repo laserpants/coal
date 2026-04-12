@@ -6,9 +6,7 @@ module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-
--- import Coal.Compiler.Build.Core (buildEnv)
-
+import Debug.Trace
 import Coal.Compiler.Build
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
@@ -57,6 +55,8 @@ prep modul = do
 
   prepareBuildAliases m1
 
+  hashBuild
+
   expandFunctionGroups m1
 
 prepareBuildAliases Module{..} = do
@@ -67,6 +67,22 @@ prepareBuildAliases Module{..} = do
         { buildPath = modulePath
         }
   insertBuildC build
+
+hashBuild :: (Monad m) => CompilerT a m ()
+hashBuild = do
+  Build{..} <- getCurrentBuildC
+  env <- gets compilerSources
+
+  case Environment.lookup (principalPath buildPath) env of
+    Nothing -> do
+      pure ()
+    Just source -> do
+
+      -- TODO: modifyBuild ??
+      newBuild <-
+        flip execStateT Build{..} $ do
+          modify (insertHash source)
+      insertBuildC newBuild
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions = traverse_ collectTypeAliases

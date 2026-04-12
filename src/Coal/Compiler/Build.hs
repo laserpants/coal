@@ -13,11 +13,12 @@ module Coal.Compiler.Build (
   --  setBuildFile,
   setBuildBitcode,
   setBuildHash,
+  insertHash,
   setBuildKernelNames,
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
   setQualifiedNames,
-  setBuildSource,
+--  setBuildSource,
   insertBuildNameEntry,
   removeBuildNamePlaceholder,
   replaceBuildNameEntry,
@@ -31,6 +32,7 @@ module Coal.Compiler.Build (
   overBuildDataConstructors,
 ) where
 
+import Crypto.Hash
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
@@ -49,6 +51,7 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import Extras (Name, Set, forM_)
 import GHC.Generics (Generic)
+import qualified Data.Text.Encoding as Text
 
 type InstanceMap a = Map IndexedType a
 
@@ -67,11 +70,9 @@ data Build a = Build
   , buildQualifiedNames :: Environment Name
   , buildBitcode :: Maybe ByteString
   , buildHash :: Maybe Hash256
-  , buildSource :: Text
   , buildKernelNames :: Environment Kernel.Type
   , buildKernelIRTypes :: Environment IRType
   , buildKernelConstructors :: Environment Int
-  --  , buildTypedDefinitions :: [Definition a Kind IndexedType]
   }
   deriving (Show, Eq, Ord, Generic, Functor, Foldable, Traversable)
 
@@ -93,11 +94,9 @@ emptyBuild =
     , buildQualifiedNames = mempty
     , buildBitcode = Nothing
     , buildHash = Nothing
-    , buildSource = mempty
     , buildKernelNames = mempty
     , buildKernelIRTypes = mempty
     , buildKernelConstructors = mempty
-    --   , buildTypedDefinitions = mempty
     }
 
 setBuildPath :: Path -> Build a -> Build a
@@ -106,13 +105,6 @@ setBuildPath newBuildPath Build{..} =
     { buildPath = newBuildPath
     , ..
     }
-
--- setBuildFile :: FilePath -> Build a -> Build a
--- setBuildFile newBuildFile Build{..} =
---  Build
---    { buildFile = newBuildFile
---    , ..
---    }
 
 overBuildNames :: (Environment [NameEntry] -> Environment [NameEntry]) -> Build a -> Build a
 overBuildNames f Build{..} =
@@ -217,13 +209,6 @@ overBuildAliases f Build{..} =
     , ..
     }
 
--- overBuildQualifiedNames :: (Environment Name -> Environment Name) -> Build a -> Build a
--- overBuildQualifiedNames f Build{..} =
---  Build
---    { buildQualifiedNames = f buildQualifiedNames
---    , ..
---    }
-
 insertBuildAlias :: Name -> AliasEntry a -> Build a -> Build a
 insertBuildAlias name = overBuildAliases . Environment.insert name
 
@@ -240,6 +225,9 @@ setBuildHash newBuildHash Build{..} =
     { buildHash = Just newBuildHash
     , ..
     }
+
+insertHash :: Text -> Build a -> Build a
+insertHash source = setBuildHash (Hash256 (hash (Text.encodeUtf8 source)))
 
 setBuildKernelNames :: Environment Kernel.Type -> Build a -> Build a
 setBuildKernelNames env Build{..} =
@@ -266,13 +254,6 @@ setQualifiedNames :: Environment Name -> Build a -> Build a
 setQualifiedNames names Build{..} =
   Build
     { buildQualifiedNames = names
-    , ..
-    }
-
-setBuildSource :: Text -> Build a -> Build a
-setBuildSource source Build{..} =
-  Build
-    { buildSource = source
     , ..
     }
 

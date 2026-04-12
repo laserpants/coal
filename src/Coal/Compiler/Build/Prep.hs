@@ -849,6 +849,7 @@ importedBuild path = do
 
 replacePlaceholders :: (Monad m) => CompilerT a m ()
 replacePlaceholders = do
+  -- TODO: modifyBuild ??
   build <- getCurrentBuildC
   store <- gets compilerNameStore
   newBuild <-
