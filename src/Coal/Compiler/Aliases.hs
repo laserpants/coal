@@ -232,7 +232,7 @@ instance AliasTransform (Type Parameter Kind) where
   aliasTransform =
     \case
       t@(TApplication k _ _) ->
-        uncurry (aliasTransformTypeApplication k t) (listTypeArgs t)
+        uncurry (aliasTransformTypeApplication k t) (typeArgs t)
       TArrow t1 t2 ->
         TArrow <$> aliasTransform t1 <*> aliasTransform t2
       TAlias name ts t ->
@@ -252,7 +252,7 @@ instance AliasTransform (Type TypeIndex Kind) where
   aliasTransform =
     \case
       t@(TApplication k _ _) ->
-        uncurry (aliasTransformTypeApplication2 k t) (listTypeArgs t)
+        uncurry (aliasTransformTypeApplication2 k t) (typeArgs t)
       TArrow t1 t2 ->
         TArrow <$> aliasTransform t1 <*> aliasTransform t2
       TAlias name ts t ->

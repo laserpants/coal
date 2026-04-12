@@ -41,7 +41,7 @@ indexTypeAnnotations :: (Show a, Monad m) => Type Parameter Kind -> AnnotationsT
 indexTypeAnnotations =
   \case
     t@TApplication{} -> do
-      uncurry indexTypeApplicationTypeAnnotations (listTypeArgs t)
+      uncurry indexTypeApplicationTypeAnnotations (typeArgs t)
     TVariable (Parameter k v) ->
       TVariable <$> typeIndex k v
     TArrow t1 t2 ->

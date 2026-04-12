@@ -21,7 +21,7 @@ spec :: SpecWith ()
 spec =
   describe "Unit tests" $ do
     typeSystemSpec
-    listTypeArgsSpec
+    typeArgsSpec
     typeApplicationSpec
     patternAnomaliesSpec
 

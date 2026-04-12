@@ -6,12 +6,12 @@ import Coal.Language
 import Data.List.NonEmpty
 import Test.Hspec
 
-listTypeArgsSpec :: Spec
-listTypeArgsSpec =
-  describe "Type.listTypeArgs" $ do
+typeArgsSpec :: Spec
+typeArgsSpec =
+  describe "Type.typeArgs" $ do
     it "" $
       -- Foo<nat>
-      listTypeArgs
+      typeArgs
         ( TApplication
             KType
             (TConstructor (KArrow KType KType) "Foo")
@@ -24,7 +24,7 @@ listTypeArgsSpec =
 
     it "" $
       -- Foo2<nat, int32>
-      listTypeArgs
+      typeArgs
         ( TApplication
             KType
             ( TApplication
@@ -42,7 +42,7 @@ listTypeArgsSpec =
 
     it "" $
       -- Foo3<nat, string, int32,>
-      listTypeArgs
+      typeArgs
         ( TApplication
             KType
             ( TApplication

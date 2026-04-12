@@ -4,7 +4,7 @@
 module Coal.Compiler.Kernel.Translate.Type (translateType) where
 
 import qualified Coal.Kernel.Language as Kernel
-import Coal.Language.Type (Type (..), listTypeArgs)
+import Coal.Language.Type (Type (..), typeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Row (Row (..))
 import qualified Data.Text as Text
@@ -69,7 +69,7 @@ translateType :: Type o k -> Kernel.Type
 translateType =
   \case
     t@TApplication{} ->
-      let (t1, ts) = listTypeArgs t
+      let (t1, ts) = typeArgs t
        in foldr (translateApplication . translateType) (translateType t1) ts
     TArrow t1 t2 ->
       Kernel.arrow (translateType t1) (translateType t2)

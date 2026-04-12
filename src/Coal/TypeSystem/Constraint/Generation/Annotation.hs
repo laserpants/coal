@@ -80,7 +80,7 @@ type TypeAnnotation a m = ExceptT (a -> TypeAnnotationError a) (StateT (Dictiona
 --  undefined
 ----  \case
 ----    t@TApplication{} -> do
-----      uncurry instantiateTypeApplication (listTypeArgs t)
+----      uncurry instantiateTypeApplication (typeArgs t)
 ----    TVariable (Parameter _ v) ->
 ----      TVariable <$> typeIndex KType v
 ----    TArrow t1 t2 ->

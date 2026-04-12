@@ -20,7 +20,7 @@ module Coal.Language.Type (
   unfoldType,
   rowNormalize,
   applyTypeArgs,
-  listTypeArgs,
+  typeArgs,
   listType,
   tupleType,
   tupleTypeConstructor,
@@ -152,8 +152,8 @@ applyTypeArgs k ty = go ty . NonEmpty.toList
       _ ->
         error "Implementation error"
 
-listTypeArgs :: Type o k -> (Type o k, NonEmpty (Type o k))
-listTypeArgs (TApplication _ t1 t2) = (t, NonEmpty.prependList ts (NonEmpty.singleton t2))
+typeArgs :: Type o k -> (Type o k, NonEmpty (Type o k))
+typeArgs (TApplication _ t1 t2) = (t, NonEmpty.prependList ts (NonEmpty.singleton t2))
  where
   (t, ts) = go t1
   go =
@@ -162,7 +162,7 @@ listTypeArgs (TApplication _ t1 t2) = (t, NonEmpty.prependList ts (NonEmpty.sing
         let (u, us) = go u1 in (u, us <> [u2])
       u ->
         (u, [])
-listTypeArgs _ = error "Implementation error"
+typeArgs _ = error "Implementation error"
 
 headConstructor :: Type o k -> Maybe Name
 headConstructor =
@@ -258,7 +258,7 @@ prettyTypePrec prec =
       parensIf (prec > precArrow) $
         group (prettyTypePrec (precArrow + 1) t1 <+> "->" <+> prettyTypePrec precArrow t2)
     t@TApplication{} ->
-      uncurry (prettyTypeApplicationPrec prec) (listTypeArgs t)
+      uncurry (prettyTypeApplicationPrec prec) (typeArgs t)
     TConstructor _ name ->
       pretty name
     TVariable v ->
