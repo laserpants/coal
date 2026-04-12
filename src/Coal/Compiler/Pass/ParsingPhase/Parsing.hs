@@ -4,6 +4,7 @@
 
 module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, fromSource) where
 
+import Debug.Trace
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Cache (cachedBuild)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
@@ -61,20 +62,20 @@ parseEmbedded (p, src) = do
     Right module_ -> do
       let name = principalPath (modulePath module_)
       -- Check cached build files
-      --      cached <- cachedBuild name encodedSrc
+      cached <- cachedBuild name encodedSrc
       --      setVerbatimSourceForC module_ encodedSrc
       setBuildSourceC name encodedSrc
 
       toBeRecompiled name
-      pure $ Right (BSource module_)
+      --pure $ Right (BSource module_)
+      case cached of
+          Just mb | not configNoCache -> do
+            insertBuildC mb
+            pure $ Right (BCached mb)
+          _ -> do
+            toBeRecompiled name
+            pure $ Right (BSource module_)
  where
-  --      case cached of
-  --        Just mb | not configNoCache -> do
-  --          lift $ insertBuildC mb
-  --          pure $ Right (BCached mb)
-  --        _ -> do
-  --          insertFreshModule name
-  --          pure $ Right (BSource module_)
 
   encodedSrc :: Text
   encodedSrc = E.decodeUtf8 src
@@ -89,27 +90,33 @@ fromSource name file src = do
       if principalPath path == name
         then do
           pure $ Right (BSource module_)
-        else pure $ Left (BadModuleName file (principalPath path))
+        else 
+          pure $ Left (BadModuleName file (principalPath path))
 
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 parseFile file = do
+
+  traceShowM file
+
   CompilerConfig{..} <- gets compilerConfig
   res <- liftIO $ resolveModule configSourcePaths file
   case res of
     Right (fp, _, name) -> do
       src <- liftIO (Text.readFile fp)
       -- Check cached build files
-      --      cached <- cachedBuild name src
+      cached <- cachedBuild name src
       --      setVerbatimSourceC name src
       setBuildSourceC name src
 
-      fromSource name file src
+      --fromSource name file src
 
-    -- case cached of
-    --  Just mb | not configNoCache -> do
-    --    lift $ insertBuildC mb
-    --    pure $ Right (BCached mb)
-    --  _ ->
-    --    fromSource name file src
+      traceShowM (name, cached)
+
+      case cached of
+         Just mb | not configNoCache -> do
+           insertBuildC mb
+           pure $ Right (BCached mb)
+         _ ->
+           fromSource name file src
     Left err -> do
       pure $ Left (BadFilename file err)
