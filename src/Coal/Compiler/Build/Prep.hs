@@ -26,7 +26,7 @@ import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.TypeSystem.Parameterized
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
-import Control.Monad (unless, when)
+import Control.Monad (unless)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
@@ -35,7 +35,6 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set, (\\))
 import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
-import Debug.Trace
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
