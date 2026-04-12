@@ -133,7 +133,7 @@ inferTypes modul = do
     \Assumption{..} ->
       case Environment.lookup assumptionName compilerNameStore of
         Nothing ->
-          error "!!??"
+          error "Name not in scope"
         Just s -> do
           insertConstraintsC [Explicit (RuleAssumptionExplicit assumptionMetadata t s) t s]
          where
