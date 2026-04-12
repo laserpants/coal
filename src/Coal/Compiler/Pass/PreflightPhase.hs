@@ -16,10 +16,14 @@ import Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses)
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Control.Monad.IO.Class (MonadIO)
+import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
+import Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps)
 
 preflightPhase :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 preflightPhase =
-  passImportsTopRule
+  passTopologicalSort
+    >-> passCheckDeps
+    >-> passImportsTopRule
     >-> passSetup
     --    >-> mapPass passWhereClauses
     >-> passDoNotation
