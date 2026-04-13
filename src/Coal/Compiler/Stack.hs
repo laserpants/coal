@@ -219,7 +219,7 @@ setBitcodeC :: (Monad m, BuildName p) => p -> ByteString -> CompilerT a m ()
 setBitcodeC build bs = updateBuildC build (pure . setBuildBitcode bs)
 
 setBuildSourceC :: (Monad m, BuildName p) => p -> Text -> CompilerT a m ()
-setBuildSourceC build source = modify (overCompilerSources (Environment.insert ((buildName build)) source))
+setBuildSourceC build source = modify (overCompilerSources (Environment.insert (buildName build) source))
 
 {-# INLINE compilerReportConstraintsGenErrors #-}
 compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
