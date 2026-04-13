@@ -14,7 +14,7 @@ import Coal.Language.Expression.Choice (Guard (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (KindProxy (..), Type (..), applyTypeArgs, foldType)
+import Coal.Language.Type (Type (..), applyTypeArgs, foldType)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.Data (Data, Typeable)
@@ -49,7 +49,7 @@ instance HasType o k Primitive where
       LBignum{} ->
         TIntrinsic IBignum
 
-instance (Data a, Data s, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Pattern a s (Type o k)) where
+instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Pattern a s (Type o k)) where
   typeOf =
     \case
       PLiteral _ t ->
