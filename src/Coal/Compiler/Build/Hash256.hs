@@ -1,8 +1,9 @@
+-- +
 {-# LANGUAGE DeriveGeneric #-}
 
 module Coal.Compiler.Build.Hash256 (Hash256 (..)) where
 
-import Crypto.Hash
+import Crypto.Hash (SHA256, Digest, digestFromByteString)
 import Data.Binary
 import Data.Binary.Get (getByteString)
 import Data.Binary.Put (putByteString)
