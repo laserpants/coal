@@ -8,16 +8,12 @@ module Coal.Compiler.Pass (
   tickBar,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
-import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Build.NameEntry (typeConstructorEntryKind)
 import Coal.Compiler.Environment
 import Coal.Compiler.Stack
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (asks, local)
+import Control.Monad.Reader (asks)
 import Data.Foldable (for_)
 import System.Console.AsciiProgress
 
