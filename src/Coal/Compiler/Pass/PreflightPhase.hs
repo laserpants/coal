@@ -7,7 +7,7 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps)
 import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
-import Coal.Compiler.Pass.PreflightPhase.AliasCycles (passAliasCycles)
+import Coal.Compiler.Pass.PreflightPhase.AliasCycles (passDetectAliasCycles)
 import Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation)
 import Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule)
 import Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointRule)
@@ -27,7 +27,7 @@ preflightPhase =
     >-> passSetup
     --    >-> mapPass passWhereClauses
     >-> passDoNotation
-    >-> passAliasCycles
+    >-> passDetectAliasCycles
     --    >-> mapPass (liftPass (generateDebugArtifacts "DoNotation"))
     >-> passShadowingRule
     >-> passMainEntrypointRule

@@ -4,11 +4,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.AliasCycles (passAliasCycles) where
+module Coal.Compiler.Pass.PreflightPhase.AliasCycles (passDetectAliasCycles) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
@@ -16,21 +16,23 @@ import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module
 import Coal.Language.Module.Path
+import Control.Monad (unless)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
-passAliasCycles :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
-passAliasCycles = mapPass $ Pass{runPass = traverse impl}
+passDetectAliasCycles :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
+passDetectAliasCycles = mapPass $ Pass{runPass = traverse passImpl}
 
-impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
-impl mm = do
-  --  let mm = toModule [] m
-  setCurrentPathC (modulePath mm)
-  detectCycles mm
-  return mm
+passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
+passImpl m = do
+  setCurrentModuleC m
+  (_, errors) <- listenErrors (detectCycles m)
+  unless (null errors) $
+    throwError PreflightFailure
+  return m
 
 class AliasContext e where
   detectCycles :: (Monad m) => e -> CompilerT Metadata m ()
@@ -71,7 +73,6 @@ detectCyclesInType loc name =
       | name == con -> do
           path <- gets compilerCurrentPath
           tellErrors [TypeAliasCycle name (ErrorLocation (principalPath path) loc)]
-          throwError PreflightFailure
     TRecord t ->
       detectCyclesInType loc name t
     TRow r ->
