@@ -29,56 +29,56 @@ impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Met
 impl mm = do
   --  let mm = toModule [] m
   setCurrentPathC (modulePath mm)
-  detectAliasCycles mm
+  detectCycles mm
   return mm
 
-class TransformContext e where
-  detectAliasCycles :: (Monad m) => e -> CompilerT Metadata m ()
+class AliasContext e where
+  detectCycles :: (Monad m) => e -> CompilerT Metadata m ()
 
-instance (TransformContext e) => TransformContext [e] where
-  detectAliasCycles = traverse_ detectAliasCycles
+instance (AliasContext e) => AliasContext [e] where
+  detectCycles = traverse_ detectCycles
 
-instance (TransformContext e) => TransformContext (NonEmpty e) where
-  detectAliasCycles = traverse_ detectAliasCycles
+instance (AliasContext e) => AliasContext (NonEmpty e) where
+  detectCycles = traverse_ detectCycles
 
-instance (TransformContext e) => TransformContext (Maybe e) where
-  detectAliasCycles = traverse_ detectAliasCycles
+instance (AliasContext e) => AliasContext (Maybe e) where
+  detectCycles = traverse_ detectCycles
 
-instance TransformContext (Module Metadata () ()) where
-  detectAliasCycles =
+instance AliasContext (Module Metadata () ()) where
+  detectCycles =
     \case
       Module _ _ o -> do
-        traverse_ detectAliasCycles o
+        traverse_ detectCycles o
 
-instance TransformContext (Definition Metadata () ()) where
-  detectAliasCycles =
+instance AliasContext (Definition Metadata () ()) where
+  detectCycles =
     \case
       DTypeAlias loc name (AliasDefinition _ t) ->
-        detectCycles loc name t
+        detectCyclesInType loc name t
       _ ->
         pure ()
 
-detectCycles :: (Monad m) => Metadata -> Name -> ParameterizedType -> CompilerT Metadata m ()
-detectCycles loc name =
+detectCyclesInType :: (Monad m) => Metadata -> Name -> ParameterizedType -> CompilerT Metadata m ()
+detectCyclesInType loc name =
   \case
     TApplication _ t1 t2 -> do
-      detectCycles loc name t1
-      detectCycles loc name t2
+      detectCyclesInType loc name t1
+      detectCyclesInType loc name t2
     TArrow t1 t2 -> do
-      detectCycles loc name t1
-      detectCycles loc name t2
+      detectCyclesInType loc name t1
+      detectCyclesInType loc name t2
     TConstructor _ con
       | name == con -> do
           path <- gets compilerCurrentPath
           tellErrors [TypeAliasCycle name (ErrorLocation (principalPath path) loc)]
           throwError PreflightFailure
     TRecord t ->
-      detectCycles loc name t
+      detectCyclesInType loc name t
     TRow r ->
       detectCyclesInRow loc name r
     TAlias _ ts t -> do
-      traverse_ (detectCycles loc name) ts
-      detectCycles loc name t
+      traverse_ (detectCyclesInType loc name) ts
+      detectCyclesInType loc name t
     _ ->
       pure ()
 
@@ -86,7 +86,7 @@ detectCyclesInRow :: (Monad m) => Metadata -> Name -> Row Parameter () Parameter
 detectCyclesInRow loc name =
   \case
     RExtend _ t r -> do
-      detectCycles loc name t
+      detectCyclesInType loc name t
       detectCyclesInRow loc name r
     _ ->
       pure ()
