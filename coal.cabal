@@ -78,7 +78,7 @@ library
       Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing
       Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements
       Coal.Compiler.Pass.PreflightPhase.DetectShadowing
-      Coal.Compiler.Pass.PreflightPhase.Setup
+      Coal.Compiler.Pass.PreflightPhase.InsertBuiltinDefinitions
       Coal.Compiler.Pass.PreflightPhase.WhereClauses
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects

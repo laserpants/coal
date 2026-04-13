@@ -10,7 +10,7 @@ module Coal.Compiler.Pass.PreflightPhase.DesugarDoNotation (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Common.Label (Label (..))
+import Coal.AST.Shorthand
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
@@ -29,13 +29,13 @@ passDesugarDoNotation = mapPass $ Pass{runPass = traverse passImpl}
 passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 passImpl = desugarDoNotation
 
-class TransformContext e where
+class DoNotationContext e where
   desugarDoNotation :: (Monad m) => e -> CompilerT Metadata m e
 
-instance (TransformContext a) => TransformContext (Maybe a) where
+instance (DoNotationContext a) => DoNotationContext (Maybe a) where
   desugarDoNotation = traverse desugarDoNotation
 
-instance (Data a, Monoid a) => TransformContext (Module a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (Module a () ()) where
   desugarDoNotation =
     \case
       Module{..} -> do
@@ -46,7 +46,7 @@ instance (Data a, Monoid a) => TransformContext (Module a () ()) where
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (Definition a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (Definition a () ()) where
   desugarDoNotation =
     \case
       DFunction loc name def ->
@@ -60,7 +60,7 @@ instance (Data a, Monoid a) => TransformContext (Definition a () ()) where
       o ->
         pure o
 
-instance (Data a, Monoid a) => TransformContext (InstanceDefinition a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (InstanceDefinition a () ()) where
   desugarDoNotation =
     \case
       InstanceDefinition{..} -> do
@@ -71,7 +71,7 @@ instance (Data a, Monoid a) => TransformContext (InstanceDefinition a () ()) whe
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (FoldDefinition a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (FoldDefinition a () ()) where
   desugarDoNotation =
     \case
       FoldDefinition{..} -> do
@@ -82,7 +82,7 @@ instance (Data a, Monoid a) => TransformContext (FoldDefinition a () ()) where
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (FunctionDefinition a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (FunctionDefinition a () ()) where
   desugarDoNotation =
     \case
       FunctionDefinition{..} -> do
@@ -93,7 +93,7 @@ instance (Data a, Monoid a) => TransformContext (FunctionDefinition a () ()) whe
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (LetDefinition a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (LetDefinition a () ()) where
   desugarDoNotation =
     \case
       LetDefinition{..} -> do
@@ -104,31 +104,31 @@ instance (Data a, Monoid a) => TransformContext (LetDefinition a () ()) where
             , ..
             }
 
-instance (Data a, Monoid a) => TransformContext (Expression a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
   desugarDoNotation =
     \case
       EDoBlock _ es ->
-        pure $ foldr go e' es'
+        pure (foldr go e' es')
        where
         (e', es') = normalize es
-        bind e1 e2 = EApplication mempty () (EVariable mempty (Label () "bind")) (e1 :| [e2])
-        go (p, e) e2 = bind e (ELambda mempty (p :| []) e2)
+        bind e1 e2 = applicationE (varE "bind") (e1 :| [e2])
+        go (p, e) e2 = bind e (lambdaE (p :| []) e2)
       e ->
         descendM desugarDoNotation e
 
-instance (Data a, Monoid a) => TransformContext (Clause a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (Clause a () ()) where
   desugarDoNotation =
     \case
       EClause a p cs ->
         EClause a p <$> traverse desugarDoNotation cs
 
-instance (Data a, Monoid a) => TransformContext (Choice Expression a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (Choice Expression a () ()) where
   desugarDoNotation =
     \case
       CPlain a gs e ->
         CPlain a <$> traverse desugarDoNotation gs <*> desugarDoNotation e
 
-instance (Data a, Monoid a) => TransformContext (Guard Expression a () ()) where
+instance (Data a, Monoid a) => DoNotationContext (Guard Expression a () ()) where
   desugarDoNotation =
     \case
       CGuard e ->
@@ -140,4 +140,4 @@ normalize es =
     (PAny _ (), e) ->
       (e, NonEmpty.fromList $ NonEmpty.init es)
     _ ->
-      (EApplication mempty () (EVariable mempty (Label () "pure")) (ELiteral mempty LUnit :| []), es)
+      (applicationE (varE "pure") (ELiteral mempty LUnit :| []), es)
