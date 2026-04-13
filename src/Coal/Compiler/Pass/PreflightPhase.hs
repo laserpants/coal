@@ -7,12 +7,12 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps)
 import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
+import Coal.Compiler.Pass.PreflightPhase.DesugarDoNotation (passDesugarDoNotation)
 import Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles (passDetectAliasCycles)
 import Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams (passDetectDuplicateParams)
 import Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing (passDetectMainEntrypointMissing)
 import Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements (passDetectMisplacedImportStatements)
 import Coal.Compiler.Pass.PreflightPhase.DetectShadowing (passDetectShadowing)
-import Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation)
 import Coal.Compiler.Pass.PreflightPhase.Setup (passSetup)
 import Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses)
 import Coal.Language (Kind)
@@ -26,9 +26,9 @@ preflightPhase =
     >-> passDetectMisplacedImportStatements
     >-> passSetup
     --    >-> mapPass passWhereClauses
-    >-> passDoNotation
+    >-> passDesugarDoNotation
     >-> passDetectAliasCycles
-    --    >-> mapPass (liftPass (generateDebugArtifacts "DoNotation"))
+    --    >-> mapPass (liftPass (generateDebugArtifacts "DesugarDoNotation"))
     >-> passDetectShadowing
     >-> passDetectMainEntrypointMissing
     >-> passDetectDuplicateParams

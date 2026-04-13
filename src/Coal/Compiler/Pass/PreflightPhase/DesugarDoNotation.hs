@@ -5,7 +5,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation) where
+module Coal.Compiler.Pass.PreflightPhase.DesugarDoNotation (
+  passDesugarDoNotation,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
@@ -21,11 +23,11 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
-passDoNotation :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
-passDoNotation = mapPass $ Pass{runPass = traverse impl}
+passDesugarDoNotation :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
+passDesugarDoNotation = mapPass $ Pass{runPass = traverse passImpl}
 
-impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
-impl = desugarDoNotation
+passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
+passImpl = desugarDoNotation
 
 class TransformContext e where
   desugarDoNotation :: (Monad m) => e -> CompilerT Metadata m e
@@ -114,16 +116,6 @@ instance (Data a, Monoid a) => TransformContext (Expression a () ()) where
       e ->
         descendM desugarDoNotation e
 
-normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), NonEmpty (Pattern a () (), Expression a () ()))
-normalize es =
-  case lst of
-    (PAny _ (), e) ->
-      (e, NonEmpty.fromList $ NonEmpty.init es)
-    _ ->
-      (EApplication mempty () (EVariable mempty (Label () "pure")) (ELiteral mempty LUnit :| []), es)
- where
-  lst = NonEmpty.last es
-
 instance (Data a, Monoid a) => TransformContext (Clause a () ()) where
   desugarDoNotation =
     \case
@@ -141,3 +133,11 @@ instance (Data a, Monoid a) => TransformContext (Guard Expression a () ()) where
     \case
       CGuard e ->
         CGuard <$> desugarDoNotation e
+
+normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), NonEmpty (Pattern a () (), Expression a () ()))
+normalize es =
+  case NonEmpty.last es of
+    (PAny _ (), e) ->
+      (e, NonEmpty.fromList $ NonEmpty.init es)
+    _ ->
+      (EApplication mempty () (EVariable mempty (Label () "pure")) (ELiteral mempty LUnit :| []), es)
