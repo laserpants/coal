@@ -161,14 +161,14 @@ getCurrentBuildC = do
       return build
 
 updateBuildC :: (Monad m, BuildName p) => p -> (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
-updateBuildC name f = do
+updateBuildC name update = do
   maybeBuild <- getBuildC name
   case maybeBuild of
     Nothing ->
       --error (show name)        -- ????
       pure ()
     Just build -> do
-      newBuild <- f build
+      newBuild <- update build
       modify (overCompilerModules (Environment.insert (buildName name) newBuild))
 
 updateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
