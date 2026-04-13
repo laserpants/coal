@@ -6,7 +6,7 @@ import Coal.AST.HasMetadata (HasMetadata (..))
 import Coal.AST.Metadata (Metadata (..))
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Text.Megaparsec ( unPos, SourcePos(sourceColumn, sourceLine) )
+import Text.Megaparsec (SourcePos (sourceColumn, sourceLine), unPos)
 import TextShow (showt)
 
 prettyErrorMessage :: (HasMetadata a) => [Text] -> a -> Text -> Text

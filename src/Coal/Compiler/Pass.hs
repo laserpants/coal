@@ -34,3 +34,6 @@ p1 >-> p2 = Pass{runPass = runPassAndTickBar p1 >=> runPassAndTickBar p2}
 
 mapPass :: (MonadIO m) => Pass a m i o -> Pass a m [i] [o]
 mapPass p = Pass{runPass = traverse (runPassAndTickBar p)}
+
+liftPass :: (Monad m) => Pass a m i o -> Pass a m (BuildEnvelope i) (BuildEnvelope o)
+liftPass (Pass p) = Pass (traverse p)

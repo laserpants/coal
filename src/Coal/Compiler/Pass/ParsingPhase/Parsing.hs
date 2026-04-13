@@ -4,7 +4,6 @@
 
 module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, fromSource) where
 
-import Debug.Trace
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Cache (cachedBuild)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
@@ -30,6 +29,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as E
 import qualified Data.Text.IO as Text
+import Debug.Trace
 import Extras (Name, forM, forM_)
 import Text.Megaparsec (eof, runParser)
 
@@ -67,16 +67,15 @@ parseEmbedded (p, src) = do
       setBuildSourceC name encodedSrc
 
       toBeRecompiled name
-      --pure $ Right (BSource module_)
+      -- pure $ Right (BSource module_)
       case cached of
-          Just mb | not configNoCache -> do
-            insertBuildC mb
-            pure $ Right (BCached mb)
-          _ -> do
-            toBeRecompiled name
-            pure $ Right (BSource module_)
+        Just mb | not configNoCache -> do
+          insertBuildC mb
+          pure $ Right (BCached mb)
+        _ -> do
+          toBeRecompiled name
+          pure $ Right (BSource module_)
  where
-
   encodedSrc :: Text
   encodedSrc = E.decodeUtf8 src
 
@@ -90,12 +89,10 @@ fromSource name file src = do
       if principalPath path == name
         then do
           pure $ Right (BSource module_)
-        else 
-          pure $ Left (BadModuleName file (principalPath path))
+        else pure $ Left (BadModuleName file (principalPath path))
 
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 parseFile file = do
-
   CompilerConfig{..} <- gets compilerConfig
   res <- liftIO $ resolveModule configSourcePaths file
   case res of
@@ -106,13 +103,13 @@ parseFile file = do
       --      setVerbatimSourceC name src
       setBuildSourceC name src
 
-      --fromSource name file src
+      -- fromSource name file src
 
       case cached of
-         Just mb | not configNoCache -> do
-           insertBuildC mb
-           pure $ Right (BCached mb)
-         _ ->
-           fromSource name file src
+        Just mb | not configNoCache -> do
+          insertBuildC mb
+          pure $ Right (BCached mb)
+        _ ->
+          fromSource name file src
     Left err -> do
       pure $ Left (BadFilename file err)

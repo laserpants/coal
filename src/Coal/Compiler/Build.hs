@@ -18,7 +18,7 @@ module Coal.Compiler.Build (
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
   setQualifiedNames,
---  setBuildSource,
+  --  setBuildSource,
   insertBuildNameEntry,
   removeBuildNamePlaceholder,
   replaceBuildNameEntry,
@@ -32,7 +32,6 @@ module Coal.Compiler.Build (
   overBuildDataConstructors,
 ) where
 
-import Crypto.Hash
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
@@ -42,6 +41,7 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
 import Control.Monad.State (execState, modify)
+import Crypto.Hash
 import Data.Binary
 import Data.ByteString (ByteString)
 import Data.List (nubBy)
@@ -49,9 +49,9 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Data.Text (Text)
+import qualified Data.Text.Encoding as Text
 import Extras (Name, Set, forM_)
 import GHC.Generics (Generic)
-import qualified Data.Text.Encoding as Text
 
 type InstanceMap a = Map IndexedType a
 

@@ -14,7 +14,6 @@ import Coal.Compiler.Build (Build (..))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Extras (Name)
-import Coal.Compiler.Pass (Pass (..))
 
 data BuildEnvelope a
   = BSource a
@@ -38,6 +37,3 @@ partitionBuildEnvelopes = foldr (flip go) ([], [])
         (source : sources, cached)
       BCached b ->
         (sources, b : cached)
-
-liftPass :: (Monad m) => Pass a m i o -> Pass a m (BuildEnvelope i) (BuildEnvelope o)
-liftPass (Pass p) = Pass (traverse p)

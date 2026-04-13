@@ -6,7 +6,6 @@ module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-import Debug.Trace
 import Coal.Compiler.Build
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
@@ -30,6 +29,7 @@ import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Debug.Trace
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 
 passPrep :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind ())

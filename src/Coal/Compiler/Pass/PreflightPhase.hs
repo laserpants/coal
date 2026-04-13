@@ -5,6 +5,8 @@ module Coal.Compiler.Pass.PreflightPhase (preflightPhase) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
+import Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps)
+import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
 import Coal.Compiler.Pass.PreflightPhase.AliasCycles (passAliasCycles)
 import Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation)
 import Coal.Compiler.Pass.PreflightPhase.ImportsTopRule (passImportsTopRule)
@@ -16,8 +18,6 @@ import Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses)
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Control.Monad.IO.Class (MonadIO)
-import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
-import Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps)
 
 preflightPhase :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 preflightPhase =

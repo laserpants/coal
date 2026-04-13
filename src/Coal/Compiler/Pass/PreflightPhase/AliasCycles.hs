@@ -19,7 +19,6 @@ import Coal.Language.Module.Path
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
-import Control.Monad.Trans (lift)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
