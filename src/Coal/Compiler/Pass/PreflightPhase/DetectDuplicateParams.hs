@@ -5,14 +5,14 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.NoDuplicateParamsRule (
-  passNoDuplicateParamsRule,
+module Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams (
+  passDetectDuplicateParams,
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
@@ -29,35 +29,36 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
 
-passNoDuplicateParamsRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
-passNoDuplicateParamsRule = mapPass $ Pass{runPass = traverse fork}
+passDetectDuplicateParams :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
+passDetectDuplicateParams = mapPass $ Pass{runPass = traverse passImpl}
 
-fork :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
-fork mm = do
-  --  let mm = toModule [] m
-  setCurrentPathC (modulePath mm)
-  detectDuplicateParams mm
-  return mm
+passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
+passImpl m = do
+  setCurrentModuleC m
+  (_, errors) <- listenErrors (detectDuplicateParams m)
+  unless (null errors) $
+    throwError PreflightFailure
+  return m
 
-class RuleContext e where
+class DuplicateParamsContext e where
   detectDuplicateParams :: (Monad m) => e -> CompilerT Metadata m ()
 
-instance (RuleContext e) => RuleContext [e] where
+instance (DuplicateParamsContext e) => DuplicateParamsContext [e] where
   detectDuplicateParams = traverse_ detectDuplicateParams
 
-instance (RuleContext e) => RuleContext (NonEmpty e) where
+instance (DuplicateParamsContext e) => DuplicateParamsContext (NonEmpty e) where
   detectDuplicateParams = traverse_ detectDuplicateParams
 
-instance (RuleContext e) => RuleContext (Maybe e) where
+instance (DuplicateParamsContext e) => DuplicateParamsContext (Maybe e) where
   detectDuplicateParams = traverse_ detectDuplicateParams
 
-instance (Data t) => RuleContext (Module Metadata () t) where
+instance (Data t) => DuplicateParamsContext (Module Metadata () t) where
   detectDuplicateParams =
     \case
       Module{..} ->
         detectDuplicateParams moduleDefinitions
 
-instance (Data t) => RuleContext (Definition Metadata () t) where
+instance (Data t) => DuplicateParamsContext (Definition Metadata () t) where
   detectDuplicateParams =
     \case
       DFunction _ _ def ->
@@ -71,52 +72,52 @@ instance (Data t) => RuleContext (Definition Metadata () t) where
       _ ->
         pure ()
 
-instance RuleContext (FunctionDefinition Metadata () t) where
+instance DuplicateParamsContext (FunctionDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       FunctionDefinition{..} -> do
         checkPatterns functionDefinitionPatterns
         detectDuplicateParams functionDefinitionExpression
 
-instance RuleContext (LetDefinition Metadata () t) where
+instance DuplicateParamsContext (LetDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       LetDefinition{..} ->
         detectDuplicateParams letDefinitionExpression
 
-instance (Data t) => RuleContext (InstanceDefinition Metadata () t) where
+instance (Data t) => DuplicateParamsContext (InstanceDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       InstanceDefinition{..} ->
         detectDuplicateParams instanceDefinitionImplementations
 
-instance RuleContext (FoldDefinition Metadata () t) where
+instance DuplicateParamsContext (FoldDefinition Metadata () t) where
   detectDuplicateParams =
     \case
       FoldDefinition{..} ->
         detectDuplicateParams foldDefinitionClauses
 
-instance RuleContext (Clause Metadata () t) where
+instance DuplicateParamsContext (Clause Metadata () t) where
   detectDuplicateParams =
     \case
       EClause{..} -> do
         checkPatterns (NonEmpty.singleton clausePattern)
         detectDuplicateParams clauseChoices
 
-instance RuleContext (Choice Expression Metadata () t) where
+instance DuplicateParamsContext (Choice Expression Metadata () t) where
   detectDuplicateParams =
     \case
       CPlain{..} -> do
         detectDuplicateParams choiceGuards
         detectDuplicateParams choiceExpression
 
-instance RuleContext (Guard Expression Metadata () t) where
+instance DuplicateParamsContext (Guard Expression Metadata () t) where
   detectDuplicateParams =
     \case
       CGuard{..} ->
         detectDuplicateParams guardExpression
 
-instance RuleContext (Expression Metadata () t) where
+instance DuplicateParamsContext (Expression Metadata () t) where
   detectDuplicateParams =
     \case
       EAnnotation _ _ e ->
@@ -167,7 +168,7 @@ instance RuleContext (Expression Metadata () t) where
       _ ->
         pure ()
 
-instance RuleContext (Binding Expression Metadata () t) where
+instance DuplicateParamsContext (Binding Expression Metadata () t) where
   detectDuplicateParams =
     \case
       BPattern _ p e -> do
@@ -219,7 +220,6 @@ checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
     when (name `elem` s) $ do
       path <- lift $ gets compilerCurrentPath
       tellErrors [ConflictingParameter name (ErrorLocation (principalPath path) loc)]
-      throwError PreflightFailure
     registerName name
 
 {-# INLINE registerName #-}

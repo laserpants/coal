@@ -4,7 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointRule) where
+module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (
+  passMainEntrypointRule
+ ) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
