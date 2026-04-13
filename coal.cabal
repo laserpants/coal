@@ -69,9 +69,9 @@ library
       Coal.Compiler.Pass.MainPhase
       Coal.Compiler.Pass.ParsingPhase
       Coal.Compiler.Pass.ParsingPhase.Parsing
-      Coal.Compiler.Pass.ParsingPhase.TopologicalSort
       Coal.Compiler.Pass.PreflightPhase
       Coal.Compiler.Pass.PreflightPhase.DesugarDoNotation
+      Coal.Compiler.Pass.PreflightPhase.DesugarWhereClauses
       Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles
       Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams
       Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing
@@ -79,7 +79,7 @@ library
       Coal.Compiler.Pass.PreflightPhase.DetectShadowing
       Coal.Compiler.Pass.PreflightPhase.InsertBuiltinDefinitions
       Coal.Compiler.Pass.PreflightPhase.RefreshCache
-      Coal.Compiler.Pass.PreflightPhase.WhereClauses
+      Coal.Compiler.Pass.PreflightPhase.SortModules
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns

@@ -3,7 +3,9 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TupleSections #-}
 
-module Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort) where
+module Coal.Compiler.Pass.PreflightPhase.SortModules (
+  passSortModules,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build
@@ -26,11 +28,12 @@ import qualified Data.Set as Set
 import Data.Tuple.Extra (second)
 import Extras (Name, concatForM, for, forM_)
 
-passTopologicalSort :: (Monad m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
-passTopologicalSort = Pass{runPass = pass}
+passSortModules :: (Monad m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
+passSortModules = Pass{runPass = passImpl}
 
-pass :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
-pass units = do
+passImpl :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
+passImpl units = do
+  -- TODO: move ?
   unless ("Main" `elem` names) $ do
     tellErrors [NoModuleMain]
     throwError PreflightFailure
@@ -81,7 +84,6 @@ dependencies (Module p _ defs)
     , (mempty, Path ["Coal", "Monad"])
     ]
 
--- TODO: move
 importPath :: Definition a k t -> Maybe (a, Path)
 importPath =
   \case

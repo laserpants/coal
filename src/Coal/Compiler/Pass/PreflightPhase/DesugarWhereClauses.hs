@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses) where
+module Coal.Compiler.Pass.PreflightPhase.DesugarWhereClauses (passDesugarWhereClauses) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Transform
@@ -13,8 +13,8 @@ import Coal.Compiler.Stack
 import Data.Data (Data)
 import Extras (Name)
 
--- passWhereClauses :: (Monad m, Data t, Ord t) => Pass Metadata m (BuildEnvelope (Module Metadata k t)) (BuildEnvelope (Module Metadata k t))
-passWhereClauses = undefined -- Pass{runPass = traverse expandWhereClausesModule}
+-- passDesugarWhereClauses :: (Monad m, Data t, Ord t) => Pass Metadata m (BuildEnvelope (Module Metadata k t)) (BuildEnvelope (Module Metadata k t))
+passDesugarWhereClauses = undefined -- Pass{runPass = traverse expandDesugarWhereClausesModule}
 
 -- liftWhereClause :: (Monad m) => Name -> Definition Metadata k t -> CompilerT Metadata m (Definition Metadata k t)
 -- liftWhereClause name =
@@ -30,23 +30,23 @@ passWhereClauses = undefined -- Pass{runPass = traverse expandWhereClausesModule
 --
 -- manufacturedName :: (Monad m) => Name -> Name -> CompilerT Metadata m Name
 -- manufacturedName name old = do
---  tellWhereClauses [(old, new)]
+--  tellDesugarWhereClauses [(old, new)]
 --  pure new
 -- where
 --  new = name <> "__$local_" <> old
 --
--- expandWhereClausesModule :: (Monad m, Ord t, Data t) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
--- expandWhereClausesModule (Module p ns ds) =
---  Module p ns . concat <$> traverse expandWhereClausesDefinition ds
+-- expandDesugarWhereClausesModule :: (Monad m, Ord t, Data t) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
+-- expandDesugarWhereClausesModule (Module p ns ds) =
+--  Module p ns . concat <$> traverse expandDesugarWhereClausesDefinition ds
 --
--- expandWhereClausesDefinition :: (Monad m, Ord t, Data t) => Definition Metadata k t -> CompilerT Metadata m [Definition Metadata k t]
--- expandWhereClausesDefinition =
+-- expandDesugarWhereClausesDefinition :: (Monad m, Ord t, Data t) => Definition Metadata k t -> CompilerT Metadata m [Definition Metadata k t]
+-- expandDesugarWhereClausesDefinition =
 --  \case
 --    DFunction loc name f ws -> do
---      (ds, names) <- listenWhereClauses $ traverse (liftWhereClause name) ws
+--      (ds, names) <- listenDesugarWhereClauses $ traverse (liftWhereClause name) ws
 --      pure (replaceNames names <$> (ds <> [DFunction loc name f []]))
 --    DConstant loc name c ws -> do
---      (ds, names) <- listenWhereClauses $ traverse (liftWhereClause name) ws
+--      (ds, names) <- listenDesugarWhereClauses $ traverse (liftWhereClause name) ws
 --      pure (replaceNames names <$> (ds <> [DConstant loc name c []]))
 --    d ->
 --      pure [d]
