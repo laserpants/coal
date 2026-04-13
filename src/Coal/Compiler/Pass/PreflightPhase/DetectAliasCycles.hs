@@ -4,7 +4,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.AliasCycles (passDetectAliasCycles) where
+module Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles (passDetectAliasCycles) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))

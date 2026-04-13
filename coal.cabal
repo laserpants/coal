@@ -72,7 +72,7 @@ library
       Coal.Compiler.Pass.ParsingPhase.Parsing
       Coal.Compiler.Pass.ParsingPhase.TopologicalSort
       Coal.Compiler.Pass.PreflightPhase
-      Coal.Compiler.Pass.PreflightPhase.AliasCycles
+      Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles
       Coal.Compiler.Pass.PreflightPhase.DoNotation
       Coal.Compiler.Pass.PreflightPhase.ImportsTopRule
       Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule
