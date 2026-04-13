@@ -1,15 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Module (parseModule) where
+module Coal.Parser.Module (parseModule, parseSourceFile) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language.Module
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Path (Path (Path))
-import Coal.Parser.Core (Parser, lexeme_)
+import Coal.Parser.Core (Parser, lexeme_, spaces)
 import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Module.Definition (parseDefinition)
 import Coal.Parser.Symbol
+import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -53,6 +54,9 @@ parseModuleExports = option ExportAll (parens (Exports <$> commaSep parseExportA
 --    <*> parseModuleExports
 --    <*> braces (many parseDefinition)
 --    <* eof
+
+parseSourceFile :: Parser (Module Metadata () ())
+parseSourceFile = spaces *> parseModule <* eof
 
 parseModule :: Parser (Module Metadata () ())
 parseModule = do

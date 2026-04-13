@@ -17,7 +17,7 @@ import Coal.Compiler.State
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Path (principalPath)
-import Coal.Parser (ParserError, parseModule)
+import Coal.Parser (ParserError, parseSourceFile)
 import Coal.Parser.Core (spaces)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -56,7 +56,7 @@ pass files = do
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildEnvelope (Module Metadata () ())))
 parseEmbedded (p, src) = do
   CompilerConfig{..} <- gets compilerConfig
-  case runParser (spaces *> parseModule <* eof) "" encodedSrc of
+  case runParser parseSourceFile "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
     Right module_ -> do
@@ -82,7 +82,7 @@ parseEmbedded (p, src) = do
 fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 fromSource name file src = do
   toBeRecompiled name
-  case runParser (spaces *> parseModule <* eof) "" src of
+  case runParser parseSourceFile "" src of
     Left err ->
       pure $ Left (ParserError file err)
     Right module_@(Module path _ _) -> do

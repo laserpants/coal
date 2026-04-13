@@ -68,7 +68,6 @@ library
       Coal.Compiler.Pass.LoweringPhase.LLVMOutput
       Coal.Compiler.Pass.MainPhase
       Coal.Compiler.Pass.ParsingPhase
-      Coal.Compiler.Pass.ParsingPhase.CheckDeps
       Coal.Compiler.Pass.ParsingPhase.Parsing
       Coal.Compiler.Pass.ParsingPhase.TopologicalSort
       Coal.Compiler.Pass.PreflightPhase
@@ -79,6 +78,7 @@ library
       Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements
       Coal.Compiler.Pass.PreflightPhase.DetectShadowing
       Coal.Compiler.Pass.PreflightPhase.InsertBuiltinDefinitions
+      Coal.Compiler.Pass.PreflightPhase.RefreshCache
       Coal.Compiler.Pass.PreflightPhase.WhereClauses
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects

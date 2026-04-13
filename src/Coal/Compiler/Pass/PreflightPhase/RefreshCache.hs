@@ -3,7 +3,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps) where
+module Coal.Compiler.Pass.PreflightPhase.RefreshCache (
+  passRefreshCache,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build
@@ -14,22 +16,21 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
-import Coal.Parser (parseModule)
-import Coal.Parser.Core (spaces)
+import Coal.Parser (parseSourceFile)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (get)
 import Extras (Name)
-import Text.Megaparsec (eof, runParser)
+import Text.Megaparsec (runParser)
 
-passCheckDeps :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
-passCheckDeps = Pass{runPass = passImpl}
+passRefreshCache :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
+passRefreshCache = Pass{runPass = passImpl}
 
 passImpl :: (MonadIO m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
-passImpl = traverse check
+passImpl = traverse refreshCache
 
-check :: (MonadIO m) => BuildEnvelope (Module Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()))
-check =
+refreshCache :: (MonadIO m) => BuildEnvelope (Module Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()))
+refreshCache =
   \case
     BSource src -> do
       pure (BSource src)
@@ -37,20 +38,20 @@ check =
       CompilerState{..} <- get
       if any (\dep -> principalPath dep `elem` compilerToBeRecompiled) buildDependencies
         then do
-          res <- buildFromSource (principalPath buildPath)
+          res <- compileFromSource (principalPath buildPath)
           case res of
             Left e -> do
               tellErrors [e]
-              throwError ParserFailure
+              throwError PreflightFailure
             Right r ->
               pure r
         else pure (BCached Build{..})
 
-buildFromSource :: (MonadIO m) => Name -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
-buildFromSource name = do
+compileFromSource :: (MonadIO m) => Name -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
+compileFromSource name = do
   src <- getSourceC name
   toBeRecompiled name
-  case runParser (spaces *> parseModule <* eof) "" src of
+  case runParser parseSourceFile "" src of
     Left{} ->
       error "Implementation error"
     Right module_ -> do
