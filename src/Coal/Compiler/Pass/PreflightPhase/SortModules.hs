@@ -33,7 +33,6 @@ passSortModules = Pass{runPass = passImpl}
 
 passImpl :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 passImpl units = do
-  -- TODO: move ?
   unless ("Main" `elem` names) $ do
     tellErrors [NoModuleMain]
     throwError PreflightFailure
@@ -96,7 +95,7 @@ importPath =
 
 collectEdges :: (Monad m) => Set Name -> BuildEnvelope (Module Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()), Name, [Name])
 collectEdges names unit = do
-  unitDependencies' <-
+  updatedDependencies <-
     concatForM deps $
       \(loc, dep) ->
         if Set.member dep names
@@ -104,7 +103,7 @@ collectEdges names unit = do
           else do
             tellErrors [ModuleNotFound dep (ErrorLocation path loc)]
             pure []
-  pure (unit, path, unitDependencies')
+  pure (unit, path, updatedDependencies)
  where
   deps = for (unitDependencies unit) (second principalPath)
   path = envelopePathName unit
