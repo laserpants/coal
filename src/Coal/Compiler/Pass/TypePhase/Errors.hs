@@ -12,7 +12,6 @@ import Coal.Language.Module.Path
 import Control.Monad (forM_, unless)
 import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.State (gets)
-import Control.Monad.Trans (lift)
 import Data.List (nub)
 
 passTypePhaseErrors :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)

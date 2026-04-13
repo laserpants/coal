@@ -84,7 +84,7 @@ expandGroups =
               }
         ]
     o ->
-      pure [o]
+      return [o]
 
 clauses :: (Monoid a) => [FunctionDefinition a k ()] -> NonEmpty (Clause a k ())
 clauses defs =

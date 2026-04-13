@@ -104,7 +104,7 @@ instance (Monoid a, Data a) => ExpandContext a (Expression a Kind ()) where
 
 updateName :: (Monad m, Monoid a, Data a) => Name -> Label () -> Expression a Kind () -> CompilerT a m (Expression a Kind ())
 updateName name label =
-  pure
+  return
     . replace
       (labelName label)
       (\loc _ -> applicationE (varE name) (EVariable loc label :| []))
@@ -126,6 +126,6 @@ atLabels = execWriter . transformM go
     \case
       p@(PNamedFold _ name label) -> do
         tell [(name, label)]
-        pure p
+        return p
       p ->
-        pure p
+        return p

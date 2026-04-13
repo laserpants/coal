@@ -85,8 +85,8 @@ instance (Monoid a, Data a, Data k) => FoldContext a (Choice Expression a k ()) 
         expandMatch e
 
 instance (Monoid a, Data a, Data k) => FoldContext a (Expression a k ()) where
-  expandFolds name lls expr = pure (foldr (updateName name) expr lls)
-  expandMatch _ = pure ()
+  expandFolds name lls expr = return (foldr (updateName name) expr lls)
+  expandMatch _ = return ()
 
 updateName :: (Monoid a, Data a, Data k) => Name -> Label () -> Expression a k () -> Expression a k ()
 updateName name label =
@@ -102,9 +102,9 @@ eliminateAtPatterns =
       tellErrors [NamedFoldNotAllowed (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
     PAtVariable a ll ->
-      pure (PVariable a ll)
+      return (PVariable a ll)
     p ->
-      pure p
+      return p
 
 atLabels :: (Data a, Data k, Data t) => Pattern a k t -> [Label t]
 atLabels =
@@ -113,16 +113,16 @@ atLabels =
       ( \case
           p@(PAtVariable _ label) -> do
             tell [label]
-            pure p
+            return p
           p ->
-            pure p
+            return p
       )
 
 expandFoldExpr :: (Monad m, Monoid a, Data a, Data k) => NonEmpty (Expression a k ()) -> NonEmpty (Clause a k ()) -> CompilerT a m (Expression a k ())
 expandFoldExpr args clauses = do
   name <- supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
-  pure $
+  return $
     flattenApplicationsDeep $
       letE
         name
@@ -166,7 +166,7 @@ instance (Monoid a, Data a, Data k) => CompileContext a (Definition a k ()) wher
       DInstance a def ->
         DInstance a <$> compileFolds def
       o ->
-        pure o
+        return o
 
 instance (Monoid a, Data a, Data k) => CompileContext a (FunctionDefinition a k ()) where
   compileFolds =
@@ -209,6 +209,6 @@ instance (Monoid a, Data a, Data k) => CompileContext a (Expression a k ()) wher
           expandFoldExpr es cs
         e@(EMatch _ _ _ cs) -> do
           expandMatch cs
-          pure e
+          return e
         e ->
-          pure e
+          return e
