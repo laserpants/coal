@@ -96,12 +96,12 @@ library
       Coal.Compiler.Pass.TypePhase
       Coal.Compiler.Pass.TypePhase.Errors
       Coal.Compiler.Pass.TypePhase.ExpandAliases
+      Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds
       Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
-      Coal.Compiler.Pass.TypePhase.ExpressionFolds
+      Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds
       Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion
       Coal.Compiler.Pass.TypePhase.Prep
       Coal.Compiler.Pass.TypePhase.Prep2
-      Coal.Compiler.Pass.TypePhase.TopLevelFolds
       Coal.Compiler.Pass.TypePhase.TypeInference
       Coal.Compiler.Path.Resolve
       Coal.Compiler.PatternMatching

@@ -6,7 +6,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TypePhase.ExpressionFolds (passExpressionFolds) where
+module Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds (
+  passExpandExpressionFolds,
+) where
 
 import Coal.AST.Flattening (flattenApplicationsDeep)
 import Coal.AST.Shorthand
@@ -23,37 +25,35 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path
 import Control.Monad.Except (MonadError (throwError), void)
 import Control.Monad.State (get)
-import Control.Monad.Trans (lift)
 import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary, Name, const2, traverse_)
 
-passExpressionFolds :: (Monad m, Monoid a, Data a, Data k) => Pass a m (Module a k ()) (Module a k ())
-passExpressionFolds = Pass{runPass = pass}
+passExpandExpressionFolds :: (Monad m, Monoid a, Data a, Data k) => Pass a m (Module a k ()) (Module a k ())
+passExpandExpressionFolds = Pass{runPass = passImpl}
 
-pass :: (Monad m, Monoid a, Data a, Data k) => Module a k () -> CompilerT a m (Module a k ())
-pass = compileFolds
+passImpl :: (Monad m, Monoid a, Data a, Data k) => Module a k () -> CompilerT a m (Module a k ())
+passImpl = compileFolds
 
-class ExpressionFoldTransform a e where
+class FoldContext a e where
   expandFolds :: (Monad m) => Name -> [Label ()] -> e -> CompilerT a m e
   expandMatch :: (Monad m) => e -> CompilerT a m ()
 
-instance (ExpressionFoldTransform a e) => ExpressionFoldTransform a [e] where
+instance (FoldContext a e) => FoldContext a [e] where
   expandFolds name = traverse . expandFolds name
   expandMatch = traverse_ expandMatch
 
-instance (ExpressionFoldTransform a e) => ExpressionFoldTransform a (NonEmpty e) where
+instance (FoldContext a e) => FoldContext a (NonEmpty e) where
   expandFolds name = traverse . expandFolds name
   expandMatch = traverse_ expandMatch
 
-instance (Monoid a, Data a, Data k) => ExpressionFoldTransform a (Clause a k ()) where
+instance (Monoid a, Data a, Data k) => FoldContext a (Clause a k ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
         CompilerState{compilerCurrentPath = path} <- get
-        -- path <- gets compilerCurrentModule
         tellErrors [FoldPatternOutsideConstructor (ErrorLocation (principalPath path) loc)]
         throwError PatternAnomaly
       EClause{..} ->
@@ -69,13 +69,12 @@ checkPatterns =
   \case
     PAtVariable loc _ -> do
       CompilerState{compilerCurrentPath = path} <- get
-      -- path <- gets compilerCurrentModule
       tellErrors [FoldPatternInRegularMatch (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
     p ->
       descendM checkPatterns p
 
-instance (Monoid a, Data a, Data k) => ExpressionFoldTransform a (Choice Expression a k ()) where
+instance (Monoid a, Data a, Data k) => FoldContext a (Choice Expression a k ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
@@ -85,7 +84,7 @@ instance (Monoid a, Data a, Data k) => ExpressionFoldTransform a (Choice Express
       CPlain _ _ e ->
         expandMatch e
 
-instance (Monoid a, Data a, Data k) => ExpressionFoldTransform a (Expression a k ()) where
+instance (Monoid a, Data a, Data k) => FoldContext a (Expression a k ()) where
   expandFolds name lls expr = pure (foldr (updateName name) expr lls)
   expandMatch _ = pure ()
 
@@ -93,21 +92,13 @@ updateName :: (Monoid a, Data a, Data k) => Name -> Label () -> Expression a k (
 updateName name label =
   replace
     (labelName label)
-    ( const2
-        ( EApplication
-            mempty
-            ()
-            (EVariable mempty (Label () name))
-            (EVariable mempty label :| [])
-        )
-    )
+    (const2 (applicationE (varE name) (EVariable mempty label :| [])))
 
 eliminateAtPatterns :: (Monad m) => Pattern a k () -> CompilerT a m (Pattern a k ())
 eliminateAtPatterns =
   \case
     PNamedFold loc _ _ -> do
       CompilerState{compilerCurrentPath = path} <- get
-      -- path <- gets compilerCurrentModule
       tellErrors [NamedFoldNotAllowed (ErrorLocation (principalPath path) loc)]
       throwError PatternAnomaly
     PAtVariable a ll ->
@@ -116,16 +107,16 @@ eliminateAtPatterns =
       pure p
 
 atLabels :: (Data a, Data k, Data t) => Pattern a k t -> [Label t]
-atLabels = execWriter . go
- where
-  go =
-    transformM $
-      \case
-        p@(PAtVariable _ label) -> do
-          tell [label]
-          pure p
-        p ->
-          pure p
+atLabels =
+  execWriter
+    . transformM
+      ( \case
+          p@(PAtVariable _ label) -> do
+            tell [label]
+            pure p
+          p ->
+            pure p
+      )
 
 expandFoldExpr :: (Monad m, Monoid a, Data a, Data k) => NonEmpty (Expression a k ()) -> NonEmpty (Clause a k ()) -> CompilerT a m (Expression a k ())
 expandFoldExpr args clauses = do
@@ -141,19 +132,19 @@ expandFoldExpr args clauses = do
         )
         (applicationE (varE name) args)
 
-class CompileFoldsContext a e where
+class CompileContext a e where
   compileFolds :: (Monad m) => e -> CompilerT a m e
 
-instance (CompileFoldsContext a e) => CompileFoldsContext a [e] where
+instance (CompileContext a e) => CompileContext a [e] where
   compileFolds = traverse compileFolds
 
-instance (CompileFoldsContext a e) => CompileFoldsContext a (NonEmpty e) where
+instance (CompileContext a e) => CompileContext a (NonEmpty e) where
   compileFolds = traverse compileFolds
 
-instance (CompileFoldsContext a e) => CompileFoldsContext a (Dictionary e) where
+instance (CompileContext a e) => CompileContext a (Dictionary e) where
   compileFolds = traverse compileFolds
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Module a k ()) where
+instance (Monoid a, Data a, Data k) => CompileContext a (Module a k ()) where
   compileFolds =
     \case
       Module{..} -> do
@@ -165,7 +156,7 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Module a k ()) whe
             , ..
             }
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Definition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileContext a (Definition a k ()) where
   compileFolds =
     \case
       DFunction a name def ->
@@ -177,7 +168,7 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Definition a k ())
       o ->
         pure o
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (FunctionDefinition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileContext a (FunctionDefinition a k ()) where
   compileFolds =
     \case
       FunctionDefinition{..} -> do
@@ -188,7 +179,7 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (FunctionDefinition
             , ..
             }
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (LetDefinition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileContext a (LetDefinition a k ()) where
   compileFolds =
     \case
       LetDefinition{..} -> do
@@ -199,7 +190,7 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (LetDefinition a k 
             , ..
             }
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (InstanceDefinition a k ()) where
+instance (Monoid a, Data a, Data k) => CompileContext a (InstanceDefinition a k ()) where
   compileFolds =
     \case
       InstanceDefinition{..} -> do
@@ -210,10 +201,9 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (InstanceDefinition
             , ..
             }
 
-instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Expression a k ()) where
-  compileFolds = transformM go
-   where
-    go =
+instance (Monoid a, Data a, Data k) => CompileContext a (Expression a k ()) where
+  compileFolds =
+    transformM $
       \case
         EFold _ _ es cs ->
           expandFoldExpr es cs
@@ -222,52 +212,3 @@ instance (Monoid a, Data a, Data k) => CompileFoldsContext a (Expression a k ())
           pure e
         e ->
           pure e
-
--- instance (Monoid a, Data a) => CompileFoldsContext a (Clause a () ()) where
---  compileFolds =
---    \case
---      EClause a p cs ->
---        EClause a p <$> traverse compileFolds cs
---
--- instance (Monoid a, Data a) => CompileFoldsContext a (Choice Expression a () ()) where
---  compileFolds =
---    \case
---      CPlain a gs e ->
---        CPlain a <$> traverse compileFolds gs <*> compileFolds e
---
--- instance (Monoid a, Data a) => CompileFoldsContext a (Guard Expression a () ()) where
---  compileFolds =
---    \case
---      CGuard e ->
---        CGuard <$> compileFolds e
---
--- instance (Monoid a, Data a) => CompileFoldsContext a (Module a k ()) where
---  compileFolds =
---    \case
---      Module p ns o -> do
---        setCompilerCurrentModuleC p
---        Module p ns <$> compileFolds o
---
--- instance (Monoid a, Data a) => CompileFoldsContext a (FunctionDefinition a ()) where
---  compileFolds =
---    \case
---      FunctionDefinition a u w ps e ->
---        FunctionDefinition a u w ps <$> compileFolds e
---
--- instance (Monoid a, Data a) => CompileFoldsContext a (ConstantDefinition a ()) where
---  compileFolds =
---    \case
---      ConstantDefinition a u w e ->
---        ConstantDefinition a u w <$> compileFolds e
---
--- instance (Monoid a, Data a) => CompileFoldsContext a (Definition a k ()) where
---  compileFolds =
---    \case
---      DFunction loc name f fs ->
---        DFunction loc name <$> compileFolds f <*> traverse compileFolds fs
---      DConstant loc name g fs ->
---        DConstant loc name <$> compileFolds g <*> traverse compileFolds fs
---      DInstance loc name (InstanceDefinition ps t ds) ->
---        DInstance loc name . InstanceDefinition ps t <$> compileFolds ds
---      o ->
---        pure o
