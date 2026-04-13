@@ -6,8 +6,8 @@ import Coal.Compiler.Pass.TypePhase.Errors (passTypePhaseErrors)
 import Coal.Compiler.Pass.TypePhase.ExpandAliases (passExpandAliases)
 import Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds (passExpandExpressionFolds)
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGroups)
+import Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions (passExpandLambdaMatchExpressions)
 import Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds (passExpandTopLevelFolds)
-import Coal.Compiler.Pass.TypePhase.LambdaMatchExpansion (passLambdaMatchExpansion)
 import Coal.Compiler.Pass.TypePhase.Prep (passPrep)
 import Coal.Compiler.Pass.TypePhase.Prep2 (passPrep2)
 import Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference)
@@ -26,7 +26,7 @@ typePhasePasses =
     >-> passExpandTopLevelFolds
     >-> passExpandExpressionFolds
     ----    >-> generateDebugArtifacts "Folds"
-    >-> passLambdaMatchExpansion
+    >-> passExpandLambdaMatchExpressions
     >-> passTypeInference
     --    >-> generateDebugArtifacts "TypeInference"
     >-> passTypePhaseErrors
