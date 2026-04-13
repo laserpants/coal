@@ -74,10 +74,10 @@ library
       Coal.Compiler.Pass.PreflightPhase
       Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles
       Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams
+      Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing
       Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements
       Coal.Compiler.Pass.PreflightPhase.DetectShadowing
       Coal.Compiler.Pass.PreflightPhase.DoNotation
-      Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule
       Coal.Compiler.Pass.PreflightPhase.Setup
       Coal.Compiler.Pass.PreflightPhase.WhereClauses
       Coal.Compiler.Pass.TranslationPhase

@@ -9,10 +9,10 @@ import Coal.Compiler.Pass.ParsingPhase.CheckDeps (passCheckDeps)
 import Coal.Compiler.Pass.ParsingPhase.TopologicalSort (passTopologicalSort)
 import Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles (passDetectAliasCycles)
 import Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams (passDetectDuplicateParams)
+import Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing (passDetectMainEntrypointMissing)
+import Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements (passDetectMisplacedImportStatements)
 import Coal.Compiler.Pass.PreflightPhase.DetectShadowing (passDetectShadowing)
 import Coal.Compiler.Pass.PreflightPhase.DoNotation (passDoNotation)
-import Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements (passDetectMisplacedImportStatements)
-import Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (passMainEntrypointRule)
 import Coal.Compiler.Pass.PreflightPhase.Setup (passSetup)
 import Coal.Compiler.Pass.PreflightPhase.WhereClauses (passWhereClauses)
 import Coal.Language (Kind)
@@ -30,7 +30,7 @@ preflightPhase =
     >-> passDetectAliasCycles
     --    >-> mapPass (liftPass (generateDebugArtifacts "DoNotation"))
     >-> passDetectShadowing
-    >-> passMainEntrypointRule
+    >-> passDetectMainEntrypointMissing
     >-> passDetectDuplicateParams
 
 --    >-> mapPass (liftPass (generateDebugArtifacts "Preflight"))

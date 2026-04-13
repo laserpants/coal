@@ -4,9 +4,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.MainEntrypointRule (
-  passMainEntrypointRule
- ) where
+module Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing (
+  passDetectMainEntrypointMissing,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
@@ -17,30 +17,29 @@ import Coal.Language.Module
 import Coal.Language.Module.Path
 import Control.Monad.Except (MonadError (throwError), unless)
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Trans (lift)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
-passMainEntrypointRule :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
-passMainEntrypointRule = mapPass $ Pass{runPass = traverse impl}
+passDetectMainEntrypointMissing :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
+passDetectMainEntrypointMissing = mapPass $ Pass{runPass = traverse passImpl}
 
-impl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
-impl mm = do
-  setCurrentPathC (modulePath mm)
-  detectMainEntrypoint mm
-  return mm
+passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
+passImpl m = do
+  setCurrentModuleC m
+  detectMainEntrypointMissing m
+  return m
 
 class RuleContext e where
-  detectMainEntrypoint :: (Monad m) => e -> CompilerT Metadata m ()
+  detectMainEntrypointMissing :: (Monad m) => e -> CompilerT Metadata m ()
 
 instance (RuleContext e) => RuleContext [e] where
-  detectMainEntrypoint = traverse_ detectMainEntrypoint
+  detectMainEntrypointMissing = traverse_ detectMainEntrypointMissing
 
 instance (RuleContext e) => RuleContext (NonEmpty e) where
-  detectMainEntrypoint = traverse_ detectMainEntrypoint
+  detectMainEntrypointMissing = traverse_ detectMainEntrypointMissing
 
 instance RuleContext (Module Metadata () ()) where
-  detectMainEntrypoint =
+  detectMainEntrypointMissing =
     \case
       Module (Path ["Main"]) _ o -> do
         unless ("main" `elem` concatMap functionDefinitions o) $
