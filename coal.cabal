@@ -25,8 +25,8 @@ library
       Coal.AST.HasMetadata
       Coal.AST.Metadata
       Coal.AST.Normalization
+      Coal.AST.Rewrite
       Coal.AST.Shorthand
-      Coal.AST.Transform
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label

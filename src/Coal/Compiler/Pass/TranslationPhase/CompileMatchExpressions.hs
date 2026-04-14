@@ -12,7 +12,7 @@ module Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.AST.Transform (replaceWith)
+import Coal.AST.Rewrite (replaceWith)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))

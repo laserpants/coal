@@ -11,8 +11,8 @@ module Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds (
 ) where
 
 import Coal.AST.Flattening (flattenApplicationsDeep)
+import Coal.AST.Rewrite (replace)
 import Coal.AST.Shorthand
-import Coal.AST.Transform (replace)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
