@@ -10,7 +10,6 @@ module Coal.Compiler.Build (
   emptyBuild,
   overBuildNames,
   setBuildPath,
-  --  setBuildFile,
   setBuildBitcode,
   setBuildHash,
   insertHash,
@@ -18,7 +17,6 @@ module Coal.Compiler.Build (
   setBuildKernelIRTypes,
   setBuildKernelConstructors,
   setQualifiedNames,
-  --  setBuildSource,
   insertBuildNameEntry,
   removeBuildNamePlaceholder,
   replaceBuildNameEntry,
@@ -57,12 +55,10 @@ type InstanceMap a = Map IndexedType a
 
 data Build a = Build
   { buildPath :: Path
-  , --  , buildFile :: FilePath
-    buildNames :: Environment [NameEntry]
+  , buildNames :: Environment [NameEntry]
   , buildExportedNames :: Set Name
   , buildDataConstructors :: Environment (DataConstructorEntry a)
-  , -- folds?
-    buildTypeConstructors :: Environment (TypeConstructorEntry a)
+  , buildTypeConstructors :: Environment (TypeConstructorEntry a)
   , buildTraits :: Environment (TraitEntry a)
   , buildInstances :: Environment (InstanceMap (InstanceEntry a))
   , buildAliases :: Environment (AliasEntry a)
@@ -82,8 +78,7 @@ emptyBuild :: Build a
 emptyBuild =
   Build
     { buildPath = Path []
-    , --    , buildFile = mempty
-      buildNames = mempty
+    , buildNames = mempty
     , buildExportedNames = mempty
     , buildDataConstructors = mempty
     , buildTypeConstructors = mempty

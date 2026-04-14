@@ -43,6 +43,7 @@ library
       Coal.Compiler.Builtin.Definitions
       Coal.Compiler.Builtin.Functions
       Coal.Compiler.Builtin.Instances
+      Coal.Compiler.Builtin.Names
       Coal.Compiler.Builtin.Traits
       Coal.Compiler.Config
       Coal.Compiler.Embedded
