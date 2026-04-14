@@ -1,20 +1,23 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DesugarWhereClauses (passDesugarWhereClauses) where
+module Coal.Compiler.Pass.PreflightPhase.DesugarWhereClauses (
+  passDesugarWhereClauses,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.AST.Transform
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Journal
-import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
+import Coal.Language.Module (Module (..))
+import Control.Monad.IO.Class (MonadIO)
 import Data.Data (Data)
-import Extras (Name)
 
--- passDesugarWhereClauses :: (Monad m, Data t, Ord t) => Pass Metadata m (BuildEnvelope (Module Metadata k t)) (BuildEnvelope (Module Metadata k t))
-passDesugarWhereClauses = undefined -- Pass{runPass = traverse expandDesugarWhereClausesModule}
+passDesugarWhereClauses :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata k t)] [BuildEnvelope (Module Metadata k t)]
+passDesugarWhereClauses = mapPass $ Pass{runPass = traverse passImpl}
+
+-- TODO:
+passImpl :: (MonadIO m) => Module Metadata k t -> CompilerT Metadata m (Module Metadata k t)
+passImpl = return
 
 -- liftWhereClause :: (Monad m) => Name -> Definition Metadata k t -> CompilerT Metadata m (Definition Metadata k t)
 -- liftWhereClause name =

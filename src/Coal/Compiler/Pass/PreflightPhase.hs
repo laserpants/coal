@@ -4,6 +4,7 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.PreflightPhase.DesugarDoNotation (passDesugarDoNotation)
+import Coal.Compiler.Pass.PreflightPhase.DesugarWhereClauses (passDesugarWhereClauses)
 import Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles (passDetectAliasCycles)
 import Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams (passDetectDuplicateParams)
 import Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing (passDetectMainEntrypointMissing)
@@ -21,12 +22,9 @@ preflightPhase =
     >-> passRefreshCache
     >-> passDetectMisplacedImportStatements
     >-> passInsertBuiltinDefinitions
-    --    >-> mapPass passDesugarWhereClauses
+    >-> passDesugarWhereClauses
     >-> passDesugarDoNotation
     >-> passDetectAliasCycles
-    --    >-> mapPass (liftPass (generateDebugArtifacts "DesugarDoNotation"))
     >-> passDetectShadowing
     >-> passDetectMainEntrypointMissing
     >-> passDetectDuplicateParams
-
---    >-> mapPass (liftPass (generateDebugArtifacts "Preflight"))
