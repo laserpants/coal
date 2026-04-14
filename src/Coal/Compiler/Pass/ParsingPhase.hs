@@ -9,5 +9,3 @@ import Control.Monad.IO.Class (MonadIO)
 
 parsingPhase :: (MonadIO m) => Pass Metadata m [FilePath] [BuildEnvelope (Module Metadata () ())]
 parsingPhase = passParsing
-
---    >-> mapPass (liftPass (generateDebugArtifacts "Parsing"))
