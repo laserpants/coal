@@ -203,7 +203,7 @@ instance (AliasTransform (Type o k)) => AliasTransform (DataConstructor o k (Typ
             , ..
             }
 
-instance (Typeable o, Foo o, Data (o Kind)) => AliasTransform (Type o Kind) where
+instance (Typeable o, AliasEntryTransform o, Data (o Kind)) => AliasTransform (Type o Kind) where
   aliasTransform =
     \case
       t@(TApplication k _ _) ->
@@ -244,13 +244,13 @@ instance AliasTransform (DataConstructorEntry a) where
             , ..
             }
 
-aliasTransformTypeApplication :: (MonadIO m, Foo o, Typeable o, Data (o Kind), Show a) => Kind -> Type o Kind -> Type o Kind -> NonEmpty (Type o Kind) -> CompilerT a m (Type o Kind)
+aliasTransformTypeApplication :: (MonadIO m, AliasEntryTransform o, Typeable o, Data (o Kind), Show a) => Kind -> Type o Kind -> Type o Kind -> NonEmpty (Type o Kind) -> CompilerT a m (Type o Kind)
 aliasTransformTypeApplication _ t (TConstructor _ name) ts =
   lookupAlias t (toList ts) name
 aliasTransformTypeApplication k _ t ts =
   applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
 
-lookupAlias :: (MonadIO m, Foo o, Typeable o, Data (o Kind), Show a) => Type o Kind -> [Type o Kind] -> Name -> CompilerT a m (Type o Kind)
+lookupAlias :: (MonadIO m, AliasEntryTransform o, Typeable o, Data (o Kind), Show a) => Type o Kind -> [Type o Kind] -> Name -> CompilerT a m (Type o Kind)
 lookupAlias t ts name = do
   Build{..} <- getCurrentBuildC
   case Environment.lookup name buildAliases of
@@ -261,22 +261,22 @@ lookupAlias t ts name = do
         _ ->
           pure t
     Just aliasEntry -> do
-      t1 <- foo ts aliasEntry
+      t1 <- transformAliasEntry ts aliasEntry
       TAlias name ts <$> aliasTransform t1
 
-class Foo o where
-  foo :: (MonadIO m, Show a) => [Type o Kind] -> AliasEntry a -> CompilerT a m (Type o Kind)
+class AliasEntryTransform o where
+  transformAliasEntry :: (MonadIO m, Show a) => [Type o Kind] -> AliasEntry a -> CompilerT a m (Type o Kind)
 
-instance Foo TypeIndex where
-  foo ts AliasEntry{..} = do
+instance AliasEntryTransform TypeIndex where
+  transformAliasEntry ts AliasEntry{..} = do
     ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) aliasEntryParams
     let env = (parameterName <$> aliasEntryParams) `zip` ixs
         sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)
     t <- runReaderT (toIndexed aliasEntryType) (Environment.fromList env)
     return (applyT sub t)
 
-instance Foo Parameter where
-  foo ts AliasEntry{..} = aliasTransform t
+instance AliasEntryTransform Parameter where
+  transformAliasEntry ts AliasEntry{..} = aliasTransform t
    where
     t = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
 
