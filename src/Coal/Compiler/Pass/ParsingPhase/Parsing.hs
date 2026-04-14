@@ -14,30 +14,26 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
-import Coal.Language (Kind)
-import Coal.Language.Module (Module (..), ModuleExportList (..))
+import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseSourceFile)
-import Coal.Parser.Core (spaces)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
-import Control.Monad.Trans (lift)
 import qualified Data.ByteString as B
 import Data.Either (partitionEithers)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as E
 import qualified Data.Text.IO as Text
-import Debug.Trace
 import Extras (Name, forM, forM_)
-import Text.Megaparsec (eof, runParser)
+import Text.Megaparsec (runParser)
 
 passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildEnvelope (Module Metadata () ())]
-passParsing = Pass{runPass = pass}
+passParsing = Pass{runPass = passImpl}
 
-pass :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
-pass files = do
+passImpl :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
+passImpl files = do
   embeddedFiles <- traverse parseEmbedded embedded
   case partitionEithers embeddedFiles of
     ([], embeddedBundle) -> do
