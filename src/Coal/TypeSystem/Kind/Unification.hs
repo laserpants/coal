@@ -4,8 +4,7 @@
 module Coal.TypeSystem.Kind.Unification (
   KindUnifier (..),
   unifyKinds,
-)
-where
+) where
 
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.TypeSystem.Kind.Error (KindError (..))
