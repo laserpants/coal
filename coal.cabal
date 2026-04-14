@@ -65,7 +65,6 @@ library
       Coal.Compiler.Pass.LoweringPhase.KernelTranslate
       Coal.Compiler.Pass.LoweringPhase.Linking
       Coal.Compiler.Pass.LoweringPhase.LLVMOutput
-      Coal.Compiler.Pass.MainPhase
       Coal.Compiler.Pass.ParsingPhase
       Coal.Compiler.Pass.ParsingPhase.Parsing
       Coal.Compiler.Pass.PreflightPhase

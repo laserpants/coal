@@ -29,10 +29,8 @@ isDirectoryPrefix root p =
   length rootComps <= length pathComps
     && rootComps == take (length rootComps) pathComps
  where
-  rn = normalise root
-  pn = normalise p
-  rootComps = filter (not . null) $ splitDirectories rn
-  pathComps = filter (not . null) $ splitDirectories pn
+  rootComps = filter (not . null) $ splitDirectories (normalise root)
+  pathComps = filter (not . null) $ splitDirectories (normalise p)
 
 resolveModule :: [FilePath] -> FilePath -> IO (Either String (FilePath, FilePath, Text))
 resolveModule roots fp =

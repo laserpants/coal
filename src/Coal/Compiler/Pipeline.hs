@@ -20,12 +20,13 @@ import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
-import Coal.Compiler.Pass (Pass (..), tickBar, (>->))
+import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
-import Coal.Compiler.Pass.MainPhase (mainPhase)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
 import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
+import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
+import Coal.Compiler.Pass.TypePhase (typePhasePasses)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
@@ -38,8 +39,6 @@ import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad (replicateM_)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except (MonadIO, forM_)
-import Control.Monad.Trans (lift)
-import Data.Either (fromRight)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -54,8 +53,7 @@ pipeline :: (MonadIO m, MonadMask m) => Pass Metadata m [FilePath] ()
 pipeline =
   parsingPhase
     >-> preflightPhase
-    >-> mainPhase
-    --    >-> Pass extraTicks
+    >-> mapPass (liftPass (typePhasePasses >-> translationPhasePasses))
     >-> loweringPhase
     >-> passLinking
 
