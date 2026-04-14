@@ -15,6 +15,7 @@ import Coal.Compiler.Build
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
+import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
@@ -72,42 +73,6 @@ insertExportedName name
           pure ()
  where
   insertName = modify (Build.insertBuildExportedName name)
-
-builtinNames :: Set Name
-builtinNames =
-  Set.fromList
-    [ "(%)"
-    , "(*)"
-    , "(+)"
-    , "(-)"
-    , "(/)"
-    , "(<>)"
-    , "(==)"
-    , "(!=)"
-    , "Comparable"
-    , "Divisible"
-    , "EqualTo"
-    , "GreaterThan"
-    , "IO"
-    , "LessThan"
-    , "Modulo"
-    , "None"
-    , "Numeric"
-    , "Option"
-    , "Result"
-    , "Ok"
-    , "Err"
-    , "Ordered"
-    , "Ordering"
-    , "Semigroup"
-    , "Some"
-    , "Process"
-    , "compare"
-    , "from_int32"
-    , "from_int64"
-    , "from_bignum"
-    , "negate"
-    ]
 
 prepareBuild :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
 prepareBuild Module{..} =
