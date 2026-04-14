@@ -32,9 +32,9 @@ passRecordPatterns = Pass{runPass = passImpl}
 
 passImpl :: (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 passImpl = transformBiM go
-  where
-    go :: (Monad m, Data a, Monoid a) => Expression a Kind IndexedType -> CompilerT a m (Expression a Kind IndexedType)
-    go = desugarRecordPatterns
+ where
+  go :: (Monad m, Data a, Monoid a) => Expression a Kind IndexedType -> CompilerT a m (Expression a Kind IndexedType)
+  go = desugarRecordPatterns
 
 class RecordContext a p where
   desugarRecordPatterns :: (Monad m) => p -> CompilerT a m p

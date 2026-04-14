@@ -4,7 +4,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns) where
+module Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (
+  passExpandAsPatterns,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
@@ -19,12 +21,10 @@ import Data.Generics.Uniplate.Data (descend, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 
 passExpandAsPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandAsPatterns = Pass{runPass = bork}
+passExpandAsPatterns = Pass{runPass = passImpl}
 
-bork :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-bork m = do
-  let xx = expandAsPatterns m
-  return xx
+passImpl :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+passImpl = return . expandAsPatterns
 
 class TransformContext e where
   expandAsPatterns :: e -> e
@@ -34,14 +34,6 @@ instance (TransformContext e) => TransformContext [e] where
 
 instance (TransformContext e) => TransformContext (NonEmpty e) where
   expandAsPatterns = fmap expandAsPatterns
-
--- instance (Data a, Data t, Monoid a) => TransformContext (Expression a () t) where
---  expandAsPatterns =
---    \case
---      EMatch a t e cs ->
---        EMatch a t e (fmap (expandClause t) cs)
---      e ->
---        descend expandAsPatterns e
 
 instance (Data a, Data k, Data t, Monoid a) => TransformContext (Expression a k t) where
   expandAsPatterns =
@@ -57,31 +49,11 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (Choice Expressi
       CPlain a gs e ->
         CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
 
--- instance (Data a, Data t, Monoid a) => TransformContext (Choice Expression a () t) where
---  expandAsPatterns =
---    \case
---      CPlain a gs e ->
---        CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
-
--- instance (Data a, Data t, Monoid a) => TransformContext (Guard Expression a () t) where
---  expandAsPatterns =
---    \case
---      CGuard e ->
---        CGuard (expandAsPatterns e)
-
 instance (Data a, Data k, Data t, Monoid a) => TransformContext (Guard Expression a k t) where
   expandAsPatterns =
     \case
       CGuard e ->
         CGuard (expandAsPatterns e)
-
--- instance (Data a, Data t, Monoid a) => TransformContext (Binding Expression a () t) where
---  expandAsPatterns =
---    \case
---      BPattern a p e ->
---        BPattern a p (expandAsPatterns e)
---      BFunction a name ps e ->
---        BFunction a name ps (expandAsPatterns e)
 
 instance (Data a, Data k, Data t, Monoid a) => TransformContext (Binding Expression a k t) where
   expandAsPatterns =
@@ -122,26 +94,6 @@ collectAsPatterns =
       pure (PVariable a ll)
     p ->
       pure p
-
--- instance (Data a, Data t, Monoid a) => TransformContext (ConstantDefinition a t) where
---  expandAsPatterns =
---    \case
---      ConstantDefinition a u w e ->
---        ConstantDefinition a u w (expandAsPatterns e)
---
--- instance (Data a, Data t, Monoid a) => TransformContext (Definition a k t) where
---  expandAsPatterns =
---    \case
---      DConstant loc name g fs ->
---        DConstant loc name (expandAsPatterns g) (expandAsPatterns <$> fs)
---      d ->
---        d
---
--- instance (Data a, Data t, Monoid a) => TransformContext (Module a k t) where
---  expandAsPatterns =
---    \case
---      Module p ns o ->
---        Module p ns (expandAsPatterns o)
 
 instance (Data a, Data k, Data t, Monoid a) => TransformContext (Module a k t) where
   expandAsPatterns =
