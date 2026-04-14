@@ -8,7 +8,9 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns) where
+module Coal.Compiler.Pass.TranslationPhase.RecordPatterns (
+  passRecordPatterns,
+) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
@@ -34,19 +36,19 @@ passRecordPatterns = Pass{runPass = compileRecordPatterns}
 compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a Kind (Type TypeIndex Kind)))
 
-class RecordDesugarable a p where
+class RecordContext a p where
   desugarRecordPatterns :: (Monad m) => p -> CompilerT a m p
 
-instance (RecordDesugarable a p) => RecordDesugarable a (Maybe p) where
+instance (RecordContext a p) => RecordContext a (Maybe p) where
   desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (RecordDesugarable a p) => RecordDesugarable a [p] where
+instance (RecordContext a p) => RecordContext a [p] where
   desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (RecordDesugarable a p) => RecordDesugarable a (NonEmpty p) where
+instance (RecordContext a p) => RecordContext a (NonEmpty p) where
   desugarRecordPatterns = traverse desugarRecordPatterns
 
-instance (Data a, Monoid a) => RecordDesugarable a (Expression a Kind IndexedType) where
+instance (Data a, Monoid a) => RecordContext a (Expression a Kind IndexedType) where
   desugarRecordPatterns =
     \case
       EMatch a t e ks -> do
@@ -66,7 +68,7 @@ instance (Data a, Monoid a) => RecordDesugarable a (Expression a Kind IndexedTyp
       e ->
         pure e
 
-instance (Data a, Monoid a) => RecordDesugarable a (Guard Expression a Kind IndexedType) where
+instance (Data a, Monoid a) => RecordContext a (Guard Expression a Kind IndexedType) where
   desugarRecordPatterns =
     \case
       CGuard e ->
@@ -80,7 +82,7 @@ desugarShorthandPatterns =
     p ->
       p
 
-instance (Data a, Monoid a) => RecordDesugarable a (Pattern a Kind IndexedType) where
+instance (Data a, Monoid a) => RecordContext a (Pattern a Kind IndexedType) where
   desugarRecordPatterns =
     \case
       PAnnotation a t p ->
