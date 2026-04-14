@@ -6,7 +6,6 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE TypeApplications #-}
 
 module Coal.Compiler.Pass.TranslationPhase.RecordPatterns (
   passRecordPatterns,
@@ -19,9 +18,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Module.Path
 import Control.Monad.RWS (forM, replicateM)
-import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
