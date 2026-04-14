@@ -33,7 +33,6 @@ library
       Coal.Common.Name
       Coal.Common.Supply
       Coal.Compiler
-      Coal.Compiler.Aliases
       Coal.Compiler.Build
       Coal.Compiler.Build.Cache
       Coal.Compiler.Build.Envelope
