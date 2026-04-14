@@ -6,7 +6,6 @@ module Coal.Compiler (
   module Coal.Compiler.Journal,
   module Coal.Compiler.Pass,
   module Coal.Compiler.PatternMatching.AnomalyDetection,
-  module Coal.Compiler.PatternMatching,
   module Coal.Compiler.Stack,
   module Coal.Compiler.TypeInference,
 ) where
@@ -16,7 +15,6 @@ import Coal.Compiler.Environment
 import Coal.Compiler.Error
 import Coal.Compiler.Journal
 import Coal.Compiler.Pass
-import Coal.Compiler.PatternMatching
 import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Pipeline
 import Coal.Compiler.Stack

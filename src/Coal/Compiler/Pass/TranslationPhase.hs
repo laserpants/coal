@@ -4,13 +4,13 @@ module Coal.Compiler.Pass.TranslationPhase (translationPhasePasses) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
+import Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions (passCompileMatchExpressions)
+import Coal.Compiler.Pass.TranslationPhase.CompileNats (passCompileNats)
 import Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeObjects)
 import Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandGuards (passExpandGuards)
 import Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns)
-import Coal.Compiler.Pass.TranslationPhase.MatchExpressions (passMatchExpressions)
-import Coal.Compiler.Pass.TranslationPhase.Nats (passCompileNats)
 import Coal.Compiler.Pass.TranslationPhase.NormalizeObjects (passNormalizeObjects)
 import Coal.Compiler.Pass.TranslationPhase.OrPatterns (passOrPatterns)
 import Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternExhaustiveCheck)
@@ -34,7 +34,7 @@ translationPhasePasses =
     >-> passExpandAsPatterns
     >-> passExpandIntegerLiteralPatterns
     --    >-> generateDebugArtifacts "Patterns"
-    >-> passMatchExpressions
+    >-> passCompileMatchExpressions
     --    >-> generateDebugArtifacts "MatchExpressions"
     >-> passPlaceholders
     --    >-> generateDebugArtifacts "Placeholders"

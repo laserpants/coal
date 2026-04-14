@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.Nats (
+module Coal.Compiler.Pass.TranslationPhase.CompileNats (
   passCompileNats,
 ) where
 

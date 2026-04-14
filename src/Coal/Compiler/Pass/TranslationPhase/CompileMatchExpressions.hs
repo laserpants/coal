@@ -7,15 +7,15 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.PatternMatching (
-  MatchExpressionContext (..),
-  TypeProxy (..),
-  compileEnvelope,
+module Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions (
+  passCompileMatchExpressions,
 ) where
 
+import Coal.AST.Metadata (Metadata (..))
 import Coal.AST.Transform (replaceWith)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
 import Coal.Compiler.PatternMatching.Equation (patternEquation)
@@ -28,6 +28,12 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Dictionary)
 import TextShow (TextShow (showt))
+
+passCompileMatchExpressions :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passCompileMatchExpressions = Pass{runPass = passImpl}
+
+passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+passImpl = compileMatchExprs
 
 class MatchExpressionContext a c where
   compileMatchExprs :: (Monad m) => c -> CompilerT a m c

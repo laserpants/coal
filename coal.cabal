@@ -80,13 +80,13 @@ library
       Coal.Compiler.Pass.PreflightPhase.RefreshCache
       Coal.Compiler.Pass.PreflightPhase.SortModules
       Coal.Compiler.Pass.TranslationPhase
+      Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
+      Coal.Compiler.Pass.TranslationPhase.CompileNats
       Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandGuards
       Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandPatterns
-      Coal.Compiler.Pass.TranslationPhase.MatchExpressions
-      Coal.Compiler.Pass.TranslationPhase.Nats
       Coal.Compiler.Pass.TranslationPhase.NormalizeObjects
       Coal.Compiler.Pass.TranslationPhase.OrPatterns
       Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck
@@ -103,7 +103,6 @@ library
       Coal.Compiler.Pass.TypePhase.PrepareBuild
       Coal.Compiler.Pass.TypePhase.TypeInference
       Coal.Compiler.Path.Resolve
-      Coal.Compiler.PatternMatching
       Coal.Compiler.PatternMatching.AnomalyDetection
       Coal.Compiler.PatternMatching.Compiler
       Coal.Compiler.PatternMatching.Envelope
