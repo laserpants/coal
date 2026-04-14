@@ -4,7 +4,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.Nats (passCompileNats) where
+module Coal.Compiler.Pass.TranslationPhase.Nats (
+  passCompileNats,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
@@ -23,10 +25,10 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras (Dictionary)
 
 passCompileNats :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passCompileNats = Pass{runPass = bork}
+passCompileNats = Pass{runPass = passImpl}
 
-bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT a m (Module Metadata Kind IndexedType)
-bork = compileNats
+passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT a m (Module Metadata Kind IndexedType)
+passImpl = compileNats
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a m e
@@ -131,12 +133,6 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
       c ->
         pure c
 
--- instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) where
---  compileNats =
---    \case
---      Module p ns o ->
---        Module p ns <$> compileNats o
-
 instance (Monoid a, Data a) => CompileNatsContext (Module a Kind IndexedType) where
   compileNats =
     \case
@@ -154,40 +150,16 @@ instance (Monoid a, Data a) => CompileNatsContext (LetDefinition a Kind IndexedT
             , ..
             }
 
--- instance (Monoid a, Data a) => CompileNatsContext (FunctionDefinition a IndexedType) where
---  compileNats =
---    undefined
-----    \case
-----      FunctionDefinition a u w ps e ->
-----        FunctionDefinition a u w ps <$> compileNats e
-
 instance (Monoid a, Data a) => CompileNatsContext (FunctionDefinition a Kind IndexedType) where
   compileNats =
     \case
       FunctionDefinition{..} -> do
-        newLetDefinitionExpression <- compileNats functionDefinitionExpression
+        newFunctionDefinitionExpression <- compileNats functionDefinitionExpression
         return
           FunctionDefinition
-            { functionDefinitionExpression = undefined
+            { functionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
-
--- instance (Monoid a, Data a) => CompileNatsContext (ConstantDefinition a IndexedType) where
---  compileNats =
---    undefined
-----         \case
-----           ConstantDefinition a u w e ->
-----             ConstantDefinition a u w <$> compileNats e
-
--- instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
---  compileNats =
---    \case
---      DFunction loc name f fs ->
---        DFunction loc name <$> compileNats f <*> traverse compileNats fs
---      DConstant loc name g fs ->
---        DConstant loc name <$> compileNats g <*> traverse compileNats fs
---      o ->
---        pure o
 
 instance (Monoid a, Data a) => CompileNatsContext (Definition a Kind IndexedType) where
   compileNats =
