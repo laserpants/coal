@@ -33,15 +33,12 @@ import Debug.Trace
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 
 passPrep :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind ())
-passPrep = Pass{runPass = pass}
+passPrep = Pass{runPass = passImpl}
 
-pass :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
-pass m = do
-  -- setCompilerCurrentModuleC (modulePath m)
-  setCurrentPathC (modulePath m)
+passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
+passImpl m = do
+  setCurrentModuleC m
   prep m
-
--- withCurrentModuleC prep
 
 prep :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
 prep modul = do
@@ -209,17 +206,3 @@ importedBuild path = do
       error (show path) -- "TODO"
     Just build ->
       return build
-
---  y <- expandFunctionGroups m1
---  lift $ prepareBuild y
---
---  --  clearAssumptionsC
---  --  clearNameStoreC
---  --  (next, build) <- prepareBuild m
---  --  insertCurrentModuleC build
---  --  env <- buildEnv
---  --
---  --  setNamesC env
---  --  insertNamesC builtinFunctions
---
---  pure y

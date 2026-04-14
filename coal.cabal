@@ -79,16 +79,16 @@ library
       Coal.Compiler.Pass.PreflightPhase.RefreshCache
       Coal.Compiler.Pass.PreflightPhase.SortModules
       Coal.Compiler.Pass.TranslationPhase
+      Coal.Compiler.Pass.TranslationPhase.CheckPatternAnomalies
       Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
       Coal.Compiler.Pass.TranslationPhase.CompileNats
-      Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects
+      Coal.Compiler.Pass.TranslationPhase.DenormalizeAst
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandGuards
       Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandPatterns
-      Coal.Compiler.Pass.TranslationPhase.NormalizeObjects
-      Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck
+      Coal.Compiler.Pass.TranslationPhase.NormalizeAst
       Coal.Compiler.Pass.TranslationPhase.Placeholders
       Coal.Compiler.Pass.TranslationPhase.RecordPatterns
       Coal.Compiler.Pass.TypePhase
