@@ -26,16 +26,16 @@ passExpandAsPatterns = Pass{runPass = passImpl}
 passImpl :: (Monad m, Monoid a, Data a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 passImpl = return . expandAsPatterns
 
-class TransformContext e where
+class ExpandContext e where
   expandAsPatterns :: e -> e
 
-instance (TransformContext e) => TransformContext [e] where
+instance (ExpandContext e) => ExpandContext [e] where
   expandAsPatterns = fmap expandAsPatterns
 
-instance (TransformContext e) => TransformContext (NonEmpty e) where
+instance (ExpandContext e) => ExpandContext (NonEmpty e) where
   expandAsPatterns = fmap expandAsPatterns
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (Expression a k t) where
+instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Expression a k t) where
   expandAsPatterns =
     \case
       EMatch a t e cs ->
@@ -43,19 +43,19 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (Expression a k 
       e ->
         descend expandAsPatterns e
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (Choice Expression a k t) where
+instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Choice Expression a k t) where
   expandAsPatterns =
     \case
       CPlain a gs e ->
         CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (Guard Expression a k t) where
+instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Guard Expression a k t) where
   expandAsPatterns =
     \case
       CGuard e ->
         CGuard (expandAsPatterns e)
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (Binding Expression a k t) where
+instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Binding Expression a k t) where
   expandAsPatterns =
     \case
       BPattern a p e ->
@@ -90,11 +90,11 @@ collectAsPatterns =
   \case
     PAs a ll p -> do
       tell [(ll, p)]
-      pure (PVariable a ll)
+      return (PVariable a ll)
     p ->
-      pure p
+      return p
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (Module a k t) where
+instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Module a k t) where
   expandAsPatterns =
     \case
       Module{..} ->
@@ -103,7 +103,7 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (Module a k t) w
           , ..
           }
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (Definition a k t) where
+instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Definition a k t) where
   expandAsPatterns =
     \case
       DLet loc name def ->
@@ -111,7 +111,7 @@ instance (Data a, Data k, Data t, Monoid a) => TransformContext (Definition a k 
       d ->
         d
 
-instance (Data a, Data k, Data t, Monoid a) => TransformContext (LetDefinition a k t) where
+instance (Data a, Data k, Data t, Monoid a) => ExpandContext (LetDefinition a k t) where
   expandAsPatterns =
     \case
       LetDefinition{..} ->

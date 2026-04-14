@@ -9,8 +9,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Type (Type (..))
-import Data.Data (Data, Typeable)
+import Data.Data (Data)
 
 passNormalizeAst :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind (Type TypeIndex Kind)) (Module a Kind (Type TypeIndex Kind))
 passNormalizeAst = Pass{runPass = passImpl}

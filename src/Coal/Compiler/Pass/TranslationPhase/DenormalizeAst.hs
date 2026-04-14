@@ -5,7 +5,7 @@ module Coal.Compiler.Pass.TranslationPhase.DenormalizeAst (
 import Coal.AST.Normalization (NormalizationContext (denormalizeObject))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Language.Module (Module (..), ModuleExportList (..))
+import Coal.Language.Module (Module (..))
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
 

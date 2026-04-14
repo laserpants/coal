@@ -32,7 +32,7 @@ passImpl = traverse refreshCache
 refreshCache :: (MonadIO m) => BuildEnvelope (Module Metadata () ()) -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()))
 refreshCache =
   \case
-    BSource src -> do
+    BSource src ->
       pure (BSource src)
     BCached Build{..} -> do
       CompilerState{..} <- get

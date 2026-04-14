@@ -36,16 +36,16 @@ passExpandIntegerLiteralPatterns = Pass{runPass = passImpl}
 passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 passImpl = expandIntegerLiteralPatterns
 
-class TransformContext e where
+class ExpandContext e where
   expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata m e
 
-instance (TransformContext e) => TransformContext [e] where
+instance (ExpandContext e) => ExpandContext [e] where
   expandIntegerLiteralPatterns = traverse expandIntegerLiteralPatterns
 
-instance (TransformContext e) => TransformContext (NonEmpty e) where
+instance (ExpandContext e) => ExpandContext (NonEmpty e) where
   expandIntegerLiteralPatterns = traverse expandIntegerLiteralPatterns
 
-instance (Data k) => TransformContext (Expression Metadata k IndexedType) where
+instance (Data k) => ExpandContext (Expression Metadata k IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       EMatch a t e cs ->
@@ -61,9 +61,8 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
   (q, ints) <- runWriterT (transformM collectIntegerLiteralPatterns p)
   case (ints, ds) of
     ([], _) ->
-      pure (EClause a p (CPlain a1 gs e1' :| []))
+      return (EClause a p (CPlain a1 gs e1' :| []))
     (_, []) -> do
-      -- path <- gets compilerCurrentModule
       path <- gets compilerCurrentPath
       tellErrors [NonExhaustivePatterns (ErrorLocation (principalPath path) a)]
       throwError PatternAnomaly
@@ -76,7 +75,7 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
             (foldr numericLiteral (ELiteral mempty (LBool True)) ints)
             e1'
             (EMatch mempty (typeOf e1') expr (c :| cs))
-      pure (EClause a q (CPlain a1 gs e2 :| []))
+      return (EClause a q (CPlain a1 gs e2 :| []))
 expandClause _ _ _ = error "Implementation error"
 
 numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata k IndexedType -> Expression Metadata k IndexedType
@@ -120,11 +119,11 @@ collectIntegerLiteralPatterns =
       n <- lift (supplied id)
       let ll = Label t ("int" <> ".[" <> showt n <> "]")
       tell [(ll, int)]
-      pure (PVariable a ll)
+      return (PVariable a ll)
     p ->
-      pure p
+      return p
 
-instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
+instance ExpandContext (FunctionDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       FunctionDefinition{..} -> do
@@ -135,7 +134,7 @@ instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
             , ..
             }
 
-instance TransformContext (LetDefinition Metadata Kind IndexedType) where
+instance ExpandContext (LetDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       LetDefinition{..} -> do
@@ -146,7 +145,7 @@ instance TransformContext (LetDefinition Metadata Kind IndexedType) where
             , ..
             }
 
-instance TransformContext (Definition Metadata Kind IndexedType) where
+instance ExpandContext (Definition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       DFunction a name def ->
@@ -154,9 +153,9 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
       DLet a name def ->
         DLet a name <$> expandIntegerLiteralPatterns def
       d ->
-        pure d
+        return d
 
-instance TransformContext (Module Metadata Kind IndexedType) where
+instance ExpandContext (Module Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       Module{..} -> do
