@@ -63,11 +63,8 @@ parseEmbedded (p, src) = do
       let name = principalPath (modulePath module_)
       -- Check cached build files
       cached <- cachedBuild name encodedSrc
-      --      setVerbatimSourceForC module_ encodedSrc
       setBuildSourceC name encodedSrc
-
       toBeRecompiled name
-      -- pure $ Right (BSource module_)
       case cached of
         Just mb | not configNoCache -> do
           insertBuildC mb
@@ -100,11 +97,7 @@ parseFile file = do
       src <- liftIO (Text.readFile fp)
       -- Check cached build files
       cached <- cachedBuild name src
-      --      setVerbatimSourceC name src
       setBuildSourceC name src
-
-      -- fromSource name file src
-
       case cached of
         Just mb | not configNoCache -> do
           insertBuildC mb

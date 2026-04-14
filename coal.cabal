@@ -92,7 +92,6 @@ library
       Coal.Compiler.Pass.TranslationPhase.Placeholders
       Coal.Compiler.Pass.TranslationPhase.RecordPatterns
       Coal.Compiler.Pass.TypePhase
-      Coal.Compiler.Pass.TypePhase.Errors
       Coal.Compiler.Pass.TypePhase.ExpandAliases
       Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds
       Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
@@ -100,6 +99,7 @@ library
       Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds
       Coal.Compiler.Pass.TypePhase.Prep
       Coal.Compiler.Pass.TypePhase.PrepareBuild
+      Coal.Compiler.Pass.TypePhase.ReportTypeErrors
       Coal.Compiler.Pass.TypePhase.TypeInference
       Coal.Compiler.Path.Resolve
       Coal.Compiler.PatternMatching.AnomalyDetection
