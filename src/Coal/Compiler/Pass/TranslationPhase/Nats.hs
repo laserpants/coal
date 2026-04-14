@@ -17,7 +17,6 @@ import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module
 import Control.Monad ((<=<))
-import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
