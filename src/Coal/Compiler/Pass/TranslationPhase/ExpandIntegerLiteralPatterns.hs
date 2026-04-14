@@ -31,10 +31,10 @@ import GHC.Int (Int32, Int64)
 import TextShow (showt)
 
 passExpandIntegerLiteralPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandIntegerLiteralPatterns = Pass{runPass = bork}
+passExpandIntegerLiteralPatterns = Pass{runPass = passImpl}
 
-bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-bork = expandIntegerLiteralPatterns
+passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+passImpl = expandIntegerLiteralPatterns
 
 class TransformContext e where
   expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata m e
@@ -160,8 +160,6 @@ instance TransformContext (Module Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       Module{..} -> do
-        setCurrentPathC modulePath
-        -- setCompilerCurrentModuleC modulePath
         setCurrentPathC modulePath
         newModuleDefinitions <- traverse expandIntegerLiteralPatterns moduleDefinitions
         return $

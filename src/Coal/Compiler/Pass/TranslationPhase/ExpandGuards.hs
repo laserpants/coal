@@ -15,7 +15,6 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module
-import Control.Monad.Trans (lift)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..), tails)

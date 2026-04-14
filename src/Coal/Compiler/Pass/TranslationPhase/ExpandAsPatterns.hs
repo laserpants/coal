@@ -67,11 +67,10 @@ expandClause :: (Monoid a, Data a, Data k, Data t) => t -> Clause a k t -> Claus
 expandClause t (EClause a p cs) =
   case ps of
     [] ->
-      EClause a q cs'
+      EClause a q (expandAsPatterns cs)
     _ ->
-      EClause a q (foldr go cs' ps)
+      EClause a q (foldr go (expandAsPatterns cs) ps)
  where
-  cs' = expandAsPatterns cs
   (q, ps) =
     runWriter (transformM collectAsPatterns p)
   go (ll, p1) cs1 =
