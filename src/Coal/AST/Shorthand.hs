@@ -14,6 +14,7 @@ module Coal.AST.Shorthand (
   lambdaAnyE',
   selectE,
   tupleE,
+  literalE,
   literalBoolE,
   plainClauseE,
   opAndE,
@@ -87,6 +88,10 @@ selectE = ESelect mempty . label
 {-# INLINE tupleE #-}
 tupleE :: (Monoid a) => NonEmpty (Expression a k ()) -> Expression a k ()
 tupleE = ETuple mempty ()
+
+{-# INLINE literalE #-}
+literalE :: (Monoid a) => Primitive -> Expression a k ()
+literalE = ELiteral mempty
 
 {-# INLINE literalBoolE #-}
 literalBoolE :: (Monoid a) => Bool -> Expression a k ()

@@ -51,6 +51,7 @@ module Coal.Compiler.Stack (
 ) where
 
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Build (Build (..), setBuildBitcode)
 import Coal.Compiler.Config
@@ -73,10 +74,9 @@ import Control.Monad.State (get, gets, modify)
 import Control.Monad.Trans.Class (MonadTrans, lift)
 import Data.ByteString (ByteString)
 import Data.Maybe (fromMaybe)
+import qualified Data.Set as Set
 import Data.Text (Text)
 import Extras (Dictionary, Name)
-import qualified Coal.Common.Environment as Environment
-import qualified Data.Set as Set
 
 type CompilerStack a m c = ExceptT CompilerFailureMode (RWST (CompilerEnvironment a) (CompilerJournal a) (CompilerState a) m) c
 

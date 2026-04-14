@@ -140,4 +140,4 @@ normalize es =
     (PAny _ (), e) ->
       (e, NonEmpty.fromList $ NonEmpty.init es)
     _ ->
-      (applicationE (varE "pure") (ELiteral mempty LUnit :| []), es)
+      (applicationE (varE "pure") (literalE LUnit :| []), es)
