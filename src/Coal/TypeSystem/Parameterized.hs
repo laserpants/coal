@@ -140,8 +140,8 @@ replaceParamInScheme p o Forall{..} =
         paramsIn t
       TRow r ->
         paramsInRow r
-      TVariable p ->
-        Set.singleton p
+      TVariable v ->
+        Set.singleton v
       TAlias _ ts t ->
         unionMap paramsIn ts <> paramsIn t
       _ ->
@@ -150,8 +150,8 @@ replaceParamInScheme p o Forall{..} =
     \case
       RExtend _ t r ->
         paramsIn t <> paramsInRow r
-      RVariable p ->
-        Set.singleton p
+      RVariable r ->
+        Set.singleton r
       _ ->
         mempty
   replaceParamTrait =
