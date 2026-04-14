@@ -6,36 +6,30 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Coal.Compiler.Pass.TypePhase.ExpandAliases (
-  passExpandAliases
-  ) where
+  passExpandAliases,
+) where
 
-import Coal.Compiler.Pass (Pass (..))
-import Coal.Language.Type
 import Coal.Common.Environment (forMEnvironment)
+import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Path
 import Coal.TypeSystem.Parameterized
 import Coal.TypeSystem.Substitution (applyT)
-import Control.Monad.IO.Class (MonadIO, liftIO)
+import qualified Coal.TypeSystem.Substitution as Substitution
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (execStateT, modify)
 import Control.Monad.Trans (lift)
-import Data.Data (Data)
+import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import Data.Text.Lazy (toStrict)
 import Extras (Dictionary, Name, forM_)
-import Text.Pretty.Simple (pShowNoColor)
-import qualified Coal.Common.Environment as Environment
-import qualified Coal.TypeSystem.Substitution as Substitution
-import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
 
 passExpandAliases :: (MonadIO m, Data a, Show a, Data k, AliasTransform (Type Parameter k)) => Pass a m (Module a k ()) (Module a k ())
 passExpandAliases = Pass{runPass = aliasTransform}
@@ -70,21 +64,24 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
       Module{..} -> do
         m <- Module modulePath moduleExportList <$> aliasTransform moduleDefinitions
         updateNames
+        updateConstructors
 
-        updateCurrentBuildC $
-          \Build{..} -> do
-            newDataConstructors <- forMEnvironment buildDataConstructors aliasTransform
-            return
-              Build
-                { buildDataConstructors = newDataConstructors
-                , ..
-                }
-
-        Build{..} <- getCurrentBuildC
-        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ Build{..})
-        liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ buildNames)
+        --        Build{..} <- getCurrentBuildC
+        --        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ Build{..})
+        --        liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ buildNames)
 
         pure m
+
+updateConstructors :: (MonadIO m, Show a) => CompilerT a m ()
+updateConstructors =
+  updateCurrentBuildC $
+    \Build{..} -> do
+      newDataConstructors <- forMEnvironment buildDataConstructors aliasTransform
+      return
+        Build
+          { buildDataConstructors = newDataConstructors
+          , ..
+          }
 
 updateNames :: (MonadIO m, Show a) => CompilerT a m ()
 updateNames =
@@ -206,7 +203,7 @@ instance (AliasTransform (Type o k)) => AliasTransform (DataConstructor o k (Typ
             , ..
             }
 
-instance AliasTransform (Type Parameter Kind) where
+instance (Typeable o, Foo o, Data (o Kind)) => AliasTransform (Type o Kind) where
   aliasTransform =
     \case
       t@(TApplication k _ _) ->
@@ -223,26 +220,6 @@ instance AliasTransform (Type Parameter Kind) where
         TRow <$> traverse aliasTransform row
       t@(TConstructor _ name) ->
         lookupAlias t [] name
-      t ->
-        pure t
-
-instance AliasTransform (Type TypeIndex Kind) where
-  aliasTransform =
-    \case
-      t@(TApplication k _ _) ->
-        uncurry (aliasTransformTypeApplication2 k t) (typeArgs t)
-      TArrow t1 t2 ->
-        TArrow <$> aliasTransform t1 <*> aliasTransform t2
-      TAlias name ts t ->
-        TAlias name <$> aliasTransform ts <*> aliasTransform t
-      TIntrinsic t ->
-        pure (TIntrinsic t)
-      TRecord t ->
-        TRecord <$> aliasTransform t
-      TRow row ->
-        TRow <$> traverse aliasTransform row
-      t@(TConstructor _ name) ->
-        lookupAlias2 t [] name
       t ->
         pure t
 
@@ -267,19 +244,13 @@ instance AliasTransform (DataConstructorEntry a) where
             , ..
             }
 
-aliasTransformTypeApplication :: (MonadIO m, Show a) => Kind -> Type Parameter Kind -> Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> CompilerT a m (Type Parameter Kind)
+aliasTransformTypeApplication :: (MonadIO m, Foo o, Typeable o, Data (o Kind), Show a) => Kind -> Type o Kind -> Type o Kind -> NonEmpty (Type o Kind) -> CompilerT a m (Type o Kind)
 aliasTransformTypeApplication _ t (TConstructor _ name) ts =
   lookupAlias t (toList ts) name
 aliasTransformTypeApplication k _ t ts =
   applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
 
-aliasTransformTypeApplication2 :: (MonadIO m, Show a) => Kind -> Type TypeIndex Kind -> Type TypeIndex Kind -> NonEmpty (Type TypeIndex Kind) -> CompilerT a m (Type TypeIndex Kind)
-aliasTransformTypeApplication2 _ t (TConstructor _ name) ts =
-  lookupAlias2 t (toList ts) name
-aliasTransformTypeApplication2 k _ t ts =
-  applyTypeArgs k <$> aliasTransform t <*> aliasTransform ts
-
-lookupAlias :: (MonadIO m, Show a) => Type Parameter Kind -> [Type Parameter Kind] -> Name -> CompilerT a m (Type Parameter Kind)
+lookupAlias :: (MonadIO m, Foo o, Typeable o, Data (o Kind), Show a) => Type o Kind -> [Type o Kind] -> Name -> CompilerT a m (Type o Kind)
 lookupAlias t ts name = do
   Build{..} <- getCurrentBuildC
   case Environment.lookup name buildAliases of
@@ -289,26 +260,25 @@ lookupAlias t ts name = do
           TApplication k <$> aliasTransform t1 <*> aliasTransform t2
         _ ->
           pure t
-    Just AliasEntry{..} -> do
-      let t1 = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
+    Just aliasEntry -> do
+      t1 <- foo ts aliasEntry
       TAlias name ts <$> aliasTransform t1
 
-lookupAlias2 :: (MonadIO m, Show a) => Type TypeIndex Kind -> [Type TypeIndex Kind] -> Name -> CompilerT a m (Type TypeIndex Kind)
-lookupAlias2 t ts name = do
-  Build{..} <- getCurrentBuildC
-  case Environment.lookup name buildAliases of
-    Nothing ->
-      case t of
-        TApplication k t1 t2 ->
-          TApplication k <$> aliasTransform t1 <*> aliasTransform t2
-        _ ->
-          pure t
-    Just AliasEntry{..} -> do
-      ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) aliasEntryParams
-      let abc = (parameterName <$> aliasEntryParams) `zip` ixs
-          sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)
-      t1 <- runReaderT (toIndexed aliasEntryType) (Environment.fromList abc)
-      TAlias name ts <$> aliasTransform (applyT sub t1)
+class Foo o where
+  foo :: (MonadIO m, Show a) => [Type o Kind] -> AliasEntry a -> CompilerT a m (Type o Kind)
+
+instance Foo TypeIndex where
+  foo ts AliasEntry{..} = do
+    ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) aliasEntryParams
+    let env = (parameterName <$> aliasEntryParams) `zip` ixs
+        sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)
+    t <- runReaderT (toIndexed aliasEntryType) (Environment.fromList env)
+    return (applyT sub t)
+
+instance Foo Parameter where
+  foo ts AliasEntry{..} = aliasTransform t
+   where
+    t = foldr (uncurry substituteAlias) aliasEntryType (aliasEntryParams `zip` ts)
 
 substituteAlias :: Parameter k -> Type Parameter k -> Type Parameter k -> Type Parameter k
 substituteAlias param s =

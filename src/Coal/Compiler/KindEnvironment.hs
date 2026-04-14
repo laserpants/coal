@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+-- TODO: Is this used/needed?
 module Coal.Compiler.KindEnvironment (moduleKindEnvironment) where
 
 import Coal.Common.Environment (Environment (..))
