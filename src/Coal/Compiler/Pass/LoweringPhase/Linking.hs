@@ -25,10 +25,10 @@ import System.IO.Temp (withSystemTempDirectory)
 import System.Process
 
 passLinking :: (MonadIO m) => Pass Metadata m [(Name, ByteString)] ()
-passLinking = Pass{runPass = pass}
+passLinking = Pass{runPass = passImpl}
 
-pass :: (MonadIO m) => [(Name, ByteString)] -> CompilerT Metadata m ()
-pass bcode = do
+passImpl :: (MonadIO m) => [(Name, ByteString)] -> CompilerT Metadata m ()
+passImpl bcode = do
   config <- gets compilerConfig
   r <- liftIO (compileBitcode config bcode)
   for_ r throwError
