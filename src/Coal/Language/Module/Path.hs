@@ -5,6 +5,8 @@
 
 module Coal.Language.Module.Path (
   Path (..),
+  PathError (..),
+  validateComponent,
   principalPath,
   emptyPath,
   parsePath,

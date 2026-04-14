@@ -1,11 +1,12 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Path.Resolve (validateComponent, resolveModule) where
+module Coal.Compiler.Path.Resolve (resolveModule) where
 
+import Coal.Language.Module.Path (PathError (..), validateComponent)
 import Control.Monad (filterM, when)
 import Control.Monad.Except (runExceptT, throwError)
 import Control.Monad.IO.Class (liftIO)
-import Data.Char (isAlpha, isAlphaNum, isUpper)
 import Data.List (intercalate, maximumBy)
 import Data.Ord (comparing)
 import Data.Text (Text)
@@ -13,19 +14,15 @@ import qualified Data.Text as Text
 import System.Directory (canonicalizePath, doesFileExist)
 import System.FilePath
 
--- TODO: Use validateComponent in Path
-validateComponent :: String -> Either String ()
-validateComponent s
-  | null s =
-      Left "Empty path component"
-  | not (isAlpha (head s) || head s == '_') =
-      Left $ "Component must start with a letter or underscore: " ++ show s
-  | not (isUpper (head s) || head s == '_') =
-      Left $ "Component must start with an uppercase letter or underscore: " ++ show s
-  | not (all (\c -> isAlphaNum c || c == '_') s) =
-      Left $ "Component contains invalid characters: " ++ show s
-  | otherwise =
-      Right ()
+errorMessage :: PathError -> String
+errorMessage =
+  \case
+    EmptyComponent ->
+      "Empty path component"
+    InvalidStart c ->
+      "Component must start with an upper-case letter or underscore: " ++ show c
+    InvalidChar c ->
+      "Component contains invalid characters: " ++ show c
 
 isDirectoryPrefix :: FilePath -> FilePath -> Bool
 isDirectoryPrefix root p =
@@ -76,9 +73,9 @@ resolveModule roots fp =
     -- Split into components and validate
     let relNoExt = dropExtension rel
         comps = splitDirectories relNoExt
-    case traverse validateComponent comps of
+    case traverse (validateComponent . Text.pack) comps of
       Left err ->
-        throwError $ "Invalid module path component: " ++ err
+        throwError (errorMessage err)
       Right{} ->
         return ()
 
