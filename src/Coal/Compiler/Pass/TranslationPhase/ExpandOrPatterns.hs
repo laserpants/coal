@@ -4,7 +4,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.OrPatterns (passOrPatterns) where
+module Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns (
+  passExpandOrPatterns,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.FreeVars (boundIn)
@@ -19,7 +21,6 @@ import Coal.Language.Module.Path
 import Control.Monad (when)
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
-import Control.Monad.Trans (lift)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -27,13 +28,13 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
 import Extras (Map, traverseM)
 
-passOrPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passOrPatterns = Pass{runPass = pass}
+passExpandOrPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passExpandOrPatterns = Pass{runPass = passImpl}
 
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass Module{..} = do
-  setCurrentPathC modulePath
-  transformBiM expandExpression Module{..}
+passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+passImpl m = do
+  setCurrentModuleC m
+  transformBiM expandExpression m
 
 expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =
@@ -45,38 +46,38 @@ expandExpression =
     e ->
       pure e
 
-class OrPattern a where
+class PatternContext a where
   expandOrPatterns :: (Monad m) => a -> CompilerT Metadata m (NonEmpty a)
 
-instance (OrPattern a) => OrPattern [a] where
+instance (PatternContext a) => PatternContext [a] where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance (OrPattern a) => OrPattern (NonEmpty a) where
+instance (PatternContext a) => PatternContext (NonEmpty a) where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance (OrPattern a) => OrPattern (Map k a) where
+instance (PatternContext a) => PatternContext (Map k a) where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance (OrPattern a) => OrPattern (Maybe a) where
+instance (PatternContext a) => PatternContext (Maybe a) where
   expandOrPatterns = traverseM expandOrPatterns
 
-instance (Data t) => OrPattern (Clause Metadata Kind t) where
+instance (Data t) => PatternContext (Clause Metadata Kind t) where
   expandOrPatterns =
     \case
       EClause a p cs -> do
         q1 :| qs <- expandOrPatterns p
         pure (EClause a q1 cs :| [EClause a q cs | q <- qs])
 
-instance (Data t) => OrPattern (Pattern Metadata Kind t) where
+instance (Data t) => PatternContext (Pattern Metadata Kind t) where
   expandOrPatterns =
     \case
       POr loc _ p1 p2 -> do
-        --        this <- gets (principalPath . compilerCurrentModule)
         this <- gets (principalPath . compilerCurrentPath)
         let vars1 = boundIn p1
             vars2 = boundIn p2
         when (vars1 /= vars2) $ do
           tellErrors [OrPatternVariableMismatch vars1 vars2 (ErrorLocation this loc)]
+          -- TODO: ??
           throwError PreflightFailure
         qs1 <- expandOrPatterns p1
         qs2 <- expandOrPatterns p2

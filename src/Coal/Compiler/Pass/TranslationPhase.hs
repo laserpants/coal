@@ -10,9 +10,9 @@ import Coal.Compiler.Pass.TranslationPhase.DenormalizeObjects (passDenormalizeOb
 import Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (passExpandAsPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandGuards (passExpandGuards)
 import Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns)
+import Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns (passExpandOrPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns)
 import Coal.Compiler.Pass.TranslationPhase.NormalizeObjects (passNormalizeObjects)
-import Coal.Compiler.Pass.TranslationPhase.OrPatterns (passOrPatterns)
 import Coal.Compiler.Pass.TranslationPhase.PatternExhaustiveCheck (passPatternExhaustiveCheck)
 import Coal.Compiler.Pass.TranslationPhase.Placeholders (passPlaceholders)
 import Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns)
@@ -23,23 +23,14 @@ import Control.Monad.IO.Class (MonadIO)
 translationPhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 translationPhasePasses =
   passNormalizeObjects
-    --    >-> generateDebugArtifacts "NormalizeObjects"
     >-> passExpandPatterns
     >-> passExpandGuards
-    >-> passOrPatterns
-    --    >-> generateDebugArtifacts "OrPatterns"
+    >-> passExpandOrPatterns
     >-> passPatternExhaustiveCheck
     >-> passRecordPatterns
-    --    >-> generateDebugArtifacts "RecordPatterns"
     >-> passExpandAsPatterns
     >-> passExpandIntegerLiteralPatterns
-    --    >-> generateDebugArtifacts "Patterns"
     >-> passCompileMatchExpressions
-    --    >-> generateDebugArtifacts "MatchExpressions"
     >-> passPlaceholders
-    --    >-> generateDebugArtifacts "Placeholders"
     >-> passCompileNats
-    --    >-> generateDebugArtifacts "CompileNats"
     >-> passDenormalizeObjects
-
---    >-> generateDebugArtifacts "DenormalizeObjects"
