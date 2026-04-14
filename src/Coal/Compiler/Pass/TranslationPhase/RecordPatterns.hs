@@ -31,10 +31,13 @@ import qualified Data.Map.Strict as Map
 import Extras (Name)
 
 passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
-passRecordPatterns = Pass{runPass = compileRecordPatterns}
+passRecordPatterns = Pass{runPass = passImpl}
 
-compileRecordPatterns :: forall m a. (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-compileRecordPatterns = transformBiM (desugarRecordPatterns @a @(Expression a Kind (Type TypeIndex Kind)))
+passImpl :: (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
+passImpl = transformBiM go
+  where
+    go :: (Monad m, Data a, Monoid a) => Expression a Kind IndexedType -> CompilerT a m (Expression a Kind IndexedType)
+    go = desugarRecordPatterns
 
 class RecordContext a p where
   desugarRecordPatterns :: (Monad m) => p -> CompilerT a m p
