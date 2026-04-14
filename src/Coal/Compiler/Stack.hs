@@ -11,9 +11,6 @@ module Coal.Compiler.Stack (
   CompilerError (..),
   CompilerFailureMode (..),
   CompilerStack,
-  --  CompilerState (..),
-  --  CompilerConstraint,
-  --  CompilerAssumption,
   ErrorLocation (..),
   runCompilerT,
   evalCompilerT,
@@ -54,7 +51,6 @@ module Coal.Compiler.Stack (
 ) where
 
 import Coal.Common.Environment (Environment (..))
-import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Build (Build (..), setBuildBitcode)
 import Coal.Compiler.Config
@@ -64,29 +60,23 @@ import Coal.Compiler.Journal (CompilerJournal (..))
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module
-import Coal.Language.Module.Path
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule
 import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (Substitution)
-import Control.Monad.Catch
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT)
-import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
-import Control.Monad.Reader (MonadReader)
-import Control.Monad.State (MonadState, get, gets, modify)
+import Control.Monad.State (get, gets, modify)
 import Control.Monad.Trans.Class (MonadTrans, lift)
-import Control.Monad.Writer (MonadWriter)
 import Data.ByteString (ByteString)
-import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
-import qualified Data.Set as Set
 import Data.Text (Text)
-import Debug.Trace
-import Extras (Dictionary, Name, fromMaybe)
+import Extras (Dictionary, Name)
+import qualified Coal.Common.Environment as Environment
+import qualified Data.Set as Set
 
 type CompilerStack a m c = ExceptT CompilerFailureMode (RWST (CompilerEnvironment a) (CompilerJournal a) (CompilerState a) m) c
 
@@ -156,7 +146,6 @@ getCurrentBuildC = do
   case maybeBuild of
     Nothing ->
       error "Implementation error"
-    --      error (show (principalPath compilerCurrentPath))
     Just build ->
       return build
 
