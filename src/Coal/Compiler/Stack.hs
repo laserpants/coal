@@ -41,6 +41,8 @@ module Coal.Compiler.Stack (
   setBuildSourceC,
   compilerReportConstraintsGenErrors,
   compilerReportKindConstraintsGenErrors,
+  compilerGetConstraintsGenErrorsC,
+  compilerGetSolverRuleViolationsC,
   compilerReportSolverRuleViolations,
   setConfigC,
   setConfigExecutableNameC,
@@ -73,6 +75,7 @@ import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
 import Control.Monad.State (get, gets, modify)
 import Control.Monad.Trans.Class (MonadTrans, lift)
 import Data.ByteString (ByteString)
+import Data.List (nub)
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -221,6 +224,14 @@ compilerReportKindConstraintsGenErrors errors = modify (overCompilerKindConstrai
 {-# INLINE compilerReportSolverRuleViolations #-}
 compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
 compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
+
+{-# INLINE compilerGetConstraintsGenErrorsC #-}
+compilerGetConstraintsGenErrorsC :: (Monad m, Eq a) => CompilerT a m [ConstraintsGenError a]
+compilerGetConstraintsGenErrorsC = gets (nub . compilerConstraintsGenErrors)
+
+{-# INLINE compilerGetSolverRuleViolationsC #-}
+compilerGetSolverRuleViolationsC :: (Monad m, Eq a) => CompilerT a m [InferenceRule Kind a]
+compilerGetSolverRuleViolationsC = gets (nub . compilerSolverRuleViolations)
 
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
