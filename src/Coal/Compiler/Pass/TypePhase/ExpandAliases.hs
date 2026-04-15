@@ -270,7 +270,7 @@ class AliasEntryTransform o where
 
 instance AliasEntryTransform TypeIndex where
   transformAliasEntry ts AliasEntry{..} = do
-    ixs <- traverse (\Parameter{..} -> supplied (TypeIndex parameterKind)) aliasEntryParams
+    ixs <- traverse (\Parameter{parameterKind} -> supplied (TypeIndex parameterKind)) aliasEntryParams
     let env = (parameterName <$> aliasEntryParams) `zip` ixs
         sub = Substitution.fromList ((typeIndexId <$> ixs) `zip` ts)
     t <- runReaderT (toIndexed aliasEntryType) (Environment.fromList env)
