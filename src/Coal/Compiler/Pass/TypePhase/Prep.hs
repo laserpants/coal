@@ -52,9 +52,7 @@ prep modul = do
     toKindIndexed modul
 
   prepareBuildAliases m1
-
   insertBuildHash
-
   expandFunctionGroups m1
 
 prepareBuildAliases Module{..} = do
