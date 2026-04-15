@@ -11,8 +11,8 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind)
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (..))
+import Coal.Language.Module.Path (principalPath)
 import Control.Monad (forM_, unless)
 import Control.Monad.Except (MonadError (throwError), MonadIO)
 

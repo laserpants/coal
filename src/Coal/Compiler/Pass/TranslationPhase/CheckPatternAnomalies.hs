@@ -17,8 +17,8 @@ import Coal.Language.Definition
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (moduleDefinitions, modulePath))
+import Coal.Language.Module.Path (principalPath)
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
 import Data.List.NonEmpty (NonEmpty)

@@ -13,10 +13,10 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module
+import Coal.Language.Module (Module (..))
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..), tails)

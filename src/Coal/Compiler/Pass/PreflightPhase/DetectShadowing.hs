@@ -15,12 +15,12 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
-import Coal.Compiler.State
+import Coal.Compiler.State (CompilerState (compilerCurrentPath))
 import Coal.Language (Choice (..), Clause (..), Expression (..), Guard (..))
 import Coal.Language.Definition
 import Coal.Language.Expression.Binding (Binding (..))
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (..))
+import Coal.Language.Module.Path (principalPath)
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError), forM_, when)
 import Control.Monad.IO.Class (MonadIO)

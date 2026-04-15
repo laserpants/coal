@@ -12,7 +12,7 @@ import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Path
+import Coal.Language.Module.Path (principalPath)
 import Extras (for)
 
 passInsertBuiltinDefinitions :: (Monad m) => Pass a m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]

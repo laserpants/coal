@@ -10,11 +10,11 @@ module Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.Pass
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module
+import Coal.Language.Module (Module (..))
 import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)

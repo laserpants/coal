@@ -4,7 +4,6 @@
 
 module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
-import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
@@ -12,6 +11,7 @@ import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Build.Prep
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
+import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
 import Coal.Compiler.Stack

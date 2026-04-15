@@ -13,11 +13,11 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module
+import Coal.Language.Module (Module (Module))
 import Control.Monad ((<=<))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)

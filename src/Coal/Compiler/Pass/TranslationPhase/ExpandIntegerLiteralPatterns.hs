@@ -13,11 +13,11 @@ import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Coal.Compiler.State
+import Coal.Compiler.State (CompilerState (compilerCurrentPath))
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (..))
+import Coal.Language.Module.Path (principalPath)
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
 import Control.Monad.Writer

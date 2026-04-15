@@ -17,7 +17,7 @@ import Coal.Compiler.Stack
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..))
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
-import Coal.Language.Pattern
+import Coal.Language.Pattern (Pattern)
 import Coal.Language.Trait (Qualified (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty

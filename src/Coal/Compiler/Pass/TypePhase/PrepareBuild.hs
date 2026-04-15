@@ -1,9 +1,9 @@
 module Coal.Compiler.Pass.TypePhase.PrepareBuild (passPrepareBuild) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build.Prep
+import Coal.Compiler.Build.Prep (prepareBuild)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Kind)
 import Coal.Language.Module (Module (..))
 import Control.Monad.Except (MonadIO)

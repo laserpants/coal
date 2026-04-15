@@ -19,7 +19,7 @@ import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
-import Coal.TypeSystem.Parameterized
+import Coal.TypeSystem.Parameterized (ToIndexed (toIndexed))
 import Coal.TypeSystem.Substitution (applyT)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad.IO.Class (MonadIO)

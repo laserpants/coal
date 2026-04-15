@@ -14,7 +14,7 @@ import Coal.AST.Rewrite (replace)
 import Coal.AST.Shorthand (applicationE, lambda1E, matchE, varE)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
-import Coal.Compiler.Journal
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State

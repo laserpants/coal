@@ -9,19 +9,17 @@ module Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns) w
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
-import Coal.Compiler.Journal
+import Coal.Compiler.Journal (listenPatterns, tellPatterns)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Definition
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (..))
 import Coal.Language.Pattern (Pattern (..))
-import Control.Monad.Trans (lift)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extras (Name)

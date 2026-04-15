@@ -11,11 +11,11 @@ module Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions (
   passExpandLambdaMatchExpressions,
 ) where
 
-import Coal.AST.Shorthand
+import Coal.AST.Shorthand (lambdaE, matchE, varE, varP)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language.Definition
-import Coal.Language.Expression
+import Coal.Language.Expression (Expression (ELambdaMatch))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Type.Kind
 import Data.Data (Data)

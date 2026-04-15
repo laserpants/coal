@@ -22,7 +22,7 @@ import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Path
+import Coal.Language.Module.Path (principalPath)
 import Control.Monad.Except (MonadError (throwError), void)
 import Control.Monad.State (get)
 import Control.Monad.Writer (execWriter, tell)

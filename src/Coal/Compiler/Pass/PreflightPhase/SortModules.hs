@@ -8,7 +8,7 @@ module Coal.Compiler.Pass.PreflightPhase.SortModules (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.Compiler.Build
+import Coal.Compiler.Build (Build (buildDependencies))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
 import Coal.Compiler.Embedded (embeddedPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
@@ -17,7 +17,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Path
+import Coal.Language.Module.Path (Path (Path), principalPath)
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
 import Data.Graph (SCC (..), stronglyConnComp)
