@@ -5,7 +5,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.ExpandGuards (passExpandGuards) where
+module Coal.Compiler.Pass.TranslationPhase.ExpandGuards (
+  passExpandGuards,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
