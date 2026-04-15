@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Pass.TypePhase.ReportTypeErrors (
