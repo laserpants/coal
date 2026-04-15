@@ -106,7 +106,11 @@ expandClauseGuards loc clauseType scrutinee (EClause{..} : remainingClauses) = d
   return $ EClause clauseMetadata clausePattern (CPlain loc [] expanded :| [])
  where
   buildFallbackClause clauses =
-    let EClause{clauseMetadata = fallbackMeta, clausePattern = fallbackPattern, clauseChoices = fallbackChoices} = last clauses
+    let EClause
+          { clauseMetadata = fallbackMeta
+          , clausePattern = fallbackPattern
+          , clauseChoices = fallbackChoices
+          } = last clauses
      in EClause fallbackMeta (PAny fallbackMeta (typeOf fallbackPattern)) fallbackChoices
 
   buildGuardedIf (CPlain loc1 guards expr) elseExpr =
