@@ -26,7 +26,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as E
 import qualified Data.Text.IO as Text
-import Extras (Name, forM, forM_)
+import Extras (Name, forM_)
 import Text.Megaparsec (runParser)
 
 passParsing :: (MonadIO m) => Pass Metadata m [FilePath] [BuildEnvelope (Module Metadata () ())]
@@ -35,53 +35,54 @@ passParsing = Pass{runPass = passImpl}
 passImpl :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 passImpl files = do
   embeddedFiles <- traverse parseEmbedded embedded
-  case partitionEithers embeddedFiles of
-    ([], embeddedBundle) -> do
-      results <- traverse parseFile files
-      case partitionEithers results of
-        ([], bundle) ->
-          pure (embeddedBundle <> bundle)
-        (es, _) -> do
-          forM_ es (tellErrors . return)
-          throwError ParserFailure
-    (es, _) -> do
-      forM es $
-        \(p, e) ->
-          error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
+  embeddedBundle <- handleParseResults embeddedFiles $ \(p, e) ->
+    error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
+  results <- traverse parseFile files
+  bundle <- handleParseResults results (tellErrors . return)
+  pure (embeddedBundle <> bundle)
+
+-- | Helper to handle parsing results: report errors or return bundles
+handleParseResults :: (MonadIO m) => [Either e a] -> (e -> CompilerT Metadata m ()) -> CompilerT Metadata m [a]
+handleParseResults results reportError = do
+  case partitionEithers results of
+    ([], bundles) ->
+      pure bundles
+    (errors, _) -> do
+      forM_ errors reportError
+      throwError ParserFailure
+
+-- | Check cache and handle source registration for a given module name and source
+checkCacheAndRegister :: (MonadIO m) => Name -> Text -> Module Metadata () () -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()))
+checkCacheAndRegister name src m = do
+  CompilerConfig{..} <- gets compilerConfig
+  cached <- cachedBuild name src
+  setBuildSourceC name src
+  case cached of
+    Just mb | not configNoCache -> do
+      insertBuildC mb
+      pure (BCached mb)
+    _ -> do
+      setTouched name
+      pure (BSource m)
 
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildEnvelope (Module Metadata () ())))
 parseEmbedded (p, src) = do
-  CompilerConfig{..} <- gets compilerConfig
+  let encodedSrc = E.decodeUtf8 src
   case runParser parseSourceFile "" encodedSrc of
     Left err ->
       pure $ Left (p, err)
-    Right module_ -> do
-      let name = principalPath (modulePath module_)
-      -- Check cached build files
-      cached <- cachedBuild name encodedSrc
-      setBuildSourceC name encodedSrc
-      toBeRecompiled name
-      case cached of
-        Just mb | not configNoCache -> do
-          insertBuildC mb
-          pure $ Right (BCached mb)
-        _ -> do
-          toBeRecompiled name
-          pure $ Right (BSource module_)
- where
-  encodedSrc :: Text
-  encodedSrc = E.decodeUtf8 src
+    Right m -> do
+      let name = principalPath (modulePath m)
+      Right <$> checkCacheAndRegister name encodedSrc m
 
 fromSource :: (MonadIO m) => Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 fromSource name file src = do
-  toBeRecompiled name
   case runParser parseSourceFile "" src of
     Left err ->
       pure $ Left (ParserError file err)
-    Right module_@(Module path _ _) -> do
+    Right m@(Module path _ _) ->
       if principalPath path == name
-        then do
-          pure $ Right (BSource module_)
+        then Right <$> checkCacheAndRegister name src m
         else pure $ Left (BadModuleName file (principalPath path))
 
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
@@ -91,14 +92,6 @@ parseFile file = do
   case res of
     Right (fp, _, name) -> do
       src <- liftIO (Text.readFile fp)
-      -- Check cached build files
-      cached <- cachedBuild name src
-      setBuildSourceC name src
-      case cached of
-        Just mb | not configNoCache -> do
-          insertBuildC mb
-          pure $ Right (BCached mb)
-        _ ->
-          fromSource name file src
-    Left err -> do
+      fromSource name file src
+    Left err ->
       pure $ Left (BadFilename file err)
