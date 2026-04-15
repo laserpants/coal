@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -6,32 +7,25 @@ module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build
+import Coal.Compiler.Build (Build (..), emptyBuild, insertHash)
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
-import Coal.Compiler.Build.Prep
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language (Kind, constructors)
-import Coal.Language.Definition
+import Coal.Language.Definition (AliasDefinition (..), Definition (..))
 import Coal.Language.Module (Module (..), ModuleExportList (..))
-import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Control.Monad (unless)
 import Control.Monad.Except (MonadIO)
-import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
+import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
-import Data.Set (Set)
-import qualified Data.Set as Set
-import Debug.Trace
-import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
+import Extras (Name, forM, forM_, traverse_)
 
 passPrep :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind ())
 passPrep = Pass{runPass = passImpl}
@@ -44,17 +38,17 @@ passImpl m = do
 prep :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
 prep modul = do
   m1 <- do
-    -- let modul = toModule [] m
     clearAssumptionsC
     clearNameStoreC
-    setCurrentModuleC modul -- ??
+    setCurrentModuleC modul
     forM_ builtinFunctions $ uncurry insertNameC
     toKindIndexed modul
 
   prepareBuildAliases m1
   insertBuildHash
-  expandFunctionGroups m1
+  return m1
 
+prepareBuildAliases :: (Monad m) => Module a Kind () -> CompilerT a m ()
 prepareBuildAliases Module{..} = do
   build <-
     execStateT
@@ -73,7 +67,7 @@ insertBuildHash = do
     Just source ->
       updateCurrentBuildPureC (insertHash source)
 
-prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+prepareDefinitions :: (Monad m) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions = traverse_ collectTypeAliases
 
 -- TODO: DRY
@@ -154,10 +148,16 @@ insertTypeName Build{..} loc name =
         case Environment.lookup name buildAliases of
           Nothing ->
             error "TODO"
-          Just AliasEntry{..} -> do
-            insertAlias name AliasEntry{..}
-            forM_ (constructors aliasEntryType) (insertTypeName Build{..} loc)
-            return True
+          Just
+            AliasEntry
+              { aliasEntryMetadata
+              , aliasEntryName
+              , aliasEntryParams
+              , aliasEntryType
+              } -> do
+              insertAlias name AliasEntry{..}
+              forM_ (constructors aliasEntryType) (insertTypeName Build{..} loc)
+              return True
       _ ->
         return False
 

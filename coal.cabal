@@ -66,8 +66,8 @@ library
       Coal.Compiler.Pass.LoweringPhase.KernelTranslate
       Coal.Compiler.Pass.LoweringPhase.Linking
       Coal.Compiler.Pass.LoweringPhase.LLVMOutput
-      Coal.Compiler.Pass.ParsingPhase
-      Coal.Compiler.Pass.ParsingPhase.Parsing
+      Coal.Compiler.Pass.PhaseParsing
+      Coal.Compiler.Pass.PhaseParsing.Parsing
       Coal.Compiler.Pass.PhasePreflight
       Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation
       Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses

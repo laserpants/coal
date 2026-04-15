@@ -1,8 +1,9 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.ParsingPhase.Parsing (passParsing, fromSource) where
+module Coal.Compiler.Pass.PhaseParsing.Parsing (passParsing, fromSource) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Cache (cachedBuild)
@@ -54,13 +55,13 @@ handleParseResults results reportError = do
 -- | Check cache and handle source registration for a given module name and source
 checkCacheAndRegister :: (MonadIO m) => Name -> Text -> Module Metadata () () -> CompilerT Metadata m (BuildEnvelope (Module Metadata () ()))
 checkCacheAndRegister name src m = do
-  CompilerConfig{..} <- gets compilerConfig
+  CompilerConfig{configNoCache} <- gets compilerConfig
   cached <- cachedBuild name src
   setBuildSourceC name src
   case cached of
-    Just mb | not configNoCache -> do
-      insertBuildC mb
-      pure (BCached mb)
+    Just build | not configNoCache -> do
+      insertBuildC build
+      pure (BCached build)
     _ -> do
       setTouched name
       pure (BSource m)
