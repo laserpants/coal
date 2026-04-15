@@ -37,7 +37,7 @@ refreshCache =
       pure (BSource src)
     BCached Build{..} -> do
       CompilerState{..} <- get
-      let touched dep = principalPath dep `elem` compilerToBeRecompiled
+      let touched dep = principalPath dep `elem` compilerTouched
        in if any touched buildDependencies
             then do
               res <- compileFromSource (principalPath buildPath)
@@ -52,7 +52,7 @@ refreshCache =
 compileFromSource :: (MonadIO m) => Name -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 compileFromSource name = do
   src <- getSourceC name
-  toBeRecompiled name
+  setTouched name
   case runParser parseSourceFile "" src of
     Left{} ->
       error "Implementation error"

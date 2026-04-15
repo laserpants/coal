@@ -59,7 +59,7 @@ pass ir = do
       forM_ results (uncurry setBitcodeC) -- ???
       modules_ <- gets compilerModules
 
-      fresh <- gets compilerToBeRecompiled
+      fresh <- gets compilerTouched
       let freshModules = Environment.restrict (Set.toList fresh) modules_
 
       let buildDir = "./.build/"

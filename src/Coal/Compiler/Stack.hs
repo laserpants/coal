@@ -49,7 +49,7 @@ module Coal.Compiler.Stack (
   setConfigGenerateDotFilesC,
   setConfigGenerateLLVMOutputC,
   getSourceC,
-  toBeRecompiled,
+  setTouched,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -250,5 +250,5 @@ getSourceC name = do
   s <- gets compilerSources
   pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
 
-toBeRecompiled :: (Monad m, BuildName p) => p -> CompilerT a m ()
-toBeRecompiled build = modify (overCompilerToBeRecompiled (Set.insert (buildName build)))
+setTouched :: (Monad m, BuildName p) => p -> CompilerT a m ()
+setTouched build = modify (overCompilerTouched (Set.insert (buildName build)))

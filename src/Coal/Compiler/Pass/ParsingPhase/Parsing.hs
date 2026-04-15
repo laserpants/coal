@@ -13,7 +13,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
 import Coal.Compiler.Stack
-import Coal.Compiler.State
+import Coal.Compiler.State (CompilerState (compilerConfig))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Parser (ParserError, parseSourceFile)

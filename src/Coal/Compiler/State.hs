@@ -11,7 +11,7 @@ module Coal.Compiler.State (
   overCompilerConfig,
   overCompilerModules,
   overCompilerSources,
-  overCompilerToBeRecompiled,
+  overCompilerTouched,
   overCompilerModuleWithPath,
   overCompilerCurrentPath,
   overCompilerSubstitution,
@@ -52,7 +52,7 @@ data CompilerState a = CompilerState
   , compilerConfig :: CompilerConfig
   , compilerModules :: Environment (Build a)
   , compilerSources :: Environment Text
-  , compilerToBeRecompiled :: Set Name
+  , compilerTouched :: Set Name
   , compilerCurrentPath :: Path
   , compilerSubstitution :: Substitution
   , compilerNameStore :: Environment IndexedScheme
@@ -77,7 +77,7 @@ initialCompilerState =
     , compilerConfig = defaultConfig
     , compilerModules = mempty
     , compilerSources = mempty
-    , compilerToBeRecompiled = mempty
+    , compilerTouched = mempty
     , compilerCurrentPath = emptyPath
     , compilerSubstitution = mempty
     , compilerNameStore = mempty
@@ -130,11 +130,11 @@ overCompilerSources fn CompilerState{..} =
     , ..
     }
 
-{-# INLINE overCompilerToBeRecompiled #-}
-overCompilerToBeRecompiled :: Over (CompilerState a) (Set Name)
-overCompilerToBeRecompiled fn CompilerState{..} =
+{-# INLINE overCompilerTouched #-}
+overCompilerTouched :: Over (CompilerState a) (Set Name)
+overCompilerTouched fn CompilerState{..} =
   CompilerState
-    { compilerToBeRecompiled = fn compilerToBeRecompiled
+    { compilerTouched = fn compilerTouched
     , ..
     }
 
