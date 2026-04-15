@@ -28,13 +28,10 @@ import qualified Data.Map.Strict as Map
 import Extras (Name)
 
 passExpandRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
-passExpandRecordPatterns = Pass{runPass = passImpl}
+passExpandRecordPatterns = Pass{runPass = transformBiM passImpl}
 
-passImpl :: (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
-passImpl = transformBiM go
- where
-  go :: (Monad m, Data a, Monoid a) => Expression a Kind IndexedType -> CompilerT a m (Expression a Kind IndexedType)
-  go = desugarRecordPatterns
+passImpl :: (Monad m, Data a, Monoid a) => Expression a Kind IndexedType -> CompilerT a m (Expression a Kind IndexedType)
+passImpl = desugarRecordPatterns
 
 class RecordContext a p where
   desugarRecordPatterns :: (Monad m) => p -> CompilerT a m p
@@ -123,59 +120,74 @@ extractVarName =
 desugar :: (Data a, Monoid a, Monad m) => IndexedType -> Expression a Kind IndexedType -> [Clause a Kind IndexedType] -> RecordEntry a -> Expression a Kind IndexedType -> CompilerT a m (Expression a Kind IndexedType)
 desugar t0 e0 rest (name, dict, p1) expr = do
   names <- replicateM (length fields - 1) (supplied (freshName "row"))
-  (_, _, e1) <- foldrM go (v1, r1, e2 expr) (zip fields (name : names))
-  pure e1
+  (_, _, result) <- foldrM processField (varName, initialRow, initialExpr expr) (zip fields (name : names))
+  pure result
  where
   fields = Map.toList dict
-  r1 = maybe RNil extractRow p1
-  v1 = extractVarName p1
-  t1 = maybe (TRecord (TRow RNil)) typeOf p1
-  e2 = ELet mempty (BPattern mempty (PVariable mempty (Label t1 v1)) (EVariable mempty (Label t1 (name <> ".tail"))) :| [])
-  go ((fname, p), prefix) (var, row, expr2) = do
-    let t2 = typeOf p
-        ll1 = Label (typeOf p) (prefix <> ".field." <> fname)
-        ll2 = Label (TRecord (TRow row)) (prefix <> ".tail")
-        match = EMatch mempty (typeOf expr2)
-        clause q e = EClause mempty q (CPlain mempty [] e :| [])
-        focus = EFocus mempty fname ll1 ll2 (EVariable mempty (Label (TRow (RExtend fname t2 row)) prefix))
-    e3 <-
-      desugarRecordPatterns
-        ( match
-            (EVariable mempty ll1)
-            ( clause p expr2
-                :| ( case rest of
-                      [] -> []
-                      q : qs ->
-                        [ EClause
-                            mempty
-                            (PAny mempty t2)
-                            ( CPlain
-                                mempty
-                                []
-                                (EMatch mempty t0 e0 (q :| qs))
-                                :| []
-                            )
-                        ]
-                   )
-            )
-        )
-    pure
-      ( prefix
-      , RExtend fname t2 row
-      , focus
-          ( if var == v1
-              then e3
-              else
-                match
-                  (EVariable mempty ll2)
-                  ( clause
-                      ( PConstructor
-                          mempty
-                          (Label (TRecord (TRow row)) "$Record")
-                          [PVariable mempty (Label (TRow row) var)]
-                      )
-                      e3
-                      :| []
-                  )
-          )
+  initialRow = maybe RNil extractRow p1
+  varName = extractVarName p1
+  rowType = maybe (TRecord (TRow RNil)) typeOf p1
+
+  initialExpr =
+    ELet
+      mempty
+      ( BPattern
+          mempty
+          (PVariable mempty (Label rowType varName))
+          (EVariable mempty (Label rowType (name <> ".tail")))
+          :| []
       )
+
+  processField ((fieldName, pattern), prefix) (currentVar, currentRow, currentExpr) = do
+    let fieldType = typeOf pattern
+        fieldLabel = Label fieldType (prefix <> ".field." <> fieldName)
+        tailLabel = Label (TRecord (TRow currentRow)) (prefix <> ".tail")
+        extendedRowType = TRow (RExtend fieldName fieldType currentRow)
+
+        makeClause pat body = EClause mempty pat (CPlain mempty [] body :| [])
+
+        fieldFocus =
+          EFocus
+            mempty
+            fieldName
+            fieldLabel
+            tailLabel
+            (EVariable mempty (Label extendedRowType prefix))
+
+        fallbackClauses =
+          case rest of
+            [] -> []
+            q : qs ->
+              [ EClause
+                  mempty
+                  (PAny mempty fieldType)
+                  (CPlain mempty [] (EMatch mempty t0 e0 (q :| qs)) :| [])
+              ]
+
+    matchedExpr <-
+      desugarRecordPatterns $
+        EMatch
+          mempty
+          (typeOf currentExpr)
+          (EVariable mempty fieldLabel)
+          (makeClause pattern currentExpr :| fallbackClauses)
+
+    let wrappedExpr =
+          if currentVar == varName
+            then matchedExpr
+            else
+              EMatch
+                mempty
+                (typeOf matchedExpr)
+                (EVariable mempty tailLabel)
+                ( makeClause
+                    ( PConstructor
+                        mempty
+                        (Label (TRecord (TRow currentRow)) "$Record")
+                        [PVariable mempty (Label (TRow currentRow) currentVar)]
+                    )
+                    matchedExpr
+                    :| []
+                )
+
+    return (prefix, RExtend fieldName fieldType currentRow, fieldFocus wrappedExpr)
