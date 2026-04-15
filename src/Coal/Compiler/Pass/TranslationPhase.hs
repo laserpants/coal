@@ -11,9 +11,9 @@ import Coal.Compiler.Pass.TranslationPhase.ExpandGuards (passExpandGuards)
 import Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns (passExpandOrPatterns)
 import Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns)
+import Coal.Compiler.Pass.TranslationPhase.ExpandRecordPatterns (passExpandRecordPatterns)
 import Coal.Compiler.Pass.TranslationPhase.NormalizeAst (passNormalizeAst)
 import Coal.Compiler.Pass.TranslationPhase.Placeholders (passPlaceholders)
-import Coal.Compiler.Pass.TranslationPhase.RecordPatterns (passRecordPatterns)
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
@@ -25,7 +25,7 @@ translationPhasePasses =
     >-> passExpandGuards
     >-> passExpandOrPatterns
     >-> passCheckPatternAnomalies
-    >-> passRecordPatterns
+    >-> passExpandRecordPatterns
     >-> passExpandAsPatterns
     >-> passExpandIntegerLiteralPatterns
     >-> passCompileMatchExpressions

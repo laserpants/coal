@@ -7,8 +7,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.RecordPatterns (
-  passRecordPatterns,
+module Coal.Compiler.Pass.TranslationPhase.ExpandRecordPatterns (
+  passExpandRecordPatterns,
 ) where
 
 import Coal.Common.Label (Label (..))
@@ -27,8 +27,8 @@ import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import Extras (Name)
 
-passRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
-passRecordPatterns = Pass{runPass = passImpl}
+passExpandRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
+passExpandRecordPatterns = Pass{runPass = passImpl}
 
 passImpl :: (Monad m, Data a, Monoid a) => Module a Kind IndexedType -> CompilerT a m (Module a Kind IndexedType)
 passImpl = transformBiM go
