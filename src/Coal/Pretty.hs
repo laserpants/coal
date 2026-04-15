@@ -45,13 +45,7 @@ module Coal.Pretty (
 where
 
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (
-  Parameter (..),
-  Type (..),
-  TypeIndex (..),
-  isTupleType,
-  typeArgs,
- )
+import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..), isTupleType, typeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
