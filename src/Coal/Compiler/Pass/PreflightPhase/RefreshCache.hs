@@ -3,9 +3,9 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.RefreshCache
-  ( passRefreshCache,
-  )
+module Coal.Compiler.Pass.PreflightPhase.RefreshCache (
+  passRefreshCache,
+)
 where
 
 import Coal.AST.Metadata (Metadata (..))
@@ -25,7 +25,7 @@ import Extras (Name)
 import Text.Megaparsec (runParser)
 
 passRefreshCache :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
-passRefreshCache = Pass {runPass = passImpl}
+passRefreshCache = Pass{runPass = passImpl}
 
 passImpl :: (MonadIO m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 passImpl = traverse refreshCache
@@ -35,8 +35,8 @@ refreshCache =
   \case
     BSource src ->
       pure (BSource src)
-    BCached Build {..} -> do
-      CompilerState {..} <- get
+    BCached Build{..} -> do
+      CompilerState{..} <- get
       let touched dep = principalPath dep `elem` compilerToBeRecompiled
        in if any touched buildDependencies
             then do
@@ -47,14 +47,14 @@ refreshCache =
                   throwError PreflightFailure
                 Right r ->
                   pure r
-            else pure (BCached Build {..})
+            else pure (BCached Build{..})
 
 compileFromSource :: (MonadIO m) => Name -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 compileFromSource name = do
   src <- getSourceC name
   toBeRecompiled name
   case runParser parseSourceFile "" src of
-    Left {} ->
+    Left{} ->
       error "Implementation error"
     Right module_ -> do
       pure $ Right (BSource module_)
