@@ -19,101 +19,103 @@ import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..), tails)
 import qualified Data.List.NonEmpty as NonEmpty
-import Extras (Map, traverseM)
 
 passExpandGuards :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandGuards = Pass{runPass = passImpl}
+passExpandGuards = Pass{runPass = expandModule}
 
-passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-passImpl = bork
-
+-- | Check if a clause is trivial (has no guards)
 trivial :: Clause a Kind t -> Bool
 trivial (EClause _ _ (CPlain _ [] _ :| [])) = True
 trivial _ = False
 
+-- | Expand guard expressions within a single expression
 expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =
   \case
     e@(EMatch _ _ _ cs)
       | all trivial cs ->
-          pure e
+          return e
     EMatch a t e cs -> do
-      e' <- expandExpression e
+      expr <- expandExpression e
       name <- supplied (freshName "scr")
       let ll = Label (typeOf e) name
           var = EVariable a ll
       cs' <- traverse (expandClauseGuards a t var) (NonEmpty.init $ tails cs)
       case cs' of
         x : xs ->
-          pure $
+          return $
             ELet
               a
-              (BPattern a (PVariable a ll) e' :| [])
+              (BPattern a (PVariable a ll) expr :| [])
               (EMatch a t var (x :| xs))
         [] ->
           error "Implementation error"
     e ->
-      pure e
+      return e
 
-class ExpandGuards a where
-  expandGuards :: (Monad m) => a -> CompilerT Metadata m (NonEmpty a)
-
-instance (ExpandGuards a) => ExpandGuards [a] where
-  expandGuards = traverseM expandGuards
-
-instance (ExpandGuards a) => ExpandGuards (NonEmpty a) where
-  expandGuards = traverseM expandGuards
-
-instance (ExpandGuards a) => ExpandGuards (Map k a) where
-  expandGuards = traverseM expandGuards
-
-instance (ExpandGuards a) => ExpandGuards (Maybe a) where
-  expandGuards = traverseM expandGuards
-
-bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-bork =
+-- | Expand guards in all definitions within a module
+expandModule :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+expandModule =
   \case
     Module{..} -> do
-      newModuleDefinitions <- traverse fnork moduleDefinitions
+      newDefinitions <- traverse expandDefinition moduleDefinitions
       return $
         Module
-          { moduleDefinitions = newModuleDefinitions
+          { moduleDefinitions = newDefinitions
           , ..
           }
 
-fnork :: (Monad m) => Definition Metadata Kind IndexedType -> CompilerT Metadata m (Definition Metadata Kind IndexedType)
-fnork =
+-- | Expand guards in a single definition
+expandDefinition :: (Monad m) => Definition Metadata Kind IndexedType -> CompilerT Metadata m (Definition Metadata Kind IndexedType)
+expandDefinition =
   \case
-    DFunction loc name def -> do
+    DFunction loc name def ->
       DFunction loc name <$> transformBiM expandExpression def
     DLet loc name def ->
       DLet loc name <$> transformBiM expandExpression def
     DInstance loc InstanceDefinition{..} -> do
-      newInstanceDefinitionImplementations <- traverse fnork instanceDefinitionImplementations
+      newImplementations <- traverse expandDefinition instanceDefinitionImplementations
       return $
         DInstance
           loc
           InstanceDefinition
-            { instanceDefinitionImplementations = newInstanceDefinitionImplementations
+            { instanceDefinitionImplementations = newImplementations
             , ..
             }
     d ->
       return d
 
-expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata Kind IndexedType -> [Clause Metadata Kind IndexedType] -> CompilerT Metadata m (Clause Metadata Kind IndexedType)
-expandClauseGuards _ _ _ (c@(EClause _ _ (CPlain _ [] _ :| [])) : _) =
-  pure c
-expandClauseGuards a1 t var (EClause a2 p choices : clauses) = do
-  next <- expandExpression (EMatch a1 t var (NonEmpty.fromList $ clauses <> [EClause a3 (PAny a3 (typeOf q)) cs2]))
-  e1 <- foldrM go next choices
-  pure $ EClause a2 p (CPlain a1 [] e1 :| [])
- where
-  EClause a3 q cs2 = last clauses
-  go :: (Monad m) => Choice Expression Metadata Kind IndexedType -> Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
-  go (CPlain a gs e) e1 =
-    pure $ EIf a (typeOf e1) (foldr1 (conjunction a) (guardExpression <$> gs)) e e1
-expandClauseGuards _ _ _ _ =
-  error "Implementation error"
+{- | Expand guards in a clause, with fallback to remaining clauses
 
+This transforms a clause with guards into nested if-expressions.
+For example, a clause like:
+  | guard1 -> expr1
+  | guard2 -> expr2
+becomes:
+  if guard1 then expr1 else if guard2 then expr2 else <fallback>
+-}
+expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadata Kind IndexedType -> [Clause Metadata Kind IndexedType] -> CompilerT Metadata m (Clause Metadata Kind IndexedType)
+expandClauseGuards _ _ _ (trivialClause@EClause{clauseChoices = CPlain _ [] _ :| []} : _) =
+  return trivialClause
+expandClauseGuards loc clauseType scrutinee (EClause{..} : remainingClauses) = do
+  let fallbackClause = buildFallbackClause remainingClauses
+      fallbackMatch = EMatch loc clauseType scrutinee (NonEmpty.fromList $ remainingClauses <> [fallbackClause])
+  nextExpr <- expandExpression fallbackMatch
+  expanded <- foldrM buildGuardedIf nextExpr clauseChoices
+
+  return $ EClause clauseMetadata clausePattern (CPlain loc [] expanded :| [])
+ where
+  buildFallbackClause clauses =
+    let EClause{clauseMetadata = fallbackMeta, clausePattern = fallbackPattern, clauseChoices = fallbackChoices} = last clauses
+     in EClause fallbackMeta (PAny fallbackMeta (typeOf fallbackPattern)) fallbackChoices
+
+  buildGuardedIf (CPlain loc1 guards expr) elseExpr =
+    return $ EIf loc1 (typeOf elseExpr) combinedGuard expr elseExpr
+   where
+    combinedGuard = foldr1 (conjunction loc1) (guardExpression <$> guards)
+expandClauseGuards _ _ _ _ =
+  error "Implementation error: expandClauseGuards called with invalid arguments"
+
+-- | Combine two boolean expressions with logical AND
 conjunction :: Metadata -> Expression Metadata Kind IndexedType -> Expression Metadata Kind IndexedType -> Expression Metadata Kind IndexedType
 conjunction a e1 e2 = EApplication a (TIntrinsic IBool) e1 (e2 :| [])
