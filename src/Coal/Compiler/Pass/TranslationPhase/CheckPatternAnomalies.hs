@@ -70,15 +70,15 @@ instance PatternContext (LetDefinition Metadata k t) where
 instance PatternContext (Binding Expression Metadata k t) where
   checkPatternAnomalies name =
     \case
-      BPattern a p e ->
+      BPattern _ _ e ->
         checkPatternAnomalies name e
-      BFunction a n ps e ->
+      BFunction _ _ _ e ->
         checkPatternAnomalies name e
 
 instance PatternContext (Choice Expression Metadata k t) where
   checkPatternAnomalies name =
     \case
-      CPlain a gs e -> do
+      CPlain _ gs e -> do
         traverse_ (checkPatternAnomalies name) gs
         checkPatternAnomalies name e
 
@@ -91,52 +91,52 @@ instance PatternContext (Guard Expression Metadata k t) where
 instance PatternContext (Clause Metadata k t) where
   checkPatternAnomalies name =
     \case
-      EClause a p cs ->
+      EClause _ _ cs ->
         traverse_ (checkPatternAnomalies name) cs
 
 instance PatternContext (Expression Metadata k t) where
   checkPatternAnomalies name =
     \case
-      EAnnotation a t e ->
+      EAnnotation _ _ e ->
         checkPatternAnomalies name e
-      EApplication a t e es -> do
+      EApplication _ _ e es -> do
         checkPatternAnomalies name e
         traverse_ (checkPatternAnomalies name) es
-      ELambda a ps e ->
+      ELambda _ _ e ->
         checkPatternAnomalies name e
-      ELet a gs e1 -> do
+      ELet _ gs e1 -> do
         traverse_ (checkPatternAnomalies name) gs
         checkPatternAnomalies name e1
       ERecursiveLet a p e1 e2 -> do
         checkPatternAnomalies name e1
         checkPatternAnomalies name e2
-      EIf a t e1 e2 e3 -> do
+      EIf _ _ e1 e2 e3 -> do
         checkPatternAnomalies name e1
         checkPatternAnomalies name e2
         checkPatternAnomalies name e3
-      ERecord a t d me -> do
+      ERecord _ _ d me -> do
         traverse_ (checkPatternAnomalies name) d
         traverse_ (checkPatternAnomalies name) me
-      EListCons a t e1 e2 -> do
+      EListCons _ _ e1 e2 -> do
         checkPatternAnomalies name e1
         checkPatternAnomalies name e2
-      EListLiteral a t es ->
+      EListLiteral _ _ es ->
         traverse_ (checkPatternAnomalies name) es
-      ETuple a t es ->
+      ETuple _ _ es ->
         traverse_ (checkPatternAnomalies name) es
-      EMatch a t e cs -> do
+      EMatch a _ e cs -> do
         checkPatternAnomalies name e
         checkExhaustive name a cs
         traverse_ (checkPatternAnomalies name) cs
-      ELambdaMatch a t cs -> do
+      ELambdaMatch a _ cs -> do
         checkExhaustive name a cs
         traverse_ (checkPatternAnomalies name) cs
-      ESelect a ll e ->
+      ESelect _ _ e ->
         checkPatternAnomalies name e
-      EFocus a n ll1 ll2 e1 e2 -> do
+      EFocus _ _ _ _ e1 e2 -> do
         checkPatternAnomalies name e1
         checkPatternAnomalies name e2
-      EFFICall a t ll es e -> do
+      EFFICall _ _ _ es e -> do
         traverse_ (checkPatternAnomalies name) es
         checkPatternAnomalies name e
       _ ->
