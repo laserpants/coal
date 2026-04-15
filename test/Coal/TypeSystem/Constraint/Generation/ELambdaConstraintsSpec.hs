@@ -102,6 +102,7 @@ constraint4 = Equality () [TVariable (TypeIndex KType 2), TVariable (TypeIndex K
 collectELambdaConstraintsSpec4 :: Bool
 collectELambdaConstraintsSpec4 =
   undefined
+
 --  constraint2 `elem` constraints && constraint3 `elem` constraints && constraint4 `elem` constraints
 -- where
 --  constraints = muteConstraint <$> rights outs

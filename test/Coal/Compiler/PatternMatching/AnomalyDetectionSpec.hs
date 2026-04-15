@@ -6,15 +6,14 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Build
+import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Environment
 import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
-import Coal.Compiler.Build
-import Coal.Compiler.Build.NameEntry
-import Coal.Compiler.Stack
-import Coal.Compiler.State
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (lift, modify, put)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -179,18 +178,18 @@ runTest px = r2
   setupEnv = do
     -- lift $ updateCurrentBuildC (pure . overBuildDataConstructors (const testEnv))
     put
-        initialCompilerState
-          { compilerCurrentPath = Path ["Test"]
-          , compilerModules =
-              Environment.fromList
-                [
-                  ( "Test"
-                  , emptyBuild
-                      { buildDataConstructors = testEnv
-                      }
-                  )
-                ]
-          }
+      initialCompilerState
+        { compilerCurrentPath = Path ["Test"]
+        , compilerModules =
+            Environment.fromList
+              [
+                ( "Test"
+                , emptyBuild
+                    { buildDataConstructors = testEnv
+                    }
+                )
+              ]
+        }
 
 example6 :: [Pattern () () ()]
 example6 =
@@ -239,18 +238,18 @@ runTest2 px = r2
   Right r2 = runIdentity (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive (translatePattern <$> px)))
   setupEnv = do
     put
-        initialCompilerState
-          { compilerCurrentPath = Path ["Test"]
-          , compilerModules =
-              Environment.fromList
-                [
-                  ( "Test"
-                  , emptyBuild
-                      { buildDataConstructors = testEnv
-                      }
-                  )
-                ]
-          }
+      initialCompilerState
+        { compilerCurrentPath = Path ["Test"]
+        , compilerModules =
+            Environment.fromList
+              [
+                ( "Test"
+                , emptyBuild
+                    { buildDataConstructors = testEnv
+                    }
+                )
+              ]
+        }
 
 patternAnomaliesSpec :: Spec
 patternAnomaliesSpec =

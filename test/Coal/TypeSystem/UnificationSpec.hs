@@ -4,16 +4,16 @@
 module Coal.TypeSystem.UnificationSpec (unificationSpec) where
 
 import Coal.Language
+import Coal.Pretty ()
 import Coal.TypeSystem.Substitution
+import qualified Coal.TypeSystem.Substitution as Substitution
 import Coal.TypeSystem.Unification
 import Control.Monad (forM_)
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.List.NonEmpty as NonEmpty
 import Prettyprinter
 import Prettyprinter.Render.String (renderString)
 import Test.Hspec
-
-import qualified Coal.TypeSystem.Substitution as Substitution
-import qualified Data.List.NonEmpty as NonEmpty
 
 data UnificationSpecTestCase t
   = UnifyTestCase t t (Either UnificationError Substitution)
@@ -622,7 +622,7 @@ runHspecTestCase specTestCase = do
         prettyType t1 ++ " >~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
 
 prettyType :: IndexedType -> String
-prettyType = renderString . layoutPretty defaultLayoutOptions . pretty 
+prettyType = renderString . layoutPretty defaultLayoutOptions . pretty
 
 unificationSpec :: SpecWith ()
 unificationSpec =

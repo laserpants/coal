@@ -16,6 +16,7 @@ import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (principalPath)
+import Coal.Pretty ()
 import Control.Monad.State
 import Data.Foldable (foldrM)
 import qualified Data.List.NonEmpty as NonEmpty

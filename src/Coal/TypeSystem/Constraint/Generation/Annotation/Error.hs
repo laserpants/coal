@@ -16,7 +16,7 @@ data TypeAnnotationError a
     -- same type. The type signature claims that the function is polymorphic
     -- with respect to any choice of variables a, b, and c.
     EAnnotationNonDistinctParameter a Name
-  | -- | Type parameter resolves to a concrete type; e.g.,
+  | -- | Type parameter resolves to a concrete type, e.g.,
     -- fn(x : a, y : int32) => x + y
     EAnnotationMonomorphicType a Name (Type TypeIndex Kind)
   deriving (Show, Eq, Ord, Read)

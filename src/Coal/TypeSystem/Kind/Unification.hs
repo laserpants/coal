@@ -8,7 +8,7 @@ module Coal.TypeSystem.Kind.Unification (
 
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.TypeSystem.Kind.Error (KindError (..))
-import Coal.TypeSystem.Kind.Substitution
+import Coal.TypeSystem.Kind.Substitution (KindSubstitutable (applyKinds), KindSubstitution (KindSubstitution))
 import Control.Monad.Except (MonadError, throwError)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, member)

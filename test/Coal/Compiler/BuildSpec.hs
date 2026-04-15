@@ -8,28 +8,28 @@ module Coal.Compiler.BuildSpec where
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Build
+import Coal.Compiler.Build.Prep (prepareBuild, replacePlaceholders)
+import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
+import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Compiler.TypeInference
 import Coal.Graphviz.Dot
 import Coal.Language
+import Coal.Language.Definition
+import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Language.Type (Parameter (..))
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
-import Coal.Compiler.Build
-import Coal.Compiler.Build.Prep (prepareBuild, replacePlaceholders)
-import Coal.Compiler.Stack
-import Coal.Compiler.State
-import Coal.Language.Definition
-import Coal.Language.Module (ModuleExportList (..), Module (..))
+import Coal.TypeSystem.Constraint
+import Coal.TypeSystem.Constraint.Assumption
+import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Constraint.Generation
 import Coal.TypeSystem.Kind.Constraint.Solver (solveKindConstraints)
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Kind.Substitution
 import Coal.TypeSystem.Kind.Unification
-import Coal.TypeSystem.Constraint
-import Coal.TypeSystem.Constraint.Assumption
-import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Substitution
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
