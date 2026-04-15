@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where
@@ -9,7 +10,7 @@ import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Control.Exception (SomeException (..), try)
-import Control.Monad (unless)
+import Control.Monad (guard, unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Crypto.Hash
@@ -22,24 +23,29 @@ import qualified Data.Text.Encoding as Text
 import Extras (Name)
 import System.FilePath ((<.>), (</>))
 
+-- Build cache constants
+buildCacheDir :: FilePath
+buildCacheDir = ".build"
+
+buildFileExt :: String
+buildFileExt = "coal.b"
+
 cachedData :: (MonadIO m) => Name -> CompilerT Metadata m (Either SomeException ByteString)
-cachedData name = liftIO $ try $ ByteString.readFile ("./.build" </> Text.unpack name <.> "coal.b")
+cachedData name = liftIO $ try $ ByteString.readFile (buildCacheDir </> Text.unpack name <.> buildFileExt)
 
 cachedBuild :: (MonadIO m, Binary a) => Name -> Text -> CompilerT Metadata m (Maybe (Build a))
 cachedBuild name src = do
   res <- cachedData name
-  case res of
-    Left{} ->
-      pure Nothing
-    Right bs ->
-      case decodeOrFail (fromStrict bs) of
-        Left{} ->
-          pure Nothing
-        Right (_, _, Build{..}) ->
-          pure $
-            if (unHash256 <$> buildHash) == Just (hash (Text.encodeUtf8 src))
-              then Just Build{..}
-              else Nothing
+  pure $ do
+    bs <- case res of
+      Left{} -> Nothing
+      Right b -> Just b
+    case decodeOrFail (fromStrict bs) of
+      Left{} -> Nothing
+      Right (_, _, build) -> do
+        let expectedHash = hash (Text.encodeUtf8 src)
+        guard (buildHash build == Just (Hash256 expectedHash))
+        Just build
 
 writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> Build a -> CompilerT Metadata m ()
 writeBuildFile buildDir name build = do
@@ -49,4 +55,5 @@ writeBuildFile buildDir name build = do
       putStrLn file
     ByteString.writeFile (buildDir </> file) (toStrict (encode build))
  where
-  file = Text.unpack name <.> "coal.b"
+  file :: FilePath
+  file = Text.unpack name <.> buildFileExt
