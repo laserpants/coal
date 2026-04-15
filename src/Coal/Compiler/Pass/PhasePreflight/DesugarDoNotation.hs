@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DesugarDoNotation (
+module Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation (
   passDesugarDoNotation,
 ) where
 

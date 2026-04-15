@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.RefreshCache (
+module Coal.Compiler.Pass.PhasePreflight.RefreshCache (
   passRefreshCache,
 )
 where

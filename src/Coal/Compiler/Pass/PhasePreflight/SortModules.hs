@@ -3,7 +3,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TupleSections #-}
 
-module Coal.Compiler.Pass.PreflightPhase.SortModules (
+module Coal.Compiler.Pass.PhasePreflight.SortModules (
   passSortModules,
 ) where
 

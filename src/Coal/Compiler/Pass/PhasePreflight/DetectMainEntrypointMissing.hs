@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing (
+module Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing (
   passDetectMainEntrypointMissing,
 ) where
 

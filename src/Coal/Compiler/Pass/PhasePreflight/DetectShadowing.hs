@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DetectShadowing (
+module Coal.Compiler.Pass.PhasePreflight.DetectShadowing (
   passDetectShadowing,
 ) where
 

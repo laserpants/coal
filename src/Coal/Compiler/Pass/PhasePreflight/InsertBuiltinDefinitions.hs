@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.InsertBuiltinDefinitions (
+module Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions (
   passInsertBuiltinDefinitions,
 ) where
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DesugarWhereClauses (
+module Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses (
   passDesugarWhereClauses,
 ) where
 

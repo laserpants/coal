@@ -5,7 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles (
+module Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles (
   passDetectAliasCycles,
 ) where
 

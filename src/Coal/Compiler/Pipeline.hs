@@ -24,7 +24,7 @@ import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
 import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
 import Coal.Compiler.Pass.ParsingPhase (parsingPhase)
-import Coal.Compiler.Pass.PreflightPhase (preflightPhase)
+import Coal.Compiler.Pass.PhasePreflight (phasePreflight)
 import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Pass.TypePhase (typePhasePasses)
 import Coal.Compiler.Stack
@@ -53,7 +53,7 @@ import TextShow (showt)
 pipeline :: (MonadIO m, MonadMask m) => Pass Metadata m [FilePath] ()
 pipeline =
   parsingPhase
-    >-> preflightPhase
+    >-> phasePreflight
     >-> mapPass (liftPass (typePhasePasses >-> translationPhasePasses))
     >-> loweringPhase
     >-> passLinking

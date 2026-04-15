@@ -15,7 +15,7 @@ import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, updateCurrentBuildC)
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))

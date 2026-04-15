@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements (
+module Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements (
   passDetectMisplacedImportStatements,
 ) where
 

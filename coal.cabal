@@ -68,17 +68,17 @@ library
       Coal.Compiler.Pass.LoweringPhase.LLVMOutput
       Coal.Compiler.Pass.ParsingPhase
       Coal.Compiler.Pass.ParsingPhase.Parsing
-      Coal.Compiler.Pass.PreflightPhase
-      Coal.Compiler.Pass.PreflightPhase.DesugarDoNotation
-      Coal.Compiler.Pass.PreflightPhase.DesugarWhereClauses
-      Coal.Compiler.Pass.PreflightPhase.DetectAliasCycles
-      Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams
-      Coal.Compiler.Pass.PreflightPhase.DetectMainEntrypointMissing
-      Coal.Compiler.Pass.PreflightPhase.DetectMisplacedImportStatements
-      Coal.Compiler.Pass.PreflightPhase.DetectShadowing
-      Coal.Compiler.Pass.PreflightPhase.InsertBuiltinDefinitions
-      Coal.Compiler.Pass.PreflightPhase.RefreshCache
-      Coal.Compiler.Pass.PreflightPhase.SortModules
+      Coal.Compiler.Pass.PhasePreflight
+      Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation
+      Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses
+      Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles
+      Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams
+      Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing
+      Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements
+      Coal.Compiler.Pass.PhasePreflight.DetectShadowing
+      Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions
+      Coal.Compiler.Pass.PhasePreflight.RefreshCache
+      Coal.Compiler.Pass.PhasePreflight.SortModules
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.CheckPatternAnomalies
       Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions

@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PreflightPhase.DetectDuplicateParams (
+module Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams (
   passDetectDuplicateParams,
 ) where
 
