@@ -5,6 +5,7 @@ module Coal.Language (
   module Coal.Language.HasType,
   module Coal.Language.HasActive,
   module Coal.Language.Type,
+  module Coal.Language.Type.Operations,
   module Coal.Language.Type.Intrinsic,
   module Coal.Language.Type.Kind,
   module Coal.Language.Type.Scheme,
@@ -35,5 +36,6 @@ import Coal.Language.Type
 import Coal.Language.Type.Indexed
 import Coal.Language.Type.Intrinsic
 import Coal.Language.Type.Kind
+import Coal.Language.Type.Operations
 import Coal.Language.Type.Row
 import Coal.Language.Type.Scheme

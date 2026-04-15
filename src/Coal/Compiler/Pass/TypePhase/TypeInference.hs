@@ -148,7 +148,7 @@ inferTypes modul = do
       , ..
       }
 
-inferKinds :: (MonadIO m, Show a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+inferKinds :: (MonadIO m) => Module a Kind () -> CompilerT a m (Module a Kind ())
 inferKinds indexed = do
   generateKindConstraints indexed
   constraints <- gets compilerKindConstraints
@@ -175,6 +175,8 @@ defineName =
             define (instanceLabel trait name) (typeOf def)
           def@(DLet _ name _) ->
             define (instanceLabel trait name) (typeOf def)
+          _ ->
+            pure ()
     _ ->
       pure ()
 

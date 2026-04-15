@@ -2,7 +2,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.Language.Trait (Trait (..), Qualified (..)) where
@@ -11,7 +10,6 @@ import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Extras (Name)
 import GHC.Generics (Generic)
-import Prettyprinter (Pretty (..))
 
 -- | Standalone type trait
 data Trait t = Trait
@@ -32,10 +30,6 @@ data Trait t = Trait
     )
 
 instance (Binary t) => Binary (Trait t)
-
-instance (Pretty t) => Pretty (Trait t) where
-  pretty (Trait name t) =
-    pretty name <> "<" <> pretty t <> ">"
 
 -- | Qualified type
 data Qualified t = With [Trait t] t

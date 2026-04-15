@@ -203,6 +203,7 @@ library
       Coal.Language.Type.Intrinsic
       Coal.Language.Type.Kind
       Coal.Language.Type.Kind.Indexed
+      Coal.Language.Type.Operations
       Coal.Language.Type.Row
       Coal.Language.Type.Scheme
       Coal.Parser
@@ -218,6 +219,7 @@ library
       Coal.Parser.Type
       Coal.Parser.Type.Intrinsic
       Coal.Parser.Utils
+      Coal.Pretty
       Coal.TypeSystem
       Coal.TypeSystem.Annotations
       Coal.TypeSystem.Constraint

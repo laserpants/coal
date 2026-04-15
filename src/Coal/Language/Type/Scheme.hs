@@ -21,11 +21,13 @@ module Coal.Language.Type.Scheme (
   IndexedScheme,
   listConstructorScheme,
   tupleScheme,
-) where
+)
+where
 
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), listType, tupleType, (~>))
+import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), (~>))
 import Coal.Language.Type.Kind (Kind (..))
+import Coal.Language.Type.Operations (listType, tupleType)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List (intersperse)
@@ -33,7 +35,6 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (Set)
 import qualified Data.Set as Set
 import GHC.Generics (Generic)
-import Prettyprinter (Pretty (..), hsep)
 
 data Scheme o k t = Forall
   { schemeTypeVariables :: Set (o k)
@@ -52,16 +53,6 @@ data Scheme o k t = Forall
     )
 
 instance (Binary (o k), Binary t) => Binary (Scheme o k t)
-
-instance (Pretty k, Pretty (o k), Pretty t) => Pretty (Scheme o k t) where
-  pretty =
-    \case
-      Forall _ ts t ->
-        pretty t <> traits
-       where
-        traits
-          | Set.null ts = ""
-          | otherwise = " with " <> hsep (intersperse "," (pretty <$> Set.toList ts))
 
 {-# INLINE index #-}
 index :: Int -> TypeIndex Kind

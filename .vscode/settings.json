@@ -1,0 +1,9 @@
+{
+  // Use fourmolu as the Haskell formatter
+  "haskell.formattingProvider": "fourmolu",
+  
+  // Enable format on save for Haskell files
+  "[haskell]": {
+    "editor.formatOnSave": true
+  }
+}

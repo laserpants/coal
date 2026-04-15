@@ -32,6 +32,7 @@ import Coal.Compiler.State
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
 import Coal.Language (Kind)
 import Coal.Language.Module.Path (principalPath)
+import Coal.Pretty (CoalPretty (..))
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
@@ -154,8 +155,8 @@ prettyRule =
     e ->
       Text.pack ("TODO: " <> show e)
 
-prettyType :: (Pretty t) => t -> Text
-prettyType p = "`" <> (renderStrict . layoutPretty defaultLayoutOptions $ pretty p) <> "`"
+prettyType :: (CoalPretty t) => t -> Text
+prettyType p = "`" <> (renderStrict . layoutPretty defaultLayoutOptions $ prettyCoal p) <> "`"
 
 prettyConstraintsGenError :: (Show a) => ConstraintsGenError a -> Text
 prettyConstraintsGenError =

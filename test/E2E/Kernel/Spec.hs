@@ -17,7 +17,6 @@ import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Parser (spaces)
 import Coal.Kernel.Parser.Module (module_)
-import Coal.Compiler.Stack
 import Control.Monad (void)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)

@@ -2,12 +2,12 @@
 
 module E2E.Spec (e2eSpec, runSpec) where
 
-import Control.Monad.Trans (lift)
 import Coal.Compiler (pipeline)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
+import Control.Monad.Trans (lift)
 import System.Process
 import Test.Hspec
 
@@ -1622,12 +1622,12 @@ runSpec :: FilePath -> [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec srcPath files = do
   e <-
     evalCompilerT (emptyCompilerEnvironment Nothing) $ do
-        -- TODO: cache?
-        setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
-        runPass pipeline files
+      -- TODO: cache?
+      setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
+      runPass pipeline files
   case e of
-        Left e1 ->
-          pure (Left e1)
-        Right{} -> do
-          txt <- readProcess "./dist" [] ""
-          pure (Right txt)
+    Left e1 ->
+      pure (Left e1)
+    Right{} -> do
+      txt <- readProcess "./dist" [] ""
+      pure (Right txt)

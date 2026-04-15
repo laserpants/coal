@@ -21,7 +21,7 @@ import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (.
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.HasKind (HasKind (..))
-import Coal.Language.Module
+import Coal.Language.Module (Module (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Qualified (..), Trait (..))
 import Coal.Language.Type (Parameter (..), Type (..))

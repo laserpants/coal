@@ -14,7 +14,8 @@ module Coal.Language.Type.Kind (
   applyKind,
   tupleKind,
   tupleConstructorKind,
-) where
+)
+where
 
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
@@ -24,9 +25,7 @@ import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as Text
 import Extras (Name)
-import Extras.Prettyprinter (parensIf)
 import GHC.Generics (Generic)
-import Prettyprinter (Doc, Pretty (..), group, (<+>))
 
 data Kind
   = KType
@@ -81,24 +80,3 @@ instance (Data t) => KindProxy t Kind where
 
 instance KindProxy a () where
   tailKind _ = ()
-
-precKArrow :: Int
-precKArrow = 1 -- a -> b
-
-instance Pretty Kind where
-  pretty = prettyKindPrec 0
-
-prettyKindPrec :: Int -> Kind -> Doc ann
-prettyKindPrec prec =
-  \case
-    KType ->
-      "*"
-    KRow ->
-      "Row"
-    KTrait ->
-      "Trait"
-    KVariable v ->
-      "k." <> pretty v
-    KArrow k1 k2 ->
-      parensIf (prec > precKArrow) $
-        group (prettyKindPrec (precKArrow + 1) k1 <+> "→" <+> prettyKindPrec precKArrow k2)
