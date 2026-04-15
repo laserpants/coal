@@ -133,16 +133,16 @@ inferTypes modul = do
       }
 
 inferKinds :: (MonadIO m) => Module a Kind () -> CompilerT a m (Module a Kind ())
-inferKinds indexed = do
-  generateKindConstraints indexed
+inferKinds m = do
+  generateKindConstraints m
   constraints <- gets compilerKindConstraints
   case kindUnifierMonad (solveKindConstraints constraints) of
     Left err ->
       error (show err)
     Right sub -> do
       modify (overCompilerNameStore (replaceVariables . applyKinds sub))
-      modify (overCompilerModuleWithPath (modulePath indexed) (replaceVariables . applyKinds sub))
-      return (replaceVariables (applyKinds sub indexed))
+      modify (overCompilerModuleWithPath (modulePath m) (replaceVariables . applyKinds sub))
+      return (replaceVariables (applyKinds sub m))
 
 defineName :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m ()
 defineName =
