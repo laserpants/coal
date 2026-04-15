@@ -22,10 +22,10 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Map, traverseM)
 
 passExpandGuards :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandGuards = Pass{runPass = pass}
+passExpandGuards = Pass{runPass = passImpl}
 
-pass :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass = bork
+passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+passImpl = bork
 
 trivial :: Clause a Kind t -> Bool
 trivial (EClause _ _ (CPlain _ [] _ :| [])) = True
