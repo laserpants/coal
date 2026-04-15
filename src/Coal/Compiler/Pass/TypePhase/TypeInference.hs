@@ -91,23 +91,7 @@ runTypeInference m = do
 
   liftIO $ Text.writeFile ("tmp/build_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ Build{..})
 
-  --  stor <- gets compilerNameStore
-  --  liftIO $ Text.writeFile ("tmp/oldnames_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ stor)
-
-  --  traceShowM (modulePath m)
-
-  --  pure (Module p ns (normalizeTypeIndexes tdefs))
-
-  --  traceShowM (definitionName <$> tdefs)
-  --  traceShowM (definitionName <$> (moduleDefinitions $ fromModule nm))
-
-  --  when (modulePath m == Path ["Main"]) $ do
-  --    pPrint nm
-
   pure nm
-
--- where
---  Module p ns ds = m
 
 ti :: (MonadIO m, Data a, Monoid a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 ti modul = do
@@ -163,9 +147,9 @@ inferKinds indexed = do
 defineName :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m ()
 defineName =
   \case
-    def@(DFunction _ name FunctionDefinition{..}) ->
+    def@(DFunction _ name FunctionDefinition{}) ->
       define name (typeOf def)
-    def@(DLet _ name LetDefinition{..}) ->
+    def@(DLet _ name LetDefinition{}) ->
       define name (typeOf def)
     DInstance _ InstanceDefinition{..} -> do
       let trait = Trait instanceDefinitionTraitName instanceDefinitionType

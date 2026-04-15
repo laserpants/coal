@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -46,7 +47,7 @@ passImpl Module{..} = do
 expandTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a Kind () -> CompilerT a m (Definition a Kind ())
 expandTopLevelFolds =
   \case
-    DFold loc name FoldDefinition{..} -> do
+    DFold loc name FoldDefinition{foldDefinitionAnnotation, foldDefinitionClauses} -> do
       newExpression <- expandClauses foldDefinitionClauses
       let def =
             LetDefinition
