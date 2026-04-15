@@ -25,8 +25,9 @@ module Coal.Language.Type.Scheme (
 where
 
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), listType, tupleType, (~>))
+import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), (~>))
 import Coal.Language.Type.Kind (Kind (..))
+import Coal.Language.Type.Operations (listType, tupleType)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List (intersperse)

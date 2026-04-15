@@ -9,8 +9,9 @@ module Coal.Language.Expression.Operator (
   operatorTypeScheme,
 ) where
 
-import Coal.Language.Type (Type (..), listType, (~>))
+import Coal.Language.Type (Type (..), (~>))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
+import Coal.Language.Type.Operations (listType)
 import Coal.Language.Type.Scheme (IndexedScheme, Scheme (..), forall0, forall1, forall2, forall3)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)

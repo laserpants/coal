@@ -4,6 +4,7 @@
 
 module Coal.Compiler.Pass.TypePhase.Prep (passPrep) where
 
+import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
@@ -94,42 +95,6 @@ insertExportedName name
           pure ()
  where
   insertName = modify (Build.insertBuildExportedName name)
-
-builtinNames :: Set Name
-builtinNames =
-  Set.fromList
-    [ "(%)"
-    , "(*)"
-    , "(+)"
-    , "(-)"
-    , "(/)"
-    , "(<>)"
-    , "(==)"
-    , "(!=)"
-    , "Comparable"
-    , "Divisible"
-    , "EqualTo"
-    , "GreaterThan"
-    , "IO"
-    , "LessThan"
-    , "Modulo"
-    , "None"
-    , "Numeric"
-    , "Option"
-    , "Result"
-    , "Ok"
-    , "Err"
-    , "Ordered"
-    , "Ordering"
-    , "Semigroup"
-    , "Some"
-    , "Process"
-    , "compare"
-    , "from_int32"
-    , "from_int64"
-    , "from_bignum"
-    , "negate"
-    ]
 
 insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)

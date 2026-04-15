@@ -3,8 +3,9 @@
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Language.Type
-import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (..), applyTypeArgs, tupleType)
+import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (..), applyTypeArgs)
 import Coal.Language.Type.Kind
+import Coal.Language.Type.Operations (tupleType)
 import Coal.Language.Type.Scheme
 import Coal.Language.TypeSpec
 import Coal.TypeSystem.Constraint.Solver
