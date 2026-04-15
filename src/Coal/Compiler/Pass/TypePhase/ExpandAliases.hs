@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -252,7 +253,7 @@ aliasTransformTypeApplication k _ t ts =
 
 lookupAlias :: (MonadIO m, AliasEntryTransform o, Typeable o, Data (o Kind), Show a) => Type o Kind -> [Type o Kind] -> Name -> CompilerT a m (Type o Kind)
 lookupAlias t ts name = do
-  Build{..} <- getCurrentBuildC
+  Build{buildAliases} <- getCurrentBuildC
   case Environment.lookup name buildAliases of
     Nothing ->
       case t of
