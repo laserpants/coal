@@ -16,7 +16,7 @@ import Coal.Language.Module (Module (..), ModuleExportList (..))
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (principalPath)
-import Coal.Pretty ()
+import Coal.Pretty (CoalPretty (..))
 import Control.Monad.State
 import Data.Foldable (foldrM)
 import qualified Data.List.NonEmpty as NonEmpty
@@ -365,12 +365,12 @@ instance (Dot t) => Dot (Qualified t) where
     emitEdge dotId t
     return dotId
 
-instance (Show k, Pretty k, HasKind (Type TypeIndex k)) => Dot (Type TypeIndex k) where
+instance (Show k, CoalPretty k, HasKind (Type TypeIndex k)) => Dot (Type TypeIndex k) where
   toDot t = do
     (id1, _) <- withTypeInfo (kindOf t) $ emitShape HexagonShape (prettyType t)
     return id1
 
-instance (Show k, Pretty k, HasKind (Type Parameter k)) => Dot (Type Parameter k) where
+instance (Show k, CoalPretty k, HasKind (Type Parameter k)) => Dot (Type Parameter k) where
   toDot t = do
     (id1, _) <- withTypeInfo (kindOf t) $ emitShape HexagonShape (prettyType t)
     return id1
@@ -379,7 +379,7 @@ instance Dot Kind where
   toDot k = do
     emitShape HexagonShape (Text.pack $ show k)
 
-instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Binding Expression a k t) where
+instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Binding Expression a k t) where
   toDot =
     \case
       BPattern _ p e -> do
@@ -422,7 +422,7 @@ instance Dot Primitive where
       LString str ->
         emitNamedShape RectangleShape (Just $ showt str) "LString"
 
-instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Expression a k t) where
+instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Expression a k t) where
   toDot =
     \case
       EAnnotation _ t e -> do
@@ -541,7 +541,7 @@ instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Expression a 
             emitEdge id1 e
         return dotId
 
-instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Pattern a k t) where
+instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Pattern a k t) where
   toDot =
     \case
       PAnnotation _ t p -> do
@@ -633,7 +633,7 @@ instance Dot Operator where
       OListConcatenation ->
         emitShape RectangleShape "OListConcatenation"
 
-instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Clause a k t) where
+instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Clause a k t) where
   toDot =
     \case
       EClause{..} -> do
@@ -642,7 +642,7 @@ instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Clause a k t)
         emitEdges dotId clauseChoices
         return dotId
 
-instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Choice Expression a k t) where
+instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Choice Expression a k t) where
   toDot =
     \case
       CPlain _ gs e -> do
@@ -651,7 +651,7 @@ instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Choice Expres
         emitEdge dotId e
         return dotId
 
-instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Guard Expression a k t) where
+instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Guard Expression a k t) where
   toDot =
     \case
       CGuard e -> do
@@ -659,7 +659,7 @@ instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (Guard Express
         emitEdge dotId e
         return dotId
 
-instance (Dot t, Dot (Type Parameter k), Show k, Pretty k) => Dot (CompiledClause a k t) where
+instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (CompiledClause a k t) where
   toDot =
     \case
       ECompiledClause{..} -> do
@@ -746,6 +746,5 @@ generateDotSyntax ast =
     | DotEdge{..} <- dotStateEdges finalState
     ]
 
--- TODO
-prettyType :: (Pretty t) => t -> Text
-prettyType p = Text.replace "->" "→" (renderStrict $ layoutPretty defaultLayoutOptions $ pretty p)
+prettyType :: (CoalPretty t) => t -> Text
+prettyType p = Text.replace "->" "→" (renderStrict $ layoutPretty defaultLayoutOptions $ prettyCoal p)

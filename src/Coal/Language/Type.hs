@@ -37,11 +37,10 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..), KindProxy (..), tupleKind)
 import Coal.Language.Type.Row (Row (..), fromDictionary, normalizeRow)
-import Coal.Utils (intToVar)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (transform)
-import Data.List.NonEmpty (NonEmpty (..), toList, (<|))
+import Data.List.NonEmpty (NonEmpty (..), (<|))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)

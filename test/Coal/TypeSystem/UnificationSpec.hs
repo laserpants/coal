@@ -3,8 +3,8 @@
 
 module Coal.TypeSystem.UnificationSpec (unificationSpec) where
 
+import Coal.Pretty
 import Coal.Language
-import Coal.Pretty ()
 import Coal.TypeSystem.Substitution
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Coal.TypeSystem.Unification
@@ -622,7 +622,7 @@ runHspecTestCase specTestCase = do
         prettyType t1 ++ " >~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
 
 prettyType :: IndexedType -> String
-prettyType = renderString . layoutPretty defaultLayoutOptions . pretty
+prettyType = renderString . layoutPretty defaultLayoutOptions . prettyCoal
 
 unificationSpec :: SpecWith ()
 unificationSpec =
