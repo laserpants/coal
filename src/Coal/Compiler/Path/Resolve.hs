@@ -12,7 +12,7 @@ import Data.Ord (comparing)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import System.Directory (canonicalizePath, doesFileExist)
-import System.FilePath
+import System.FilePath (dropExtension, isAbsolute, makeRelative, normalise, splitDirectories, takeExtension, (</>))
 
 errorMessage :: PathError -> String
 errorMessage =
