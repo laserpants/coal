@@ -1483,7 +1483,7 @@ inferTypes modul = do
   forM_ moduleDefinitions $
     \def -> do
       generateConstraints def
-      sub <- solveX
+      sub <- solveT
       defineName (apply sub def)
   sub <- gets compilerSubstitution
   modify (overCompilerAssumptions (apply sub))

@@ -22,9 +22,9 @@ import Coal.Language.Module
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Constraint.Generation
 import Coal.TypeSystem.Parameterized
-import Control.Monad.Except (MonadError (..), forM_)
+import Control.Monad.Except (forM_)
 import Control.Monad.Reader (runReaderT)
-import Control.Monad.State (evalState, get, gets)
+import Control.Monad.State (get, gets)
 import Control.Monad.Writer (execWriter)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
@@ -202,8 +202,8 @@ assumptionConstraints Assumption{..} = do
       Just s ->
         Right (Explicit (RuleTypeConstraint assumptionMetadata assumptionName assumptionType s) assumptionType s)
 
-solveConstraintsX :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
-solveConstraintsX constraints = do
+solveConstraintsT :: (Monad m, Data a, Eq a) => [CompilerConstraint a] -> CompilerT a m Substitution
+solveConstraintsT constraints = do
   dict <- gets compilerTypeAnnotationParams
   n <- gets compilerSupply
   let (sub, m, rs) = solveConstraints n constraints
@@ -213,11 +213,11 @@ solveConstraintsX constraints = do
   compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
   pure sub
 
-solveX :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
-solveX = do
+solveT :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
+solveT = do
   constraints <- gets compilerConstraints
   sub1 <- gets compilerSubstitution
-  sub2 <- solveConstraintsX constraints
+  sub2 <- solveConstraintsT constraints
   clearConstraintsC
   clearKindConstraintsC
   clearTypeAnnotationParamsC

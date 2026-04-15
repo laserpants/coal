@@ -15,7 +15,7 @@ import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
-import Coal.Compiler.TypeInference (define, generateConstraints, generateKindConstraints, solveX)
+import Coal.Compiler.TypeInference (define, generateConstraints, generateKindConstraints, solveT)
 import Coal.Graphviz.Dot
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), TypeIndex, indexed, instanceLabel, rowNormalize, typeOf)
 import Coal.Language.Definition
@@ -123,7 +123,7 @@ inferTypes modul = do
   forM_ moduleDefinitions $
     \def -> do
       generateConstraints def
-      sub <- solveX
+      sub <- solveT
       defineName (apply sub def)
 
   CompilerState{..} <- get
@@ -138,7 +138,7 @@ inferTypes modul = do
          where
           t = apply compilerSubstitution assumptionType
 
-  sub <- solveX -- again?
+  sub <- solveT -- again?
   modify (overCompilerAssumptions (apply sub))
 
   let newModuleDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)
