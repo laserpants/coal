@@ -38,10 +38,13 @@ cachedBuild name src = do
   res <- cachedData name
   pure $ do
     bs <- case res of
-      Left{} -> Nothing
-      Right b -> Just b
+      Left{} ->
+        Nothing
+      Right b ->
+        Just b
     case decodeOrFail (fromStrict bs) of
-      Left{} -> Nothing
+      Left{} ->
+        Nothing
       Right (_, _, build) -> do
         let expectedHash = hash (Text.encodeUtf8 src)
         guard (buildHash build == Just (Hash256 expectedHash))

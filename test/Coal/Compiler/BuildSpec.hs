@@ -9,15 +9,16 @@ import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build
-import Coal.Compiler.Build.Prep (prepareBuild, replacePlaceholders)
+import Coal.Compiler.Build.NameEntry (NameEntry (..))
 import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
+import Coal.Compiler.Pass.TypePhase.PrepareBuild
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference
 import Coal.Graphviz.Dot
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module (Module (..), ExportList (..))
+import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Language.Type (Parameter (..))
@@ -33,7 +34,7 @@ import Coal.TypeSystem.Kind.Unification
 import Coal.TypeSystem.Substitution
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.State (evalState, evalStateT, get, gets, modify, runState)
+import Control.Monad.State (evalState, evalStateT, execStateT, get, gets, modify, runState)
 import Data.Data (Data)
 import Data.Either (lefts, rights)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
@@ -1457,6 +1458,16 @@ xyz modules = do
   --  pPrint r
 
   pure ()
+
+replacePlaceholders :: (Monad m) => CompilerT a m ()
+replacePlaceholders = do
+  store <- gets compilerNameStore
+  updateCurrentBuildC $
+    \build ->
+      flip execStateT build $
+        forM_ (Environment.toList store) $
+          \(name, s) ->
+            modify (replaceBuildNameEntry (NName name s))
 
 indexTypes :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 indexTypes ds = run (indexed ds) =<< gets compilerSupply

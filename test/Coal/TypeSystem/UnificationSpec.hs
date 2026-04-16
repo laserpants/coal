@@ -3,8 +3,8 @@
 
 module Coal.TypeSystem.UnificationSpec (unificationSpec) where
 
-import Coal.Pretty
 import Coal.Language
+import Coal.Pretty
 import Coal.TypeSystem.Substitution
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Coal.TypeSystem.Unification

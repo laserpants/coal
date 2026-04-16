@@ -21,9 +21,10 @@ The inference process:
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build.Prep (replacePlaceholders)
+import Coal.Compiler.Build (replaceBuildNameEntry)
+import Coal.Compiler.Build.NameEntry (NameEntry (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT, insertConstraintsC, updateSupplyC)
+import Coal.Compiler.Stack (CompilerT, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference (define, generateConstraints, generateKindConstraints, solveT)
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
@@ -37,7 +38,7 @@ import Coal.TypeSystem.Kind.Substitution (KindSubstitutable (applyKinds, replace
 import Coal.TypeSystem.Kind.Unification (KindUnifier (kindUnifierMonad))
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Control.Monad.Except (MonadIO (..), forM_)
-import Control.Monad.State (get, gets, modify, runState)
+import Control.Monad.State (execStateT, get, gets, modify, runState)
 import Data.Data (Data)
 import qualified Data.Text as Text
 
@@ -58,6 +59,16 @@ runTypeInference m = do
   newM <- inferTypes indexedM
   replacePlaceholders
   return newM
+
+replacePlaceholders :: (Monad m) => CompilerT a m ()
+replacePlaceholders = do
+  store <- gets compilerNameStore
+  updateCurrentBuildC $
+    \build ->
+      flip execStateT build $
+        forM_ (Environment.toList store) $
+          \(name, s) ->
+            modify (replaceBuildNameEntry (NName name s))
 
 inferTypes :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 inferTypes m = do
