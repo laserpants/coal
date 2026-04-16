@@ -40,7 +40,7 @@ import Coal.Compiler.Stack (CompilerT, clearAssumptionsC, clearNameStoreC, inser
 import Coal.Compiler.State
 import Coal.Language (Kind, constructors)
 import Coal.Language.Definition (AliasDefinition (..), Definition (..))
-import Coal.Language.Module (Module (..), ModuleExportList (..))
+import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
@@ -110,10 +110,10 @@ insertBuildHash = do
     Just source ->
       updateCurrentBuildPureC (insertHash source)
 
-prepareDefinitions :: (Monad m) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+prepareDefinitions :: (Monad m) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions = traverse_ collectTypeAliases
 
-insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertExportedName :: (Monad m) => Name -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertExportedName name
   | name `elem` builtinNames =
       pure ()
@@ -123,17 +123,17 @@ insertExportedName name
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-  isExported :: Name -> ModuleExportList a -> Bool
+  isExported :: Name -> ExportList a -> Bool
   isExported _ ExportAll = True
   isExported n (Exports exports) = n `elem` (nameOf <$> exports)
 
-insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
 
-insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
-collectTypeAliases :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectTypeAliases :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTypeAliases =
   \case
     DTypeAlias loc name AliasDefinition{..} -> do
@@ -172,7 +172,7 @@ collectTypeAliases =
     _ ->
       pure ()
 
-insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) Bool
+insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) Bool
 insertTypeName Build{..} loc name =
   or <$> forM (Environment.lookupWithDefault [] name buildNames) go
  where
