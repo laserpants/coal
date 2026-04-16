@@ -16,7 +16,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
-import Coal.Language.Definition
+import Coal.Language.Definition (Definition (DFunction, DLet), FunctionDefinition (..), LetDefinition (..))
 import Coal.Language.Module (Module (Module))
 import Control.Monad ((<=<))
 import Data.Data (Data)
