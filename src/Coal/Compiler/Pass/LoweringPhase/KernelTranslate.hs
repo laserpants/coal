@@ -14,8 +14,8 @@ import Coal.Compiler.Pass (Pass (..), tickBar)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (Module))
+import Coal.Language.Module.Path (principalPath)
 import Control.Monad.IO.Class (MonadIO)
 import Extras (Name)
 
