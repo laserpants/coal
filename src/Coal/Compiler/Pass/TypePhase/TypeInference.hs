@@ -64,10 +64,11 @@ inferTypes m = do
   Module{..} <- assignTypeIndices m
 
   -- Generate and solve constraints for each definition
-  forM_ moduleDefinitions $ \def -> do
-    generateConstraints def
-    sub <- solveT
-    storeDefinitionType (apply sub def)
+  forM_ moduleDefinitions $
+    \def -> do
+      generateConstraints def
+      sub <- solveT
+      storeDefinitionType (apply sub def)
 
   CompilerState{..} <- get
 
