@@ -6,13 +6,49 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds
+
+Expand fold expressions embedded within other expressions into explicit form.
+
+This pass identifies and expands fold expressions that appear within the body
+of other expressions, transforming them into recursive let bindings with lambda
+expressions and pattern matching. This is distinct from top-level fold
+definitions, which are handled by the ExpandTopLevelFolds pass.
+
+Fold expressions allow structural recursion over data types using @-patterns
+to bind recursive positions. For example:
+
+@
+fold(list) {
+  | [] => 0
+  | x :: @rest => 1 + rest
+}
+@
+
+is expanded into:
+
+@
+let fold$1 =
+  fn(fold$1.expr) =>
+    match(fold$1.expr) {
+      | [] => 0
+      | x :: rest => 1 + fold$1(rest)
+    }
+  in
+    fold$1(list)
+@
+
+The pass also validates that @-patterns are only used within fold contexts
+and reports errors for misplaced or invalid fold patterns.
+-}
 module Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds (
   passExpandExpressionFolds,
 ) where
 
 import Coal.AST.Flattening (flattenApplicationsDeep)
 import Coal.AST.Rewrite (replace)
-import Coal.AST.Shorthand
+import Coal.AST.Shorthand (applicationE, lambda1E, letE, matchE, varE)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
@@ -31,6 +67,14 @@ import Data.Generics.Uniplate.Data (descendM, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary, Name, const2, traverse_)
 
+{- | Expression fold expansion pass.
+
+Expand fold expressions embedded within other expressions into explicit let
+bindings with lambda expressions and pattern matching. Validate that @-patterns
+are only used in appropriate fold contexts and report errors for misplaced
+fold patterns. This transformation enables structural recursion by making the
+recursive call points explicit.
+-}
 passExpandExpressionFolds :: (Monad m, Monoid a, Data a, Data k) => Pass a m (Module a k ()) (Module a k ())
 passExpandExpressionFolds = Pass{runPass = passImpl}
 
