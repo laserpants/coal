@@ -6,6 +6,30 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+{- |
+Module: Coal.Compiler.Pass.TypePhase.ExpandAliases
+
+Expand type aliases to their underlying definitions throughout the AST.
+
+This pass performs inline expansion of type aliases, replacing all occurrences
+of aliased types with their full definitions. The expansion is recursive,
+handling nested aliases and ensuring that all type aliases are fully resolved
+before type inference begins.
+
+For example, a type alias like:
+
+@
+type alias Dictionary<a> = Map<string, a>
+@
+
+is expanded so that all uses of @Dictionary<a>@ in the code are replaced with
+@Map<string, a>@. This simplification ensures that the type checker only needs
+to work with concrete types rather than dealing with alias resolution during
+type inference.
+
+The pass also updates the build environment to reflect the expanded types in
+constructors and name entries.
+-}
 module Coal.Compiler.Pass.TypePhase.ExpandAliases (
   passExpandAliases,
 ) where
@@ -32,6 +56,13 @@ import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Dictionary, Name, forM_)
 
+{- | Type alias expansion pass.
+
+Replace all type alias references with their underlying definitions throughout
+the module AST. Perform recursive expansion to handle nested aliases and update
+the build environment with expanded types. This simplifies subsequent type
+inference by eliminating alias indirection.
+-}
 passExpandAliases :: (MonadIO m, Data a, Show a, Data k, AliasTransform (Type Parameter k)) => Pass a m (Module a k ()) (Module a k ())
 passExpandAliases = Pass{runPass = aliasTransform}
 
