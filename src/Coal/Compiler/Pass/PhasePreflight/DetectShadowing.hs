@@ -11,7 +11,7 @@ Detect variable shadowing in expressions and patterns.
 
 This pass identifies cases where a variable binding shadows (hides) another
 variable with the same name in an outer scope. While shadowing is allowed in
-many languages, Coal treats it as an error to prevent confusion and potential
+many languages, Coal treats this as an error to prevent confusion and potential
 bugs from unintended name reuse.
 
 For example, this would be detected as shadowing:
