@@ -5,6 +5,37 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
+
+Expand function groups into individual let definitions with pattern matching.
+
+Function groups represent multiple equations defining a single function with
+different patterns. This pass converts them into a single lambda expression
+that performs explicit pattern matching on the arguments.
+
+For example, a function group like:
+
+@
+fun f
+  | 0 = "zero"
+  | n = "non-zero"
+@
+
+is transformed into:
+
+@
+fun f =
+  fn($arg_1) =>
+    match ($arg_1) {
+      | 0 => "zero"
+      | n => "non-zero"
+    }
+@
+
+This normalization simplifies later type checking and compilation phases by
+ensuring all functions have a uniform representation.
+-}
 module Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (
   ExpandContext (..),
   passExpandFunctionGroups,
@@ -24,6 +55,13 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Name)
 import TextShow (showt)
 
+{- | Function group expansion pass.
+
+Transform function groups (multiple equations for a single function) into
+individual let definitions containing lambda expressions with explicit pattern
+matching. This normalization ensures all functions have a uniform representation
+for subsequent type inference and compilation.
+-}
 passExpandFunctionGroups :: (Monad m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
 passExpandFunctionGroups = Pass{runPass = passImpl}
 
@@ -94,7 +132,7 @@ clauses defs =
     c : cs ->
       c :| cs
     [] ->
-      error "Implementation error"
+      error "Internal compiler error: clauses function called with empty list of function definitions."
 
 pat :: (Monoid a) => NonEmpty (Pattern a k ()) -> Pattern a k ()
 pat ps
