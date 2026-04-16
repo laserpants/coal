@@ -153,20 +153,23 @@ instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
 instance (Data a, Monoid a) => DoNotationContext (Clause a () ()) where
   desugarDoNotation =
     \case
-      EClause a p cs ->
-        EClause a p <$> traverse desugarDoNotation cs
+      EClause{..} ->
+        EClause clauseMetadata clausePattern
+          <$> traverse desugarDoNotation clauseChoices
 
 instance (Data a, Monoid a) => DoNotationContext (Choice Expression a () ()) where
   desugarDoNotation =
     \case
-      CPlain a gs e ->
-        CPlain a <$> traverse desugarDoNotation gs <*> desugarDoNotation e
+      CPlain{..} ->
+        CPlain choiceMetadata
+          <$> traverse desugarDoNotation choiceGuards
+          <*> desugarDoNotation choiceExpression
 
 instance (Data a, Monoid a) => DoNotationContext (Guard Expression a () ()) where
   desugarDoNotation =
     \case
-      CGuard e ->
-        CGuard <$> desugarDoNotation e
+      CGuard{..} ->
+        CGuard <$> desugarDoNotation guardExpression
 
 normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), NonEmpty (Pattern a () (), Expression a () ()))
 normalize es =
