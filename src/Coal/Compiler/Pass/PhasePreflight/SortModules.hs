@@ -3,6 +3,25 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TupleSections #-}
 
+{- |
+Module: Coal.Compiler.Pass.PhasePreflight.SortModules
+
+Sort modules in dependency order and detect cyclic dependencies.
+
+This pass performs topological sorting of modules based on their import
+dependencies, ensuring that each module is processed after all of its
+dependencies. It also detects cyclic imports by identifying strongly
+connected components in the module dependency graph.
+
+The pass validates that:
+- A Main module exists in the compilation unit
+- All imported modules are present
+- No cyclic dependencies exist between modules
+
+Modules are returned in dependency order, where dependencies always appear
+before the modules that depend on them. This ordering is essential for
+correct compilation and type checking.
+-}
 module Coal.Compiler.Pass.PhasePreflight.SortModules (
   passSortModules,
 ) where
@@ -15,7 +34,7 @@ import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
-import Coal.Language.Definition
+import Coal.Language.Definition (Definition (DImport, DNamespaceImport))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (Path (Path), principalPath)
 import Control.Monad (unless)
@@ -28,6 +47,13 @@ import qualified Data.Set as Set
 import Data.Tuple.Extra (second)
 import Extras (Name, concatForM, for, forM_)
 
+{- | Module sorting and cycle detection pass.
+
+Sort modules in topological order based on their import dependencies and
+detect any cyclic imports. Validate that a Main module exists and all
+imported modules are present. Return modules in dependency order where
+each module appears after all of its dependencies.
+-}
 passSortModules :: (Monad m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passSortModules = Pass{runPass = passImpl}
 
@@ -44,7 +70,7 @@ passImpl units = do
       tellErrors [ModuleCycle (envelopePathName <$> getModulesFromSCC scc)]
   if notNull cyclicSCCs
     then throwError PreflightFailure
-    else pure $ concatMap getModulesFromSCC sccs
+    else return $ concatMap getModulesFromSCC sccs
  where
   names = Set.fromList (envelopePathName <$> units)
 
@@ -99,11 +125,11 @@ collectEdges names unit = do
     concatForM deps $
       \(loc, dep) ->
         if Set.member dep names
-          then pure [dep]
+          then return [dep]
           else do
             tellErrors [ModuleNotFound dep (ErrorLocation path loc)]
-            pure []
-  pure (unit, path, updatedDependencies)
+            return []
+  return (unit, path, updatedDependencies)
  where
   deps = for (unitDependencies unit) (second principalPath)
   path = envelopePathName unit
