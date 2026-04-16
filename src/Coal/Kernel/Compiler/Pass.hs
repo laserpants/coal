@@ -15,7 +15,7 @@ module Coal.Kernel.Compiler.Pass (
   astSaturateConstructors,
 ) where
 
-import Coal.Kernel.Compiler.Ast (flattenLambdaNodes, flattenObject, simplifyLetNodes, sortMatchClauses)
+import Coal.Kernel.Compiler.AST (flattenLambdaNodes, flattenObject, simplifyLetNodes, sortMatchClauses)
 import Coal.Kernel.Compiler.Pass.ClosureConversion (closeObjects)
 import Coal.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs)
 import Coal.Kernel.Compiler.Pass.LambdaLifting (liftLambdaNodes)

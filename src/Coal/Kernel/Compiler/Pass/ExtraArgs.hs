@@ -4,7 +4,7 @@
 module Coal.Kernel.Compiler.Pass.ExtraArgs (addImplicitArgs) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Kernel.Compiler.Ast (flattenAppNodes)
+import Coal.Kernel.Compiler.AST (flattenAppNodes)
 import Coal.Kernel.Language (Expr, Type, Typed (..))
 import qualified Coal.Kernel.Language as Syntax
 import Coal.Kernel.Language.Object (Object (..))

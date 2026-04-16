@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.Kernel.Compiler.Ast (
+module Coal.Kernel.Compiler.AST (
   flattenLambdaNodes,
   flattenAppNodes,
   flattenObject,

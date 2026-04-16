@@ -83,14 +83,14 @@ library
       Coal.Compiler.Pass.TranslationPhase.CheckPatternAnomalies
       Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
       Coal.Compiler.Pass.TranslationPhase.CompileNats
-      Coal.Compiler.Pass.TranslationPhase.DenormalizeAst
+      Coal.Compiler.Pass.TranslationPhase.DenormalizeAST
       Coal.Compiler.Pass.TranslationPhase.DesugarPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandGuards
       Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandRecordPatterns
-      Coal.Compiler.Pass.TranslationPhase.NormalizeAst
+      Coal.Compiler.Pass.TranslationPhase.NormalizeAST
       Coal.Compiler.Pass.TranslationPhase.Placeholders
       Coal.Compiler.Pass.TypePhase
       Coal.Compiler.Pass.TypePhase.ExpandAliases
@@ -118,7 +118,7 @@ library
       Coal.Kernel.Builtin.Constructors
       Coal.Kernel.Builtin.Objects
       Coal.Kernel.Compiler
-      Coal.Kernel.Compiler.Ast
+      Coal.Kernel.Compiler.AST
       Coal.Kernel.Compiler.EntryPoint
       Coal.Kernel.Compiler.Pass
       Coal.Kernel.Compiler.Pass.ClosureConversion
