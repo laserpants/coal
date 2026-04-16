@@ -24,7 +24,7 @@ parameter is being referenced in the definition body.
 For example, this would be detected as an error:
 
 @
-fn add(x, x) => x + x  -- Which x?
+fun add(x, x) = x + x  // Which x?
 @
 
 The pass ensures parameter names are unique within their scope, preventing
@@ -40,11 +40,11 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
-import Coal.Compiler.State
+import Coal.Compiler.State (CompilerState (compilerCurrentPath))
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (..))
+import Coal.Language.Module.Path (principalPath)
 import Control.Monad.Except
 import Control.Monad.State (StateT, evalStateT, get, gets, modify, put)
 import Data.Data (Data)
