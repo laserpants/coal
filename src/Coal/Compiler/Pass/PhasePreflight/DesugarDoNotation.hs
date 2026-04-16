@@ -5,6 +5,36 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation
+
+Desugar do-notation into explicit bind operations.
+
+This pass transforms do-notation syntax into explicit monadic bind (>>=)
+operations. Do-notation is a convenient imperative-style syntax for monadic
+computations that is desugared into the underlying monadic operations.
+
+For example, this do-expression:
+
+@
+do {
+  x <- action1();
+  y <- action2(x);
+  pure(x + y)
+}
+@
+
+is desugared into:
+
+@
+action1() >>= fn(x) =>
+  action2(x) >>= fn(y) =>
+    pure(x + y)
+@
+
+This transformation converts the syntactic sugar into the explicit monadic
+operations that the rest of the compiler pipeline can process.
+-}
 module Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation (
   passDesugarDoNotation,
 ) where
@@ -23,6 +53,10 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
+{- | Do-notation desugaring pass.
+
+Transform do-notation syntax into monadic bind (>>=) operations.
+-}
 passDesugarDoNotation :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passDesugarDoNotation = mapPass $ Pass{runPass = traverse passImpl}
 
