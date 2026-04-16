@@ -11,21 +11,21 @@ Detect variable shadowing in expressions and patterns.
 
 This pass identifies cases where a variable binding shadows (hides) another
 variable with the same name in an outer scope. While shadowing is allowed in
-many languages, Coal reports it as an error to prevent confusion and potential
+many languages, Coal treats it as an error to prevent confusion and potential
 bugs from unintended name reuse.
 
 For example, this would be detected as shadowing:
 
 @
 let x = 5 in
-  let x = 10 in  -- Error: shadows outer x
+  let x = 10 in  // Error: shadows outer x
     x + 1
 @
 
 Similarly in lambda expressions:
 
 @
-fn(x) => fn(x) => x  -- Error: inner x shadows parameter
+fn(x) => fn(x) => x  // Error: inner x shadows parameter
 @
 
 The pass tracks bound variables in nested scopes and reports shadowing errors
