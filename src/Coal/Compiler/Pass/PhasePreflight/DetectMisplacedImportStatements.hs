@@ -11,8 +11,13 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
-import Coal.Language.Definition
+import Coal.Compiler.Stack (
+  CompilerError (MisplacedImportStatement),
+  CompilerFailureMode (PreflightFailure),
+  CompilerT,
+  ErrorLocation (ErrorLocation),
+ )
+import Coal.Language.Definition (Definition (DImport, DNamespaceImport))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
