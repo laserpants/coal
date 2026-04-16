@@ -10,8 +10,8 @@ Module: Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing
 Detect missing main entry point in Main module.
 
 This pass validates that the Main module contains a "main" function, which
-serves as the program entry point. Executable Coal programs must define a
-main function in their Main module to specify where program execution begins.
+serves as the program entry point. Coal programs must define a main function
+in their Main module to specify where program execution begins.
 
 For example, a valid Main module must include:
 
@@ -45,7 +45,7 @@ import Extras (Name, traverse_)
 {- | Main entry point detection pass.
 
 Validate that the Main module contains a "main" function to serve as the
-program entry point. 
+program entry point.
 -}
 passDetectMainEntrypointMissing :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passDetectMainEntrypointMissing = mapPass $ Pass{runPass = traverse passImpl}

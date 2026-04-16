@@ -5,7 +5,7 @@
 
 module Coal.Language.Module (
   Module (..),
-  ModuleExportList (..),
+  ExportList (..),
 ) where
 
 import Coal.Language.Definition (Definition (..))
@@ -13,7 +13,7 @@ import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Path (Path)
 import Data.Data (Data, Typeable)
 
-data ModuleExportList a
+data ExportList a
   = Exports [Export a]
   | ExportAll
   deriving
@@ -27,7 +27,7 @@ data ModuleExportList a
 
 data Module a k t = Module
   { modulePath :: Path
-  , moduleExportList :: ModuleExportList a
+  , moduleExportList :: ExportList a
   , moduleDefinitions :: [Definition a k t]
   }
   deriving

@@ -12,7 +12,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module (Module (..), ModuleExportList (..))
+import Coal.Language.Module (Module (..), ExportList (..))
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (principalPath)
@@ -182,7 +182,7 @@ instance Dot (Export a) where
         _ <- foldrM connectDots dotId names
         return dotId
 
-instance Dot (ModuleExportList a) where
+instance Dot (ExportList a) where
   toDot =
     \case
       Exports exports -> do

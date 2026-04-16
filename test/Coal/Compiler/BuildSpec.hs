@@ -17,7 +17,7 @@ import Coal.Compiler.TypeInference
 import Coal.Graphviz.Dot
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module (Module (..), ModuleExportList (..))
+import Coal.Language.Module (Module (..), ExportList (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Language.Type (Parameter (..))
