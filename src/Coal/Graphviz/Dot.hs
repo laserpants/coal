@@ -12,7 +12,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module (Module (..), ExportList (..))
+import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (principalPath)
