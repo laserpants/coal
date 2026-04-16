@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -25,12 +26,12 @@ qualifyName :: (Monad m) => Name -> CompilerT a m Name
 qualifyName name = do
   KernelEnvironment{..} <- asks compilerKernelEnvironment
   if isFinal name kernelEnvironmentLocalNames
-    then pure name
+    then return name
     else case Environment.lookup name kernelEnvironmentQualifiedNames of
       Just qname ->
-        pure qname
+        return qname
       Nothing ->
-        pure (kernelEnvironmentModule <.> name)
+        return (kernelEnvironmentModule <.> name)
 
 isFinal :: Name -> Set Name -> Bool
 isFinal name localNames

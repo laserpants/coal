@@ -20,7 +20,6 @@ import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
 import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
-import Debug.Trace
 import Extras (Name, (<.>))
 
 translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
