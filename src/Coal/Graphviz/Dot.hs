@@ -17,7 +17,7 @@ import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Pretty (CoalPretty (..))
-import Control.Monad.State
+import Control.Monad.State (State, forM, forM_, modify, runState)
 import Data.Foldable (foldrM)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
@@ -25,7 +25,7 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Dictionary, Name)
-import Prettyprinter (Pretty (..), defaultLayoutOptions, layoutPretty)
+import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
 import TextShow (showt)
 

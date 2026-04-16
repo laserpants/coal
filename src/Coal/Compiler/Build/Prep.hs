@@ -54,8 +54,8 @@ insertTrait name entry = modify (Build.insertBuildTrait name entry)
 insertInstance :: (Monad m) => Name -> IndexedType -> InstanceEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertInstance name t entry = modify (Build.insertBuildInstance name t entry)
 
-insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
-insertAlias name entry = modify (Build.insertBuildAlias name entry)
+-- insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+-- insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
 insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertExportedName name
@@ -123,10 +123,6 @@ prepareDefinitions defs = do
 
   -- Collect type constructors
   traverse_ collectTypeConstructors defs
-
-  --  -- Collect type aliases
-  --  traverse_ collectTypeAliases defs
-
   -- Collect data constructors
   traverse_ collectDataConstructors defs
   -- expand exports
@@ -382,28 +378,6 @@ insertTypeName Build{..} loc name =
       --            return True
       _ ->
         return False
-
--- collectTypeAliases :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
--- collectTypeAliases =
---  \case
---    DTypeAlias loc name AliasDefinition{..} -> do
---      insertNameEntry (NTypeAlias name)
---      insertExportedName name
---      insertAlias name entry
---     where
---      entry =
---        AliasEntry
---          { aliasEntryMetadata = loc
---          , aliasEntryName = name
---          , aliasEntryParams = aliasDefinitionParameters
---          , aliasEntryType = aliasDefinitionType
---          }
---    DImport _ path imports ->
---      pure ()
---    DNamespaceImport loc path ->
---      pure ()
---    _ ->
---      pure ()
 
 collectDataConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectDataConstructors =

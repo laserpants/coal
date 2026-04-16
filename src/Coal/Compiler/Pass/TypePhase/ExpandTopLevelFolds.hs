@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
@@ -22,7 +23,7 @@ Fold definitions use @-patterns to mark recursive positions in patterns. For
 example, a top-level fold definition:
 
 @
-fold sum : List Nat -> Nat {
+fold(sum) : List Nat -> Nat {
   | [] => 0
   | x :: @rest => x + sum(rest)
 }
@@ -31,7 +32,7 @@ fold sum : List Nat -> Nat {
 is expanded into:
 
 @
-let sum = fn(sum.expr) => match sum.expr {
+let sum = fn(sum.expr) => match(sum.expr) {
   | [] => 0
   | x :: rest => x + sum(rest)
 }
