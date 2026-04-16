@@ -25,7 +25,7 @@ fun f
 is transformed into:
 
 @
-fun f =
+let f =
   fn($arg_1) =>
     match ($arg_1) {
       | 0 => "zero"
