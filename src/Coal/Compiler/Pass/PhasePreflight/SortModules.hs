@@ -8,7 +8,7 @@ Module: Coal.Compiler.Pass.PhasePreflight.SortModules
 
 Sort modules in dependency order and detect cyclic dependencies.
 
-This pass performs topological sorting of modules based on their import
+This pass performs a topological sort of modules based on their import
 dependencies, ensuring that each module is processed after all of its
 dependencies. It also detects cyclic imports by identifying strongly
 connected components in the module dependency graph.
