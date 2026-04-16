@@ -59,8 +59,8 @@ import TextShow (showt)
 
 Transform function groups (multiple equations for a single function) into
 individual let definitions containing lambda expressions with explicit pattern
-matching. This normalization ensures all functions have a uniform representation
-for subsequent type inference and compilation.
+matching. This normalization ensures all functions have a uniform representation,
+simplifying subsequent type inference and compilation.
 -}
 passExpandFunctionGroups :: (Monad m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
 passExpandFunctionGroups = Pass{runPass = passImpl}
