@@ -7,7 +7,7 @@ import Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds (passExpandExpressionF
 import Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (passExpandFunctionGroups)
 import Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions (passExpandLambdaMatchExpressions)
 import Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds (passExpandTopLevelFolds)
-import Coal.Compiler.Pass.TypePhase.Prep (passPrep)
+import Coal.Compiler.Pass.TypePhase.KindIndexing (passKindIndexing)
 import Coal.Compiler.Pass.TypePhase.PrepareBuild (passPrepareBuild)
 import Coal.Compiler.Pass.TypePhase.ReportTypeErrors (passReportTypeErrors)
 import Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference)
@@ -17,7 +17,7 @@ import Control.Monad.IO.Class (MonadIO)
 
 typePhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind IndexedType)
 typePhasePasses =
-  passPrep
+  passKindIndexing
     >-> passExpandFunctionGroups
     >-> passExpandAliases
     >-> passPrepareBuild

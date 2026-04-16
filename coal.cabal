@@ -98,7 +98,7 @@ library
       Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
       Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions
       Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds
-      Coal.Compiler.Pass.TypePhase.Prep
+      Coal.Compiler.Pass.TypePhase.KindIndexing
       Coal.Compiler.Pass.TypePhase.PrepareBuild
       Coal.Compiler.Pass.TypePhase.ReportTypeErrors
       Coal.Compiler.Pass.TypePhase.TypeInference
