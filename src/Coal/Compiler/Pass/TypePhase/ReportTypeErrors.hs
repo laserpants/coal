@@ -1,6 +1,12 @@
--- +
 {-# LANGUAGE RecordWildCards #-}
 
+{- |
+Module: Coal.Compiler.Pass.TypePhase.ReportTypeErrors
+
+Report type errors that occurred during constraint generation and solving.
+Collect errors from both the constraint generation phase and the solver phase,
+then report them to the user and abort compilation if any errors were found.
+-}
 module Coal.Compiler.Pass.TypePhase.ReportTypeErrors (
   passReportTypeErrors,
 ) where
@@ -16,6 +22,12 @@ import Coal.Language.Module.Path (principalPath)
 import Control.Monad (forM_, unless)
 import Control.Monad.Except (MonadError (throwError), MonadIO)
 
+{- | Type error pass.
+
+Gather constraint generation errors and solver rule violations from the
+compiler state, report them as type errors, and throw a TypeError exception
+if any errors were found.
+-}
 passReportTypeErrors :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passReportTypeErrors = Pass{runPass = passImpl}
 
