@@ -26,7 +26,7 @@ match {
 }
 @
 
-is expanded into:
+translates to:
 
 @
 fn($lambda_match) => match($lambda_match) {

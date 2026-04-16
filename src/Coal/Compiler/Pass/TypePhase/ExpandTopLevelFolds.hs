@@ -23,7 +23,7 @@ Fold definitions use @-patterns to mark recursive positions in patterns. For
 example, a top-level fold definition:
 
 @
-fold(sum) : List Nat -> Nat {
+fold sum : List Nat -> Nat {
   | [] => 0
   | x :: @rest => x + sum(rest)
 }
