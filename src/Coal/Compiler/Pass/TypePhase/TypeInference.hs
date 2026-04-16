@@ -90,7 +90,7 @@ inferTypes m = do
   modify (overCompilerAssumptions (apply sub))
 
   let newDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)
-  pure $
+  return $
     Module
       { moduleDefinitions = normalizeTypeIndexes newDefinitions
       , ..
@@ -127,10 +127,10 @@ storeDefinitionType =
         def@(DLet _ name _) ->
           define (instanceLabel trait name) (typeOf def)
         _ ->
-          pure ()
+          return ()
     -- Type definitions, aliases, traits don't need type storage
     _ ->
-      pure ()
+      return ()
 
 assignTypeIndices :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
 assignTypeIndices ds = do
