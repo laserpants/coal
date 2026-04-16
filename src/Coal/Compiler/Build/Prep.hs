@@ -20,7 +20,7 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module (Module (..), ModuleExportList (..))
+import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
@@ -39,25 +39,25 @@ import Data.Tuple.Extra (uncurry3)
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
-insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
 
-insertDataConstructor :: (Monad m) => Name -> DataConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertDataConstructor :: (Monad m) => Name -> DataConstructorEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertDataConstructor name entry = modify (Build.insertBuildDataConstructor name entry)
 
-insertTypeConstructor :: (Monad m) => Name -> TypeConstructorEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertTypeConstructor :: (Monad m) => Name -> TypeConstructorEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertTypeConstructor name entry = modify (Build.insertBuildTypeConstructor name entry)
 
-insertTrait :: (Monad m) => Name -> TraitEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertTrait :: (Monad m) => Name -> TraitEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertTrait name entry = modify (Build.insertBuildTrait name entry)
 
-insertInstance :: (Monad m) => Name -> IndexedType -> InstanceEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertInstance :: (Monad m) => Name -> IndexedType -> InstanceEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertInstance name t entry = modify (Build.insertBuildInstance name t entry)
 
--- insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+-- insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 -- insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
-insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
+insertExportedName :: (Monad m) => Name -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertExportedName name
   | name `elem` builtinNames =
       pure ()
@@ -84,7 +84,7 @@ prepareBuild Module{..} =
           { buildPath = modulePath
           }
 
-prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions defs = do
   insertNameEntry (NType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
@@ -145,7 +145,7 @@ prepareDefinitions defs = do
   qualifiedNames <- traverse (qualifiedImports build) defs
   modify (setQualifiedNames (Environment.fromList (concat qualifiedNames)))
 
-qualifiedImports :: (Monad m) => Build a -> Definition a k t -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) [(Name, Name)]
+qualifiedImports :: (Monad m) => Build a -> Definition a k t -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) [(Name, Name)]
 qualifiedImports Build{..} =
   \case
     --    DImport _ (Path ["Builtin$"]) imports -> do
@@ -276,7 +276,7 @@ qualifiedImports Build{..} =
 qualified :: Name -> Path -> Name
 qualified name path = principalPath path <> "." <> name
 
-expandExports :: (Monad m) => ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) (ModuleExportList a)
+expandExports :: (Monad m) => ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
 expandExports = do
   exportList <- ask
   Build{buildDataConstructors} <- get
@@ -298,7 +298,7 @@ expandExports = do
       return
         (Exports newExports)
 
-collectTypeConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectTypeConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTypeConstructors =
   \case
     DType loc name TypeDefinition{..} -> do
@@ -346,7 +346,7 @@ collectTypeConstructors =
     _ ->
       pure ()
 
-insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) Bool
+insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) Bool
 insertTypeName Build{..} loc name =
   or <$> forM (Environment.lookupWithDefault mempty name buildNames) go
  where
@@ -379,7 +379,7 @@ insertTypeName Build{..} loc name =
       _ ->
         return False
 
-collectDataConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectDataConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectDataConstructors =
   \case
     DType loc _ TypeDefinition{..} ->
@@ -433,7 +433,7 @@ collectDataConstructors =
     _ ->
       pure ()
 
-dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) (DataConstructorEntry a)
+dataConstructorEntry :: (Monad m) => a -> Set Name -> DataConstructor Parameter Kind (Type Parameter Kind) -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (DataConstructorEntry a)
 dataConstructorEntry loc constructorSet DataConstructor{..} = do
   (s, _) <- instantiateScheme constructorScheme
   pure $
@@ -448,7 +448,7 @@ dataConstructorEntry loc constructorSet DataConstructor{..} = do
       , dataConstructorEntryConstructorSet = constructorSet
       }
 
-collectTraits :: (Monad m) => Definition a Kind t -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectTraits :: (Monad m) => Definition a Kind t -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTraits =
   \case
     DTrait loc name TraitDefinition{..} -> do
@@ -533,7 +533,7 @@ instancesForType name = Map.filter isType
 traitDefinitionInterfaceEntryToPair :: TraitDefinitionInterfaceEntry Kind -> (Name, Scheme Parameter Kind (Type Parameter Kind))
 traitDefinitionInterfaceEntryToPair TraitDefinitionInterfaceEntry{..} = (traitDefinitionInterfaceEntryName, traitDefinitionInterfaceEntryScheme)
 
-collectTraitsInterface :: (Monad m) => Definition a Kind t -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectTraitsInterface :: (Monad m) => Definition a Kind t -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTraitsInterface =
   \case
     DTrait _ name TraitDefinition{..} ->
@@ -603,7 +603,7 @@ collectTraitsInterface =
     _ ->
       pure ()
 
-collectInstances :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectInstances :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectInstances =
   \case
     DInstance _ InstanceDefinition{..} -> do
@@ -672,7 +672,7 @@ collectInstances =
     _ ->
       pure ()
 
-collectPlaceholders :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectPlaceholders :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectPlaceholders =
   \case
     DFunction _ name FunctionDefinition{..} -> do
@@ -687,7 +687,7 @@ collectPlaceholders =
     _ ->
       pure ()
 
-instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) (IndexedScheme, [(Name, TypeIndex Kind)])
+instantiateScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (IndexedScheme, [(Name, TypeIndex Kind)])
 instantiateScheme Forall{..} =
   lift $ lift $ do
     env <- instantiateTypeIndexes schemeTypeVariables
@@ -699,10 +699,10 @@ instantiateScheme Forall{..} =
           <*> toIndexed schemeTypeBody
     return (s, env)
 
-instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) IndexedType
+instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 
-collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectImports =
   \case
     -- TODO: remove
