@@ -7,6 +7,40 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds
+
+Expand top-level fold definitions into let definitions with explicit recursion.
+
+This pass transforms top-level fold definitions, which declare named recursive
+functions using pattern matching over data types, into standard let definitions
+containing lambda expressions with explicit recursive calls. This is distinct
+from fold expressions within other expressions, which are handled by the
+ExpandExpressionFolds pass.
+
+Fold definitions use @-patterns to mark recursive positions in patterns. For
+example, a top-level fold definition:
+
+@
+fold sum : List Nat -> Nat {
+  | [] => 0
+  | x :: @rest => x + sum(rest)
+}
+@
+
+is expanded into:
+
+@
+let sum = fn(sum.expr) => match sum.expr {
+  | [] => 0
+  | x :: rest => x + sum(rest)
+}
+@
+
+The pass validates that @-patterns only appear within constructor patterns and
+reports errors for misplaced fold patterns. This transformation enables
+structural recursion by making the recursive function binding explicit.
+-}
 module Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds (
   passExpandTopLevelFolds,
 ) where
@@ -31,6 +65,14 @@ import Data.Generics.Uniplate.Data (transform, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, foldrM)
 
+{- | Top-level fold expansion pass.
+
+Expand top-level fold definitions into let definitions with explicit lambda
+expressions and pattern matching. Validate that @-patterns are only used within
+constructor patterns and report errors for misplaced fold patterns. This
+transformation enables structural recursion by making the recursive function
+binding and call sites explicit.
+-}
 passExpandTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passExpandTopLevelFolds = Pass{runPass = passImpl}
 

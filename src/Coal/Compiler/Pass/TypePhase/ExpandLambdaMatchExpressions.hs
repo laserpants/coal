@@ -6,6 +6,38 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions
+
+Expand lambda-match expressions into standard lambda expressions with embedded match.
+
+This pass transforms lambda-match expressions, which combine lambda abstraction
+with pattern matching in a compact syntax, into their desugared form: a regular
+lambda expression containing a match expression.
+
+Lambda-match expressions provide a convenient shorthand for pattern-matching
+lambdas. For example:
+
+@
+match {
+  | [] => 0
+  | x :: xs => x + 1
+}
+@
+
+is expanded into:
+
+@
+fn($lambda_match) => match($lambda_match) {
+  | [] => 0
+  | x :: xs => x + 1
+}
+@
+
+This transformation makes the binding of the match scrutinee explicit,
+simplifying later compiler passes that work with standard lambda and match
+constructs.
+-}
 module Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions (
   ExpandContext (..),
   passExpandLambdaMatchExpressions,
@@ -23,6 +55,13 @@ import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Dictionary)
 
+{- | Lambda-match expression expansion pass.
+
+Expand lambda-match expressions into standard lambda expressions with embedded
+match statements. This desugaring makes the binding of the match scrutinee
+explicit, transforming the compact lambda-match syntax into standard lambda
+and match constructs for subsequent compiler passes.
+-}
 passExpandLambdaMatchExpressions :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passExpandLambdaMatchExpressions = Pass{runPass = passImpl}
 
