@@ -6,7 +6,12 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 
-module Coal.Compiler.TypeInference where -- (typeDefinitionsC, toIndexedType, toIndexedScheme) where
+module Coal.Compiler.TypeInference (
+  generateKindConstraints,
+  generateConstraints,
+  define,
+  solveT,
+) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
