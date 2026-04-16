@@ -104,7 +104,7 @@ expandGroups =
               , letDefinitionAnnotation = Nothing
               , letDefinitionType = With [] ()
               , letDefinitionExpression =
-                  ELambda loc (varP <$> args) (matchE (var args) (clauses defs))
+                  ELambda loc (varP <$> args) (matchE (packVariables args) (buildExpressionClauses defs))
               }
         ]
      where
@@ -124,25 +124,25 @@ expandGroups =
     o ->
       return [o]
 
-clauses :: (Monoid a) => [FunctionDefinition a k ()] -> NonEmpty (Clause a k ())
-clauses defs =
-  case [ EClause a (pat ps) (CPlain mempty [] e :| [])
-       | FunctionDefinition a _ _ ps e <- defs
+buildExpressionClauses :: (Monoid a) => [FunctionDefinition a k ()] -> NonEmpty (Clause a k ())
+buildExpressionClauses defs =
+  case [ EClause functionDefinitionMetadata (packPatterns functionDefinitionPatterns) (CPlain mempty [] functionDefinitionExpression :| [])
+       | FunctionDefinition{..} <- defs
        ] of
     c : cs ->
       c :| cs
     [] ->
-      error "Internal compiler error: clauses function called with empty list of function definitions."
+      error "Internal compiler error: buildExpressionClauses called with empty list of function definitions."
 
-pat :: (Monoid a) => NonEmpty (Pattern a k ()) -> Pattern a k ()
-pat ps
+packPatterns :: (Monoid a) => NonEmpty (Pattern a k ()) -> Pattern a k ()
+packPatterns ps
   | length ps == 1 =
       NonEmpty.head ps
   | otherwise =
       tupleP ps
 
-var :: (Monoid a) => NonEmpty Name -> Expression a k ()
-var qs
+packVariables :: (Monoid a) => NonEmpty Name -> Expression a k ()
+packVariables qs
   | length qs == 1 =
       varE (NonEmpty.head qs)
   | otherwise =
