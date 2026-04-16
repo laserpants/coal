@@ -3,6 +3,19 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.PhasePreflight.RefreshCache
+
+Refresh cached build artifacts when their dependencies have been modified.
+
+This pass examines cached builds and determines whether they need to be
+recompiled based on dependency changes. If any dependencies of a cached
+build have been touched (modified), the module is recompiled from source.
+Otherwise, the cached build is reused for incremental compilation.
+
+This enables fast incremental builds by avoiding unnecessary recompilation
+of modules whose dependencies haven't changed.
+-}
 module Coal.Compiler.Pass.PhasePreflight.RefreshCache (
   passRefreshCache,
 )
@@ -24,6 +37,12 @@ import Control.Monad.State (get)
 import Extras (Name)
 import Text.Megaparsec (runParser)
 
+{- | Cache refresh pass.
+
+Check cached builds and recompile from source if any dependencies have been
+modified. This enables incremental compilation by avoiding unnecessary work
+on modules whose dependencies are unchanged.
+-}
 passRefreshCache :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passRefreshCache = Pass{runPass = passImpl}
 
@@ -55,6 +74,6 @@ compileFromSource name = do
   setTouched name
   case runParser parseSourceFile "" src of
     Left{} ->
-      error "Implementation error"
+      error $ "Internal error: Parser failed on previously cached source for module " ++ show name ++ ". This indicates either source corruption or a parser inconsistency bug."
     Right module_ -> do
       pure $ Right (BSource module_)
