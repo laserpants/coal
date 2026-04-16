@@ -36,13 +36,13 @@ passImpl m = do
   prep m
 
 prep :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
-prep modul = do
+prep m = do
   m1 <- do
     clearAssumptionsC
     clearNameStoreC
-    setCurrentModuleC modul
+    setCurrentModuleC m
     forM_ builtinFunctions $ uncurry insertNameC
-    toKindIndexed modul
+    toKindIndexed m
 
   prepareBuildAliases m1
   insertBuildHash
