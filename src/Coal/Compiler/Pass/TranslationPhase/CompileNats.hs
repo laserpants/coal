@@ -4,6 +4,37 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TranslationPhase.CompileNats
+
+Compile natural number types and constructors into efficient runtime representation.
+
+This pass transforms the @nat@ type and its constructors (@Zero@ and @Succ@) into
+an internal representation backed by @int32@ for efficient execution. The
+transformation converts the intrinsic @nat@ type to a compiled representation
+that uses primitive integer operations.
+
+The @nat@ type constructors are transformed as follows:
+
+@
+Zero => $Zero
+Succ(n) => $Succ(unpack(n))
+@
+
+Where unpacking converts the @nat@ to its @int32@ backing value. Pattern matching
+on @nat@ constructors is also compiled to efficient integer comparisons:
+
+@
+match(n) {
+  | Zero => ...
+  | Succ(m) => ...  // m is reconstructed from int32
+}
+@
+
+becomes runtime checks on the @int32@ value, reconstructing the recursive @nat@
+structure only when needed. This provides an efficient implementation of
+natural numbers while maintaining the structural recursion guarantees.
+-}
 module Coal.Compiler.Pass.TranslationPhase.CompileNats (
   passCompileNats,
 ) where
@@ -24,6 +55,13 @@ import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 import Extras (Dictionary)
 
+{- | Natural number compilation pass.
+
+Transform @nat@ types and constructors into an efficient @int32@-backed runtime
+representation. Convert @nat@ pattern matching into integer comparisons and
+reconstruct recursive @nat@ structures only when needed, providing efficient
+natural number operations while preserving structural recursion semantics.
+-}
 passCompileNats :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passCompileNats = Pass{runPass = passImpl}
 
@@ -107,7 +145,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
                       (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")))
                       ( EVariable mempty (Label (TIntrinsic IInt32) name)
                           <| ELiteral mempty (LInt32 0)
-                          :| []
+                            :| []
                       )
                   )
                   (EConstructor mempty (Label natType "$Zero"))
@@ -121,7 +159,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
                           (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")))
                           ( EVariable mempty (Label (TIntrinsic IInt32) name)
                               <| ELiteral mempty (LInt32 1)
-                              :| []
+                                :| []
                           )
                           :| []
                       )
