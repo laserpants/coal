@@ -84,11 +84,11 @@ library
       Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
       Coal.Compiler.Pass.TranslationPhase.CompileNats
       Coal.Compiler.Pass.TranslationPhase.DenormalizeAst
+      Coal.Compiler.Pass.TranslationPhase.DesugarPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandGuards
       Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns
-      Coal.Compiler.Pass.TranslationPhase.ExpandPatterns
       Coal.Compiler.Pass.TranslationPhase.ExpandRecordPatterns
       Coal.Compiler.Pass.TranslationPhase.NormalizeAst
       Coal.Compiler.Pass.TranslationPhase.Placeholders

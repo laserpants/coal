@@ -4,7 +4,50 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.ExpandPatterns (passExpandPatterns) where
+{- |
+Module: Coal.Compiler.Pass.TranslationPhase.DesugarPatterns
+
+Desugar complex patterns into simple variable patterns with explicit match expressions.
+
+This pass simplifies pattern matching by transforming complex patterns in
+bindings, lambdas, and let expressions into simple variable patterns,
+extracting the pattern matching logic into explicit match expressions.
+
+For example, a let binding with a complex pattern:
+
+@
+let (x, y) = tuple in body
+@
+
+is desugared into:
+
+@
+let v = tuple in match(v) {
+  | (x, y) => body
+}
+@
+
+Similarly, function patterns are extracted:
+
+@
+fn (Just x) => x + 1
+@
+
+becomes:
+
+@
+fn v => match(v) {
+  | Just x => x + 1
+}
+@
+
+This transformation normalizes the AST by ensuring that only simple variable
+patterns appear in bindings, with all structural pattern matching performed
+through explicit match expressions.
+-}
+module Coal.Compiler.Pass.TranslationPhase.DesugarPatterns (
+  passDesugarPatterns,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
@@ -24,16 +67,23 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 import Extras (Name)
 
-passExpandPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passExpandPatterns = Pass{runPass = bork}
+{- | Pattern desugaring pass.
 
-bork :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-bork = desugarPatterns
+Transform complex patterns in bindings, lambdas, and let expressions into
+simple variable patterns with explicit match expressions. This normalization
+ensures that only trivial variable patterns appear in bindings, while all
+structural pattern matching is performed through explicit match constructs.
+-}
+passDesugarPatterns :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passDesugarPatterns = Pass{runPass = passImpl}
 
-class TransformContext s where
+passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
+passImpl = desugarPatterns
+
+class PatternContext s where
   desugarPatterns :: (Monad m) => s -> CompilerT Metadata m s
 
-instance TransformContext (Pattern Metadata Kind IndexedType) where
+instance PatternContext (Pattern Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       p@PVariable{} ->
@@ -47,21 +97,7 @@ instance TransformContext (Pattern Metadata Kind IndexedType) where
         tellPatterns [(name, p)]
         pure (PVariable mempty (Label (typeOf p) name))
 
--- instance TransformContext (IndexedPattern Metadata) where
---  desugarPatterns =
---    \case
---      p@PVariable{} ->
---        pure p
---      p@(PAnnotation _ _ PVariable{}) ->
---        pure p
---      PShorthand loc (Label t name) ->
---        desugarPatterns (PVariable loc (Label t name))
---      p -> do
---        name <- lift $ supplied (freshName "v")
---        tellPatterns1 (name, p)
---        pure (PVariable mempty (Label (typeOf p) name))
-
-instance TransformContext (Binding Expression Metadata Kind IndexedType) where
+instance PatternContext (Binding Expression Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       BPattern a p e ->
@@ -74,7 +110,7 @@ instance TransformContext (Binding Expression Metadata Kind IndexedType) where
               (ELambda mempty ps e)
           )
 
-instance TransformContext (Expression Metadata Kind IndexedType) where
+instance PatternContext (Expression Metadata Kind IndexedType) where
   desugarPatterns = go
    where
     go =
@@ -103,43 +139,7 @@ unrollMatch loc (name, p) e =
     (EVariable mempty (Label (typeOf p) name))
     (EClause loc p (CPlain mempty [] e :| []) :| [])
 
--- instance TransformContext (FunctionDefinition Metadata IndexedType) where
---  desugarPatterns =
---    \case
---      FunctionDefinition a u w ps e -> do
---        error "!1"
---
-----        e1 <- desugarPatterns e
-----        (qs, rs) <- listenPatterns (traverse desugarPatterns ps)
-----        pure (FunctionDefinition a u w qs (foldr (unrollMatch a) e1 rs))
---
--- instance TransformContext (ConstantDefinition Metadata IndexedType) where
---  desugarPatterns =
---    \case
---      ConstantDefinition a u w e ->
---        error "!2"
---
-----        ConstantDefinition a u w <$> desugarPatterns e
---
--- instance TransformContext (Definition Metadata Kind IndexedType) where
---  desugarPatterns =
---    \case
---      DFunction loc name f fs ->
---        DFunction loc name <$> traverse desugarPatterns f <*> traverse desugarPatterns fs
---      DConstant loc name g fs ->
---        DConstant loc name <$> desugarPatterns g <*> traverse desugarPatterns fs
---      DInstance loc n (InstanceDefinition ts pt ds) ->
---        DInstance loc n . InstanceDefinition ts pt <$> traverse desugarPatterns ds
---      d ->
---        pure d
---
--- instance TransformContext (Module Metadata Kind IndexedType) where
---  desugarPatterns =
---    \case
---      Module p ns ds ->
---        Module p ns <$> traverse desugarPatterns ds
-
-instance TransformContext (Module Metadata Kind IndexedType) where
+instance PatternContext (Module Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       Module{..} -> do
@@ -150,7 +150,7 @@ instance TransformContext (Module Metadata Kind IndexedType) where
             , ..
             }
 
-instance TransformContext (Definition Metadata Kind IndexedType) where
+instance PatternContext (Definition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       DFunction loc name def ->
@@ -169,7 +169,7 @@ instance TransformContext (Definition Metadata Kind IndexedType) where
       d ->
         pure d
 
-instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
+instance PatternContext (FunctionDefinition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       FunctionDefinition{..} -> do
@@ -184,7 +184,7 @@ instance TransformContext (FunctionDefinition Metadata Kind IndexedType) where
             , ..
             }
 
-instance TransformContext (LetDefinition Metadata Kind IndexedType) where
+instance PatternContext (LetDefinition Metadata Kind IndexedType) where
   desugarPatterns =
     \case
       LetDefinition{..} -> do
