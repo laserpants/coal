@@ -5,6 +5,19 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles
+
+Detect cyclic type alias definitions.
+
+This pass analyzes type alias definitions to detect cycles where a type alias
+references itself either directly or indirectly through other aliases. Cyclic
+type aliases are not allowed in Coal because they would cause infinite
+recursion loops during compilation and do not represent well-founded types.
+
+The pass reports all detected cycles as errors during the preflight phase,
+preventing compilation from proceeding with invalid type definitions.
+-}
 module Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles (
   passDetectAliasCycles,
 ) where
@@ -26,6 +39,10 @@ import Control.Monad.State (gets)
 import Data.List.NonEmpty (NonEmpty (..))
 import Extras (Name, traverse_)
 
+{- | Type alias cycle detection pass.
+
+Detect and report cyclic type alias references.
+-}
 passDetectAliasCycles :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passDetectAliasCycles = mapPass $ Pass{runPass = traverse passImpl}
 
