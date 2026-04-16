@@ -5,6 +5,45 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TranslationPhase.ExpandGuards
+
+Expand guard expressions in pattern matching clauses into nested if-expressions.
+
+This pass transforms pattern matching clauses that use guard expressions into
+explicit if-then-else expressions. Guards provide a convenient way to add
+conditions to pattern matches, and this pass desugars them into the underlying
+conditional expressions.
+
+For example, a guarded clause like:
+
+@
+match(x) {
+  | Just(y)
+      when (y > 0) => positive(y)
+      when (y < 0) => negative(y)
+  | Nothing =>
+      Zero
+}
+@
+
+is expanded into:
+
+@
+match(x) {
+  | Just(y) =>
+      if (y > 0) then positive(y)
+        else if (y < 0) then negative(y)
+        else match(x) { | Nothing => Zero }
+  | Nothing => Zero
+}
+@
+
+Multiple guards within a single clause are combined with logical AND, and
+the expansion ensures proper fallthrough to subsequent clauses when guards
+fail. This transformation makes the control flow explicit for later compiler
+stages.
+-}
 module Coal.Compiler.Pass.TranslationPhase.ExpandGuards (
   passExpandGuards,
 ) where
@@ -22,6 +61,13 @@ import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..), tails)
 import qualified Data.List.NonEmpty as NonEmpty
 
+{- | Guard expansion pass.
+
+Transform pattern matching clauses with guard expressions into explicit
+if-then-else expressions. Combine multiple guards with logical AND and ensure
+proper fallthrough to subsequent clauses when guards fail, making control flow
+explicit for later compilation stages.
+-}
 passExpandGuards :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passExpandGuards = Pass{runPass = expandModule}
 
