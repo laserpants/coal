@@ -1,0 +1,10 @@
+module Main {
+
+  import namespace IO
+
+  type Pair<a, a> = MkPair(a, a)
+
+  fun main() =
+    IO.println_string("hello")
+
+}

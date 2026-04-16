@@ -1,0 +1,11 @@
+module Main {
+
+  import namespace IO
+
+  fun banan(x, x) =
+    x
+
+  fun main() =
+    IO.println_string("hello")
+
+}

@@ -7,7 +7,6 @@ import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import Control.Monad.Trans (lift)
 import System.Process
 import Test.Hspec
 
@@ -1611,6 +1610,28 @@ e2eSpec = do
       "test/Coal/examples/310"
       [ "Main.coal"
       ]
+
+  describe "311" $ do
+    expectOutput
+      "hello\none\ntwo"
+      "test/Coal/examples/310"
+      [ "Main.coal"
+      ]
+
+  describe "311" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/311" ["Main.coal"]
+      res `shouldBe` Left PreflightFailure
+
+  describe "312" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/312" ["Main.coal"]
+      res `shouldBe` Left PreflightFailure
+
+  describe "313" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/313" ["Main.coal"]
+      res `shouldBe` Left PreflightFailure
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
@@ -5,6 +6,30 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams
+
+Detect duplicate parameter names in function and type definitions.
+
+This pass validates that all parameter names within a single definition are
+unique, reporting errors for duplicate parameters in:
+
+- Function definitions: @fun f(x, x) = ...@
+- Type constructors: @type Pair<a, a> = Pair(a, a)@
+- Lambda expressions: @fn(x, x) => ...@
+
+Duplicate parameters are ambiguous and would lead to confusion about which
+parameter is being referenced in the definition body.
+
+For example, this would be detected as an error:
+
+@
+fn add(x, x) => x + x  -- Which x?
+@
+
+The pass ensures parameter names are unique within their scope, preventing
+ambiguous references.
+-}
 module Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams (
   passDetectDuplicateParams,
 ) where
@@ -29,6 +54,12 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Name, traverse_)
 
+{- | Duplicate parameter detection pass.
+
+Validate that all parameter names within function definitions, type
+constructors, and lambda expressions are unique. Report errors for any
+duplicate parameters that would create ambiguous references.
+-}
 passDetectDuplicateParams :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata () ())] [BuildEnvelope (Module Metadata () ())]
 passDetectDuplicateParams = mapPass $ Pass{runPass = traverse passImpl}
 
@@ -61,6 +92,10 @@ instance (Data t) => DuplicateParamsContext (Module Metadata () t) where
 instance (Data t) => DuplicateParamsContext (Definition Metadata () t) where
   detectDuplicateParams =
     \case
+      DType loc _ def ->
+        checkTypeParameters loc (typeDefinitionParameters def)
+      DTypeAlias loc _ def ->
+        checkTypeParameters loc (aliasDefinitionParameters def)
       DFunction _ _ def ->
         detectDuplicateParams def
       DLet _ _ def ->
@@ -177,6 +212,17 @@ instance DuplicateParamsContext (Binding Expression Metadata () t) where
       BFunction _ _ ps e -> do
         checkPatterns ps
         detectDuplicateParams e
+
+checkTypeParameters :: (Monad m) => Metadata -> [Parameter ()] -> CompilerT Metadata m ()
+checkTypeParameters loc params = evalStateT (traverse_ checkParam params) mempty
+ where
+  checkParam :: (Monad m) => Parameter () -> StateT (Set Name) (CompilerT Metadata m) ()
+  checkParam (Parameter _ name) = do
+    s <- get
+    when (name `elem` s) $ do
+      path <- lift $ gets compilerCurrentPath
+      tellErrors [ConflictingParameter name (ErrorLocation (principalPath path) loc)]
+    registerName name
 
 checkPatterns :: (Monad m) => NonEmpty (Pattern Metadata () t) -> CompilerT Metadata m ()
 checkPatterns patterns = evalStateT (traverse_ checkPattern patterns) mempty
