@@ -12,7 +12,7 @@ Compile natural number types and constructors into efficient runtime representat
 This pass transforms the @nat@ type and its constructors (@Zero@ and @Succ@) into
 an internal representation backed by @int32@ for efficient execution. The
 transformation converts the intrinsic @nat@ type to a compiled representation
-that uses primitive integer operations.
+that relies on primitive integer operations.
 
 The @nat@ type constructors are transformed as follows:
 
