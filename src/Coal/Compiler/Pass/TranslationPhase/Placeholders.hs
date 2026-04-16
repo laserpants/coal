@@ -26,8 +26,6 @@ import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module
 import Coal.Language.Module.Path
-
--- import Coal.TypeSystem.Constraint.Assumption (normalizedName)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
 import Control.Monad (replicateM_, when)
@@ -244,24 +242,6 @@ lookupTraitInstance2 loc trait@(Trait name _) = do
     applyTraits loc (Label t (instanceLabel (Trait tn t1) n)) ts
       >>= expandTraits
 
--- lookupTraitInstance :: (Show a, Monoid a, Data a, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a k IndexedType)))
--- lookupTraitInstance loc trait@(Trait name _) = do
---  found <- findFirstMatch trait
---  case found of
---    Nothing -> do
---      if isConcrete trait
---        then do
---          path <- lift $ gets compilerCurrentPath
---          tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
---          throwError TraitError
---        else pure Nothing
---    Just (t, a, b) ->
---      Just <$> Map.traverseWithKey (go t (Trait name a)) b
--- where
---  go t1 (Trait tn _) n (Forall _ ts t) =
---    applyTraits loc (Label t (instanceLabel (Trait tn t1) n)) ts
---      >>= expandTraits
-
 isConcrete :: Trait IndexedType -> Bool
 isConcrete (Trait _ TIntrinsic{}) = True
 isConcrete (Trait _ TRecord{}) = True
@@ -331,35 +311,6 @@ instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Expression a k In
       e ->
         descendM expandTraits e
 
--- instance (Monoid a, Data a, Show a) => TraitContext a (Expression a () IndexedType) where
---  expandTraits =
---    \case
---      ERecursiveLet a p e1 e2 ->
---        expandRecursiveLet <$> expandTraits (ELet a (BPattern a p e1 :| []) e2)
---      ELet a bs e -> do
---        as <- censorDictionaryTraits (const mempty) (traverse transformBinding bs)
---        let xs = concat (toList (snd <$> as))
---
---        old <- lift get
---        lift $ insertNamesC xs
---
---        r <- ELet a (fst <$> as) <$> expandTraits e
---
---        lift $ put old
---        return r
---      var@(EVariable _ (Label t name))
---        | "$fold" `isPrefixOf` name -> do
---            traits <- collectTraits t name
---            tellDictionaryTraits traits
---            pure var
---      EVariable loc (Label t name) -> do
---        traits <- collectTraits t name
---        applyTraits loc (Label t name) traits
---      ECompiledMatch a t e cs ->
---        ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
---      e ->
---        descendM expandTraits e
-
 transformBinding2 :: (Monoid a, Data a, Data k, Show a, Monad m) => Binding Expression a k IndexedType -> CompilerT a m (Binding Expression a k IndexedType, [(Name, IndexedScheme)])
 transformBinding2 =
   \case
@@ -376,22 +327,6 @@ transformBinding2 =
     _ ->
       error "Not implemented"
 
--- transformBinding :: (Monoid a, Data a, Show a, Monad m) => Binding Expression a () IndexedType -> CompilerT a m (Binding Expression a () IndexedType, [(Name, IndexedScheme)])
--- transformBinding =
---  \case
---    BPattern a var@(PVariable _ (Label t name)) e
---      | "$fold" `isPrefixOf` name -> do
---          (body, traits) <- listenDictionaryTraits (expandTraits e)
---          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) traits t)])
---    BPattern _ (PVariable a (Label t name)) e -> do
---      (e1, traits) <- transformScope e
---      let ll = Label (foldTypeOf t (Set.toList traits)) name
---      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
---    BPattern a (PAnnotation _ _ p) e ->
---      transformBinding (BPattern a p e)
---    _ ->
---      error "Not implemented"
-
 transformScope2 :: (Monoid a, Data a, Data k, Monad m, Show a) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType, Set (Trait IndexedType))
 transformScope2 e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
@@ -399,22 +334,11 @@ transformScope2 e = do
     [] -> pure (expr, traits)
     tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
--- transformScope :: (Monoid a, Data a, Monad m, Show a) => Expression a () IndexedType -> CompilerT a m (Expression a () IndexedType, Set (Trait IndexedType))
--- transformScope e = do
---  (expr, traits) <- listenDictionaryTraits (expandTraits e)
---  case Set.toList traits of
---    [] -> pure (expr, traits)
---    tr : trs -> pure (dictionaryLambda tr trs expr, traits)
-
 instance (Monoid a, Data a, Data k, Show a) => TraitContext a (CompiledClause a k IndexedType) where
   expandTraits =
     \case
       ECompiledClause a lls e ->
         ECompiledClause a lls <$> expandTraits e
-
--- instance (Monoid a, Data a, Show a) => TraitContext a (Module a k IndexedType) where
---  expandTraits = undefined
---    overModuleDefinitionsM (traverse expandTraits)
 
 instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Definition a k IndexedType) where
   expandTraits =
@@ -433,17 +357,6 @@ instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Definition a k In
               }
       d ->
         return d
-
--- instance (Monoid a, Data a, Show a) => TraitContext a (Definition a Kind IndexedType) where
---  expandTraits =
---    undefined
---    \case
---      DConstant loc name c fs ->
---        DConstant loc name <$> expandConstantDefinitionTraits name c <*> traverse expandTraits fs
---      DInstance loc name (InstanceDefinition ps t ds) ->
---        DInstance loc name . InstanceDefinition ps t <$> traverse expandTraits ds
---      d ->
---        pure d
 
 expandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Data k, Show a) => Name -> LetDefinition a k IndexedType -> CompilerT a m (LetDefinition a k IndexedType)
 expandLetDefinitionTraits name =
@@ -483,81 +396,14 @@ expandLetDefinitionTraits name =
               pure $
                 LetDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
 
--- expandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a m (ConstantDefinition a IndexedType)
--- expandConstantDefinitionTraits name =
---  \case
---    ConstantDefinition loc with (With _ t) e -> do
---      (expr, traits) <- listenDictionaryTraits (expandTraits e)
---      case Set.toList traits of
---        [] ->
---          pure $ ConstantDefinition loc with (With [] t) expr
---        tr : trs -> do
---          -- path <- gets compilerCurrentModule
---          path <- lift $ gets compilerCurrentPath
---          -- Insert default int32 instance for Numeric and Ordered traits
---          if "main" == name && Path ["Main"] == path
---            then do
---              recs <- forM (tr :| trs) $
---                \(Trait trait _) -> do
---                  fields <- fromJust <$> lookupTraitInstance loc (Trait trait (TIntrinsic IInt32))
---                  pure $
---                    ERecord
---                      mempty
---                      (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (TIntrinsic IInt32 :| []))
---                      fields
---                      Nothing
---              pure $
---                ConstantDefinition
---                  loc
---                  with
---                  (With trs t)
---                  ( EApplication
---                      mempty
---                      t
---                      (dictionaryLambda tr trs expr)
---                      recs
---                  )
---            else
---              pure $
---                ConstantDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
-
 isVariable :: Trait IndexedType -> Bool
 isVariable (Trait _ TVariable{}) = True
 isVariable _ = False
 
--- dictionaryLambda ::
---  (Monoid a, HasType o k (Trait (Type o k))) =>
---  Trait (Type o k) ->
---  [Trait (Type o k)] ->
---  Expression a () (Type o k) ->
---  Expression a () (Type o k)
--- dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
--- where
---  dict t = PTraitInstance mempty (typeOf t) t
-
-dictionaryLambda ::
-  (Monoid a, HasType o k (Trait (Type o k))) =>
-  Trait (Type o k) ->
-  [Trait (Type o k)] ->
-  Expression a i (Type o k) ->
-  Expression a i (Type o k)
+dictionaryLambda :: (Monoid a, HasType o k (Trait (Type o k))) => Trait (Type o k) -> [Trait (Type o k)] -> Expression a i (Type o k) -> Expression a i (Type o k)
 dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
  where
   dict t = PTraitInstance mempty (typeOf t) t
-
---
-
--- passiveOexpandConstantDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> ConstantDefinition a IndexedType -> CompilerT a m (ConstantDefinition a IndexedType)
--- passiveOexpandConstantDefinitionTraits name =
---  \case
---    ConstantDefinition loc with (With _ t) e -> do
---      (_, traits) <- listenDictionaryTraits (passiveOexpandTraitsInExpr e)
---      case Set.toList traits of
---        [] ->
---          pure $ ConstantDefinition loc with (With [] t) e
---        tr : trs -> do
---          path <- lift $ gets compilerCurrentPath
---          pure $ ConstantDefinition loc with (With (tr : trs) t) e
 
 passiveOexpandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> LetDefinition a Kind IndexedType -> CompilerT a m (LetDefinition a Kind IndexedType)
 passiveOexpandLetDefinitionTraits name =
@@ -639,22 +485,3 @@ cafe2 =
             pure ()
     _ ->
       pure ()
-
--- cafe :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m () -- [(Name, Set Name)]
--- cafe =
---  \case
---    DConstant a name def x -> do
---      d <- passiveOexpandConstantDefinitionTraits name def
---      insertName (DConstant a name d x) name
---    DInstance a trait InstanceDefinition{..} ->
---      forM_ instanceDefinitionEntries $
---        \case
---          DConstant a name def x -> do
---            d <- passiveOexpandConstantDefinitionTraits instanceName def
---            insertName (DConstant a name d x) instanceName
---           where
---            instanceName = instanceLabel (Trait trait instanceDefinitionType) name
---          _ ->
---            pure ()
---    _ ->
---      pure ()
