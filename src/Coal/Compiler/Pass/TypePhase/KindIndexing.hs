@@ -13,13 +13,13 @@ subsequent type inference.
 
 This pass performs three main tasks:
 
-1. Kind Indexing: Converts the module to kind-indexed form via 'toKindIndexed',
+1. Kind indexing: Converts the module to kind-indexed form via 'toKindIndexed',
    assigning proper 'Kind' annotations to type parameters throughout the AST.
 
-2. Environment Setup: Initializes the typing environment by clearing previous
+2. Environment setup: Initializes the typing environment by clearing previous
    state and inserting builtin functions into the name store.
 
-3. Build Preparation: Collects type aliases and their metadata from the module
+3. Build preparation: Collects type aliases and their metadata from the module
    and its imports, preparing the Build structure for later compilation phases.
 
 The pass operates on 'Module Metadata () ()' (no kind or type information)
@@ -62,18 +62,12 @@ before any type inference can occur.
 passKindIndexing :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind ())
 passKindIndexing = Pass{runPass = passImpl}
 
-{- | Implementation of the kind indexing pass.
-
-Sets the current module context and delegates to 'kindIndexing'.
--}
 passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata Kind ())
 passImpl m = do
   setCurrentModuleC m
   kindIndexing m
 
-{- | Perform kind indexing on a module.
-
-This function:
+{- This function:
 
 1. Clears previous assumptions and name stores to ensure a clean state
 2. Inserts builtin functions into the name environment
@@ -89,23 +83,13 @@ kindIndexing m = do
     clearAssumptionsC
     clearNameStoreC
     setCurrentModuleC m
-    forM_ builtinFunctions $ uncurry insertNameC
+    forM_ builtinFunctions (uncurry insertNameC)
     toKindIndexed m
 
   prepareBuildAliases indexedM
   insertBuildHash
   return indexedM
 
-{- | Prepare build information for type aliases in the module.
-
-Traverses all definitions in the module and collects type alias information
-into a 'Build' structure, which is then inserted into the compiler state.
-This information is used by later passes to expand type aliases and resolve
-type names.
-
-The function uses a 'ReaderT' over 'StateT' transformer stack to thread
-the module's export list and accumulate build information.
--}
 prepareBuildAliases :: (Monad m) => Module a Kind () -> CompilerT a m ()
 prepareBuildAliases Module{..} = do
   build <-
@@ -116,12 +100,6 @@ prepareBuildAliases Module{..} = do
         }
   insertBuildC build
 
-{- | Insert a hash of the source code into the current build.
-
-This hash is used for change detection and incremental compilation.
-If the module's source is found in the compiler state, its hash is
-computed and stored in the build information.
--}
 insertBuildHash :: (Monad m) => CompilerT a m ()
 insertBuildHash = do
   CompilerState{..} <- get
@@ -131,25 +109,9 @@ insertBuildHash = do
     Just source ->
       updateCurrentBuildPureC (insertHash source)
 
-{- | Process a list of definitions to collect type information.
-
-Currently focuses on collecting type aliases via 'collectTypeAliases'.
-Other definition types are handled in subsequent passes.
--}
 prepareDefinitions :: (Monad m) => [Definition a Kind ()] -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions = traverse_ collectTypeAliases
 
-{- | Insert a name into the build's exported names list if it should be exported.
-
-Builtin names are never added to the export list as they're handled separately.
-For other names, checks the module's export list to determine if the name
-should be exported.
-
-The 'isExported' helper function encapsulates the export checking logic:
-
-* 'ExportAll': All names are exported
-* 'Exports': Only explicitly listed names are exported
--}
 insertExportedName :: (Monad m) => Name -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertExportedName name
   | name `elem` builtinNames =
@@ -164,33 +126,12 @@ insertExportedName name
   isExported _ ExportAll = True
   isExported n (Exports exports) = n `elem` (nameOf <$> exports)
 
-{- | Insert a name entry into the build's name registry.
-
-Name entries categorize names by their role (type alias, data constructor, etc.)
-and are used during name resolution in later compilation phases.
--}
 insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
 
-{- | Insert a type alias entry into the build's alias registry.
-
-Stores the complete information about a type alias including its parameters
-and definition, which will be used during alias expansion in later passes.
--}
 insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ModuleExportList a) (StateT (Build a) m) ()
 insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
-{- | Collect type alias information from a definition.
-
-Handles different definition types:
-
-* 'DTypeAlias': Records the alias name, parameters, and type in the build
-* 'DImport': Processes imported type aliases from dependencies
-* Other definitions: Ignored in this pass (handled elsewhere)
-
-For imports, recursively includes transitive dependencies by processing
-constructors used in imported type aliases.
--}
 collectTypeAliases :: (Monad m) => Definition a Kind () -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTypeAliases =
   \case
@@ -230,17 +171,6 @@ collectTypeAliases =
     _ ->
       pure ()
 
-{- | Insert a type name and its transitive dependencies from an imported module.
-
-Looks up the name in the provided build's name registry and, if it's a type
-alias, inserts it along with all constructors used in the alias type.
-This ensures that all transitive type dependencies are available.
-
-Returns 'True' if the name was found and inserted, 'False' otherwise.
-
-Note: Throws an internal error if a name is found in 'buildNames' but not
-in 'buildAliases', which would indicate a compiler bug.
--}
 insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ModuleExportList a) (StateT (Build a) (CompilerT a m)) Bool
 insertTypeName Build{..} loc name =
   or <$> forM (Environment.lookupWithDefault [] name buildNames) go
@@ -267,17 +197,6 @@ insertTypeName Build{..} loc name =
       _ ->
         return False
 
-{- | Retrieve the build information for an imported module.
-
-Looks up the module's build in the compiler state. The build contains
-all the type and name information that has been processed for that module.
-
-Throws an internal error if the module is not found, which indicates either:
-
-* The module was not processed yet (dependency resolution issue)
-* The module path is incorrect
-* There's a bug in the compilation pipeline
--}
 importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
 importedBuild path = do
   env <- gets compilerModules
