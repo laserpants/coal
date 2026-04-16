@@ -6,63 +6,41 @@
 module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build (Build (..), buildNames)
 import Coal.Compiler.Build.Prep (replacePlaceholders)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT, insertConstraintsC, updateSupplyC)
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference (define, generateConstraints, generateKindConstraints, solveT)
-import Coal.Graphviz.Dot (generateDotSyntax)
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
-import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Constraint (Constraint (Explicit))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Kind.Constraint.Solver (solveKindConstraints)
-import Coal.TypeSystem.Kind.Substitution
+import Coal.TypeSystem.Kind.Substitution (KindSubstitutable (applyKinds, replaceVariables))
 import Coal.TypeSystem.Kind.Unification (KindUnifier (kindUnifierMonad))
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
-import Control.Monad.Except (MonadIO (..), forM, forM_)
+import Control.Monad.Except (MonadIO (..), forM_)
 import Control.Monad.State (get, gets, modify, runState)
 import Data.Data (Data)
-import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
-import Data.Text.Lazy (toStrict)
-import Text.Pretty.Simple (pShowNoColor)
 
-passTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
+passTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
 passTypeInference = Pass{runPass = passImpl}
 
-passImpl :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+passImpl :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 passImpl = runTypeInference
 
-runTypeInference :: (MonadIO m, Monoid a, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+runTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 runTypeInference m = do
-  --  defs <- traverse indexTypes ds
-  --  (tdefs, _) <- typeDefinitionsC defs
-
-  nm <- ti m -- builtinTraits m)
-  liftIO $ Text.writeFile ("tmp/defs_" <> Text.unpack (principalPath (modulePath m))) (generateDotSyntax nm)
-  --  liftIO $ Text.writeFile ("tmp/olddefs_" <> Text.unpack (principalPath (modulePath m))) (generateDot (Module p ns (normalizeTypeIndexes tdefs)))
-  Build{..} <- getCurrentBuildC
-  liftIO $ Text.writeFile ("tmp/names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ buildNames)
-
-  liftIO $ Text.writeFile ("tmp/build_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ Build{..})
-
-  pure nm
-
-ti :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
-ti modul = do
-  indexed <- inferKinds modul
-  newModule <- inferTypes indexed
+  indexedM <- inferKinds m
+  newM <- inferTypes indexedM
   replacePlaceholders
-  return newModule
+  return newM
 
 inferTypes :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
-inferTypes modul = do
-  Module{..} <- indexTypes modul
+inferTypes m = do
+  Module{..} <- indexTypes m
 
   forM_ moduleDefinitions $
     \def -> do
@@ -72,7 +50,7 @@ inferTypes modul = do
 
   CompilerState{..} <- get
 
-  forM compilerAssumptions $
+  forM_ compilerAssumptions $
     \Assumption{..} ->
       case Environment.lookup assumptionName compilerNameStore of
         Nothing ->
@@ -82,13 +60,13 @@ inferTypes modul = do
          where
           t = apply compilerSubstitution assumptionType
 
-  sub <- solveT -- again?
+  sub <- solveT
   modify (overCompilerAssumptions (apply sub))
 
-  let newModuleDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)
+  let newDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)
   pure $
     Module
-      { moduleDefinitions = normalizeTypeIndexes newModuleDefinitions
+      { moduleDefinitions = normalizeTypeIndexes newDefinitions
       , ..
       }
 
