@@ -60,11 +60,11 @@ library
       Coal.Compiler.KindEnvironment
       Coal.Compiler.Pass
       Coal.Compiler.Pass.DebugOutput
-      Coal.Compiler.Pass.LoweringPhase
-      Coal.Compiler.Pass.LoweringPhase.KernelCode
-      Coal.Compiler.Pass.LoweringPhase.KernelTranslate
-      Coal.Compiler.Pass.LoweringPhase.Linking
-      Coal.Compiler.Pass.LoweringPhase.LLVMOutput
+      Coal.Compiler.Pass.PhaseLowering
+      Coal.Compiler.Pass.PhaseLowering.KernelCode
+      Coal.Compiler.Pass.PhaseLowering.KernelTranslate
+      Coal.Compiler.Pass.PhaseLowering.Linking
+      Coal.Compiler.Pass.PhaseLowering.LLVMOutput
       Coal.Compiler.Pass.PhaseParsing
       Coal.Compiler.Pass.PhaseParsing.Parsing
       Coal.Compiler.Pass.PhasePreflight

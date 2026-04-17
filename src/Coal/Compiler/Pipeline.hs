@@ -21,8 +21,8 @@ import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
-import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
-import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
+import Coal.Compiler.Pass.PhaseLowering (phaseLowering)
+import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
 import Coal.Compiler.Pass.PhasePreflight (phasePreflight)
 import Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking)
@@ -55,7 +55,7 @@ pipeline =
   phaseParsing
     >-> phasePreflight
     >-> mapPass (liftPass (phaseTypeChecking >-> translationPhasePasses))
-    >-> loweringPhase
+    >-> phaseLowering
     >-> passLinking
 
 extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]

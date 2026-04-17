@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 
-module Coal.Compiler.Pass.LoweringPhase.LLVMOutput (
+module Coal.Compiler.Pass.PhaseLowering.LLVMOutput (
   passLLVMOutput,
   generateLLOutput,
 ) where

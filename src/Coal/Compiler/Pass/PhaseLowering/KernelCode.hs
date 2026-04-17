@@ -4,7 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Pass.LoweringPhase.KernelCode (
+module Coal.Compiler.Pass.PhaseLowering.KernelCode (
   passKernelCode,
   compileEnvelopes,
 ) where

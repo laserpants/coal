@@ -4,7 +4,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate) where
+module Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate) where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment

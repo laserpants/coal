@@ -2,15 +2,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Pass.LoweringPhase (loweringPhase) where
+module Coal.Compiler.Pass.PhaseLowering (phaseLowering) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
-import Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode)
-import Coal.Compiler.Pass.LoweringPhase.KernelTranslate (passKernelTranslate)
-import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (passLLVMOutput)
+import Coal.Compiler.Pass.PhaseLowering.KernelCode (passKernelCode)
+import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)
+import Coal.Compiler.Pass.PhaseLowering.LLVMOutput (passLLVMOutput)
 import Coal.Kernel.Compiler (KernelModule)
 import Coal.Kernel.Language (moduleName)
 import Coal.Language (IndexedType, Kind)
@@ -33,8 +33,8 @@ import Extras (Name)
 --        writeDotFile (ll <> "_" <> moduleName m) m
 --    pure m
 
-loweringPhase :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
-loweringPhase =
+phaseLowering :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
+phaseLowering =
   mapPass passKernelTranslate
     --    >-> mapPass (liftPass (generateDebugArtifacts "Kernel"))
     >-> passKernelCode
