@@ -8,6 +8,40 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
 
+{- |
+Module: Coal.Compiler.TypeInference
+
+This module implements the type inference system for the Coal language, which is based
+on Hindley-Milner type inference with extensions for parametric polymorphism and traits.
+
+The type inference process consists of three main phases:
+
+1. **Kind constraint generation**: Generate kind constraints for type-level constructs
+   to ensure well-kindedness of types throughout the module.
+
+2. **Type constraint generation**: Generate type constraints from expressions and
+   definitions by traversing the AST and creating equality and explicit constraints
+   for type checking.
+
+3. **Constraint solving**: Solve the accumulated type and kind constraints using
+   unification, producing a substitution that determines the types of all expressions
+   and definitions.
+
+Key features:
+
+* Constraint-based type inference with support for let-polymorphism
+* Kind inference for type constructors and type variables
+* Trait instance checking and validation
+* Type annotation support with parameter inference
+* Integration with the compiler's build system for cross-module type information
+
+The module exports the following main functions:
+
+* 'generateKindConstraints': Generate kind constraints for a module
+* 'generateConstraints': Generate type constraints for expressions and definitions
+* 'define': Add a type binding to the compiler's name store
+* 'solveT': Solve all accumulated constraints and produce a type substitution
+-}
 module Coal.Compiler.TypeInference (
   generateKindConstraints,
   generateConstraints,
