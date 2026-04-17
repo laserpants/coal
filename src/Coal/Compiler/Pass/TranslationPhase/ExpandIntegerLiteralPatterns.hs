@@ -5,6 +5,36 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
+Description: Expansion of integer literal patterns into equality guards
+
+This module implements the desugaring of integer literals in pattern matching.
+Integer literal patterns at the source level are lowered into explicit equality
+checks, as the underlying pattern match compiler operates on constructor
+discrimination. This pass bridges the gap between high-level literal patterns
+and the core pattern matching implementation.
+
+Key transformations:
+
+1. **Integer pattern conversion**: A pattern like `| 42 => expr` is transformed
+   into a fresh variable pattern with an if-expression that checks equality.
+
+2. **Fresh variable generation**: Each integer literal pattern is replaced with
+   a fresh variable, and the integer value is recorded for generating the equality check.
+
+3. **Guard synthesis**: All integer literals in a pattern are combined into a
+   single boolean expression using logical AND operations.
+
+4. **Fallthrough handling**: When integer patterns are present, subsequent clauses
+   become the else-branch to ensure proper pattern matching semantics.
+
+5. **Type-specific conversion**: Integers are converted using appropriate constructors
+   (`from_int32`, `from_int64`, or `from_bignum`) based on their magnitude.
+
+This pass runs during the translation phase after type checking and before
+further lowering transformations.
+-}
 module Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (
   passExpandIntegerLiteralPatterns,
 ) where
@@ -38,6 +68,7 @@ passExpandIntegerLiteralPatterns = Pass{runPass = passImpl}
 passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 passImpl = expandIntegerLiteralPatterns
 
+-- | Types that can have integer literal patterns expanded
 class ExpandContext e where
   expandIntegerLiteralPatterns :: (Monad m) => e -> CompilerT Metadata m e
 
@@ -57,6 +88,10 @@ instance (Data k) => ExpandContext (Expression Metadata k IndexedType) where
       e ->
         descendM expandIntegerLiteralPatterns e
 
+{- | Expand a single clause, converting integer patterns to guards.
+Takes the clause and remaining clauses (for fallthrough), and produces
+a clause with fresh variables and an if-expression guard.
+-}
 expandClause :: (Monad m, Data k) => Metadata -> Expression Metadata k IndexedType -> (Clause Metadata k IndexedType, [Clause Metadata k IndexedType]) -> CompilerT Metadata m (Clause Metadata k IndexedType)
 expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
   e1' <- expandIntegerLiteralPatterns e1
@@ -78,8 +113,9 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
             e1'
             (EMatch mempty (typeOf e1') expr (c :| cs))
       return (EClause a q (CPlain a1 gs e2 :| []))
-expandClause _ _ _ = error "Implementation error"
+expandClause _ _ _ = error "expandClause: expected single plain clause body"
 
+-- | Create an equality check for a numeric literal variable
 numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata k IndexedType -> Expression Metadata k IndexedType
 numericLiteral (ll@(Label t _), int) e1 =
   EApplication
@@ -95,6 +131,9 @@ numericLiteral (ll@(Label t _), int) e1 =
            ]
     )
 
+{- | Convert an integer literal to an expression using the appropriate constructor.
+Chooses between from_int32, from_int64, or from_bignum based on the value.
+-}
 fromLiteral :: IndexedType -> Integer -> Expression Metadata k IndexedType
 fromLiteral t int
   | int <= fromIntegral (maxBound :: Int32) =
@@ -114,6 +153,9 @@ fromLiteral t int
             :| []
         )
 
+{- | Collect all integer literal patterns in a pattern, replacing them with fresh variables.
+Returns the transformed pattern and a list of (variable, integer) pairs.
+-}
 collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata k IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata k IndexedType)
 collectIntegerLiteralPatterns =
   \case
@@ -129,10 +171,10 @@ instance ExpandContext (FunctionDefinition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
       FunctionDefinition{..} -> do
-        newFunctiongDefinitionExpression <- expandIntegerLiteralPatterns functionDefinitionExpression
+        newFunctionDefinitionExpression <- expandIntegerLiteralPatterns functionDefinitionExpression
         return $
           FunctionDefinition
-            { functionDefinitionExpression = newFunctiongDefinitionExpression
+            { functionDefinitionExpression = newFunctionDefinitionExpression
             , ..
             }
 
