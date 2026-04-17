@@ -3,6 +3,58 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns
+Description: Expansion of or-patterns into multiple pattern clauses
+
+This module implements the expansion of or-patterns (disjunctive patterns) into
+separate pattern match clauses. Or-patterns allow multiple patterns to be specified
+in a single clause using the @or@ keyword, and this pass desugars them into individual
+clauses for each alternative.
+
+Key transformations:
+
+1. **Or-pattern expansion**: A pattern `p1 or p2` is expanded into multiple clauses,
+   one for each alternative pattern.
+
+2. **Variable consistency check**: Ensures that both sides of an or-pattern bind
+   the same set of variables, reporting an error if they differ.
+
+3. **Nested expansion**: Recursively expands or-patterns within constructors, tuples,
+   lists, records, and other pattern forms.
+
+4. **Clause duplication**: The body of each clause is duplicated for each pattern
+   alternative, creating semantically equivalent but syntactically separate clauses.
+
+Example transformation:
+@
+match(x) {
+  | Just y or Nothing => 0
+}
+@
+becomes:
+@
+match(x) {
+  | Just y => 0
+  | Nothing => 0
+}
+@
+
+Or-patterns in nested positions are also expanded:
+@
+match((x, y)) {
+  | (1 or 2, 3) => ...
+@
+becomes:
+@
+match((x, y)) {
+  | (1, 3) => ...
+  | (2, 3) => ...
+@
+
+This pass runs during the translation phase after type checking and before
+pattern match compilation.
+-}
 module Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns (
   passExpandOrPatterns,
 ) where
