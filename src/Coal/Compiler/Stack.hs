@@ -1,10 +1,23 @@
+-- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Stack
+
+The compiler monad stack and state management operations.
+
+This module defines the core compiler monad transformer @CompilerT@, which
+combines reader, writer, state, and error handling effects. It provides
+operations for managing compilation state including builds, constraints,
+assumptions, type information, and configuration.
+-}
 module Coal.Compiler.Stack (
+  -- * Core types
   CompilerT (..),
   CompilerEnvironment (..),
   CompilerJournal (..),
@@ -12,49 +25,71 @@ module Coal.Compiler.Stack (
   CompilerFailureMode (..),
   CompilerStack,
   ErrorLocation (..),
+
+  -- * Monad runners
   runCompilerT,
   evalCompilerT,
-  updateSupply,
+
+  -- * Supply management
   updateSupplyC,
+
+  -- * Build management
   insertBuildC,
-  setCurrentPathC,
-  setCurrentModuleC,
-  setSubstitutionC,
   getBuildC,
   getCurrentBuildC,
   updateBuildC,
   updateCurrentBuildC,
   updateCurrentBuildPureC,
+  setBitcodeC,
+  setBuildSourceC,
+
+  -- * Path and module management
+  setCurrentPathC,
+  setCurrentModuleC,
+
+  -- * Constraints
   insertConstraintsC,
   clearConstraintsC,
   insertKindConstraintsC,
   clearKindConstraintsC,
+
+  -- * Assumptions
   insertAssumptionsC,
   clearAssumptionsC,
-  clearTypeAnnotationParamsC,
-  clearNameStoreC,
+
+  -- * Name store
   insertNameC,
   insertNamesC,
   setNamesC,
+  clearNameStoreC,
+
+  -- * Type annotations
   setTypeAnnotationParamsC,
-  setBitcodeC,
-  setBuildSourceC,
+  clearTypeAnnotationParamsC,
+
+  -- * Type substitution
+  setSubstitutionC,
+
+  -- * Error reporting
   compilerReportConstraintsGenErrors,
   compilerReportKindConstraintsGenErrors,
+  compilerReportSolverRuleViolations,
   compilerGetConstraintsGenErrorsC,
   compilerGetSolverRuleViolationsC,
-  compilerReportSolverRuleViolations,
+
+  -- * Configuration
   setConfigC,
   setConfigExecutableNameC,
   setConfigGenerateDotFilesC,
   setConfigGenerateLLVMOutputC,
+
+  -- * Source management
   getSourceC,
   setTouched,
 ) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Build (Build (..), setBuildBitcode)
 import Coal.Compiler.Config (CompilerConfig, setConfigExecutableName, setConfigGenerateDotFiles, setConfigGenerateLLVMOutput)
 import Coal.Compiler.Environment (CompilerEnvironment (..))
@@ -81,6 +116,10 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import Extras (Dictionary, Name)
 
+-- ----------------------------------------------------------------------------
+-- Core types and monad stack
+-- ----------------------------------------------------------------------------
+
 type CompilerStack a m c = ExceptT CompilerFailureMode (RWST (CompilerEnvironment a) (CompilerJournal a) (CompilerState a) m) c
 
 newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
@@ -101,6 +140,10 @@ newtype CompilerT a m c = Compiler {compilerStack :: CompilerStack a m c}
 instance MonadTrans (CompilerT a) where
   lift = Compiler . lift . lift
 
+-- ----------------------------------------------------------------------------
+-- Monad runners
+-- ----------------------------------------------------------------------------
+
 runCompilerT :: (Monad m) => CompilerEnvironment a -> CompilerT a m c -> m (Either CompilerFailureMode c, CompilerState a, [CompilerError a])
 runCompilerT env com = do
   (c, s, w) <- runRWST (runExceptT (compilerStack com)) env initialCompilerState
@@ -111,23 +154,19 @@ evalCompilerT env com = do
   (c, _, _) <- runCompilerT env com
   pure c
 
+-- ----------------------------------------------------------------------------
+-- Supply management
+-- ----------------------------------------------------------------------------
+
+{-# INLINE updateSupplyC #-}
 updateSupplyC :: (Monad m) => Int -> CompilerT a m ()
 updateSupplyC supply = modify (overCompilerSupply (const supply))
 
-insertBuildC :: (Monad m) => Build a -> CompilerT a m ()
-insertBuildC Build{..} = modify (overCompilerModules (Environment.insert principalName Build{..}))
- where
-  principalName = principalPath buildPath
+-- ----------------------------------------------------------------------------
+-- Build management
+-- ----------------------------------------------------------------------------
 
-setCurrentPathC :: (Monad m) => Path -> CompilerT a m ()
-setCurrentPathC path = modify (overCompilerCurrentPath (const path))
-
-setCurrentModuleC :: (Monad m) => Module a s t -> CompilerT a m ()
-setCurrentModuleC Module{..} = setCurrentPathC modulePath
-
-setSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
-setSubstitutionC sub = modify (overCompilerSubstitution (const sub))
-
+-- | Typeclass for values that can be converted to build names.
 class (Show p) => BuildName p where
   buildName :: p -> Name
 
@@ -137,6 +176,13 @@ instance BuildName Path where
 instance BuildName Text where
   buildName = id
 
+{-# INLINE insertBuildC #-}
+insertBuildC :: (Monad m) => Build a -> CompilerT a m ()
+insertBuildC Build{..} = modify (overCompilerModules (Environment.insert principalName Build{..}))
+ where
+  principalName = principalPath buildPath
+
+{-# INLINE getBuildC #-}
 getBuildC :: (Monad m, BuildName p) => p -> CompilerT a m (Maybe (Build a))
 getBuildC path = do
   modules <- gets compilerModules
@@ -148,7 +194,7 @@ getCurrentBuildC = do
   maybeBuild <- getBuildC compilerCurrentPath
   case maybeBuild of
     Nothing ->
-      error "Implementation error"
+      error $ "Internal error: No build found for current path " ++ show compilerCurrentPath
     Just build ->
       return build
 
@@ -157,61 +203,115 @@ updateBuildC name update = do
   maybeBuild <- getBuildC name
   case maybeBuild of
     Nothing ->
-      -- error (show name)        -- ????
-      pure ()
+      pure () -- Silently ignore missing builds (may be external/cached)
     Just build -> do
       newBuild <- update build
       modify (overCompilerModules (Environment.insert (buildName name) newBuild))
 
 updateCurrentBuildC :: (Monad m) => (Build a -> CompilerT a m (Build a)) -> CompilerT a m ()
 updateCurrentBuildC f = do
-  CompilerState{..} <- get
+  CompilerState{compilerCurrentPath} <- get
   updateBuildC compilerCurrentPath f
 
+{-# INLINE updateCurrentBuildPureC #-}
 updateCurrentBuildPureC :: (Monad m) => (Build a -> Build a) -> CompilerT a m ()
 updateCurrentBuildPureC f = updateCurrentBuildC (pure . f)
 
-insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
-insertConstraintsC constraints = modify (overCompilerConstraints (<> constraints))
-
-clearConstraintsC :: (Monad m) => CompilerT a m ()
-clearConstraintsC = modify (overCompilerConstraints (const mempty))
-
-insertKindConstraintsC :: (Monad m) => [KindConstraint] -> CompilerT a m ()
-insertKindConstraintsC constraints = modify (overCompilerKindConstraints (<> constraints))
-
-clearKindConstraintsC :: (Monad m) => CompilerT a m ()
-clearKindConstraintsC = modify (overCompilerKindConstraints (const mempty))
-
-insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
-insertAssumptionsC assumptions = modify (overCompilerAssumptions (<> assumptions))
-
-clearAssumptionsC :: (Monad m) => CompilerT a m ()
-clearAssumptionsC = modify (overCompilerAssumptions (const mempty))
-
-clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
-clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
-
-clearNameStoreC :: (Monad m) => CompilerT a m ()
-clearNameStoreC = modify (overCompilerNameStore (const mempty))
-
-insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
-insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
-
-insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
-insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
-
-setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
-setNamesC names = modify (overCompilerNameStore (const names))
-
-setTypeAnnotationParamsC :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
-setTypeAnnotationParamsC params = modify (overCompilerTypeAnnotationParams (const params))
-
+{-# INLINE setBitcodeC #-}
 setBitcodeC :: (Monad m, BuildName p) => p -> ByteString -> CompilerT a m ()
 setBitcodeC build bs = updateBuildC build (pure . setBuildBitcode bs)
 
+{-# INLINE setBuildSourceC #-}
 setBuildSourceC :: (Monad m, BuildName p) => p -> Text -> CompilerT a m ()
 setBuildSourceC build source = modify (overCompilerSources (Environment.insert (buildName build) source))
+
+-- ----------------------------------------------------------------------------
+-- Path and module management
+-- ----------------------------------------------------------------------------
+
+{-# INLINE setCurrentPathC #-}
+setCurrentPathC :: (Monad m) => Path -> CompilerT a m ()
+setCurrentPathC path = modify (overCompilerCurrentPath (const path))
+
+{-# INLINE setCurrentModuleC #-}
+setCurrentModuleC :: (Monad m) => Module a s t -> CompilerT a m ()
+setCurrentModuleC Module{..} = setCurrentPathC modulePath
+
+-- ----------------------------------------------------------------------------
+-- Constraints
+-- ----------------------------------------------------------------------------
+
+{-# INLINE insertConstraintsC #-}
+insertConstraintsC :: (Monad m) => [CompilerConstraint a] -> CompilerT a m ()
+insertConstraintsC constraints = modify (overCompilerConstraints (<> constraints))
+
+{-# INLINE clearConstraintsC #-}
+clearConstraintsC :: (Monad m) => CompilerT a m ()
+clearConstraintsC = modify (overCompilerConstraints (const mempty))
+
+{-# INLINE insertKindConstraintsC #-}
+insertKindConstraintsC :: (Monad m) => [KindConstraint] -> CompilerT a m ()
+insertKindConstraintsC constraints = modify (overCompilerKindConstraints (<> constraints))
+
+{-# INLINE clearKindConstraintsC #-}
+clearKindConstraintsC :: (Monad m) => CompilerT a m ()
+clearKindConstraintsC = modify (overCompilerKindConstraints (const mempty))
+
+-- ----------------------------------------------------------------------------
+-- Assumptions
+-- ----------------------------------------------------------------------------
+
+{-# INLINE insertAssumptionsC #-}
+insertAssumptionsC :: (Monad m) => [CompilerAssumption a] -> CompilerT a m ()
+insertAssumptionsC assumptions = modify (overCompilerAssumptions (<> assumptions))
+
+{-# INLINE clearAssumptionsC #-}
+clearAssumptionsC :: (Monad m) => CompilerT a m ()
+clearAssumptionsC = modify (overCompilerAssumptions (const mempty))
+
+-- ----------------------------------------------------------------------------
+-- Name store
+-- ----------------------------------------------------------------------------
+
+{-# INLINE insertNameC #-}
+insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
+insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
+
+{-# INLINE insertNamesC #-}
+insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()
+insertNamesC names = modify (overCompilerNameStore (Environment.insertMultiple names))
+
+{-# INLINE setNamesC #-}
+setNamesC :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
+setNamesC names = modify (overCompilerNameStore (const names))
+
+{-# INLINE clearNameStoreC #-}
+clearNameStoreC :: (Monad m) => CompilerT a m ()
+clearNameStoreC = modify (overCompilerNameStore (const mempty))
+
+-- ----------------------------------------------------------------------------
+-- Type annotations
+-- ----------------------------------------------------------------------------
+
+{-# INLINE setTypeAnnotationParamsC #-}
+setTypeAnnotationParamsC :: (Monad m) => Dictionary (a, TypeIndex Kind) -> CompilerT a m ()
+setTypeAnnotationParamsC params = modify (overCompilerTypeAnnotationParams (const params))
+
+{-# INLINE clearTypeAnnotationParamsC #-}
+clearTypeAnnotationParamsC :: (Monad m) => CompilerT a m ()
+clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mempty))
+
+-- ----------------------------------------------------------------------------
+-- Type substitution
+-- ----------------------------------------------------------------------------
+
+{-# INLINE setSubstitutionC #-}
+setSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
+setSubstitutionC sub = modify (overCompilerSubstitution (const sub))
+
+-- ----------------------------------------------------------------------------
+-- Error reporting
+-- ----------------------------------------------------------------------------
 
 {-# INLINE compilerReportConstraintsGenErrors #-}
 compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
@@ -233,22 +333,35 @@ compilerGetConstraintsGenErrorsC = gets (nub . compilerConstraintsGenErrors)
 compilerGetSolverRuleViolationsC :: (Monad m, Eq a) => CompilerT a m [InferenceRule Kind a]
 compilerGetSolverRuleViolationsC = gets (nub . compilerSolverRuleViolations)
 
+-- ----------------------------------------------------------------------------
+-- Configuration
+-- ----------------------------------------------------------------------------
+
+{-# INLINE setConfigC #-}
 setConfigC :: (Monad m) => CompilerConfig -> CompilerT a m ()
 setConfigC config = modify (overCompilerConfig (const config))
 
+{-# INLINE setConfigExecutableNameC #-}
 setConfigExecutableNameC :: (Monad m) => FilePath -> CompilerT a m ()
 setConfigExecutableNameC name = modify (overCompilerConfig (setConfigExecutableName name))
 
+{-# INLINE setConfigGenerateDotFilesC #-}
 setConfigGenerateDotFilesC :: (Monad m) => Bool -> CompilerT a m ()
 setConfigGenerateDotFilesC flag = modify (overCompilerConfig (setConfigGenerateDotFiles flag))
 
+{-# INLINE setConfigGenerateLLVMOutputC #-}
 setConfigGenerateLLVMOutputC :: (Monad m) => Bool -> CompilerT a m ()
 setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerateLLVMOutput flag))
+
+-- ----------------------------------------------------------------------------
+-- Source management
+-- ----------------------------------------------------------------------------
 
 getSourceC :: (Monad m) => Name -> CompilerT a m Text
 getSourceC name = do
   s <- gets compilerSources
-  pure (fromMaybe (error "Implementation error") (Environment.lookup name s))
+  pure (fromMaybe (error $ "Internal error: No source found for module " ++ show name) (Environment.lookup name s))
 
+{-# INLINE setTouched #-}
 setTouched :: (Monad m, BuildName p) => p -> CompilerT a m ()
 setTouched build = modify (overCompilerTouched (Set.insert (buildName build)))
