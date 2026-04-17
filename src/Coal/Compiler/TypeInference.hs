@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -176,7 +177,7 @@ generateExpressionConstraints expr = do
 
 runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
 runConstraintsGen stack = do
-  CompilerState{..} <- get
+  CompilerState{compilerSupply} <- get
   Build{..} <- getCurrentBuildC
   let (result, ConstraintsGenState{..}, output) =
         runConstraintsGenStack
