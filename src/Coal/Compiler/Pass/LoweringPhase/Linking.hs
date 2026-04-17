@@ -3,7 +3,10 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Coal.Compiler.Pass.LoweringPhase.Linking (passLinking, compileBitcode) where
+module Coal.Compiler.Pass.LoweringPhase.Linking (
+  passLinking,
+  compileBitcode,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
