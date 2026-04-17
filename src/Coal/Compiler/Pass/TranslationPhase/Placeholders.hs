@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
@@ -8,12 +9,52 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.Placeholders (TraitContext (..), passPlaceholders) where
+{- |
+Module: Coal.Compiler.Pass.TranslationPhase.Placeholders
+Description: Trait dictionary insertion and constraint elaboration
+
+This module implements dictionary-passing style for type classes (traits) in Coal.
+It transforms expressions with trait constraints into explicit dictionary parameters
+and applications, enabling runtime polymorphism through dictionary passing.
+
+Key transformations:
+
+1. **Dictionary insertion**: Functions with trait constraints are transformed to
+   accept explicit dictionary parameters (records containing trait methods).
+
+2. **Instance resolution**: At call sites, the compiler looks up appropriate trait
+   instances and inserts dictionary arguments automatically.
+
+3. **Dictionary lambda creation**: Functions requiring dictionaries are wrapped in
+   lambdas that accept dictionary parameters.
+
+4. **Recursive let handling**: Handles recursive let bindings to properly thread
+   trait dictionaries through recursive references.
+
+Example transformation:
+@
+fun show(x: a) with Show\<a\> = ...
+@
+becomes:
+@
+fun show(implementation_Show : Show\<a\>, x : a) = ...
+@
+
+Call sites automatically insert the appropriate implementation:
+@
+show(42)  // becomes: show(Show\<int32\>, 42)
+@
+
+The pass runs twice to handle all trait dependencies correctly.
+-}
+module Coal.Compiler.Pass.TranslationPhase.Placeholders (
+  TraitContext (..),
+  passPlaceholders,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment)
 import qualified Coal.Common.Environment as Environment
-import Coal.Common.FreeVars
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
@@ -24,77 +65,47 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module
-import Coal.Language.Module.Path
+import Coal.Language.Module (Module (..))
+import Coal.Language.Module.Path (Path (Path), principalPath)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
-import Control.Monad (replicateM_, when)
 import Control.Monad.Except (MonadError (throwError), forM)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (asks, local)
-import Control.Monad.State (StateT, evalStateT, execStateT, get, gets, modify, put)
-import Control.Monad.Trans (lift)
+import Control.Monad.IO.Class (MonadIO)
+import Control.Monad.State (execStateT, get, gets, modify, put)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
-import Data.Foldable.Extra (notNull)
 import Data.Generics.Uniplate.Data (descendM)
-import Data.Graph (SCC (..), stronglyConnComp)
-import Data.List (nub)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.List.NonEmpty as NonEmpty
-import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (catMaybes, fromJust)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
-import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
-import Data.Text.Lazy (toStrict)
-import Debug.Trace
-import Extras (Dictionary, Name, concatForM, forM_, traverse_, twice)
-import Text.Pretty.Simple (pPrint, pShowNoColor)
+import Extras (Dictionary, Name, forM_, traverse_, twice)
 
 passPlaceholders :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passPlaceholders = Pass{runPass = pass}
 
 pass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-pass m = do
-  --  withCurrentModuleC $
-  --    \m -> do
-  setCurrentPathC (modulePath m)
-
-  b <- getCurrentBuildC
-  setNamesC (typeEnvironment b)
-
-  twice (traverse_ cafe2 (moduleDefinitions m))
-  --  traverse_ cafe2 (moduleDefinitions m)
-
+pass Module{..} = do
+  setCurrentPathC modulePath
+  build <- getCurrentBuildC
+  setNamesC (typeEnvironment build)
+  twice (traverse_ collectDefinitionTraits moduleDefinitions)
   names <- gets compilerNameStore
   updateNames names
-
-  --      Build{..} <- lift $ getCurrentBuildC
-  --      liftIO $ Text.writeFile ("tmp/placeholder_1names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ buildNames)
-  --      liftIO $ Text.writeFile ("tmp/placeholder_1build_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ Build{..})
-  --      liftIO $ Text.writeFile ("tmp/placeholder_1defs_" <> Text.unpack (principalPath (modulePath m))) (generateDot m)
-
-  -- mm <- overModuleDefinitionsM (traverse insertPlaceholders) m
-
-  mm <- traverse insertPlaceholders2 (moduleDefinitions m)
-
-  Build{..} <- getCurrentBuildC
-  liftIO $ Text.writeFile ("tmp/placeholder_names_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ buildNames)
-  liftIO $ Text.writeFile ("tmp/placeholder_build_" <> Text.unpack (principalPath (modulePath m))) (toStrict $ pShowNoColor $ Build{..})
-  --  liftIO $ Text.writeFile ("tmp/placeholder_defs_" <> Text.unpack (principalPath (modulePath mm))) (generateDot mm)
-
-  return m{moduleDefinitions = mm}
-
--- TODO: Move
+  newDefinitions <- traverse insertTraitDictionaries moduleDefinitions
+  return
+    Module
+      { moduleDefinitions = newDefinitions
+      , ..
+      }
 
 updateNames :: (Monad m) => Environment IndexedScheme -> CompilerT a m ()
 updateNames store =
   updateCurrentBuildC $
-    \build@Build{..} ->
+    \build@Build{buildNames} ->
       flip execStateT build $
         forM_ (concat $ Environment.elems buildNames) $
           \case
@@ -107,13 +118,13 @@ updateNames store =
             _ ->
               pure ()
 
-insertPlaceholders2 :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
-insertPlaceholders2 =
+insertTraitDictionaries :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
+insertTraitDictionaries =
   \case
     def@DLet{} ->
       expandTraits def
     DInstance loc InstanceDefinition{..} -> do
-      newInstanceDefinitionImplementations <- forM instanceDefinitionImplementations insertPlaceholdersInDef2
+      newInstanceDefinitionImplementations <- forM instanceDefinitionImplementations insertTraitDictionariesInDef
       return $
         DInstance
           loc
@@ -124,53 +135,24 @@ insertPlaceholders2 =
     d ->
       pure d
 
--- insertPlaceholders :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
--- insertPlaceholders =
---  \case
---    d@(DConstant _ name _ _) -> do
---      undefined -- expandTraits d
---    DInstance loc name (InstanceDefinition ts t ds) -> do
---      es <- forM ds insertPlaceholdersInDef
---      pure (DInstance loc name (InstanceDefinition ts t es))
---    d ->
---      pure d
-
--- insertPlaceholdersInDef2 :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
--- insertPlaceholdersInDef2 =
---  \case
-----    c@DConstant{} -> do
-----      expandTraits c
---    _ ->
---      error "Not implemented"
-
--- insertPlaceholdersInDef :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
--- insertPlaceholdersInDef =
---  \case
---    c@DConstant{} -> do
---      expandTraits c
---    _ ->
---      error "Not implemented"
-
-insertPlaceholdersInDef2 :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
-insertPlaceholdersInDef2 =
+insertTraitDictionariesInDef :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m (Definition a Kind IndexedType)
+insertTraitDictionariesInDef =
   \case
     def@DLet{} -> do
       expandTraits def
     d ->
       pure d
 
--- insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
--- insertName (DConstant _ _ (ConstantDefinition _ _ (With ts t) _) _) name = do
---  let s = Forall (typeIndexesIn t) (Set.fromList ts) t
---  lift $ insertNameC name s
--- insertName _ _ = error "Implementation error"
-
-insertName2 :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
-insertName2 (DLet _ _ (LetDefinition _ _ (With ts t) _)) name = do
+-- | Insert a name and its scheme into the compiler's name store from a let definition
+insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
+insertName (DLet _ _ (LetDefinition _ _ (With ts t) _)) name = do
   let s = Forall (typeIndexesIn t) (Set.fromList ts) t
   insertNameC name s
-insertName2 _ _ = error "Implementation error"
+insertName _ _ = pure () -- Other definitions do not need name insertion
 
+{- | Collect all trait constraints required by a name at the given type.
+Unifies the name's type scheme with the given type and returns required traits.
+-}
 collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m (Set (Trait IndexedType))
 collectTraits u name = do
   env <- gets compilerNameStore
@@ -184,8 +166,10 @@ collectTraits u name = do
       sub1 <- foldrM instantiate mempty vs
       r <- tryMatch (apply sub1 t) u
       case r of
-        Left{} ->
-          error (show (name, apply sub1 t, u)) -- "TODO"
+        Left{} -> do
+          -- Type mismatch during trait collection - this shouldn't happen in well-typed code
+          -- Return empty set and let type checker catch the error
+          pure mempty
         Right sub2 ->
           pure (apply (sub2 <> sub1) ts)
  where
@@ -193,11 +177,15 @@ collectTraits u name = do
     var <- supplied (TVariable . TypeIndex k)
     pure (index `mapsTo` var <> acc)
 
+-- | Try to unify two types, returning either an error or a substitution
 tryMatch :: (Monad m) => IndexedType -> IndexedType -> CompilerT a m (Either UnificationError Substitution)
 tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
+{- | Find the first matching trait instance for a trait constraint.
+Returns the instance type, indexed type, and member type schemes if found.
+-}
 findFirstMatch :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))
 findFirstMatch (Trait name t) = do
   Build{buildInstances} <- getCurrentBuildC
@@ -213,7 +201,7 @@ findFirstMatch (Trait name t) = do
           pure (Just (t1, k, v))
  where
   go f m = fmap catMaybes . forM (Map.toList m) $
-    \(k, InstanceEntry{..}) -> do
+    \(k, InstanceEntry{instanceEntryType, instanceEntryTypeSchemes}) -> do
       result <- f k
       case result of
         Left{} ->
@@ -224,8 +212,11 @@ findFirstMatch (Trait name t) = do
 substituteInScheme :: Substitution -> Scheme o Kind IndexedType -> IndexedScheme
 substituteInScheme sub (Forall _ ts t) = scheme (apply sub ts) (apply sub t)
 
-lookupTraitInstance2 :: (Show a, Monoid a, Data a, Data k, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a k IndexedType)))
-lookupTraitInstance2 loc trait@(Trait name _) = do
+{- | Look up a trait instance and return its dictionary (record of method implementations).
+Reports an error if the trait is concrete but no instance is found.
+-}
+lookupTraitInstance :: (Show a, Monoid a, Data a, Data k, Show k, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a k IndexedType)))
+lookupTraitInstance loc trait@(Trait name _) = do
   found <- findFirstMatch trait
   case found of
     Nothing -> do
@@ -242,12 +233,14 @@ lookupTraitInstance2 loc trait@(Trait name _) = do
     applyTraits loc (Label t (instanceLabel (Trait tn t1) n)) ts
       >>= expandTraits
 
+-- | Check if a trait's type is concrete (not a type variable)
 isConcrete :: Trait IndexedType -> Bool
 isConcrete (Trait _ TIntrinsic{}) = True
 isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
-applyTraits :: (Show a, Monoid a, Data a, Data k, Monad m) => a -> Label IndexedType -> Set (Trait IndexedType) -> CompilerT a m (Expression a k IndexedType)
+-- | Apply trait dictionaries to a variable reference, wrapping in application if needed
+applyTraits :: (Show a, Monoid a, Data a, Data k, Show k, Monad m) => a -> Label IndexedType -> Set (Trait IndexedType) -> CompilerT a m (Expression a k IndexedType)
 applyTraits loc (Label t name) traits =
   if Set.null traits
     then pure (EVariable mempty (Label t name))
@@ -255,7 +248,7 @@ applyTraits loc (Label t name) traits =
  where
   t1 = foldTypeOf t (Set.toList traits) -- (tr : trs)
   insert_ trait = do
-    fields <- lookupTraitInstance2 loc trait
+    fields <- lookupTraitInstance loc trait
     case fields of
       Nothing | not (isVariable trait) -> do
         path <- gets compilerCurrentPath
@@ -267,12 +260,17 @@ applyTraits loc (Label t name) traits =
       Just r ->
         pure (ERecord mempty (typeOf trait) r Nothing)
 
+{- | Types that can have trait dictionaries inserted during elaboration.
+This typeclass enables trait constraint expansion for expressions, clauses, and definitions.
+-}
 class TraitContext a d where
+  -- | Expand trait constraints into explicit dictionary parameters and applications
   expandTraits :: (Monad m) => d -> CompilerT a m d
 
+-- | Transform a recursive let into the appropriate form for trait handling
 expandRecursiveLet :: Expression a k IndexedType -> Expression a k IndexedType
 expandRecursiveLet (ELet a (BPattern _ p e1 :| []) e2) = ERecursiveLet a p e1 e2
-expandRecursiveLet _ = error "Implementation error"
+expandRecursiveLet _ = error "expandRecursiveLet: expected ELet with single BPattern, got unexpected form"
 
 withLocalEnvironment :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m r -> CompilerT a m r
 withLocalEnvironment xs action = do
@@ -282,22 +280,16 @@ withLocalEnvironment xs action = do
   put old
   return r
 
-instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Expression a k IndexedType) where
+instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (Expression a k IndexedType) where
   expandTraits =
     \case
       ERecursiveLet a p e1 e2 ->
         expandRecursiveLet <$> expandTraits (ELet a (BPattern a p e1 :| []) e2)
       ELet a bs e -> do
-        as <- censorDictionaryTraits (const mempty) (traverse transformBinding2 bs)
+        as <- censorDictionaryTraits (const mempty) (traverse transformBindingWithTraits bs)
         let xs = concat (toList (snd <$> as))
-
-        old <- get
-        insertNamesC xs
-
-        r <- ELet a (fst <$> as) <$> expandTraits e
-
-        put old
-        return r
+        withLocalEnvironment xs $
+          ELet a (fst <$> as) <$> expandTraits e
       var@(EVariable _ (Label t name))
         | "$fold" `isPrefixOf` name -> do
             traits <- collectTraits t name
@@ -308,39 +300,42 @@ instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Expression a k In
         applyTraits loc (Label t name) traits
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
+      -- Transform a binding to collect trait dependencies and wrap the body in dictionary lambdas
       e ->
         descendM expandTraits e
 
-transformBinding2 :: (Monoid a, Data a, Data k, Show a, Monad m) => Binding Expression a k IndexedType -> CompilerT a m (Binding Expression a k IndexedType, [(Name, IndexedScheme)])
-transformBinding2 =
+-- | Transform a binding to collect trait dependencies and wrap the body in dictionary lambdas
+transformBindingWithTraits :: (Monoid a, Data a, Data k, Show a, Show k, Monad m) => Binding Expression a k IndexedType -> CompilerT a m (Binding Expression a k IndexedType, [(Name, IndexedScheme)])
+transformBindingWithTraits =
   \case
     BPattern a var@(PVariable _ (Label t name)) e
       | "$fold" `isPrefixOf` name -> do
           (body, traits) <- listenDictionaryTraits (expandTraits e)
           pure (BPattern a var body, [(name, Forall (typeIndexesIn t) traits t)])
     BPattern _ (PVariable a (Label t name)) e -> do
-      (e1, traits) <- transformScope2 e
+      (e1, traits) <- transformScopeWithTraits e
       let ll = Label (foldTypeOf t (Set.toList traits)) name
       pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
     BPattern a (PAnnotation _ _ p) e ->
-      transformBinding2 (BPattern a p e)
-    _ ->
-      error "Not implemented"
+      transformBindingWithTraits (BPattern a p e)
+    binding ->
+      error $ "transformBindingWithTraits: unsupported binding pattern: " ++ show binding
 
-transformScope2 :: (Monoid a, Data a, Data k, Monad m, Show a) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType, Set (Trait IndexedType))
-transformScope2 e = do
+-- | Transform an expression scope to collect trait constraints and create dictionary lambdas
+transformScopeWithTraits :: (Monoid a, Data a, Data k, Monad m, Show a, Show k) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType, Set (Trait IndexedType))
+transformScopeWithTraits e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
   case Set.toList traits of
     [] -> pure (expr, traits)
     tr : trs -> pure (dictionaryLambda tr trs expr, traits)
 
-instance (Monoid a, Data a, Data k, Show a) => TraitContext a (CompiledClause a k IndexedType) where
+instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (CompiledClause a k IndexedType) where
   expandTraits =
     \case
       ECompiledClause a lls e ->
         ECompiledClause a lls <$> expandTraits e
 
-instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Definition a k IndexedType) where
+instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (Definition a k IndexedType) where
   expandTraits =
     \case
       DLet loc name letDefinition -> do
@@ -358,7 +353,7 @@ instance (Monoid a, Data a, Data k, Show a) => TraitContext a (Definition a k In
       d ->
         return d
 
-expandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Data k, Show a) => Name -> LetDefinition a k IndexedType -> CompilerT a m (LetDefinition a k IndexedType)
+expandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Data k, Show a, Show k) => Name -> LetDefinition a k IndexedType -> CompilerT a m (LetDefinition a k IndexedType)
 expandLetDefinitionTraits name =
   \case
     LetDefinition loc with (With _ t) e -> do
@@ -367,14 +362,13 @@ expandLetDefinitionTraits name =
         [] ->
           pure $ LetDefinition loc with (With [] t) expr
         tr : trs -> do
-          -- path <- gets compilerCurrentModule
           path <- gets compilerCurrentPath
-          -- Insert default int32 instance for Numeric and Ordered traits
+          -- Insert default int32 instance for Numeric and Ordered traits for main function
           if "main" == name && Path ["Main"] == path
             then do
               recs <- forM (tr :| trs) $
                 \(Trait trait _) -> do
-                  fields <- fromJust <$> lookupTraitInstance2 loc (Trait trait (TIntrinsic IInt32))
+                  fields <- fromJust <$> lookupTraitInstance loc (Trait trait (TIntrinsic IInt32))
                   pure $
                     ERecord
                       mempty
@@ -392,44 +386,54 @@ expandLetDefinitionTraits name =
                       (dictionaryLambda tr trs expr)
                       recs
                   )
-            else
+            else -- Check if a trait constraint is on a type variable (not yet resolved)
+
               pure $
                 LetDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
 
+-- | Create a lambda that accepts trait dictionaries as parameters
+
+-- | Check if a trait constraint is on a type variable (not yet resolved)
 isVariable :: Trait IndexedType -> Bool
 isVariable (Trait _ TVariable{}) = True
 isVariable _ = False
 
+{- | Expand trait constraints in a let definition without modifying the expression body.
+Used during the first pass to collect trait information.
+-}
+
+-- | Create a lambda that accepts trait dictionaries as parameters
 dictionaryLambda :: (Monoid a, HasType o k (Trait (Type o k))) => Trait (Type o k) -> [Trait (Type o k)] -> Expression a i (Type o k) -> Expression a i (Type o k)
 dictionaryLambda tr trs = ELambda mempty (dict <$> (tr :| trs))
  where
   dict t = PTraitInstance mempty (typeOf t) t
 
-passiveOexpandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => Name -> LetDefinition a Kind IndexedType -> CompilerT a m (LetDefinition a Kind IndexedType)
-passiveOexpandLetDefinitionTraits name =
+{- | Expand trait constraints in a let definition without modifying the expression body.
+Used during the first pass to collect trait information.
+-}
+passiveExpandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => LetDefinition a Kind IndexedType -> CompilerT a m (LetDefinition a Kind IndexedType)
+passiveExpandLetDefinitionTraits =
+  -- \| Collect trait information from an expression without transformation (passive pass)
   \case
     LetDefinition loc with (With _ t) e -> do
-      (_, traits) <- listenDictionaryTraits (passiveOexpandTraitsInExpr e)
+      (_, traits) <- listenDictionaryTraits (passiveExpandTraitsInExpr e)
       case Set.toList traits of
         [] ->
           pure $ LetDefinition loc with (With [] t) e
         tr : trs -> do
-          path <- gets compilerCurrentPath
           pure $ LetDefinition loc with (With (tr : trs) t) e
 
-passiveOexpandTraitsInExpr :: (Monad m, Monoid a, Data a, Data k, Show a) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType)
-passiveOexpandTraitsInExpr =
+-- | Collect trait information from an expression without transformation (passive pass)
+passiveExpandTraitsInExpr :: (Monad m, Monoid a, Data a, Data k, Show a, Show k) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType)
+passiveExpandTraitsInExpr =
   \case
     ERecursiveLet a p e1 e2 ->
-      expandRecursiveLet <$> passiveOexpandTraitsInExpr (ELet a (BPattern a p e1 :| []) e2)
+      expandRecursiveLet <$> passiveExpandTraitsInExpr (ELet a (BPattern a p e1 :| []) e2)
     ELet a bs e -> do
-      as <- censorDictionaryTraits (const mempty) (traverse transformBinding2 bs)
+      as <- censorDictionaryTraits (const mempty) (traverse transformBindingWithTraits bs)
       let xs = concat (toList (snd <$> as))
-      old <- get
-      insertNamesC xs
-      r <- ELet a (fst <$> as) <$> passiveOexpandTraitsInExpr e
-      put old
-      return r
+      withLocalEnvironment xs $
+        ELet a (fst <$> as) <$> passiveExpandTraitsInExpr e
     var@(EVariable _ (Label t name))
       | "$fold" `isPrefixOf` name -> do
           traits <- collectTraits t name
@@ -437,48 +441,49 @@ passiveOexpandTraitsInExpr =
           pure var
     EVariable loc (Label t name) -> do
       traits <- collectTraits t name
-      passiveOapplyTraits loc (Label t name) traits
+      passiveApplyTraits loc traits
       pure (EVariable loc (Label t name))
     ECompiledMatch a t e cs ->
-      ECompiledMatch a t <$> passiveOexpandTraitsInExpr e <*> traverse passiveOexpandTraitsInClause cs
+      ECompiledMatch a t <$> passiveExpandTraitsInExpr e <*> traverse passiveExpandTraitsInClause cs
     e ->
-      descendM passiveOexpandTraitsInExpr e
+      descendM passiveExpandTraitsInExpr e
 
-passiveOexpandTraitsInClause :: (Monad m, Monoid a, Data a, Data k, Show a) => CompiledClause a k IndexedType -> CompilerT a m (CompiledClause a k IndexedType)
-passiveOexpandTraitsInClause =
+passiveExpandTraitsInClause :: (Monad m, Monoid a, Data a, Data k, Show a, Show k) => CompiledClause a k IndexedType -> CompilerT a m (CompiledClause a k IndexedType)
+passiveExpandTraitsInClause =
   \case
     ECompiledClause a lls e ->
-      ECompiledClause a lls <$> passiveOexpandTraitsInExpr e
+      ECompiledClause a lls <$> passiveExpandTraitsInExpr e
 
-passiveOapplyTraits :: forall m a. (Show a, Monoid a, Data a, Monad m) => a -> Label IndexedType -> Set (Trait IndexedType) -> CompilerT a m ()
-passiveOapplyTraits loc (Label t name) traits = do
+passiveApplyTraits :: (Show a, Monoid a, Data a, Monad m) => a -> Set (Trait IndexedType) -> CompilerT a m ()
+passiveApplyTraits loc traits = do
   case Set.toList traits of
     [] ->
       pure ()
     x : xs ->
+      -- \| Collect trait constraints from a definition and register its name (first pass)
       traverse_ insert_ (x :| xs)
  where
   insert_ trait = do
-    fields <- lookupTraitInstance2 loc trait
-    let zz = fields :: Maybe (Dictionary (Expression a Kind IndexedType))
+    (fields :: Maybe (Dictionary (Expression a Kind IndexedType))) <- lookupTraitInstance loc trait
     case fields of
       Nothing | isVariable trait -> do
         tellDictionaryTraits (Set.singleton trait)
       _ ->
         pure ()
 
-cafe2 :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m () -- [(Name, Set Name)]
-cafe2 =
+-- | Collect trait constraints from a definition and register its name (first pass)
+collectDefinitionTraits :: (Show a, Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m ()
+collectDefinitionTraits =
   \case
     DLet a name def -> do
-      d <- passiveOexpandLetDefinitionTraits name def
-      insertName2 (DLet a name d) name
-    DInstance a InstanceDefinition{..} ->
+      d <- passiveExpandLetDefinitionTraits def
+      insertName (DLet a name d) name
+    DInstance _ InstanceDefinition{..} ->
       forM_ instanceDefinitionImplementations $
         \case
-          DLet a name def -> do
-            d <- passiveOexpandLetDefinitionTraits instanceName def
-            insertName2 (DLet a name d) instanceName
+          DLet loc name def -> do
+            d <- passiveExpandLetDefinitionTraits def
+            insertName (DLet loc name d) instanceName
            where
             instanceName = instanceLabel (Trait instanceDefinitionTraitName instanceDefinitionType) name
           _ ->

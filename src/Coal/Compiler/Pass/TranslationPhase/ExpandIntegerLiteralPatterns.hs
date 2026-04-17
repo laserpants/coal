@@ -22,7 +22,7 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
-import Control.Monad.Writer
+import Control.Monad.Writer (MonadTrans (lift), MonadWriter (tell), WriterT (runWriterT))
 import qualified Data.ByteString.Char8 as ByteString
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM, transformM)

@@ -10,7 +10,7 @@ Module: Coal.Compiler.Pass.TranslationPhase.DesugarPatterns
 Desugar complex patterns into simple variable patterns with explicit match expressions.
 
 This pass simplifies pattern matching by transforming complex patterns in
-bindings, lambdas, and let expressions into simple variable patterns,
+bindings, lambdas, and let-expressions into simple variable patterns,
 extracting the pattern matching logic into explicit match expressions.
 
 For example, a let binding with a complex pattern:
@@ -69,7 +69,7 @@ import Extras (Name)
 
 {- | Pattern desugaring pass.
 
-Transform complex patterns in bindings, lambdas, and let expressions into
+Transform complex patterns in bindings, lambdas, and let-expressions into
 simple variable patterns with explicit match expressions. This normalization
 ensures that only trivial variable patterns appear in bindings, while all
 structural pattern matching is performed through explicit match constructs.

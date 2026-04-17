@@ -25,8 +25,8 @@ import Coal.Compiler.Pass.LoweringPhase (loweringPhase)
 import Coal.Compiler.Pass.LoweringPhase.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
 import Coal.Compiler.Pass.PhasePreflight (phasePreflight)
-import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking)
+import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
