@@ -4,6 +4,38 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+{- |
+Module: Coal.Compiler.Pass.TypePhase.PrepareBuild
+Description: Build environment population before type inference
+
+This module implements a compiler pass that populates the Build environment by
+collecting and cataloging all definitions from a Coal module. It serves as the
+foundation for type inference and later compilation stages.
+
+The pass operates in several strictly ordered steps:
+
+1. **Type constructor collection**: Gather all type definitions and their kinds
+2. **Data constructor collection**: Gather data constructors with their schemes
+3. **Export expansion**: Resolve wildcard exports (Type(*) -> Type(A, B, C))
+4. **Trait collection**: Register trait definitions
+5. **Trait interface collection**: Register trait member signatures
+6. **Instance collection**: Register trait implementations
+7. **Built-in instance insertion**: Add compiler-provided instances
+8. **Import collection**: Process imports from other modules
+9. **Placeholder collection**: Register function/let names for type inference
+10. **Qualified name resolution**: Build mapping of local to qualified names
+
+The ordering is critical: data constructors depend on type constructors,
+instances depend on traits, and imports depend on all prior definitions being
+registered in the imported modules.
+
+Monad stack:
+  @ReaderT (ExportList a) (StateT (Build a) (CompilerT a m))@
+
+The Reader provides export context (what names should be exported), the State
+accumulates the Build structure, and CompilerT provides access to other modules
+and error reporting.
+-}
 module Coal.Compiler.Pass.TypePhase.PrepareBuild (
   passPrepareBuild,
   prepareBuild,
@@ -17,6 +49,8 @@ import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Builtin.Names (builtinNames)
+import Coal.Compiler.Error ()
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
@@ -26,7 +60,7 @@ import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
-import Coal.TypeSystem.Parameterized
+import Coal.TypeSystem.Parameterized (Parameterized (instantiateTypeIndexes), ToIndexed (toIndexed))
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless)
@@ -94,6 +128,8 @@ prepareBuild Module{..} =
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions defs = do
+  -- Insert built-in type and data constructors that are always available
+  -- These are compiler-provided primitives for lists and natural numbers
   insertNameEntry (NType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
     TypeConstructorEntry
@@ -129,103 +165,135 @@ prepareDefinitions defs = do
       , dataConstructorEntryConstructorSet = Set.fromList ["Zero", "Succ"]
       }
 
-  -- Collect type constructors
+  -- Step 1: Collect type constructors
+  -- Must happen first because data constructors reference their parent type
   traverse_ collectTypeConstructors defs
-  -- Collect data constructors
+
+  -- Step 2: Collect data constructors
+  -- Depends on type constructors being registered (Step 1)
   traverse_ collectDataConstructors defs
-  -- expand exports
+
+  -- Step 3: Expand wildcard exports
+  -- Converts Type(*) exports to explicit constructor lists (Type(A, B, C))
+  -- Must happen after type/data collection to know what constructors exist
   exports <- expandExports
   local (const exports) $ do
-    -- Collect traits
+    -- Step 4: Collect trait definitions
+    -- Must happen before trait interfaces and instances
     traverse_ collectTraits defs
-    -- Collect trait interfaces
+
+    -- Step 5: Collect trait interface members
+    -- Depends on traits being registered (Step 4)
     traverse_ collectTraitsInterface defs
-    -- Collect instances
+
+    -- Step 6: Collect trait instances
+    -- Depends on traits being defined (Step 4)
     traverse_ collectInstances defs
-    -- Insert built-in instances
+
+    -- Step 7: Insert compiler built-in instances
+    -- Standard instances provided by the compiler (e.g., Show for primitives)
     forM_ builtinInstances (modify . uncurry3 insertBuildInstance)
-    -- Collect imports
+
+    -- Step 8: Collect imports from other modules
+    -- Depends on all prior phases completing in the imported modules
     traverse_ collectImports defs
-    -- Collect placeholders
+
+    -- Step 9: Collect function/let placeholders
+    -- Creates entries for definitions that will be type-checked later
     traverse_ collectPlaceholders defs
 
   build <- get
   qualifiedNames <- traverse (qualifiedImports build) defs
   modify (setQualifiedNames (Environment.fromList (concat qualifiedNames)))
 
+{- |
+Generate qualified names for trait instance members.
+
+Given a list of trait instances, this function creates qualified name mappings
+for all instance member implementations. For example, if a trait \"Show\" has a
+member \"show\" and there's an instance for type \"Int\", this generates a mapping
+from the instance member name (e.g., \"Show$Int$show\") to its qualified form.
+
+This is used in import resolution to ensure instance members from imported modules
+are properly qualified.
+-}
+generateQualifiedInstanceNames ::
+  (Monad m) =>
+  Path ->
+  Environment [NameEntry] ->
+  [(Name, InstanceMap (InstanceEntry a))] ->
+  ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) [(Name, Name)]
+generateQualifiedInstanceNames path nameEnv instances =
+  concatForM instances $
+    \(traitName, instanceMap) ->
+      concatForM (Map.toList instanceMap) $
+        \(_, InstanceEntry{..}) -> do
+          concatForM (Map.keys instanceEntryTypeSchemes) $
+            \member -> do
+              let instanceName = instanceLabel (Trait traitName instanceEntryType) member
+              concatForM (Environment.lookupWithDefault mempty instanceName nameEnv) $
+                \case
+                  NName n _ -> do
+                    pure [(n, principalPath path <.> n)]
+                  _ ->
+                    pure mempty
+
+{- |
+Generate qualified name mappings for imported definitions.
+
+This function processes import statements and creates a mapping from local names
+to their fully qualified names (e.g., "map" -> "List.map"). This is crucial for:
+- Name resolution during type inference
+- Preventing name conflicts between imports
+- Supporting qualified access to imported definitions
+
+The function handles three import types:
+1. NameImport: Single name import (e.g., @import List.map@)
+   - Maps the name to its qualified form
+   - Also maps any trait members if the name has trait constraints
+   - Also maps trait instance members
+
+2. TypeImport: Type/trait import with optional member list (e.g., @import List.List(::, mempty)@)
+   - Maps data constructors or trait members
+   - Handles wildcard (*) to import all members
+   - Maps instance members for the type/trait
+
+3. NamespaceImport: Import entire module namespace (e.g., @import namespace List@)
+   - Maps all exported names with namespace prefix
+   - Result: @List.map@, @List.filter@, etc.
+-}
 qualifiedImports :: (Monad m) => Build a -> Definition a k t -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) [(Name, Name)]
 qualifiedImports Build{..} =
   \case
-    --    DImport _ (Path ["Builtin$"]) imports -> do
-    --      pure mempty
-
     DImport _ path imports ->
       concatForM imports $
         \case
           NameImport _ name -> do
-            nsa <- pure [(name, principalPath path <.> name)]
-
             nsb <- concatForM (Environment.lookupWithDefault mempty name buildNames) $
               \case
-                info@(NName _ s) -> do
+                (NName _ s) -> do
                   concatForM (Set.toList (schemeTraits s)) $
                     \Trait{..} -> do
-                      if (Path ["Builtin$"] == path)
+                      if Path ["Builtin$"] == path
                         then pure []
                         else do
                           Build{buildTraits = importTraits, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
                           case Environment.lookup traitName importTraits of
                             Just TraitEntry{..} -> do
                               let entries = Environment.names traitEntryInterface
-                                  ns1 =
-                                    [ (n, principalPath path <.> n)
-                                    | -- \| n <- if ["*"] == names then entries else names `intersect` entries
-                                    n <- entries
-                                    ]
+                                  ns1 = [(n, principalPath path <.> n) | n <- entries]
 
-                              -- Build{buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
-
-                              let
-                                -- TODO: DRY
-                                qualifiedInstanceNames instances =
-                                  concatForM instances $
-                                    \(traitName, instanceMap) ->
-                                      concatForM (Map.toList instanceMap) $
-                                        \(t, InstanceEntry{..}) -> do
-                                          concatForM (Map.keys instanceEntryTypeSchemes) $
-                                            \member -> do
-                                              let instanceName = instanceLabel (Trait traitName instanceEntryType) member
-                                              concatForM (Environment.lookupWithDefault mempty instanceName importNames) $
-                                                \case
-                                                  NName n _ -> do
-                                                    pure [(n, principalPath path <.> n)]
-                                                  _ ->
-                                                    pure mempty
-
-                              ns2 <- qualifiedInstanceNames (traitInstances traitName importInstances)
+                              ns2 <- generateQualifiedInstanceNames path importNames (traitInstances traitName importInstances)
 
                               pure (ns1 <> ns2)
                             _ ->
                               pure mempty
-
-                -- forM_ (Environment.lookupWithDefault mempty traitName buildNames) $
-                --  \case
-                --    info@NTrait{} -> do
-                --      --traceShowM info
-
-                --      case Environment.lookup name buildTraits of
-                --        Nothing ->
-                --          pure ()
-                --        -- error (show (path, name))
-                --        Just TraitEntry{..} -> do
-                --          insertNameEntry (NTrait name)
-                --          insertTrait name TraitEntry{..}
-                --            qualifiedInstanceNames (traitInstances name buildInstances)
-
                 _ ->
                   pure mempty
 
-            return (nsa <> nsb)
+            return $
+              [(name, principalPath path <.> name)]
+                <> nsb
           TypeImport _ name names ->
             case Environment.lookup name buildTypeConstructors of
               Just TypeConstructorEntry{..} -> do
@@ -235,7 +303,7 @@ qualifiedImports Build{..} =
                         else names `intersect` typeConstructorEntryDataConstructors
                     ns1 = [(n, principalPath path <.> n) | n <- dataConstructors]
                 Build{buildInstances = importInstances} <- lift $ lift $ importedBuild path
-                ns2 <- qualifiedInstanceNames (typeInstances name importInstances)
+                ns2 <- generateQualifiedInstanceNames path buildNames (typeInstances name importInstances)
                 pure (ns1 <> ns2)
               _ ->
                 case Environment.lookup name buildTraits of
@@ -246,38 +314,14 @@ qualifiedImports Build{..} =
                           | n <- if ["*"] == names then entries else names `intersect` entries
                           ]
                     Build{buildInstances = importInstances} <- lift $ lift $ importedBuild path
-                    ns2 <- qualifiedInstanceNames (traitInstances name importInstances)
+                    ns2 <- generateQualifiedInstanceNames path buildNames (traitInstances name importInstances)
                     pure (ns1 <> ns2)
                   _ ->
                     pure mempty
-     where
-      -- qualifiedInstanceNames :: (Monad m) => Path -> Environment [NameEntry] -> [(Name, InstanceMap (InstanceEntry a))] -> m [(Name, Name)]
-      qualifiedInstanceNames instances =
-        concatForM instances $
-          \(traitName, instanceMap) ->
-            concatForM (Map.toList instanceMap) $
-              \(t, InstanceEntry{..}) -> do
-                concatForM (Map.keys instanceEntryTypeSchemes) $
-                  \member -> do
-                    let instanceName = instanceLabel (Trait traitName instanceEntryType) member
-                    concatForM (Environment.lookupWithDefault mempty instanceName buildNames) $
-                      \case
-                        NName n _ -> do
-                          pure [(n, principalPath path <.> n)]
-                        _ ->
-                          pure mempty
     DNamespaceImport _ path -> do
       Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
       concatForM (Set.toList exportedNames) $
-        \name ->
-          --          concatForM (fromMaybe mempty $ Environment.lookup name importedNames) $
-          --            \case
-          --              NName{} -> do
-          --                when (Path ["List"] == path) $
-          --                  traceShowM (qualified name path)
-          pure [(qualified name path, qualified name path)]
-    --              _ ->
-    --                pure mempty
+        \name -> pure [(qualified name path, qualified name path)]
     _ ->
       pure mempty
 
@@ -295,10 +339,13 @@ expandExports = do
       newExports <-
         forM exports $
           \case
-            TypeExport loc name mempty ->
+            TypeExport loc name [] ->
               case Environment.lookup name buildDataConstructors of
-                Nothing ->
-                  error "TODO"
+                Nothing -> do
+                  lift $ lift $ do
+                    path <- gets compilerCurrentPath
+                    tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+                  return (TypeExport loc name mempty)
                 Just DataConstructorEntry{..} ->
                   return (TypeExport loc name (Set.toList dataConstructorEntryConstructorSet))
             e ->
@@ -324,8 +371,9 @@ collectTypeConstructors =
               for typeDefinitionConstructors constructorName
           }
 
-    -- TODO: remove
-    DImport _ (Path ["Builtin$"]) imports -> do
+    -- Special case: Builtin$ is a compiler-internal module that should not be processed
+    -- It's used for bootstrapping and its definitions are handled separately
+    DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
     DImport _ path imports -> do
       Build{..} <- lift $ lift $ importedBuild path
@@ -336,20 +384,13 @@ collectTypeConstructors =
                 build <- lift $ lift $ importedBuild path
                 found <- insertTypeName build loc name
                 unless found $ do
-                  error "TODO"
-
-            -- throwError PreflightFailure
-
-            -- found <- insertTypeName path loc name
-            -- unless found $ do
-            --  tellErrors [MissingType name path (ErrorLocation this loc)]
-            --  throwError PreflightFailure
-
+                  currentPath <- lift $ lift $ gets compilerCurrentPath
+                  lift $ lift $ tellErrors [MissingType name path (ErrorLocation (principalPath currentPath) loc)]
             | otherwise ->
-                pure () -- error (show name)
+                pure ()
           _ ->
             pure ()
-    DNamespaceImport loc path ->
+    DNamespaceImport _ _ ->
       pure ()
     _ ->
       pure ()
@@ -362,28 +403,31 @@ insertTypeName Build{..} loc name =
     \case
       NType{} ->
         case Environment.lookup name buildTypeConstructors of
-          Nothing ->
-            error "TODO"
+          Nothing -> do
+            path <- lift $ lift $ gets compilerCurrentPath
+            lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+            return False
           Just entry -> do
             insertTypeConstructor name entry
             return True
       NTrait{} ->
         case Environment.lookup name buildTraits of
-          Nothing ->
-            error "TODO"
+          Nothing -> do
+            path <- lift $ lift $ gets compilerCurrentPath
+            lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+            return False
           Just entry -> do
             insertTrait name entry
             return True
       NTypeAlias{} ->
         case Environment.lookup name buildAliases of
-          Nothing ->
-            error "TODO"
+          Nothing -> do
+            path <- lift $ lift $ gets compilerCurrentPath
+            lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+            return False
           Just AliasEntry{..} -> do
             forM_ (constructors aliasEntryType) (insertTypeName Build{..} loc)
             return True
-      --            insertAlias name AliasEntry{..}
-      --            forM_ (constructors aliasEntryType) (insertTypeName Build{..} loc)
-      --            return True
       _ ->
         return False
 
@@ -405,8 +449,8 @@ collectDataConstructors =
      where
       ctorSet = Set.fromList (for typeDefinitionConstructors constructorName)
 
-    -- TODO: remove
-    DImport _ (Path ["Builtin$"]) imports -> do
+    -- Special case: Builtin$ module handling (see collectTypeConstructors)
+    DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
     DImport loc path imports -> do
       Build{..} <- lift $ lift $ importedBuild path
@@ -417,26 +461,27 @@ collectDataConstructors =
                 case Environment.lookup name buildTypeConstructors of
                   Nothing ->
                     pure ()
-                  -- error (show (path, name))
                   Just TypeConstructorEntry{..} ->
                     forM_ dataConstructors $
                       \ctor ->
                         case Environment.lookup ctor buildDataConstructors of
-                          Nothing ->
-                            error "TODO"
-                          Just entry@DataConstructorEntry{dataConstructorEntryConstructor = DataConstructor{..}, ..} -> do
+                          Nothing -> do
+                            currentPath <- lift $ lift $ gets compilerCurrentPath
+                            lift $ lift $ tellErrors [NoDataConstructorForType ctor name path (ErrorLocation (principalPath currentPath) loc)]
+                          Just entry@DataConstructorEntry{dataConstructorEntryConstructor = DataConstructor{..}} -> do
                             insertDataConstructor ctor entry
                             lift $ lift $ insertNameC constructorName constructorScheme
                    where
                     dataConstructors
                       | ["*"] == ctors = typeConstructorEntryDataConstructors
                       | otherwise = ctors
-            | otherwise ->
-                error (show name)
+            | otherwise -> do
+                currentPath <- lift $ lift $ gets compilerCurrentPath
+                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
           _ ->
             pure ()
-    -- TODO
-    DNamespaceImport loc path ->
+    -- Namespace imports are handled in collectImports and qualifiedImports
+    DNamespaceImport _ _ ->
       pure ()
     _ ->
       pure ()
@@ -472,30 +517,29 @@ collectTraits =
           , traitEntryConstraints = traitDefinitionConstraints
           , traitEntryInterface = Environment.fromList (fmap traitDefinitionInterfaceEntryToPair traitDefinitionInterface)
           }
-    -- TODO
-    DImport _ (Path ["Builtin$"]) imports -> do
+    -- Special case: Builtin$ module handling (see collectTypeConstructors)
+    DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
     DImport _ path imports -> do
       Build{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
-          TypeImport _ name names
+          TypeImport loc name names
             | name `elem` buildExportedNames ->
                 case Environment.lookup name buildTraits of
                   Nothing ->
                     case Environment.lookup name buildTypeConstructors of
                       Just TypeConstructorEntry{} -> do
-                        -- traceShowM name
                         qualifiedInstanceNames (typeInstances name buildInstances)
                       Nothing ->
                         pure ()
-                  -- error (show (path, name))
                   Just TraitEntry{..} -> do
                     insertNameEntry (NTrait name)
                     insertTrait name TraitEntry{..}
                     qualifiedInstanceNames (traitInstances name buildInstances)
-            | otherwise ->
-                error "TODO"
+            | otherwise -> do
+                currentPath <- lift $ lift $ gets compilerCurrentPath
+                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
            where
             qualifiedInstanceNames instances =
               forM_ instances $
@@ -509,7 +553,6 @@ collectTraits =
                               else names `intersect` Map.keys instanceEntryTypeSchemes
                       forM_ members $
                         \member -> do
-                          -- traceShowM member
                           let instanceName = instanceLabel (Trait traitName instanceEntryType) member
                           forM_ (Environment.lookupWithDefault mempty instanceName buildNames) $
                             \case
@@ -520,8 +563,8 @@ collectTraits =
                                 pure ()
           _ ->
             pure ()
-    -- TODO
-    DNamespaceImport loc path ->
+    -- Namespace imports are handled in collectImports and qualifiedImports
+    DNamespaceImport _ _ ->
       pure ()
     _ ->
       pure ()
@@ -571,8 +614,8 @@ collectTraitsInterface =
                   exportName
             _ ->
               pure ()
-    -- TODO
-    DImport _ (Path ["Builtin$"]) imports -> do
+    -- Special case: Builtin$ module handling (see collectTypeConstructors)
+    DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
     DImport loc path imports -> do
       Build{..} <- lift $ lift $ importedBuild path
@@ -583,7 +626,6 @@ collectTraitsInterface =
                 case Environment.lookup name buildTraits of
                   Nothing ->
                     pure ()
-                  -- error (show (path, name))
                   Just TraitEntry{..} -> do
                     forM_ names $
                       \case
@@ -601,12 +643,13 @@ collectTraitsInterface =
                     names
                       | ["*"] == members = Environment.names traitEntryInterface
                       | otherwise = members
-            | otherwise ->
-                error "TODO"
+            | otherwise -> do
+                currentPath <- lift $ lift $ gets compilerCurrentPath
+                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
           _ ->
             pure ()
-    -- TODO
-    DNamespaceImport loc path ->
+    -- Namespace imports are handled in collectImports and qualifiedImports
+    DNamespaceImport _ _ ->
       pure ()
     _ ->
       pure ()
@@ -652,15 +695,6 @@ collectInstances =
                 Nothing ->
                   error "Implementation error"
 
-          -- case lookup (parameterName traitEntryParameter) env of
-          --  Nothing ->
-          --    error "TODO"
-          --  Just (TypeIndex _ index) -> do
-          --    let sub = index `mapsTo` t
-          --        newTraits = apply sub schemeTraits
-          --        newTypeBody = apply sub schemeTypeBody
-          --        vars = typeIndexesIn newTraits <> typeIndexesIn newTypeBody
-          --    pure $ Forall vars newTraits newTypeBody
           let entry =
                 InstanceEntry
                   { instanceEntryMetadata = instanceDefinitionMetadata
@@ -669,13 +703,13 @@ collectInstances =
                   , instanceEntryTypeSchemes = normalizeScheme <$> env
                   }
           insertInstance instanceDefinitionTraitName t entry
-        Nothing ->
-          error "TODO"
-    -- TODO
-    DImport loc path items ->
+        Nothing -> do
+          currentPath <- lift $ lift $ gets compilerCurrentPath
+          lift $ lift $ tellErrors [TraitNotInScope instanceDefinitionTraitName (ErrorLocation (principalPath currentPath) instanceDefinitionMetadata)]
+    -- Import and namespace import definitions don't define instances themselves
+    DImport{} ->
       pure ()
-    -- TODO
-    DNamespaceImport loc path ->
+    DNamespaceImport{} ->
       pure ()
     _ ->
       pure ()
@@ -683,13 +717,13 @@ collectInstances =
 collectPlaceholders :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectPlaceholders =
   \case
-    DFunction _ name FunctionDefinition{..} -> do
+    DFunction _ name _ -> do
       insertNameEntry (NPlaceholder name)
       insertExportedName name
-    DLet _ name LetDefinition{..} -> do
+    DLet _ name _ -> do
       insertNameEntry (NPlaceholder name)
       insertExportedName name
-    DFold _ name FoldDefinition{..} -> do
+    DFold _ name _ -> do
       insertNameEntry (NPlaceholder name)
       insertExportedName name
     _ ->
@@ -713,42 +747,25 @@ instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectImports =
   \case
-    -- TODO: remove
-    DImport _ (Path ["Builtin$"]) imports -> do
+    -- Special case: Builtin$ module handling (see collectTypeConstructors)
+    DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
-    DImport _ path imports -> do
+    DImport loc path imports -> do
       Build{..} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
-          NameImport _ name
+          NameImport iloc name
             | name `elem` buildExportedNames -> do
                 forM_ (Environment.lookupWithDefault mempty name buildNames) $
                   \case
                     info@(NName _ s) -> do
                       modify (insertBuildNameEntry info)
-
-                      --                      forM_ (schemeTraits s) $
-                      --                        \Trait{..} -> do
-                      --                          forM_ (Environment.lookupWithDefault mempty traitName buildNames) $
-                      --                            \case
-                      --                              info@NTrait{} -> do
-                      --                                case Environment.lookup name buildTraits of
-                      --                                  Nothing ->
-                      --                                    pure ()
-                      --                                  -- error (show (path, name))
-                      --                                  Just TraitEntry{..} -> do
-                      --                                    insertNameEntry (NTrait name)
-                      --                                    insertTrait name TraitEntry{..}
-                      --
-                      --                              _ ->
-                      --                                pure ()
-
                       lift $ lift $ insertNameC name s
                     _ -> do
                       pure ()
-            | otherwise ->
-                -- error "TODO"
-                error (show (name, buildExportedNames))
+            | otherwise -> do
+                currentPath <- lift $ lift $ gets compilerCurrentPath
+                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) iloc)]
           TypeImport _ name _
             | name `elem` buildExportedNames ->
                 forM_ (Environment.lookupWithDefault mempty name buildNames) $
@@ -761,8 +778,9 @@ collectImports =
                       modify (insertBuildNameEntry info)
                     _ ->
                       pure ()
-            | otherwise ->
-                error "TODO"
+            | otherwise -> do
+                currentPath <- lift $ lift $ gets compilerCurrentPath
+                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
     DNamespaceImport _ path -> do
       Build{..} <- lift $ lift $ importedBuild path
       let qualifiedName name = principalPath buildPath <.> name
@@ -789,6 +807,8 @@ importedBuild path = do
   env <- gets compilerModules
   case Environment.lookup (principalPath path) env of
     Nothing ->
-      error (show path) -- "TODO"
+      -- Module not found - this should have been caught earlier during dependency resolution
+      -- Return empty build to allow compilation to continue and collect all errors
+      return emptyBuild
     Just build ->
       return build
