@@ -27,7 +27,7 @@ import Coal.Language.Definition
 import Coal.Language.Module (Module)
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
-import Coal.TypeSystem.Parameterized
+import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
 import Control.Monad.Except (forM_)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (get, gets)
