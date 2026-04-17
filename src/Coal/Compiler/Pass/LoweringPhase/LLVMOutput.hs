@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
@@ -99,7 +100,7 @@ irOutput pb CompilerConfig{..} tmpDir = do
 
       bs <- runLLVM tmpDir file
       pure (fmap (name,) bs)
-    BCached Build{..} ->
+    BCached Build{buildPath, buildBitcode} ->
       pure (Right (principalPath buildPath, fromJust buildBitcode))
 
 runLLVM :: (MonadIO m) => FilePath -> FilePath -> CompilerT Metadata m (Either SomeException ByteString)
