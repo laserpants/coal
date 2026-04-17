@@ -19,16 +19,18 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module (Module)
+import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
-import Control.Monad.Except (forM_)
+import Control.Monad.Except (forM_, throwError)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (get, gets)
 import Control.Monad.Writer (execWriter)
@@ -119,24 +121,28 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
                 EAnnotation loc annotationType letDefinitionExpression
       DInstance _ InstanceDefinition{..} -> do
         Build{..} <- getCurrentBuildC
+        path <- gets compilerCurrentPath
         case Environment.lookup instanceDefinitionTraitName buildTraits of
-          Nothing ->
-            error "TODO"
+          Nothing -> do
+            tellErrors [TraitNotInScope instanceDefinitionTraitName (ErrorLocation (principalPath path) instanceDefinitionMetadata)]
+            throwError TraitError
           Just TraitEntry{..} ->
             forM_ instanceDefinitionImplementations $
               \case
                 d@(DFunction loc name def) ->
                   case Environment.lookup name traitEntryInterface of
-                    Nothing ->
-                      error "TODO"
+                    Nothing -> do
+                      tellErrors [UnexpectedTraitDefinition name instanceDefinitionTraitName (ErrorLocation (principalPath path) loc)]
+                      throwError TraitError
                     Just sig -> do
                       s <- toIndexedScheme (replaceParamInScheme traitEntryParameter instanceDefinitionType sig)
                       insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
                       generateConstraints $ DFunction loc (instanceLabel trait name) def
                 d@(DLet loc name def) ->
                   case Environment.lookup name traitEntryInterface of
-                    Nothing ->
-                      error "TODO"
+                    Nothing -> do
+                      tellErrors [UnexpectedTraitDefinition name instanceDefinitionTraitName (ErrorLocation (principalPath path) loc)]
+                      throwError TraitError
                     Just sig -> do
                       s <- toIndexedScheme (replaceParamInScheme traitEntryParameter instanceDefinitionType sig)
                       insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
