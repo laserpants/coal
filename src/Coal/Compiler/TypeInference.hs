@@ -191,12 +191,6 @@ define name t = insertNameC name (Forall (typeIndexesIn s) mempty s)
  where
   s = normalizeTypeIndexes t
 
-type ConstraintsGenResult g o a t s =
-  ( s
-  , Dictionary (g, o a)
-  , [ConstraintsGenOutput g o a t]
-  )
-
 assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
 assumptionConstraints Assumption{..} = do
   names <- gets compilerNameStore

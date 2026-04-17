@@ -5,7 +5,7 @@
 
 module Coal.Language.Module.Import (Import (..)) where
 
-import Data.Binary
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Extras (Name)
 import GHC.Generics (Generic)

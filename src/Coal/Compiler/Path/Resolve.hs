@@ -25,12 +25,13 @@ errorMessage =
       "Component contains invalid characters: " ++ show c
 
 isDirectoryPrefix :: FilePath -> FilePath -> Bool
-isDirectoryPrefix root p =
+isDirectoryPrefix root path =
   length rootComps <= length pathComps
     && rootComps == take (length rootComps) pathComps
  where
-  rootComps = filter (not . null) $ splitDirectories (normalise root)
-  pathComps = filter (not . null) $ splitDirectories (normalise p)
+  rootComps = comps root
+  pathComps = comps path
+  comps p = filter (not . null) $ splitDirectories (normalise p)
 
 resolveModule :: [FilePath] -> FilePath -> IO (Either String (FilePath, FilePath, Text))
 resolveModule roots fp =
@@ -44,14 +45,15 @@ resolveModule roots fp =
 
     -- Find first existing candidate
     existing <- liftIO $ filterM doesFileExist candidates
-    chosen <- case existing of
-      [] ->
-        throwError $ "File not found. Tried these candidate paths:\n  " ++ unlines candidates
-      (c : _) ->
-        return c
+    choice <-
+      case existing of
+        [] ->
+          throwError $ "File not found. Tried these candidate paths:\n  " ++ unlines candidates
+        (c : _) ->
+          return c
 
     -- Canonicalize the chosen file
-    canFile <- liftIO $ canonicalizePath chosen
+    canFile <- liftIO $ canonicalizePath choice
 
     -- Find all roots that are directory prefixes of the canonical file
     let matching = filter (`isDirectoryPrefix` canFile) roots'

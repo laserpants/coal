@@ -21,6 +21,8 @@ import Coal.Language.Module (Module (moduleDefinitions, modulePath))
 import Coal.Language.Module.Path (principalPath)
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
+import Control.Monad.Reader (ReaderT, ask, runReaderT)
+import Control.Monad.Trans (lift)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Extras (Name, traverse_)
@@ -37,115 +39,117 @@ checkPatternAnomaliesM :: (Monad m) => Module Metadata k t -> CompilerT Metadata
 checkPatternAnomaliesM m = do
   (_, es) <-
     listenErrors $
-      traverse_ (checkPatternAnomalies (principalPath $ modulePath m)) (moduleDefinitions m)
+      runReaderT (traverse_ checkPatternAnomalies (moduleDefinitions m)) (principalPath $ modulePath m)
   unless (null es) (throwError PatternAnomaly)
 
 class PatternContext c where
-  checkPatternAnomalies :: (Monad m) => Name -> c -> CompilerT Metadata m ()
+  checkPatternAnomalies :: (Monad m) => c -> ReaderT Name (CompilerT Metadata m) ()
 
 instance PatternContext (Definition Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
-      DFunction _ name def ->
-        checkPatternAnomalies name def
-      DLet _ name def ->
-        checkPatternAnomalies name def
+      DFunction _ _ def ->
+        checkPatternAnomalies def
+      DLet _ _ def ->
+        checkPatternAnomalies def
       DInstance _ InstanceDefinition{..} ->
-        traverse_ (checkPatternAnomalies name) instanceDefinitionImplementations
+        traverse_ checkPatternAnomalies instanceDefinitionImplementations
       _ ->
         pure ()
 
 instance PatternContext (FunctionDefinition Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
       FunctionDefinition{..} ->
-        checkPatternAnomalies name functionDefinitionExpression
+        checkPatternAnomalies functionDefinitionExpression
 
 instance PatternContext (LetDefinition Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
       LetDefinition{..} ->
-        checkPatternAnomalies name letDefinitionExpression
+        checkPatternAnomalies letDefinitionExpression
 
 instance PatternContext (Binding Expression Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
       BPattern _ _ e ->
-        checkPatternAnomalies name e
+        checkPatternAnomalies e
       BFunction _ _ _ e ->
-        checkPatternAnomalies name e
+        checkPatternAnomalies e
 
 instance PatternContext (Choice Expression Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
       CPlain _ gs e -> do
-        traverse_ (checkPatternAnomalies name) gs
-        checkPatternAnomalies name e
+        traverse_ checkPatternAnomalies gs
+        checkPatternAnomalies e
 
 instance PatternContext (Guard Expression Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
       CGuard e ->
-        checkPatternAnomalies name e
+        checkPatternAnomalies e
 
 instance PatternContext (Clause Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
       EClause _ _ cs ->
-        traverse_ (checkPatternAnomalies name) cs
+        traverse_ checkPatternAnomalies cs
 
 instance PatternContext (Expression Metadata k t) where
-  checkPatternAnomalies name =
+  checkPatternAnomalies =
     \case
       EAnnotation _ _ e ->
-        checkPatternAnomalies name e
+        checkPatternAnomalies e
       EApplication _ _ e es -> do
-        checkPatternAnomalies name e
-        traverse_ (checkPatternAnomalies name) es
+        checkPatternAnomalies e
+        traverse_ checkPatternAnomalies es
       ELambda _ _ e ->
-        checkPatternAnomalies name e
+        checkPatternAnomalies e
       ELet _ gs e1 -> do
-        traverse_ (checkPatternAnomalies name) gs
-        checkPatternAnomalies name e1
+        traverse_ checkPatternAnomalies gs
+        checkPatternAnomalies e1
       ERecursiveLet a p e1 e2 -> do
-        checkPatternAnomalies name e1
-        checkPatternAnomalies name e2
+        checkPatternAnomalies e1
+        checkPatternAnomalies e2
       EIf _ _ e1 e2 e3 -> do
-        checkPatternAnomalies name e1
-        checkPatternAnomalies name e2
-        checkPatternAnomalies name e3
+        checkPatternAnomalies e1
+        checkPatternAnomalies e2
+        checkPatternAnomalies e3
       ERecord _ _ d me -> do
-        traverse_ (checkPatternAnomalies name) d
-        traverse_ (checkPatternAnomalies name) me
+        traverse_ checkPatternAnomalies d
+        traverse_ checkPatternAnomalies me
       EListCons _ _ e1 e2 -> do
-        checkPatternAnomalies name e1
-        checkPatternAnomalies name e2
+        checkPatternAnomalies e1
+        checkPatternAnomalies e2
       EListLiteral _ _ es ->
-        traverse_ (checkPatternAnomalies name) es
+        traverse_ checkPatternAnomalies es
       ETuple _ _ es ->
-        traverse_ (checkPatternAnomalies name) es
+        traverse_ checkPatternAnomalies es
       EMatch a _ e cs -> do
-        checkPatternAnomalies name e
-        checkExhaustive name a cs
-        traverse_ (checkPatternAnomalies name) cs
+        checkPatternAnomalies e
+        checkExhaustive a cs
+        traverse_ checkPatternAnomalies cs
       ELambdaMatch a _ cs -> do
-        checkExhaustive name a cs
-        traverse_ (checkPatternAnomalies name) cs
+        checkExhaustive a cs
+        traverse_ checkPatternAnomalies cs
       ESelect _ _ e ->
-        checkPatternAnomalies name e
+        checkPatternAnomalies e
       EFocus _ _ _ _ e1 e2 -> do
-        checkPatternAnomalies name e1
-        checkPatternAnomalies name e2
+        checkPatternAnomalies e1
+        checkPatternAnomalies e2
       EFFICall _ _ _ es e -> do
-        traverse_ (checkPatternAnomalies name) es
-        checkPatternAnomalies name e
+        traverse_ checkPatternAnomalies es
+        checkPatternAnomalies e
       _ ->
         pure ()
 
-checkExhaustive :: (Monad m) => Name -> Metadata -> NonEmpty (Clause Metadata k t) -> CompilerT Metadata m ()
-checkExhaustive name loc cs = do
-  isExhaustive <- exhaustive patterns
-  unless isExhaustive $ do
-    tellErrors [NonExhaustivePatterns (ErrorLocation name loc)]
+checkExhaustive :: (Monad m) => Metadata -> NonEmpty (Clause Metadata k t) -> ReaderT Name (CompilerT Metadata m) ()
+checkExhaustive loc cs = do
+  name <- ask
+  isExhaustive <- lift $ exhaustive patterns
+  unless isExhaustive $
+    lift $
+      tellErrors [NonExhaustivePatterns (ErrorLocation name loc)]
  where
   patterns = NonEmpty.toList (translatePattern . clausePattern <$> cs)

@@ -1,9 +1,10 @@
+-- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
 module Coal.Language.HasActive (HasActive (..), activeIdsIn) where
 
-import Coal.Language.Type
+import Coal.Language.Type (TypeIndex (typeIndexId))
 import Coal.Language.Type.Kind (Kind (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set

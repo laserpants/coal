@@ -11,7 +11,9 @@ module Coal.Compiler.Pass.TypePhase.PrepareBuild (
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
+import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Builtin.Names (builtinNames)
@@ -26,21 +28,19 @@ import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.TypeSystem.Parameterized
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
+import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless)
 import Control.Monad.Except (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.List (intersect)
+import qualified Data.Map.Strict as Map
 import Data.Set (Set, (\\))
+import qualified Data.Set as Set
 import Data.Tuple.Extra (uncurry3)
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
-import qualified Coal.Common.Environment as Environment
-import qualified Coal.Compiler.Build as Build
-import qualified Coal.TypeSystem.Substitution as Substitution
-import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 
 passPrepareBuild :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
 passPrepareBuild = Pass{runPass = passImpl}

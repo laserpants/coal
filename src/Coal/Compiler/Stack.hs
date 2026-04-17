@@ -58,11 +58,11 @@ import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Build (Build (..), setBuildBitcode)
 import Coal.Compiler.Config
 import Coal.Compiler.Environment (CompilerEnvironment (..))
-import Coal.Compiler.Error
+import Coal.Compiler.Error (CompilerError (..), CompilerFailureMode (..), ErrorLocation (..))
 import Coal.Compiler.Journal (CompilerJournal (..))
 import Coal.Compiler.State
-import Coal.Language
-import Coal.Language.Module
+import Coal.Language (IndexedScheme, Kind, TypeIndex)
+import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule

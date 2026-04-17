@@ -13,7 +13,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Definition
+import Coal.Language.Definition (Definition (DLet), LetDefinition (..))
 import Coal.Language.Module (Module (..))
 import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
 import Data.Data (Data)

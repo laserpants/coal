@@ -7,6 +7,38 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
+
+Compile match expressions into decision trees for efficient pattern matching.
+
+This pass transforms high-level match expressions with patterns into an
+optimized compiled representation using decision trees. The pattern matching
+compiler analyzes the patterns and generates an efficient sequence of tests
+and branches that minimize redundant checks.
+
+For example, a match expression:
+
+@
+match(value) {
+  | Some(x) => x + 1
+  | None => 0
+}
+@
+
+is compiled into a decision tree that efficiently tests the constructor and
+binds variables, avoiding redundant checks when multiple patterns share common
+structure. The compilation process:
+
+1. Translates patterns into an internal envelope representation
+2. Generates pattern matching equations from clauses
+3. Compiles equations into optimized decision trees using the pattern matching compiler
+4. Produces @ECompiledMatch@ expressions with efficient branching
+
+This transformation is essential for efficient pattern matching execution,
+particularly for complex nested patterns where naive left-to-right matching
+would perform redundant tests.
+-}
 module Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions (
   passCompileMatchExpressions,
 ) where
@@ -29,6 +61,13 @@ import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Dictionary)
 import TextShow (TextShow (showt))
 
+{- | Match expression compilation pass.
+
+Transform match expressions into optimized decision trees using the pattern
+matching compiler. Generate efficient branching code that minimizes redundant
+constructor tests, particularly for complex nested patterns where multiple
+patterns share common structure.
+-}
 passCompileMatchExpressions :: (Monad m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passCompileMatchExpressions = Pass{runPass = passImpl}
 
