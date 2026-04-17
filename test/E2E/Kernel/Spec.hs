@@ -7,7 +7,7 @@ import Coal.Common.Name (Name)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
-import Coal.Compiler.Pass.LoweringPhase.KernelCode (compileUnits)
+import Coal.Compiler.Pass.LoweringPhase.KernelCode (compileEnvelopes)
 import Coal.Compiler.Pass.LoweringPhase.LLVMOutput (generateLLOutput)
 import Coal.Compiler.Pass.LoweringPhase.Linking (compileBitcode)
 import Coal.Compiler.Stack
@@ -160,7 +160,7 @@ expectOutput expt files =
 
 runKernelSpec :: [FilePath] -> CompilerT Metadata IO String -- (Either CompilerFailureMode String)
 runKernelSpec files = do
-  ir <- evalPipelineT (compileUnits (BSource builtinObjects : mods))
+  ir <- evalPipelineT (compileEnvelopes (BSource builtinObjects : mods))
   res <- generateLLOutput Nothing config ir
   case res of
     Left err ->

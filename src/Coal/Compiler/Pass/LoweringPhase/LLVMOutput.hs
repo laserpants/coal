@@ -57,15 +57,15 @@ pass ir = do
     Left err ->
       throwError err
     Right results -> do
-      forM_ results (uncurry setBitcodeC) -- ???
+      forM_ results (uncurry setBitcodeC)
       modules_ <- gets compilerModules
 
-      fresh <- gets compilerTouched
-      let freshModules = Environment.restrict (Set.toList fresh) modules_
+      touched <- gets compilerTouched
+      let touchedModules = Environment.restrict (Set.toList touched) modules_
 
       let buildDir = "./.build/"
       liftIO $ createDirectoryIfMissing True buildDir
-      forM_ (Environment.toList freshModules) $
+      forM_ (Environment.toList touchedModules) $
         uncurry (writeBuildFile buildDir)
 
       pure results

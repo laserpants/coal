@@ -1,9 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Pass.LoweringPhase.KernelCode (passKernelCode, compileUnits) where
+module Coal.Compiler.Pass.LoweringPhase.KernelCode (
+  passKernelCode,
+  compileEnvelopes,
+) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
@@ -11,7 +15,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT, updateBuildC)
 import Coal.Kernel.Builtin.Objects (builtinObjects)
 import Coal.Kernel.Compiler (KernelExpr, compile, compileClosureCode)
 import Coal.Kernel.Compiler.EntryPoint (entryPoint)
@@ -29,16 +33,16 @@ import qualified Data.Text as Text
 import Extras (Name, forM, isConstructor, (<$$>))
 
 passKernelCode :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] [BuildEnvelope (Name, [IRConstruct [IRLine]])]
-passKernelCode = Pass{runPass = evalPipelineT . pass}
+passKernelCode = Pass{runPass = passImpl}
 
-pass :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata m) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
-pass ms = compileUnits (builtin : ms)
+passImpl :: (MonadIO m) => [BuildEnvelope (Module Type Name (Expr Type))] -> CompilerT Metadata m [BuildEnvelope (Name, [IRConstruct [IRLine]])]
+passImpl modules = evalPipelineT (compileEnvelopes (builtin : modules))
 
-compileUnits :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata m) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
-compileUnits units = do
+compileEnvelopes :: (MonadIO m) => [BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))] -> PipelineT (CompilerT Metadata m) [BuildEnvelope (Name, [IRConstruct [IRLine]])]
+compileEnvelopes units = do
   mods <- forM units $
     \case
-      BSource Module{..} -> do
+      BSource Module{moduleName, moduleImports, moduleObjects} -> do
         pipelineReset
 
         names <- collectNames moduleImports
@@ -77,7 +81,7 @@ compileUnits units = do
         pure (BCached Build{..})
 
   cc <- transformInterpreter compileClosureCode
-  -- TODO: cache
+  -- TODO: cache?
   pure (BSource ("closures", cc) : mods)
  where
   collectNames :: (MonadIO m) => [Name] -> PipelineT m [(Name, Type)]
@@ -109,6 +113,6 @@ compileUnits units = do
       Just it ->
         OExternal name it t
 
--- TODO: cache
+-- TODO: cache?
 builtin :: BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))
 builtin = BSource builtinObjects
