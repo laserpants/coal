@@ -56,7 +56,7 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (Supply (..))
 import Coal.Compiler.Build (Build (..), setBuildBitcode)
-import Coal.Compiler.Config
+import Coal.Compiler.Config (CompilerConfig, setConfigExecutableName, setConfigGenerateDotFiles, setConfigGenerateLLVMOutput)
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error (CompilerError (..), CompilerFailureMode (..), ErrorLocation (..))
 import Coal.Compiler.Journal (CompilerJournal (..))
@@ -65,7 +65,7 @@ import Coal.Language (IndexedScheme, Kind, TypeIndex)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
 import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (Substitution)
