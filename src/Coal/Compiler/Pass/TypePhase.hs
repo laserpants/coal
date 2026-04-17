@@ -12,7 +12,7 @@ import Coal.Compiler.Pass.TypePhase.PrepareBuild (passPrepareBuild)
 import Coal.Compiler.Pass.TypePhase.ReportTypeErrors (passReportTypeErrors)
 import Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference)
 import Coal.Language (IndexedType, Kind)
-import Coal.Language.Module
+import Coal.Language.Module (Module)
 import Control.Monad.IO.Class (MonadIO)
 
 typePhasePasses :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind IndexedType)
