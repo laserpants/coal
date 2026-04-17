@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TranslationPhase.ExpandGuards
+Module: Coal.Compiler.Pass.PhaseTranslation.ExpandGuards
 
 Expand guard expressions in pattern matching clauses into nested if-expressions.
 
@@ -44,7 +44,7 @@ the expansion ensures proper fallthrough to subsequent clauses when guards
 fail. This transformation makes the control flow explicit for later compiler
 stages.
 -}
-module Coal.Compiler.Pass.TranslationPhase.ExpandGuards (
+module Coal.Compiler.Pass.PhaseTranslation.ExpandGuards (
   passExpandGuards,
 ) where
 

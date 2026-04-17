@@ -5,7 +5,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TranslationPhase.CompileNats
+Module: Coal.Compiler.Pass.PhaseTranslation.CompileNats
 
 Compile natural number types and constructors into efficient runtime representation.
 
@@ -35,7 +35,7 @@ becomes runtime checks on the @int32@ value, reconstructing the recursive @nat@
 structure only when needed. This provides an efficient implementation of
 natural numbers while maintaining the structural recursion guarantees.
 -}
-module Coal.Compiler.Pass.TranslationPhase.CompileNats (
+module Coal.Compiler.Pass.PhaseTranslation.CompileNats (
   passCompileNats,
 ) where
 

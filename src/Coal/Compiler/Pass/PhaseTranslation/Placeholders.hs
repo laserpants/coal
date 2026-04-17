@@ -10,7 +10,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TranslationPhase.Placeholders
+Module: Coal.Compiler.Pass.PhaseTranslation.Placeholders
 Description: Trait dictionary insertion and constraint elaboration
 
 This module implements dictionary-passing style for type classes (traits) in Coal.
@@ -47,7 +47,7 @@ show(42)  // becomes: show(Show\<int32\>, 42)
 
 The pass runs twice to handle all trait dependencies correctly.
 -}
-module Coal.Compiler.Pass.TranslationPhase.Placeholders (
+module Coal.Compiler.Pass.PhaseTranslation.Placeholders (
   TraitContext (..),
   passPlaceholders,
 ) where
@@ -91,7 +91,7 @@ pass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m 
 pass Module{..} = do
   setCurrentPathC modulePath
   build <- getCurrentBuildC
-  setNamesC (typeEnvironment build)
+  setNamesC (extractTypeEnvironment build)
   twice (traverse_ collectDefinitionTraits moduleDefinitions)
   names <- gets compilerNameStore
   updateNames names
@@ -460,7 +460,7 @@ passiveApplyTraits loc traits = do
     [] ->
       pure ()
     x : xs ->
-      -- \| Collect trait constraints from a definition and register its name (first pass)
+      -- Collect trait constraints from a definition and register its name (first pass)
       traverse_ insert_ (x :| xs)
  where
   insert_ trait = do

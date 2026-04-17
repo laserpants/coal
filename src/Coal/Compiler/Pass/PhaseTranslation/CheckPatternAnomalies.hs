@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.CheckPatternAnomalies (
+module Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies (
   passCheckPatternAnomalies,
 ) where
 

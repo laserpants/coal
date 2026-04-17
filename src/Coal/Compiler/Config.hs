@@ -3,6 +3,13 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Config
+Description: Compiler configuration settings
+
+This module defines the compiler configuration and provides default
+configurations for various compilation scenarios.
+-}
 module Coal.Compiler.Config (
   CompilerConfig (..),
   defaultConfig,

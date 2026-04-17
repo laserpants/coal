@@ -1,4 +1,4 @@
-module Coal.Compiler.Pass.TranslationPhase.DenormalizeAST (
+module Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST (
   passDenormalizeAST,
 ) where
 

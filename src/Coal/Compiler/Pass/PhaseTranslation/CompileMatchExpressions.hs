@@ -8,7 +8,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
+Module: Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions
 
 Compile match expressions into decision trees for efficient pattern matching.
 
@@ -39,7 +39,7 @@ This transformation is essential for efficient pattern matching execution,
 particularly for complex nested patterns where naive left-to-right matching
 would perform redundant tests.
 -}
-module Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions (
+module Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions (
   passCompileMatchExpressions,
 ) where
 

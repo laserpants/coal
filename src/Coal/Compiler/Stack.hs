@@ -12,7 +12,7 @@ Module: Coal.Compiler.Stack
 The compiler monad stack and state management operations.
 
 This module defines the core compiler monad transformer @CompilerT@, which
-combines reader, writer, state, and error handling effects. It provides
+combines Reader, Writer, State, and error handling effects. It provides
 operations for managing compilation state including builds, constraints,
 assumptions, type information, and configuration.
 -}

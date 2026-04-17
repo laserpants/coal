@@ -78,6 +78,19 @@ library
       Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions
       Coal.Compiler.Pass.PhasePreflight.RefreshCache
       Coal.Compiler.Pass.PhasePreflight.SortModules
+      Coal.Compiler.Pass.PhaseTranslation
+      Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies
+      Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions
+      Coal.Compiler.Pass.PhaseTranslation.CompileNats
+      Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST
+      Coal.Compiler.Pass.PhaseTranslation.DesugarPatterns
+      Coal.Compiler.Pass.PhaseTranslation.ExpandAsPatterns
+      Coal.Compiler.Pass.PhaseTranslation.ExpandGuards
+      Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns
+      Coal.Compiler.Pass.PhaseTranslation.ExpandOrPatterns
+      Coal.Compiler.Pass.PhaseTranslation.ExpandRecordPatterns
+      Coal.Compiler.Pass.PhaseTranslation.NormalizeAST
+      Coal.Compiler.Pass.PhaseTranslation.Placeholders
       Coal.Compiler.Pass.PhaseTypeChecking
       Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases
       Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds
@@ -88,19 +101,6 @@ library
       Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild
       Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors
       Coal.Compiler.Pass.PhaseTypeChecking.TypeInference
-      Coal.Compiler.Pass.TranslationPhase
-      Coal.Compiler.Pass.TranslationPhase.CheckPatternAnomalies
-      Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
-      Coal.Compiler.Pass.TranslationPhase.CompileNats
-      Coal.Compiler.Pass.TranslationPhase.DenormalizeAST
-      Coal.Compiler.Pass.TranslationPhase.DesugarPatterns
-      Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns
-      Coal.Compiler.Pass.TranslationPhase.ExpandGuards
-      Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
-      Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns
-      Coal.Compiler.Pass.TranslationPhase.ExpandRecordPatterns
-      Coal.Compiler.Pass.TranslationPhase.NormalizeAST
-      Coal.Compiler.Pass.TranslationPhase.Placeholders
       Coal.Compiler.Path.Resolve
       Coal.Compiler.PatternMatching.AnomalyDetection
       Coal.Compiler.PatternMatching.Compiler

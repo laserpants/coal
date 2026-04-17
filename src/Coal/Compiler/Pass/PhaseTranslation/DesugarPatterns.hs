@@ -5,7 +5,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TranslationPhase.DesugarPatterns
+Module: Coal.Compiler.Pass.PhaseTranslation.DesugarPatterns
 
 Desugar complex patterns into simple variable patterns with explicit match expressions.
 
@@ -30,22 +30,23 @@ let v = tuple in match(v) {
 Similarly, function patterns are extracted:
 
 @
-fn (Just x) => x + 1
+fn(Just(x)) => x + 1
 @
 
 becomes:
 
 @
-fn v => match(v) {
-  | Just x => x + 1
-}
+fn(v) =>
+  match(v) {
+    | Just(x) => x + 1
+  }
 @
 
 This transformation normalizes the AST by ensuring that only simple variable
 patterns appear in bindings, with all structural pattern matching performed
 through explicit match expressions.
 -}
-module Coal.Compiler.Pass.TranslationPhase.DesugarPatterns (
+module Coal.Compiler.Pass.PhaseTranslation.DesugarPatterns (
   passDesugarPatterns,
 ) where
 

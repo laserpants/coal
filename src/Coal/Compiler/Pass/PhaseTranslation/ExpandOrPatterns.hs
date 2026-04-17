@@ -4,7 +4,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns
+Module: Coal.Compiler.Pass.PhaseTranslation.ExpandOrPatterns
 Description: Expansion of or-patterns into multiple pattern clauses
 
 This module implements the expansion of or-patterns (disjunctive patterns) into
@@ -29,13 +29,13 @@ Key transformations:
 Example transformation:
 @
 match(x) {
-  | Just y or Nothing => 0
+  | Just(y) or Nothing => 0
 }
 @
 becomes:
 @
 match(x) {
-  | Just y => 0
+  | Just(y) => 0
   | Nothing => 0
 }
 @
@@ -55,7 +55,7 @@ match((x, y)) {
 This pass runs during the translation phase after type checking and before
 pattern match compilation.
 -}
-module Coal.Compiler.Pass.TranslationPhase.ExpandOrPatterns (
+module Coal.Compiler.Pass.PhaseTranslation.ExpandOrPatterns (
   passExpandOrPatterns,
 ) where
 

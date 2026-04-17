@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Coal.Compiler.Pass.TranslationPhase.NormalizeAST (
+module Coal.Compiler.Pass.PhaseTranslation.NormalizeAST (
   passNormalizeAST,
 ) where
 

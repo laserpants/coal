@@ -7,7 +7,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.ExpandRecordPatterns (
+module Coal.Compiler.Pass.PhaseTranslation.ExpandRecordPatterns (
   passExpandRecordPatterns,
 ) where
 

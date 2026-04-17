@@ -4,7 +4,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.TranslationPhase.ExpandAsPatterns (
+module Coal.Compiler.Pass.PhaseTranslation.ExpandAsPatterns (
   passExpandAsPatterns,
 ) where
 

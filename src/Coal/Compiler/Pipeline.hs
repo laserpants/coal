@@ -25,8 +25,8 @@ import Coal.Compiler.Pass.PhaseLowering (phaseLowering)
 import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
 import Coal.Compiler.Pass.PhasePreflight (phasePreflight)
+import Coal.Compiler.Pass.PhaseTranslation (phaseTranslation)
 import Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking)
-import Coal.Compiler.Pass.TranslationPhase (translationPhasePasses)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
@@ -54,7 +54,7 @@ pipeline :: (MonadIO m, MonadMask m) => Pass Metadata m [FilePath] ()
 pipeline =
   phaseParsing
     >-> phasePreflight
-    >-> mapPass (liftPass (phaseTypeChecking >-> translationPhasePasses))
+    >-> mapPass (liftPass (phaseTypeChecking >-> phaseTranslation))
     >-> phaseLowering
     >-> passLinking
 

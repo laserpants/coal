@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns
+Module: Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns
 Description: Expansion of integer literal patterns into equality guards
 
 This module implements the desugaring of integer literals in pattern matching.
@@ -35,7 +35,7 @@ Key transformations:
 This pass runs during the translation phase after type checking and before
 further lowering transformations.
 -}
-module Coal.Compiler.Pass.TranslationPhase.ExpandIntegerLiteralPatterns (
+module Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns (
   passExpandIntegerLiteralPatterns,
 ) where
 
