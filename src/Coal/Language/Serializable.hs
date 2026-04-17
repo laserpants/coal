@@ -86,7 +86,7 @@ instance Serializable Intrinsic where
       IVoid ->
         "IVoid"
 
-instance (Serializable (s k)) => Serializable (Type s k) where
+instance (Serializable (o k)) => Serializable (Type o k) where
   serialize =
     \case
       TApplication _ t1 ts ->
