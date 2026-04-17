@@ -8,7 +8,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds
+Module: Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds
 
 Expand fold expressions embedded within other expressions into explicit form.
 
@@ -43,7 +43,7 @@ let fold$1 =
 The pass also validates that @-patterns are only used within fold contexts
 and reports errors for misplaced or invalid fold patterns.
 -}
-module Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds (
+module Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds (
   passExpandExpressionFolds,
 ) where
 

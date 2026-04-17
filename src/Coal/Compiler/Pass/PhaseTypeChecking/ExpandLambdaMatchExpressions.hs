@@ -8,7 +8,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions
+Module: Coal.Compiler.Pass.PhaseTypeChecking.ExpandLambdaMatchExpressions
 
 Expand lambda-match expressions into standard lambda expressions with embedded match.
 
@@ -39,7 +39,7 @@ This transformation makes the binding of the match scrutinee explicit,
 simplifying later compiler passes that work with standard lambda and match
 constructs.
 -}
-module Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions (
+module Coal.Compiler.Pass.PhaseTypeChecking.ExpandLambdaMatchExpressions (
   ExpandContext (..),
   passExpandLambdaMatchExpressions,
 ) where

@@ -9,7 +9,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds
+Module: Coal.Compiler.Pass.PhaseTypeChecking.ExpandTopLevelFolds
 
 Expand top-level fold definitions into let definitions with explicit recursion.
 
@@ -42,7 +42,7 @@ The pass validates that @-patterns only appear within constructor patterns and
 reports errors for misplaced fold patterns. This transformation enables
 structural recursion by making the recursive function binding explicit.
 -}
-module Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds (
+module Coal.Compiler.Pass.PhaseTypeChecking.ExpandTopLevelFolds (
   passExpandTopLevelFolds,
 ) where
 

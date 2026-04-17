@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.PrepareBuild
+Module: Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild
 Description: Build environment population before type inference
 
 This module implements a compiler pass that populates the Build environment by
@@ -36,7 +36,7 @@ The Reader provides export context (what names should be exported), the State
 accumulates the Build structure, and CompilerT provides access to other modules
 and error reporting.
 -}
-module Coal.Compiler.Pass.TypePhase.PrepareBuild (
+module Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild (
   passPrepareBuild,
   prepareBuild,
 ) where

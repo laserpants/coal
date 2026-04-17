@@ -11,7 +11,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry (NameEntry (..))
 import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
-import Coal.Compiler.Pass.TypePhase.PrepareBuild
+import Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference

@@ -8,7 +8,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.ExpandAliases
+Module: Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases
 
 Expand type aliases to their underlying definitions throughout the AST.
 
@@ -31,7 +31,7 @@ type inference.
 The pass also updates the build environment to reflect the expanded types in
 constructors and name entries.
 -}
-module Coal.Compiler.Pass.TypePhase.ExpandAliases (
+module Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases (
   passExpandAliases,
 ) where
 

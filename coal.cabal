@@ -78,6 +78,16 @@ library
       Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions
       Coal.Compiler.Pass.PhasePreflight.RefreshCache
       Coal.Compiler.Pass.PhasePreflight.SortModules
+      Coal.Compiler.Pass.PhaseTypeChecking
+      Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases
+      Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds
+      Coal.Compiler.Pass.PhaseTypeChecking.ExpandFunctionGroups
+      Coal.Compiler.Pass.PhaseTypeChecking.ExpandLambdaMatchExpressions
+      Coal.Compiler.Pass.PhaseTypeChecking.ExpandTopLevelFolds
+      Coal.Compiler.Pass.PhaseTypeChecking.KindIndexing
+      Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild
+      Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors
+      Coal.Compiler.Pass.PhaseTypeChecking.TypeInference
       Coal.Compiler.Pass.TranslationPhase
       Coal.Compiler.Pass.TranslationPhase.CheckPatternAnomalies
       Coal.Compiler.Pass.TranslationPhase.CompileMatchExpressions
@@ -91,16 +101,6 @@ library
       Coal.Compiler.Pass.TranslationPhase.ExpandRecordPatterns
       Coal.Compiler.Pass.TranslationPhase.NormalizeAST
       Coal.Compiler.Pass.TranslationPhase.Placeholders
-      Coal.Compiler.Pass.TypePhase
-      Coal.Compiler.Pass.TypePhase.ExpandAliases
-      Coal.Compiler.Pass.TypePhase.ExpandExpressionFolds
-      Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
-      Coal.Compiler.Pass.TypePhase.ExpandLambdaMatchExpressions
-      Coal.Compiler.Pass.TypePhase.ExpandTopLevelFolds
-      Coal.Compiler.Pass.TypePhase.KindIndexing
-      Coal.Compiler.Pass.TypePhase.PrepareBuild
-      Coal.Compiler.Pass.TypePhase.ReportTypeErrors
-      Coal.Compiler.Pass.TypePhase.TypeInference
       Coal.Compiler.Path.Resolve
       Coal.Compiler.PatternMatching.AnomalyDetection
       Coal.Compiler.PatternMatching.Compiler

@@ -2,13 +2,13 @@
 {-# LANGUAGE RecordWildCards #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.ReportTypeErrors
+Module: Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors
 
 Report type errors that occurred during constraint generation and solving.
 Collect errors from both the constraint generation phase and the solver phase,
 then report them to the user and abort compilation if any errors were found.
 -}
-module Coal.Compiler.Pass.TypePhase.ReportTypeErrors (
+module Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors (
   passReportTypeErrors,
 ) where
 

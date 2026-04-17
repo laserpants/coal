@@ -7,7 +7,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups
+Module: Coal.Compiler.Pass.PhaseTypeChecking.ExpandFunctionGroups
 
 Expand function groups into individual let definitions with pattern matching.
 
@@ -37,7 +37,7 @@ let f =
 This normalization simplifies later type checking and compilation phases by
 ensuring all functions have a uniform representation.
 -}
-module Coal.Compiler.Pass.TypePhase.ExpandFunctionGroups (
+module Coal.Compiler.Pass.PhaseTypeChecking.ExpandFunctionGroups (
   ExpandContext (..),
   passExpandFunctionGroups,
 ) where

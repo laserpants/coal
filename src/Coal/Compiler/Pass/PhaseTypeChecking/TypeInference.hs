@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.TypeInference
+Module: Coal.Compiler.Pass.PhaseTypeChecking.TypeInference
 Description: Type inference and kind inference for Coal modules
 
 This module implements bidirectional type inference using constraint generation
@@ -18,7 +18,7 @@ The inference process:
 3. Solve constraints incrementally
 4. Apply substitutions and normalize types
 -}
-module Coal.Compiler.Pass.TypePhase.TypeInference (passTypeInference) where
+module Coal.Compiler.Pass.PhaseTypeChecking.TypeInference (passTypeInference) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (replaceBuildNameEntry)

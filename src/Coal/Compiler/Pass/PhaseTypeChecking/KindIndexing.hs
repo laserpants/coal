@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 {- |
-Module: Coal.Compiler.Pass.TypePhase.KindIndexing
+Module: Coal.Compiler.Pass.PhaseTypeChecking.KindIndexing
 
 The kind indexing pass is the entry point to the type checking phase.
 It transforms a module from having no kind annotations to having proper
@@ -26,7 +26,7 @@ This pass performs three main tasks:
 The pass operates on 'Module Metadata () ()' (no kind or type information)
 and produces 'Module Metadata Kind ()' (with kind annotations but no types yet).
 -}
-module Coal.Compiler.Pass.TypePhase.KindIndexing (passKindIndexing) where
+module Coal.Compiler.Pass.PhaseTypeChecking.KindIndexing (passKindIndexing) where
 
 import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
