@@ -359,8 +359,8 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 
 getSourceC :: (Monad m) => Name -> CompilerT a m Text
 getSourceC name = do
-  s <- gets compilerSources
-  pure (fromMaybe (error $ "Internal error: No source found for module " ++ show name) (Environment.lookup name s))
+  CompilerState{compilerSources} <- get
+  pure (fromMaybe (error $ "Internal error: No source found for module " ++ show name) (Environment.lookup name compilerSources))
 
 {-# INLINE setTouched #-}
 setTouched :: (Monad m, BuildName p) => p -> CompilerT a m ()
