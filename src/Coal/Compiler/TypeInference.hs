@@ -1,3 +1,4 @@
+-- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
@@ -23,9 +24,9 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Definition
-import Coal.Language.Module
+import Coal.Language.Module (Module)
 import Coal.TypeSystem
-import Coal.TypeSystem.Kind.Constraint.Generation
+import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized
 import Control.Monad.Except (forM_)
 import Control.Monad.Reader (runReaderT)
@@ -141,11 +142,11 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
                       insertConstraintsC [Explicit (RuleTraitInstance loc (typeOf d) s) (typeOf d) s]
                       generateConstraints $ DLet loc (instanceLabel trait name) def
                 _ ->
-                  pure ()
+                  return ()
            where
             trait = Trait instanceDefinitionTraitName instanceDefinitionType
       _ ->
-        pure ()
+        return ()
 
 toIndexedScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> CompilerT a m (Scheme TypeIndex Kind IndexedType)
 toIndexedScheme Forall{..} = do
@@ -165,7 +166,7 @@ generateExpressionConstraints expr = do
   let (errors, constraints) = partitionEithers result
   compilerReportConstraintsGenErrors errors
   setTypeAnnotationParamsC params
-  pure (assumptions, constraints)
+  return (assumptions, constraints)
 
 runConstraintsGen :: (Monad m) => ConstraintsGenStack a TypeIndex Kind IndexedType r -> CompilerT a m (r, Dictionary (a, TypeIndex Kind), [ConstraintsGenOutput a TypeIndex Kind IndexedType])
 runConstraintsGen stack = do
@@ -184,7 +185,7 @@ runConstraintsGen stack = do
           )
           stack
   updateSupplyC constraintsGenStateSupply
-  pure (result, constraintsGenStateTypeIndexes, output)
+  return (result, constraintsGenStateTypeIndexes, output)
 
 define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
 define name t = insertNameC name (Forall (typeIndexesIn s) mempty s)
@@ -194,7 +195,7 @@ define name t = insertNameC name (Forall (typeIndexesIn s) mempty s)
 assumptionConstraints :: (Monad m) => CompilerAssumption a -> CompilerT a m (Either (CompilerAssumption a) (CompilerConstraint a))
 assumptionConstraints Assumption{..} = do
   names <- gets compilerNameStore
-  pure $
+  return $
     case Environment.lookup assumptionName names of
       Nothing ->
         Left Assumption{..}
@@ -210,7 +211,7 @@ solveConstraintsT constraints = do
   let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
   compilerReportSolverRuleViolations (apply sub rs)
   compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
-  pure sub
+  return sub
 
 solveT :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
 solveT = do
