@@ -119,7 +119,7 @@ updateConstructors =
 updateNames :: (MonadIO m, Show a) => CompilerT a m ()
 updateNames =
   updateCurrentBuildC $
-    \build@Build{..} ->
+    \build@Build{buildNames} ->
       flip execStateT build $ do
         forM_ (concat $ Environment.elems buildNames) $
           \case
