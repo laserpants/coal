@@ -31,8 +31,8 @@ passLinking = Pass{runPass = passImpl}
 passImpl :: (MonadIO m) => [(Name, ByteString)] -> CompilerT Metadata m ()
 passImpl bcode = do
   config <- gets compilerConfig
-  r <- liftIO (compileBitcode config bcode)
-  for_ r throwError
+  err <- liftIO (compileBitcode config bcode)
+  for_ err throwError
 
 compileBitcode :: CompilerConfig -> [(Name, ByteString)] -> IO (Maybe CompilerFailureMode)
 compileBitcode CompilerConfig{..} files =
