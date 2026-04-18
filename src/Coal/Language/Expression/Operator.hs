@@ -1,9 +1,17 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Expression.Operator
+
+Type schemes for builtin operators.
+
+Note: These operators represent only a subset of the language's operators.
+Many builtin operators (such as arithmetic) are overloaded and are therefore
+represented as qualified function calls.
+-}
 module Coal.Language.Expression.Operator (
   Operator (..),
   operatorTypeScheme,

@@ -1,8 +1,12 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Module.Import
+
+Module import declarations for names and types.
+-}
 module Coal.Language.Module.Import (Import (..)) where
 
 import Data.Binary (Binary)

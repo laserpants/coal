@@ -5,6 +5,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.HasType
+
+Type class for extracting and folding types from language constructs.
+-}
 module Coal.Language.HasType (HasType (..), foldTypeOf) where
 
 import Coal.Common.Label (Label (..))

@@ -1,7 +1,11 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Module.Export
+
+Module export declarations for names and types.
+-}
 module Coal.Language.Module.Export (Export (..), includesName) where
 
 import Coal.Common.Name (isConstructor)

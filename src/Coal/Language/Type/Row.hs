@@ -4,6 +4,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Type.Row
+
+Row polymorphism for extensible records and variants.
+-}
 module Coal.Language.Type.Row (
   Row (..),
   RowData (..),

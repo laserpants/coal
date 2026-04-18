@@ -1,9 +1,13 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Data.Constructor
+
+Data constructor representation with arity and type schemes.
+-}
 module Coal.Language.Data.Constructor (DataConstructor (..)) where
 
 import Coal.Language.Type.Scheme (Scheme (..))

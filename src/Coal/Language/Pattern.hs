@@ -1,10 +1,17 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Pattern
+
+Pattern matching constructs for the Coal language.
+
+Supports wildcards, variables, constructors, literals, records, lists, tuples,
+or-patterns, as-patterns, and recursive patterns for fold expressions.
+-}
 module Coal.Language.Pattern (Pattern (..)) where
 
 import Coal.Common.FreeVars (BoundVars (..))

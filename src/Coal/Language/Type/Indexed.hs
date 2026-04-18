@@ -5,6 +5,11 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TypeApplications #-}
 
+{- |
+Module: Coal.Language.Type.Indexed
+
+Type indexing and operations for indexed type representations.
+-}
 module Coal.Language.Type.Indexed (
   TypeIndexed (..),
   typeIdsIn,

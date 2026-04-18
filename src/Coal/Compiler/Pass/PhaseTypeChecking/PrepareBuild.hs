@@ -20,7 +20,7 @@ The pass operates in several strictly ordered steps:
 4. **Trait collection**: Register trait definitions
 5. **Trait interface collection**: Register trait member signatures
 6. **Instance collection**: Register trait implementations
-7. **Built-in instance insertion**: Add compiler-provided instances
+7. **Builtin instance insertion**: Add compiler-provided instances
 8. **Import collection**: Process imports from other modules
 9. **Placeholder collection**: Register function/let names for type inference
 10. **Qualified name resolution**: Build mapping of local to qualified names
@@ -128,7 +128,7 @@ prepareBuild Module{..} =
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions defs = do
-  -- Insert built-in type and data constructors that are always available
+  -- Insert builtin type and data constructors that are always available
   -- These are compiler-provided primitives for lists and natural numbers
   insertNameEntry (NType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
@@ -190,7 +190,7 @@ prepareDefinitions defs = do
     -- Depends on traits being defined (Step 4)
     traverse_ collectInstances defs
 
-    -- Step 7: Insert compiler built-in instances
+    -- Step 7: Insert compiler builtin instances
     -- Standard instances provided by the compiler (e.g., Show for primitives)
     forM_ builtinInstances (modify . uncurry3 insertBuildInstance)
 

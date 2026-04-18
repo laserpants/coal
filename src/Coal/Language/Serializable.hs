@@ -1,8 +1,12 @@
--- +
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Language.Serializable
+
+Text serialization for language types and constructs.
+-}
 module Coal.Language.Serializable (
   Serializable (..),
   instanceLabel,

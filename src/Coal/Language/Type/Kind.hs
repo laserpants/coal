@@ -6,6 +6,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Type.Kind
+
+Kind representation and operations for the type system.
+-}
 module Coal.Language.Type.Kind (
   Kind (..),
   KindProxy (..),

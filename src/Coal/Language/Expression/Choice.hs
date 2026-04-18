@@ -1,4 +1,3 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
@@ -6,6 +5,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Expression.Choice
+
+Guarded expression choices for pattern matching branches.
+-}
 module Coal.Language.Expression.Choice (Choice (..), Guard (..)) where
 
 import Coal.Common.FreeVars (FreeVars (..))

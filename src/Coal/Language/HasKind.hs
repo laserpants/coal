@@ -1,9 +1,13 @@
--- +
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.HasKind
+
+Type class for extracting and folding kinds from language constructs.
+-}
 module Coal.Language.HasKind (HasKind (..), foldKindOf) where
 
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))

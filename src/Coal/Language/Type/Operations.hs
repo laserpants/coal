@@ -2,6 +2,11 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Language.Type.Operations
+
+Smart constructors and utility functions for type manipulation.
+-}
 module Coal.Language.Type.Operations (
   -- * Smart constructors
   listType,

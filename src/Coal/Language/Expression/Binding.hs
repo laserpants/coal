@@ -1,4 +1,3 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
@@ -7,6 +6,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Expression.Binding
+
+Let-binding constructs for pattern and function bindings.
+-}
 module Coal.Language.Expression.Binding (Binding (..)) where
 
 import Coal.Common.FreeVars (BoundVars (..), FreeVars (..), exceptNames)

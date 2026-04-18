@@ -5,6 +5,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Type.Scheme
+
+Polymorphic type schemes with universal quantification.
+-}
 module Coal.Language.Type.Scheme (
   Scheme (..),
   forall0,

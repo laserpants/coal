@@ -9,6 +9,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Type
+
+Core type representation for the Coal language type system.
+
+Defines indexed and parameterized type variants including applications,
+arrows, constructors, records, and row polymorphism.
+-}
 module Coal.Language.Type (
   Type (..),
   TypeIndex (..),

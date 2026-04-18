@@ -3,6 +3,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+{- |
+Module: Coal.Language.Module.Path
+
+Module path representation and validation for hierarchical module names.
+-}
 module Coal.Language.Module.Path (
   Path (..),
   PathError (..),

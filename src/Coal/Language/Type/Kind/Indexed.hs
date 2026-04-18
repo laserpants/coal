@@ -3,6 +3,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RecordWildCards #-}
 
+{- |
+Module: Coal.Language.Type.Kind.Indexed
+
+Conversion of language constructs to kind-indexed representations.
+-}
 module Coal.Language.Type.Kind.Indexed (ToKindIndexed (..)) where
 
 import Coal.Common.Label (Label (..))

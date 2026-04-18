@@ -1,9 +1,13 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Trait
+
+Trait and qualified type representations for type classes.
+-}
 module Coal.Language.Trait (Trait (..), Qualified (..)) where
 
 import Data.Binary (Binary)

@@ -1,10 +1,18 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Definition
+
+Internal representation of module-level declarations in Coal source programs.
+
+A Definition represents any construct that can appear at the top level of a
+module, including data types, type aliases, functions, folds, imports, traits,
+and trait instances.
+-}
 module Coal.Language.Definition (
   Definition (..),
   TypeDefinition (..),

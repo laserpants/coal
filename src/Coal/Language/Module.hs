@@ -1,8 +1,12 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Module
+
+Module representation with imports, exports, and definitions.
+-}
 module Coal.Language.Module (
   Module (..),
   ExportList (..),

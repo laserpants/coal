@@ -1,15 +1,19 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Type.Intrinsic
+
+Intrinsic primitive types built into the language.
+-}
 module Coal.Language.Type.Intrinsic (Intrinsic (..)) where
 
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import GHC.Generics (Generic)
 
--- | Built-in types
+-- | Builtin types
 data Intrinsic
   = IBool
   | IChar

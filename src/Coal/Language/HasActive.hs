@@ -1,7 +1,11 @@
--- +
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
+{- |
+Module: Coal.Language.HasActive
+
+Type class for extracting active type variables from language constructs.
+-}
 module Coal.Language.HasActive (HasActive (..), activeIdsIn) where
 
 import Coal.Language.Type (TypeIndex (typeIndexId))

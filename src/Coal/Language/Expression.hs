@@ -1,4 +1,3 @@
--- +
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
@@ -6,6 +5,14 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Language.Expression
+
+Expression representation for the Coal language AST.
+
+Includes lambdas, applications, let bindings, pattern matching, literals,
+operators, and fold/unfold expressions for data and codata.
+-}
 module Coal.Language.Expression (
   Expression (..),
   Clause (..),
