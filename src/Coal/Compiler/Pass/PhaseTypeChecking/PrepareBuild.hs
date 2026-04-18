@@ -128,7 +128,7 @@ prepareBuild Module{..} =
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions defs = do
-  -- Insert builtin type and data constructors that are always available
+  -- Insert built-in type and data constructors that are always available
   -- These are compiler-provided primitives for lists and natural numbers
   insertNameEntry (NType "List" (KArrow KType KType))
   insertTypeConstructor "List" $
@@ -190,7 +190,7 @@ prepareDefinitions defs = do
     -- Depends on traits being defined (Step 4)
     traverse_ collectInstances defs
 
-    -- Step 7: Insert compiler builtin instances
+    -- Step 7: Insert compiler built-in instances
     -- Standard instances provided by the compiler (e.g., Show for primitives)
     forM_ builtinInstances (modify . uncurry3 insertBuildInstance)
 

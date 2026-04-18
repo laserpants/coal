@@ -4,7 +4,7 @@ module Main {
   import String(is_prefix_of, length, drop)
   import Coal.Combinators(snd)
 
-//  Builtin type:
+//  Built-in type:
 //
 //  type Process<a, v> =
 //    Process({ state : a, step : v -> a -> Process<a, v> })

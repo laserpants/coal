@@ -2,7 +2,7 @@ module Main {
 
   import IO(println_int32)
 
-//  Builtin type:
+//  Built-in type:
 //
 //  type Process<a, v> =
 //    Process(

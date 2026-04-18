@@ -34,9 +34,9 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Extras (for)
 
-{- | Builtin definition insertion pass.
+{- | Built-in definition insertion pass.
 
-Inject compiler-provided builtin definitions into modules. Insert core builtins
+Inject compiler-provided built-in definitions into modules. Insert core built-ins
 for embedded standard library modules and additional definitions for user
 modules, ensuring all modules have access to necessary compiler primitives.
 -}

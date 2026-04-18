@@ -148,7 +148,7 @@ collectTypeAliases =
           , aliasEntryParams = aliasDefinitionParameters
           , aliasEntryType = aliasDefinitionType
           }
-    -- Skip builtin imports as they are handled separately
+    -- Skip built-in imports as they are handled separately
     DImport _ (Path ["Builtin$"]) _ ->
       pure ()
     DImport _ path imports -> do

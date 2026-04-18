@@ -13,7 +13,7 @@ import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import GHC.Generics (Generic)
 
--- | Builtin types
+-- | Built-in types
 data Intrinsic
   = IBool
   | IChar
