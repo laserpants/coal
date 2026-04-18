@@ -103,10 +103,10 @@ module Main {
     | R270
 
   fun spin
-    | R0 = R90
-    | R90 = R180
-    | R180 = R270
-    | R270 = R0
+    | R0 => R90
+    | R90 => R180
+    | R180 => R270
+    | R270 => R0
 
   type Board = Board(Set<(int32, int32)>)
 
@@ -162,10 +162,10 @@ module Main {
     }
 
   fun interpret_event : Event -> Move 
-    | KeyLeft         = MoveLeft
-    | KeyRight        = MoveRight
-    | KeyUp           = Rotate
-    | KeyDown or Tick = MoveDown
+    | KeyLeft         => MoveLeft
+    | KeyRight        => MoveRight
+    | KeyUp           => Rotate
+    | KeyDown or Tick => MoveDown
 
   let game : Process<GameState, Move> =
     let

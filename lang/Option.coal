@@ -5,23 +5,23 @@ module Option {
    * value for the case when the input is `None`.
    */ 
   fun with_default
-    | _, Some(value) = value
-    | value, _       = value
+    | _, Some(value) => value
+    | value, _       => value
 
   /**
    * Return `true` if the given value is constructed with `Some`, and `false` 
    * otherwise.
    */
   fun is_some 
-    | Some(_) = true
-    | None    = false
+    | Some(_) => true
+    | None    => false
 
   /**
    * Return `true` if the given value is `None`, and `false` otherwise.
    */
   fun is_none
-    | None    = true
-    | Some(_) = false
+    | None    => true
+    | Some(_) => false
 
   /**
    * From a default value of type `b`, a function of type `a -> b`, and an 

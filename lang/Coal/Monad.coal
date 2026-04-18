@@ -17,8 +17,8 @@ module Coal.Monad {
   instance Monad<Option> {
     // bind : Option<a> -> (a -> Option<b>) -> Option<b>
     fun bind
-      | None, _    = None
-      | Some(x), f = f(x) 
+      | None, _    => None
+      | Some(x), f => f(x) 
   }
 
   instance Monad<IO> {

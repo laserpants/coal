@@ -154,31 +154,6 @@ parseNormalImport start = do
   end <- getSourcePos
   pure (DImport (Metadata start end) (Path path) names)
 
--- parseQualifiedImport :: SourcePos -> Parser (Definition Metadata o ())
--- parseQualifiedImport start = do
---  lexeme_ "namespace"
---  path <- identifier upperChar `sepBy1` symbol "."
---  end <- getSourcePos
---  pure (DQualifiedImport (Metadata start end) (Path path))
-
--- parseNormalImport :: SourcePos -> Parser (Definition Metadata o ())
--- parseNormalImport start = do
---  path <- (lexeme "Builtin$" <|> identifier upperChar) `sepBy1` symbol "."
---  names <- parens (commaSep parseImportAtom)
---  end <- getSourcePos
---  pure (DImport (Metadata start end) (Path path) names)
-
--- parseFunctionGroup :: Parser Name -> Parser (Definition Metadata o ())
--- parseFunctionGroup parseName = do
---  start <- getSourcePos
---  fn <- lexeme_ "fun" *> parseName
---  ann <- optional parseAnnotation
---  fns <- some (void pipe *> parseGroupFunctionDefinition ann)
---  end <- getSourcePos
---  case fns of
---    [] -> fail "Empty list"
---    f : fs -> pure (DFunction (Metadata start end) fn (f :| fs) [])
-
 parseFunctionGroup :: Parser Name -> Parser (Definition Metadata () ())
 parseFunctionGroup parseName = do
   start <- getSourcePos
@@ -194,7 +169,7 @@ parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefin
 parseGroupFunctionDefinition ann = do
   start <- getSourcePos
   args <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
-  expr <- symbol_ "=" *> parseExpression
+  expr <- symbol_ "=>" *> parseExpression
   end <- getSourcePos
   pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
@@ -220,19 +195,6 @@ parseFunctionDefinition parseName = do
   expr <- symbol_ "=" *> parseExpression
   --  ws <- option [] parseWhereClauses
   pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr))
-
--- parseWhereClauses :: Parser [Definition Metadata o ()]
--- parseWhereClauses = lexeme_ "where" *> braces (some (parseFunctionDefinition name))
-
--- parseLetDefinition :: Parser Name -> Parser (Definition Metadata o ())
--- parseLetDefinition parseName = do
---  start <- getSourcePos
---  c <- lexeme_ "let" *> parseName
---  ann <- optional parseAnnotation
---  end <- getSourcePos
---  expr <- symbol_ "=" *> parseExpression
---  ws <- option [] parseWhereClauses
---  pure (DConstant (Metadata start end) c (ConstantDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr) ws)
 
 parseLetDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseLetDefinition parseName = do
@@ -262,7 +224,7 @@ parseTopLevelFoldClause =
  where
   parseChoice =
     withMetadata $ do
-      symbol_ "="
+      symbol_ "=>"
       e <- parseExpression
       pure (\loc -> CPlain loc [] e)
 

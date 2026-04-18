@@ -3,8 +3,7 @@ module Main {
   import IO(println_string, println_int32, println_bool)
 
   fun fst : int32
-    | ((a, _)) = 
-        a
+    | ((a, _)) => a
 
   fun main() =
     println_int32(fst((5, 3)))

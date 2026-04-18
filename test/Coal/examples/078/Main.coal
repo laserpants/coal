@@ -7,9 +7,9 @@ module Main {
     | Cons(a, MyList<a>)
 
   fold len : MyList<a> -> int32 
-    | Nil = 0
+    | Nil => 0
     // Should fail
-    | @next = next + 1
+    | @next => next + 1
 
   fun main() = 
     println_int32(len(Cons("a", Nil)))

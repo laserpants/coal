@@ -7,15 +7,15 @@ module List {
    * list is empty.
    */
   fun head : List<a> -> Option<a> 
-    | [] = None
-    | x :: _ = Some(x)
+    | []     => None
+    | x :: _ => Some(x)
 
   /**
    * Return the list without its first element, or `None` if the list is empty.
    */
   fun tail : List<a> -> Option<List<a>>
-    | [] = None
-    | _ :: xs = Some(xs)
+    | []      => None
+    | _ :: xs => Some(xs)
 
   /**
    * Return a pair (head, tail) wrapped in `Some`, or `None` if the list is 

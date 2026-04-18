@@ -20,9 +20,9 @@ module Coal.Applicative {
   instance Applicative<Option> {
     // ap : Option<a -> b> -> Option<a> -> Option<b>
     fun ap
-      | None, _ = None
-      | _, None = None
-      | Some(f), Some(x) = Some(f(x))
+      | None, _ => None
+      | _, None => None
+      | Some(f), Some(x) => Some(f(x))
 
     let pure = Some
   }

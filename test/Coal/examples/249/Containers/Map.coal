@@ -36,8 +36,8 @@ module Containers.Map {
         })
 
   fun balance_factor
-    | Empty  = 0
-    | Map(m) = height(m.left) - height(m.right)
+    | Empty  => 0
+    | Map(m) => height(m.left) - height(m.right)
  
   // Constructors
 
@@ -159,13 +159,13 @@ module Containers.Map {
   // Deletion
 
   fold delete_min_node : Map<k, v> -> (Option<k>, Option<v>, Map<k, v>) 
-    | Empty =
+    | Empty =>
         (None, None, Empty)
 
-    | Map({ left = Empty | _ } as m) =
+    | Map({ left = Empty | _ } as m) =>
         (Some(m.key), Some(m.value), m.right)
 
-    | Map({ left = delete_min_node(@left) | _ } as m) =
+    | Map({ left = delete_min_node(@left) | _ } as m) =>
         let (k, v, new_left) = left 
         in
         (Some(k), Some(v), rebalance(make_node(m.key, m.value, new_left, m.right)))

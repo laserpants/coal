@@ -3,8 +3,8 @@ module Main {
   import namespace IO
 
   fun with_default 
-    | _, Some(s) = s 
-    | val, None = val
+    | _, Some(s) => s 
+    | val, None  => val
 
   fun main() =
     IO.println_int32(with_default(4, None))

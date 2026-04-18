@@ -13,21 +13,21 @@ module Main {
     | JsonObject(List<(string, JsonValue)>)
 
   fold encode_json_value : JsonValue -> string 
-    | JsonNull = "null"
-    | JsonBool(false) = "false"
-    | JsonBool(true) = "true"
-    | JsonNumber(d) = double_to_string(d)
-    | JsonString(str) = "\"" +++ str +++ "\""
-    | JsonArray(encode_json_array(@values)) = "[" +++ intercalate(",", values) +++ "]"
-    | JsonObject(encode_json_object(@key_value_pairs)) = "{" +++ intercalate(",", key_value_pairs) +++ "}"
+    | JsonNull => "null"
+    | JsonBool(false) => "false"
+    | JsonBool(true) => "true"
+    | JsonNumber(d) => double_to_string(d)
+    | JsonString(str) => "\"" +++ str +++ "\""
+    | JsonArray(encode_json_array(@values)) => "[" +++ intercalate(",", values) +++ "]"
+    | JsonObject(encode_json_object(@key_value_pairs)) => "{" +++ intercalate(",", key_value_pairs) +++ "}"
 
   fold encode_json_array : List<JsonValue> -> List<string> 
-    | [] = []
-    | encode_json_value(@value) :: encode_json_array(@values) = value :: values
+    | [] => []
+    | encode_json_value(@value) :: encode_json_array(@values) => value :: values
 
   fold encode_json_object : List<(string, JsonValue)> -> List<string> 
-    | [] = []
-    | (key, encode_json_value(@value)) :: encode_json_object(@pairs) = 
+    | [] => []
+    | (key, encode_json_value(@value)) :: encode_json_object(@pairs) =>
         let label = "\"" +++ key +++ "\""
         in (label +++ ":" +++ value) :: pairs
 

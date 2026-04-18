@@ -18,22 +18,22 @@ module Main {
     Node({ value = value, children = children })
 
   fold tree_list_size : List<Tree<a>> -> int32 
-    | size(@tree) :: tree_list_size(@trees) = tree + trees
-    | [] = 0
+    | size(@tree) :: tree_list_size(@trees) => tree + trees
+    | [] => 0
 
   fold size : Tree<a> -> int32 
-    | Node({ children = tree_list_size(@children) | _ }) = 1 + children
+    | Node({ children = tree_list_size(@children) | _ }) => 1 + children
 
   fold tree_list_height : List<Tree<a>> -> int32 
-    | [] = 0
-    | height(@h) :: tree_list_height(@g) = max(h, g)
+    | [] => 0
+    | height(@h) :: tree_list_height(@g) => max(h, g)
 
   fold height : Tree<a> -> int32 
-    | Node({ children = tree_list_height(@h) | _ }) = 1 + h
+    | Node({ children = tree_list_height(@h) | _ }) => 1 + h
 
   fold tree_list_map : List<Tree<a>> -> (a -> b) -> List<Tree<b>> 
-    | [] = fn(_) => []
-    | Node({ value = value, children = tree_list_map(@children) }) :: tree_list_map(@trees) =
+    | [] => fn(_) => []
+    | Node({ value = value, children = tree_list_map(@children) }) :: tree_list_map(@trees) =>
         fn(f) => Node({ value = f(value), children = children(f) }) :: trees(f)
 
   fun tree_map(f : a -> b, tree : Tree<a>) : Tree<b> =

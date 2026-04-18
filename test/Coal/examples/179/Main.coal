@@ -3,7 +3,7 @@ module Main {
   import namespace IO
 
   fun foo
-    | x = x
+    | x => x
 
   fun main() =
     IO.println_string(foo("aaa"))
