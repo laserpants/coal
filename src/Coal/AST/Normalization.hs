@@ -1,8 +1,16 @@
--- +
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
+{- |
+Module: Coal.AST.Normalization
+
+AST normalization and denormalization for simplified intermediate representations.
+
+Performs transformations between function definitions and lambda expressions,
+converting the syntax tree into a standard form and reversing the process
+during denormalization.
+-}
 module Coal.AST.Normalization (NormalizationContext (..)) where
 
 import Coal.AST.Flattening (flattenLambdas)
