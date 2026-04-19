@@ -1,5 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Core
+
+Core parser infrastructure and basic combinators.
+
+Provides the base Parser type, lexing utilities, and fundamental
+combinators used throughout the parser implementation.
+-}
 module Coal.Parser.Core (
   Parser,
   ParserError,
@@ -79,6 +87,7 @@ reserved =
   , "do"
   ]
 
+-- | Parse a word (identifier or keyword) and reject reserved keywords
 word :: Parser Text -> Parser Text
 word p =
   lexeme $

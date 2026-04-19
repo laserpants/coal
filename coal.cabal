@@ -206,12 +206,15 @@ library
       Coal.Language.Type.Row
       Coal.Language.Type.Scheme
       Coal.Parser
+      Coal.Parser.BuiltinNames
+      Coal.Parser.Common
       Coal.Parser.Core
       Coal.Parser.Expression
       Coal.Parser.Identifier
       Coal.Parser.Metadata
       Coal.Parser.Module
       Coal.Parser.Module.Definition
+      Coal.Parser.Operator
       Coal.Parser.Pattern
       Coal.Parser.Primitive
       Coal.Parser.Symbol

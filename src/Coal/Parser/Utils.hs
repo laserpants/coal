@@ -1,3 +1,11 @@
+{- |
+Module: Coal.Parser.Utils
+
+Utilities for parsing field lists.
+
+Provides combinators for parsing comma-separated field lists with keys,
+commonly used in record types and patterns.
+-}
 module Coal.Parser.Utils (fieldListWithKey, fieldList) where
 
 import Coal.Parser.Core (Parser)

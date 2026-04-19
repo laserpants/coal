@@ -1,3 +1,10 @@
+{- |
+Module: Coal.Parser.Metadata
+
+Source location tracking helpers for parsers.
+
+Provides combinators to attach source position metadata to parsed constructs.
+-}
 module Coal.Parser.Metadata (withMetadata, withMetadataM) where
 
 import Coal.AST.Metadata (Metadata (..))

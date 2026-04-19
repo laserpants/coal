@@ -1,13 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Pattern
+
+Parsers for pattern matching constructs.
+
+Handles all pattern forms including variables, constructors, literals,
+records, lists, tuples, wildcards, or-patterns, and as-patterns.
+-}
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
 import Coal.AST.HasMetadata (metadataSpan)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Language (Pattern (..), Primitive (LUnit))
+import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)
 import Coal.Parser.Core (Parser, lexeme, lexeme_, spaces)
-import Coal.Parser.Identifier (constructor, identifier, name)
+import Coal.Parser.Identifier (name)
 import Coal.Parser.Metadata (withMetadata)
 import qualified Coal.Parser.Primitive as Primitive
 import Coal.Parser.Symbol
@@ -16,10 +25,9 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import qualified Data.Text as Text
 import Extras (Name)
 import Text.Megaparsec (option, optional, some, try, (<|>))
-import Text.Megaparsec.Char (char, upperChar)
+import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Pattern Metadata () ())
@@ -130,15 +138,6 @@ parseConstructorPattern =
     ll <- try parseQualifiedConstructor <|> parseSimpleConstructor
     ps <- option [] (parens (commaSep1 parsePattern))
     pure (\loc -> PConstructor loc ll ps)
-
-parseSimpleConstructor :: Parser (Label ())
-parseSimpleConstructor = Label () <$> constructor
-
-parseQualifiedConstructor :: Parser (Label ())
-parseQualifiedConstructor = do
-  ns <- some (identifier upperChar <* symbol ".")
-  n <- constructor
-  pure (Label () (Text.intercalate "." ns <> "." <> n))
 
 recordFields :: Parser [(Name, Pattern Metadata () ())]
 recordFields = commaSep1 (try normalField <|> shorthand)

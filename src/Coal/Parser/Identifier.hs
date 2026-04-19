@@ -1,5 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Identifier
+
+Parsers for identifiers, names, and constructors.
+
+Handles lowercase names (variables, functions), uppercase names (types,
+constructors), backtick-quoted operators, and magic constructors.
+-}
 module Coal.Parser.Identifier (
   underscore,
   validChar,

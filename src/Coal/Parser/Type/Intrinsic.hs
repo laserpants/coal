@@ -1,5 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Type.Intrinsic
+
+Parser for built-in intrinsic types.
+
+Handles parsing of primitive types like int32, bool, string, etc.
+-}
 module Coal.Parser.Type.Intrinsic (parseIntrinsic) where
 
 import Coal.Language (Intrinsic (..))

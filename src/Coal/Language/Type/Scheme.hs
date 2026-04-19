@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
@@ -12,6 +13,7 @@ Polymorphic type schemes with universal quantification.
 -}
 module Coal.Language.Type.Scheme (
   Scheme (..),
+  toScheme,
   forall0,
   forall1,
   forall1',
@@ -30,12 +32,15 @@ module Coal.Language.Type.Scheme (
 where
 
 import Coal.Language.Trait (Trait (..))
-import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..), (~>))
+import Coal.Language.Type (IndexedType, Parameter, ParameterizedType, Type (..), TypeIndex (..), (~>))
+import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Operations (listType, tupleType)
+import Coal.Language.Type.Row (Row (..))
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List (intersperse)
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (Set)
 import qualified Data.Set as Set
@@ -130,3 +135,53 @@ listConstructorScheme = forall1 (\a -> a ~> listType a ~> listType a)
 tupleScheme :: Int -> IndexedScheme
 tupleScheme n | n < 2 = error "Invalid tuple size"
 tupleScheme n = forallN n (tupleType . NonEmpty.fromList)
+
+-- | Helper to convert a type to a scheme by collecting its parameters
+toScheme :: Type Parameter () -> Scheme Parameter () ParameterizedType
+toScheme t = Forall (Set.fromList (params t)) mempty t
+
+-- | Typeclass for extracting type parameters from types and related structures
+class Parameterized p where
+  params :: p -> [Parameter ()]
+
+instance (Parameterized p) => Parameterized [p] where
+  params = concatMap params
+
+instance (Parameterized p) => Parameterized (NonEmpty p) where
+  params = concatMap params
+
+instance Parameterized (Type Parameter ()) where
+  params =
+    \case
+      TVariable p ->
+        params p
+      TApplication _ t ts ->
+        params t <> params ts
+      TArrow t1 t2 ->
+        params t1 <> params t2
+      TIntrinsic t ->
+        params t
+      TRecord t ->
+        params t
+      TRow r ->
+        params r
+      TAlias _ _ t ->
+        params t
+      TConstructor{} ->
+        []
+
+instance Parameterized Intrinsic where
+  params _ = []
+
+instance Parameterized (Row Parameter () (Type Parameter ())) where
+  params =
+    \case
+      RVariable p ->
+        params p
+      RExtend _ t r ->
+        params t <> params r
+      RNil ->
+        []
+
+instance Parameterized (Parameter ()) where
+  params = return

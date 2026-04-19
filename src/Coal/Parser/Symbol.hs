@@ -1,5 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Symbol
+
+Parsers for symbols, delimiters, and separators.
+
+Provides parsers for parentheses, brackets, braces, commas, and other
+structural symbols used in Coal syntax.
+-}
 module Coal.Parser.Symbol (
   symbol,
   symbol_,

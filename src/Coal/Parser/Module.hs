@@ -1,5 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Module
+
+Module declaration and export list parsers.
+
+Parses module headers including module paths and export specifications.
+-}
 module Coal.Parser.Module (parseModule, parseSourceFile) where
 
 import Coal.AST.Metadata (Metadata (..))
@@ -10,7 +17,6 @@ import Coal.Parser.Core (Parser, lexeme_, spaces)
 import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Module.Definition (parseDefinition)
 import Coal.Parser.Symbol
-import Data.Text (Text)
 import Extras (Name)
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
@@ -39,21 +45,8 @@ parseNameExport = do
   end <- getSourcePos
   pure (NameExport (Metadata start end) n)
 
--- {-# INLINE parseModuleExports #-}
--- parseModuleExports :: Parser [Export Metadata]
--- parseModuleExports = option [] (parens (commaSep parseExportAtom))
-
 parseModuleExports :: Parser (ExportList Metadata)
 parseModuleExports = option ExportAll (parens (Exports <$> commaSep parseExportAtom))
-
--- parseModule :: Parser (Module Metadata o ())
--- parseModule = do
---  lexeme_ "module"
---  Module . Path
---    <$> parseModulePath
---    <*> parseModuleExports
---    <*> braces (many parseDefinition)
---    <* eof
 
 parseSourceFile :: Parser (Module Metadata () ())
 parseSourceFile = spaces *> parseModule <* eof

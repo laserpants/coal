@@ -6,9 +6,12 @@ import Coal.AST.HasMetadata (metadataSpan)
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Language
+import qualified Coal.Parser.BuiltinNames as Builtin
+import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)
 import Coal.Parser.Core
 import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Metadata (withMetadata)
+import qualified Coal.Parser.Operator as Op
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Primitive (parsePrimitive)
 import Coal.Parser.Symbol
@@ -21,7 +24,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Extras (Name)
 import GHC.Int (Int32, Int64)
-import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, satisfy, some, try, (<|>))
 import Text.Megaparsec.Char (char, upperChar)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -117,15 +120,6 @@ parseDataConstructor =
     ll <- try parseQualifiedConstructor <|> parseSimpleConstructor
     pure (`EConstructor` ll)
 
-parseSimpleConstructor :: Parser (Label ())
-parseSimpleConstructor = Label () <$> constructor
-
-parseQualifiedConstructor :: Parser (Label ())
-parseQualifiedConstructor = do
-  ns <- some (identifier upperChar <* symbol ".")
-  n <- constructor
-  pure (Label () (Text.intercalate "." ns <> "." <> n))
-
 patternBinding :: Parser (Binding Expression Metadata () ())
 patternBinding =
   withMetadata $ do
@@ -190,46 +184,11 @@ parseFoldExpression = do
 parseSpecialNameExpression :: Parser (Expression Metadata () ())
 parseSpecialNameExpression =
   withMetadata $ do
-    spec <-
-      "nat$_pack"
-        <|> "nat$_unpack"
-        <|> "io$_println_string"
-        <|> "io$_print_string"
-        <|> "io$_println_int32"
-        <|> "io$_print_int32"
-        <|> "io$_println_int64"
-        <|> "io$_print_int64"
-        <|> "io$_println_bignum"
-        <|> "io$_print_bignum"
-        <|> "io$_println_bool"
-        <|> "io$_print_bool"
-        <|> "io$_println_char"
-        <|> "io$_print_char"
-        <|> "io$_println_float"
-        <|> "io$_print_float"
-        <|> "io$_println_double"
-        <|> "io$_print_double"
-        <|> "io$_eval"
-        <|> "io$_return"
-        <|> "string$_char_to_string"
-        <|> "string$_bool_to_string"
-        <|> "string$_int32_to_string"
-        <|> "string$_float_to_string"
-        <|> "string$_double_to_string"
-        <|> "string$_to_list"
-        <|> "string$_from_list"
-        <|> "string$_reverse"
-        <|> "string$_remove_whitespace"
-        <|> "string$_tail"
-        <|> "string$_length"
-        <|> "string$_head_unsafe"
-        <|> "number$_unsafe_parse_bignum"
-        <|> "char$_ord"
-        <|> "char$_chr"
-        <|> "process$_process"
-        <|> "process$_map_process"
-        <|> "process$_contramap_input"
-        <|> "process$_duplicate"
+    spec <- lexeme $ try $ do
+      t <- Text.pack <$> some (satisfy (\c -> c /= ' ' && c /= '(' && c /= ')' && c /= ',' && c /= '{' && c /= '}'))
+      if Builtin.isBuiltinName t
+        then pure t
+        else fail "not a builtin name"
     pure (\ll -> EVariable ll (Label () spec))
 
 parseVariableExpression :: Parser (Expression Metadata () ())
@@ -349,163 +308,6 @@ binaryOperator op e1 e2 =
 listCons :: Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ()
 listCons e1 e2 = EListCons (metadataSpan e1 e2) () e1 e2
 
--- TODO: DRY
-parseAdditionOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseAdditionOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(+)"))
-            (lhs :| [rhs])
-      )
-
-parseSubtractionOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseSubtractionOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(-)"))
-            (lhs :| [rhs])
-      )
-
-parseMultiplicationOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseMultiplicationOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(*)"))
-            (lhs :| [rhs])
-      )
-
-parseDivisionOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseDivisionOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(/)"))
-            (lhs :| [rhs])
-      )
-
-parseModulusOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseModulusOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(%)"))
-            (lhs :| [rhs])
-      )
-
-parseExponentiationOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseExponentiationOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(^)"))
-            (lhs :| [rhs])
-      )
-
-parseSemigroupOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseSemigroupOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(<>)"))
-            (lhs :| [rhs])
-      )
-
-parseEqualityOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseEqualityOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(==)"))
-            (lhs :| [rhs])
-      )
-
-parseInequalityOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseInequalityOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(!=)"))
-            (lhs :| [rhs])
-      )
-
-parseLessThanOrEqualOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseLessThanOrEqualOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(<=)"))
-            (lhs :| [rhs])
-      )
-
-parseGreaterThanOrEqualOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseGreaterThanOrEqualOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(>=)"))
-            (lhs :| [rhs])
-      )
-
-parseLessThanOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseLessThanOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(<)"))
-            (lhs :| [rhs])
-      )
-
-parseGreaterThanOperator :: Parser (Expression Metadata () () -> Expression Metadata () () -> Expression Metadata () ())
-parseGreaterThanOperator =
-  withMetadata $
-    pure
-      ( \loc lhs rhs ->
-          EApplication
-            loc
-            ()
-            (EVariable loc (Label () "(>)"))
-            (lhs :| [rhs])
-      )
-
 fixity9 :: [Combinators.Operator Parser (Expression Metadata () ())]
 fixity9 =
   [ Combinators.InfixR (binaryOperator OReverseComposition <$ symbol "<<")
@@ -527,17 +329,17 @@ fixity8, fixity7, fixity6, fixity5, fixity4, fixity3, fixity2, fixity1, fixity0 
 fixity8 =
   [ Combinators.Prefix negationOperator
   , Combinators.Prefix (unaryOperator OLogicalNot <$ (symbol "!" <* notFollowedBy (char '=')))
-  , Combinators.InfixR (parseExponentiationOperator <* symbol "^")
+  , Combinators.InfixR (Op.parseExponentiationOperator <* symbol "^")
   ]
 fixity7 =
-  [ Combinators.InfixL (parseMultiplicationOperator <* symbol "*")
-  , Combinators.InfixL (parseDivisionOperator <* symbol "/")
-  , Combinators.InfixL (parseModulusOperator <* symbol "%")
+  [ Combinators.InfixL (Op.parseMultiplicationOperator <* symbol "*")
+  , Combinators.InfixL (Op.parseDivisionOperator <* symbol "/")
+  , Combinators.InfixL (Op.parseModulusOperator <* symbol "%")
   ]
 fixity6 =
-  [ Combinators.InfixL (parseAdditionOperator <* try (symbol "+" <* notFollowedBy (char '+')))
-  , Combinators.InfixL (parseSubtractionOperator <* try (symbol "-"))
-  , Combinators.InfixR (parseSemigroupOperator <* symbol "<>")
+  [ Combinators.InfixL (Op.parseAdditionOperator <* try (symbol "+" <* notFollowedBy (char '+')))
+  , Combinators.InfixL (Op.parseSubtractionOperator <* try (symbol "-"))
+  , Combinators.InfixR (Op.parseSemigroupOperator <* symbol "<>")
   ]
 fixity5 =
   [ Combinators.InfixR (binaryOperator OListConcatenation <$ try (symbol "++" <* notFollowedBy (char '+')))
@@ -546,31 +348,31 @@ fixity5 =
   ]
 fixity4 =
   [ Combinators.InfixN
-      ( parseEqualityOperator
+      ( Op.parseEqualityOperator
           <* symbol "=="
       )
   , Combinators.InfixN
-      ( parseInequalityOperator
+      ( Op.parseInequalityOperator
           <* symbol "!="
       )
   , Combinators.InfixN
-      ( parseLessThanOrEqualOperator
+      ( Op.parseLessThanOrEqualOperator
           <* symbol "<="
       )
   , Combinators.InfixN
-      ( parseGreaterThanOrEqualOperator
+      ( Op.parseGreaterThanOrEqualOperator
           <* symbol ">="
       )
   , Combinators.InfixN
       ( try
-          ( parseLessThanOperator
+          ( Op.parseLessThanOperator
               <* symbol "<"
               <* notFollowedBy (char '=' <|> char '<')
           )
       )
   , Combinators.InfixN
       ( try
-          ( parseGreaterThanOperator
+          ( Op.parseGreaterThanOperator
               <* symbol ">"
               <* notFollowedBy (char '=' <|> char '>')
           )

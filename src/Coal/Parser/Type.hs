@@ -1,5 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Type
+
+Type and kind expression parsers.
+
+Parses type expressions including arrows, applications, records, rows,
+intrinsic types, and kind annotations.
+-}
 module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Language
@@ -49,6 +57,7 @@ parseRecordType =
   braces $ do
     fields <- optional (fieldList parseType ":")
     let dict = maybe mempty Map.fromList fields
+    -- Optional row variable for polymorphic records (e.g., { x : int32 | r })
     param <- optional rest
     pure (TRecord (TRow (Row.fromDictionary dict (maybe RNil RVariable param))))
  where

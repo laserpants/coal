@@ -1,15 +1,22 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Module.Definition
+
+Parsers for top-level module definitions.
+
+Handles function definitions, type definitions, type aliases, trait
+declarations, instances, imports, and top-level folds.
+-}
 module Coal.Parser.Module.Definition (parseDefinition) where
 
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module.Import (Import (..))
-import Coal.Language.Module.Path
-import Coal.Parser.Core
+import Coal.Language.Module.Path (Path (Path))
+import Coal.Parser.Core (Parser, lexeme, lexeme_, nonEmpty, nonEmptyOr)
 import Coal.Parser.Expression (parseExpression)
 import Coal.Parser.Identifier
 import Coal.Parser.Metadata (withMetadata)
@@ -173,18 +180,6 @@ parseGroupFunctionDefinition ann = do
   end <- getSourcePos
   pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
 
--- TODO: DRY
--- parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata o ())
--- parseFunctionDefinition parseName = do
---  start <- getSourcePos
---  fn <- lexeme_ "fun" *> parseName
---  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
---  ann <- optional parseAnnotation
---  end <- getSourcePos
---  expr <- symbol_ "=" *> parseExpression
---  ws <- option [] parseWhereClauses
---  pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr :| []) ws)
-
 parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseFunctionDefinition parseName = do
   start <- getSourcePos
@@ -193,7 +188,6 @@ parseFunctionDefinition parseName = do
   ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
-  --  ws <- option [] parseWhereClauses
   pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr))
 
 parseLetDefinition :: Parser Name -> Parser (Definition Metadata () ())
@@ -203,7 +197,6 @@ parseLetDefinition parseName = do
   ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
-  --  ws <- option [] parseWhereClauses
   pure (DLet (Metadata start end) c (LetDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr))
 
 parseTopLevelFold :: Parser (Definition Metadata () ())
@@ -231,52 +224,3 @@ parseTopLevelFoldClause =
 {-# INLINE parseAnnotation #-}
 parseAnnotation :: Parser (Type Parameter ())
 parseAnnotation = symbol_ ":" *> parseType
-
--- TODO: move
-toScheme :: Type Parameter () -> Scheme Parameter () ParameterizedType
-toScheme t = Forall (Set.fromList (params t)) mempty t
-
-class Parameterized p where
-  params :: p -> [Parameter ()]
-
-instance (Parameterized p) => Parameterized [p] where
-  params = concatMap params
-
-instance (Parameterized p) => Parameterized (NonEmpty p) where
-  params = concatMap params
-
-instance Parameterized (Type Parameter ()) where
-  params =
-    \case
-      TVariable p ->
-        params p
-      TApplication _ t ts ->
-        params t <> params ts
-      TArrow t1 t2 ->
-        params t1 <> params t2
-      TIntrinsic t ->
-        params t
-      TRecord t ->
-        params t
-      TRow r ->
-        params r
-      TAlias _ _ t ->
-        params t
-      TConstructor{} ->
-        []
-
-instance Parameterized Intrinsic where
-  params _ = []
-
-instance Parameterized (Row Parameter () (Type Parameter ())) where
-  params =
-    \case
-      RVariable p ->
-        params p
-      RExtend _ t r ->
-        params t <> params r
-      RNil ->
-        []
-
-instance Parameterized (Parameter ()) where
-  params = return

@@ -1,5 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module: Coal.Parser.Primitive
+
+Parsers for primitive literal values.
+
+Handles booleans, characters, strings, integers, and floating-point literals.
+-}
 module Coal.Parser.Primitive (parseAtom, parsePrimitive) where
 
 import Coal.AST.Metadata (Metadata (..))
