@@ -222,7 +222,6 @@ library
       Coal.Parser.Type.Intrinsic
       Coal.Parser.Utils
       Coal.Pretty
-      Coal.TypeSystem
       Coal.TypeSystem.Annotations
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption

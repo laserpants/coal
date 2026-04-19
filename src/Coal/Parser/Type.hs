@@ -11,7 +11,6 @@ intrinsic types, and kind annotations.
 module Coal.Parser.Type (parseType, parseKind) where
 
 import Coal.Language
-import qualified Coal.Language.Type.Row as Row
 import Coal.Parser.Core (Parser, nonEmpty)
 import Coal.Parser.Identifier (constructor, name)
 import Coal.Parser.Symbol
@@ -59,7 +58,7 @@ parseRecordType =
     let dict = maybe mempty Map.fromList fields
     -- Optional row variable for polymorphic records (e.g., { x : int32 | r })
     param <- optional rest
-    pure (TRecord (TRow (Row.fromDictionary dict (maybe RNil RVariable param))))
+    pure (TRecord (TRow (fromDictionary dict (maybe RNil RVariable param))))
  where
   rest = pipe >> Parameter () <$> name
 

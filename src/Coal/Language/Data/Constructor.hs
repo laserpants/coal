@@ -6,7 +6,7 @@
 {- |
 Module: Coal.Language.Data.Constructor
 
-Data constructor representation with arity and type schemes.
+Data constructor representation.
 -}
 module Coal.Language.Data.Constructor (DataConstructor (..)) where
 
