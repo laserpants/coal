@@ -27,7 +27,7 @@ match(x) {
 }
 @
 
-is expanded into:
+translates into:
 
 @
 match(x) {
