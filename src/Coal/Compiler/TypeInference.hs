@@ -65,15 +65,17 @@ import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
+import Control.Arrow ((>>>))
 import Control.Monad.Except (forM_, throwError)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (get, gets)
-import Control.Monad.Writer (execWriter)
+import Control.Monad.Writer (MonadWriter, execWriter, tell)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
+import Data.List.Extra (groupSortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Extras (Dictionary, Name)
+import Extras (Dictionary, Name, concatMapM)
 
 generateKindConstraints :: (Monad m) => Module a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do
@@ -264,3 +266,25 @@ solveT = do
   clearTypeAnnotationParamsC
   setSubstitutionC (sub2 <> sub1)
   gets compilerSubstitution
+
+checkTypeAnnotationParameters :: (MonadWriter [TypeAnnotationError a] m) => [(Name, (a, TypeIndex Kind))] -> Substitution -> m ()
+checkTypeAnnotationParameters ps (Substitution sub) = do
+  params <- groupSortOn fst <$> concatMapM go ps
+  case filter (lengthMoreThan 1) params of
+    [] ->
+      pure ()
+    qs -> do
+      tell [EAnnotationNonDistinctParameter loc p | (_, (p, loc)) <- concat qs]
+ where
+  lengthMoreThan n = length >>> (> n)
+  go (name, (loc, TypeIndex _ index)) =
+    case Map.lookup index sub of
+      Just (TVariable (TypeIndex _ n)) ->
+        pure [(n, (name, loc))]
+      Just (TRow (RVariable (TypeIndex _ n))) ->
+        pure [(n, (name, loc))]
+      Just t -> do
+        tell [EAnnotationMonomorphicType loc name t]
+        pure []
+      Nothing ->
+        pure [(index, (name, loc))]

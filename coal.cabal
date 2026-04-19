@@ -224,7 +224,6 @@ library
       Coal.TypeSystem.Constraint
       Coal.TypeSystem.Constraint.Assumption
       Coal.TypeSystem.Constraint.Generation
-      Coal.TypeSystem.Constraint.Generation.Annotation
       Coal.TypeSystem.Constraint.Generation.Annotation.Error
       Coal.TypeSystem.Constraint.Generation.Context
       Coal.TypeSystem.Constraint.Generation.Error

@@ -12,6 +12,7 @@ import Coal.Utils (lexOrderRank)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError, withExceptT)
 import Control.Monad.Reader (MonadReader, ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, get, modify, runStateT)
+import Control.Monad.Writer (tell)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name)

@@ -3,7 +3,6 @@ module Coal.TypeSystem (
   module Coal.TypeSystem.Constraint.Assumption,
   module Coal.TypeSystem.Constraint.Generation,
   module Coal.TypeSystem.Constraint.Generation.Stack,
-  module Coal.TypeSystem.Constraint.Generation.Annotation,
   module Coal.TypeSystem.Constraint.Solver,
   module Coal.TypeSystem.Substitution,
   module Coal.TypeSystem.Unification,
@@ -12,7 +11,6 @@ module Coal.TypeSystem (
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.Annotation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Solver
 import Coal.TypeSystem.Substitution
