@@ -3,6 +3,15 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies
+
+Pattern exhaustiveness checking for match expressions.
+
+Validates that pattern matching is exhaustive and reports missing cases. Handles
+patterns in match expressions, with let-bindings and lambdas already desugared
+by earlier compiler passes to ensure that all pattern contexts are checked.
+-}
 module Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies (
   passCheckPatternAnomalies,
 ) where
@@ -12,13 +21,14 @@ import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.PatternMatching.AnomalyDetection (exhaustive, translatePattern)
 import Coal.Compiler.Stack
-import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Definition
 import Coal.Language.Expression (Clause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module (Module (moduleDefinitions, modulePath))
 import Coal.Language.Module.Path (principalPath)
+import Coal.Language.Type (IndexedType)
+import Coal.Language.Type.Kind (Kind (..))
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
