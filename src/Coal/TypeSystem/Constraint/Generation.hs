@@ -16,12 +16,11 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Language
-import Coal.TypeSystem.Annotations
+import Coal.TypeSystem.Annotations (indexTypeAnnotations, runAnnotationsT)
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
-import Coal.TypeSystem.Constraint.Generation.Context
 import Coal.TypeSystem.Constraint.Generation.Stack
-import Coal.TypeSystem.Constraint.Generation.State
+import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (modify)
 import Data.Data (Data)
