@@ -2,19 +2,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Coal.Compiler.Embedded (embedded, embeddedPaths) where
+module Coal.Compiler.Builtin.Modules (builtinModules, builtinModulesPaths) where
 
 import Data.ByteString (ByteString)
 import Data.FileEmbed (embedFile)
 import Data.Text (Text)
 import Extras (Name, for)
 
-{-# INLINE embeddedPaths #-}
-embeddedPaths :: [Name]
-embeddedPaths = for embedded fst
+{-# INLINE builtinModulesPaths #-}
+builtinModulesPaths :: [Name]
+builtinModulesPaths = for builtinModules fst
 
-embedded :: [(Text, ByteString)]
-embedded =
+builtinModules :: [(Text, ByteString)]
+builtinModules =
   [
     ( "IO"
     , $(embedFile "lang/IO.coal")

@@ -16,8 +16,8 @@ import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.Builtin.Modules (builtinModules)
 import Coal.Compiler.Config (CompilerConfig (..))
-import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
@@ -78,7 +78,7 @@ compileWithCFiles config files cFiles = do
           pb <-
             newProgressBar
               def
-                { pgTotal = (fromIntegral (length embedded + length files) * 73) + 28
+                { pgTotal = (fromIntegral (length builtinModules + length files) * 73) + 28
                 , pgWidth = 100
                 , pgFormat = "Compiling [:bar] :current/:total"
                 }

@@ -8,8 +8,8 @@ module Coal.Compiler.Pass.PhaseParsing.Parsing (passParsing, fromSource) where
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Cache (cachedBuild)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.Builtin.Modules (builtinModules)
 import Coal.Compiler.Config
-import Coal.Compiler.Embedded (embedded)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Path.Resolve (resolveModule)
@@ -35,12 +35,12 @@ passParsing = Pass{runPass = passImpl}
 
 passImpl :: (MonadIO m) => [FilePath] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 passImpl files = do
-  embeddedFiles <- traverse parseEmbedded embedded
-  embeddedBundle <- handleParseResults embeddedFiles $ \(p, e) ->
-    error ("Error in embedded module '" <> Text.unpack p <> "': " <> show e)
+  builtinModulesFiles <- traverse parseEmbedded builtinModules
+  builtinModulesBundle <- handleParseResults builtinModulesFiles $ \(p, e) ->
+    error ("Error in builtinModules module '" <> Text.unpack p <> "': " <> show e)
   results <- traverse parseFile files
   bundle <- handleParseResults results (tellErrors . return)
-  pure (embeddedBundle <> bundle)
+  pure (builtinModulesBundle <> bundle)
 
 -- | Helper to handle parsing results: report errors or return bundles
 handleParseResults :: (MonadIO m) => [Either e a] -> (e -> CompilerT Metadata m ()) -> CompilerT Metadata m [a]

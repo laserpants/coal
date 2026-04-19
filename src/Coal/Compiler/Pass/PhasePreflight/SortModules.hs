@@ -29,7 +29,7 @@ module Coal.Compiler.Pass.PhasePreflight.SortModules (
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (Build (buildDependencies))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
-import Coal.Compiler.Embedded (embeddedPaths)
+import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
@@ -100,7 +100,7 @@ unitDependencies =
 
 dependencies :: (Monoid a) => Module a k t -> [(a, Path)]
 dependencies (Module p _ defs)
-  | principalPath p `elem` embeddedPaths = imported
+  | principalPath p `elem` builtinModulesPaths = imported
   | otherwise = imported <> extra
  where
   imported = mapMaybe importPath defs

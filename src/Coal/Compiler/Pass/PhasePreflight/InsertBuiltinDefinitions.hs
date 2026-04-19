@@ -27,7 +27,7 @@ module Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions (
 import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions, insertExtraDefinitions)
-import Coal.Compiler.Embedded (embeddedPaths)
+import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language.Module (Module (..))
@@ -54,5 +54,5 @@ insertModuleBuiltins Module{..} =
     }
  where
   insertBuiltins
-    | principalPath modulePath `elem` embeddedPaths = insertBuiltinDefinitions
+    | principalPath modulePath `elem` builtinModulesPaths = insertBuiltinDefinitions
     | otherwise = insertExtraDefinitions . insertBuiltinDefinitions
