@@ -46,7 +46,7 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandTopLevelFolds (
 ) where
 
 import Coal.AST.Rewrite (replace)
-import Coal.AST.Shorthand (applicationE, lambda1E, matchE, varE)
+import Coal.AST.Builders (applicationE, lambda1E, matchE, varE)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)

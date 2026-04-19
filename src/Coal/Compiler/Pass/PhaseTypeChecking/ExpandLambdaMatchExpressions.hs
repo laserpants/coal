@@ -43,7 +43,7 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandLambdaMatchExpressions (
   passExpandLambdaMatchExpressions,
 ) where
 
-import Coal.AST.Shorthand (lambdaE, matchE, varE, varP)
+import Coal.AST.Builders (lambdaE, matchE, varE, varP)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language.Definition

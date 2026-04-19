@@ -48,7 +48,7 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds (
 
 import Coal.AST.Flattening (flattenApplicationsDeep)
 import Coal.AST.Rewrite (replace)
-import Coal.AST.Shorthand (applicationE, lambda1E, letE, matchE, varE)
+import Coal.AST.Builders (applicationE, lambda1E, letE, matchE, varE)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)

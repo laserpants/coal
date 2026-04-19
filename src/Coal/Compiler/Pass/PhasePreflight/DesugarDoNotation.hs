@@ -40,7 +40,7 @@ module Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation (
 ) where
 
 import Coal.AST.Metadata (Metadata (..))
-import Coal.AST.Shorthand
+import Coal.AST.Builders
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
