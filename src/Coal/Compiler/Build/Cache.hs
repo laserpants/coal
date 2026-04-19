@@ -1,4 +1,3 @@
--- +
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where

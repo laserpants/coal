@@ -1,4 +1,3 @@
--- +
 {-# LANGUAGE LambdaCase #-}
 
 module Coal.AST.Flattening (
