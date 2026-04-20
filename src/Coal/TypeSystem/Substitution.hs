@@ -17,7 +17,6 @@ module Coal.TypeSystem.Substitution (
 
 import Coal.Common.Environment (Environment (..))
 import Coal.Language
-import Coal.Language.Definition
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transform, transformBi)

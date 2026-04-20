@@ -41,8 +41,6 @@ import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Compiler.State (CompilerState (compilerCurrentPath))
 import Coal.Language
-import Coal.Language.Definition
-import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Control.Monad.Except
 import Control.Monad.State (StateT, evalStateT, get, gets, modify, put)
