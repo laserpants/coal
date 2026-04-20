@@ -1,6 +1,6 @@
 module Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking) where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases (passExpandAliases)
 import Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds (passExpandExpressionFolds)

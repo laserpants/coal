@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.AST.HasMetadata (HasMetadata (..), metadataSpan) where
+module Coal.Compiler.HasMetadata (HasMetadata (..), metadataSpan) where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language.Definition (Definition (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Pattern (Pattern (..))

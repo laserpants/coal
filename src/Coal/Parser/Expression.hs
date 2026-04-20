@@ -2,9 +2,9 @@
 
 module Coal.Parser.Expression (parseExpression, parseMatchClause) where
 
-import Coal.AST.HasMetadata (metadataSpan)
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.HasMetadata (metadataSpan)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language
 import qualified Coal.Parser.BuiltinNames as Builtin
 import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)

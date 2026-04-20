@@ -16,8 +16,8 @@ module Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies (
   passCheckPatternAnomalies,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.PatternMatching.AnomalyDetection (exhaustive, translatePattern)
 import Coal.Compiler.Stack

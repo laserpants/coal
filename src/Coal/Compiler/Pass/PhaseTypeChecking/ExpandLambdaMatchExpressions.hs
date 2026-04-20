@@ -43,9 +43,9 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandLambdaMatchExpressions (
   passExpandLambdaMatchExpressions,
 ) where
 
-import Coal.AST.Builders (lambdaE, matchE, varE, varP)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Language.AST.Builders (lambdaE, matchE, varE, varP)
 import Coal.Language.Definition
 import Coal.Language.Expression (Expression (ELambdaMatch))
 import Coal.Language.Module (Module (..))

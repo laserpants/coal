@@ -2,8 +2,8 @@
 
 module Coal.Compiler.TypeInference.Errors (prettyErrorMessage) where
 
-import Coal.AST.HasMetadata (HasMetadata (..))
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.HasMetadata (HasMetadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Text.Megaparsec (SourcePos (sourceColumn, sourceLine), unPos)

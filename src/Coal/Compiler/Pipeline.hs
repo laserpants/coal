@@ -12,7 +12,6 @@ module Coal.Compiler.Pipeline (
   prettyError,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
@@ -20,6 +19,7 @@ import Coal.Compiler.Builtin.Modules (builtinModules)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
 import Coal.Compiler.Pass.PhaseLowering (phaseLowering)
 import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)

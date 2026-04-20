@@ -7,7 +7,7 @@ Provides combinators to attach source position metadata to parsed constructs.
 -}
 module Coal.Parser.Metadata (withMetadata, withMetadataM) where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Parser.Core (Parser)
 import Text.Megaparsec (getSourcePos)
 

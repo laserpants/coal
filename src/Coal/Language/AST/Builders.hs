@@ -1,4 +1,4 @@
-module Coal.AST.Builders (
+module Coal.Language.AST.Builders (
   matchE,
   varE,
   varE',

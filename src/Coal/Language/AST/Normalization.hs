@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 {- |
-Module: Coal.AST.Normalization
+Module: Coal.Language.AST.Normalization
 
 AST normalization and denormalization for simplified intermediate representations.
 
@@ -11,9 +11,9 @@ Performs transformations between function definitions and lambda expressions,
 converting the syntax tree into a standard form and reversing the process
 during denormalization.
 -}
-module Coal.AST.Normalization (NormalizationContext (..)) where
+module Coal.Language.AST.Normalization (NormalizationContext (..)) where
 
-import Coal.AST.Flattening (flattenLambdas)
+import Coal.Language.AST.Flattening (flattenLambdas)
 import Coal.Language.Definition
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.HasType (HasType (..), foldTypeOf)

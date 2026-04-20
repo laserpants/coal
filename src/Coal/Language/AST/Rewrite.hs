@@ -2,7 +2,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.AST.Rewrite (
+module Coal.Language.AST.Rewrite (
   replace,
   replaceWith,
   replaceMultipleWith,

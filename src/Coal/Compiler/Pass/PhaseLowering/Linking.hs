@@ -7,8 +7,8 @@ module Coal.Compiler.Pass.PhaseLowering.Linking (
   compileBitcode,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Config (CompilerConfig (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (CompilerError), CompilerT)
 import Coal.Compiler.State (CompilerState (compilerConfig))

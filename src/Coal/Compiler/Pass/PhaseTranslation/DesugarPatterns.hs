@@ -50,10 +50,10 @@ module Coal.Compiler.Pass.PhaseTranslation.DesugarPatterns (
   passDesugarPatterns,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (listenPatterns, tellPatterns)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), HasType (..), IndexedType, Kind (..), Pattern (..), foldTypeOf)

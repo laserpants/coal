@@ -5,12 +5,12 @@
 
 module Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate) where
 
-import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)
 import Coal.Compiler.Kernel.Translate.Definition (translateDefinition)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), tickBar)
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, setCurrentPathC)
 import qualified Coal.Kernel.Language as Kernel

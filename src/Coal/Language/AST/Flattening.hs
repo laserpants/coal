@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.AST.Flattening (
+module Coal.Language.AST.Flattening (
   flattenApplications,
   flattenLambdas,
   flattenApplicationsDeep,

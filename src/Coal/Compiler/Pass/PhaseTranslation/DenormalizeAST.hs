@@ -2,9 +2,9 @@ module Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST (
   passDenormalizeAST,
 ) where
 
-import Coal.AST.Normalization (NormalizationContext (denormalizeObject))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Language.AST.Normalization (NormalizationContext (denormalizeObject))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)

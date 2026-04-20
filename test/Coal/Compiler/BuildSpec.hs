@@ -5,7 +5,7 @@
 
 module Coal.Compiler.BuildSpec where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build

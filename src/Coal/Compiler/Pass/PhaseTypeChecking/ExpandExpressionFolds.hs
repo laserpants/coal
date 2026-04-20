@@ -46,9 +46,6 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds (
   passExpandExpressionFolds,
 ) where
 
-import Coal.AST.Flattening (flattenApplicationsDeep)
-import Coal.AST.Rewrite (replace)
-import Coal.AST.Builders (applicationE, lambda1E, letE, matchE, varE)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
@@ -56,6 +53,9 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
+import Coal.Language.AST.Builders (applicationE, lambda1E, letE, matchE, varE)
+import Coal.Language.AST.Flattening (flattenApplicationsDeep)
+import Coal.Language.AST.Rewrite (replace)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)

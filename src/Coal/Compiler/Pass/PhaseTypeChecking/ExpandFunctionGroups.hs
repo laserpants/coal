@@ -41,11 +41,11 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandFunctionGroups (
   passExpandFunctionGroups,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
-import Coal.AST.Builders (matchE, tupleE, tupleP, varE, varP)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, setCurrentModuleC)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern, Qualified (..))
+import Coal.Language.AST.Builders (matchE, tupleE, tupleP, varE, varP)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
 import Data.List.NonEmpty (NonEmpty (..))

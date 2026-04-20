@@ -41,7 +41,6 @@ module Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild (
   prepareBuild,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
@@ -51,6 +50,7 @@ import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Error ()
 import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State

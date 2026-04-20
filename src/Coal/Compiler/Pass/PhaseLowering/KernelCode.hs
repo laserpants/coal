@@ -9,11 +9,11 @@ module Coal.Compiler.Pass.PhaseLowering.KernelCode (
   compileEnvelopes,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, updateBuildC)
 import Coal.Kernel.Builtin.Objects (builtinObjects)

@@ -8,8 +8,8 @@ module Coal.Compiler.Pass.PhaseTranslation.ExpandAsPatterns (
   passExpandAsPatterns,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language

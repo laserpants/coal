@@ -27,13 +27,13 @@ and produces 'Module Metadata Kind ()' (with kind annotations but no types yet).
 -}
 module Coal.Compiler.Pass.PhaseTypeChecking.KindIndexing (passKindIndexing) where
 
-import Coal.AST.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..), emptyBuild, insertHash)
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Builtin.Names (builtinNames)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, clearAssumptionsC, clearNameStoreC, insertBuildC, insertNameC, setCurrentModuleC, updateCurrentBuildPureC)
 import Coal.Compiler.State

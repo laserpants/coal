@@ -8,8 +8,8 @@ module Coal.Compiler.Build.Envelope (
   partitionBuildEnvelopes,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (Build (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Extras (Name)

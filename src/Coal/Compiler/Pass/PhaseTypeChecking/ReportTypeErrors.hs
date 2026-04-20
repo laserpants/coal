@@ -11,9 +11,9 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors (
   passReportTypeErrors,
 ) where
 
-import Coal.AST.HasMetadata (getMetadata)
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.HasMetadata (getMetadata)
 import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind)

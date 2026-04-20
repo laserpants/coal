@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.AST.Metadata (Metadata (..)) where
+module Coal.Compiler.Metadata (Metadata (..)) where
 
 import Data.Binary (Binary (..))
 import Data.Data (Data)

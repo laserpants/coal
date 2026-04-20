@@ -33,10 +33,10 @@ module Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams (
   passDetectDuplicateParams,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Compiler.State (CompilerState (compilerCurrentPath))

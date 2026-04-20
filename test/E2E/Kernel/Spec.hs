@@ -2,7 +2,7 @@
 
 module E2E.Kernel.Spec (e2eKernelSpec) where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Common.Name (Name)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)

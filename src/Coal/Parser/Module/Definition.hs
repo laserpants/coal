@@ -11,7 +11,7 @@ declarations, instances, imports, and top-level folds.
 -}
 module Coal.Parser.Module.Definition (parseDefinition) where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Definition
 import Coal.Language.Module.Import (Import (..))

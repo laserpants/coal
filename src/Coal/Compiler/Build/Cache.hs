@@ -2,10 +2,10 @@
 
 module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Config (CompilerConfig (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Control.Exception (SomeException (..), try)

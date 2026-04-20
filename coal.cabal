@@ -21,12 +21,6 @@ extra-source-files:
 
 library
   exposed-modules:
-      Coal.AST.Builders
-      Coal.AST.Flattening
-      Coal.AST.HasMetadata
-      Coal.AST.Metadata
-      Coal.AST.Normalization
-      Coal.AST.Rewrite
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
@@ -48,6 +42,7 @@ library
       Coal.Compiler.Config
       Coal.Compiler.Environment
       Coal.Compiler.Error
+      Coal.Compiler.HasMetadata
       Coal.Compiler.Journal
       Coal.Compiler.Kernel.Environment
       Coal.Compiler.Kernel.Translate.Definition
@@ -58,6 +53,7 @@ library
       Coal.Compiler.Kernel.Translate.Record
       Coal.Compiler.Kernel.Translate.Type
       Coal.Compiler.KindEnvironment
+      Coal.Compiler.Metadata
       Coal.Compiler.Pass
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.PhaseLowering
@@ -180,6 +176,10 @@ library
       Coal.Kernel.Parser.Symbol
       Coal.Kernel.Parser.Type
       Coal.Language
+      Coal.Language.AST.Builders
+      Coal.Language.AST.Flattening
+      Coal.Language.AST.Normalization
+      Coal.Language.AST.Rewrite
       Coal.Language.Data.Constructor
       Coal.Language.Definition
       Coal.Language.Expression

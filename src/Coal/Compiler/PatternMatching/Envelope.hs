@@ -12,9 +12,9 @@ module Coal.Compiler.PatternMatching.Envelope (
   fails,
 ) where
 
-import Coal.AST.Rewrite (rename)
 import Coal.Common.Label (Label (..))
 import Coal.Language (Expression (..), HasType (..))
+import Coal.Language.AST.Rewrite (rename)
 import Data.Data (Data)
 import Extras (Name)
 

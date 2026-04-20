@@ -1,7 +1,7 @@
 module Coal.Compiler.Pass.PhasePreflight (phasePreflight) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation (passDesugarDoNotation)
 import Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses (passDesugarWhereClauses)

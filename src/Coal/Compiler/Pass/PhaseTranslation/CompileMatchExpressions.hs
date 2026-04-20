@@ -43,10 +43,9 @@ module Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions (
   passCompileMatchExpressions,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
-import Coal.AST.Rewrite (replaceWith)
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.PatternMatching.Compiler (TypeProxy (..), compileEnvelope)
 import Coal.Compiler.PatternMatching.Envelope (EnvelopeExpression (..), EnvelopePattern (..))
@@ -54,6 +53,7 @@ import Coal.Compiler.PatternMatching.Equation (patternEquation)
 import Coal.Compiler.PatternMatching.Rule (matchPatterns)
 import Coal.Compiler.Stack (CompilerT (..))
 import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), IndexedType, Kind (..), Pattern (..), Primitive (..))
+import Coal.Language.AST.Rewrite (replaceWith)
 import Coal.Language.Module (Module (..))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformBiM)

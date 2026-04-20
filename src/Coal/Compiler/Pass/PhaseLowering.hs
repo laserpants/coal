@@ -4,9 +4,9 @@
 
 module Coal.Compiler.Pass.PhaseLowering (phaseLowering) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.PhaseLowering.KernelCode (passKernelCode)
 import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)

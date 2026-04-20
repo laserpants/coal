@@ -23,10 +23,10 @@ module Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions (
   passInsertBuiltinDefinitions,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Builtin.Definitions (insertBuiltinDefinitions, insertExtraDefinitions)
 import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language.Module (Module (..))

@@ -10,9 +10,9 @@ records, lists, tuples, wildcards, or-patterns, and as-patterns.
 -}
 module Coal.Parser.Pattern (parsePattern, parseUnitPattern) where
 
-import Coal.AST.HasMetadata (metadataSpan)
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.HasMetadata (metadataSpan)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language (Pattern (..), Primitive (LUnit))
 import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)
 import Coal.Parser.Core (Parser, lexeme, lexeme_, spaces)

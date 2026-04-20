@@ -21,10 +21,10 @@ module Coal.Compiler.Pass.PhasePreflight.RefreshCache (
 )
 where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State

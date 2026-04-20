@@ -26,12 +26,12 @@ module Coal.Compiler.Pass.PhasePreflight.SortModules (
   passSortModules,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build (Build (buildDependencies))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
 import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Language.Definition (Definition (DImport, DNamespaceImport))

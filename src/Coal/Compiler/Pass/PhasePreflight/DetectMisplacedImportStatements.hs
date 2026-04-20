@@ -38,10 +38,10 @@ module Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements (
   passDetectMisplacedImportStatements,
 ) where
 
-import Coal.AST.HasMetadata (HasMetadata (..))
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.HasMetadata (HasMetadata (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (
   CompilerError (MisplacedImportStatement),

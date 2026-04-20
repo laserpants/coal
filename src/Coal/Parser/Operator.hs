@@ -26,8 +26,8 @@ module Coal.Parser.Operator (
   parseGreaterThanOperator,
 ) where
 
-import Coal.AST.Metadata (Metadata)
 import Coal.Common.Label (Label (..))
+import Coal.Compiler.Metadata (Metadata)
 import Coal.Language (Expression (..))
 import Coal.Parser.Core (Parser)
 import Coal.Parser.Metadata (withMetadata)

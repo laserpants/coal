@@ -9,7 +9,7 @@ Handles booleans, characters, strings, integers, and floating-point literals.
 -}
 module Coal.Parser.Primitive (parseAtom, parsePrimitive) where
 
-import Coal.AST.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Primitive
 import Coal.Parser.Core (Parser, lexeme, lexeme_)

@@ -4,8 +4,8 @@ module Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses (
   passDesugarWhereClauses,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language.Module (Module (..))

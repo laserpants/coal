@@ -45,8 +45,6 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandTopLevelFolds (
   passExpandTopLevelFolds,
 ) where
 
-import Coal.AST.Rewrite (replace)
-import Coal.AST.Builders (applicationE, lambda1E, matchE, varE)
 import Coal.Common.Label (Label (..), labelName)
 import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
@@ -54,6 +52,8 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), Qualified (..))
+import Coal.Language.AST.Builders (applicationE, lambda1E, matchE, varE)
+import Coal.Language.AST.Rewrite (replace)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)

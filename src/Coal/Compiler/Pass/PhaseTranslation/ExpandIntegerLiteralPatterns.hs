@@ -39,10 +39,10 @@ module Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns (
   passExpandIntegerLiteralPatterns,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State (CompilerState (compilerCurrentPath))

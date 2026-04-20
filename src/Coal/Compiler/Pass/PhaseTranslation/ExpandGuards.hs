@@ -48,9 +48,9 @@ module Coal.Compiler.Pass.PhaseTranslation.ExpandGuards (
   passExpandGuards,
 ) where
 
-import Coal.AST.Metadata (Metadata (..))
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (freshName, supplied)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
