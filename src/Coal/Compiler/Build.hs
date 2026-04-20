@@ -50,6 +50,9 @@ module Coal.Compiler.Build (
   -- * Type constructor operations
   insertBuildTypeConstructor,
 
+  -- * Fold operations
+  insertBuildFold,
+
   -- * Trait operations
   insertBuildTrait,
 
@@ -123,6 +126,7 @@ data Build a = Build
   { buildPath :: Path
   , buildNames :: Environment [NameEntry]
   , buildExportedNames :: Set Name
+  , buildFolds :: Set Name
   , buildDataConstructors :: Environment (DataConstructorEntry a)
   , buildTypeConstructors :: Environment (TypeConstructorEntry a)
   , buildTraits :: Environment (TraitEntry a)
@@ -151,6 +155,7 @@ emptyBuild =
     { buildPath = Path []
     , buildNames = mempty
     , buildExportedNames = mempty
+    , buildFolds = mempty
     , buildDataConstructors = mempty
     , buildTypeConstructors = mempty
     , buildTraits = mempty
@@ -297,6 +302,22 @@ overBuildTypeConstructors f Build{..} =
 -- | Register a type constructor
 insertBuildTypeConstructor :: Name -> TypeConstructorEntry a -> Build a -> Build a
 insertBuildTypeConstructor name = overBuildTypeConstructors . Environment.insert name
+
+-- -----------------------------------------------------------------------------
+
+-- * Fold operations
+
+-- | Apply a function to the fold environment
+overBuildFolds :: (Set Name -> Set Name) -> Build a -> Build a
+overBuildFolds f Build{..} =
+  Build
+    { buildFolds = f buildFolds
+    , ..
+    }
+
+-- | Register a top-level fold
+insertBuildFold :: Name -> Build a -> Build a
+insertBuildFold name = overBuildFolds (Set.insert name)
 
 -- -----------------------------------------------------------------------------
 

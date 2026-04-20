@@ -7,6 +7,7 @@ import Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions (passCompileM
 import Coal.Compiler.Pass.PhaseTranslation.CompileNats (passCompileNats)
 import Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST (passDenormalizeAST)
 import Coal.Compiler.Pass.PhaseTranslation.DesugarPatterns (passDesugarPatterns)
+import Coal.Compiler.Pass.PhaseTranslation.DetectCallCycles (passDetectCallCycles)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandAsPatterns (passExpandAsPatterns)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandGuards (passExpandGuards)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns)
@@ -31,4 +32,5 @@ phaseTranslation =
     >-> passCompileMatchExpressions
     >-> passPlaceholders
     >-> passCompileNats
+    >-> passDetectCallCycles
     >-> passDenormalizeAST

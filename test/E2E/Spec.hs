@@ -257,9 +257,9 @@ e2eSpec = do
     expectOutput "123" "test/Coal/examples/048" ["Main.coal"]
 
   describe "049" $ do
-    it "is NoSuchIdentifier" $ do
+    it "is CallCycleError" $ do
       res <- runSpec "test/Coal/examples/049" ["Main.coal"]
-      res `shouldBe` Left NoSuchIdentifier
+      res `shouldBe` Left CallCycleError
 
   describe "050" $
     expectOutput

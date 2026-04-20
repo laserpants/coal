@@ -91,6 +91,9 @@ insertDataConstructor name entry = modify (Build.insertBuildDataConstructor name
 insertTypeConstructor :: (Monad m) => Name -> TypeConstructorEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertTypeConstructor name entry = modify (Build.insertBuildTypeConstructor name entry)
 
+insertFold :: (Monad m) => Name -> ReaderT (ExportList a) (StateT (Build a) m) ()
+insertFold name = modify (Build.insertBuildFold name)
+
 insertTrait :: (Monad m) => Name -> TraitEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertTrait name entry = modify (Build.insertBuildTrait name entry)
 
@@ -170,6 +173,8 @@ prepareDefinitions defs = do
   -- Step 2: Collect data constructors
   -- Depends on type constructors being registered (Step 1)
   traverse_ collectDataConstructors defs
+
+  traverse_ collectFolds defs
 
   -- Step 3: Expand wildcard exports
   -- Converts Type(*) exports to explicit constructor lists (Type(A, B, C))
@@ -741,6 +746,14 @@ instantiateScheme Forall{..} =
 
 instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
+
+collectFolds :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectFolds =
+  \case
+    DFold _ name _ ->
+      insertFold name
+    _ ->
+      pure ()
 
 collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectImports =

@@ -80,6 +80,7 @@ library
       Coal.Compiler.Pass.PhaseTranslation.CompileNats
       Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST
       Coal.Compiler.Pass.PhaseTranslation.DesugarPatterns
+      Coal.Compiler.Pass.PhaseTranslation.DetectCallCycles
       Coal.Compiler.Pass.PhaseTranslation.ExpandAsPatterns
       Coal.Compiler.Pass.PhaseTranslation.ExpandGuards
       Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns

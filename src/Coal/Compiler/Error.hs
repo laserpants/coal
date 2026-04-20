@@ -50,6 +50,7 @@ data CompilerError a
   | MissingRequiredInstance Name IndexedType (ErrorLocation a)
   | KindError KindError (ErrorLocation a)
   | OrPatternVariableMismatch (Set Name) (Set Name) (ErrorLocation a)
+  | CallCycle [[Name]] (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -60,6 +61,7 @@ data CompilerFailureMode
   | TraitError
   | PatternAnomaly
   | TypeError
+  | CallCycleError
   | CompilerError
   deriving (Show, Eq, Ord, Read)
 
@@ -121,6 +123,8 @@ errorLocation =
     KindError _ erl ->
       Just erl
     OrPatternVariableMismatch _ _ erl ->
+      Just erl
+    CallCycle _ erl ->
       Just erl
     NamedFoldNotAllowed erl ->
       Just erl
