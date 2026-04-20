@@ -55,8 +55,6 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Definition
-import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
