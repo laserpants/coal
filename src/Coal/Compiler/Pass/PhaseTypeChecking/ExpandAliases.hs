@@ -97,12 +97,7 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
         m <- Module modulePath moduleExportList <$> aliasTransform moduleDefinitions
         updateNames
         updateConstructors
-
-        --        Build{..} <- getCurrentBuildC
-        --        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ Build{..})
-        --        liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ buildNames)
-
-        pure m
+        return m
 
 updateConstructors :: (MonadIO m, Show a) => CompilerT a m ()
 updateConstructors =
@@ -126,7 +121,7 @@ updateNames =
               newScheme <- lift $ aliasTransform s
               modify (replaceBuildNameEntry (NName name newScheme))
             _ ->
-              pure ()
+              return ()
 
 instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (Definition e a t) where
   aliasTransform =
@@ -142,7 +137,7 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
       DTypeAlias loc name def ->
         DTypeAlias loc name <$> aliasTransform def
       o ->
-        pure o
+        return o
 
 instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (FunctionDefinition e a t) where
   aliasTransform =
@@ -168,7 +163,7 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
     \case
       InstanceDefinition{..} -> do
         newInstanceDefinitionImplementations <- aliasTransform instanceDefinitionImplementations
-        pure $
+        return $
           InstanceDefinition
             { instanceDefinitionImplementations = newInstanceDefinitionImplementations
             , ..
@@ -179,7 +174,7 @@ instance (AliasTransform (Type Parameter a)) => AliasTransform (TypeDefinition e
     \case
       TypeDefinition{..} -> do
         newTypeDefinitionConstructors <- aliasTransform typeDefinitionConstructors
-        pure $
+        return $
           TypeDefinition
             { typeDefinitionConstructors = newTypeDefinitionConstructors
             , ..
@@ -190,7 +185,7 @@ instance (AliasTransform (Type Parameter k)) => AliasTransform (AliasDefinition 
     \case
       AliasDefinition{..} -> do
         newAliasDefinitionType <- aliasTransform aliasDefinitionType
-        pure $
+        return $
           AliasDefinition
             { aliasDefinitionType = newAliasDefinitionType
             , ..
@@ -205,7 +200,7 @@ instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTra
         ELet a bs e ->
           ELet a <$> aliasTransform bs <*> aliasTransform e
         e ->
-          pure e
+          return e
 
 instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Pattern e a t) where
   aliasTransform =
@@ -214,7 +209,7 @@ instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTra
         PAnnotation a t p ->
           PAnnotation a <$> aliasTransform t <*> aliasTransform p
         p ->
-          pure p
+          return p
 
 instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Binding Expression e a t) where
   aliasTransform =
@@ -229,7 +224,7 @@ instance (AliasTransform (Type o k)) => AliasTransform (DataConstructor o k (Typ
     \case
       DataConstructor{..} -> do
         newConstructorScheme <- aliasTransform constructorScheme
-        pure
+        return
           DataConstructor
             { constructorScheme = newConstructorScheme
             , ..
@@ -245,7 +240,7 @@ instance (Typeable o, AliasEntryTransform o, Data (o Kind)) => AliasTransform (T
       TAlias name ts t ->
         TAlias name <$> aliasTransform ts <*> aliasTransform t
       TIntrinsic t ->
-        pure (TIntrinsic t)
+        return (TIntrinsic t)
       TRecord t ->
         TRecord <$> aliasTransform t
       TRow row ->
@@ -253,7 +248,7 @@ instance (Typeable o, AliasEntryTransform o, Data (o Kind)) => AliasTransform (T
       t@(TConstructor _ name) ->
         lookupAlias t [] name
       t ->
-        pure t
+        return t
 
 instance (AliasTransform t) => AliasTransform (Scheme o k t) where
   aliasTransform =
@@ -263,7 +258,7 @@ instance (AliasTransform t) => AliasTransform (Scheme o k t) where
           <$> aliasTransform schemeTypeBody
 
 instance AliasTransform () where
-  aliasTransform _ = pure ()
+  aliasTransform _ = return ()
 
 instance AliasTransform (DataConstructorEntry a) where
   aliasTransform =
@@ -291,7 +286,7 @@ lookupAlias t ts name = do
         TApplication k t1 t2 ->
           TApplication k <$> aliasTransform t1 <*> aliasTransform t2
         _ ->
-          pure t
+          return t
     Just aliasEntry -> do
       t1 <- transformAliasEntry ts aliasEntry
       TAlias name ts <$> aliasTransform t1

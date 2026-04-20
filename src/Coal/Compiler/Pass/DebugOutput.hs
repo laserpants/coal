@@ -4,6 +4,10 @@
 
 module Coal.Compiler.Pass.DebugOutput where -- (generateDebugArtifacts) where
 
+--        Build{..} <- getCurrentBuildC
+--        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ Build{..})
+--        liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ buildNames)
+
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
