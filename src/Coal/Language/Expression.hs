@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
@@ -19,6 +21,7 @@ module Coal.Language.Expression (
   CompiledClause (..),
 ) where
 
+import Coal.Common.FreeVars
 import Coal.Common.Label (Label (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..))
@@ -30,6 +33,8 @@ import Coal.Language.Type (Parameter (..), Type)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
+import Data.Set (Set, singleton)
+import qualified Data.Set as Set
 import Extras (Dictionary, Name)
 import GHC.Generics (Generic)
 
@@ -134,3 +139,83 @@ data CompiledClause a s t = ECompiledClause
     )
 
 instance (Binary a, Binary s, Binary t) => Binary (CompiledClause a s t)
+
+instance (Ord t, Data a, Data s, Data t) => FreeVars (Expression a s t) t where
+  freeIn =
+    \case
+      EAnnotation _ _ e ->
+        freeIn e
+      EApplication _ _ f args ->
+        freeIn f <> freeIn args
+      ELambda _ pats body ->
+        let bound = boundIn pats
+         in freeSet bound body
+      ELet _ bindings body ->
+        let bound = boundIn bindings
+            rhsFree = freeIn bindings
+            bodyFree = freeSet bound body
+         in rhsFree <> bodyFree
+      ERecursiveLet _ pat rhs body ->
+        let bound = boundIn pat
+            rhsFree = freeSet bound rhs
+            bodyFree = freeSet bound body
+         in rhsFree <> bodyFree
+      EVariable _ lbl ->
+        Set.singleton lbl
+      EConstructor{} ->
+        mempty
+      ELiteral{} ->
+        mempty
+      EIf _ _ c t f ->
+        freeIn c <> freeIn t <> freeIn f
+      EOperator{} ->
+        mempty
+      ERecord _ _ fields rest ->
+        freeIn fields <> freeIn rest
+      EListCons _ _ x xs ->
+        freeIn x <> freeIn xs
+      EListLiteral _ _ xs ->
+        freeIn xs
+      ETuple _ _ xs ->
+        freeIn xs
+      EMatch _ _ e clauses ->
+        freeIn e <> foldMap freeClause clauses
+      ELambdaMatch _ _ clauses ->
+        foldMap freeClause clauses
+      ECompiledMatch _ _ e clauses ->
+        freeIn e <> foldMap freeCompiledClause clauses
+      EFold _ _ exprs clauses ->
+        freeIn exprs <> foldMap freeClause clauses
+      ESelect _ _ e ->
+        freeIn e
+      EFocus _ _ _ _ e1 e2 ->
+        freeIn e1 <> freeIn e2
+      ETraitInstance{} ->
+        mempty
+      EFFICall _ _ _ args k ->
+        freeIn args <> freeIn k
+      e ->
+        error "Not implemented"
+
+freeClause ::
+  (Ord t, Data a, Data s, Data t) =>
+  Clause a s t ->
+  Set (Label t)
+freeClause (EClause _ pat choices) =
+  let bound = boundIn pat
+   in foldMap (freeChoice bound) choices
+
+freeChoice ::
+  (Ord t, Data a, Data s, Data t) =>
+  Set Name ->
+  Choice Expression a s t ->
+  Set (Label t)
+freeChoice bound (CPlain _ guards expr) =
+  freeIn guards <> freeSet bound expr
+
+freeCompiledClause ::
+  (Ord t, Data a, Data s, Data t) =>
+  CompiledClause a s t ->
+  Set (Label t)
+freeCompiledClause (ECompiledClause _ _ expr) =
+  freeIn expr
