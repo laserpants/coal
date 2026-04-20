@@ -24,7 +24,7 @@ do {
 }
 @
 
-is desugared into:
+desugars into:
 
 @
 action1() >>= fn(x) =>

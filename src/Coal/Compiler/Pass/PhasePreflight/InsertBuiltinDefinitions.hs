@@ -4,15 +4,15 @@
 {- |
 Module: Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions
 
-Insert compiler builtin definitions into modules.
+Insert compiler built-in definitions into modules.
 
-This pass injects compiler-provided builtin definitions into modules during
+This pass injects compiler-provided built-in definitions into modules during
 the preflight phase. Builtins include primitive operations, intrinsic
 functions, and standard library foundations that are implemented at the
 compiler level rather than in source code.
 
 For embedded/standard library modules (like List, String, etc.), this pass
-inserts the core builtin definitions. For user modules, it may insert
+inserts the core built-in definitions. For user modules, it may insert
 additional definitions needed for proper compilation.
 
 This ensures that all modules have access to necessary compiler primitives
