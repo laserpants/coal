@@ -210,6 +210,7 @@ overBuildNames f Build{..} =
     }
 
 {- | Check if two name entries refer to the same name.
+
 Used for deduplication when inserting name entries. Two entries are considered
 equal if they have the same constructor and the same name, regardless of their
 associated data (schemes, types, etc.).
