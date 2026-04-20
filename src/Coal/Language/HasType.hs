@@ -13,7 +13,7 @@ Type class for extracting and folding types from language constructs.
 module Coal.Language.HasType (HasType (..), foldTypeOf) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Language.Definition
+import Coal.Language.Definition (Definition (DFunction, DLet), FunctionDefinition (..), LetDefinition (..))
 import Coal.Language.Expression (Expression (..))
 import Coal.Language.Expression.Choice (Guard (..))
 import Coal.Language.Pattern (Pattern (..))
