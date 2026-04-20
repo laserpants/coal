@@ -33,7 +33,7 @@ import Coal.Language.Type (Parameter (..), Type)
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
-import Data.Set (Set, singleton)
+import Data.Set (Set)
 import qualified Data.Set as Set
 import Extras (Dictionary, Name)
 import GHC.Generics (Generic)
@@ -194,7 +194,7 @@ instance (Ord t, Data a, Data s, Data t) => FreeVars (Expression a s t) t where
         mempty
       EFFICall _ _ _ args k ->
         freeIn args <> freeIn k
-      e ->
+      _ ->
         error "Not implemented"
 
 freeClause ::
