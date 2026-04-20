@@ -27,15 +27,15 @@ module Coal.Language.Definition (
 ) where
 
 import Coal.Language.Data.Constructor (DataConstructor (..))
-import Coal.Language.Expression
+import Coal.Language.Expression (Clause, Expression)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..))
-import Coal.Language.Pattern
-import Coal.Language.Trait
-import Coal.Language.Type
-import Coal.Language.Type.Kind
-import Coal.Language.Type.Scheme
-import Data.Binary
+import Coal.Language.Pattern (Pattern)
+import Coal.Language.Trait (Qualified, Trait (Trait))
+import Coal.Language.Type (Parameter, Type)
+import Coal.Language.Type.Kind (Kind)
+import Coal.Language.Type.Scheme (Scheme)
+import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Data.List.NonEmpty (NonEmpty)
 import Extras (Name)
