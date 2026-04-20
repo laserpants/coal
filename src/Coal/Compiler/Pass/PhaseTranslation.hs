@@ -15,7 +15,7 @@ import Coal.Compiler.Pass.PhaseTranslation.ExpandRecordPatterns (passExpandRecor
 import Coal.Compiler.Pass.PhaseTranslation.NormalizeAST (passNormalizeAST)
 import Coal.Compiler.Pass.PhaseTranslation.Placeholders (passPlaceholders)
 import Coal.Language (IndexedType, Kind)
-import Coal.Language.Module
+import Coal.Language.Module (Module)
 import Control.Monad.IO.Class (MonadIO)
 
 phaseTranslation :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
