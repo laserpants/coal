@@ -54,35 +54,38 @@ pipeline :: (MonadIO m, MonadMask m) => Pass Metadata m [FilePath] ()
 pipeline =
   phaseParsing
     >-> phasePreflight
-    >-> mapPass (liftPass (phaseTypeChecking >-> phaseTranslation))
+    >-> phaseMain (phaseTypeChecking >-> phaseTranslation)
     >-> phaseLowering
     >-> passLinking
 
-extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
-extraTicks units = do
-  forM_ units $
-    \case
-      BCached{} -> replicateM_ 73 tickBar
-      _ -> pure ()
-  pure units
+phaseMain :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
+phaseMain x = mapPass (liftPass x)
+
+--extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
+--extraTicks units = do
+--  forM_ units $
+--    \case
+--      BCached{} -> replicateM_ 73 tickBar
+--      _ -> pure ()
+--  pure units
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
   foo <-
     if configSilent config
       then do
-        go2 Nothing
+        go Nothing
       else -- pure $ fromRight (error "???") z
-      do
-        displayConsoleRegions $ do
-          pb <-
-            newProgressBar
-              def
-                { pgTotal = (fromIntegral (length builtinModules + length files) * 73) + 28
-                , pgWidth = 100
-                , pgFormat = "Compiling [:bar] :current/:total"
-                }
-          go2 (Just pb)
+        do
+          displayConsoleRegions $ do
+            pb <-
+              newProgressBar
+                def
+                  { pgTotal = (fromIntegral (length builtinModules + length files) * 73) + 28
+                  , pgWidth = 100
+                  , pgFormat = "Compiling [:bar] :current/:total"
+                  }
+            go (Just pb)
   -- pure $ fromRight (error "???") z
 
   case foo of
@@ -106,7 +109,7 @@ compileWithCFiles config files cFiles = do
   --    runCompilerT (emptyCompilerEnvironment progressBar) $ do
   --      lift $ setConfigC config{configCFiles = configCFiles config <> cFiles}
   --      runPass pipeline files
-  go2 progressBar = do
+  go progressBar = do
     runCompilerT (emptyCompilerEnvironment progressBar) $ do
       setConfigC config{configCFiles = configCFiles config <> cFiles}
       runPass pipeline files
