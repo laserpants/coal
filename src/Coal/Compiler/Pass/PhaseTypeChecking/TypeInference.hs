@@ -22,6 +22,9 @@ module Coal.Compiler.Pass.PhaseTypeChecking.TypeInference (passTypeInference) wh
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (replaceBuildNameEntry)
 import Coal.Compiler.Build.NameEntry (NameEntry (..))
+import Coal.Compiler.Error
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
 import Coal.Compiler.State
@@ -29,6 +32,7 @@ import Coal.Compiler.TypeInference (define, generateConstraints, generateKindCon
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
+import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Constraint (Constraint (Explicit))
 import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
@@ -36,30 +40,29 @@ import Coal.TypeSystem.Kind.Constraint.Solver (solveKindConstraints)
 import Coal.TypeSystem.Kind.Substitution (KindSubstitutable (applyKinds, replaceVariables))
 import Coal.TypeSystem.Kind.Unification (KindUnifier (kindUnifierMonad))
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
-import Control.Monad.Except (MonadIO (..), forM_)
+import Control.Monad.Except (MonadError (throwError), MonadIO (..), forM_)
 import Control.Monad.State (execStateT, get, gets, modify, runState)
 import Data.Data (Data)
-import qualified Data.Text as Text
 
 {- | Type inference compiler pass
 
 Infers kinds and types for all definitions in a module, returning a module
 with fully annotated type information.
 -}
-passTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Pass a m (Module a Kind ()) (Module a Kind IndexedType)
+passTypeInference :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind IndexedType)
 passTypeInference = Pass{runPass = passImpl}
 
-passImpl :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+passImpl :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 passImpl = runTypeInference
 
-runTypeInference :: (MonadIO m, Data a, Eq a, Show a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+runTypeInference :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 runTypeInference m = do
   indexedM <- inferKinds m
   newM <- inferTypes indexedM
   replacePlaceholders
   return newM
 
-replacePlaceholders :: (Monad m) => CompilerT a m ()
+replacePlaceholders :: (Monad m) => CompilerT Metadata m ()
 replacePlaceholders = do
   store <- gets compilerNameStore
   updateCurrentBuildC $
@@ -69,7 +72,7 @@ replacePlaceholders = do
           \(name, s) ->
             modify (replaceBuildNameEntry (NName name s))
 
-inferTypes :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+inferTypes :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 inferTypes m = do
   Module{..} <- assignTypeIndices m
 
@@ -83,17 +86,16 @@ inferTypes m = do
   CompilerState{..} <- get
 
   -- Verify all assumptions (explicit type annotations) are satisfied
-  forM_ compilerAssumptions $ \Assumption{..} ->
-    case Environment.lookup assumptionName compilerNameStore of
-      Nothing ->
-        error $
-          "Type inference: assumption for name '"
-            <> Text.unpack assumptionName
-            <> "' not found in name store (internal compiler error)"
-      Just s -> do
-        insertConstraintsC [Explicit (RuleAssumptionExplicit assumptionMetadata t s) t s]
-       where
-        t = apply compilerSubstitution assumptionType
+  forM_ compilerAssumptions $
+    \Assumption{..} ->
+      case Environment.lookup assumptionName compilerNameStore of
+        Nothing -> do
+          tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath modulePath) assumptionMetadata)]
+          throwError NoSuchIdentifier
+        Just s -> do
+          insertConstraintsC [Explicit (RuleAssumptionExplicit assumptionMetadata t s) t s]
+         where
+          t = apply compilerSubstitution assumptionType
 
   -- Final solve and normalization
   sub <- solveT
@@ -122,7 +124,7 @@ inferKinds m = do
       modify (overCompilerModuleWithPath (modulePath m) (replaceVariables . applyKinds sub))
       return (replaceVariables (applyKinds sub m))
 
-storeDefinitionType :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m ()
+storeDefinitionType :: (Monad m) => Definition Metadata Kind IndexedType -> CompilerT Metadata m ()
 storeDefinitionType =
   \case
     def@(DFunction _ name _) ->
@@ -142,7 +144,7 @@ storeDefinitionType =
     _ ->
       return ()
 
-assignTypeIndices :: (Monad m, Traversable t) => t e -> CompilerT a m (t IndexedType)
+assignTypeIndices :: (Monad m, Traversable t) => t e -> CompilerT Metadata m (t IndexedType)
 assignTypeIndices ds = do
   CompilerState{..} <- get
   let (result, supply) = runState (indexed ds) compilerSupply
