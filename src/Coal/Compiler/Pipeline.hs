@@ -53,15 +53,15 @@ pipeline :: (MonadIO m, MonadMask m) => Pass Metadata m [FilePath] ()
 pipeline =
   phaseParsing
     >-> phasePreflight
-    >-> phaseMain (phaseTypeChecking >-> phaseTranslation)
+    >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
     >-> phaseLowering
     >-> passLinking
 
-phaseMain :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
-phaseMain x = mapPass (liftPass x)
+phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
+phaseMainPasses = mapPass . liftPass
 
---extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
---extraTicks units = do
+-- extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
+-- extraTicks units = do
 --  forM_ units $
 --    \case
 --      BCached{} -> replicateM_ 73 tickBar
@@ -70,24 +70,21 @@ phaseMain x = mapPass (liftPass x)
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
-  foo <-
+  res <-
     if configSilent config
       then do
         go Nothing
-      else -- pure $ fromRight (error "???") z
-        do
-          displayConsoleRegions $ do
-            pb <-
-              newProgressBar
-                def
-                  { pgTotal = (fromIntegral (length builtinModules + length files) * 73) + 28
-                  , pgWidth = 100
-                  , pgFormat = "Compiling [:bar] :current/:total"
-                  }
-            go (Just pb)
-  -- pure $ fromRight (error "???") z
-
-  case foo of
+      else do
+        displayConsoleRegions $ do
+          pb <-
+            newProgressBar
+              def
+                { pgTotal = (fromIntegral (length builtinModules + length files) * 73) + 28
+                , pgWidth = 100
+                , pgFormat = "Compiling [:bar] :current/:total"
+                }
+          go (Just pb)
+  case res of
     (e, CompilerState{..}, es) -> do
       forM_ (nub es) $
         \err -> do
