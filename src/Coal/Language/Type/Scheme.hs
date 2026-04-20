@@ -39,7 +39,6 @@ import Coal.Language.Type.Operations (listType, tupleType)
 import Coal.Language.Type.Row (Row (..))
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
-import Data.List (intersperse)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Set (Set)
