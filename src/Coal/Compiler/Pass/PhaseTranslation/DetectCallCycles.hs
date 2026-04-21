@@ -39,7 +39,7 @@ import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerError (..), CompilerFailureMode (..), CompilerT, ErrorLocation (..), getCurrentBuildC)
+import Coal.Compiler.Stack (CompilerError (..), CompilerFailureMode (..), CompilerT, ErrorLocation (..), getCurrentBuildC, setCurrentModuleC)
 import Coal.Language (Definition (..), IndexedType, Kind)
 import Coal.Language.Definition (FunctionDefinition (..), InstanceDefinition (..), LetDefinition (..))
 import Coal.Language.Expression (Expression)
@@ -47,7 +47,7 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
-import qualified Data.Data
+import Data.Data (Data)
 import Data.Graph (SCC (..), stronglyConnComp)
 import Data.List (nub)
 import qualified Data.Set as Set
@@ -58,15 +58,16 @@ passDetectCallCycles = Pass{runPass = passImpl}
 
 passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 passImpl m = do
+  setCurrentModuleC m
   detectCallCycles m
   return m
 
-detectCallCycles :: (Monad m, Ord t, Data.Data.Data k, Data.Data.Data t) => Module Metadata k t -> CompilerT Metadata m ()
+detectCallCycles :: (Monad m, Ord t, Data k, Data t) => Module Metadata k t -> CompilerT Metadata m ()
 detectCallCycles m = do
   (_, es) <- listenErrors $ checkForCycles m
   unless (null es) (throwError CallCycleError)
 
-checkForCycles :: (Monad m, Ord t, Data.Data.Data k, Data.Data.Data t) => Module Metadata k t -> CompilerT Metadata m ()
+checkForCycles :: (Monad m, Ord t, Data k, Data t) => Module Metadata k t -> CompilerT Metadata m ()
 checkForCycles Module{..} = do
   -- Get fold names to exclude from cycle detection (mutually recursive folds are valid)
   Build{buildFolds} <- getCurrentBuildC
@@ -74,8 +75,7 @@ checkForCycles Module{..} = do
   case topoSortDefs buildFolds depGraph of
     Left cycles -> do
       let moduleName = principalPath modulePath
-      let errorLoc = ErrorLocation moduleName mempty
-      tellErrors [CallCycle cycles errorLoc]
+      tellErrors [CallCycle cycles (ErrorLocation moduleName mempty)]
     Right _ ->
       return ()
 
@@ -87,7 +87,7 @@ current module. Constructors and imported names are excluded.
 
 Returns a list of (name, dependencies) pairs suitable for topological sorting.
 -}
-buildDependencyGraph :: (Ord t, Data.Data.Data a, Data.Data.Data k, Data.Data.Data t) => [Definition a k t] -> [(Name, [Name])]
+buildDependencyGraph :: (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [(Name, [Name])]
 buildDependencyGraph defs =
   let definedNames = Set.fromList (getDefinedNames defs)
       depPairs = [(name, filter (`Set.member` definedNames) deps) | (name, deps) <- extractDependencies defs]
@@ -120,7 +120,7 @@ For each definition, compute the set of free variables in its body and
 return as a (name, dependencies) pair. Mutually recursive folds are filtered
 out during topological sorting using the buildFolds set.
 -}
-extractDependencies :: forall a k t. (Ord t, Data.Data.Data a, Data.Data.Data k, Data.Data.Data t) => [Definition a k t] -> [(Name, [Name])]
+extractDependencies :: forall a k t. (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [(Name, [Name])]
 extractDependencies = concatMap extractDependency
  where
   extractDependency :: Definition a k t -> [(Name, [Name])]
