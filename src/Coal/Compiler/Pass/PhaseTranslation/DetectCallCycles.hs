@@ -75,7 +75,11 @@ checkForCycles Module{..} = do
   case topoSortDefs buildFolds depGraph of
     Left cycles -> do
       let moduleName = principalPath modulePath
-      tellErrors [CallCycle cycles (ErrorLocation moduleName mempty)]
+          cycleNames = map (map fst) cycles
+          errorLoc = case cycles of
+            (((_, metadata) : _) : _) -> ErrorLocation moduleName metadata
+            _ -> ErrorLocation moduleName mempty
+      tellErrors [CallCycle cycleNames errorLoc]
     Right _ ->
       return ()
 
@@ -87,22 +91,23 @@ current module. Constructors and imported names are excluded.
 
 Returns a list of (name, dependencies) pairs suitable for topological sorting.
 -}
-buildDependencyGraph :: (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [(Name, [Name])]
+buildDependencyGraph :: (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [((Name, a), [Name])]
 buildDependencyGraph defs =
-  let definedNames = Set.fromList (getDefinedNames defs)
+  let definedNamePairs = getDefinedNames defs
+      definedNames = Set.fromList (map fst definedNamePairs)
       depPairs = [(name, filter (`Set.member` definedNames) deps) | (name, deps) <- extractDependencies defs]
-      namesWithDeps = Set.fromList (map fst depPairs)
-      namesWithoutDeps = [(name, []) | name <- Set.toList definedNames, name `Set.notMember` namesWithDeps]
+      namesWithDeps = Set.fromList (map (fst . fst) depPairs)
+      namesWithoutDeps = [(nameLoc, []) | nameLoc <- definedNamePairs, fst nameLoc `Set.notMember` namesWithDeps]
    in depPairs ++ namesWithoutDeps
  where
-  getDefinedNames :: [Definition a k t] -> [Name]
+  getDefinedNames :: [Definition a k t] -> [(Name, a)]
   getDefinedNames = concatMap getDefName
 
-  getDefName :: Definition a k t -> [Name]
+  getDefName :: Definition a k t -> [(Name, a)]
   getDefName =
     \case
-      DFunction _ name _ -> [name]
-      DLet _ name _ -> [name]
+      DFunction loc name _ -> [(name, loc)]
+      DLet loc name _ -> [(name, loc)]
       DInstance _ inst -> concatMap getDefName (instanceDefinitionImplementations inst)
       _ -> []
 
@@ -112,22 +117,19 @@ For each definition, compute the set of free variables in its body and
 return as a (name, dependencies) pair. Mutually recursive folds are filtered
 out during topological sorting using the buildFolds set.
 -}
-extractDependencies :: forall a k t. (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [(Name, [Name])]
+extractDependencies :: forall a k t. (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [((Name, a), [Name])]
 extractDependencies = concatMap extractDependency
  where
-  extractDependency :: Definition a k t -> [(Name, [Name])]
+  extractDependency :: Definition a k t -> [((Name, a), [Name])]
   extractDependency =
     \case
-      DFunction _ name (FunctionDefinition{..}) ->
+      DFunction _ name FunctionDefinition{..} ->
         let deps = getDeps functionDefinitionExpression
-         in [(name, deps)]
-      DLet _ name (LetDefinition{..}) ->
+         in [((name, functionDefinitionMetadata), deps)]
+      DLet _ name LetDefinition{..} ->
         let deps = getDeps letDefinitionExpression
-         in [(name, deps)]
-      DFunctionGroup _ name funDefs ->
-        let deps = nub $ concatMap (\(FunctionDefinition{..}) -> getDeps functionDefinitionExpression) funDefs
-         in [(name, deps)]
-      DInstance _ (InstanceDefinition{..}) ->
+         in [((name, letDefinitionMetadata), deps)]
+      DInstance _ InstanceDefinition{..} ->
         concatMap extractDependency instanceDefinitionImplementations
       _ ->
         []
@@ -151,20 +153,20 @@ by pattern matching and should be caught.
 If any problematic cycles exist, returns Left with the list of cycles.
 Otherwise returns Right with a valid topological ordering.
 -}
-topoSortDefs :: Set.Set Name -> [(Name, [Name])] -> Either [[Name]] [Name]
+topoSortDefs :: Set.Set Name -> [((Name, a), [Name])] -> Either [[(Name, a)]] [(Name, a)]
 topoSortDefs folds defs =
   if null problematicCycles
     then Right (concatMap flatten sccs)
     else Left problematicCycles
  where
-  edges = [(name, name, deps) | (name, deps) <- defs]
+  edges = [((name, loc), name, deps) | ((name, loc), deps) <- defs]
   sccs = stronglyConnComp edges
   -- Report all cycles (self-recursion and mutual recursion)
   -- EXCEPT cycles where all participants are folds (valid structural recursion)
   problematicCycles =
     [ xs
     | CyclicSCC xs <- sccs
-    , not (all (`Set.member` folds) xs) -- Exclude if all are folds
+    , not (all (\(name, _) -> name `Set.member` folds) xs) -- Exclude if all are folds
     ]
   flatten (AcyclicSCC x) = [x]
   flatten (CyclicSCC xs) = xs
