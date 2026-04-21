@@ -43,7 +43,7 @@ import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
-import Prettyprinter
+import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
 import System.Console.AsciiProgress
 import Text.Megaparsec (errorBundlePretty)

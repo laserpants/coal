@@ -59,7 +59,9 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module.Path (principalPath)
-import Coal.TypeSystem.Constraint
+import Coal.TypeSystem.Constraint (
+  Constraint (Equality, Explicit),
+ )
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack

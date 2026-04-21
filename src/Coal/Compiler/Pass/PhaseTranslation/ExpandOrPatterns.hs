@@ -67,7 +67,6 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State (CompilerState (compilerCurrentPath))
 import Coal.Language
-import Coal.Language.Module (Module)
 import Coal.Language.Module.Path (principalPath)
 import Control.Monad (when)
 import Control.Monad.Except (throwError)
