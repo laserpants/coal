@@ -11,7 +11,6 @@ import Coal.Compiler.Builtin.Functions (builtinFunctions)
 import Coal.Compiler.Builtin.Traits (builtinTraits)
 import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Language
-import Coal.Language.Definition
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (Path))
 import Data.List.NonEmpty (NonEmpty (..))

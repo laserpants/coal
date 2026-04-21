@@ -45,8 +45,6 @@ import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
 import Coal.Language
 import Coal.Language.AST.Builders
-import Coal.Language.Definition
-import Coal.Language.Module
 import Control.Monad.IO.Class (MonadIO)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM)

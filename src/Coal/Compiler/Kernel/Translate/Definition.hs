@@ -13,7 +13,6 @@ import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Language.Object (KernelObject)
 import Coal.Language
-import Coal.Language.Definition
 import Control.Monad (forM)
 import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (asks)

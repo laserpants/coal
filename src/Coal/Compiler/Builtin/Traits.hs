@@ -11,7 +11,6 @@ module Coal.Compiler.Builtin.Traits (
 ) where
 
 import Coal.Language
-import Coal.Language.Definition
 import qualified Data.Set as Set
 
 {-# INLINE numeric #-}
