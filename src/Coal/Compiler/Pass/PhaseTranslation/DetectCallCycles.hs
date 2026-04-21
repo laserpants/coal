@@ -103,16 +103,8 @@ buildDependencyGraph defs =
     \case
       DFunction _ name _ -> [name]
       DLet _ name _ -> [name]
-      DFunctionGroup _ name _ -> [name]
-      DInstance _ inst -> map getDefName' (instanceDefinitionImplementations inst)
+      DInstance _ inst -> concatMap getDefName (instanceDefinitionImplementations inst)
       _ -> []
-
-  getDefName' :: Definition a k t -> Name
-  getDefName' =
-    \case
-      DFunction _ name _ -> name
-      DLet _ name _ -> name
-      _ -> error "Unexpected definition in instance"
 
 {- | Extract dependencies from definitions.
 
