@@ -45,10 +45,6 @@ translateExpression =
       d1 <- withLocalName (labelName ll) (translateExpression e1)
       d2 <- withLocalName (labelName ll) (translateExpression e2)
       pure (Kernel.let_ (Kernel.Binding (translateLabel ll) d1 :| []) d2)
-    --    EVariable loc (Label t name)
-    --      -- Top-level fold
-    --      | "!" `Text.isPrefixOf` name ->
-    --          translateExpression (EVariable loc (Label t (Text.drop 1 name)))
     EVariable _ (Label t name) ->
       Kernel.var . Label (translateType t) <$> qualifyName name
     EConstructor _ (Label t name) ->
