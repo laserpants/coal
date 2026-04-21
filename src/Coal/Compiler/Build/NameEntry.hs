@@ -4,6 +4,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Build.NameEntry
+
+Name and definition entry types for the build system.
+
+Defines data types for tracking constructors, types, traits, instances, and
+aliases with their metadata during compilation.
+-}
 module Coal.Compiler.Build.NameEntry (
   DataConstructorEntry (..),
   TypeConstructorEntry (..),

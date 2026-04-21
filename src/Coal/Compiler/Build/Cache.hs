@@ -1,18 +1,25 @@
 {-# LANGUAGE RecordWildCards #-}
 
+{- |
+Module: Coal.Compiler.Build.Cache
+
+Build artifact caching for incremental compilation.
+
+Manages reading and writing serialized build data to the `.build/` directory.
+-}
 module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where
 
-import Coal.Compiler.Build
+import Coal.Compiler.Build (Build (buildHash))
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Metadata (Metadata (..))
-import Coal.Compiler.Stack
-import Coal.Compiler.State
+import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.State (CompilerState (compilerConfig))
 import Control.Exception (SomeException (..), try)
 import Control.Monad (guard, unless)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
-import Crypto.Hash
+import Crypto.Hash (hash)
 import Data.Binary (Binary (..), decodeOrFail, encode)
 import Data.ByteString (ByteString, fromStrict, toStrict)
 import qualified Data.ByteString as ByteString
