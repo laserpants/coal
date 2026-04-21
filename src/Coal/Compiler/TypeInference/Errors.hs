@@ -36,8 +36,9 @@ prettyErrorMessage msg err src =
 
 extractSpan :: Text -> SourcePos -> SourcePos -> [(Int, Text, Text)]
 extractSpan src start end =
-  map extractPointer $
-    filter (\(n, _) -> n >= startLine && n <= endLine) numberedLines
+  trimTrailingBlankLines $
+    map extractPointer $
+      filter (\(n, _) -> n >= startLine && n <= endLine) numberedLines
  where
   startLine = unPos (sourceLine start)
   endLine = unPos (sourceLine end)
@@ -59,3 +60,20 @@ extractSpan src start end =
         let underline = Text.replicate (endCol - 1) "^"
          in (lineNum, lineText, underline)
     | otherwise = (lineNum, lineText, "")
+
+  -- Trim trailing lines that are blank, whitespace-only, or where the error
+  -- span only barely touches the beginning (e.g., the start of the next definition)
+  trimTrailingBlankLines :: [(Int, Text, Text)] -> [(Int, Text, Text)]
+  trimTrailingBlankLines = reverse . dropWhile isIrrelevantLine . reverse
+
+  isIrrelevantLine :: (Int, Text, Text) -> Bool
+  isIrrelevantLine (_, lineText, marker)
+    -- Line is blank or whitespace-only
+    | Text.null (Text.strip lineText) = True
+    -- Line has content but the error marker only touches the very beginning
+    -- (likely just capturing the start position of the next definition)
+    | otherwise = isOnlyStartMarker marker
+   where
+    isOnlyStartMarker m =
+      let stripped = Text.stripStart m
+       in not (Text.null stripped) && Text.length stripped <= 2

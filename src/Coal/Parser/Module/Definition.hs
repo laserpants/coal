@@ -13,7 +13,6 @@ module Coal.Parser.Module.Definition (parseDefinition) where
 
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language
-import Coal.Language.Definition
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (Path))
 import Coal.Parser.Core (Parser, lexeme, lexeme_, nonEmpty, nonEmptyOr)
@@ -188,7 +187,8 @@ parseFunctionDefinition parseName = do
   ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
-  pure (DFunction (Metadata start end) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr))
+  fin <- getSourcePos
+  pure (DFunction (Metadata start fin) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr))
 
 parseLetDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseLetDefinition parseName = do
@@ -197,7 +197,8 @@ parseLetDefinition parseName = do
   ann <- optional parseAnnotation
   end <- getSourcePos
   expr <- symbol_ "=" *> parseExpression
-  pure (DLet (Metadata start end) c (LetDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr))
+  fin <- getSourcePos
+  pure (DLet (Metadata start fin) c (LetDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr))
 
 parseTopLevelFold :: Parser (Definition Metadata () ())
 parseTopLevelFold = do
