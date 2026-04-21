@@ -6,7 +6,7 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-module Coal.Graphviz.Dot (generateDotSyntax) where
+module Coal.Graphviz.Dot (Dot (..), generateDotSyntax) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
@@ -190,7 +190,7 @@ instance Dot (ExportList a) where
       ExportAll ->
         emitShape FolderShape "ExportsAll"
 
-instance (Dot t) => Dot (Module a Kind t) where
+instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Dot k, Show k) => Dot (Module a k t) where
   toDot =
     \case
       Module{..} -> do
@@ -205,7 +205,7 @@ emitDefinition name label def = do
   emitEdge dotId def
   return dotId
 
-instance (Dot t) => Dot (Definition a Kind t) where
+instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Dot k, Show k) => Dot (Definition a k t) where
   toDot =
     \case
       DType _ name def ->
@@ -241,7 +241,7 @@ connectDots a from = do
   emitEdge from dotId
   return dotId
 
-instance Dot (TypeDefinition a Kind t) where
+instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Dot k, Show k) => Dot (TypeDefinition a k t) where
   toDot =
     \case
       TypeDefinition{..} -> do
@@ -256,7 +256,7 @@ annotation t = do
   emitEdge dotId t
   return dotId
 
-instance (Dot t) => Dot (FunctionDefinition a Kind t) where
+instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Show k) => Dot (FunctionDefinition a k t) where
   toDot =
     \case
       FunctionDefinition{..} -> do
@@ -267,7 +267,7 @@ instance (Dot t) => Dot (FunctionDefinition a Kind t) where
         emitEdge dotId functionDefinitionExpression
         return dotId
 
-instance (Dot t) => Dot (LetDefinition a Kind t) where
+instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Show k) => Dot (LetDefinition a k t) where
   toDot =
     \case
       LetDefinition{..} -> do
@@ -277,7 +277,7 @@ instance (Dot t) => Dot (LetDefinition a Kind t) where
         emitEdge dotId letDefinitionExpression
         return dotId
 
-instance (Dot t) => Dot (FoldDefinition a Kind t) where
+instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Show k) => Dot (FoldDefinition a k t) where
   toDot =
     \case
       FoldDefinition{..} -> do
@@ -286,7 +286,7 @@ instance (Dot t) => Dot (FoldDefinition a Kind t) where
         emitEdges dotId foldDefinitionClauses
         return dotId
 
-instance Dot (TraitDefinition a Kind) where
+instance (HasKind (Type Parameter k), Dot k, CoalPretty k, Show k) => Dot (TraitDefinition a k) where
   toDot =
     \case
       TraitDefinition{..} -> do
@@ -300,7 +300,7 @@ instance Dot (TraitDefinition a Kind) where
             emitEdge id1 traitDefinitionInterfaceEntryScheme
         return dotId
 
-instance (Dot t) => Dot (InstanceDefinition a Kind t) where
+instance (HasKind (Type Parameter k), Dot k, CoalPretty k, Show k, Dot t) => Dot (InstanceDefinition a k t) where
   toDot =
     \case
       InstanceDefinition{..} -> do
@@ -310,7 +310,7 @@ instance (Dot t) => Dot (InstanceDefinition a Kind t) where
         emitEdges dotId instanceDefinitionImplementations
         return dotId
 
-instance Dot (AliasDefinition a Kind) where
+instance (HasKind (Type Parameter k), Dot k, CoalPretty k, Show k) => Dot (AliasDefinition a k) where
   toDot =
     \case
       AliasDefinition{..} -> do
