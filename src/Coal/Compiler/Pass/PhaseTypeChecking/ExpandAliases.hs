@@ -42,8 +42,6 @@ import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, updateCurrentBuildC)
 import Coal.Language
-import Coal.Language.Definition
-import Coal.Language.Module (Module (..))
 import Coal.TypeSystem.Parameterized (ToIndexed (toIndexed))
 import Coal.TypeSystem.Substitution (applyT)
 import qualified Coal.TypeSystem.Substitution as Substitution

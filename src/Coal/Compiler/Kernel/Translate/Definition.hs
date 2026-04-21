@@ -26,16 +26,16 @@ translateDefinition =
   \case
     DType _ _ TypeDefinition{..} ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName typeDefinitionConstructors))
-    DFunction loc name (FunctionDefinition _ _ _ ps e) -> do
+    DFunction _ name (FunctionDefinition _ _ _ ps e) -> do
       qs <- traverse translatePattern (toList ps)
       f <- withLocalNames (labelName <$> qs) (translateExpression e)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OFunction (moduleName <.> name) qs f]
-    DLet loc name (LetDefinition _ _ With{} e) -> do
+    DLet _ name (LetDefinition _ _ With{} e) -> do
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    DTrait loc name TraitDefinition{..} ->
+    DTrait _ name TraitDefinition{..} ->
       forM traitDefinitionInterface $
         \(TraitDefinitionInterfaceEntry n (Forall _ _ t)) ->
           traitAccessor name n (translateType t)

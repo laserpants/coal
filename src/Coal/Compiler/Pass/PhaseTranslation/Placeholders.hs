@@ -63,8 +63,6 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Definition
-import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (Path (Path), principalPath)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification

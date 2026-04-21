@@ -6,13 +6,13 @@ module Coal.Compiler.KindEnvironment (moduleKindEnvironment) where
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build
+import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language.Definition
 import Coal.Language.HasKind (HasKind (..), foldKindOf)
-import Coal.Language.Module
+import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind (Kind (..))
@@ -47,7 +47,7 @@ moduleKindEnvironment Module{..} = do
             )
           ]
       -- TODO: temp
-      DImport _ (Path ["Builtin$"]) items -> do
+      DImport _ (Path ["Builtin$"]) _ -> do
         pure []
       DImport _ path items -> do
         importedModule <- importedBuild path

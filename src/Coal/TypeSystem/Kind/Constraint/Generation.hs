@@ -258,7 +258,7 @@ instance EmitKinds (Expression a Kind ()) where
       EFocus _ _ _ _ e1 e2 ->
         emitKindConstraints e1
           <>^ emitKindConstraints e2
-      EFFICall _ t _ es e ->
+      EFFICall _ _ _ es e ->
         --        emitKindConstraints t
         emitKindConstraints es <>^ emitKindConstraints e
       EDoBlock _ is -> do

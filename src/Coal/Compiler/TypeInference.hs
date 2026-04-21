@@ -58,8 +58,6 @@ import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Definition
-import Coal.Language.Module (Module)
 import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Constraint
 import Coal.TypeSystem.Constraint.Assumption
@@ -69,7 +67,6 @@ import Coal.TypeSystem.Constraint.Solver
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
 import Coal.TypeSystem.Substitution
-import Coal.TypeSystem.Unification
 import Control.Arrow ((>>>))
 import Control.Monad.Except (forM_, throwError)
 import Control.Monad.Reader (runReaderT)

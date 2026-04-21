@@ -13,8 +13,6 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Definition (Definition (DLet), LetDefinition (..))
-import Coal.Language.Module (Module (..))
 import Control.Monad.Writer (MonadWriter (tell), Writer, runWriter)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descend, transformM)

@@ -119,7 +119,7 @@ instance PatternContext (Expression Metadata k t) where
       ELet _ gs e1 -> do
         traverse_ checkPatternAnomalies gs
         checkPatternAnomalies e1
-      ERecursiveLet a p e1 e2 -> do
+      ERecursiveLet _ _ e1 e2 -> do
         checkPatternAnomalies e1
         checkPatternAnomalies e2
       EIf _ _ e1 e2 e3 -> do
