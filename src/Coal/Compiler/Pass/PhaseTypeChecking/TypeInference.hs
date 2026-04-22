@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -42,7 +43,6 @@ import Coal.TypeSystem.Kind.Unification (KindUnifier (kindUnifierMonad))
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Control.Monad.Except (MonadError (throwError), MonadIO (..), forM_)
 import Control.Monad.State (execStateT, get, gets, modify, runState)
-import Data.Data (Data)
 
 {- | Type inference compiler pass
 
@@ -74,7 +74,7 @@ replacePlaceholders = do
 
 inferTypes :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 inferTypes m = do
-  Module{..} <- assignTypeIndices m
+  Module{modulePath, moduleExportList, moduleDefinitions} <- assignTypeIndices m
 
   -- Generate and solve constraints for each definition
   forM_ moduleDefinitions $
@@ -83,11 +83,16 @@ inferTypes m = do
       sub <- solveT
       storeDefinitionType (apply sub def)
 
-  CompilerState{..} <- get
+  CompilerState
+    { compilerSubstitution
+    , compilerNameStore
+    , compilerAssumptions
+    } <-
+    get
 
   -- Verify all assumptions (explicit type annotations) are satisfied
   forM_ compilerAssumptions $
-    \Assumption{..} ->
+    \Assumption{assumptionMetadata, assumptionName, assumptionType} ->
       case Environment.lookup assumptionName compilerNameStore of
         Nothing -> do
           tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath modulePath) assumptionMetadata)]
@@ -131,22 +136,28 @@ storeDefinitionType =
       define name (typeOf def)
     def@(DLet _ name _) ->
       define name (typeOf def)
-    DInstance _ InstanceDefinition{..} -> do
-      let trait = Trait instanceDefinitionTraitName instanceDefinitionType
-      forM_ instanceDefinitionImplementations $ \case
-        def@(DFunction _ name _) ->
-          define (instanceLabel trait name) (typeOf def)
-        def@(DLet _ name _) ->
-          define (instanceLabel trait name) (typeOf def)
-        _ ->
-          return ()
+    DInstance
+      _
+      InstanceDefinition
+        { instanceDefinitionTraitName
+        , instanceDefinitionType
+        , instanceDefinitionImplementations
+        } -> do
+        let trait = Trait instanceDefinitionTraitName instanceDefinitionType
+        forM_ instanceDefinitionImplementations $ \case
+          def@(DFunction _ name _) ->
+            define (instanceLabel trait name) (typeOf def)
+          def@(DLet _ name _) ->
+            define (instanceLabel trait name) (typeOf def)
+          _ ->
+            return ()
     -- Type definitions, aliases, traits don't need type storage
     _ ->
       return ()
 
 assignTypeIndices :: (Monad m, Traversable t) => t e -> CompilerT Metadata m (t IndexedType)
 assignTypeIndices ds = do
-  CompilerState{..} <- get
+  CompilerState{compilerSupply} <- get
   let (result, supply) = runState (indexed ds) compilerSupply
   updateSupplyC supply
   return result
