@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -95,7 +96,7 @@ collectAsPatterns =
 instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Module a k t) where
   expandAsPatterns =
     \case
-      Module{..} ->
+      Module{modulePath, moduleExportList, moduleDefinitions} ->
         Module
           { moduleDefinitions = fmap expandAsPatterns moduleDefinitions
           , ..
@@ -112,8 +113,13 @@ instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Definition a k t) 
 instance (Data a, Data k, Data t, Monoid a) => ExpandContext (LetDefinition a k t) where
   expandAsPatterns =
     \case
-      LetDefinition{..} ->
-        LetDefinition
-          { letDefinitionExpression = expandAsPatterns letDefinitionExpression
-          , ..
-          }
+      LetDefinition
+        { letDefinitionMetadata
+        , letDefinitionAnnotation
+        , letDefinitionType
+        , letDefinitionExpression
+        } ->
+          LetDefinition
+            { letDefinitionExpression = expandAsPatterns letDefinitionExpression
+            , ..
+            }
