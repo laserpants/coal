@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -35,7 +36,7 @@ translateDefinition =
       c <- translateExpression e
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    DTrait _ name TraitDefinition{..} ->
+    DTrait _ name TraitDefinition{traitDefinitionInterface} ->
       forM traitDefinitionInterface $
         \(TraitDefinitionInterfaceEntry n (Forall _ _ t)) ->
           traitAccessor name n (translateType t)

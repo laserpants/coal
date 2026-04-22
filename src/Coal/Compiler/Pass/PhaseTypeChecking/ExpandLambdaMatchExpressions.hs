@@ -49,7 +49,7 @@ import Coal.Language.AST.Builders (lambdaE, matchE, varE, varP)
 import Coal.Language.Definition
 import Coal.Language.Expression (Expression (ELambdaMatch))
 import Coal.Language.Module (Module (..))
-import Coal.Language.Type.Kind
+import Coal.Language.Type.Kind (Kind)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..))

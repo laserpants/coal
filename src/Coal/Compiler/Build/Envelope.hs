@@ -2,6 +2,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
+{- |
+Module: Coal.Compiler.Build.Envelope
+
+Build envelope for distinguishing source and cached modules.
+
+Wraps modules as either fresh source code to compile or cached build artifacts,
+enabling incremental compilation.
+-}
 module Coal.Compiler.Build.Envelope (
   BuildEnvelope (..),
   envelopePathName,
