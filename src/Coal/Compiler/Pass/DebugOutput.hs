@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Pass.DebugOutput where -- (generateDebugArtifacts) where
+module Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts) where
 
 --        Build{..} <- getCurrentBuildC
 --        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ Build{..})

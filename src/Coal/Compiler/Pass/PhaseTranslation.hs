@@ -1,7 +1,10 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Coal.Compiler.Pass.PhaseTranslation (phaseTranslation) where
 
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
+import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
 import Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies (passCheckPatternAnomalies)
 import Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions (passCompileMatchExpressions)
 import Coal.Compiler.Pass.PhaseTranslation.CompileNats (passCompileNats)
@@ -22,15 +25,28 @@ import Control.Monad.IO.Class (MonadIO)
 phaseTranslation :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 phaseTranslation =
   passNormalizeAST
+    >-> generateDebugArtifacts "NormalizeAST"
     >-> passDesugarPatterns
+    >-> generateDebugArtifacts "DesugarPatterns"
     >-> passExpandGuards
+    >-> generateDebugArtifacts "ExpandGuards"
     >-> passExpandOrPatterns
+    >-> generateDebugArtifacts "ExpandOrPatterns"
     >-> passCheckPatternAnomalies
+    >-> generateDebugArtifacts "CheckPatternAnomalies"
     >-> passExpandRecordPatterns
+    >-> generateDebugArtifacts "ExpandRecordPatterns"
     >-> passExpandAsPatterns
+    >-> generateDebugArtifacts "ExpandAsPatterns"
     >-> passExpandIntegerLiteralPatterns
+    >-> generateDebugArtifacts "ExpandIntegerLiteralPatterns"
     >-> passCompileMatchExpressions
+    >-> generateDebugArtifacts "CompileMatchExpressions"
     >-> passPlaceholders
+    >-> generateDebugArtifacts "Placeholders"
     >-> passCompileNats
+    >-> generateDebugArtifacts "CompileNats"
     >-> passDetectCallCycles
+    >-> generateDebugArtifacts "DetectCallCycles"
     >-> passDenormalizeAST
+    >-> generateDebugArtifacts "DenormalizeAST"
