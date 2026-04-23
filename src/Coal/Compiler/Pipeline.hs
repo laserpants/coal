@@ -56,7 +56,7 @@ pipeline =
   phaseParsing
     >-> phasePreflight
     >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
-    >-> Pass extraTicks
+    >-> Pass{runPass = extraTicks}
     >-> phaseLowering
     >-> passLinking
 
