@@ -84,7 +84,7 @@ compileWithCFiles config files cFiles = do
               def
                 { pgTotal = fromIntegral $ Counts.calculateProgressBarTotal (length builtinModules) (length files)
                 , pgWidth = 100
-                , pgFormat = "Compiling [:bar] :current/:total"
+                , pgFormat = "Compiling [:bar] :percent"
                 }
           go (Just pb)
   case res of
