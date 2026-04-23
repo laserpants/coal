@@ -9,8 +9,8 @@ module Coal.Compiler.Pass (
 ) where
 
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Environment
-import Coal.Compiler.Stack
+import Coal.Compiler.Environment (CompilerEnvironment (compilerProgressBar))
+import Coal.Compiler.Stack (CompilerT)
 import Control.Monad ((>=>))
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Reader (asks)
@@ -36,4 +36,4 @@ mapPass :: (MonadIO m) => Pass a m i o -> Pass a m [i] [o]
 mapPass p = Pass{runPass = traverse (runPassAndTickBar p)}
 
 liftPass :: (Monad m) => Pass a m i o -> Pass a m (BuildEnvelope i) (BuildEnvelope o)
-liftPass (Pass p) = Pass (traverse p)
+liftPass (Pass p) = Pass{runPass = traverse p}
