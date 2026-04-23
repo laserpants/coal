@@ -55,6 +55,7 @@ library
       Coal.Compiler.KindEnvironment
       Coal.Compiler.Metadata
       Coal.Compiler.Pass
+      Coal.Compiler.Pass.Counts
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.PhaseLowering
       Coal.Compiler.Pass.PhaseLowering.KernelCode

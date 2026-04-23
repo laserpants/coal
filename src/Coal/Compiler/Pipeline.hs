@@ -21,6 +21,7 @@ import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
+import qualified Coal.Compiler.Pass.Counts as Counts
 import Coal.Compiler.Pass.PhaseLowering (phaseLowering)
 import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
@@ -66,7 +67,7 @@ extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnv
 extraTicks units = do
   forM_ units $
     \case
-      BCached{} -> replicateM_ 73 tickBar
+      BCached{} -> replicateM_ Counts.cachedModuleTicks tickBar
       _ -> pure ()
   pure units
 
@@ -81,7 +82,7 @@ compileWithCFiles config files cFiles = do
           pb <-
             newProgressBar
               def
-                { pgTotal = (fromIntegral (length builtinModules + length files) * 73) + 28
+                { pgTotal = fromIntegral $ Counts.calculateProgressBarTotal (length builtinModules) (length files)
                 , pgWidth = 100
                 , pgFormat = "Compiling [:bar] :current/:total"
                 }
@@ -102,11 +103,6 @@ compileWithCFiles config files cFiles = do
         Right{} -> do
           pure ()
  where
-  -- go progressBar = do
-  --  evalCompilerT $
-  --    runCompilerT (emptyCompilerEnvironment progressBar) $ do
-  --      lift $ setConfigC config{configCFiles = configCFiles config <> cFiles}
-  --      runPass pipeline files
   go progressBar = do
     runCompilerT (emptyCompilerEnvironment progressBar) $ do
       setConfigC config{configCFiles = configCFiles config <> cFiles}
