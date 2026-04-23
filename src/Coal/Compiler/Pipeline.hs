@@ -20,7 +20,7 @@ import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
+import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
 import Coal.Compiler.Pass.PhaseLowering (phaseLowering)
 import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
@@ -37,6 +37,7 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
+import Control.Monad (replicateM_)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except (MonadIO, forM_)
 import Data.List (nub)
@@ -54,19 +55,20 @@ pipeline =
   phaseParsing
     >-> phasePreflight
     >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
+    >-> Pass extraTicks
     >-> phaseLowering
     >-> passLinking
 
 phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
 phaseMainPasses = mapPass . liftPass
 
--- extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
--- extraTicks units = do
---  forM_ units $
---    \case
---      BCached{} -> replicateM_ 73 tickBar
---      _ -> pure ()
---  pure units
+extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
+extraTicks units = do
+  forM_ units $
+    \case
+      BCached{} -> replicateM_ 73 tickBar
+      _ -> pure ()
+  pure units
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
