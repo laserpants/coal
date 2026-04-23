@@ -8,11 +8,9 @@ module Coal.Compiler.Journal (
   tellPatterns,
   tellPatterns1,
   listenPatterns,
-  --  listenWhereClauses,
   listenRecordEntry,
   listenDictionaryTraits,
   listenErrors,
-  --  tellWhereClauses,
   tellRecordEntry,
   tellDictionaryTraits,
   tellErrors,
@@ -43,10 +41,11 @@ data CompilerJournal a = CompilerJournal
 instance Semigroup (CompilerJournal a) where
   (<>) (CompilerJournal a1 a2 a3 a4) (CompilerJournal b1 b2 b3 b4) =
     CompilerJournal
-      (a1 <> b1)
-      (a2 <> b2)
-      (a3 <> b3)
-      (a4 <> b4)
+      { compilerJournalPatterns = a1 <> b1
+      , compilerJournalRecordEntries = a2 <> b2
+      , compilerJournalDictionaryTraits = a3 <> b3
+      , compilerJournalErrors = a4 <> b4
+      }
 
 instance Monoid (CompilerJournal a) where
   mempty = CompilerJournal mempty mempty mempty mempty
@@ -58,10 +57,6 @@ tellPatterns w = tell $ CompilerJournal w mempty mempty mempty
 {-# INLINE tellPatterns1 #-}
 tellPatterns1 :: (MonadWriter (CompilerJournal a) m) => (Name, Pattern a Kind IndexedType) -> m ()
 tellPatterns1 w = tellPatterns [w]
-
--- {-# INLINE tellWhereClauses #-}
--- tellWhereClauses :: (MonadWriter (CompilerJournal a) m) => [(Name, Name)] -> m ()
--- tellWhereClauses w = tell $ CompilerJournal mempty w mempty mempty mempty
 
 {-# INLINE tellRecordEntry #-}
 tellRecordEntry :: (MonadWriter (CompilerJournal a) m) => [RecordEntry a] -> m ()
@@ -77,9 +72,6 @@ tellErrors w = tell $ CompilerJournal mempty mempty mempty w
 
 listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a Kind IndexedType)])
 listenPatterns w = second compilerJournalPatterns <$> listen w
-
--- listenWhereClauses :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Name)])
--- listenWhereClauses w = second compilerJournalWhereClauses <$> listen w
 
 listenRecordEntry :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [RecordEntry a])
 listenRecordEntry w = second compilerJournalRecordEntries <$> listen w
