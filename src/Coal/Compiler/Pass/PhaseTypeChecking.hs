@@ -4,7 +4,7 @@ module Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking) where
 
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
-import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
+import Coal.Compiler.Pass.DebugOutput (generateBuildInfo, generateDebugArtifacts)
 import Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases (passExpandAliases)
 import Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds (passExpandExpressionFolds)
 import Coal.Compiler.Pass.PhaseTypeChecking.ExpandFunctionGroups (passExpandFunctionGroups)
@@ -28,6 +28,7 @@ phaseTypeChecking =
     >-> generateDebugArtifacts "ExpandAliases"
     >-> passPrepareBuild
     >-> generateDebugArtifacts "PrepareBuild"
+    >-> generateBuildInfo "PrepareBuild"
     >-> passExpandTopLevelFolds
     >-> generateDebugArtifacts "ExpandTopLevelFolds"
     >-> passExpandExpressionFolds
@@ -36,5 +37,6 @@ phaseTypeChecking =
     >-> generateDebugArtifacts "ExpandLambdaMatchExpressions"
     >-> passTypeInference
     >-> generateDebugArtifacts "TypeInference"
+    >-> generateBuildInfo "TypeInference"
     >-> passReportTypeErrors
     >-> generateDebugArtifacts "ReportTypeErrors"

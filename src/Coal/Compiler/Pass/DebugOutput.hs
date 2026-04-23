@@ -5,40 +5,47 @@
 
 module Coal.Compiler.Pass.DebugOutput (
   generateDebugArtifacts,
+  generateBuildInfo,
   writeDotFile,
 ) where
 
---        Build{..} <- getCurrentBuildC
---        liftIO $ Text.writeFile ("tmp/aliases_build_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ Build{..})
---        liftIO $ Text.writeFile ("tmp/aliases_names_" <> Text.unpack (principalPath modulePath)) (toStrict $ pShowNoColor $ buildNames)
-
+import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Stack (CompilerT, getCurrentBuildC)
 import Coal.Compiler.State (compilerConfig)
 import Coal.Debug (writeDebugFile)
 import Coal.Graphviz.Dot (Dot (..), generateDotSyntax)
 import Coal.Language
-import Coal.Language.Module.Path (Path (..))
+import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Pretty (CoalPretty (..))
 import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Data.Text (Text)
 import qualified Data.Text as Text
+import Data.Text.Lazy (toStrict)
 import Extras (forM_)
 import System.FilePath ((<.>), (</>))
+import Text.Pretty.Simple
 
 generateDebugArtifacts :: (MonadIO m, HasKind (Type Parameter k), CoalPretty k, Dot t, Dot k, Show k) => Text -> Pass a m (Module a k t) (Module a k t)
-generateDebugArtifacts ll = Pass{runPass = pass ll}
+generateDebugArtifacts label = Pass{runPass = pass}
+ where
+  pass m = do
+    CompilerConfig{..} <- gets compilerConfig
+    when configGenerateDebugArtifacts $
+      liftIO $
+        writeDotFiles label m
+    return m
 
-pass :: (MonadIO m, HasKind (Type Parameter k), CoalPretty k, Dot t, Dot k, Show k) => Text -> Module a k t -> CompilerT a m (Module a k t)
-pass label m = do
-  CompilerConfig{..} <- gets compilerConfig
-  when configGenerateDotFiles $
-    liftIO $
-      writeDotFiles label m
-  pure m
+generateBuildInfo :: (MonadIO m, Show a) => Text -> Pass a m (Module a k t) (Module a k t)
+generateBuildInfo label = Pass{runPass = pass}
+ where
+  pass m = do
+    CompilerConfig{..} <- gets compilerConfig
+    when configGenerateDebugArtifacts (writeBuildInfo label)
+    return m
 
 {-# INLINE writeDotFile #-}
 writeDotFile :: (Dot a) => Text -> a -> IO ()
@@ -60,3 +67,13 @@ writeDotFiles ns m@(Module (Path path) _ defs) = do
  where
   prefix = ns <> "__" <> Text.intercalate "_" path
   prefixedName n = prefix <> "_" <> n
+
+writeBuildInfo :: (MonadIO m, Show a) => Text -> CompilerT a m ()
+writeBuildInfo label = do
+  Build{..} <- getCurrentBuildC
+  let path = principalPath buildPath
+  liftIO $ do
+    writeDebugFile (rootPath <> "_build_" <> Text.unpack path) (toStrict $ pShowNoColor $ Build{..})
+    writeDebugFile (rootPath <> "_names_" <> Text.unpack path) (toStrict $ pShowNoColor $ buildNames)
+ where
+  rootPath = "./.debug" </> Text.unpack label

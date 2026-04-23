@@ -14,7 +14,7 @@ compileCommand CompileCmdOptions{..} = do
   config =
     CompilerConfig
       { configExecutableName = outputFile
-      , configGenerateDotFiles = debugGenerateDotfiles
+      , configGenerateDebugArtifacts = generateDebugArtifacts
       , configGenerateLLVMOutput = debugLLVMOutput
       , configSourcePaths = nub ("src" : srcPaths)
       , configCFiles = extraSourceFiles

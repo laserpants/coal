@@ -30,7 +30,7 @@ generateDebugArtifacts ll = Pass{runPass = run}
  where
   run m = do
     CompilerConfig{..} <- gets compilerConfig
-    when configGenerateDotFiles $
+    when configGenerateDebugArtifacts $
       liftIO $
         writeDotFile (ll <> "_" <> moduleName m) m
     pure m

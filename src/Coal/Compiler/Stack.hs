@@ -79,7 +79,7 @@ module Coal.Compiler.Stack (
   -- * Configuration
   setConfigC,
   setConfigExecutableNameC,
-  setConfigGenerateDotFilesC,
+  setConfigGenerateDebugArtifactsC,
   setConfigGenerateLLVMOutputC,
 
   -- * Source management
@@ -90,7 +90,7 @@ module Coal.Compiler.Stack (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..), setBuildBitcode)
-import Coal.Compiler.Config (CompilerConfig, setConfigExecutableName, setConfigGenerateDotFiles, setConfigGenerateLLVMOutput)
+import Coal.Compiler.Config (CompilerConfig, setConfigExecutableName, setConfigGenerateDebugArtifacts, setConfigGenerateLLVMOutput)
 import Coal.Compiler.Environment (CompilerEnvironment (..))
 import Coal.Compiler.Error (CompilerError (..), CompilerFailureMode (..), ErrorLocation (..))
 import Coal.Compiler.Journal (CompilerJournal (..))
@@ -344,9 +344,9 @@ setConfigC config = modify (overCompilerConfig (const config))
 setConfigExecutableNameC :: (Monad m) => FilePath -> CompilerT a m ()
 setConfigExecutableNameC name = modify (overCompilerConfig (setConfigExecutableName name))
 
-{-# INLINE setConfigGenerateDotFilesC #-}
-setConfigGenerateDotFilesC :: (Monad m) => Bool -> CompilerT a m ()
-setConfigGenerateDotFilesC flag = modify (overCompilerConfig (setConfigGenerateDotFiles flag))
+{-# INLINE setConfigGenerateDebugArtifactsC #-}
+setConfigGenerateDebugArtifactsC :: (Monad m) => Bool -> CompilerT a m ()
+setConfigGenerateDebugArtifactsC flag = modify (overCompilerConfig (setConfigGenerateDebugArtifacts flag))
 
 {-# INLINE setConfigGenerateLLVMOutputC #-}
 setConfigGenerateLLVMOutputC :: (Monad m) => Bool -> CompilerT a m ()

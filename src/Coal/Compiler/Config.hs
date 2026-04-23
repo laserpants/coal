@@ -15,13 +15,13 @@ module Coal.Compiler.Config (
   silentConfig,
   debugConfig,
   setConfigExecutableName,
-  setConfigGenerateDotFiles,
+  setConfigGenerateDebugArtifacts,
   setConfigGenerateLLVMOutput,
 ) where
 
 data CompilerConfig = CompilerConfig
   { configExecutableName :: FilePath
-  , configGenerateDotFiles :: Bool
+  , configGenerateDebugArtifacts :: Bool
   , configGenerateLLVMOutput :: Bool
   , configSourcePaths :: [FilePath]
   , configCFiles :: [FilePath]
@@ -35,7 +35,7 @@ defaultConfig :: CompilerConfig
 defaultConfig =
   CompilerConfig
     { configExecutableName = "dist"
-    , configGenerateDotFiles = True
+    , configGenerateDebugArtifacts = True
     , configGenerateLLVMOutput = True
     , configSourcePaths = ["src"]
     , configCFiles = []
@@ -60,11 +60,11 @@ setConfigExecutableName name CompilerConfig{..} =
     , ..
     }
 
-{-# INLINE setConfigGenerateDotFiles #-}
-setConfigGenerateDotFiles :: Bool -> CompilerConfig -> CompilerConfig
-setConfigGenerateDotFiles flag CompilerConfig{..} =
+{-# INLINE setConfigGenerateDebugArtifacts #-}
+setConfigGenerateDebugArtifacts :: Bool -> CompilerConfig -> CompilerConfig
+setConfigGenerateDebugArtifacts flag CompilerConfig{..} =
   CompilerConfig
-    { configGenerateDotFiles =
+    { configGenerateDebugArtifacts =
         flag
     , ..
     }

@@ -173,7 +173,7 @@ runKernelSpec files = do
   mods = BSource . unsafeParseFile <$> files
   config =
     defaultConfig
-      { configGenerateDotFiles = False
+      { configGenerateDebugArtifacts = False
       , configGenerateLLVMOutput = False
       }
 

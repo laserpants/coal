@@ -22,6 +22,7 @@ import Coal.Package.Version (PackageVersion (..))
 import Control.Monad.Except
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
+import Data.Either.Extra (eitherToMaybe)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
@@ -30,7 +31,6 @@ import Extras (Name)
 import GHC.Generics (Generic)
 import System.Directory
 import System.FilePath
-import Data.Either.Extra (eitherToMaybe)
 
 data PackageManifest = PackageManifest
   { name :: Text

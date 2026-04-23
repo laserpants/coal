@@ -18,10 +18,10 @@ compileCmdParser = do
           <> help "Excecutable file name"
       )
 
-  debugGenerateDotfiles <-
+  generateDebugArtifacts <-
     switch
-      ( long "debug-generate-dotfiles"
-          <> help "Generate Graphviz DOT files for debugging"
+      ( long "generate-debug-artifacts"
+          <> help "Generate build info and Graphviz DOT files for debugging"
       )
 
   debugLLVMOutput <-

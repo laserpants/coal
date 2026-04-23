@@ -6,7 +6,7 @@ data CompileCmdOptions = CompileCmdOptions
   { inputFiles :: [FilePath]
   , outputFile :: FilePath
   , srcPaths :: [FilePath]
-  , debugGenerateDotfiles :: Bool
+  , generateDebugArtifacts :: Bool
   , debugLLVMOutput :: Bool
   , extraSourceFiles :: [FilePath]
   , silent :: Bool
