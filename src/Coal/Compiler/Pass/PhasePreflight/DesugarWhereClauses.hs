@@ -7,10 +7,9 @@ module Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses (
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language.Module (Module (..))
 import Control.Monad.IO.Class (MonadIO)
-import Data.Data (Data)
 
 passDesugarWhereClauses :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata k t)] [BuildEnvelope (Module Metadata k t)]
 passDesugarWhereClauses = mapPass $ Pass{runPass = traverse passImpl}
