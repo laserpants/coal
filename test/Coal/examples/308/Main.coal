@@ -6,8 +6,9 @@ module Main {
     fun `==`(xs, ys) =
       match((xs, ys)) {
         | (a :: _, b :: _) => 
-           a == b
-        | _ => false
+            a == b
+        | _ => 
+            false
       }
   }
 
