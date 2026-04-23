@@ -6,6 +6,7 @@
 
 module Coal.Kernel.Language.Type (Type (..)) where
 
+import Coal.Pretty (CoalPretty (..))
 import Data.Binary (Binary)
 import Data.Data (Data, Typeable)
 import Extras (Name)
@@ -84,3 +85,6 @@ prettyRow = braces . fields
 
 instance Pretty Type where
   pretty = prettyTypePrec 0
+
+instance CoalPretty Type where
+  prettyCoalPrec = prettyTypePrec
