@@ -249,7 +249,7 @@ prettyError env =
     OrPatternVariableMismatch _ _ erl ->
       errorMessage ["Sub-patterns must bind the same variable in or-patterns"] env erl
     CallCycle cycles erl ->
-      errorMessage (fmap (\cs -> "Explicit recursion detected: " <> Text.intercalate ", " cs) cycles) env erl
+      errorMessage (fmap (\cs -> "Explicit recursion detected: " <> Text.intercalate " → " cs) cycles) env erl
     NamedFoldNotAllowed erl ->
       errorMessage ["Named fold pattern inside expression fold."] env erl
 

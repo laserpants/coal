@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+
+  fun baz() =
+    foo()
+
+  fun foo() =
+    baz()
+
+  fun main() =
+    baz()
+
+}
+
