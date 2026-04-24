@@ -10,7 +10,7 @@ module Coal.Compiler.Pass.PhaseLowering.LLVMOutput (
 ) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build
+import Coal.Compiler.Build (Build (Build, buildBitcode, buildPath))
 import Coal.Compiler.Build.Cache (writeBuildFile)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
@@ -25,7 +25,7 @@ import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
 import Coal.Language.Module.Path
 import Control.Exception (SomeException, try)
 import Control.Monad.Catch (MonadMask)
-import Control.Monad.Except
+import Control.Monad.Except (MonadError (..), MonadIO (..), forM, forM_, when)
 import Control.Monad.Reader (asks)
 import Control.Monad.State (gets)
 import Data.ByteString (ByteString)
