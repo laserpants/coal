@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -961,7 +962,7 @@ generateDotSyntax ast =
       <> ", label="
       <> labelToDotSyntax dotNodeLabel dotNodeName
       <> "];"
-    | DotNode{..} <- dotStateNodes finalState
+    | DotNode{dotNodeId, dotNodeLabel, dotNodeName, dotNodeShape} <- dotStateNodes finalState
     ]
   dotEdges =
     [ showt dotEdgeFrom
@@ -969,7 +970,7 @@ generateDotSyntax ast =
       <> showt dotEdgeTo
       <> edgeLabelToDotSyntax dotEdgeLabel
       <> ";"
-    | DotEdge{..} <- dotStateEdges finalState
+    | DotEdge{dotEdgeFrom, dotEdgeTo, dotEdgeLabel} <- dotStateEdges finalState
     ]
 
 prettyType :: (CoalPretty t) => t -> Text

@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.TypeSystem.Parameterized (
@@ -124,7 +125,7 @@ instance Parameterized (Parameter Kind) where
     pure [(name, index)]
 
 replaceParamInScheme :: Parameter Kind -> Type Parameter Kind -> Scheme Parameter Kind (Type Parameter Kind) -> Scheme Parameter Kind (Type Parameter Kind)
-replaceParamInScheme p o Forall{..} =
+replaceParamInScheme p o Forall{schemeTypeVariables, schemeTraits, schemeTypeBody} =
   Forall
     (paramsIn o <> Set.filter (on (/=) parameterName p) schemeTypeVariables)
     (Set.map replaceParamTrait schemeTraits)
@@ -157,7 +158,10 @@ replaceParamInScheme p o Forall{..} =
   replaceParamTrait =
     \case
       Trait name t ->
-        Trait name (replaceParam t)
+        Trait
+          { traitName = name
+          , traitType = replaceParam t
+          }
   replaceParam =
     \case
       TApplication k t1 t2 ->

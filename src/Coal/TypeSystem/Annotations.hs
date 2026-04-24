@@ -7,9 +7,7 @@ module Coal.TypeSystem.Annotations (indexTypeAnnotations, runAnnotationsT) where
 import qualified Coal.Common.Environment as Environment
 import Coal.Language
 import Coal.TypeSystem.Constraint.Generation.Annotation.Error (TypeAnnotationError (..))
-import Coal.TypeSystem.Constraint.Generation.Context (
-  ConstraintsGenContext (constraintsGenContextTypeConstructors),
- )
+import Coal.TypeSystem.Constraint.Generation.Context (ConstraintsGenContext (..))
 import Coal.Utils (lexOrderRank)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError, withExceptT)
 import Control.Monad.Reader (MonadReader, ReaderT, asks, runReaderT)
