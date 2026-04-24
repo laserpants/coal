@@ -58,34 +58,7 @@ builtinDataConstructors =
                       `TArrow` applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Process") (a :| [b])
                 )
             )
-      , -- ( Forall
-        --    (Set.fromList [TypeIndex KType 0, TypeIndex KType 1])
-        --    mempty
-        --    ( TRecord
-        --        ( TRow
-        --            ( RExtend
-        --                "state"
-        --                (TVariable (TypeIndex KType 0))
-        --                ( RExtend
-        --                    "step"
-        --                    ( TVariable (TypeIndex KType 1)
-        --                        `TArrow` TVariable (TypeIndex KType 0)
-        --                        `TArrow` applyTypeArgs
-        --                          KType
-        --                          (TConstructor (KArrow KType (KArrow KType KType)) "Process")
-        --                          (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
-        --                    )
-        --                    RNil
-        --                )
-        --            )
-        --        )
-        --        `TArrow` applyTypeArgs
-        --          KType
-        --          (TConstructor (KArrow KType (KArrow KType KType)) "Process")
-        --          (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
-        --    )
-        -- )
-        dataConstructorEntryConstructorSet =
+      , dataConstructorEntryConstructorSet =
           Set.fromList ["Process"]
       }
   ]
