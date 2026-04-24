@@ -109,6 +109,7 @@ information collected during compilation phases:
 - 'buildPath': Current module path being compiled
 - 'buildNames': Environment mapping names to their entries (values, types, traits, etc.)
 - 'buildExportedNames': Set of names exported from the module
+- 'buildFolds': Set that contains the names of all fold definitions
 - 'buildDataConstructors': Data constructor information
 - 'buildTypeConstructors': Type constructor information (arities, kinds)
 - 'buildTraits': Trait (typeclass) definitions
