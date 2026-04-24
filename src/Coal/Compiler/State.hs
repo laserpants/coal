@@ -59,7 +59,7 @@ import Coal.Language.Module.Path (Path (..), emptyPath, principalPath)
 import Coal.TypeSystem.Constraint (Constraint)
 import Coal.TypeSystem.Constraint.Assumption (Assumption)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
 import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (Substitution)

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -29,7 +30,7 @@ generateDebugArtifacts :: (MonadIO m) => Text -> Pass a m KernelModule KernelMod
 generateDebugArtifacts ll = Pass{runPass = run}
  where
   run m = do
-    CompilerConfig{..} <- gets compilerConfig
+    CompilerConfig{configGenerateDebugArtifacts} <- gets compilerConfig
     when configGenerateDebugArtifacts $
       liftIO $
         writeDotFile (ll <> "_" <> moduleName m) m
