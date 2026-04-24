@@ -47,11 +47,12 @@ import Coal.Compiler.Stack (
   getCurrentBuildC,
   setCurrentModuleC,
  )
-import Coal.Language (Definition (..), IndexedType, Kind)
+import Coal.Language (Definition (..), IndexedType, Kind, Trait (..))
 import Coal.Language.Definition (FunctionDefinition (..), InstanceDefinition (..), LetDefinition (..))
 import Coal.Language.Expression (Expression)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
+import Coal.Language.Serializable (instanceLabel)
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
 import Data.Data (Data)
@@ -113,10 +114,25 @@ buildDependencyGraph defs =
   getDefName :: Definition a k t -> [(Name, a)]
   getDefName =
     \case
-      DFunction loc name _ -> [(name, loc)]
-      DLet loc name _ -> [(name, loc)]
-      DInstance _ inst -> concatMap getDefName (instanceDefinitionImplementations inst)
-      _ -> []
+      DFunction loc name _ ->
+        [(name, loc)]
+      DLet loc name _ ->
+        [(name, loc)]
+      DInstance _ InstanceDefinition{..} ->
+        let
+          tr = Trait instanceDefinitionTraitName instanceDefinitionType
+          getInstanceDefName =
+            \case
+              DFunction loc name _ ->
+                [(instanceLabel tr name, loc)]
+              DLet loc name _ ->
+                [(instanceLabel tr name, loc)]
+              _ ->
+                []
+         in
+          concatMap getInstanceDefName instanceDefinitionImplementations
+      _ ->
+        []
 
 {- | Extract dependencies from definitions.
 
@@ -137,13 +153,56 @@ extractDependencies = concatMap extractDependency
           { functionDefinitionMetadata
           , functionDefinitionExpression
           } ->
-          let deps = getDeps functionDefinitionExpression
-           in [((name, functionDefinitionMetadata), deps)]
+          [
+            (
+              ( name
+              , functionDefinitionMetadata
+              )
+            , getDeps functionDefinitionExpression
+            )
+          ]
       DLet _ name LetDefinition{letDefinitionMetadata, letDefinitionExpression} ->
-        let deps = getDeps letDefinitionExpression
-         in [((name, letDefinitionMetadata), deps)]
-      DInstance _ InstanceDefinition{instanceDefinitionImplementations} ->
-        concatMap extractDependency instanceDefinitionImplementations
+        [
+          (
+            ( name
+            , letDefinitionMetadata
+            )
+          , getDeps letDefinitionExpression
+          )
+        ]
+      DInstance _ InstanceDefinition{..} ->
+        let
+          tr = Trait instanceDefinitionTraitName instanceDefinitionType
+          extractInstanceDependency =
+            \case
+              DFunction
+                _
+                name
+                FunctionDefinition
+                  { functionDefinitionMetadata
+                  , functionDefinitionExpression
+                  } ->
+                  [
+                    (
+                      ( instanceLabel tr name
+                      , functionDefinitionMetadata
+                      )
+                    , getDeps functionDefinitionExpression
+                    )
+                  ]
+              DLet _ name LetDefinition{letDefinitionMetadata, letDefinitionExpression} ->
+                [
+                  (
+                    ( instanceLabel tr name
+                    , letDefinitionMetadata
+                    )
+                  , getDeps letDefinitionExpression
+                  )
+                ]
+              _ ->
+                []
+         in
+          concatMap extractInstanceDependency instanceDefinitionImplementations
       _ ->
         []
 

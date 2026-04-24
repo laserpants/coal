@@ -1407,6 +1407,8 @@ defineName =
             define (instanceLabel trait name) to
           def@(DLet _ name _) ->
             define (instanceLabel trait name) (typeOf def)
+          _ ->
+            pure ()
     _ ->
       pure ()
 
