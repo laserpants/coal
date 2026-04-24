@@ -4,6 +4,16 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.TypeSystem.Constraint.Generation
+Description: Constraint generation from expressions and patterns
+
+This module implements the constraint generation phase of type inference.
+It traverses Coal expressions and patterns to emit type constraints including
+equality constraints, implicit generalization constraints, and trait instance
+requirements. The generated constraints are later solved by the constraint
+solver to produce concrete type assignments.
+-}
 module Coal.TypeSystem.Constraint.Generation (
   ConstraintsGenContext (..),
   ConstraintsGenError (..),

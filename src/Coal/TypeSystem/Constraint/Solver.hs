@@ -3,6 +3,16 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.TypeSystem.Constraint.Solver
+Description: Constraint solving via unification and substitution
+
+This module implements the constraint solver for type inference. It takes
+the constraints generated during the constraint generation phase and solves
+them using unification and substitution to produce concrete type assignments.
+The solver handles equality constraints, implicit generalization, explicit
+instantiation, and row polymorphism constraints.
+-}
 module Coal.TypeSystem.Constraint.Solver (
   Solver (..),
   runSolver,

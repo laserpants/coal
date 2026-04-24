@@ -2,6 +2,15 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.TypeSystem.Constraint.Assumption
+Description: Type assumptions for constraint generation
+
+This module defines type assumptions that associate names with types during
+the constraint generation phase of type inference. Assumptions represent the
+expected types of variables and are used to generate equality and unification
+constraints.
+-}
 module Coal.TypeSystem.Constraint.Assumption (
   Assumption (..),
   assumptionNameIs,
