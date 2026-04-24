@@ -39,7 +39,14 @@ import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerError (..), CompilerFailureMode (..), CompilerT, ErrorLocation (..), getCurrentBuildC, setCurrentModuleC)
+import Coal.Compiler.Stack (
+  CompilerError (..),
+  CompilerFailureMode (..),
+  CompilerT,
+  ErrorLocation (..),
+  getCurrentBuildC,
+  setCurrentModuleC,
+ )
 import Coal.Language (Definition (..), IndexedType, Kind)
 import Coal.Language.Definition (FunctionDefinition (..), InstanceDefinition (..), LetDefinition (..))
 import Coal.Language.Expression (Expression)
@@ -68,7 +75,7 @@ detectCallCycles m = do
   unless (null es) (throwError CallCycleError)
 
 checkForCycles :: (Monad m, Ord t, Data k, Data t) => Module Metadata k t -> CompilerT Metadata m ()
-checkForCycles Module{..} = do
+checkForCycles Module{modulePath, moduleDefinitions} = do
   -- Get fold names to exclude from cycle detection (mutually recursive folds are valid)
   Build{buildFolds} <- getCurrentBuildC
   let depGraph = buildDependencyGraph moduleDefinitions
@@ -123,13 +130,19 @@ extractDependencies = concatMap extractDependency
   extractDependency :: Definition a k t -> [((Name, a), [Name])]
   extractDependency =
     \case
-      DFunction _ name FunctionDefinition{..} ->
-        let deps = getDeps functionDefinitionExpression
-         in [((name, functionDefinitionMetadata), deps)]
-      DLet _ name LetDefinition{..} ->
+      DFunction
+        _
+        name
+        FunctionDefinition
+          { functionDefinitionMetadata
+          , functionDefinitionExpression
+          } ->
+          let deps = getDeps functionDefinitionExpression
+           in [((name, functionDefinitionMetadata), deps)]
+      DLet _ name LetDefinition{letDefinitionMetadata, letDefinitionExpression} ->
         let deps = getDeps letDefinitionExpression
          in [((name, letDefinitionMetadata), deps)]
-      DInstance _ InstanceDefinition{..} ->
+      DInstance _ InstanceDefinition{instanceDefinitionImplementations} ->
         concatMap extractDependency instanceDefinitionImplementations
       _ ->
         []
