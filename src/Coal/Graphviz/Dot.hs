@@ -7,6 +7,15 @@
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+{- |
+Module: Coal.Graphviz.Dot
+Description: Graphviz DOT syntax generation for Coal language structures
+
+This module provides utilities for generating Graphviz DOT syntax to visualize
+Coal language structures including modules, expressions, types, and patterns.
+It defines the 'Dot' typeclass with instances for various Coal types, enabling
+automatic graph generation for debugging.
+-}
 module Coal.Graphviz.Dot (Dot (..), generateDotSyntax) where
 
 import Coal.Common.Label (Label (..))
