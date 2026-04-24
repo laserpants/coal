@@ -1,0 +1,20 @@
+module Main {
+
+  import namespace IO
+
+  type alias Config = { 
+    api_key : string, 
+    debug : bool 
+  }
+
+  fun ff(f) = 
+    f({ api_key = "a", debug = false})
+
+  fun bork() =
+    ff(fn(c : Config) => c.api_key)
+    // ff(fn(c : { api_key : string, debug : bool }) => c.api_key)
+
+  fun main() =
+    IO.println_string(bork())
+
+}

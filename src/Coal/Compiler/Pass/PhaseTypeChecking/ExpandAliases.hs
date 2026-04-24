@@ -197,6 +197,8 @@ instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTra
           EAnnotation a <$> aliasTransform t <*> aliasTransform e
         ELet a bs e ->
           ELet a <$> aliasTransform bs <*> aliasTransform e
+        ELambda a ps e ->
+          ELambda a <$> aliasTransform ps <*> aliasTransform e
         e ->
           return e
 
