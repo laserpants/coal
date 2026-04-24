@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StrictData #-}
 
 module Coal.TypeSystem.Constraint.Assumption (
@@ -26,12 +26,12 @@ instance (Data a, Data t) => Substitutable (Assumption a t) where
 
 {-# INLINE assumptionNameIs #-}
 assumptionNameIs :: Name -> Assumption a t -> Bool
-assumptionNameIs name Assumption{..} = assumptionName == name
+assumptionNameIs name Assumption{assumptionName} = assumptionName == name
 
 {-# INLINE assumptionNameIsOneOf #-}
 assumptionNameIsOneOf :: [Name] -> Assumption a t -> Bool
-assumptionNameIsOneOf names Assumption{..} = assumptionName `elem` names
+assumptionNameIsOneOf names Assumption{assumptionName} = assumptionName `elem` names
 
 {-# INLINE assumptionNameIsNotOneOf #-}
 assumptionNameIsNotOneOf :: [Name] -> Assumption a t -> Bool
-assumptionNameIsNotOneOf names Assumption{..} = assumptionName `notElem` names
+assumptionNameIsNotOneOf names Assumption{assumptionName} = assumptionName `notElem` names
