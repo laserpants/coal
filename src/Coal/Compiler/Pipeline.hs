@@ -2,10 +2,19 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Module: Coal.Compiler.Pipeline
+Description: Main compiler pipeline orchestrating all compilation phases
+
+This module defines the central compiler pipeline that coordinates all
+compilation phases from source files to executable binaries. The pipeline
+consists of six sequential phases: parsing, preflight, type checking,
+translation, lowering, and linking. It also provides error formatting
+utilities for presenting compilation errors to users.
+-}
 module Coal.Compiler.Pipeline (
   pipeline,
   compile,

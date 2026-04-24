@@ -47,7 +47,6 @@ moduleKindEnvironment Module{moduleDefinitions} = do
             , kindOf aliasDefinitionType
             )
           ]
-      -- TODO: temp
       DImport _ (Path ["Builtin$"]) _ -> do
         pure []
       DImport _ path items -> do
