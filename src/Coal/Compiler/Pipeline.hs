@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -47,7 +48,7 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
-import System.Console.AsciiProgress
+import System.Console.AsciiProgress (Default (def), Options (..), displayConsoleRegions, newProgressBar)
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
@@ -88,7 +89,7 @@ compileWithCFiles config files cFiles = do
                 }
           go (Just pb)
   case res of
-    (e, CompilerState{..}, es) -> do
+    (e, CompilerState{compilerSources}, es) -> do
       forM_ (nub es) $
         \err -> do
           case errorLocation err of
