@@ -22,7 +22,7 @@ import Coal.Compiler.Error (CompilerError (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait)
 import Coal.Language.Type (IndexedType)
-import Coal.Language.Type.Kind
+import Coal.Language.Type.Kind (Kind)
 import Control.Monad.Writer (MonadWriter, censor, listen, tell)
 import Data.Set (Set)
 import Data.Tuple.Extra (second)

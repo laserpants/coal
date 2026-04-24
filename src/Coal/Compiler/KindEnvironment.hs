@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -8,7 +9,7 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Build.NameEntry
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State
 import Coal.Language.Definition
 import Coal.Language.HasKind (HasKind (..), foldKindOf)
@@ -22,24 +23,24 @@ import Data.Maybe (fromMaybe)
 import Extras (Name, concatForM, forM, (<.>))
 
 moduleKindEnvironment :: (Monad m) => Module a Kind () -> CompilerT b m (Environment Kind)
-moduleKindEnvironment Module{..} = do
+moduleKindEnvironment Module{moduleDefinitions} = do
   res <- forM moduleDefinitions $
     \case
-      DTrait _ name TraitDefinition{..} ->
+      DTrait _ name TraitDefinition{traitDefinitionParameter} ->
         pure
           [
             ( name
             , KArrow (kindOf traitDefinitionParameter) KTrait
             )
           ]
-      DType _ name TypeDefinition{..} ->
+      DType _ name TypeDefinition{typeDefinitionParameters} ->
         pure
           [
             ( name
             , foldKindOf KType typeDefinitionParameters
             )
           ]
-      DTypeAlias _ name AliasDefinition{..} ->
+      DTypeAlias _ name AliasDefinition{aliasDefinitionType} ->
         pure
           [
             ( name
@@ -65,7 +66,7 @@ moduleKindEnvironment Module{..} = do
               pure []
       DNamespaceImport _ path -> do
         let qualified name = principalPath path <.> name
-        importedModule@Build{..} <- importedBuild path
+        importedModule@Build{buildTypeConstructors, buildTraits, buildAliases} <- importedBuild path
         ps1 <- concatForM (Environment.names buildTypeConstructors) $
           \name ->
             pure $
@@ -97,26 +98,26 @@ nameKindPairs name maybeKind =
     pure [(name, kind)]
 
 exports :: Build a -> Name -> Bool
-exports Build{..} name = name `elem` buildExportedNames
+exports Build{buildExportedNames} name = name `elem` buildExportedNames
 
 typeConstructorKind :: Name -> Build a -> Maybe Kind
-typeConstructorKind name Build{..} =
+typeConstructorKind name Build{buildTypeConstructors} =
   case Environment.lookup name buildTypeConstructors of
     Nothing ->
       Nothing
-    Just TypeConstructorEntry{..} ->
+    Just TypeConstructorEntry{typeConstructorEntryKind} ->
       Just typeConstructorEntryKind
 
 traitKind :: Name -> Build a -> Maybe Kind
-traitKind name Build{..} =
+traitKind name Build{buildTraits} =
   case Environment.lookup name buildTraits of
     Nothing ->
       Nothing
-    Just TraitEntry{..} ->
+    Just TraitEntry{traitEntryParameter} ->
       Just (KArrow (kindOf traitEntryParameter) KTrait)
 
 aliasKind :: Name -> Build a -> Maybe Kind
-aliasKind name Build{..} =
+aliasKind name Build{buildAliases} =
   case Environment.lookup name buildAliases of
     Nothing ->
       Nothing
@@ -125,7 +126,7 @@ aliasKind name Build{..} =
 
 importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
 importedBuild path = do
-  CompilerState{..} <- get
+  CompilerState{compilerModules} <- get
   case Environment.lookup (principalPath path) compilerModules of
     Nothing ->
       -- TODO
