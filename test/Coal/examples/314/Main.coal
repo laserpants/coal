@@ -1,0 +1,18 @@
+module Main {
+
+  import namespace IO
+
+  instance Comparable<List<a>> with Comparable<a> {
+    fun `==`(xs, ys) =
+      match((xs, ys)) {
+        | (a :: _, b :: _) => 
+            a == b
+        | _ => 
+            false
+      }
+  }
+  
+  fun main() =
+    IO.println_string("123")
+
+}
