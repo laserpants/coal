@@ -410,7 +410,7 @@ Used during the first pass to collect trait information.
 -}
 passiveExpandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => LetDefinition a Kind IndexedType -> CompilerT a m (LetDefinition a Kind IndexedType)
 passiveExpandLetDefinitionTraits =
-  -- \| Collect trait information from an expression without transformation (passive pass)
+  -- Collect trait information from an expression without transformation (passive pass)
   \case
     LetDefinition loc with (With _ t) e -> do
       (_, traits) <- listenDictionaryTraits (passiveExpandTraitsInExpr e)
