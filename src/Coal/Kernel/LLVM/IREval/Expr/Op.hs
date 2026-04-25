@@ -7,7 +7,6 @@ import Coal.Kernel.LLVM.IREval
 import Coal.Kernel.LLVM.IREval.Comment (irCommentBlock)
 import Coal.Kernel.LLVM.IRInstruction (FCmpCond (..), ICmpCond (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
-import qualified Coal.Kernel.LLVM.IRInstruction.TH as IR
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i64)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
@@ -157,15 +156,55 @@ irEvalOp =
         v2 <- irEval e2
         icmp Ne i1 v1 v2
     OAnd e1 e2 -> do
-      irCommentBlock "OAnd" $ do
+      irCommentBlock "OAnd (short-circuit)" $ do
+        -- Short-circuit AND: if e1 is false, return false without evaluating e2
         v1 <- irEval e1
-        v2 <- irEval e2
-        IR.and i1 v1 v2
+        labelThen <- label "and.then"
+        labelFalse <- label "and.false"
+        labelEnd <- label "and.end"
+        br v1 [labelThen, labelFalse]
+
+        -- False branch: short-circuit with false
+        (labelFalseActual, _) <- block labelFalse $ do
+          br1 labelEnd
+          pure (I1 False)
+
+        -- True branch: evaluate e2
+        (labelThenActual, v2) <- block labelThen $ do
+          v2 <- irEval e2
+          br1 labelEnd
+          pure v2
+
+        -- Merge results
+        (_, result) <-
+          block labelEnd $
+            phi i1 [(labelFalseActual, I1 False), (labelThenActual, v2)]
+        pure result
     OOr e1 e2 -> do
-      irCommentBlock "OOr" $ do
+      irCommentBlock "OOr (short-circuit)" $ do
+        -- Short-circuit OR: if e1 is true, return true without evaluating e2
         v1 <- irEval e1
-        v2 <- irEval e2
-        IR.or i1 v1 v2
+        labelTrue <- label "or.true"
+        labelElse <- label "or.else"
+        labelEnd <- label "or.end"
+        br v1 [labelTrue, labelElse]
+
+        -- True branch: short-circuit with true
+        (labelTrueActual, _) <- block labelTrue $ do
+          br1 labelEnd
+          pure (I1 True)
+
+        -- False branch: evaluate e2
+        (labelElseActual, v2) <- block labelElse $ do
+          v2 <- irEval e2
+          br1 labelEnd
+          pure v2
+
+        -- Merge results
+        (_, result) <-
+          block labelEnd $
+            phi i1 [(labelTrueActual, I1 True), (labelElseActual, v2)]
+        pure result
     OLtInt32 e1 e2 -> do
       irCommentBlock "OLtInt32" $ do
         v1 <- irEval e1
