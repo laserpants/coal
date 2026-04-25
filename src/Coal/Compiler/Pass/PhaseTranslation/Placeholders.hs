@@ -376,7 +376,7 @@ expandLetDefinitionTraits name =
                 LetDefinition
                   loc
                   with
-                  (With trs t)
+                  (With (tr : trs) t)
                   ( EApplication
                       mempty
                       t
