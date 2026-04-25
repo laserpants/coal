@@ -688,7 +688,7 @@ instance (Dot t) => Dot (Kernel.Binding Kernel.Type t) where
   toDot =
     \case
       Kernel.Binding (Label t name) e -> do
-        (id1, id2) <- withTypeInfo t $ emitNamedShape RectangleShape (Just name) ("Binding\\n" <> name)
+        (id1, id2) <- withTypeInfo t $ emitNamedShape RectangleShape (Just name) "Binding"
         emitEdgeWithLabel "=" id2 e
         return id1
 
@@ -705,7 +705,7 @@ instance Dot (Kernel.Focus Kernel.Type) where
   toDot =
     \case
       Kernel.Focus name ll1 ll2 -> do
-        dotId <- emitShape RectangleShape ("Focus\\n" <> name)
+        dotId <- emitNamedShape RectangleShape (Just name) "Focus"
         emitEdge dotId ll1
         emitEdge dotId ll2
         return dotId
