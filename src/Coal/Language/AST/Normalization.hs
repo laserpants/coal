@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
 {- |
@@ -58,14 +59,14 @@ denormalizeConstant name =
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => NormalizationContext (Module a k (Type o k)) where
   normalizeObject =
     \case
-      Module{..} ->
+      Module{modulePath, moduleExportList, moduleDefinitions} ->
         Module
           { moduleDefinitions = normalizeObject moduleDefinitions
           , ..
           }
   denormalizeObject =
     \case
-      Module{..} ->
+      Module{modulePath, moduleExportList, moduleDefinitions} ->
         Module
           { moduleDefinitions = denormalizeObject moduleDefinitions
           , ..
