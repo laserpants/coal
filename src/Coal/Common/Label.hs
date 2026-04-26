@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -32,7 +33,7 @@ instance (Binary t) => Binary (Label t)
 
 {-# INLINE setLabelName #-}
 setLabelName :: Name -> Label t -> Label t
-setLabelName newName Label{..} =
+setLabelName newName Label{labelTag} =
   Label
     { labelName = newName
     , ..
