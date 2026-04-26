@@ -388,8 +388,6 @@ expandLetDefinitionTraits name =
               pure $
                 LetDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
 
--- | Create a lambda that accepts trait dictionaries as parameters
-
 -- | Check if a trait constraint is on a type variable (not yet resolved)
 isVariable :: Trait IndexedType -> Bool
 isVariable (Trait _ TVariable{}) = True
