@@ -243,7 +243,7 @@ applyTraits loc (Label t name) traits =
     then pure (EVariable mempty (Label t name))
     else EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insert_ (NonEmpty.fromList (Set.toList traits))
  where
-  t1 = foldTypeOf t (Set.toList traits) -- (tr : trs)
+  t1 = foldTypeOf t (Set.toList traits)
   insert_ trait = do
     fields <- lookupTraitInstance loc trait
     case fields of
