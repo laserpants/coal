@@ -25,16 +25,16 @@ import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
 import Coal.Kernel.LLVM.IREval.Expr (IREval (..))
 import Coal.Kernel.LLVM.IRInstruction
 import Coal.Kernel.LLVM.IRInstruction.TH (bind, ret)
-import Coal.Kernel.LLVM.IRInterpreter.Artifact
-import Coal.Kernel.LLVM.IRInterpreter.Environment
-import Coal.Kernel.LLVM.IRInterpreter.Instruction
+import Coal.Kernel.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact (..))
+import Coal.Kernel.LLVM.IRInterpreter.Environment (IRInterpreterEnv (..), insertBoundVars)
+import Coal.Kernel.LLVM.IRInterpreter.Instruction (instruction, instruction1)
 import Coal.Kernel.LLVM.IRInterpreter.Monad
 import Coal.Kernel.LLVM.IRInterpreter.State
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import qualified Coal.Kernel.Language as Syntax
-import Coal.Kernel.Language.Object
+import Coal.Kernel.Language.Object (Object (..))
 import Control.Monad (unless, void)
 import Control.Monad.Free (iterM)
 import Control.Monad.RWS (asks, gets, local, tell)
