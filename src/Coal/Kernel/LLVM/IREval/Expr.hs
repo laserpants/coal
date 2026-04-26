@@ -8,7 +8,7 @@ module Coal.Kernel.LLVM.IREval.Expr (IREval (..)) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
-import Coal.Kernel.LLVM.IREval
+import Coal.Kernel.LLVM.IREval (IREval (..))
 import Coal.Kernel.LLVM.IREval.Closure (irApplyClosure, irPackClosure)
 import Coal.Kernel.LLVM.IREval.Comment (irComment, irCommentBlock)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irConcealArgs, irReveal)
