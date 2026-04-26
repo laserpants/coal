@@ -14,8 +14,8 @@ module Coal.Kernel.LLVM.IRInterpreter.Monad (
 ) where
 
 import Coal.Kernel.LLVM.IREncodable (IREncodable (..), enquote)
-import Coal.Kernel.LLVM.IRInterpreter.Artifact
-import Coal.Kernel.LLVM.IRInterpreter.Environment
+import Coal.Kernel.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact)
+import Coal.Kernel.LLVM.IRInterpreter.Environment (IRInterpreterEnv)
 import Coal.Kernel.LLVM.IRInterpreter.State
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
