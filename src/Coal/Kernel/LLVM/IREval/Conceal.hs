@@ -14,7 +14,7 @@ import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Control.Monad (unless)
 import Data.List.NonEmpty (NonEmpty, toList)
 import Extras (forM)
-import GHC.Float
+import GHC.Float (castDoubleToWord64, castFloatToWord32)
 
 irBox :: IRValue -> IRType -> IRInstr IRValue
 irBox v t = do
