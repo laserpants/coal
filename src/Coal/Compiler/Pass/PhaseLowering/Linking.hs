@@ -68,23 +68,40 @@ compileBitcode CompilerConfig{..} files =
 runLLC :: FilePath -> Name -> ByteString -> IO (Either SomeException FilePath)
 runLLC dir name bcode = do
   ByteString.writeFile file bcode
+
+  let cmd = "llc"
+      args = ["-filetype=obj", "-relocation-model=pic", file, "-o", target]
+      cmdStr = unwords (cmd : args)
+
+--  putStrLn $ "Running: " ++ cmdStr
+
   try $ do
     execProcess process
     pure target
  where
   file = dir </> Text.unpack name <.> "bc"
-  process = (proc "llc" ["-filetype=obj", "-relocation-model=pic", file, "-o", target]){cwd = Just dir}
   target = takeBaseName file <.> "o"
+  process =
+    (proc "llc" ["-filetype=obj", "-relocation-model=pic", file, "-o", target])
+      { cwd = Just dir
+      }
 
 runGCC :: FilePath -> [FilePath] -> [FilePath] -> IO (Either SomeException ())
 runGCC dir objFiles cFiles = do
   isClang <- ("clang" `isInfixOf`) <$> readProcess "cc" ["--version"] ""
-  let
-    args = (if isClang then flags else "-no-pie" : flags) <> commonArgs
-    process = (proc "gcc" args){cwd = Just dir}
+
+  let args =
+        (if isClang then flags else "-no-pie" : flags)
+          <> commonArgs
+
+      process = (proc "gcc" args){cwd = Just dir}
+
+--  putStrLn $ "Running: " ++ showCommandForUser "gcc" args
+
   try $ execProcess process
  where
   flags = ["-g", "-I."]
+
   commonArgs =
     ["runtime.c"]
       <> cFiles
