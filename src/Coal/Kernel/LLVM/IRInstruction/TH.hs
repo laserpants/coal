@@ -28,6 +28,7 @@ module Coal.Kernel.LLVM.IRInstruction.TH (
   gepsize,
   inttoptr,
   ptrtoint,
+  zext,
   alloca,
   alloca1,
   bitcast,
@@ -167,6 +168,10 @@ inttoptr = iInttoptr
 {-# INLINE ptrtoint #-}
 ptrtoint :: (MonadFree (IRInstrOp) m) => IRValue -> IRType -> m IRValue
 ptrtoint = iPtrtoint
+
+{-# INLINE zext #-}
+zext :: (MonadFree (IRInstrOp) m) => IRValue -> IRType -> m IRValue
+zext = iZext
 
 {-# INLINE alloca #-}
 alloca :: (MonadFree (IRInstrOp) m) => IRType -> IRValue -> m IRValue

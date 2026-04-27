@@ -190,6 +190,8 @@ interpreter =
       instruction t next ["inttoptr", annotated v, "to", irEncode t]
     IPtrtoint v t next ->
       instruction t next ["ptrtoint", annotated v, "to", irEncode t]
+    IZext v t next ->
+      instruction t next ["zext", annotated v, "to", irEncode t]
     IBitcast v t next ->
       instruction t next ["bitcast", annotated v, "to", irEncode t]
     IAlloca t v next ->

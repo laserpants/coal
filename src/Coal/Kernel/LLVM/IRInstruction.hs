@@ -68,6 +68,7 @@ data InstrOpF v t next
   | IGepsize t v (v -> next)
   | IInttoptr v t (v -> next)
   | IPtrtoint v t (v -> next)
+  | IZext v t (v -> next)
   | IAlloca t v (v -> next)
   | IAlloca1 t (v -> next)
   | IBitcast v t (v -> next)
