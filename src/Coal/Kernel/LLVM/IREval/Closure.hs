@@ -9,7 +9,7 @@ module Coal.Kernel.LLVM.IREval.Closure (
 import Coal.Kernel.LLVM.IREval
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
-import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
+import Coal.Kernel.LLVM.IREval.Malloc (irMalloc, irMallocN)
 import Coal.Kernel.LLVM.IRInstruction (IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
@@ -29,7 +29,7 @@ storeElement base v i = do
 
 irApplyClosure :: (IRTyped t, IREval e) => t -> IRValue -> NonEmpty e -> IRInstr IRValue
 irApplyClosure t v es = do
-  r1 <- alloca i8Ptr (I32 n)
+  r1 <- irMallocN i8Ptr (I32 n)
   vs <- forM es irEval
   forSM_ 0 (toList vs) (storeElement r1)
   r2 <- callg i8Ptr "apply" [v, I32 n, r1]
