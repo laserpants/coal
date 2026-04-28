@@ -47,7 +47,7 @@ irPackClosure ::
   IRInstr IRValue
 irPackClosure name k vs = do
   let t = closureStructType (length vs)
-  r1 <- irMalloc (closureStructType (length vs))
+  r1 <- irMalloc t
   r2 <- getelementptr t r1 (I32 0) (I32 0)
   store (I32 (fromIntegral (length vs))) r2
   r3 <- getelementptr t r1 (I32 0) (I32 1)
