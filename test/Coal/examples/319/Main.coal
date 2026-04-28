@@ -9,7 +9,7 @@
       in
       IO.println_bool(match(lookup('A', s)) {
         | None => false
-      | _ => true
-    })
+        | _ => true
+      })
 
 }
