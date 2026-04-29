@@ -1,5 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- | Closure extension for undersaturated function applications
+
+When a closure is applied with fewer arguments than needed,
+this function creates a NEW closure with:
+- Updated captured argument count (old + new)
+- Updated remaining argument count (old - new)
+- Same target function pointer
+- Combined argument array (old captured + new supplied)
+
+= Memory Allocation
+
+Cannot use 'irMalloc' because array size is dynamic (runtime value).
+Computes: @sizeof(closureStructType 0) + new_captured_count * 8@
+-}
 module Coal.Kernel.LLVM.IREval.Closure.Extend (irExtend) where
 
 import Coal.Common.Label (Label (..))

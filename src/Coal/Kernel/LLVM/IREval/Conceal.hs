@@ -1,6 +1,27 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{- | Value concealment and revelation for uniform i8* representation
+
+= Purpose
+
+Coal's runtime uses uniform @i8*@ pointers for all values. This module
+provides conversion between native LLVM types and the uniform representation.
+
+= Strategy
+
+* __Integers__ (i1, i8, i32, i64): Embed directly in pointer via @inttoptr@
+  No heap allocation needed - the value IS the pointer.
+
+* __Floats/Doubles__: Box on heap with bit pattern preservation
+  1. Cast float bits to integer (@castFloatToWord32@, @castDoubleToWord64@)
+  2. Allocate heap memory
+  3. Store integer bit pattern
+  4. Return pointer to heap location
+  This preserves exact float representation across concealment/revelation.
+
+* __Pointers__: Pass through unchanged (already i8*)
+-}
 module Coal.Kernel.LLVM.IREval.Conceal (irConceal, irConcealArgs, irReveal) where
 
 import Coal.Kernel.LLVM.IREval (IREval (..))
@@ -42,14 +63,18 @@ irConceal v =
       inttoptr v i8Ptr
     TFloat -> do
       case v of
+        -- Literal float: convert bit pattern to i32, then box
         Float f ->
           irConcealFloat (I32 (fromIntegral (castFloatToWord32 f))) TFloat
+        -- Runtime float value: box directly
         _ ->
           irBox v TFloat
     TDouble ->
       case v of
+        -- Literal double: convert bit pattern to i64, then box
         Double d ->
           irConcealFloat (I64 (fromIntegral (castDoubleToWord64 d))) TDouble
+        -- Runtime double value: box directly
         _ ->
           irBox v TDouble
     _ ->

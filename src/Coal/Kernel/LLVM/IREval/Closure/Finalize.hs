@@ -2,6 +2,18 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{- | Closure finalization for saturated function applications
+
+When a closure has all required arguments, this function:
+1. Assembles complete argument array (captured + supplied)
+2. Calls the target function via @call_n@
+3. Returns the result
+
+= Stack Allocation
+
+Uses stack allocation (@alloca@) for the assembled argument array
+since it's temporary and known to be used only during the call.
+-}
 module Coal.Kernel.LLVM.IREval.Closure.Finalize (irFinalize) where
 
 import Coal.Common.Label (Label (..))

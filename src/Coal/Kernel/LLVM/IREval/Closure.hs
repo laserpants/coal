@@ -1,5 +1,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- | Closure support for partial function application
+
+= Memory Layout
+
+Closures are represented as structs with a flexible array member:
+
+> struct Closure {
+>   i32 captured_count;   // Number of arguments already captured
+>   i32 remaining_count;  // Number of additional arguments needed
+>   i8* target_function;  // Pointer to the actual function
+>   i8*[n] captured_args; // Array of captured argument pointers (flexible)
+> }
+
+= Allocation Strategy
+
+* 'irPackClosure': Allocates with known array size (compile-time)
+  Uses @closureStructType (length vs)@ where the array size is fixed.
+  Can use 'irMalloc' directly.
+
+* Extend/Finalize: Allocate with dynamic array size (runtime)
+  Use @closureStructType 0@ as base type, then calculate:
+  @sizeof(base) + num_args * sizeof(i8*)@
+  Cannot use 'irMalloc' - need manual size calculation.
+-}
 module Coal.Kernel.LLVM.IREval.Closure (
   irApplyClosure,
   irPackClosure,
