@@ -1023,11 +1023,11 @@ void*
 debug_call_n_bounds(int32_t argn)
 {
   fprintf(stderr, "DEBUG: call_n called with argN = %d (max allowed = 256)\n", argn);
-  fail();
+  exit_failure();
 }
 
 void*
-fail(void)
+exit_failure(void)
 {
   exit(EXIT_FAILURE);
 }
