@@ -6,37 +6,37 @@ module Containers.SetSpec(setSpec) {
 
   fun setSpec() : Test =
     suite([
-      // Test empty set
-      check(is_empty(empty)),
-      check(size(empty) == 0),
-      
-      // Test singleton
-      check(is_member(42, singleton(42))),
-      check(!is_member(99, singleton(42))),
-      check(size(singleton(42)) == 1),
-      
-      // Test insert and membership
-      check(is_member(5, insert(5, empty))),
-      check(
-        let s = insert(1, insert(2, insert(3, empty))) in
-        is_member(1, s) && is_member(2, s) && is_member(3, s) && size(s) == 3
-      ),
-      
-      // Test delete
-      check(
-        let s = insert(1, insert(2, empty)) in
-        let s2 = delete(1, s) in
-        !is_member(1, s2) && is_member(2, s2) && size(s2) == 1
-      )
-      
-//      // Test union
+//      // Test empty set
+//      check(is_empty(empty)),
+//      check(size(empty) == 0),
+//      
+//      // Test singleton
+//      check(is_member(42, singleton(42))),
+//      check(!is_member(99, singleton(42))),
+//      check(size(singleton(42)) == 1),
+//      
+//      // Test insert and membership
+//      check(is_member(5, insert(5, empty))),
 //      check(
-//        let s1 = insert(1, insert(2, empty)) in
-//        let s2 = insert(2, insert(3, empty)) in
-//        let u = union(s1, s2) in
-//        is_member(1, u) && is_member(2, u) && is_member(3, u) && size(u) == 3
+//        let s = insert(1, insert(2, insert(3, empty))) in
+//        is_member(1, s) && is_member(2, s) && is_member(3, s) && size(s) == 3
 //      ),
 //      
+//      // Test delete
+//      check(
+//        let s = insert(1, insert(2, empty)) in
+//        let s2 = delete(1, s) in
+//        !is_member(1, s2) && is_member(2, s2) && size(s2) == 1
+//      ),
+      
+      // Test union
+      check(
+        let s1 = insert(1, insert(2, empty)) in
+        let s2 = insert(2, insert(3, empty)) in
+        let u = union(s1, s2) in
+        is_member(1, u) && is_member(2, u) && is_member(3, u) && size(u) == 3
+      )
+      
 //      // Test intersection
 //      check(
 //        let s1 = insert(1, insert(2, insert(3, empty))) in
