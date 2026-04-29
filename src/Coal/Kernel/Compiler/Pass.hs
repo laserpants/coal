@@ -26,6 +26,7 @@ import Coal.Kernel.Compiler.Pass.Suffix (suffixExpr)
 import Coal.Kernel.Compiler.Pipeline (PipelineT, pipelineInsertArtifacts)
 import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..), overPipelineStateSupply)
 import Coal.Kernel.LLVM (IRInterpreter, irInterpreterStateArtifacts, runInterpreter)
+import Coal.Kernel.LLVM.IRError (prettyIRError)
 import Coal.Kernel.Language
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (State, gets, modify, runState)
@@ -42,9 +43,11 @@ transformSuffixMonad a = do
 transformInterpreter :: (MonadIO m) => IRInterpreter a -> PipelineT m a
 transformInterpreter p = do
   env <- gets pipelineInterpreterEnv
-  let (a, s, _) = runInterpreter env p
+  let (result, s, _) = runInterpreter env p
   pipelineInsertArtifacts (irInterpreterStateArtifacts s)
-  pure a
+  case result of
+    Left err -> error ("IR generation error: " <> show (prettyIRError err))
+    Right a -> pure a
 
 type Pass m i o = i -> PipelineT m o
 

@@ -8,6 +8,7 @@ module Coal.Kernel.LLVM.IREval.Expr (IREval (..)) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
+import Coal.Kernel.LLVM.IRError
 import Coal.Kernel.LLVM.IREval (IREval (..))
 import Coal.Kernel.LLVM.IREval.Closure (irApplyClosure, irPackClosure)
 import Coal.Kernel.LLVM.IREval.Comment (irComment, irCommentBlock)
@@ -18,6 +19,7 @@ import Coal.Kernel.LLVM.IREval.Expr.Var (irEvalVar)
 import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
 import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..), IRConstructor (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
+import Coal.Kernel.LLVM.IRInterpreter.Monad (throwIRError)
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i8Ptr, stringLiteral, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..), irPrimValue)
@@ -71,9 +73,9 @@ irEvalApp t ll@(Label vt var) es
                     r1 <- irEval (Syntax.var ll)
                     irApplyClosure t r1 (b :| bs)
                   (_, []) ->
-                    error "Implementation error"
+                    error "Implementation error: empty overapplication"
           _ ->
-            error "Implementation error"
+            error "Implementation error: non-function in application"
 
 {-# INLINE comment1 #-}
 comment1 :: Name -> [Text]
@@ -147,7 +149,7 @@ instance IREval (Syntax.Expr Syntax.Type) where
                 r <- callg i8Ptr "apply" [v2, I32 1, a1]
                 irReveal r (irTypeOf (returnTypeOf e))
               _ ->
-                error "Implementation error"
+                error "Implementation error: non-local value in apply"
         Syntax.EMat t e1 cs ->
           irCommentBlock "EMat" $
             irEvalMatch t e1 cs
@@ -194,4 +196,4 @@ instance IREval (Syntax.Expr Syntax.Type) where
                 phi (irTypeOf e) [isNullBlock, notNullBlock]
             pure v
         e ->
-          error (show e)
+          error ("Unsupported expression in IR generation: " <> show e)

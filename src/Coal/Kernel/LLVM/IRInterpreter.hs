@@ -19,6 +19,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Coal.Kernel.LLVM.IREncodable
+import Coal.Kernel.LLVM.IRError
 import Coal.Kernel.LLVM.IREval.Closure (closureStructType)
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
@@ -114,7 +115,7 @@ interpretObject =
         TFun t ts ->
           pure [CDeclare name t ts]
         _ ->
-          error "Implementation error"
+          throwIRError (InvalidExternalType name it)
     OData{} ->
       pure []
 
@@ -237,7 +238,7 @@ interpreter =
       ix <- constructorIndex name
       case ix of
         Nothing ->
-          error ("No constructor '" <> Text.unpack name <> "'")
+          throwIRError (UnboundConstructor name)
         Just n ->
           next (IRConstructor n t1)
      where
@@ -263,7 +264,7 @@ interpreter =
       env <- asks irInterpreterValueEnv
       case Environment.lookup var env of
         Nothing ->
-          error ("Name not in scope: '" <> show var <> "'")
+          throwIRError (UnboundVariable var)
         Just val ->
           next val
     ConstructorLookup name next -> do
@@ -317,5 +318,7 @@ interpret = iterM interpreter
 offset :: IRType -> (IRValue, IRValue) -> IRType
 offset (TArray _ t) _ = t
 offset (TNamed _ t) p = offset t p
-offset (TStruct ts) (_, I32 n) = ts !! fromIntegral n
-offset _ _ = error "Implementation error"
+offset (TStruct ts) (_, I32 n)
+  | fromIntegral n < length ts = ts !! fromIntegral n
+  | otherwise = error ("Struct field index " <> show n <> " out of bounds for " <> show (length ts) <> " fields")
+offset ty _ = error ("Invalid getelementptr on type: " <> show ty)

@@ -145,6 +145,7 @@ library
       Coal.Kernel.LLVM.IR
       Coal.Kernel.LLVM.IRConstruct
       Coal.Kernel.LLVM.IREncodable
+      Coal.Kernel.LLVM.IRError
       Coal.Kernel.LLVM.IREval
       Coal.Kernel.LLVM.IREval.Closure
       Coal.Kernel.LLVM.IREval.Closure.Apply
