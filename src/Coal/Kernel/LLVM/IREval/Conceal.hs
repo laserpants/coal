@@ -5,7 +5,7 @@
 
 = Purpose
 
-Coal's runtime uses uniform @i8*@ pointers for all values. This module
+The runtime uses uniform @i8*@ pointers for all values. This module
 provides conversion between native LLVM types and the uniform representation.
 
 = Strategy

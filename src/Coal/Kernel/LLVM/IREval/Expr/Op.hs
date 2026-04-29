@@ -3,7 +3,10 @@
 
 module Coal.Kernel.LLVM.IREval.Expr.Op (irEvalOp) where
 
-import Coal.Kernel.LLVM.IREval
+import Coal.Kernel.LLVM.IREval (
+  IREval (..),
+  IRTailContext (NotInTail),
+ )
 import Coal.Kernel.LLVM.IREval.Comment (irCommentBlock)
 import Coal.Kernel.LLVM.IRInstruction (FCmpCond (..), ICmpCond (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH

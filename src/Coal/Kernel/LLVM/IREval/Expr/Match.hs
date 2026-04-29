@@ -3,7 +3,10 @@
 module Coal.Kernel.LLVM.IREval.Expr.Match (irEvalMatch) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Kernel.LLVM.IREval
+import Coal.Kernel.LLVM.IREval (
+  IREval (..),
+  IRTailContext (NotInTail),
+ )
 import Coal.Kernel.LLVM.IREval.Conceal (irReveal)
 import Coal.Kernel.LLVM.IRInstruction (IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
