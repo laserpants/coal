@@ -8,7 +8,6 @@ module Coal.Kernel.LLVM.IREval.Expr (IREval (..)) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IREncodable (irEncode)
-import Coal.Kernel.LLVM.IRError
 import Coal.Kernel.LLVM.IREval (IREval (..))
 import Coal.Kernel.LLVM.IREval.Closure (irApplyClosure, irPackClosure)
 import Coal.Kernel.LLVM.IREval.Comment (irComment, irCommentBlock)
@@ -19,7 +18,6 @@ import Coal.Kernel.LLVM.IREval.Expr.Var (irEvalVar)
 import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
 import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..), IRConstructor (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
-import Coal.Kernel.LLVM.IRInterpreter.Monad (throwIRError)
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i8Ptr, stringLiteral, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..), irPrimValue)
