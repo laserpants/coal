@@ -73,7 +73,7 @@ runLLC dir name bcode = do
       args = ["-filetype=obj", "-relocation-model=pic", file, "-o", target]
       cmdStr = unwords (cmd : args)
 
---  putStrLn $ "Running: " ++ cmdStr
+  --  putStrLn $ "Running: " ++ cmdStr
 
   try $ do
     execProcess process
@@ -96,17 +96,19 @@ runGCC dir objFiles cFiles = do
 
       process = (proc "gcc" args){cwd = Just dir}
 
---  putStrLn $ "Running: " ++ showCommandForUser "gcc" args
+  --  putStrLn $ "Running: " ++ showCommandForUser "gcc" args
 
   try $ execProcess process
  where
-  flags = ["-g", "-I."]
+  -- Enable AddressSanitizer for memory error detection
+  flags = ["-g", "-I.", "-fsanitize=address"]
 
   commonArgs =
     ["runtime.c"]
       <> cFiles
       <> objFiles
       <> ["-o", "dist"]
+      <> ["-fsanitize=address"] -- Link with ASAN runtime
       <> ["-lgc", "-lgmp"]
 
 execProcess :: CreateProcess -> IO ()
