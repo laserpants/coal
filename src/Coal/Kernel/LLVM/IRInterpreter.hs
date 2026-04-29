@@ -19,6 +19,8 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Coal.Kernel.LLVM.IREncodable
+import Coal.Kernel.LLVM.IRError
+import Coal.Kernel.LLVM.IREval (IRTailContext (..))
 import Coal.Kernel.LLVM.IREval.Closure (closureStructType)
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
@@ -57,6 +59,8 @@ support :: [IRConstruct [IRLine]]
 support =
   [ CType "closure" (closureStructType 0)
   , CDeclare "init" TVoid []
+  , CDeclare "fail" i8Ptr []
+  , CDeclare "debug_call_n_bounds" i8Ptr [i32]
   , CDeclare "gc_init" TVoid []
   , CDeclare "gc_malloc" i8Ptr [i64]
   , CDeclare "hashmap_init" i8Ptr []
@@ -68,6 +72,7 @@ support =
 interpretFunction :: Name -> IRInstr a -> [Label IRType] -> IRInterpreter (IRConstruct [IRLine])
 interpretFunction name f args = do
   refreshInterpreterState
+  setCurrentFunction (Just name)
   CDefine name i8Ptr Nothing args <$> listenOnly (interpret f)
 
 irEvalFun :: (IREval e) => [Label Syntax.Type] -> e -> IRInstr ()
@@ -78,7 +83,7 @@ irEvalFun lls e = do
       r <- irReveal v (irTypeOf t)
       unless (r == v) (irComment ["^ Reveal arg. " <> name])
       pure (name, r)
-  r1 <- bind bound (irEval e)
+  r1 <- bind bound (irEval InTail e) -- Function body is in tail position
   r2 <- irConceal r1
   unless (r1 == r2) (irComment ["^ Conceal return value"])
   ret r2
@@ -113,7 +118,7 @@ interpretObject =
         TFun t ts ->
           pure [CDeclare name t ts]
         _ ->
-          error "Implementation error"
+          throwIRError (InvalidExternalType name it)
     OData{} ->
       pure []
 
@@ -190,6 +195,8 @@ interpreter =
       instruction t next ["inttoptr", annotated v, "to", irEncode t]
     IPtrtoint v t next ->
       instruction t next ["ptrtoint", annotated v, "to", irEncode t]
+    IZext v t next ->
+      instruction t next ["zext", annotated v, "to", irEncode t]
     IBitcast v t next ->
       instruction t next ["bitcast", annotated v, "to", irEncode t]
     IAlloca t v next ->
@@ -201,10 +208,18 @@ interpreter =
       next
     IRet v next ->
       instruction1 next ["ret", irEncode (annotated v)]
-    ICall t v vs next ->
-      instruction t next ["call", irEncode t, irEncode v <> "(" <> commaSep (annotated <$> vs) <> ")"]
-    ICallGlobal t name vs next ->
-      instruction t next ["call", irEncode t, irGlobalName name <> "(" <> commaSep (annotated <$> vs) <> ")"]
+    ICall marker t v vs next ->
+      let prefix = case marker of
+            NoTail -> []
+            Tail -> ["tail"]
+            MustTail -> ["musttail"]
+       in instruction t next (prefix <> ["call", irEncode t, irEncode v <> "(" <> commaSep (annotated <$> vs) <> ")"])
+    ICallGlobal marker t name vs next ->
+      let prefix = case marker of
+            NoTail -> []
+            Tail -> ["tail"]
+            MustTail -> ["musttail"]
+       in instruction t next (prefix <> ["call", irEncode t, irGlobalName name <> "(" <> commaSep (annotated <$> vs) <> ")"])
     IBr v names next ->
       instruction1 next ["br", commaSep (annotated v : (encodeLabel <$> names))]
     IBr1 name next ->
@@ -234,7 +249,7 @@ interpreter =
       ix <- constructorIndex name
       case ix of
         Nothing ->
-          error ("No constructor '" <> Text.unpack name <> "'")
+          throwIRError (UnboundConstructor name)
         Just n ->
           next (IRConstructor n t1)
      where
@@ -260,9 +275,12 @@ interpreter =
       env <- asks irInterpreterValueEnv
       case Environment.lookup var env of
         Nothing ->
-          error ("Name not in scope: '" <> show var <> "'")
+          throwIRError (UnboundVariable var)
         Just val ->
           next val
+    CurrentFunction next -> do
+      currentFn <- gets irInterpreterStateCurrentFunction
+      next currentFn
     ConstructorLookup name next -> do
       ix <- constructorIndex name
       next ix
@@ -314,5 +332,7 @@ interpret = iterM interpreter
 offset :: IRType -> (IRValue, IRValue) -> IRType
 offset (TArray _ t) _ = t
 offset (TNamed _ t) p = offset t p
-offset (TStruct ts) (_, I32 n) = ts !! fromIntegral n
-offset _ _ = error "Implementation error"
+offset (TStruct ts) (_, I32 n)
+  | fromIntegral n < length ts = ts !! fromIntegral n
+  | otherwise = error ("Struct field index " <> show n <> " out of bounds for " <> show (length ts) <> " fields")
+offset ty _ = error ("Invalid getelementptr on type: " <> show ty)

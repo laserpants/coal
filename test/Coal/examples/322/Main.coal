@@ -1,0 +1,15 @@
+  module Main {
+
+    import namespace IO
+    import List(reduce)
+    import Containers.Set(insert, is_member, union, size, empty, delete)
+
+    fun main() =
+      let s1 = insert(1, insert(2, empty)) in
+        let s2 = insert(2, insert(3, empty)) in
+        let u = union(s1, s2) in
+        let r = is_member(1, u) && is_member(2, u) && is_member(3, u) && size(u) == 3
+      in
+      IO.println_bool(r)
+
+}

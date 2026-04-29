@@ -1,0 +1,14 @@
+module Main {
+
+  import Containers.SetSpec(setSpec)
+  import namespace IO
+  import MicroTest(Test, suite, run)
+
+  let 
+    spec : Test =
+      suite([ setSpec() ])
+
+  fun main() =
+    run(spec)
+
+}

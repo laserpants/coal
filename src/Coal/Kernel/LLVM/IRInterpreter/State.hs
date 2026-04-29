@@ -11,17 +11,21 @@ module Coal.Kernel.LLVM.IRInterpreter.State (
   resetIRInterpreterState,
   addArtifact,
   setLabel,
+  setCurrentFunction,
+  getCurrentFunction,
 ) where
 
 import Control.Monad.RWS (MonadState, modify)
+import Control.Monad.State (gets)
 import Data.Text (Text)
-import Extras (Over)
+import Extras (Name, Over)
 
 data IRInterpreterState a = IRInterpreterState
   { irInterpreterStateRegisterIndex :: Int
   , irInterpreterStateLabelIndex :: Int
   , irInterpreterStateLabel :: Text
   , irInterpreterStateArtifacts :: [a]
+  , irInterpreterStateCurrentFunction :: Maybe Name
   }
   deriving (Show, Eq, Ord)
 
@@ -33,6 +37,7 @@ initialIRInterpreterState =
     , irInterpreterStateLabelIndex = 1
     , irInterpreterStateLabel = ""
     , irInterpreterStateArtifacts = []
+    , irInterpreterStateCurrentFunction = Nothing
     }
 
 resetIRInterpreterState :: IRInterpreterState a -> IRInterpreterState a
@@ -74,3 +79,11 @@ setLabel label = modify (overIRInterpreterStateLabel (const label))
 {-# INLINE addArtifact #-}
 addArtifact :: (MonadState (IRInterpreterState a) m) => a -> m ()
 addArtifact art = modify (overIRInterpreterStateArtifacts (art :))
+
+{-# INLINE setCurrentFunction #-}
+setCurrentFunction :: (MonadState (IRInterpreterState a) m) => Maybe Name -> m ()
+setCurrentFunction name = modify (\s -> s{irInterpreterStateCurrentFunction = name})
+
+{-# INLINE getCurrentFunction #-}
+getCurrentFunction :: (MonadState (IRInterpreterState a) m) => m (Maybe Name)
+getCurrentFunction = gets irInterpreterStateCurrentFunction

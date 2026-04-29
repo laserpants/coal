@@ -1,5 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- | Closure extension for undersaturated function applications
+
+When a closure is applied with fewer arguments than needed,
+this function creates a NEW closure with:
+- Updated captured argument count (old + new)
+- Updated remaining argument count (old - new)
+- Same target function pointer
+- Combined argument array (old captured + new supplied)
+
+= Memory Allocation
+
+Cannot use 'irMalloc' because array size is dynamic (runtime value).
+Computes: @sizeof(closureStructType 0) + new_captured_count * 8@
+-}
 module Coal.Kernel.LLVM.IREval.Closure.Extend (irExtend) where
 
 import Coal.Common.Label (Label (..))
@@ -11,7 +25,7 @@ import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRInterpreter
 import Coal.Kernel.LLVM.IRInterpreter.Monad
 import Coal.Kernel.LLVM.IRType (IRType (..))
-import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i8Ptr, i8PtrPtr, ptr)
+import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i64, i8Ptr, i8PtrPtr, ptr)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 
 irClosureExtend :: IRValue -> IRValue -> IRValue -> IRInstr ()
@@ -32,11 +46,13 @@ irClosureExtend argF argN argAs = do
   irComment ["New # of remaining arguments"]
   r9 <- sub i32 r7 argN
   --
-  r10 <- sub i32 r8 (I32 1)
-  r11 <- mul i32 r10 (I32 8)
-  r12 <- gepsize t (I32 1)
-  r13 <- ptrtoint r12 i32
-  r14 <- add i32 r13 r11
+  -- Calculate allocation size: sizeof(closure) + r8 * sizeof(i8*)
+  -- Using i64 arithmetic to prevent overflow
+  r10 <- gepsize t (I32 1)
+  r11 <- ptrtoint r10 i64
+  r12 <- zext r8 i64
+  r13 <- mul i64 r12 (I64 8)
+  r14 <- add i64 r11 r13
   r15 <- callg i8Ptr "gc_malloc" [r14]
   r16 <- bitcast r15 (ptr t)
   r17 <- getelementptr t r16 (I32 0) (I32 0)
@@ -58,6 +74,7 @@ irClosureExtend argF argN argAs = do
   labelSndLoopExit <- label "loop_exit"
   br1 labelFstLoop
   --
+  -- First loop: copy old captured args (indices 0..r5-1)
   (_, r) <- block labelFstLoop $ do
     r23 <- load i32 r22
     irComment ["Compare counter < captured # of args"]
@@ -65,6 +82,7 @@ irClosureExtend argF argN argAs = do
     br r24 [labelFstLoopBody, labelSndLoop]
     pure r23
   block1 labelFstLoopBody $ do
+    -- Copy old_closure.args[r] to new_closure.args[r]
     r25 <- getelementptr1 i8Ptr r21 r
     r26 <- load i8Ptr r25
     r27 <- getelementptr1 i8Ptr r20 r
@@ -74,6 +92,7 @@ irClosureExtend argF argN argAs = do
     store r28 r22
     irComment ["Jump back to loop condition"]
     br1 labelFstLoop
+  -- Second loop: copy new supplied args (indices r5..r8-1)
   (_, q) <- block labelSndLoop $ do
     r29 <- load i32 r22
     irComment ["Compare counter < new # of captured arguments"]
@@ -81,6 +100,7 @@ irClosureExtend argF argN argAs = do
     br r30 [labelSndLoopBody, labelSndLoopExit]
     pure r29
   block1 labelSndLoopBody $ do
+    -- Copy supplied_args[q - r5] to new_closure.args[q]
     r31 <- sub i32 q r5
     r32 <- getelementptr1 i8Ptr argAs r31
     r33 <- load i8Ptr r32

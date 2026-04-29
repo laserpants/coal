@@ -1,0 +1,32 @@
+module Main {
+
+  import IO(println_int32)
+
+  // Test 1: Simple partial application (tests closure extension)
+  fun add3(x : int32, y : int32, z : int32) : int32 =
+    x + y + z
+
+  // Test 2: Higher-order function (tests closure finalization)
+  fun apply_twice(f : int32 -> int32, x : int32) : int32 =
+    f(f(x))
+
+  fun inc(x : int32) : int32 = x + 1
+
+  // Test 3: Closure with captured values (tests capture)
+  fun make_adder(n : int32) : int32 -> int32 =
+    fn(x : int32) => x + n
+
+  fun main() : IO<unit> = 
+    let add3_1 = add3(1) in
+    let add3_1_2 = add3_1(2) in
+    let result1 = add3_1_2(3) in  // Should be 6
+
+    let result2 = apply_twice(inc, 5) in  // Should be 7
+
+    let add5 = make_adder(5) in
+    let result3 = add5(10) in  // Should be 15
+
+    // Return sum: 6 + 7 + 15 = 28
+    println_int32(result1 + result2 + result3)
+
+}

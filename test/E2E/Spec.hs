@@ -1659,6 +1659,45 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "318" $ do
+    expectOutput
+      "✓ All 13 tests passed"
+      "test/Coal/examples/318"
+      ["Main.coal", "Containers/Set.coal", "Containers/Map.coal", "Containers/SetSpec.coal", "MicroTest.coal"]
+
+  describe "319" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/319"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "320" $ do
+    expectOutput
+      "28"
+      "test/Coal/examples/320"
+      ["Main.coal"]
+
+  describe "321" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/321"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
+  describe "322" $ do
+    expectOutput
+      "true"
+      "test/Coal/examples/322"
+      [ "Main.coal"
+      , "Containers/Set.coal"
+      , "Containers/Map.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

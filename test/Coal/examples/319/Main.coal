@@ -1,0 +1,15 @@
+  module Main {
+
+    import namespace IO
+    import List(reduce)
+    import Containers.Map(Map, insert, lookup)
+
+    fun main() =
+      let s = reduce(fn(v) => insert(v, "x"), Empty, ['A', 'B', 'C', 'D']) 
+      in
+      IO.println_bool(match(lookup('A', s)) {
+        | None => false
+        | _ => true
+      })
+
+}

@@ -9,6 +9,7 @@ module Coal.Kernel.LLVM.IRInstruction (
   IRConstructor (..),
   ICmpCond (..),
   FCmpCond (..),
+  TailMarker (..),
 ) where
 
 import Coal.Kernel.LLVM.IRType (IRType)
@@ -38,6 +39,15 @@ data FCmpCond
   | OGte
   deriving (Show, Eq, Ord)
 
+{- | Tail call markers for LLVM call instructions
+NoTail: regular call, Tail: tail call hint, MustTail: required tail call
+-}
+data TailMarker
+  = NoTail
+  | Tail
+  | MustTail
+  deriving (Show, Eq, Ord)
+
 -- | LLVM IR language instruction grammar
 data InstrOpF v t next
   = IAdd t v v (v -> next)
@@ -61,13 +71,14 @@ data InstrOpF v t next
   | IBr v [Name] next
   | IBr1 Name next
   | IComment Text next
-  | ICall t v [v] (v -> next)
-  | ICallGlobal t Name [v] (v -> next)
+  | ICall TailMarker t v [v] (v -> next)
+  | ICallGlobal TailMarker t Name [v] (v -> next)
   | IGep t v v v (v -> next)
   | IGep1 t v v (v -> next)
   | IGepsize t v (v -> next)
   | IInttoptr v t (v -> next)
   | IPtrtoint v t (v -> next)
+  | IZext v t (v -> next)
   | IAlloca t v (v -> next)
   | IAlloca1 t (v -> next)
   | IBitcast v t (v -> next)
@@ -80,6 +91,7 @@ data InstrOpF v t next
   | MakeBignum Integer (v -> next)
   | CCall t Name [v] (v -> next)
   | NameLookup Name (v -> next)
+  | CurrentFunction (Maybe Name -> next)
   | ConstructorLookup Name (Maybe Int -> next)
   | Bind [(Name, v)] (IRInstr v) (v -> next)
   | Block Name (IRInstr v) ((Name, v) -> next)

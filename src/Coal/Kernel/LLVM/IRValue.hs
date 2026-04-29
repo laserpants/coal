@@ -74,6 +74,6 @@ irPrimValue =
     PChar c ->
       I32 c
     PString _ ->
-      error "Implementation error"
+      error "irPrimValue called on PString (should use MakeString instruction)"
     PBignum _ ->
-      error "Implementation error"
+      error "irPrimValue called on PBignum (should use MakeBignum instruction)"

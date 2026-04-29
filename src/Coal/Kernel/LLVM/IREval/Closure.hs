@@ -1,15 +1,39 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- | Closure support for partial function application
+
+= Memory Layout
+
+Closures are represented as structs with a flexible array member:
+
+> struct Closure {
+>   i32 captured_count;   // Number of arguments already captured
+>   i32 remaining_count;  // Number of additional arguments needed
+>   i8* target_function;  // Pointer to the actual function
+>   i8*[n] captured_args; // Array of captured argument pointers (flexible)
+> }
+
+= Allocation Strategy
+
+* 'irPackClosure': Allocates with known array size (compile-time)
+  Uses @closureStructType (length vs)@ where the array size is fixed.
+  Can use 'irMalloc' directly.
+
+* Extend/Finalize: Allocate with dynamic array size (runtime)
+  Use @closureStructType 0@ as base type, then calculate:
+  @sizeof(base) + num_args * sizeof(i8*)@
+  Cannot use 'irMalloc' - need manual size calculation.
+-}
 module Coal.Kernel.LLVM.IREval.Closure (
   irApplyClosure,
   irPackClosure,
   closureStructType,
 ) where
 
-import Coal.Kernel.LLVM.IREval
+import Coal.Kernel.LLVM.IREval (IREval (..), IRTailContext (..))
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
-import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
+import Coal.Kernel.LLVM.IREval.Malloc (irMalloc, irMallocN)
 import Coal.Kernel.LLVM.IRInstruction (IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
@@ -29,8 +53,8 @@ storeElement base v i = do
 
 irApplyClosure :: (IRTyped t, IREval e) => t -> IRValue -> NonEmpty e -> IRInstr IRValue
 irApplyClosure t v es = do
-  r1 <- alloca i8Ptr (I32 n)
-  vs <- forM es irEval
+  r1 <- irMallocN i8Ptr (I32 n)
+  vs <- forM es (irEval NotInTail) -- Arguments are not in tail position
   forSM_ 0 (toList vs) (storeElement r1)
   r2 <- callg i8Ptr "apply" [v, I32 n, r1]
   irReveal r2 (irTypeOf t)
@@ -47,7 +71,7 @@ irPackClosure ::
   IRInstr IRValue
 irPackClosure name k vs = do
   let t = closureStructType (length vs)
-  r1 <- irMalloc (closureStructType (length vs))
+  r1 <- irMalloc t
   r2 <- getelementptr t r1 (I32 0) (I32 0)
   store (I32 (fromIntegral (length vs))) r2
   r3 <- getelementptr t r1 (I32 0) (I32 1)
