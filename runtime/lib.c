@@ -1018,3 +1018,10 @@ init(void)
   srand((unsigned)time(NULL));
   gc_init();
 }
+
+void*
+fail(void)
+{
+  printf("TODO");
+  exit(EXIT_FAILURE);
+}

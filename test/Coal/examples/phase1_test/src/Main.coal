@@ -1,0 +1,7 @@
+module Main where
+
+-- Simple function to test closure extension
+let add x y z = x + y + z in
+let add1 = add 1 in  
+let add1_2 = add1 2 in
+add1_2 3

@@ -42,6 +42,7 @@ irClosureFinalize argF argAs = do
   labelSndLoopBody <- label "snd_loop_body"
   labelSndLoopExit <- label "loop_exit"
   br1 labelFstLoop
+  -- First loop: copy captured args (indices 0..r5-1)
   (_, r) <- block labelFstLoop $ do
     r12 <- load i32 r11
     irComment ["Compare counter < captured # of args"]
@@ -49,6 +50,7 @@ irClosureFinalize argF argAs = do
     br r13 [labelFstLoopBody, labelSndLoop]
     pure r12
   block1 labelFstLoopBody $ do
+    -- Copy closure.args[r] to assembled_array[r]
     r14 <- getelementptr1 i8Ptr r10 r
     r15 <- load i8Ptr r14
     r16 <- getelementptr1 i8Ptr r9 r
@@ -58,6 +60,7 @@ irClosureFinalize argF argAs = do
     store r17 r11
     irComment ["Jump back to loop condition"]
     br1 labelFstLoop
+  -- Second loop: copy supplied args (indices r5..r8-1)
   (_, q) <- block labelSndLoop $ do
     r18 <- load i32 r11
     irComment ["Compare counter < total # of args"]
@@ -65,6 +68,7 @@ irClosureFinalize argF argAs = do
     br r19 [labelSndLoopBody, labelSndLoopExit]
     pure r18
   block1 labelSndLoopBody $ do
+    -- Copy supplied_args[q - r5] to assembled_array[q]
     r20 <- sub i32 q r5
     r21 <- getelementptr1 i8Ptr argAs r20
     r22 <- load i8Ptr r21

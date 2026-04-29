@@ -4,7 +4,7 @@ module Coal.Kernel.LLVM.IREval.Closure.Call (irCalls, irCallTable, irCallN) wher
 
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
-import Coal.Kernel.LLVM.IRInstruction (IRInstr)
+import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..), IRInstr)
 import Coal.Kernel.LLVM.IRInstruction.TH
 import Coal.Kernel.LLVM.IRInterpreter (interpretFunction)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRInterpreter, IRLine)
@@ -54,11 +54,22 @@ irCallTable =
 
 irClosureCallN :: IRValue -> IRValue -> IRValue -> IRInstr ()
 irClosureCallN argF argN argAs = do
-  r1 <- getelementptr t (Global (ptr t) "call_table") (I32 0) argN
-  r2 <- load i8Ptr r1
-  r3 <- bitcast r2 (fun i8Ptr [i8Ptr, i8PtrPtr])
-  r4 <- call i8Ptr r3 [argF, argAs]
-  ret r4
+  -- Bounds check: ensure argN <= maxArgs
+  labelBoundsOk <- label "bounds_ok"
+  labelBoundsError <- label "bounds_error"
+  r0 <- icmp SGte i1 argN (I32 (fromIntegral (maxArgs + 1)))
+  br r0 [labelBoundsError, labelBoundsOk]
+  block1 labelBoundsError $ do
+    -- Abort with error message
+    _ <- ccall i8Ptr "fail" []
+    -- Unreachable after abort, but LLVM requires terminator
+    ret Null
+  block1 labelBoundsOk $ do
+    r1 <- getelementptr t (Global (ptr t) "call_table") (I32 0) argN
+    r2 <- load i8Ptr r1
+    r3 <- bitcast r2 (fun i8Ptr [i8Ptr, i8PtrPtr])
+    r4 <- call i8Ptr r3 [argF, argAs]
+    ret r4
  where
   t = TArray (maxArgs + 1) i8Ptr
 
