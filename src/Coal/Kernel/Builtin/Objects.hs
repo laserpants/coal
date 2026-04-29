@@ -5,7 +5,7 @@ module Coal.Kernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
 import Coal.Common.Label (Label (..))
 import qualified Coal.Compiler.Builtin.Traits as Trait
-import Coal.Kernel.Language
+import Coal.Kernel.Language (Module (..), Object (..), char, opaque)
 import qualified Coal.Kernel.Language as Kernel
 import Coal.Kernel.Parser.Expr (expr)
 import Coal.Language

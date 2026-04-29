@@ -118,5 +118,5 @@ applyTypeArgs k ty = go ty . NonEmpty.toList
         TApplication k t t1
       t1 : ts ->
         go (TApplication (tailKind t) t t1) ts
-      _ ->
-        error "Implementation error"
+      [] ->
+        error "applyTypeArgs: empty type argument list"
