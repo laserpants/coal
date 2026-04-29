@@ -59,6 +59,7 @@ support =
   [ CType "closure" (closureStructType 0)
   , CDeclare "init" TVoid []
   , CDeclare "fail" i8Ptr []
+  , CDeclare "debug_call_n_bounds" i8Ptr [i32]
   , CDeclare "gc_init" TVoid []
   , CDeclare "gc_malloc" i8Ptr [i64]
   , CDeclare "hashmap_init" i8Ptr []

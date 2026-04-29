@@ -1661,7 +1661,7 @@ e2eSpec = do
 
   describe "318" $ do
     expectOutput
-      "✓ All 8 tests passed"
+      "✓ All 13 tests passed"
       "test/Coal/examples/318"
       ["Main.coal", "Containers/Set.coal", "Containers/Map.coal", "Containers/SetSpec.coal", "MicroTest.coal"]
 

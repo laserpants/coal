@@ -2,7 +2,7 @@
 
     import namespace IO
     import List(reduce)
-    import Containers.Set(insert, is_member, union, size, empty)
+    import Containers.Set(insert, is_member, union, size, empty, delete)
 
     fun main() =
       let s1 = insert(1, insert(2, empty)) in

@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Coal.Kernel.LLVM.IRError (
   IRGenError (..),
@@ -31,7 +31,7 @@ data IRGenError
 
 -- | Pretty-print an IR generation error
 prettyIRError :: IRGenError -> Text
-prettyIRError = 
+prettyIRError =
   \case
     UnboundVariable name ->
       "Name not in scope: '" <> name <> "'"

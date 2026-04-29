@@ -15,7 +15,7 @@ import Extras (forM)
 import TextShow (showt)
 
 maxArgs :: Int
-maxArgs = 32 -- TODO: 256 ?
+maxArgs = 256
 
 irClosureCall :: Int -> IRValue -> IRValue -> IRInstr ()
 irClosureCall n argF argAs = do
@@ -57,11 +57,11 @@ irClosureCallN argF argN argAs = do
   -- Bounds check: ensure argN <= maxArgs
   labelBoundsOk <- label "bounds_ok"
   labelBoundsError <- label "bounds_error"
-  r0 <- icmp SGte i1 argN (I32 (fromIntegral (maxArgs + 1)))
+  r0 <- icmp SGt i1 argN (I32 (fromIntegral maxArgs))
   br r0 [labelBoundsError, labelBoundsOk]
   block1 labelBoundsError $ do
     -- Abort with error message
-    _ <- ccall i8Ptr "fail" []
+    _ <- ccall i8Ptr "debug_call_n_bounds" [argN]
     -- Unreachable after abort, but LLVM requires terminator
     ret Null
   block1 labelBoundsOk $ do

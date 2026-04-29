@@ -1020,8 +1020,14 @@ init(void)
 }
 
 void*
+debug_call_n_bounds(int32_t argN)
+{
+  fprintf(stderr, "DEBUG: call_n called with argN = %d (max allowed = 256)\n", argN);
+  exit(EXIT_FAILURE);
+}
+
+void*
 fail(void)
 {
-  printf("TODO");
   exit(EXIT_FAILURE);
 }
