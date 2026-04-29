@@ -30,7 +30,7 @@ module Coal.Kernel.LLVM.IREval.Closure (
   closureStructType,
 ) where
 
-import Coal.Kernel.LLVM.IREval
+import Coal.Kernel.LLVM.IREval (IREval (..), IRTailContext (..))
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
 import Coal.Kernel.LLVM.IREval.Malloc (irMalloc, irMallocN)
@@ -54,7 +54,7 @@ storeElement base v i = do
 irApplyClosure :: (IRTyped t, IREval e) => t -> IRValue -> NonEmpty e -> IRInstr IRValue
 irApplyClosure t v es = do
   r1 <- irMallocN i8Ptr (I32 n)
-  vs <- forM es irEval
+  vs <- forM es (irEval NotInTail) -- Arguments are not in tail position
   forSM_ 0 (toList vs) (storeElement r1)
   r2 <- callg i8Ptr "apply" [v, I32 n, r1]
   irReveal r2 (irTypeOf t)

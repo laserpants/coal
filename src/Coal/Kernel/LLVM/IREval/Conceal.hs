@@ -24,7 +24,7 @@ provides conversion between native LLVM types and the uniform representation.
 -}
 module Coal.Kernel.LLVM.IREval.Conceal (irConceal, irConcealArgs, irReveal) where
 
-import Coal.Kernel.LLVM.IREval (IREval (..))
+import Coal.Kernel.LLVM.IREval (IREval (..), IRTailContext (..))
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
 import Coal.Kernel.LLVM.IRInstruction (IRInstr)
@@ -89,7 +89,7 @@ irConcealArgs :: (IREval e) => NonEmpty e -> IRInstr [IRValue]
 irConcealArgs args = do
   vs <- forM args $
     \e -> do
-      v1 <- irEval e
+      v1 <- irEval NotInTail e -- Arguments are not in tail position
       v2 <- irConceal v1
       unless (v1 == v2) (irComment ["^ Conceal arg."])
       pure v2

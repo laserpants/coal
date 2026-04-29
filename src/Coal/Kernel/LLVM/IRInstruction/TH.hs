@@ -23,6 +23,10 @@ module Coal.Kernel.LLVM.IRInstruction.TH (
   br1,
   call,
   callg,
+  tailCall,
+  tailCallg,
+  musttailCall,
+  musttailCallg,
   getelementptr,
   getelementptr1,
   gepsize,
@@ -39,6 +43,7 @@ module Coal.Kernel.LLVM.IRInstruction.TH (
   label,
   makeIndex,
   nameLookup,
+  currentFunction,
   block,
   block1,
   makeConstructor,
@@ -51,7 +56,7 @@ module Coal.Kernel.LLVM.IRInstruction.TH (
 ) where
 
 import Coal.Common.Name (Name)
-import Coal.Kernel.LLVM.IRInstruction (FCmpCond, ICmpCond, IRInstrOp, InstrOpF (..))
+import Coal.Kernel.LLVM.IRInstruction (FCmpCond, ICmpCond, IRInstrOp, InstrOpF (..), TailMarker (..))
 import Coal.Kernel.LLVM.IRType (IRType)
 import Coal.Kernel.LLVM.IRValue (IRValue)
 import Control.Monad.Free (MonadFree, liftF)
@@ -139,11 +144,27 @@ br1 = iBr1
 
 {-# INLINE call #-}
 call :: (MonadFree (IRInstrOp) m) => IRType -> IRValue -> [IRValue] -> m IRValue
-call = iCall
+call = iCall NoTail
 
 {-# INLINE callg #-}
 callg :: (MonadFree (IRInstrOp) m) => IRType -> Name -> [IRValue] -> m IRValue
-callg = iCallGlobal
+callg = iCallGlobal NoTail
+
+{-# INLINE tailCall #-}
+tailCall :: (MonadFree (IRInstrOp) m) => IRType -> IRValue -> [IRValue] -> m IRValue
+tailCall = iCall Tail
+
+{-# INLINE tailCallg #-}
+tailCallg :: (MonadFree (IRInstrOp) m) => IRType -> Name -> [IRValue] -> m IRValue
+tailCallg = iCallGlobal Tail
+
+{-# INLINE musttailCall #-}
+musttailCall :: (MonadFree (IRInstrOp) m) => IRType -> IRValue -> [IRValue] -> m IRValue
+musttailCall = iCall MustTail
+
+{-# INLINE musttailCallg #-}
+musttailCallg :: (MonadFree (IRInstrOp) m) => IRType -> Name -> [IRValue] -> m IRValue
+musttailCallg = iCallGlobal MustTail
 
 {-# INLINE ccall #-}
 ccall :: (MonadFree (IRInstrOp) m) => IRType -> Name -> [IRValue] -> m IRValue
