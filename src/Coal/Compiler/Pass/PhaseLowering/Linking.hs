@@ -69,10 +69,9 @@ runLLC :: FilePath -> Name -> ByteString -> IO (Either SomeException FilePath)
 runLLC dir name bcode = do
   ByteString.writeFile file bcode
 
-  let cmd = "llc"
-      args = ["-filetype=obj", "-relocation-model=pic", file, "-o", target]
-      cmdStr = unwords (cmd : args)
-
+  -- let cmd = "llc"
+  --     args = ["-filetype=obj", "-relocation-model=pic", file, "-o", target]
+  --     cmdStr = unwords (cmd : args)
   --  putStrLn $ "Running: " ++ cmdStr
 
   try $ do

@@ -1020,10 +1020,10 @@ init(void)
 }
 
 void*
-debug_call_n_bounds(int32_t argN)
+debug_call_n_bounds(int32_t argn)
 {
-  fprintf(stderr, "DEBUG: call_n called with argN = %d (max allowed = 256)\n", argN);
-  exit(EXIT_FAILURE);
+  fprintf(stderr, "DEBUG: call_n called with argN = %d (max allowed = 256)\n", argn);
+  fail();
 }
 
 void*
