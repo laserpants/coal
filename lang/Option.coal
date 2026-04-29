@@ -1,5 +1,14 @@
 module Option {
 
+  instance Comparable<Option<a>> {
+    fun `==`(lhs, rhs) =
+      match((lhs, rhs)) {
+        | (Some(x), Some(y)) => x == y
+        | (None, None) => true
+        | (_, _) => false
+      }
+  }
+
   /**
    * Extract a value of type `a` from an `Option<a>` by providing a default 
    * value for the case when the input is `None`.
