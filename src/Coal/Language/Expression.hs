@@ -13,7 +13,7 @@ Module: Coal.Language.Expression
 Expression representation for the Coal language AST.
 
 Includes lambdas, applications, let bindings, pattern matching, literals,
-operators, and fold/unfold expressions for data and codata.
+operators, records, and fold expressions.
 -}
 module Coal.Language.Expression (
   Expression (..),
