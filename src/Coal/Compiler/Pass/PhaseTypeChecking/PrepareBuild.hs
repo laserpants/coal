@@ -709,11 +709,46 @@ collectInstances =
         Nothing -> do
           currentPath <- lift $ lift $ gets compilerCurrentPath
           lift $ lift $ tellErrors [TraitNotInScope instanceDefinitionTraitName (ErrorLocation (principalPath currentPath) instanceDefinitionMetadata)]
-    -- Import and namespace import definitions don't define instances themselves
-    DImport{} ->
+    -- Import all instances from imported modules
+    DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
-    DNamespaceImport{} ->
-      pure ()
+    DImport _ path _imports -> do
+      Build{..} <- lift $ lift $ importedBuild path
+      -- Import all instances from the imported module
+      -- Instances are always imported (like in Haskell) regardless of what names are explicitly imported
+      forM_ (Environment.toList buildInstances) $
+        \(traitName, instanceMap) ->
+          forM_ (Map.toList instanceMap) $
+            \(t, InstanceEntry{..}) -> do
+              insertInstance traitName t InstanceEntry{..}
+              -- Import all instance member implementations
+              forM_ (Map.keys instanceEntryTypeSchemes) $ \member -> do
+                let instanceName = instanceLabel (Trait traitName instanceEntryType) member
+                forM_ (Environment.lookupWithDefault mempty instanceName buildNames) $
+                  \case
+                    info@(NName n s) -> do
+                      insertNameEntry info
+                      lift $ lift $ insertNameC n s
+                    _ ->
+                      pure ()
+    DNamespaceImport _ path -> do
+      Build{..} <- lift $ lift $ importedBuild path
+      -- Import all instances from the imported module
+      forM_ (Environment.toList buildInstances) $
+        \(traitName, instanceMap) ->
+          forM_ (Map.toList instanceMap) $
+            \(t, InstanceEntry{..}) -> do
+              insertInstance traitName t InstanceEntry{..}
+              -- Import all instance member implementations
+              forM_ (Map.keys instanceEntryTypeSchemes) $ \member -> do
+                let instanceName = instanceLabel (Trait traitName instanceEntryType) member
+                forM_ (Environment.lookupWithDefault mempty instanceName buildNames) $
+                  \case
+                    info@(NName n s) -> do
+                      insertNameEntry info
+                      lift $ lift $ insertNameC n s
+                    _ ->
+                      pure ()
     _ ->
       pure ()
 
