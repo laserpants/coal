@@ -87,8 +87,8 @@ library
       Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns
       Coal.Compiler.Pass.PhaseTranslation.ExpandOrPatterns
       Coal.Compiler.Pass.PhaseTranslation.ExpandRecordPatterns
+      Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries
       Coal.Compiler.Pass.PhaseTranslation.NormalizeAST
-      Coal.Compiler.Pass.PhaseTranslation.Placeholders
       Coal.Compiler.Pass.PhaseTypeChecking
       Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases
       Coal.Compiler.Pass.PhaseTypeChecking.ExpandExpressionFolds

@@ -9,7 +9,7 @@
 {-# LANGUAGE StrictData #-}
 
 {- |
-Module: Coal.Compiler.Pass.PhaseTranslation.Placeholders
+Module: Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries
 Description: Trait dictionary insertion and constraint elaboration
 
 This module implements dictionary-passing style for type classes (traits) in Coal.
@@ -46,7 +46,7 @@ show(42)  // becomes: show(Show\<int32\>, 42)
 
 The pass runs twice to handle all trait dependencies correctly.
 -}
-module Coal.Compiler.Pass.PhaseTranslation.Placeholders (
+module Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries (
   TraitContext (..),
   passPlaceholders,
 ) where
