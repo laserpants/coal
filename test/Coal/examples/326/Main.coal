@@ -1,0 +1,35 @@
+module Main {
+
+  import namespace IO
+  import namespace Number
+
+  type Complex = Complex(double, double)
+
+  instance Numeric<Complex> {
+    fun from_int32(n : int32) = 
+      Complex(Number.int32_to_double(n), 0)
+    fun from_int64(n : int64) = 
+      Complex(Number.int64_to_double(n), 0)
+    fun from_bignum(n : bignum) = 
+      Complex(Number.bignum_to_double(n), 0)
+    fun negate(Complex(r, i)) =
+      Complex(-r, -i)
+    fun `+`(Complex(r, i), Complex(q, j)) =
+      Complex(r + q, i + j)
+    fun `-`(Complex(r, i), Complex(q, j)) =
+      Complex(r - q, i - j)
+    fun `*`(Complex(r, i), Complex(q, j)) =
+      Complex(r * q - i * j, r * j + i * q)
+  }
+
+  let q1 = Complex(1, 2)
+  let q2 = Complex(4, 8)
+
+  fun main() =
+    let
+      Complex(r, i) =
+        q1 + q2
+    in
+    IO.println_double(r)
+
+}

@@ -1,0 +1,24 @@
+module Main {
+
+  import namespace IO
+  import Stream(Stream, nats, tail, head)
+
+  let
+    n =
+      nats
+        |. tail
+        |. tail
+        |. tail
+        |. tail
+        |. tail
+        |. tail
+        |. tail
+        |. tail
+        |. tail
+        |. tail
+        |. head
+
+  fun main() =
+    IO.println_int32(n)
+
+}

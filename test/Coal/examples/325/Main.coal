@@ -1,0 +1,23 @@
+module Main {
+
+  import namespace IO
+  import Stream(Stream, nats, tail, head)
+  import Process(process)
+
+  fun random_stream(seed : int32) : Stream<int32> =
+    process(seed, fn(_, state) =>
+      let a = 1664525;
+          c = 1013904223;
+          m = 2147483647  // 2^31 - 1
+      in
+        (a * state + c) % m
+    )
+
+  let rng = random_stream(42)
+
+  let n = rng |.tail |.tail |.tail |.head   
+
+  fun main() =
+    IO.println_int32(n)
+
+}

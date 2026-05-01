@@ -82,6 +82,18 @@ module Number {
         if (yes) then None else Some(res)))
 
   /**
+   * Convert a bignum to a float.
+   */
+  fun bignum_to_float(n : bignum) : float =
+    #{bignum_to_float : bignum -> float}(n)(fn(f) => f)
+
+  /**
+   * Convert a bignum to a double.
+   */
+  fun bignum_to_double(n : bignum) : double =
+    #{bignum_to_double : bignum -> double}(n)(fn(d) => d)
+
+  /**
    * Return the greater of two comparable values.
    */
   fun max(a, b) = if (a > b) then a else b
