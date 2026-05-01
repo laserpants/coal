@@ -21,7 +21,7 @@
 
 ## Key Patterns & Conventions
 
-- **Recursion**: Only structural recursion is allowed for data; codata uses corecursion (see `fold`/`unfold` in README and `src/Coal/Language/Expression.hs`).
+- **Recursion**: Only structural recursion is allowed for data via `fold` expressions with `@`-patterns (see `docs/language-manual.md` and `src/Coal/Language/Expression.hs`). Codata (infinite/lazy structures) use the `Process` type with observation operations (`head`, `tail`, `process` constructor).
 - **Type System**: Parametric polymorphism and type inference are central; see `src/Coal/TypeSystem/` and `src/Coal/Language/Type.hs`.
 - **Pattern Matching**: Extensively used for both data and codata; see `src/Coal/Language/Pattern.hs`.
 - **Compiler Passes**: Organized in phases within `src/Coal/Compiler/Pass/` (ParsingPhase, PreflightPhase, MainPhase, LoweringPhase).
