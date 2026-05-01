@@ -21,7 +21,7 @@ import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IREval.Closure (closureStructType)
 import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..), IRInstr)
-import Coal.Kernel.LLVM.IRInstruction.TH
+import Coal.Kernel.LLVM.IRInstruction.Builders
 import Coal.Kernel.LLVM.IRInterpreter
 import Coal.Kernel.LLVM.IRInterpreter.Monad
 import Coal.Kernel.LLVM.IRType (IRType (..))

@@ -17,7 +17,7 @@ import Coal.Kernel.LLVM.IREval.Expr.Op (irEvalOp)
 import Coal.Kernel.LLVM.IREval.Expr.Var (irEvalVar)
 import Coal.Kernel.LLVM.IREval.Malloc (irMalloc)
 import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..), IRConstructor (..), IRInstr, TailMarker (..))
-import Coal.Kernel.LLVM.IRInstruction.TH
+import Coal.Kernel.LLVM.IRInstruction.Builders
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i1, i32, i8Ptr, stringLiteral, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..), irPrimValue)

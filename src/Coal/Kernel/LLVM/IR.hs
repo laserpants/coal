@@ -6,13 +6,13 @@ module Coal.Kernel.LLVM.IR (
   module Coal.Kernel.LLVM.IRConstruct,
   module Coal.Kernel.LLVM.IREval.Expr,
   module Coal.Kernel.LLVM.IRInterpreter,
-  module Coal.Kernel.LLVM.IRInstruction.TH,
+  module Coal.Kernel.LLVM.IRInstruction.Builders,
 ) where
 
 import Coal.Kernel.LLVM.IRConstruct
 import Coal.Kernel.LLVM.IREval.Expr
 import Coal.Kernel.LLVM.IRInstruction
-import Coal.Kernel.LLVM.IRInstruction.TH
+import Coal.Kernel.LLVM.IRInstruction.Builders
 import Coal.Kernel.LLVM.IRInterpreter
 import Coal.Kernel.LLVM.IRType
 import Coal.Kernel.LLVM.IRType.Syntax

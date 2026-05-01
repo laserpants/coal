@@ -3,7 +3,9 @@
 
 module Coal.Kernel.LLVM.IRInstruction (
   InstrOpF (..),
+  MetaOpF (..),
   IRInstrOp,
+  IRMetaOp,
   IRInstr,
   IRClosure (..),
   IRConstructor (..),
@@ -48,7 +50,25 @@ data TailMarker
   | MustTail
   deriving (Show, Eq, Ord)
 
--- | LLVM IR language instruction grammar
+-- | Code generation meta-operations (non-IR helpers)
+data MetaOpF v t next
+  = MakeLabel Name (Name -> next)
+  | MakeIndex (Name -> next)
+  | MakeConstructor t Name (IRConstructor t -> next)
+  | MakeKey Name (v -> next)
+  | MakeString ByteString (v -> next)
+  | MakeBignum Integer (v -> next)
+  | CCall t Name [v] (v -> next)
+  | NameLookup Name (v -> next)
+  | CurrentFunction (Maybe Name -> next)
+  | ConstructorLookup Name (Maybe Int -> next)
+  | Bind [(Name, v)] (IRInstr v) (v -> next)
+  | Block Name (IRInstr v) ((Name, v) -> next)
+  | Block1 Name (IRInstr ()) next
+  | Memoize (v -> next)
+  deriving (Functor)
+
+-- | LLVM IR instruction set
 data InstrOpF v t next
   = IAdd t v v (v -> next)
   | ISub t v v (v -> next)
@@ -83,20 +103,7 @@ data InstrOpF v t next
   | IAlloca1 t (v -> next)
   | IBitcast v t (v -> next)
   | IPhi t [(Name, v)] (v -> next)
-  | MakeLabel Name (Name -> next)
-  | MakeIndex (Name -> next)
-  | MakeConstructor t Name (IRConstructor t -> next)
-  | MakeKey Name (v -> next)
-  | MakeString ByteString (v -> next)
-  | MakeBignum Integer (v -> next)
-  | CCall t Name [v] (v -> next)
-  | NameLookup Name (v -> next)
-  | CurrentFunction (Maybe Name -> next)
-  | ConstructorLookup Name (Maybe Int -> next)
-  | Bind [(Name, v)] (IRInstr v) (v -> next)
-  | Block Name (IRInstr v) ((Name, v) -> next)
-  | Block1 Name (IRInstr ()) next
-  | Memoize (v -> next)
+  | IMeta (MetaOpF v t next)
   deriving (Functor)
 
 data IRClosure v = IRClosure Name v v v
@@ -106,5 +113,7 @@ data IRConstructor t = IRConstructor Int t
   deriving (Show, Eq, Ord)
 
 type IRInstrOp = InstrOpF IRValue IRType
+
+type IRMetaOp = MetaOpF IRValue IRType
 
 type IRInstr = Free IRInstrOp

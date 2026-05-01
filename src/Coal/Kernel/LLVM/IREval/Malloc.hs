@@ -4,7 +4,7 @@ module Coal.Kernel.LLVM.IREval.Malloc (irMalloc, irMallocN) where
 
 import Coal.Kernel.LLVM.IREval.Comment (irCommentBlock)
 import Coal.Kernel.LLVM.IRInstruction (IRInstr)
-import Coal.Kernel.LLVM.IRInstruction.TH (bitcast, callg, gepsize, ptrtoint)
+import Coal.Kernel.LLVM.IRInstruction.Builders (bitcast, callg, gepsize, ptrtoint)
 import Coal.Kernel.LLVM.IRType (IRType (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i64, i8Ptr, ptr)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))

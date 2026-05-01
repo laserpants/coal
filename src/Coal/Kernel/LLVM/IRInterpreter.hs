@@ -26,7 +26,7 @@ import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
 import Coal.Kernel.LLVM.IREval.Expr (IREval (..))
 import Coal.Kernel.LLVM.IRInstruction
-import Coal.Kernel.LLVM.IRInstruction.TH (bind, ret)
+import Coal.Kernel.LLVM.IRInstruction.Builders (bind, ret)
 import Coal.Kernel.LLVM.IRInterpreter.Artifact (IRInterpreterArtifact (..))
 import Coal.Kernel.LLVM.IRInterpreter.Environment (IRInterpreterEnv (..), insertBoundVars)
 import Coal.Kernel.LLVM.IRInterpreter.Instruction (instruction, instruction1)
@@ -238,67 +238,72 @@ interpreter =
       instruction1 next ["store", commaSep [irEncode (annotated v1), irEncode (annotated v2)]]
     ISwitch v n cs next ->
       instruction1 next ["switch", commaSep [annotated v, encodeLabel n], "[" <> switchBranches cs <> "]"]
-    MakeLabel name next -> do
-      d <- nextLabelIndex
-      next (name <.> showt d)
-    MakeIndex next -> do
-      d <- nextLabelIndex
-      next (showt d)
-    MakeConstructor t name next -> do
-      addArtifact (ADataConstructor name t)
-      ix <- constructorIndex name
-      case ix of
-        Nothing ->
-          throwIRError (UnboundConstructor name)
-        Just n ->
-          next (IRConstructor n t1)
-     where
-      t1 = TNamed name t
-    MakeKey name next -> do
-      let label = "label." <> name
-      addArtifact (AHashMapKey name)
-      next (Global (ptr (stringLiteral (Text.length name + 1))) label)
-    MakeString str next -> do
-      d <- nextLabelIndex
-      let name = "str." <> showt d
-      addArtifact (AStringLiteral name str)
-      next (Global (ptr (TArray (ByteString.length str + 1) i8)) name)
-    MakeBignum n next -> do
-      d <- nextLabelIndex
-      let name = "bignum." <> showt d
-      addArtifact (ABignum name n)
-      next (Global (ptr (TArray (Text.length (showt n) + 1) i8)) name)
-    CCall t name vs next -> do
-      addArtifact (ACFunctionCall name t [irTypeOf v | v <- vs])
-      instruction t next ["call", irEncode t, irGlobalName name <> "(" <> commaSep (annotated <$> vs) <> ")"]
-    NameLookup var next -> do
-      env <- asks irInterpreterValueEnv
-      case Environment.lookup var env of
-        Nothing ->
-          throwIRError (UnboundVariable var)
-        Just val ->
-          next val
-    CurrentFunction next -> do
-      currentFn <- gets irInterpreterStateCurrentFunction
-      next currentFn
-    ConstructorLookup name next -> do
-      ix <- constructorIndex name
-      next ix
-    Bind bound instr next -> do
-      v <- local (insertBoundVars bound) (interpret instr)
-      next v
-    Block name instr next -> do
-      r <- makeBlock name instr
-      l <- gets irInterpreterStateLabel
-      next (l, r)
-    Block1 name instr next -> do
-      void (makeBlock name instr)
-      next
-    Memoize next -> do
-      d <- nextLabelIndex
-      let name = "ptr." <> showt d
-      addArtifact (AMemoizedConstant name)
-      next (Global i8Ptr name)
+    IMeta metaOp ->
+      interpretMeta metaOp
+
+interpretMeta :: MetaOpF IRValue IRType (IRInterpreter a) -> IRInterpreter a
+interpretMeta = \case
+  MakeLabel name next -> do
+    d <- nextLabelIndex
+    next (name <.> showt d)
+  MakeIndex next -> do
+    d <- nextLabelIndex
+    next (showt d)
+  MakeConstructor t name next -> do
+    addArtifact (ADataConstructor name t)
+    ix <- constructorIndex name
+    case ix of
+      Nothing ->
+        throwIRError (UnboundConstructor name)
+      Just n ->
+        next (IRConstructor n t1)
+   where
+    t1 = TNamed name t
+  MakeKey name next -> do
+    let label = "label." <> name
+    addArtifact (AHashMapKey name)
+    next (Global (ptr (stringLiteral (Text.length name + 1))) label)
+  MakeString str next -> do
+    d <- nextLabelIndex
+    let name = "str." <> showt d
+    addArtifact (AStringLiteral name str)
+    next (Global (ptr (TArray (ByteString.length str + 1) i8)) name)
+  MakeBignum n next -> do
+    d <- nextLabelIndex
+    let name = "bignum." <> showt d
+    addArtifact (ABignum name n)
+    next (Global (ptr (TArray (Text.length (showt n) + 1) i8)) name)
+  CCall t name vs next -> do
+    addArtifact (ACFunctionCall name t [irTypeOf v | v <- vs])
+    instruction t next ["call", irEncode t, irGlobalName name <> "(" <> commaSep (annotated <$> vs) <> ")"]
+  NameLookup var next -> do
+    env <- asks irInterpreterValueEnv
+    case Environment.lookup var env of
+      Nothing ->
+        throwIRError (UnboundVariable var)
+      Just val ->
+        next val
+  CurrentFunction next -> do
+    currentFn <- gets irInterpreterStateCurrentFunction
+    next currentFn
+  ConstructorLookup name next -> do
+    ix <- constructorIndex name
+    next ix
+  Bind bound instr next -> do
+    v <- local (insertBoundVars bound) (interpret instr)
+    next v
+  Block name instr next -> do
+    r <- makeBlock name instr
+    l <- gets irInterpreterStateLabel
+    next (l, r)
+  Block1 name instr next -> do
+    void (makeBlock name instr)
+    next
+  Memoize next -> do
+    d <- nextLabelIndex
+    let name = "ptr." <> showt d
+    addArtifact (AMemoizedConstant name)
+    next (Global i8Ptr name)
 
 constructorIndex :: Name -> IRInterpreter (Maybe Int)
 constructorIndex name = do

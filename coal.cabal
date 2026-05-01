@@ -160,7 +160,7 @@ library
       Coal.Kernel.LLVM.IREval.Expr.Var
       Coal.Kernel.LLVM.IREval.Malloc
       Coal.Kernel.LLVM.IRInstruction
-      Coal.Kernel.LLVM.IRInstruction.TH
+      Coal.Kernel.LLVM.IRInstruction.Builders
       Coal.Kernel.LLVM.IRInterpreter
       Coal.Kernel.LLVM.IRInterpreter.Artifact
       Coal.Kernel.LLVM.IRInterpreter.Environment

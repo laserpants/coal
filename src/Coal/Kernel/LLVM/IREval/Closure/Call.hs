@@ -5,7 +5,7 @@ module Coal.Kernel.LLVM.IREval.Closure.Call (irCalls, irCallTable, irCallN) wher
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
 import Coal.Kernel.LLVM.IRInstruction (ICmpCond (..), IRInstr)
-import Coal.Kernel.LLVM.IRInstruction.TH
+import Coal.Kernel.LLVM.IRInstruction.Builders
 import Coal.Kernel.LLVM.IRInterpreter (interpretFunction)
 import Coal.Kernel.LLVM.IRInterpreter.Monad (IRInterpreter, IRLine)
 import Coal.Kernel.LLVM.IRType (IRType (..))

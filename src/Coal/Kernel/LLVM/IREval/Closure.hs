@@ -35,7 +35,7 @@ import Coal.Kernel.LLVM.IREval.Comment (irComment)
 import Coal.Kernel.LLVM.IREval.Conceal (irConceal, irReveal)
 import Coal.Kernel.LLVM.IREval.Malloc (irMalloc, irMallocN)
 import Coal.Kernel.LLVM.IRInstruction (IRInstr)
-import Coal.Kernel.LLVM.IRInstruction.TH
+import Coal.Kernel.LLVM.IRInstruction.Builders
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
 import Coal.Kernel.LLVM.IRType.Syntax (i32, i8Ptr, struct)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
