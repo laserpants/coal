@@ -35,8 +35,8 @@ defaultConfig :: CompilerConfig
 defaultConfig =
   CompilerConfig
     { configExecutableName = "dist"
-    , configGenerateDebugArtifacts = True
-    , configGenerateLLVMOutput = True
+    , configGenerateDebugArtifacts = False
+    , configGenerateLLVMOutput = False
     , configSourcePaths = ["src"]
     , configCFiles = []
     , configSilent = False
