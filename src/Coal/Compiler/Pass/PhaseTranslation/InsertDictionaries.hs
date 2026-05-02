@@ -48,7 +48,7 @@ The pass runs twice to handle all trait dependencies correctly.
 -}
 module Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries (
   TraitContext (..),
-  passPlaceholders,
+  passInsertDictionaries,
 ) where
 
 import Coal.Common.Environment (Environment)
@@ -81,8 +81,8 @@ import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import Extras (Dictionary, Name, forM_, traverse_, twice)
 
-passPlaceholders :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
-passPlaceholders = Pass{runPass = pass}
+passInsertDictionaries :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
+passInsertDictionaries = Pass{runPass = pass}
 
 pass :: (MonadIO m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 pass Module{..} = do

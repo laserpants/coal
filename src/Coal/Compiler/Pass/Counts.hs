@@ -41,7 +41,7 @@ ticksTypeChecking = 18
 Includes: passNormalizeAST, passDesugarPatterns, passExpandGuards,
 passExpandOrPatterns, passCheckPatternAnomalies, passExpandRecordPatterns,
 passExpandAsPatterns, passExpandIntegerLiteralPatterns, passCompileMatchExpressions,
-passPlaceholders, passCompileNats, passDetectCallCycles, passDenormalizeAST
+passInsertDictionaries, passCompileNats, passDetectCallCycles, passDenormalizeAST
 Plus generateDebugArtifacts after each pass (13 + 13 = 26)
 -}
 ticksTranslation :: Int

@@ -16,7 +16,7 @@ import Coal.Compiler.Pass.PhaseTranslation.ExpandGuards (passExpandGuards)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandOrPatterns (passExpandOrPatterns)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandRecordPatterns (passExpandRecordPatterns)
-import Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries (passPlaceholders)
+import Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries (passInsertDictionaries)
 import Coal.Compiler.Pass.PhaseTranslation.NormalizeAST (passNormalizeAST)
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module)
@@ -42,8 +42,8 @@ phaseTranslation =
     >-> generateDebugArtifacts "ExpandIntegerLiteralPatterns"
     >-> passCompileMatchExpressions
     >-> generateDebugArtifacts "CompileMatchExpressions"
-    >-> passPlaceholders
-    >-> generateDebugArtifacts "Placeholders"
+    >-> passInsertDictionaries
+    >-> generateDebugArtifacts "InsertDictionaries"
     >-> passCompileNats
     >-> generateDebugArtifacts "CompileNats"
     >-> passDetectCallCycles
