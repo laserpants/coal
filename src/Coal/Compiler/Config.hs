@@ -49,7 +49,12 @@ silentConfig = defaultConfig{configSilent = True}
 
 {-# INLINE debugConfig #-}
 debugConfig :: CompilerConfig
-debugConfig = defaultConfig{configNoCache = True}
+debugConfig =
+  defaultConfig
+    { configNoCache = True
+    , configGenerateDebugArtifacts = True
+    , configGenerateLLVMOutput = True
+    }
 
 {-# INLINE setConfigExecutableName #-}
 setConfigExecutableName :: FilePath -> CompilerConfig -> CompilerConfig
