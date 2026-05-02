@@ -11,8 +11,8 @@ Call cycle detection for function definitions.
 
 This pass analyzes the module's definition dependency graph to detect cyclic
 function calls. It runs after trait dictionaries have been inserted by
-passInsertDictionaries and fold expressions have been expanded, providing a final
-check for call cycles before AST denormalization.
+passInsertDictionaries and fold expressions have been expanded, providing a
+final check for call cycles before AST denormalization.
 
 The analysis uses free variable analysis to extract dependencies between
 definitions and applies topological sorting via strongly connected components
