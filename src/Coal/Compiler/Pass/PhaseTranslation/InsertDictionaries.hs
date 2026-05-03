@@ -41,7 +41,7 @@ fun show(implementation_Show : Show\<a\>, x : a) = ...
 
 Call sites automatically insert the appropriate implementation:
 @
-show(42)  // becomes: show(Show\<int32\>, 42)
+show(42 : int32)  // becomes: show(Show\<int32\>, 42 : int32)
 @
 
 The pass runs twice to handle all trait dependencies correctly.
