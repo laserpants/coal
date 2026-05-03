@@ -142,7 +142,7 @@ insertTraitDictionariesInDef =
 
 -- | Insert a name and its scheme into the compiler's name store from a let definition
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
-insertName (DLet _ _ (LetDefinition _ _ (With ts t) _)) name = do
+insertName (DLet _ _ LetDefinition{letDefinitionType = With ts t}) name = do
   let s = Forall (typeIndexesIn t) (Set.fromList ts) t
   insertNameC name s
 insertName _ _ = pure () -- Other definitions do not need name insertion
@@ -353,11 +353,11 @@ instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (Definitio
 expandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Data k, Show a, Show k) => Name -> LetDefinition a k IndexedType -> CompilerT a m (LetDefinition a k IndexedType)
 expandLetDefinitionTraits name =
   \case
-    LetDefinition loc with (With _ t) e -> do
-      (expr, traits) <- listenDictionaryTraits (expandTraits e)
+    LetDefinition{letDefinitionType = With _ t, ..} -> do
+      (expr, traits) <- listenDictionaryTraits (expandTraits letDefinitionExpression)
       case Set.toList traits of
         [] ->
-          pure $ LetDefinition loc with (With [] t) expr
+          pure $ LetDefinition{letDefinitionType = With [] t, letDefinitionExpression = expr, ..}
         tr : trs -> do
           path <- gets compilerCurrentPath
           -- Insert default int32 instance for Numeric and Ordered traits for main function
@@ -365,7 +365,7 @@ expandLetDefinitionTraits name =
             then do
               recs <- forM (tr :| trs) $
                 \(Trait trait _) -> do
-                  fields <- fromJust <$> lookupTraitInstance loc (Trait trait (TIntrinsic IInt32))
+                  fields <- fromJust <$> lookupTraitInstance letDefinitionMetadata (Trait trait (TIntrinsic IInt32))
                   pure $
                     ERecord
                       mempty
@@ -374,19 +374,23 @@ expandLetDefinitionTraits name =
                       Nothing
               pure $
                 LetDefinition
-                  loc
-                  with
-                  (With (tr : trs) t)
-                  ( EApplication
-                      mempty
-                      t
-                      (dictionaryLambda tr trs expr)
-                      recs
-                  )
+                  { letDefinitionType = With (tr : trs) t
+                  , letDefinitionExpression =
+                      EApplication
+                        mempty
+                        t
+                        (dictionaryLambda tr trs expr)
+                        recs
+                  , ..
+                  }
             else -- Check if a trait constraint is on a type variable (not yet resolved)
 
               pure $
-                LetDefinition loc with (With (tr : trs) t) (dictionaryLambda tr trs expr)
+                LetDefinition
+                  { letDefinitionType = With (tr : trs) t
+                  , letDefinitionExpression = dictionaryLambda tr trs expr
+                  , ..
+                  }
 
 -- | Check if a trait constraint is on a type variable (not yet resolved)
 isVariable :: Trait IndexedType -> Bool
@@ -410,13 +414,13 @@ passiveExpandLetDefinitionTraits :: (Monad m, Monoid a, Data a, Show a) => LetDe
 passiveExpandLetDefinitionTraits =
   -- Collect trait information from an expression without transformation (passive pass)
   \case
-    LetDefinition loc with (With _ t) e -> do
-      (_, traits) <- listenDictionaryTraits (passiveExpandTraitsInExpr e)
+    LetDefinition{letDefinitionType = With _ t, ..} -> do
+      (_, traits) <- listenDictionaryTraits (passiveExpandTraitsInExpr letDefinitionExpression)
       case Set.toList traits of
         [] ->
-          pure $ LetDefinition loc with (With [] t) e
+          pure $ LetDefinition{letDefinitionType = With [] t, ..}
         tr : trs -> do
-          pure $ LetDefinition loc with (With (tr : trs) t) e
+          pure $ LetDefinition{letDefinitionType = With (tr : trs) t, ..}
 
 -- | Collect trait information from an expression without transformation (passive pass)
 passiveExpandTraitsInExpr :: (Monad m, Monoid a, Data a, Data k, Show a, Show k) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType)

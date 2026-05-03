@@ -27,26 +27,36 @@ translateDefinition =
   \case
     DType _ _ TypeDefinition{..} ->
       traverse translateConstructor (zip [0 ..] (sortOn constructorName typeDefinitionConstructors))
-    DFunction _ name (FunctionDefinition _ _ _ ps e) -> do
-      qs <- traverse translatePattern (toList ps)
-      f <- withLocalNames (labelName <$> qs) (translateExpression e)
+    DFunction _ name FunctionDefinition{..} -> do
+      qs <- traverse translatePattern (toList functionDefinitionPatterns)
+      f <- withLocalNames (labelName <$> qs) (translateExpression functionDefinitionExpression)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OFunction (moduleName <.> name) qs f]
-    DLet _ name (LetDefinition _ _ With{} e) -> do
-      c <- translateExpression e
+    DLet _ name LetDefinition{letDefinitionType = With{}, ..} -> do
+      c <- translateExpression letDefinitionExpression
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
       pure [Kernel.OConstant (moduleName <.> name) c]
-    DTrait _ name TraitDefinition{traitDefinitionInterface} ->
+    DTrait _ name TraitDefinition{..} ->
       forM traitDefinitionInterface $
         \(TraitDefinitionInterfaceEntry n (Forall _ _ t)) ->
           traitAccessor name n (translateType t)
-    DInstance _ (InstanceDefinition _ trait _ t ds) ->
-      concatForM ds $
+    DInstance _ InstanceDefinition{..} ->
+      concatForM instanceDefinitionImplementations $
         \case
-          DFunction loc n f ->
-            translateDefinition (DFunction loc (instanceLabel (Trait trait t) n) f)
-          DLet loc n c ->
-            translateDefinition (DLet loc (instanceLabel (Trait trait t) n) c)
+          DFunction loc n FunctionDefinition{..} ->
+            translateDefinition
+              ( DFunction
+                  loc
+                  (instanceLabel (Trait instanceDefinitionTraitName instanceDefinitionType) n)
+                  FunctionDefinition{..}
+              )
+          DLet loc n LetDefinition{..} ->
+            translateDefinition
+              ( DLet
+                  loc
+                  (instanceLabel (Trait instanceDefinitionTraitName instanceDefinitionType) n)
+                  LetDefinition{..}
+              )
           _ ->
             pure []
     _ ->

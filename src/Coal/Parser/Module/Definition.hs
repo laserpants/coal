@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
@@ -51,7 +52,15 @@ parseTypeAlias = do
   symbol_ "="
   t <- parseType
   end <- getSourcePos
-  pure (DTypeAlias (Metadata start end) n (AliasDefinition ps t))
+  pure
+    ( DTypeAlias
+        (Metadata start end)
+        n
+        AliasDefinition
+          { aliasDefinitionParameters = ps
+          , aliasDefinitionType = t
+          }
+    )
 
 parseTraitDefinition :: Parser (Definition Metadata () ())
 parseTraitDefinition = do
@@ -62,7 +71,18 @@ parseTraitDefinition = do
   ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
-  pure (DTrait (Metadata start end) n (TraitDefinition (Metadata start end) n ts t (toEntry <$> toScheme <$$> ds)))
+  pure
+    ( DTrait
+        (Metadata start end)
+        n
+        TraitDefinition
+          { traitDefinitionMetadata = Metadata start end
+          , traitDefinitionTraitName = n
+          , traitDefinitionConstraints = ts
+          , traitDefinitionParameter = t
+          , traitDefinitionInterface = toEntry <$> toScheme <$$> ds
+          }
+    )
 
 toEntry :: (Name, Scheme Parameter () ParameterizedType) -> TraitDefinitionInterfaceEntry ()
 toEntry = uncurry TraitDefinitionInterfaceEntry
@@ -79,7 +99,17 @@ parseTraitInstance = do
   end <- getSourcePos
   ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
   ds <- braces (some parseMethod)
-  pure (DInstance (Metadata start end) (InstanceDefinition (Metadata start end) n ts t ds))
+  pure
+    ( DInstance
+        (Metadata start end)
+        InstanceDefinition
+          { instanceDefinitionMetadata = Metadata start end
+          , instanceDefinitionTraitName = n
+          , instanceDefinitionConstraints = ts
+          , instanceDefinitionType = t
+          , instanceDefinitionImplementations = ds
+          }
+    )
  where
   methodName = backtickName <|> name
   parseMethod =
@@ -101,7 +131,15 @@ parseTypeDefinition = do
   ps <- option [] parseParameterList
   end <- getSourcePos
   cs <- option [] (symbol_ "=" *> parseConstructor n ps `sepBy1` symbol_ "|")
-  pure (DType (Metadata start end) n (TypeDefinition ps cs))
+  pure
+    ( DType
+        (Metadata start end)
+        n
+        TypeDefinition
+          { typeDefinitionParameters = ps
+          , typeDefinitionConstructors = cs
+          }
+    )
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
@@ -174,53 +212,104 @@ parseFunctionGroup parseName = do
 parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata () ())
 parseGroupFunctionDefinition ann = do
   start <- getSourcePos
-  args <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
-  expr <- symbol_ "=>" *> parseExpression
+  functionDefinitionPatterns <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
+  functionDefinitionExpression <- symbol_ "=>" *> parseExpression
   end <- getSourcePos
-  pure (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr)
+  pure
+    FunctionDefinition
+      { functionDefinitionMetadata = Metadata start end
+      , functionDefinitionAnnotation = With [] <$> ann
+      , functionDefinitionType = With [] ()
+      , functionDefinitionPatterns
+      , functionDefinitionExpression
+      }
 
 parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseFunctionDefinition parseName = do
   start <- getSourcePos
-  fn <- lexeme_ "fun" *> parseName
-  args <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
+  functionDefinitionName <- lexeme_ "fun" *> parseName
+  functionDefinitionPatterns <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
   ann <- optional parseAnnotation
   end <- getSourcePos
-  expr <- symbol_ "=" *> parseExpression
+  functionDefinitionExpression <- symbol_ "=" *> parseExpression
   fin <- getSourcePos
-  pure (DFunction (Metadata start fin) fn (FunctionDefinition (Metadata start end) (With [] <$> ann) (With [] ()) args expr))
+  pure
+    ( DFunction
+        (Metadata start fin)
+        functionDefinitionName
+        FunctionDefinition
+          { functionDefinitionMetadata = Metadata start end
+          , functionDefinitionAnnotation = With [] <$> ann
+          , functionDefinitionType = With [] ()
+          , functionDefinitionPatterns
+          , functionDefinitionExpression
+          }
+    )
 
 parseLetDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseLetDefinition parseName = do
   start <- getSourcePos
-  c <- lexeme_ "let" *> parseName
+  letDefinitionName <- lexeme_ "let" *> parseName
   ann <- optional parseAnnotation
   end <- getSourcePos
-  expr <- symbol_ "=" *> parseExpression
+  letDefinitionExpression <- symbol_ "=" *> parseExpression
   fin <- getSourcePos
-  pure (DLet (Metadata start fin) c (LetDefinition (Metadata start end) (With [] <$> ann) (With [] ()) expr))
+  pure
+    ( DLet
+        (Metadata start fin)
+        letDefinitionName
+        LetDefinition
+          { letDefinitionMetadata = Metadata start end
+          , letDefinitionAnnotation = With [] <$> ann
+          , letDefinitionType = With [] ()
+          , letDefinitionExpression
+          }
+    )
 
 parseTopLevelFold :: Parser (Definition Metadata () ())
 parseTopLevelFold = do
   start <- getSourcePos
-  n <- lexeme_ "fold" *> name
+  foldName <- lexeme_ "fold" *> name
   ann <- optional parseAnnotation
   end <- getSourcePos
-  cs <- try (nonEmpty (some parseTopLevelFoldClause))
-  pure (DFold (Metadata start end) n (FoldDefinition (Metadata start end) (With [] <$> ann) cs))
+  foldDefinitionClauses <- try (nonEmpty (some parseTopLevelFoldClause))
+  pure
+    ( DFold
+        (Metadata start end)
+        foldName
+        FoldDefinition
+          { foldDefinitionMetadata = Metadata start end
+          , foldDefinitionAnnotation = With [] <$> ann
+          , foldDefinitionClauses
+          }
+    )
 
 parseTopLevelFoldClause :: Parser (Clause Metadata () ())
 parseTopLevelFoldClause =
   withMetadata $ do
-    p <- symbol_ "|" *> parsePattern
-    cs <- nonEmpty (some parseChoice)
-    pure (\loc -> EClause loc p cs)
+    clausePattern <- symbol_ "|" *> parsePattern
+    clauseChoices <- nonEmpty (some parseChoice)
+    pure
+      ( \loc ->
+          EClause
+            { clauseMetadata = loc
+            , clausePattern
+            , clauseChoices
+            }
+      )
  where
   parseChoice =
     withMetadata $ do
       symbol_ "=>"
-      e <- parseExpression
-      pure (\loc -> CPlain loc [] e)
+      choiceExpression <- parseExpression
+      pure
+        ( \loc ->
+            CPlain
+              { choiceMetadata = loc
+              , choiceGuards = []
+              , choiceExpression
+              }
+        )
 
 {-# INLINE parseAnnotation #-}
 parseAnnotation :: Parser (Type Parameter ())
