@@ -290,9 +290,9 @@ parseTopLevelFoldClause =
     clausePattern <- symbol_ "|" *> parsePattern
     clauseChoices <- nonEmpty (some parseChoice)
     pure
-      ( \loc ->
+      ( \clauseMetadata ->
           EClause
-            { clauseMetadata = loc
+            { clauseMetadata
             , clausePattern
             , clauseChoices
             }
@@ -303,9 +303,9 @@ parseTopLevelFoldClause =
       symbol_ "=>"
       choiceExpression <- parseExpression
       pure
-        ( \loc ->
+        ( \choiceMetadata ->
             CPlain
-              { choiceMetadata = loc
+              { choiceMetadata
               , choiceGuards = []
               , choiceExpression
               }
