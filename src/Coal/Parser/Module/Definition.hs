@@ -143,9 +143,14 @@ parseTypeDefinition = do
 
 parseConstructor :: Name -> [Parameter ()] -> Parser (DataConstructor Parameter () (Type Parameter ()))
 parseConstructor tn qs = do
-  n <- constructor
+  constructorName <- constructor
   ps <- option [] (parens (commaSep1 parseType))
-  pure (DataConstructor n (length ps) (Forall (Set.fromList qs) mempty (foldr TArrow t0 ps)))
+  pure $
+    DataConstructor
+      { constructorName
+      , constructorArity = length ps
+      , constructorScheme = Forall (Set.fromList qs) mempty (foldr TArrow t0 ps)
+      }
  where
   t0 =
     case qs of
