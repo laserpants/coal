@@ -4,13 +4,12 @@ module Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST (
 
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Language (Kind, Module (..), Type (..))
 import Coal.Language.AST.Normalization (NormalizationContext (denormalizeObject))
-import Coal.Language.Module (Module (..))
-import Coal.Language.Type (Type (..))
 import Data.Data (Data, Typeable)
 
-passDenormalizeAST :: (Monad m, Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Pass a m (Module a k (Type o k)) (Module a k (Type o k))
+passDenormalizeAST :: (Monad m, Monoid a, Data a, Data (o Kind), Typeable o) => Pass a m (Module a Kind (Type o Kind)) (Module a Kind (Type o Kind))
 passDenormalizeAST = Pass{runPass = passImpl}
 
-passImpl :: (Monad m, Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Module a k (Type o k) -> CompilerT a m (Module a k (Type o k))
+passImpl :: (Monad m, Monoid a, Data a, Data (o Kind), Typeable o) => Module a Kind (Type o Kind) -> CompilerT a m (Module a Kind (Type o Kind))
 passImpl = return . denormalizeObject
