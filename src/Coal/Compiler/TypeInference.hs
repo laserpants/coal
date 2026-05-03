@@ -65,7 +65,7 @@ import Coal.TypeSystem.Constraint (
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
-import Coal.TypeSystem.Constraint.Solver
+import Coal.TypeSystem.Constraint.Solver (solveConstraints)
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
 import Coal.TypeSystem.Substitution

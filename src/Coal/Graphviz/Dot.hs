@@ -228,9 +228,9 @@ instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Dot k, Show k) => Dot
         emitDefinition name "DFunction" def
       DLet _ name def ->
         emitDefinition name "DLet" def
-      DFunctionGroup _ name defs -> do
+      DFunctionGroup _ name FunctionGroupDefinition{..} -> do
         dotId <- emitNamedShape TriangleShape (Just name) "DFunctionGroup"
-        emitEdges dotId defs
+        emitEdges dotId functionGroupDefinitionBranches
         return dotId
       DFold _ name def -> do
         emitDefinition name "DFold" def

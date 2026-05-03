@@ -186,8 +186,8 @@ instance EmitKinds (Definition a Kind ()) where
         emitKindConstraints def
       DFunction _ _ def ->
         emitKindConstraints def
-      DFunctionGroup _ _ defs ->
-        concat <$> traverse emitKindConstraints defs
+      DFunctionGroup _ _ FunctionGroupDefinition{..} ->
+        concat <$> traverse emitKindConstraints functionGroupDefinitionBranches
       DFold _ _ def ->
         emitKindConstraints def
       DLet _ _ def ->

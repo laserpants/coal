@@ -10,7 +10,7 @@ Parses module headers including module paths and export specifications.
 module Coal.Parser.Module (parseModule, parseSourceFile) where
 
 import Coal.Compiler.Metadata (Metadata (..))
-import Coal.Language.Module
+import Coal.Language.Module (ExportList (..), Module (Module))
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Path (Path (Path))
 import Coal.Parser.Core (Parser, lexeme_, spaces)

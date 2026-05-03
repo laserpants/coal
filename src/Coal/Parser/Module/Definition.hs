@@ -94,20 +94,20 @@ parseTraitInstance :: Parser (Definition Metadata () ())
 parseTraitInstance = do
   start <- getSourcePos
   lexeme_ "instance"
-  n <- constructor
-  t <- angleBrackets parseType
+  instanceDefinitionTraitName <- constructor
+  instanceDefinitionType <- angleBrackets parseType
   end <- getSourcePos
-  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
-  ds <- braces (some parseMethod)
+  instanceDefinitionConstraints <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
+  instanceDefinitionImplementations <- braces (some parseMethod)
   pure
     ( DInstance
         (Metadata start end)
         InstanceDefinition
           { instanceDefinitionMetadata = Metadata start end
-          , instanceDefinitionTraitName = n
-          , instanceDefinitionConstraints = ts
-          , instanceDefinitionType = t
-          , instanceDefinitionImplementations = ds
+          , instanceDefinitionTraitName
+          , instanceDefinitionConstraints
+          , instanceDefinitionType
+          , instanceDefinitionImplementations
           }
     )
  where
@@ -212,7 +212,17 @@ parseFunctionGroup parseName = do
   end <- getSourcePos
   case fns of
     [] -> fail "Empty list"
-    fs -> pure (DFunctionGroup (Metadata start end) fn fs)
+    fs ->
+      pure
+        ( DFunctionGroup
+            (Metadata start end)
+            fn
+            FunctionGroupDefinition
+              { functionGroupDefinitionMetadata = Metadata start end
+              , functionGroupDefinitionAnnotation = With [] <$> ann
+              , functionGroupDefinitionBranches = fs
+              }
+        )
 
 parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata () ())
 parseGroupFunctionDefinition ann = do

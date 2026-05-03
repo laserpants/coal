@@ -244,8 +244,14 @@ instance KindSubstitutable (Definition a Kind ()) where
         DTypeAlias a name (applyKinds sub def)
       DFunction a name def ->
         DFunction a name (applyKinds sub def)
-      DFunctionGroup a name defs ->
-        DFunctionGroup a name (applyKinds sub <$> defs)
+      DFunctionGroup a name FunctionGroupDefinition{..} ->
+        DFunctionGroup
+          a
+          name
+          FunctionGroupDefinition
+            { functionGroupDefinitionBranches = applyKinds sub <$> functionGroupDefinitionBranches
+            , ..
+            }
       DFold a name def ->
         DFold a name (applyKinds sub def)
       DLet a name def ->
@@ -266,8 +272,14 @@ instance KindSubstitutable (Definition a Kind ()) where
         DTypeAlias a name (replaceVariables def)
       DFunction a name def ->
         DFunction a name (replaceVariables def)
-      DFunctionGroup a name defs ->
-        DFunctionGroup a name (replaceVariables <$> defs)
+      DFunctionGroup a name FunctionGroupDefinition{..} ->
+        DFunctionGroup
+          a
+          name
+          FunctionGroupDefinition
+            { functionGroupDefinitionBranches = replaceVariables <$> functionGroupDefinitionBranches
+            , ..
+            }
       DFold a name def ->
         DFold a name (replaceVariables def)
       DLet a name def ->

@@ -2,7 +2,7 @@ module Main {
 
   import IO(println_string, println_int32, println_bool)
 
-  fun fst : int32
+  fun fst : (int32, a) -> int32
     | ((a, _)) => a
 
   fun main() =

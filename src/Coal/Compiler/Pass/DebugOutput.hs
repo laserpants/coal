@@ -27,7 +27,7 @@ import qualified Data.Text as Text
 import Data.Text.Lazy (toStrict)
 import Extras (forM_)
 import System.FilePath ((<.>), (</>))
-import Text.Pretty.Simple
+import Text.Pretty.Simple (pShowNoColor)
 
 generateDebugArtifacts :: (MonadIO m, HasKind (Type Parameter k), CoalPretty k, Dot t, Dot k, Show k) => Text -> Pass a m (Module a k t) (Module a k t)
 generateDebugArtifacts label = Pass{runPass = pass}

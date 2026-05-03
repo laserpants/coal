@@ -15,6 +15,7 @@ and trait instances.
 -}
 module Coal.Language.Definition (
   Definition (..),
+  FunctionGroupDefinition (..),
   TypeDefinition (..),
   FunctionDefinition (..),
   FoldDefinition (..),
@@ -59,6 +60,26 @@ data TypeDefinition a k t = TypeDefinition
     )
 
 instance (Binary a, Binary k, Binary t) => Binary (TypeDefinition a k t)
+
+data FunctionGroupDefinition a k t = FunctionGroupDefinition
+  { functionGroupDefinitionMetadata :: a
+  , functionGroupDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , functionGroupDefinitionBranches :: [FunctionDefinition a k t]
+  }
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
+
+instance (Binary a, Binary k, Binary t) => Binary (FunctionGroupDefinition a k t)
 
 data FunctionDefinition a k t = FunctionDefinition
   { functionDefinitionMetadata :: a
@@ -208,7 +229,7 @@ data Definition a k t
   | -- | Function definition
     DFunction a Name (FunctionDefinition a k t)
   | -- | Function
-    DFunctionGroup a Name [FunctionDefinition a k t]
+    DFunctionGroup a Name (FunctionGroupDefinition a k t)
   | -- | Top-level fold
     DFold a Name (FoldDefinition a k t)
   | -- | Top-level let-binding

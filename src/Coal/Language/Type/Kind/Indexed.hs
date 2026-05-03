@@ -61,8 +61,8 @@ instance ToKindIndexed (Definition a k ()) (Definition a Kind ()) where
         DTypeAlias loc name <$> toKindIndexed def
       DFunction loc name def ->
         DFunction loc name <$> toKindIndexed def
-      DFunctionGroup loc name defs ->
-        DFunctionGroup loc name <$> traverse toKindIndexed defs
+      DFunctionGroup loc name def ->
+        DFunctionGroup loc name <$> toKindIndexed def
       DFold loc name def ->
         DFold loc name <$> toKindIndexed def
       DLet loc name def ->
@@ -93,6 +93,14 @@ instance ToKindIndexed (FunctionDefinition a k ()) (FunctionDefinition a Kind ()
           <*> toKindIndexed functionDefinitionType
           <*> toKindIndexed functionDefinitionPatterns
           <*> toKindIndexed functionDefinitionExpression
+
+instance ToKindIndexed (FunctionGroupDefinition a k ()) (FunctionGroupDefinition a Kind ()) where
+  toKindIndexed =
+    \case
+      FunctionGroupDefinition{..} ->
+        FunctionGroupDefinition functionGroupDefinitionMetadata
+          <$> toKindIndexed functionGroupDefinitionAnnotation
+          <*> toKindIndexed functionGroupDefinitionBranches
 
 instance ToKindIndexed (LetDefinition a k ()) (LetDefinition a Kind ()) where
   toKindIndexed =

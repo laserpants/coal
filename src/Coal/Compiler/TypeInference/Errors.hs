@@ -64,9 +64,9 @@ extractSpan src start end =
   -- Trim trailing lines that are blank, whitespace-only, or where the error
   -- span only barely touches the beginning (e.g., the start of the next definition)
   trimTrailingBlankLines :: [(Int, Text, Text)] -> [(Int, Text, Text)]
-  trimTrailingBlankLines lines =
-    let trimmed = reverse . dropWhile isIrrelevantLine . reverse $ lines
-     in if null trimmed then lines else trimmed
+  trimTrailingBlankLines lines_ =
+    let trimmed = reverse . dropWhile isIrrelevantLine . reverse $ lines_
+     in if null trimmed then lines_ else trimmed
 
   isIrrelevantLine :: (Int, Text, Text) -> Bool
   isIrrelevantLine (_, lineText, marker)

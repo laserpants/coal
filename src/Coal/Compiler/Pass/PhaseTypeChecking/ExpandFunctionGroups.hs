@@ -92,21 +92,23 @@ instance ExpandContext (Module Metadata Kind ()) where
 expandGroups :: (Monad m) => Definition Metadata Kind () -> CompilerT Metadata m [Definition Metadata Kind ()]
 expandGroups =
   \case
-    DFunctionGroup loc name defs@(firstDef : _) ->
+    DFunctionGroup loc name FunctionGroupDefinition{..} ->
       return
         [ DLet
             loc
             name
             LetDefinition
               { letDefinitionMetadata = loc
-              , letDefinitionAnnotation = Nothing
+              , letDefinitionAnnotation = functionGroupDefinitionAnnotation
               , letDefinitionType = With [] ()
               , letDefinitionExpression =
-                  ELambda loc (varP <$> args) (matchE (packVariables args) (buildExpressionClauses defs))
+                  ELambda loc (varP <$> args) (matchE (packVariables args) (buildExpressionClauses functionGroupDefinitionBranches))
               }
         ]
      where
-      FunctionDefinition{..} = firstDef
+      FunctionDefinition{..} = case functionGroupDefinitionBranches of
+        (firstDef : _) -> firstDef
+        [] -> error "Empty function group"
       ns = NonEmpty.fromList [1 .. length functionDefinitionPatterns]
       args = (<>) "$arg_" . showt <$> ns
     DInstance loc InstanceDefinition{..} -> do
