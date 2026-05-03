@@ -4,7 +4,7 @@ module Coal.Compiler.Pass.PhaseTranslation (phaseTranslation) where
 
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
-import Coal.Compiler.Pass.DebugOutput (generateDebugArtifacts)
+import Coal.Compiler.Pass.DebugOutput (generateBuildInfo, generateDebugArtifacts)
 import Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies (passCheckPatternAnomalies)
 import Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions (passCompileMatchExpressions)
 import Coal.Compiler.Pass.PhaseTranslation.CompileNats (passCompileNats)
@@ -44,6 +44,7 @@ phaseTranslation =
     >-> generateDebugArtifacts "CompileMatchExpressions"
     >-> passInsertDictionaries
     >-> generateDebugArtifacts "InsertDictionaries"
+    >-> generateBuildInfo "InsertDictionaries"
     >-> passCompileNats
     >-> generateDebugArtifacts "CompileNats"
     >-> passDetectCallCycles
