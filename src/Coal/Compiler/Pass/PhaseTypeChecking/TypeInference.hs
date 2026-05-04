@@ -90,7 +90,7 @@ inferTypes m = do
     } <-
     get
 
-  -- Verify all assumptions (explicit type annotations) are satisfied
+  -- Verify that all assumptions are satisfied
   forM_ compilerAssumptions $
     \Assumption{assumptionMetadata, assumptionName, assumptionType} ->
       case Environment.lookup assumptionName compilerNameStore of
