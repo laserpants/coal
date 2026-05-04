@@ -77,8 +77,7 @@ emitPConstructorConstraints :: (Data a) => a -> Label IndexedType -> [Pattern a 
 emitPConstructorConstraints loc (Label t name) ps = do
   r <- lookupDataConstructor name
   case r of
-    Nothing -> do
-      --      error (show name)
+    Nothing ->
       tellLeft [ENoDataConstructor loc name]
     Just DataConstructor{..}
       | constructorArity /= length ps ->
