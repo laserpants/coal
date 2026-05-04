@@ -8,7 +8,7 @@ Type and kind expression parsers.
 Parses type expressions including arrows, applications, records, rows,
 intrinsic types, and kind annotations.
 -}
-module Coal.Parser.Type (parseType, parseKind) where
+module Coal.Parser.Type (parseType, parseTypeParameter, parseKind) where
 
 import Coal.Language
 import Coal.Parser.Core (Parser, nonEmpty)

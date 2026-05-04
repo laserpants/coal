@@ -40,21 +40,30 @@ instance (NormalizationContext a) => NormalizationContext (Map k a) where
 denormalizeConstant :: (Data a, Data k, Data (o k), Typeable o, Ord k) => Name -> LetDefinition a k (Type o k) -> Definition a k (Type o k)
 denormalizeConstant name =
   \case
-    LetDefinition loc w1 w2 (ELambda a1 ps (ELambda _ qs e)) ->
-      denormalizeConstant name (LetDefinition loc w1 w2 (ELambda a1 (ps <> qs) e))
-    LetDefinition loc w1 (With ts _) (ELambda _ ps e) ->
-      DFunction
-        loc
+    LetDefinition{letDefinitionExpression = ELambda a1 ps (ELambda _ qs e), ..} ->
+      denormalizeConstant
         name
-        FunctionDefinition
-          { functionDefinitionMetadata = loc
-          , functionDefinitionAnnotation = w1
-          , functionDefinitionType = With ts (typeOf e)
-          , functionDefinitionPatterns = ps
-          , functionDefinitionExpression = e
+        LetDefinition
+          { letDefinitionExpression = ELambda a1 (ps <> qs) e
+          , ..
           }
-    def@(LetDefinition loc _ _ _) ->
-      DLet loc name def
+    LetDefinition
+      { letDefinitionType = With ts _
+      , letDefinitionExpression = ELambda _ ps e
+      , ..
+      } ->
+        DFunction
+          letDefinitionMetadata
+          name
+          FunctionDefinition
+            { functionDefinitionMetadata = letDefinitionMetadata
+            , functionDefinitionAnnotation = letDefinitionAnnotation
+            , functionDefinitionType = With ts (typeOf e)
+            , functionDefinitionPatterns = ps
+            , functionDefinitionExpression = e
+            }
+    def@LetDefinition{..} ->
+      DLet letDefinitionMetadata name def
 
 instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => NormalizationContext (Module a k (Type o k)) where
   normalizeObject =
@@ -86,12 +95,9 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Normalizat
             loc
             name
             LetDefinition
-              { letDefinitionMetadata =
-                  loc
-              , letDefinitionAnnotation =
-                  functionDefinitionAnnotation
-              , letDefinitionType =
-                  With ts (foldTypeOf t functionDefinitionPatterns)
+              { letDefinitionMetadata = loc
+              , letDefinitionAnnotation = functionDefinitionAnnotation
+              , letDefinitionType = With ts (foldTypeOf t functionDefinitionPatterns)
               , letDefinitionExpression =
                   flattenLambdas (ELambda mempty functionDefinitionPatterns functionDefinitionExpression)
               }

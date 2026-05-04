@@ -22,7 +22,7 @@ import Coal.Parser.Identifier
 import Coal.Parser.Metadata (withMetadata)
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
-import Coal.Parser.Type (parseType)
+import Coal.Parser.Type (parseType, parseTypeParameter)
 import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
@@ -68,7 +68,7 @@ parseTraitDefinition = do
   lexeme_ "trait"
   n <- constructor
   t <- angleBrackets parseParameter
-  ts <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
+  ts <- parseConstraints parseParameter
   end <- getSourcePos
   ds <- braces (some ((,) <$> name <*> (symbol_ ":" *> parseType)))
   pure
@@ -86,6 +86,9 @@ parseTraitDefinition = do
 
 toEntry :: (Name, Scheme Parameter () ParameterizedType) -> TraitDefinitionInterfaceEntry ()
 toEntry = uncurry TraitDefinitionInterfaceEntry
+
+parseConstraints :: Parser p -> Parser [Trait p]
+parseConstraints p = option [] (lexeme_ "with" *> commaSep1 (parseTrait p))
 
 parseParameter :: Parser (Parameter ())
 parseParameter = Parameter () <$> name
@@ -208,10 +211,12 @@ parseFunctionGroup parseName = do
   start <- getSourcePos
   fn <- lexeme_ "fun" *> parseName
   ann <- optional parseAnnotation
+  trs <- parseConstraints parseTypeParameter
   fns <- some (void pipe *> parseGroupFunctionDefinition ann)
   end <- getSourcePos
   case fns of
-    [] -> fail "Empty list"
+    [] ->
+      fail "Empty list"
     fs ->
       pure
         ( DFunctionGroup
@@ -219,7 +224,7 @@ parseFunctionGroup parseName = do
             fn
             FunctionGroupDefinition
               { functionGroupDefinitionMetadata = Metadata start end
-              , functionGroupDefinitionAnnotation = With [] <$> ann
+              , functionGroupDefinitionAnnotation = With trs <$> ann
               , functionGroupDefinitionBranches = fs
               }
         )
@@ -244,7 +249,7 @@ parseFunctionDefinition parseName = do
   start <- getSourcePos
   functionDefinitionName <- lexeme_ "fun" *> parseName
   functionDefinitionPatterns <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
-  ann <- optional parseAnnotation
+  functionDefinitionAnnotation <- parseQualifiedAnnotation
   end <- getSourcePos
   functionDefinitionExpression <- symbol_ "=" *> parseExpression
   fin <- getSourcePos
@@ -254,7 +259,7 @@ parseFunctionDefinition parseName = do
         functionDefinitionName
         FunctionDefinition
           { functionDefinitionMetadata = Metadata start end
-          , functionDefinitionAnnotation = With [] <$> ann
+          , functionDefinitionAnnotation = functionDefinitionAnnotation
           , functionDefinitionType = With [] ()
           , functionDefinitionPatterns
           , functionDefinitionExpression
@@ -265,7 +270,7 @@ parseLetDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseLetDefinition parseName = do
   start <- getSourcePos
   letDefinitionName <- lexeme_ "let" *> parseName
-  ann <- optional parseAnnotation
+  letDefinitionAnnotation <- parseQualifiedAnnotation
   end <- getSourcePos
   letDefinitionExpression <- symbol_ "=" *> parseExpression
   fin <- getSourcePos
@@ -275,7 +280,7 @@ parseLetDefinition parseName = do
         letDefinitionName
         LetDefinition
           { letDefinitionMetadata = Metadata start end
-          , letDefinitionAnnotation = With [] <$> ann
+          , letDefinitionAnnotation = letDefinitionAnnotation
           , letDefinitionType = With [] ()
           , letDefinitionExpression
           }
@@ -285,7 +290,7 @@ parseTopLevelFold :: Parser (Definition Metadata () ())
 parseTopLevelFold = do
   start <- getSourcePos
   foldName <- lexeme_ "fold" *> name
-  ann <- optional parseAnnotation
+  foldDefinitionAnnotation <- parseQualifiedAnnotation
   end <- getSourcePos
   foldDefinitionClauses <- try (nonEmpty (some parseTopLevelFoldClause))
   pure
@@ -294,7 +299,7 @@ parseTopLevelFold = do
         foldName
         FoldDefinition
           { foldDefinitionMetadata = Metadata start end
-          , foldDefinitionAnnotation = With [] <$> ann
+          , foldDefinitionAnnotation = foldDefinitionAnnotation
           , foldDefinitionClauses
           }
     )
@@ -329,3 +334,9 @@ parseTopLevelFoldClause =
 {-# INLINE parseAnnotation #-}
 parseAnnotation :: Parser (Type Parameter ())
 parseAnnotation = symbol_ ":" *> parseType
+
+parseQualifiedAnnotation :: Parser (Maybe (Qualified (Type Parameter ())))
+parseQualifiedAnnotation = do
+  ann <- optional parseAnnotation
+  trs <- parseConstraints parseTypeParameter
+  pure (With trs <$> ann)
