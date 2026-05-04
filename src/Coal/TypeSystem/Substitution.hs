@@ -57,6 +57,12 @@ instance Substitutable IndexedScheme where
        where
         sub1 = foldr removeSubstitution sub qs
 
+instance (Substitutable s) => Substitutable (Qualified s) where
+  apply sub =
+    \case
+      With ts t ->
+        With (apply sub ts) (apply sub t)
+
 instance Substitutable (Row TypeIndex Kind IndexedType) where
   apply sub =
     \case

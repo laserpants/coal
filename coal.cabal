@@ -77,6 +77,7 @@ library
       Coal.Compiler.Pass.PhasePreflight.SortModules
       Coal.Compiler.Pass.PhaseTranslation
       Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies
+      Coal.Compiler.Pass.PhaseTranslation.CheckTraitAnnotations
       Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions
       Coal.Compiler.Pass.PhaseTranslation.CompileNats
       Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST
