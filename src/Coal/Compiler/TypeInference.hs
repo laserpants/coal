@@ -232,7 +232,7 @@ runConstraintsGen stack = do
           )
           stack
   updateSupplyC constraintsGenStateSupply
-  return (result, constraintsGenStateTypeIndexes, output)
+  return (result, constraintsGenStateAnnotationIndexes, output)
 
 define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
 define name t = insertNameC name (Forall (typeIndexesIn s) mempty s)

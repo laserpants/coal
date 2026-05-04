@@ -30,7 +30,7 @@ import Coal.TypeSystem.Annotations (indexTypeAnnotations, runAnnotationsT)
 import Coal.TypeSystem.Constraint (Constraint (..))
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation.Stack
-import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateTypeIndexes)
+import Coal.TypeSystem.Constraint.Generation.State (overConstraintsGenStateAnnotationIndexes)
 import Control.Monad.Reader (ask, asks)
 import Control.Monad.State (modify)
 import Data.Data (Data)
@@ -449,5 +449,5 @@ instantiateAnnotation loc a = do
   (t, s) <- runAnnotationsT loc env (indexTypeAnnotations a)
   forM_ (Map.toList s) $
     \(n, k) ->
-      modify (overConstraintsGenStateTypeIndexes (Map.insert n (loc, k)))
+      modify (overConstraintsGenStateAnnotationIndexes (Map.insert n (loc, k)))
   return t

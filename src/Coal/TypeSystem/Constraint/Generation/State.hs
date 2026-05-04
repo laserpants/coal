@@ -3,7 +3,7 @@
 
 module Coal.TypeSystem.Constraint.Generation.State (
   ConstraintsGenState (..),
-  overConstraintsGenStateTypeIndexes,
+  overConstraintsGenStateAnnotationIndexes,
   overConstraintsGenStateSupply,
 ) where
 
@@ -12,7 +12,7 @@ import Coal.Language (Kind (..), TypeIndex (..))
 import Extras (Dictionary)
 
 data ConstraintsGenState c = ConstraintsGenState
-  { constraintsGenStateTypeIndexes :: Dictionary (c, TypeIndex Kind)
+  { constraintsGenStateAnnotationIndexes :: Dictionary (c, TypeIndex Kind)
   , constraintsGenStateSupply :: Int
   }
   deriving (Show, Eq, Ord, Read)
@@ -21,11 +21,11 @@ instance Supply (ConstraintsGenState c) where
   updateSupply = overConstraintsGenStateSupply
   getSupply = constraintsGenStateSupply
 
-{-# INLINE overConstraintsGenStateTypeIndexes #-}
-overConstraintsGenStateTypeIndexes :: (Dictionary (c, TypeIndex Kind) -> Dictionary (c, TypeIndex Kind)) -> ConstraintsGenState c -> ConstraintsGenState c
-overConstraintsGenStateTypeIndexes fn ConstraintsGenState{..} =
+{-# INLINE overConstraintsGenStateAnnotationIndexes #-}
+overConstraintsGenStateAnnotationIndexes :: (Dictionary (c, TypeIndex Kind) -> Dictionary (c, TypeIndex Kind)) -> ConstraintsGenState c -> ConstraintsGenState c
+overConstraintsGenStateAnnotationIndexes fn ConstraintsGenState{..} =
   ConstraintsGenState
-    { constraintsGenStateTypeIndexes = fn constraintsGenStateTypeIndexes
+    { constraintsGenStateAnnotationIndexes = fn constraintsGenStateAnnotationIndexes
     , ..
     }
 
