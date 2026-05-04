@@ -6,6 +6,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), (>->))
 import Coal.Compiler.Pass.DebugOutput (generateBuildInfo, generateDebugArtifacts)
 import Coal.Compiler.Pass.PhaseTranslation.CheckPatternAnomalies (passCheckPatternAnomalies)
+import Coal.Compiler.Pass.PhaseTranslation.CheckTraitAnnotations (passCheckTraitAnnotations)
 import Coal.Compiler.Pass.PhaseTranslation.CompileMatchExpressions (passCompileMatchExpressions)
 import Coal.Compiler.Pass.PhaseTranslation.CompileNats (passCompileNats)
 import Coal.Compiler.Pass.PhaseTranslation.DenormalizeAST (passDenormalizeAST)
@@ -51,3 +52,4 @@ phaseTranslation =
     >-> generateDebugArtifacts "DetectCallCycles"
     >-> passDenormalizeAST
     >-> generateDebugArtifacts "DenormalizeAST"
+    >-> passCheckTraitAnnotations
