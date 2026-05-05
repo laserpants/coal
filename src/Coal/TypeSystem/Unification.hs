@@ -87,25 +87,12 @@ instance Unifiable Intrinsic where
   match _ _ =
     throwError ECannotMatch
 
-instance (Unifiable u) => Unifiable (Trait u) where
-  unify (Trait n1 t1) (Trait n2 t2)
-    | n1 == n2 = unify t1 t2
-    | otherwise = throwError ECannotUnify
+instance (Unifiable u) => Unifiable (Qualified u) where
+  unify (With _ t1) (With _ t2) = do
+    unify t1 t2
 
-  match (Trait n1 t1) (Trait n2 t2)
-    | n1 == n2 = match t1 t2
-    | otherwise = throwError ECannotMatch
-
-instance (Substitutable u, Data u, Unifiable u) => Unifiable (Qualified u) where
-  unify (With traits1 t1) (With traits2 t2) = do
-    sub1 <- unify t1 t2
-    sub2 <- unify (apply sub1 traits1) (apply sub1 traits2)
-    pure (sub2 <> sub1)
-
-  match (With traits1 t1) (With traits2 t2) = do
-    sub1 <- match t1 t2
-    sub2 <- match traits1 traits2
-    maybe (throwError ECannotMatch) pure (merge sub1 sub2)
+  match (With _ t1) (With _ t2) = do
+    match t1 t2
 
 instance Unifiable (Row TypeIndex Kind IndexedType) where
   unify RNil RNil =
