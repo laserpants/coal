@@ -81,26 +81,26 @@ instance (CompileNatsContext a) => CompileNatsContext (Dictionary a) where
 natType :: IndexedType
 natType = TConstructor KType "$Nat"
 
-convertConstructor :: (Monad m) => IndexedType -> CompilerT a m IndexedType
-convertConstructor =
-  \case
-    TIntrinsic INat ->
-      pure natType
-    TIntrinsic t ->
-      pure (TIntrinsic t)
-    TArrow t1 t2 ->
-      TArrow <$> convertConstructor t1 <*> convertConstructor t2
-    TApplication k t1 t2 ->
-      TApplication k <$> convertConstructor t1 <*> convertConstructor t2
-    TRow r ->
-      TRow <$> traverse convertConstructor r
-    TAlias name ts t ->
-      TAlias name <$> traverse convertConstructor ts <*> convertConstructor t
-    t ->
-      pure t
+instance CompileNatsContext IndexedType where
+  compileNats =
+    \case
+      TIntrinsic INat ->
+        pure natType
+      TIntrinsic t ->
+        pure (TIntrinsic t)
+      TArrow t1 t2 ->
+        TArrow <$> compileNats t1 <*> compileNats t2
+      TApplication k t1 t2 ->
+        TApplication k <$> compileNats t1 <*> compileNats t2
+      TRow r ->
+        TRow <$> traverse compileNats r
+      TAlias name ts t ->
+        TAlias name <$> traverse compileNats ts <*> compileNats t
+      t ->
+        pure t
 
 instance (Monoid a, Data a) => CompileNatsContext (Expression a Kind IndexedType) where
-  compileNats = transformM (traverse convertConstructor <=< go)
+  compileNats = transformM (traverse compileNats <=< go)
    where
     go =
       \case
