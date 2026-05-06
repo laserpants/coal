@@ -15,6 +15,13 @@ import Coal.Language.Type.Kind (Kind (..), foldKind)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 
+{- | Safe helper to extract the first kind, with invariant checking
+This should never fail for well-formed kind-indexed AST nodes
+-}
+safeHeadKind :: [Kind] -> Kind
+safeHeadKind [] = error "Internal compiler error: kindOf called on AST node with no kind annotation"
+safeHeadKind (k : _) = k
+
 class HasKind k where
   kindOf :: k -> Kind
 
@@ -22,10 +29,10 @@ instance HasKind Kind where
   kindOf = id
 
 instance HasKind (TypeIndex Kind) where
-  kindOf = head . universeBi
+  kindOf = safeHeadKind . universeBi
 
 instance HasKind (Parameter Kind) where
-  kindOf = head . universeBi
+  kindOf = safeHeadKind . universeBi
 
 instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
   kindOf =
@@ -41,7 +48,7 @@ instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
       TAlias _ _ k ->
         kindOf k
       k ->
-        head (universeBi k)
+        safeHeadKind (universeBi k)
 
 {-# INLINE foldKindOf #-}
 foldKindOf :: (HasKind k, HasKind i, Functor f, Foldable f) => i -> f k -> Kind

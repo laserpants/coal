@@ -75,7 +75,7 @@ import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
-import Data.Maybe (catMaybes, fromJust)
+import Data.Maybe (catMaybes)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
@@ -365,7 +365,12 @@ expandLetDefinitionTraits name =
             then do
               recs <- forM (tr :| trs) $
                 \(Trait trait _) -> do
-                  fields <- fromJust <$> lookupTraitInstance letDefinitionMetadata (Trait trait (TIntrinsic IInt32))
+                  mFields <- lookupTraitInstance letDefinitionMetadata (Trait trait (TIntrinsic IInt32))
+                  fields <- case mFields of
+                    Nothing -> do
+                      tellErrors [MissingInstance (Trait trait (TIntrinsic IInt32)) (ErrorLocation (principalPath path) letDefinitionMetadata)]
+                      throwError TraitError
+                    Just f -> pure f
                   pure $
                     ERecord
                       mempty

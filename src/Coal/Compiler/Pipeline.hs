@@ -121,7 +121,7 @@ compileWithCFiles config files cFiles = do
 compile :: CompilerConfig -> [FilePath] -> IO ()
 compile config files = compileWithCFiles config files []
 
-prettyRule :: (Show a) => InferenceRule Kind a -> Text
+prettyRule :: InferenceRule Kind a -> Text
 prettyRule =
   \case
     RuleAnnotation _ t1 _ ->
@@ -159,23 +159,69 @@ prettyRule =
      where
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
-    e ->
-      Text.pack ("TODO: " <> show e)
+    RuleApplication _ t1 ts ->
+      "Cannot apply function of type " <> prettyType (normalizeTypeIndexes t1) <> " to arguments of types " <> Text.intercalate ", " (map (prettyType . normalizeTypeIndexes) ts)
+    RuleIfCondition _ t1 ->
+      "Condition must have type `bool`, but got type " <> prettyType (normalizeTypeIndexes t1)
+    RuleIfBranches _ t1 t2 ->
+      "If branches must have the same type, but got " <> prettyType (normalizeTypeIndexes t1) <> " and " <> prettyType (normalizeTypeIndexes t2)
+    RuleLetBindingPattern _ t1 t2 ->
+      "Let binding pattern type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expression type " <> prettyType (normalizeTypeIndexes t2)
+    RuleMatchClauseGuard _ ->
+      "Match clause guard must have type `bool`."
+    RuleMatchClauseExpressions _ ->
+      "All match clause expressions must have the same type."
+    RuleListConstructor _ t1 s ->
+      "List constructor type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType s
+    RuleMatchClausePatterns _ ->
+      "All match clause patterns must have the same type."
+    RuleOperator _ ->
+      "Operator application type error."
+    RuleTopLevelFunction _ ->
+      "Top-level function type error."
+    RuleTopLevelConstant _ ->
+      "Top-level constant type error."
+    RuleAsConstraint _ ->
+      "Type constraint in 'as' pattern doesn't match."
+    RuleFoldType _ ->
+      "Fold expression type error."
+    RuleDataConstructor _ name t1 s ->
+      "Data constructor `" <> name <> "` type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType s
+    RuleSelectEquality _ t1 t2 ->
+      "Record select type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType (normalizeTypeIndexes t2)
+    RuleRecordField _ name t1 ->
+      "Record field `" <> name <> "` type error: " <> prettyType (normalizeTypeIndexes t1)
+    RuleRecordLacks _ name t1 ->
+      "Record lacks field `" <> name <> "`: " <> prettyType (normalizeTypeIndexes t1)
+    RuleTailRow _ t1 t2 ->
+      "Row tail type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match " <> prettyType (normalizeTypeIndexes t2)
+    RuleEntrypoint _ t1 ->
+      "Entrypoint type " <> prettyType (normalizeTypeIndexes t1) <> " is invalid. Main function must return `()` or `IO<()>`."
+    RuleTraitInstance _ t1 s ->
+      "Trait instance type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType s
+    RuleAssumptionExplicit _ t1 s ->
+      "Explicit type assumption " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType s
 
 prettyType :: (CoalPretty t) => t -> Text
 prettyType p = "`" <> (renderStrict . layoutPretty defaultLayoutOptions $ prettyCoal p) <> "`"
 
-prettyConstraintsGenError :: (Show a) => ConstraintsGenError a -> Text
+prettyConstraintsGenError :: ConstraintsGenError a -> Text
 prettyConstraintsGenError =
   \case
     EIllFormedTypeAnnotation (EAnnotationNonDistinctParameter _ name) ->
       "Type annotation is too general: error in the parameter '" <> name <> "'."
+    EIllFormedTypeAnnotation (EAnnotationKindMismatch _) ->
+      "Type annotation has a kind mismatch."
+    EIllFormedTypeAnnotation (EAnnotationConstructor _ name) ->
+      "Type constructor '" <> name <> "' is not in scope."
+    EIllFormedTypeAnnotation (EAnnotationMonomorphicType _ name t) ->
+      "Type parameter '" <> name <> "' resolves to concrete type " <> prettyType (normalizeTypeIndexes t) <> " instead of being polymorphic."
     EFoldPatternInRegularMatch _ ->
       "Fold patterns are not supported in regular match expression clauses. Perhaps you intended to use a 'fold'?"
     ENoDataConstructor _ name ->
       "Data constructor '" <> name <> "' not in scope."
-    e ->
-      Text.pack ("TODO:" <> show e)
+    EDataConstructorArityMismatch _ name expected actual ->
+      "Data constructor '" <> name <> "' expects " <> Text.pack (show expected) <> " arguments, but got " <> Text.pack (show actual) <> "."
 
 prettyKindInferenceError :: KindError -> Text
 prettyKindInferenceError =
@@ -264,6 +310,7 @@ prettyError env =
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msgs env (ErrorLocation path loc) =
   maybe
-    (error "Implementation error")
+    -- If source not found, return a basic error message
+    (Text.unlines $ ("Internal compiler error: source file not found for module '" <> path <> "'") : msgs)
     (prettyErrorMessage (("\n• " <>) <$> msgs) loc)
     (Environment.lookup path env)

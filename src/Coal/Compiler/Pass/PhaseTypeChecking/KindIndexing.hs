@@ -181,10 +181,10 @@ insertTypeName Build{..} loc name =
     \case
       NTypeAlias{} ->
         case Environment.lookup name buildAliases of
-          Nothing ->
+          Nothing -> do
             -- Invariant violation: name is in buildNames but not in buildAliases
             -- This should not happen; indicates a compiler bug
-            error $ "Internal error: Type alias " ++ show name ++ " found in buildNames but not in buildAliases"
+            throwError CompilerError
           Just
             AliasEntry
               { aliasEntryMetadata

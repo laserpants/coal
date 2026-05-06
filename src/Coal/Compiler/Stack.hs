@@ -104,13 +104,12 @@ import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (Substitution)
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
-import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT)
+import Control.Monad.Except (ExceptT (..), MonadError, MonadIO, runExceptT, throwError)
 import Control.Monad.RWS (MonadReader, MonadState, MonadWriter, RWST, runRWST)
 import Control.Monad.State (get, gets, modify)
 import Control.Monad.Trans.Class (MonadTrans, lift)
 import Data.ByteString (ByteString)
 import Data.List (nub)
-import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import Extras (Dictionary, Name)
@@ -193,7 +192,8 @@ getCurrentBuildC = do
   maybeBuild <- getBuildC compilerCurrentPath
   case maybeBuild of
     Nothing ->
-      error $ "Internal error: No build found for current path " ++ show compilerCurrentPath
+      -- This indicates a compiler bug - the build should have been created during preflight
+      throwError CompilerError
     Just build ->
       return build
 
@@ -359,7 +359,12 @@ setConfigGenerateLLVMOutputC flag = modify (overCompilerConfig (setConfigGenerat
 getSourceC :: (Monad m) => Name -> CompilerT a m Text
 getSourceC name = do
   CompilerState{compilerSources} <- get
-  pure (fromMaybe (error $ "Internal error: No source found for module " ++ show name) (Environment.lookup name compilerSources))
+  case Environment.lookup name compilerSources of
+    Nothing ->
+      -- This indicates a compiler bug - source should have been loaded during parsing
+      throwError CompilerError
+    Just source ->
+      pure source
 
 {-# INLINE setTouched #-}
 setTouched :: (Monad m, BuildName p) => p -> CompilerT a m ()

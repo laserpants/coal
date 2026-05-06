@@ -73,7 +73,9 @@ compileFromSource name = do
   src <- getSourceC name
   setTouched name
   case runParser parseSourceFile "" src of
-    Left{} ->
-      error $ "Internal error: Parser failed on previously cached source for module " ++ show name ++ ". This indicates either source corruption or a parser inconsistency bug."
+    Left parserError -> do
+      -- Parser failed on previously cached source - this indicates source corruption or parser bug
+      tellErrors [ParserError (show name) parserError]
+      throwError PreflightFailure
     Right module_ -> do
       pure $ Right (BSource module_)

@@ -118,12 +118,10 @@ inferKinds m = do
   generateKindConstraints m
   constraints <- gets compilerKindConstraints
   case kindUnifierMonad (solveKindConstraints constraints) of
-    Left err ->
-      error $
-        "Kind inference failed for module '"
-          <> show (modulePath m)
-          <> "': "
-          <> show err
+    Left err -> do
+      -- Kind inference failed - report as KindError
+      tellErrors [KindError err (ErrorLocation (principalPath (modulePath m)) undefined)]
+      throwError CompilerError
     Right sub -> do
       modify (overCompilerNameStore (replaceVariables . applyKinds sub))
       modify (overCompilerModuleWithPath (modulePath m) (replaceVariables . applyKinds sub))

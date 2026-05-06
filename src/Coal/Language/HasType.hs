@@ -26,6 +26,13 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 
+{- | Safe helper to extract the first type, with invariant checking
+This should never fail for well-formed type-indexed AST nodes
+-}
+safeHeadType :: [Type o k] -> Type o k
+safeHeadType [] = error "Internal compiler error: typeOf called on AST node with no type annotation"
+safeHeadType (t : _) = t
+
 class HasType o k t where
   typeOf :: t -> Type o k
 
@@ -62,10 +69,10 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Patter
       PInteger _ t _ ->
         t
       p ->
-        head (universeBi p)
+        safeHeadType (universeBi p)
 
 instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Guard Expression a s (Type o k)) where
-  typeOf = head . universeBi
+  typeOf = safeHeadType . universeBi
 
 instance (HasType o k t) => HasType o k (Label t) where
   typeOf (Label t _) =
@@ -91,7 +98,7 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o, Ord k) => HasType o k 
       EFFICall _ t _ _ _ ->
         typeOf t
       e ->
-        head (universeBi e)
+        safeHeadType (universeBi e)
 
 instance (Data a, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Definition a k (Type o k)) where
   typeOf =
@@ -101,7 +108,7 @@ instance (Data a, Data k, Data (o k), Typeable o, Ord k) => HasType o k (Definit
       DLet _ _ LetDefinition{..} ->
         typeOf letDefinitionExpression
       d ->
-        head (universeBi d)
+        safeHeadType (universeBi d)
 
 instance (Data (o Kind), Typeable o) => HasType o Kind (Trait (Type o Kind)) where
   typeOf (Trait name t) =
