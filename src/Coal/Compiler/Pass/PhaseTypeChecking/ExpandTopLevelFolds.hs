@@ -89,12 +89,13 @@ passImpl Module{..} = do
 expandTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a Kind () -> CompilerT a m (Definition a Kind ())
 expandTopLevelFolds =
   \case
-    DFold loc name FoldDefinition{foldDefinitionAnnotation, foldDefinitionClauses} -> do
+    DFold loc name FoldDefinition{foldDefinitionAnnotation, foldDefinitionConstraints, foldDefinitionClauses} -> do
       newExpression <- expandClauses foldDefinitionClauses
       let def =
             LetDefinition
               { letDefinitionMetadata = loc
               , letDefinitionAnnotation = foldDefinitionAnnotation
+              , letDefinitionConstraints = foldDefinitionConstraints
               , letDefinitionType = With [] ()
               , letDefinitionExpression = newExpression
               }

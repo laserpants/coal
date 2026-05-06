@@ -1712,6 +1712,50 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "327" $ do
+    it "is TraitAnnotationError" $ do
+      res <- runSpec "test/Coal/examples/327" ["Main.coal"]
+      res `shouldBe` Left TraitAnnotationError
+
+  describe "328" $ do
+    expectOutput
+      "5"
+      "test/Coal/examples/328"
+      [ "Main.coal"
+      ]
+
+  describe "329" $ do
+    it "is TraitAnnotationError" $ do
+      res <- runSpec "test/Coal/examples/329" ["Main.coal"]
+      res `shouldBe` Left TraitAnnotationError
+
+  describe "330" $ do
+    expectOutput
+      "5"
+      "test/Coal/examples/330"
+      [ "Main.coal"
+      ]
+
+  describe "331" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/331"
+      [ "Main.coal"
+      ]
+
+  describe "332" $ do
+    it "is TraitAnnotationError" $ do
+      res <- runSpec "test/Coal/examples/332" [ "Main.coal" , "Containers/Map.coal" ]
+      res `shouldBe` Left TraitAnnotationError
+
+  describe "333" $ do
+    expectOutput
+      "3"
+      "test/Coal/examples/333" 
+      [ "Main.coal" 
+      , "Containers/Map.coal" 
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

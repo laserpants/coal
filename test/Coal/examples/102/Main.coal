@@ -14,7 +14,7 @@ module Main {
     let foo = fn(x) => 3 : int32
   }
 
-  instance Foo<List<a>> with Foo<a> {
+  instance Foo<List<a>> with (Foo<a>) {
     let foo = 
       fn(xs) => 
         match(xs) {

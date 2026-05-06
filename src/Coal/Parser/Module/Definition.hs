@@ -88,7 +88,7 @@ toEntry :: (Name, Scheme Parameter () ParameterizedType) -> TraitDefinitionInter
 toEntry = uncurry TraitDefinitionInterfaceEntry
 
 parseConstraints :: Parser p -> Parser [Trait p]
-parseConstraints p = option [] (lexeme_ "with" *> commaSep1 (parseTrait p))
+parseConstraints p = option [] (lexeme_ "with" *> parens (commaSep1 (parseTrait p)))
 
 parseParameter :: Parser (Parameter ())
 parseParameter = Parameter () <$> name
@@ -100,7 +100,7 @@ parseTraitInstance = do
   instanceDefinitionTraitName <- constructor
   instanceDefinitionType <- angleBrackets parseType
   end <- getSourcePos
-  instanceDefinitionConstraints <- option [] (lexeme_ "with" *> commaSep1 (parseTrait parseParameter))
+  instanceDefinitionConstraints <- option [] (lexeme_ "with" *> parens (commaSep1 (parseTrait parseParameter)))
   instanceDefinitionImplementations <- braces (some parseMethod)
   pure
     ( DInstance
@@ -238,7 +238,8 @@ parseGroupFunctionDefinition ann = do
   pure
     FunctionDefinition
       { functionDefinitionMetadata = Metadata start end
-      , functionDefinitionAnnotation = With [] <$> ann
+      , functionDefinitionAnnotation = ann
+      , functionDefinitionConstraints = []
       , functionDefinitionType = With [] ()
       , functionDefinitionPatterns
       , functionDefinitionExpression
@@ -249,7 +250,7 @@ parseFunctionDefinition parseName = do
   start <- getSourcePos
   functionDefinitionName <- lexeme_ "fun" *> parseName
   functionDefinitionPatterns <- parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
-  functionDefinitionAnnotation <- parseQualifiedAnnotation
+  (functionDefinitionAnnotation, functionDefinitionConstraints) <- parseReturnTypeAndConstraints
   end <- getSourcePos
   functionDefinitionExpression <- symbol_ "=" *> parseExpression
   fin <- getSourcePos
@@ -259,7 +260,8 @@ parseFunctionDefinition parseName = do
         functionDefinitionName
         FunctionDefinition
           { functionDefinitionMetadata = Metadata start end
-          , functionDefinitionAnnotation = functionDefinitionAnnotation
+          , functionDefinitionAnnotation
+          , functionDefinitionConstraints
           , functionDefinitionType = With [] ()
           , functionDefinitionPatterns
           , functionDefinitionExpression
@@ -270,7 +272,7 @@ parseLetDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseLetDefinition parseName = do
   start <- getSourcePos
   letDefinitionName <- lexeme_ "let" *> parseName
-  letDefinitionAnnotation <- parseQualifiedAnnotation
+  (letDefinitionAnnotation, letDefinitionConstraints) <- parseReturnTypeAndConstraints
   end <- getSourcePos
   letDefinitionExpression <- symbol_ "=" *> parseExpression
   fin <- getSourcePos
@@ -280,7 +282,8 @@ parseLetDefinition parseName = do
         letDefinitionName
         LetDefinition
           { letDefinitionMetadata = Metadata start end
-          , letDefinitionAnnotation = letDefinitionAnnotation
+          , letDefinitionAnnotation
+          , letDefinitionConstraints
           , letDefinitionType = With [] ()
           , letDefinitionExpression
           }
@@ -290,7 +293,7 @@ parseTopLevelFold :: Parser (Definition Metadata () ())
 parseTopLevelFold = do
   start <- getSourcePos
   foldName <- lexeme_ "fold" *> name
-  foldDefinitionAnnotation <- parseQualifiedAnnotation
+  (foldDefinitionAnnotation, foldDefinitionConstraints) <- parseReturnTypeAndConstraints
   end <- getSourcePos
   foldDefinitionClauses <- try (nonEmpty (some parseTopLevelFoldClause))
   pure
@@ -299,7 +302,8 @@ parseTopLevelFold = do
         foldName
         FoldDefinition
           { foldDefinitionMetadata = Metadata start end
-          , foldDefinitionAnnotation = foldDefinitionAnnotation
+          , foldDefinitionAnnotation
+          , foldDefinitionConstraints
           , foldDefinitionClauses
           }
     )
@@ -335,8 +339,8 @@ parseTopLevelFoldClause =
 parseAnnotation :: Parser (Type Parameter ())
 parseAnnotation = symbol_ ":" *> parseType
 
-parseQualifiedAnnotation :: Parser (Maybe (Qualified (Type Parameter ())))
-parseQualifiedAnnotation = do
+parseReturnTypeAndConstraints :: Parser (Maybe (Type Parameter ()), [Trait (Type Parameter ())])
+parseReturnTypeAndConstraints = do
   ann <- optional parseAnnotation
   trs <- parseConstraints parseTypeParameter
-  pure (With trs <$> ann)
+  pure (ann, trs)

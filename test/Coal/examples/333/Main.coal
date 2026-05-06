@@ -30,7 +30,7 @@ module Main {
           }
     }
 
-  fun size(set : Set<a>) =
+  fun size(set : Set<a>) : b with (Numeric<b>) =
     match(set) {
       | Set(map) => Containers.Map.size(map)
     }

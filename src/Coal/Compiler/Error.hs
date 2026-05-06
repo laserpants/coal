@@ -51,6 +51,7 @@ data CompilerError a
   | KindError KindError (ErrorLocation a)
   | OrPatternVariableMismatch (Set Name) (Set Name) (ErrorLocation a)
   | CallCycle [[Name]] (ErrorLocation a)
+  | MissingTraitAnnotation Name [Trait IndexedType] (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -62,6 +63,7 @@ data CompilerFailureMode
   | PatternAnomaly
   | TypeError
   | CallCycleError
+  | TraitAnnotationError
   | CompilerError
   deriving (Show, Eq, Ord, Read)
 
@@ -127,4 +129,6 @@ errorLocation =
     CallCycle _ erl ->
       Just erl
     NamedFoldNotAllowed erl ->
+      Just erl
+    MissingTraitAnnotation _ _ erl ->
       Just erl

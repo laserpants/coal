@@ -10,15 +10,15 @@ module Main {
     fun combine(x, y) = x + y
   }
 
-  fun example1(x : a, y : a) : a =
-    combine(x, y)
-
-//  ^^^
-//  should be:
-//
-//  fun example1(x : a, y : a) : a with Associative<a> =
-//    combine(x, y)
-
+   fun example2(x : a, y : a) =
+     combine(x, y)
+ 
+ //  ^^^
+ //  also:
+ //
+ //  fun example(x : a, y : a) with Associative<a> =
+ //    combine(x, y)
+ 
   fun main() =
 //    IO.println_int32(inverse(5))
     IO.println_int32(5)

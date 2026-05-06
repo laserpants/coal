@@ -1,6 +1,6 @@
 module Coal.Monoid {
   
-  trait Monoid<m> with Semigroup<m> {
+  trait Monoid<m> with (Semigroup<m>) {
     id : m
   }
 

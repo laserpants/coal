@@ -58,6 +58,7 @@ denormalizeConstant name =
           FunctionDefinition
             { functionDefinitionMetadata = letDefinitionMetadata
             , functionDefinitionAnnotation = letDefinitionAnnotation
+            , functionDefinitionConstraints = letDefinitionConstraints
             , functionDefinitionType = With ts (typeOf e)
             , functionDefinitionPatterns = ps
             , functionDefinitionExpression = e
@@ -97,6 +98,7 @@ instance (Monoid a, Data a, Data k, Data (o k), Typeable o, Ord k) => Normalizat
             LetDefinition
               { letDefinitionMetadata = loc
               , letDefinitionAnnotation = functionDefinitionAnnotation
+              , letDefinitionConstraints = functionDefinitionConstraints
               , letDefinitionType = With ts (foldTypeOf t functionDefinitionPatterns)
               , letDefinitionExpression =
                   flattenLambdas (ELambda mempty functionDefinitionPatterns functionDefinitionExpression)

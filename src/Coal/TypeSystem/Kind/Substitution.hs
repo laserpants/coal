@@ -447,6 +447,7 @@ instance KindSubstitutable (FunctionDefinition a Kind ()) where
   applyKinds sub FunctionDefinition{..} =
     FunctionDefinition
       { functionDefinitionAnnotation = applyKinds sub functionDefinitionAnnotation
+      , functionDefinitionConstraints = applyKinds sub functionDefinitionConstraints
       , functionDefinitionPatterns = applyKinds sub functionDefinitionPatterns
       , functionDefinitionExpression = applyKinds sub functionDefinitionExpression
       , ..
@@ -454,6 +455,7 @@ instance KindSubstitutable (FunctionDefinition a Kind ()) where
   replaceVariables FunctionDefinition{..} =
     FunctionDefinition
       { functionDefinitionAnnotation = replaceVariables functionDefinitionAnnotation
+      , functionDefinitionConstraints = replaceVariables functionDefinitionConstraints
       , functionDefinitionPatterns = replaceVariables functionDefinitionPatterns
       , functionDefinitionExpression = replaceVariables functionDefinitionExpression
       , ..
@@ -463,12 +465,14 @@ instance KindSubstitutable (LetDefinition a Kind ()) where
   applyKinds sub LetDefinition{..} =
     LetDefinition
       { letDefinitionAnnotation = applyKinds sub letDefinitionAnnotation
+      , letDefinitionConstraints = applyKinds sub letDefinitionConstraints
       , letDefinitionExpression = applyKinds sub letDefinitionExpression
       , ..
       }
   replaceVariables LetDefinition{..} =
     LetDefinition
       { letDefinitionAnnotation = replaceVariables letDefinitionAnnotation
+      , letDefinitionConstraints = replaceVariables letDefinitionConstraints
       , letDefinitionExpression = replaceVariables letDefinitionExpression
       , ..
       }
@@ -519,12 +523,14 @@ instance KindSubstitutable (FoldDefinition a Kind ()) where
   applyKinds sub FoldDefinition{..} =
     FoldDefinition
       { foldDefinitionAnnotation = applyKinds sub foldDefinitionAnnotation
+      , foldDefinitionConstraints = applyKinds sub foldDefinitionConstraints
       , foldDefinitionClauses = applyKinds sub foldDefinitionClauses
       , ..
       }
   replaceVariables FoldDefinition{..} =
     FoldDefinition
       { foldDefinitionAnnotation = replaceVariables foldDefinitionAnnotation
+      , foldDefinitionConstraints = replaceVariables foldDefinitionConstraints
       , foldDefinitionClauses = replaceVariables foldDefinitionClauses
       , ..
       }

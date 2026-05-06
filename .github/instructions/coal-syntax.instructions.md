@@ -30,7 +30,7 @@ This guide provides comprehensive reference for Coal language syntax, designed f
    let x = x + 1 in x  // ✗ ERROR: Name "x" not in scope in definition
    ```
 
-4. **Recursion via `fold` keyword** with `@`-patterns (NOT `unfold`):
+4. **Recursion via `fold` keyword** with `@`-patterns:
 
    ```coal
    fun factorial(n : nat) =
@@ -556,8 +556,6 @@ let evens = enum_from(0) |.map_process(fn(n) => n * 2)
 - `tail : Stream<a> -> Stream<a>` — Advance to next state
 - `map_process : (a -> b) -> Process<a, v> -> Process<b, v>` — Transform observations
 
-**NO "unfold" keyword** — this is deprecated. Use `Process` type instead.
-
 ## Traits (Type Classes)
 
 ### Defining Traits
@@ -769,13 +767,7 @@ instance Name<concrete_type> {
    map(fn(x) => x + 1, xs) // ✓ Correct
    ```
 
-5. **No unfold keyword:**
-
-   ```coal
-   unfold(...)  // ✗ DEPRECATED, use Process type
-   ```
-
-6. **Match expressions must be exhaustive:**
+5. **Match expressions must be exhaustive:**
 
    ```coal
    match(opt) {
@@ -783,7 +775,7 @@ instance Name<concrete_type> {
    }
    ```
 
-7. **Unit function calls need double parentheses OR single:**
+6. **Unit function calls need double parentheses OR single:**
    ```coal
    fun five(()) = 5
    five(())     // Explicit unit

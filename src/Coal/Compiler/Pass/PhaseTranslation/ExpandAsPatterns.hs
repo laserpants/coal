@@ -116,6 +116,7 @@ instance (Data a, Data k, Data t, Monoid a) => ExpandContext (LetDefinition a k 
       LetDefinition
         { letDefinitionMetadata
         , letDefinitionAnnotation
+        , letDefinitionConstraints
         , letDefinitionType
         , letDefinitionExpression
         } ->

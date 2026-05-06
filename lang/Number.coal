@@ -103,7 +103,7 @@ module Number {
    *
    * Returns `None` for an empty list.
    */
-  fun maximum(elems : List<a>) : Option<a> =
+  fun maximum(elems : List<a>) : Option<a> with (Ordered<a>) =
     fold(elems) {
       | [] => None
       | a :: @rest =>

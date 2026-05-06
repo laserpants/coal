@@ -2,7 +2,7 @@ module Main {
 
   import namespace IO
 
-  instance Comparable<List<a>> with Comparable<a> {
+  instance Comparable<List<a>> with (Comparable<a>) {
     fun `==`(xs, ys) =
       match((xs, ys)) {
         | (a :: _, b :: _) => 

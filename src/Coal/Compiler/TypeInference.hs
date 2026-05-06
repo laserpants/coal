@@ -130,7 +130,7 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
             case functionDefinitionAnnotation of
               Nothing ->
                 functionDefinitionExpression
-              Just (With _ annotationType) ->
+              Just annotationType ->
                 EAnnotation loc annotationType functionDefinitionExpression
       DLet
         _
@@ -158,7 +158,7 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
             case letDefinitionAnnotation of
               Nothing ->
                 letDefinitionExpression
-              Just (With _ annotationType) ->
+              Just annotationType ->
                 EAnnotation loc annotationType letDefinitionExpression
       DInstance _ InstanceDefinition{..} -> do
         Build{..} <- getCurrentBuildC

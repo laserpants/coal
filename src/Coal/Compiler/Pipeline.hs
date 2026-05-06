@@ -250,6 +250,14 @@ prettyError env =
       errorMessage ["Sub-patterns must bind the same variable in or-patterns"] env erl
     CallCycle cycles erl ->
       errorMessage (fmap (\cs -> "Explicit recursion detected: " <> Text.intercalate " → " cs) cycles) env erl
+    MissingTraitAnnotation name traits erl ->
+      errorMessage
+        [ "Missing trait annotation for '" <> name <> "'"
+        , "Required traits: " <> Text.intercalate ", " (fmap prettyType traits)
+        , "When type parameters are explicitly annotated, all required trait constraints must be included in the annotation."
+        ]
+        env
+        erl
     NamedFoldNotAllowed erl ->
       errorMessage ["Named fold pattern inside expression fold."] env erl
 

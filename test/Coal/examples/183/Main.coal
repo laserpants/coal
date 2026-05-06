@@ -6,11 +6,11 @@ module Main {
     combine : a -> a -> a
   }
 
-  trait Monoidal<a> with Associative<a> {
+  trait Monoidal<a> with (Associative<a>) {
     mempty : a 
   }
 
-  trait Group<a> with Monoidal<a> {
+  trait Group<a> with (Monoidal<a>) {
     inverse : a -> a
   }
 

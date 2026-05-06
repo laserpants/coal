@@ -5,12 +5,12 @@
 
 module Coal.Compiler.BuildSpec where
 
-import Coal.Compiler.Metadata (Metadata (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry (NameEntry (..))
 import Coal.Compiler.KindEnvironment (moduleKindEnvironment)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild
 import Coal.Compiler.Stack
 import Coal.Compiler.State
@@ -143,6 +143,7 @@ testModuleBuiltinsPreKinds =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -159,6 +160,7 @@ testModuleBuiltinsPreKinds =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -181,6 +183,7 @@ testModuleBuiltinsPreKinds =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -203,6 +206,7 @@ testModuleBuiltinsPreKinds =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -225,6 +229,7 @@ testModuleBuiltinsPreKinds =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -236,7 +241,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_add"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| mempty
+                                        :| mempty
                                   )
                             }
                         )
@@ -248,6 +253,7 @@ testModuleBuiltinsPreKinds =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -259,7 +265,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_sub"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| mempty
+                                        :| mempty
                                   )
                             }
                         )
@@ -271,6 +277,7 @@ testModuleBuiltinsPreKinds =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -282,7 +289,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_mul"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| mempty
+                                        :| mempty
                                   )
                             }
                         )
@@ -391,6 +398,7 @@ testModuleBuiltins =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -407,6 +415,7 @@ testModuleBuiltins =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -429,6 +438,7 @@ testModuleBuiltins =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -451,6 +461,7 @@ testModuleBuiltins =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -473,6 +484,7 @@ testModuleBuiltins =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -484,7 +496,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_add"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| mempty
+                                        :| mempty
                                   )
                             }
                         )
@@ -496,6 +508,7 @@ testModuleBuiltins =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -507,7 +520,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_sub"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| mempty
+                                        :| mempty
                                   )
                             }
                         )
@@ -519,6 +532,7 @@ testModuleBuiltins =
                                 mempty
                             , functionDefinitionAnnotation =
                                 Nothing
+                            , functionDefinitionConstraints = []
                             , functionDefinitionType =
                                 With mempty ()
                             , functionDefinitionPatterns =
@@ -530,7 +544,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_mul"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                      :| mempty
+                                        :| mempty
                                   )
                             }
                         )
@@ -560,14 +574,12 @@ testModule0PreKinds =
                 { functionDefinitionMetadata = mempty
                 , functionDefinitionAnnotation =
                     Just
-                      ( With
-                          mempty
-                          ( TApplication
-                              ()
-                              (TConstructor () "IO")
-                              (TIntrinsic IUnit)
-                          )
+                      ( TApplication
+                          ()
+                          (TConstructor () "IO")
+                          (TIntrinsic IUnit)
                       )
+                , functionDefinitionConstraints = []
                 , functionDefinitionType = With mempty ()
                 , functionDefinitionPatterns =
                     PAnnotation
@@ -606,14 +618,12 @@ testModule0 =
                 { functionDefinitionMetadata = mempty
                 , functionDefinitionAnnotation =
                     Just
-                      ( With
-                          mempty
-                          ( TApplication
-                              KType
-                              (TConstructor (KArrow KType KType) "IO")
-                              (TIntrinsic IUnit)
-                          )
+                      ( TApplication
+                          KType
+                          (TConstructor (KArrow KType KType) "IO")
+                          (TIntrinsic IUnit)
                       )
+                , functionDefinitionConstraints = []
                 , functionDefinitionType = With mempty ()
                 , functionDefinitionPatterns =
                     PAnnotation
@@ -664,6 +674,7 @@ testModule1PreKinds =
             ( FunctionDefinition
                 { functionDefinitionMetadata = mempty
                 , functionDefinitionAnnotation = Nothing
+                , functionDefinitionConstraints = []
                 , functionDefinitionType = With mempty ()
                 , functionDefinitionPatterns =
                     PLiteral mempty LUnit :| mempty
@@ -714,6 +725,7 @@ testModule1PreKinds =
 --            ( FunctionDefinition
 --                { functionDefinitionMetadata = mempty
 --                , functionDefinitionAnnotation = Nothing
+--                , functionDefinitionConstraints = []
 --                , functionDefinitionType = With mempty ()
 --                , functionDefinitionPatterns =
 --                    PLiteral mempty LUnit :| mempty
@@ -766,7 +778,8 @@ testModule2PreKinds =
                 { functionDefinitionMetadata =
                     mempty
                 , functionDefinitionAnnotation =
-                    Just (With mempty (TIntrinsic IInt32))
+                    Just (TIntrinsic IInt32)
+                , functionDefinitionConstraints = []
                 , functionDefinitionType =
                     With mempty ()
                 , functionDefinitionPatterns =
@@ -831,12 +844,12 @@ testModule2PreKinds =
                                                     :| mempty
                                                 )
                                                 <| EVariable mempty (Label () "f")
-                                                :| mempty
+                                                  :| mempty
                                             )
                                         )
                                         :| mempty
                                     )
-                                  :| mempty
+                                    :| mempty
                               )
                           )
                       )
@@ -938,7 +951,8 @@ testModule2PreKinds =
 --                { functionDefinitionMetadata =
 --                    mempty
 --                , functionDefinitionAnnotation =
---                    Just (With mempty (TIntrinsic IInt32))
+--                    Just (TIntrinsic IInt32)
+--                , functionDefinitionConstraints = []
 --                , functionDefinitionType =
 --                    With mempty ()
 --                , functionDefinitionPatterns =
@@ -1047,10 +1061,8 @@ testModule3PreKinds =
                 { functionDefinitionMetadata = mempty
                 , functionDefinitionAnnotation =
                     Just
-                      ( With
-                          mempty
-                          (TIntrinsic INat)
-                      )
+                      (TIntrinsic INat)
+                , functionDefinitionConstraints = []
                 , functionDefinitionType =
                     With mempty ()
                 , functionDefinitionPatterns =
@@ -1076,10 +1088,8 @@ testModule3PreKinds =
                 { functionDefinitionMetadata = mempty
                 , functionDefinitionAnnotation =
                     Just
-                      ( With
-                          mempty
-                          (TIntrinsic IInt32)
-                      )
+                      (TIntrinsic IInt32)
+                , functionDefinitionConstraints = []
                 , functionDefinitionType =
                     With mempty ()
                 , functionDefinitionPatterns =
@@ -1113,6 +1123,7 @@ testModule4PreKinds =
             ( FunctionDefinition
                 { functionDefinitionMetadata = mempty
                 , functionDefinitionAnnotation = Nothing
+                , functionDefinitionConstraints = []
                 , functionDefinitionType = With mempty ()
                 , functionDefinitionPatterns =
                     PVariable mempty (Label () "m") :| mempty
@@ -1136,10 +1147,8 @@ testModule4PreKinds =
 --                { functionDefinitionMetadata = mempty
 --                , functionDefinitionAnnotation =
 --                    Just
---                      ( With
---                          mempty
---                          (TIntrinsic INat)
---                      )
+--                      (TIntrinsic INat)
+--                , functionDefinitionConstraints = []
 --                , functionDefinitionType =
 --                    With mempty ()
 --                , functionDefinitionPatterns =
@@ -1165,10 +1174,8 @@ testModule4PreKinds =
 --                { functionDefinitionMetadata = mempty
 --                , functionDefinitionAnnotation =
 --                    Just
---                      ( With
---                          mempty
---                          (TIntrinsic IInt32)
---                      )
+--                      (TIntrinsic IInt32)
+--                , functionDefinitionConstraints = []
 --                , functionDefinitionType =
 --                    With mempty ()
 --                , functionDefinitionPatterns =
@@ -1211,7 +1218,8 @@ testModule4PreKinds =
 --                { functionDefinitionMetadata =
 --                    mempty
 --                , functionDefinitionAnnotation =
---                    Just (With mempty (TIntrinsic IInt32))
+--                    Just (TIntrinsic IInt32)
+--                , functionDefinitionConstraints = []
 --                , functionDefinitionType =
 --                    With mempty ()
 --                , functionDefinitionPatterns =
@@ -1550,14 +1558,12 @@ testModule9 =
                 { functionDefinitionMetadata = mempty
                 , functionDefinitionAnnotation =
                     Just
-                      ( With
-                          mempty
-                          ( TApplication
-                              ()
-                              (TConstructor () "IO")
-                              (TIntrinsic IUnit)
-                          )
+                      ( TApplication
+                          ()
+                          (TConstructor () "IO")
+                          (TIntrinsic IUnit)
                       )
+                , functionDefinitionConstraints = []
                 , functionDefinitionType = With mempty ()
                 , functionDefinitionPatterns =
                     PAnnotation

@@ -12,7 +12,7 @@ module Writer {
       Writer(f(a), w)
   }
 
-  instance Applicative<Writer<w>> with Monoid<w> {
+  instance Applicative<Writer<w>> with (Monoid<w>) {
     fun pure(w) = 
       Writer(w, id)
 
@@ -21,7 +21,7 @@ module Writer {
   }
 
   instance Monad<Writer<w>> {
-    fun bind(writer, k) : Writer<w, b> =
+    fun bind(writer, k) : Writer<w, b> with (Semigroup<w>) =
       match(writer) {
         | Writer(a, w1) =>
             match(k(a)) {

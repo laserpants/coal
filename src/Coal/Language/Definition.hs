@@ -83,7 +83,8 @@ instance (Binary a, Binary k, Binary t) => Binary (FunctionGroupDefinition a k t
 
 data FunctionDefinition a k t = FunctionDefinition
   { functionDefinitionMetadata :: a
-  , functionDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , functionDefinitionAnnotation :: Maybe (Type Parameter k)
+  , functionDefinitionConstraints :: [Trait (Type Parameter k)]
   , functionDefinitionType :: Qualified t
   , functionDefinitionPatterns :: NonEmpty (Pattern a k t)
   , functionDefinitionExpression :: Expression a k t
@@ -105,7 +106,8 @@ instance (Binary a, Binary k, Binary t) => Binary (FunctionDefinition a k t)
 
 data LetDefinition a k t = LetDefinition
   { letDefinitionMetadata :: a
-  , letDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , letDefinitionAnnotation :: Maybe (Type Parameter k)
+  , letDefinitionConstraints :: [Trait (Type Parameter k)]
   , letDefinitionType :: Qualified t
   , letDefinitionExpression :: Expression a k t
   }
@@ -126,7 +128,8 @@ instance (Binary a, Binary k, Binary t) => Binary (LetDefinition a k t)
 
 data FoldDefinition a k t = FoldDefinition
   { foldDefinitionMetadata :: a
-  , foldDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
+  , foldDefinitionAnnotation :: Maybe (Type Parameter k)
+  , foldDefinitionConstraints :: [Trait (Type Parameter k)]
   , foldDefinitionClauses :: NonEmpty (Clause a k t)
   }
   deriving

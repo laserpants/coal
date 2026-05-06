@@ -29,7 +29,7 @@ module Main {
   }
 
   instance Monad<Writer<w>> {
-    fun bind(writer, k) : Writer<w, b> =
+    fun bind(writer, k) : Writer<w, b> with (Semigroup<w>) =
       match(writer) {
         | Writer(a, w1) =>
             match(k(a)) {

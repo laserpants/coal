@@ -9,16 +9,13 @@ module Main {
   instance Associative<int32> {
     fun combine(x, y) = x + y
   }
-
-  fun example1(x : a, y : a) : a =
-    combine(x, y)
-
-//  ^^^
-//  should be:
-//
-//  fun example1(x : a, y : a) : a with Associative<a> =
-//    combine(x, y)
-
+ 
+   fun example3(x, y) =
+     combine(x, y)
+ 
+ //  ^^^
+ //  this is OK, since the parameter a is implicit
+ 
   fun main() =
 //    IO.println_int32(inverse(5))
     IO.println_int32(5)

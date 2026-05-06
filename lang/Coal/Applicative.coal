@@ -4,7 +4,7 @@ module Coal.Applicative {
   import IO(return, __eval_io)
   import namespace List
 
-  trait Applicative<f> with Functor<f> {
+  trait Applicative<f> with (Functor<f>) {
     ap : f<a -> b> -> f<a> -> f<b>
     pure : a -> f<a>
   }
@@ -32,7 +32,7 @@ module Coal.Applicative {
     let pure = return
   }
 
-  fun map2(f : p -> q -> r, a1 : f<p>, a2 : f<q>) : f<r> =                 
+  fun map2(f : p -> q -> r, a1 : f<p>, a2 : f<q>) : f<r> with (Applicative<f>, Functor<f>) =                 
     ap(map(f, a1), a2)
 
 }

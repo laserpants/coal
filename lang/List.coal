@@ -271,7 +271,7 @@ module List {
    * Return a boolean indicating whether the first list is a prefix of the 
    * second.
    */
-  fun is_prefix_of(part : List<a>, whole : List<a>) : bool =
+  fun is_prefix_of(part : List<a>, whole : List<a>) : bool with (Comparable<a>) =
     if (length(part) > length(whole)) 
       then 
         false

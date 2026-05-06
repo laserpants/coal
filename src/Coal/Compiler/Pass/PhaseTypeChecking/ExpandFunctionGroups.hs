@@ -99,13 +99,16 @@ expandGroups =
             name
             LetDefinition
               { letDefinitionMetadata = loc
-              , letDefinitionAnnotation = functionGroupDefinitionAnnotation
+              , letDefinitionAnnotation = extractType <$> functionGroupDefinitionAnnotation
+              , letDefinitionConstraints = maybe [] extractConstraints functionGroupDefinitionAnnotation
               , letDefinitionType = With [] ()
               , letDefinitionExpression =
                   ELambda loc (varP <$> args) (matchE (packVariables args) (buildExpressionClauses functionGroupDefinitionBranches))
               }
         ]
      where
+      extractType (With _ t) = t
+      extractConstraints (With ts _) = ts
       FunctionDefinition{..} = case functionGroupDefinitionBranches of
         (firstDef : _) -> firstDef
         [] -> error "Empty function group"

@@ -338,6 +338,7 @@ instance EmitKinds (FunctionDefinition a Kind ()) where
       FunctionDefinition{..} -> do
         ps <-
           emitKindConstraints functionDefinitionAnnotation
+            <>^ emitKindConstraints functionDefinitionConstraints
             <>^ emitKindConstraints functionDefinitionPatterns
             <>^ emitKindConstraints functionDefinitionExpression
         tellParameterConstraints ps
@@ -349,6 +350,7 @@ instance EmitKinds (LetDefinition a Kind ()) where
       LetDefinition{..} -> do
         ps <-
           emitKindConstraints letDefinitionAnnotation
+            <>^ emitKindConstraints letDefinitionConstraints
             <>^ emitKindConstraints letDefinitionExpression
         tellParameterConstraints ps
         pure ps
@@ -386,6 +388,7 @@ instance EmitKinds (FoldDefinition a Kind ()) where
       FoldDefinition{..} -> do
         ps <-
           emitKindConstraints foldDefinitionAnnotation
+            <>^ emitKindConstraints foldDefinitionConstraints
             <>^ emitKindConstraints foldDefinitionClauses
         tellParameterConstraints ps
         pure ps

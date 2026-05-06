@@ -5,7 +5,7 @@ module Coal.Monad {
   import IO(__eval_io)
   import namespace List
 
-  trait Monad<m> with Applicative<m> {
+  trait Monad<m> with (Applicative<m>) {
     bind : m<a> -> (a -> m<b>) -> m<b>
   }
 
@@ -25,10 +25,10 @@ module Coal.Monad {
     fun bind(v, f) = f(__eval_io(v))
   }
 
-  fun then_do(a : m<a>, b : m<b>) : m<b> =
+  fun then_do(a : m<a>, b : m<b>) : m<b> with (Monad<m>) =
     bind(a, always(b))
 
-  let and_then : (a -> m<b>) -> m<a> -> m<b> =
+  let and_then : (a -> m<b>) -> m<a> -> m<b> with (Monad<m>) =
     flip(bind)
 
   let and_eval = flip(then_do)

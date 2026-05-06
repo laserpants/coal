@@ -90,6 +90,7 @@ instance ToKindIndexed (FunctionDefinition a k ()) (FunctionDefinition a Kind ()
       FunctionDefinition{..} ->
         FunctionDefinition functionDefinitionMetadata
           <$> toKindIndexed functionDefinitionAnnotation
+          <*> toKindIndexed functionDefinitionConstraints
           <*> toKindIndexed functionDefinitionType
           <*> toKindIndexed functionDefinitionPatterns
           <*> toKindIndexed functionDefinitionExpression
@@ -108,6 +109,7 @@ instance ToKindIndexed (LetDefinition a k ()) (LetDefinition a Kind ()) where
       LetDefinition{..} ->
         LetDefinition letDefinitionMetadata
           <$> toKindIndexed letDefinitionAnnotation
+          <*> toKindIndexed letDefinitionConstraints
           <*> toKindIndexed letDefinitionType
           <*> toKindIndexed letDefinitionExpression
 
@@ -133,6 +135,7 @@ instance ToKindIndexed (FoldDefinition a k ()) (FoldDefinition a Kind ()) where
       FoldDefinition{..} ->
         FoldDefinition foldDefinitionMetadata
           <$> toKindIndexed foldDefinitionAnnotation
+          <*> toKindIndexed foldDefinitionConstraints
           <*> toKindIndexed foldDefinitionClauses
 
 instance ToKindIndexed (InstanceDefinition a k ()) (InstanceDefinition a Kind ()) where

@@ -8,7 +8,7 @@ Module: Coal.Language.HasKind
 
 Type class for extracting and folding kinds from language constructs.
 -}
-module Coal.Language.HasKind (HasKind (..), foldKindOf) where
+module Coal.Language.HasKind (HasKind (..), foldKindOf, hasKind) where
 
 import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..), foldKind)
@@ -46,3 +46,7 @@ instance (Data (o Kind), Typeable o) => HasKind (Type o Kind) where
 {-# INLINE foldKindOf #-}
 foldKindOf :: (HasKind k, HasKind i, Functor f, Foldable f) => i -> f k -> Kind
 foldKindOf t ts = foldKind (kindOf t) (kindOf <$> ts)
+
+{-# INLINE hasKind #-}
+hasKind :: (HasKind k) => Kind -> k -> Bool
+hasKind k o = kindOf o == k

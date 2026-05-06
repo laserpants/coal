@@ -6,10 +6,10 @@ module Containers.Set {
 
   type Set<a> = Set(Map<a, unit>)
 
-  fun insert(element : a, Set(map) : Set<a>) : Set<a> =
+  fun insert(element : a, Set(map) : Set<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
     Set(Containers.Map.insert(element, (), map))
 
-  fun delete(element : a, Set(map) : Set<a>) : Set<a> =
+  fun delete(element : a, Set(map) : Set<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
     Set(Containers.Map.delete(element, map))
 
   fun singleton(element : a) : Set<a> =
@@ -20,7 +20,7 @@ module Containers.Set {
   fun is_empty(Set(map) : Set<a>) : bool =
     Containers.Map.is_empty(map)
 
-  fun is_member(element : a, Set(map) : Set<a>) : bool =
+  fun is_member(element : a, Set(map) : Set<a>) : bool  with (Comparable<a>, Ordered<a>) =
     match(Containers.Map.lookup(element, map)) {
       | Some(_) => true
       | _ => false
@@ -35,19 +35,19 @@ module Containers.Set {
           left <> (key :: right)
     }
 
-  fun from_list(list : List<a>) : Set<a> =
+  fun from_list(list : List<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
     List.reduce(insert, empty, list)
 
-  fun map(f : a -> b, set : Set<a>) : Set<b> =
+  fun map(f : a -> b, set : Set<a>) : Set<b> with (Comparable<a>, Ordered<a>) =
     from_list(List.map(f, to_list(set)))
 
-  fun filter(predicate : a -> bool, set : Set<a>) : Set<a> =
+  fun filter(predicate : a -> bool, set : Set<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
     from_list(List.filter(predicate, to_list(set)))
 
-  fun union(fst : Set<a>, snd : Set<a>) : Set<a> =
+  fun union(fst : Set<a>, snd : Set<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
     from_list(to_list(fst) <> to_list(snd))
 
-  fun intersection(fst : Set<a>, snd : Set<a>) : Set<a> =
+  fun intersection(fst : Set<a>, snd : Set<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
     let (m, n) = if (size(fst) < size(snd)) then (fst, snd) else (snd, fst)
     in
     filter(fn(element) => n |. is_member(element), m)

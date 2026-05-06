@@ -273,7 +273,9 @@ instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Show k) => Dot (Funct
     \case
       FunctionDefinition{..} -> do
         dotId <- emitShape EllipseShape "FunctionDefinition"
-        emitEdge dotId (annotation functionDefinitionAnnotation)
+        case (functionDefinitionAnnotation, functionDefinitionConstraints) of
+          (Just t, []) -> emitEdge dotId (annotation (Just (With [] t)))
+          (rt, cs) -> emitEdge dotId (annotation (With cs <$> rt))
         emitEdge dotId functionDefinitionType
         emitEdgesWithLabels numberedList dotId (NonEmpty.toList functionDefinitionPatterns)
         emitEdge dotId functionDefinitionExpression
@@ -284,7 +286,9 @@ instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Show k) => Dot (LetDe
     \case
       LetDefinition{..} -> do
         dotId <- emitShape EllipseShape "LetDefinition"
-        emitEdge dotId (annotation letDefinitionAnnotation)
+        case (letDefinitionAnnotation, letDefinitionConstraints) of
+          (Just t, []) -> emitEdge dotId (annotation (Just (With [] t)))
+          (rt, cs) -> emitEdge dotId (annotation (With cs <$> rt))
         emitEdge dotId letDefinitionType
         emitEdge dotId letDefinitionExpression
         return dotId
@@ -294,7 +298,9 @@ instance (HasKind (Type Parameter k), CoalPretty k, Dot t, Show k) => Dot (FoldD
     \case
       FoldDefinition{..} -> do
         dotId <- emitShape EllipseShape "FoldDefinition"
-        emitEdge dotId (annotation foldDefinitionAnnotation)
+        case (foldDefinitionAnnotation, foldDefinitionConstraints) of
+          (Just t, []) -> emitEdge dotId (annotation (Just (With [] t)))
+          (rt, cs) -> emitEdge dotId (annotation (With cs <$> rt))
         emitEdges dotId foldDefinitionClauses
         return dotId
 

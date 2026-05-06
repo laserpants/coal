@@ -143,6 +143,7 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
       FunctionDefinition{..} ->
         FunctionDefinition functionDefinitionMetadata
           <$> aliasTransform functionDefinitionAnnotation
+          <*> aliasTransform functionDefinitionConstraints
           <*> aliasTransform functionDefinitionType
           <*> aliasTransform functionDefinitionPatterns
           <*> aliasTransform functionDefinitionExpression
@@ -153,6 +154,7 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
       LetDefinition{..} ->
         LetDefinition letDefinitionMetadata
           <$> aliasTransform letDefinitionAnnotation
+          <*> aliasTransform letDefinitionConstraints
           <*> aliasTransform letDefinitionType
           <*> aliasTransform letDefinitionExpression
 

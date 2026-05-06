@@ -15,7 +15,7 @@ module Test {
       then Pass
       else Fail("Assertion failed")
 
-  fun assert_eq(x : a, y : a) : TestResult =
+  fun assert_eq(x : a, y : a) : TestResult with (Comparable<a>) =
     if (x == y) 
       then Pass
       else Fail("TODO")
