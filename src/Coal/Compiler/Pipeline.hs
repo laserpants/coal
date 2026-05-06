@@ -196,7 +196,7 @@ prettyRule =
     RuleTailRow _ t1 t2 ->
       "Row tail type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match " <> prettyType (normalizeTypeIndexes t2)
     RuleEntrypoint _ t1 ->
-      "Entrypoint type " <> prettyType (normalizeTypeIndexes t1) <> " is invalid. Main function must return `()` or `IO<()>`."
+      "Entrypoint type " <> prettyType (normalizeTypeIndexes t1) <> " is invalid. Main function must return `IO<unit>`."
     RuleTraitInstance _ t1 s ->
       "Trait instance type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType s
     RuleAssumptionExplicit _ t1 s ->
