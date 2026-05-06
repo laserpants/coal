@@ -30,7 +30,7 @@ import Coal.Compiler.Build (Build (buildDependencies))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
 import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
-import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
@@ -62,7 +62,13 @@ passImpl units = do
   unless ("Main" `elem` names) $ do
     tellErrors [NoModuleMain]
     throwError PreflightFailure
-  edges <- traverse (collectEdges names) units
+
+  -- Collect edges and listen for any ModuleNotFound errors
+  (edges, errors) <- listenErrors $ traverse (collectEdges names) units
+
+  -- Fail immediately if any modules were not found
+  unless (null errors) $ throwError PreflightFailure
+
   let sccs = stronglyConnComp edges
       cyclicSCCs = filter isCyclicSCC sccs
   forM_ cyclicSCCs $

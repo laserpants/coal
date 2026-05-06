@@ -33,9 +33,11 @@ import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Builtin.Names (builtinNames)
+import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT, clearAssumptionsC, clearNameStoreC, insertBuildC, insertNameC, setCurrentModuleC, updateCurrentBuildPureC)
+import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT, clearAssumptionsC, clearNameStoreC, insertBuildC, insertNameC, setCurrentModuleC, updateCurrentBuildPureC)
 import Coal.Compiler.State
 import Coal.Language (Kind, constructors)
 import Coal.Language.Definition (AliasDefinition (..), Definition (..))
@@ -44,7 +46,7 @@ import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Control.Monad (when)
-import Control.Monad.Except (MonadIO)
+import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
@@ -90,7 +92,7 @@ kindIndexing m = do
   insertBuildHash
   return indexedM
 
-prepareBuildAliases :: (Monad m) => Module a Kind () -> CompilerT a m ()
+prepareBuildAliases :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
 prepareBuildAliases Module{..} = do
   build <-
     execStateT
@@ -109,7 +111,7 @@ insertBuildHash = do
     Just source ->
       updateCurrentBuildPureC (insertHash source)
 
-prepareDefinitions :: (Monad m) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
+prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions = traverse_ collectTypeAliases
 
 insertExportedName :: (Monad m) => Name -> ReaderT (ExportList a) (StateT (Build a) m) ()
@@ -132,7 +134,7 @@ insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
 insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
-collectTypeAliases :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectTypeAliases :: (Monad m, Monoid a) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTypeAliases =
   \case
     DTypeAlias loc name AliasDefinition{..} -> do
@@ -197,13 +199,14 @@ insertTypeName Build{..} loc name =
       _ ->
         return False
 
-importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
+importedBuild :: (Monad m, Monoid a) => Path -> CompilerT a m (Build a)
 importedBuild path = do
   env <- gets compilerModules
   case Environment.lookup (principalPath path) env of
-    Nothing ->
-      -- Module not found in compiler state; this indicates the module
-      -- was not processed or there is a dependency resolution issue
-      error $ "Internal error: Module " ++ show path ++ " not found in compiler modules. Check dependency resolution."
+    Nothing -> do
+      -- This should never happen if preflight validation passed correctly.
+      -- However, handle gracefully instead of crashing with 'error'.
+      tellErrors [ModuleNotFound (principalPath path) (ErrorLocation (principalPath path) mempty)]
+      throwError CompilerError
     Just build ->
       return build

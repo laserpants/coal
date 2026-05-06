@@ -1,0 +1,9 @@
+module Main {
+
+  import Hello(hello_world)
+  import SomeModule(hello)
+
+  fun main() =
+    hello_world()
+
+}
