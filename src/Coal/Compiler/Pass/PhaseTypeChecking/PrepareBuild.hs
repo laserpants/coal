@@ -48,7 +48,7 @@ import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Builtin.Names (builtinNames)
-import Coal.Compiler.Error ()
+import Coal.Compiler.Error
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
@@ -58,11 +58,12 @@ import Coal.Language
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
+import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Parameterized (Parameterized (instantiateTypeIndexes), ToIndexed (toIndexed))
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless)
-import Control.Monad.Except (MonadIO)
+import Control.Monad.Except (MonadError (..), MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
@@ -683,7 +684,7 @@ collectInstances =
           _ ->
             pure ()
 
-      Build{buildTraits} <- get
+      Build{buildTraits, buildTypeConstructors} <- get
       case Environment.lookup instanceDefinitionTraitName buildTraits of
         Just TraitEntry{..} -> do
           Environment env <- flip Environment.mapMEnvironment traitEntryInterface $
@@ -697,6 +698,15 @@ collectInstances =
                   return $ Forall ((typeIndexesIn vs <> typeIndexesIn t1) \\ typeIndexesIn t) vs t1
                 Nothing ->
                   error "Implementation error"
+
+          forM_ (constructors t) $
+            \constructor ->
+              unless (Environment.contains constructor buildTypeConstructors) $
+                lift $
+                  lift $ do
+                    currentPath <- gets compilerCurrentPath
+                    tellErrors [KindError (ENoTypeConstructor constructor) (ErrorLocation (principalPath currentPath) instanceDefinitionMetadata)]
+                    throwError TypeError
 
           let entry =
                 InstanceEntry

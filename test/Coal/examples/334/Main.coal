@@ -1,9 +1,13 @@
 module Main {
 
-  import Hello(hello_world)
-  import SomeModule(hello)
+  import namespace IO
+
+ instance Comparable<Baz<a>> {
+    fun `==`(a, b) =
+      true
+  }
 
   fun main() =
-    hello_world()
+    IO.println_string("...")
 
 }
