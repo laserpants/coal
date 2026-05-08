@@ -1,0 +1,137 @@
+module Main {
+
+  import namespace IO
+//  import namespace List
+//  import Process(process, receive, observe, map_process)
+//  import String(is_prefix_of, drop, length)
+//  import Coal.Applicative(Applicative)
+//  import Nat(unpack)
+//
+//  type alias Parser<a> = Process<(Option<a>, string), string>
+//
+//  fun character(c_str : string) : Parser<string> =
+//    let
+//      step(input, state) =
+//        match(state) {
+//          | (None, _) when (is_prefix_of(c_str, input) && length(c_str) == 1) =>
+//              (Some(c_str), drop(1, input))
+//          | _ =>
+//              state
+//        }
+//    in
+//      process((None, ""), step)
+//
+//  fun letter_lower() : Parser<string> =
+//    or_else(character("a"), or_else(character("b"), or_else(character("c"),
+//    or_else(character("d"), or_else(character("e"), or_else(character("f"),
+//    or_else(character("g"), or_else(character("h"), or_else(character("i"),
+//    or_else(character("j"), or_else(character("k"), or_else(character("l"),
+//    or_else(character("m"), or_else(character("n"), or_else(character("o"),
+//    or_else(character("p"), or_else(character("q"), or_else(character("r"),
+//    or_else(character("s"), or_else(character("t"), or_else(character("u"),
+//    or_else(character("v"), or_else(character("w"), or_else(character("x"),
+//    or_else(character("y"), character("z"))))))))))))))))))))))))))
+//
+//  fun letter_upper() : Parser<string> =
+//    or_else(character("A"), or_else(character("B"), or_else(character("C"),
+//    or_else(character("D"), or_else(character("E"), or_else(character("F"),
+//    or_else(character("G"), or_else(character("H"), or_else(character("I"),
+//    or_else(character("J"), or_else(character("K"), or_else(character("L"),
+//    or_else(character("M"), or_else(character("N"), or_else(character("O"),
+//    or_else(character("P"), or_else(character("Q"), or_else(character("R"),
+//    or_else(character("S"), or_else(character("T"), or_else(character("U"),
+//    or_else(character("V"), or_else(character("W"), or_else(character("X"),
+//    or_else(character("Y"), character("Z"))))))))))))))))))))))))))
+//
+//  fun letter() : Parser<string> =
+//    or_else(letter_lower(), letter_upper())
+//
+//  fun pure_parser(value : a) : Parser<a> =
+//    let
+//      step(input, state) = state
+//    in
+//      process((Some(value), ""), step)
+//
+//  fun run_parser(parser : Parser<a>, input : string) : (Option<a>, string) =
+//    parser |.receive(input) |.observe
+//
+//  fun and_then(p1 : Parser<a>, f : a -> Parser<b>) : Parser<b> =
+//    let
+//      step(input, state) =
+//        match(run_parser(p1, input)) {
+//          | (Some(result1), rest1) =>
+//              run_parser(f(result1), rest1)
+//          | (None, rest) =>
+//              (None, rest)
+//        }
+//    in
+//      process((None, ""), step)
+//
+//  fun map_parser(f : a -> b, parser : Parser<a>) : Parser<b> =
+//    map_process(fn(state) =>
+//      match(state) {
+//        | (Some(result), rest) => (Some(f(result)), rest)
+//        | (None, rest) => (None, rest)
+//      },
+//      parser)
+//
+//  fun or_else(p1 : Parser<a>, p2 : Parser<a>) : Parser<a> =
+//    let
+//      step(input, state) =
+//        match(run_parser(p1, input)) {
+//          | (Some(result), rest) => (Some(result), rest)
+//          | (None, _) => run_parser(p2, input)
+//        }
+//    in
+//      process((None, ""), step)
+//
+//  fun many_up_to(n : nat, p : Parser<a>) : Parser<List<a>> =
+//    fold(n) {
+//      | Zero => 
+//          pure_parser([])
+//      | Succ(@rest_parser) =>
+//          or_else(
+//            and_then(p, fn(x) =>
+//              map_parser(fn(xs) => x :: xs, rest_parser)),
+//            pure_parser([]))
+//    }
+//
+//  fun many(p : Parser<a>) : Parser<List<a>> =
+//    many_up_to(1000, p)
+//
+//  fun some(p : Parser<a>) : Parser<List<a>> =
+//    and_then(p, fn(x) =>
+//      map_parser(fn(xs) => x :: xs, many(p)))
+//
+//  fun parse_string(str : string) : Parser<string> =
+//    let
+//      step(input, state) =
+//        match(state) {
+//          | (Some(res), remain) 
+//              when (is_prefix_of(input, remain)) =>
+//                ( Some(res <> input)
+//                , drop(length(input), remain)
+//                )
+//              when (is_prefix_of(remain, input)) =>
+//                ( Some(res <> remain)
+//                , drop(length(remain), input)
+//                )
+//              otherwise =>
+//                state
+//          | _ =>
+//            state
+//        }
+//    in
+//      process((Some(""), str), step)
+//
+//  fun show_result(result : (Option<List<a>>, string)) : IO<unit> =
+//    match(result) {
+//      | (Some(xs), rest) => IO.print_int32(8888) // unpack(List.length(xs)))
+//      | (None, rest) => IO.print_nat(0)
+//    }
+
+  fun main() = 
+    IO.print_int32(8888 : int32)
+//    show_result(run_parser(many(letter()), "hello"))
+
+}
