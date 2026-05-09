@@ -126,7 +126,7 @@ module Main {
 
   fun show_result(result : (Option<List<a>>, string)) : IO<unit> =
     match(result) {
-      | (Some(xs), rest) => IO.print_int32(unpack(List.length(xs)))
+      | (Some(xs), rest) => IO.println_int32(unpack(List.length(xs)))
       | (None, rest) => IO.print_nat(0)
     }
 
