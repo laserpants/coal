@@ -13,6 +13,7 @@ import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
 import Coal.Language (Binding (..), Choice (..), Clause (..), CompiledClause (..), Expression (..), Guard (..))
 import Control.Monad.Identity (runIdentity)
+import Data.Foldable (foldr')
 import Data.Data (Data)
 import Data.Tuple.Extra (secondM)
 import Extras (Name, const2, (<$$>))
@@ -158,7 +159,7 @@ replaceWith :: (Ord t, Data a, Data s, Data t) => Name -> Expression a s t -> Ex
 replaceWith name = replace name . const2
 
 replaceMultipleWith :: (Ord t, Data a, Data s, Data t) => [(Name, Expression a s t)] -> Expression a s t -> Expression a s t
-replaceMultipleWith = flip $ foldr (uncurry replaceWith)
+replaceMultipleWith = flip $ foldr' (uncurry replaceWith)
 
 rename :: (Ord t, Data a, Data s, Data t) => Name -> Name -> Expression a s t -> Expression a s t
 rename old new = replace old var where var a t = EVariable a (Label t new)
