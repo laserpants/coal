@@ -50,7 +50,7 @@ import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (execStateT, modify)
 import Control.Monad.Trans (lift)
 import Data.Data (Data, Typeable)
-import Data.Generics.Uniplate.Data (transformM)
+import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Dictionary, Name, forM_)
 
@@ -193,25 +193,23 @@ instance (AliasTransform (Type Parameter k)) => AliasTransform (AliasDefinition 
 
 instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Expression e a t) where
   aliasTransform =
-    transformM $
-      \case
-        EAnnotation a t e ->
-          EAnnotation a <$> aliasTransform t <*> aliasTransform e
-        ELet a bs e ->
-          ELet a <$> aliasTransform bs <*> aliasTransform e
-        ELambda a ps e ->
-          ELambda a <$> aliasTransform ps <*> aliasTransform e
-        e ->
-          return e
+    \case
+      EAnnotation a t e ->
+        EAnnotation a <$> aliasTransform t <*> aliasTransform e
+      ELet a bs e ->
+        ELet a <$> aliasTransform bs <*> aliasTransform e
+      ELambda a ps e ->
+        ELambda a <$> aliasTransform ps <*> aliasTransform e
+      e ->
+        descendM aliasTransform e
 
 instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Pattern e a t) where
   aliasTransform =
-    transformM $
-      \case
-        PAnnotation a t p ->
-          PAnnotation a <$> aliasTransform t <*> aliasTransform p
-        p ->
-          return p
+    \case
+      PAnnotation a t p ->
+        PAnnotation a <$> aliasTransform t <*> aliasTransform p
+      p ->
+        descendM aliasTransform p
 
 instance (Data e, Data a, Data t, AliasTransform (Type Parameter a)) => AliasTransform (Binding Expression e a t) where
   aliasTransform =

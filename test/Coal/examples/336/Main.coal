@@ -1,0 +1,463 @@
+module Main {
+
+  import namespace IO
+  import namespace String
+  import Process(process, map_process, receive, observe)
+  import String(is_prefix_of, drop, length, is_empty)
+  import Nat(pack)
+
+  // Generic parser type - parses input string and produces Option<a> with remaining input
+  type alias Parser<a> = Process<(Option<a>, string), string>
+
+  // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
+
+  // Check if character is a digit (0-9)
+  fun is_digit_char(c : char) : bool =
+    match(c) {      
+      | '0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9' => true
+      | _ => false
+    }
+
+  // Check if character is a letter (a-z, A-Z)  
+  fun is_alpha_char(c : char) : bool =
+    match(c) {
+      | 'a' or 'b' or 'c' or 'd' or 'e' or 'f' or 'g' or 'h' or 'i' or 'j' or 'k' or 'l' or 'm'
+      or 'n' or 'o' or 'p' or 'q' or 'r' or 's' or 't' or 'u' or 'v' or 'w' or 'x' or 'y' or 'z'
+      or 'A' or 'B' or 'C' or 'D' or 'E' or 'F' or 'G' or 'H' or 'I' or 'J' or 'K' or 'L' or 'M'
+      or 'N' or 'O' or 'P' or 'Q' or 'R' or 'S' or 'T' or 'U' or 'V' or 'W' or 'X' or 'Y' or 'Z'
+        => true
+      | _ => false
+    }
+
+  // Check if character is whitespace
+  fun is_whitespace_char(c : char) : bool =
+    match(c) {
+      | ' ' or '\t' or '\n' or '\r' => true
+      | _ => false
+    }
+
+  // ============================================================================
+  // PRIMITIVE PARSERS
+  // ============================================================================
+
+  // Parse any single character (returns the char as a single-character string)
+  fun any_char() : Parser<string> =
+    let
+      step(input, state) =
+        match(state) {
+          | (None, _) when (!is_empty(input)) =>
+              let first_char = drop(1, input)
+              in
+                let remaining = drop(1, input)
+                in
+                  if (length(input) > 0)
+                  then (Some(drop(length(remaining), input)), remaining)
+                  else state
+          | _ =>
+              state
+        }
+    in
+      process((None, ""), step)
+
+  // Parse a character satisfying a predicate
+  fun satisfy(pred : char -> bool) : Parser<char> =
+    let
+      step(input, state) =
+        match(state) {
+          | (None, _) when (!is_empty(input)) =>
+              let chars = String.to_list(input)
+              in
+                match(chars) {
+                  | c :: rest when (pred(c)) => (Some(c), String.from_list(rest))
+                  | _ => state
+                }
+          | _ =>
+              state
+        }
+    in
+      process((None, ""), step)
+
+  // Parse a specific character
+  fun character(expected : char) : Parser<char> =
+    satisfy(fn(c) => c == expected)
+
+  // Parse a digit character (0-9)
+  fun digit() : Parser<char> =
+    satisfy(is_digit_char)
+
+  // Parse a letter character (a-z, A-Z)
+  fun letter() : Parser<char> =
+    satisfy(is_alpha_char)
+
+  // Parse a whitespace character
+  fun whitespace() : Parser<char> =
+    satisfy(is_whitespace_char)
+
+  // ============================================================================
+  // STRING PARSERS
+  // ============================================================================
+
+  // Parse an exact string
+  fun parse_string(str : string) : Parser<string> =
+    let
+      step(input, state) =
+        match(state) {
+          | (Some(res), remain) 
+              when (is_prefix_of(input, remain)) =>
+                ( Some(res <> input)
+                , drop(length(input), remain)
+                )
+              when (is_prefix_of(remain, input)) =>
+                ( Some(res <> remain)
+                , drop(length(remain), input)
+                )
+              otherwise =>
+                state
+          | _ =>
+            state
+        }
+    in
+      process((Some(""), str), step)
+
+  // ============================================================================
+  // TRANSFORMATION COMBINATORS
+  // ============================================================================
+
+  // Transform the result of a parser
+  fun map_parser(f : a -> b, parser : Parser<a>) : Parser<b> =
+    map_process(fn(state) =>
+      match(state) {
+        | (Some(result), rest) => (Some(f(result)), rest)
+        | (None, rest) => (None, rest)
+      },
+      parser)
+
+  // Parser that always succeeds with a constant value without consuming input
+  fun pure_parser(value : a) : Parser<a> =
+    let
+      step(input, state) = state
+    in
+      process((Some(value), ""), step)
+
+  // Replace parser result with a constant value
+  fun const_parser(value : b, parser : Parser<a>) : Parser<b> =
+    map_parser(fn(_) => value, parser)
+
+  // ============================================================================
+  // HELPER: Run a parser on input
+  // ============================================================================
+
+  fun run_parser(parser : Parser<a>, input : string) : (Option<a>, string) =
+    parser |.receive(input) |.observe
+
+  // ============================================================================
+  // CHOICE COMBINATORS
+  // ============================================================================
+
+  // Try first parser, if it fails try second parser
+  fun or_else(p1 : Parser<a>, p2 : Parser<a>) : Parser<a> =
+    let
+      step(input, state) =
+        match(run_parser(p1, input)) {
+          | (Some(result), rest) => (Some(result), rest)
+          | (None, _) => run_parser(p2, input)
+        }
+    in
+      process((None, ""), step)
+
+  // Try a list of parsers in order, returning first success
+  fun choice(parsers : List<Parser<a>>) : Parser<a> =
+    fold(parsers) {
+      | [] => let step(input, state) = (None, input) in process((None, ""), step)
+      | p :: @rest_parser => or_else(p, rest_parser)
+    }
+
+  // ============================================================================
+  // SEQUENCING COMBINATORS
+  // ============================================================================
+
+  // Sequence two parsers and combine their results with a function
+  fun and_then(p1 : Parser<a>, f : a -> Parser<b>) : Parser<b> =
+    let
+      step(input, state) =
+        match(run_parser(p1, input)) {
+          | (Some(result1), rest1) =>
+              run_parser(f(result1), rest1)
+          | (None, rest) =>
+              (None, rest)
+        }
+    in
+      process((None, ""), step)
+
+  // Sequence two parsers, keeping both results as a tuple
+  fun seq(p1 : Parser<a>, p2 : Parser<b>) : Parser<(a, b)> =
+    and_then(p1, fn(a) =>
+      map_parser(fn(b) => (a, b), p2))
+
+  // Sequence two parsers, discarding the first result
+  fun skip_first(p1 : Parser<a>, p2 : Parser<b>) : Parser<b> =
+    and_then(p1, fn(_) => p2)
+
+  // Sequence two parsers, discarding the second result
+  fun skip_second(p1 : Parser<a>, p2 : Parser<b>) : Parser<a> =
+    and_then(p1, fn(a) => map_parser(fn(_) => a, p2))
+
+  // ============================================================================
+  // REPETITION COMBINATORS
+  // ============================================================================
+
+  // Parse zero or more occurrences (up to a limit to ensure termination)
+  fun many_up_to(n : nat, p : Parser<a>) : Parser<List<a>> =
+    fold(n) {
+      | Zero => pure_parser([])
+      | Succ(@rest_parser) =>
+          or_else(
+            and_then(p, fn(x) =>
+              map_parser(fn(xs) => x :: xs, rest_parser)),
+            pure_parser([]))
+    }
+
+  // Parse zero or more occurrences (bounded by 1000 for termination)
+  fun many(p : Parser<a>) : Parser<List<a>> =
+    many_up_to(1000, p)
+
+  // Parse one or more occurrences
+  fun some(p : Parser<a>) : Parser<List<a>> =
+    and_then(p, fn(x) =>
+      map_parser(fn(xs) => x :: xs, many(p)))
+
+  // Parse exactly n occurrences
+  fun count(n : nat, p : Parser<a>) : Parser<List<a>> =
+    fold(n) {
+      | Zero => pure_parser([])
+      | Succ(@rest_parser) =>
+          and_then(p, fn(x) =>
+            map_parser(fn(xs) => x :: xs, rest_parser))
+    }
+
+  // Make a parser optional (0 or 1 occurrences)
+  fun optional(p : Parser<a>) : Parser<Option<a>> =
+    or_else(
+      map_parser(fn(x) => Some(x), p),
+      pure_parser(None))
+
+  // ============================================================================
+  // UTILITY COMBINATORS
+  // ============================================================================
+
+  // Parse something between opening and closing parsers
+  fun between(open : Parser<o>, close : Parser<c>, p : Parser<a>) : Parser<a> =
+    skip_first(open, skip_second(p, close))
+
+  // Parse zero or more occurrences separated by a separator
+  fun sep_by_up_to(n : nat, sep : Parser<s>, p : Parser<a>) : Parser<List<a>> =
+    or_else(
+      sep_by1_up_to(n, sep, p),
+      pure_parser([]))
+
+  // Parse one or more occurrences separated by a separator
+  fun sep_by1_up_to(n : nat, sep : Parser<s>, p : Parser<a>) : Parser<List<a>> =
+    and_then(p, fn(x) =>
+      map_parser(
+        fn(xs) => x :: xs,
+        many_up_to(n, skip_first(sep, p))))
+
+  // Parse zero or more occurrences separated by a separator (bounded)
+  fun sep_by(sep : Parser<s>, p : Parser<a>) : Parser<List<a>> =
+    sep_by_up_to(pack(1000), sep, p)
+
+  // Parse one or more occurrences separated by a separator (bounded)
+  fun sep_by1(sep : Parser<s>, p : Parser<a>) : Parser<List<a>> =
+    sep_by1_up_to(pack(1000), sep, p)
+
+  // Parse zero or more occurrences ending with a separator
+  fun end_by(sep : Parser<s>, p : Parser<a>) : Parser<List<a>> =
+    many(skip_second(p, sep))
+
+  // Parse one or more occurrences ending with a separator
+  fun end_by1(sep : Parser<s>, p : Parser<a>) : Parser<List<a>> =
+    some(skip_second(p, sep))
+
+  // ============================================================================
+  // STRING UTILITY PARSERS
+  // ============================================================================
+
+  // Parse one or more whitespace characters
+  fun spaces() : Parser<List<char>> =
+    some(whitespace())
+
+  // Parse zero or more whitespace characters
+  fun spaces0() : Parser<List<char>> =
+    many(whitespace())
+
+  // Parse a value and skip trailing whitespace
+  fun token(p : Parser<a>) : Parser<a> =
+    skip_second(p, spaces0())
+
+  // Parse a specific string and skip trailing whitespace
+  fun symbol(str : string) : Parser<string> =
+    token(parse_string(str))
+
+  // ============================================================================
+  // EXAMPLE PARSERS
+  // ============================================================================
+
+  // Parse a single digit and convert to string
+  fun digit_string() : Parser<string> =
+    map_parser(fn(c) => String.from_list([c]), digit())
+
+  // Parse multiple digits as a string
+  fun digits() : Parser<string> =
+    map_parser(String.from_list, some(digit()))
+
+  // Parse an unsigned integer (as string)
+  fun unsigned_int() : Parser<string> =
+    digits()
+
+  // Parse a signed integer (as string)
+  fun signed_int() : Parser<string> =
+    or_else(
+      and_then(character('-'), fn(sign) =>
+        map_parser(
+          fn(num) => String.from_list([sign]) <> num,
+          digits())),
+      digits())
+
+  // Parse an identifier (starts with letter, followed by letters or digits)
+  fun identifier() : Parser<string> =
+    and_then(letter(), fn(first) =>
+      map_parser(
+        fn(rest) => String.from_list(first :: rest),
+        many(or_else(letter(), digit()))))
+
+  // Parse a parenthesized expression containing digits
+  fun parens_digits() : Parser<string> =
+    between(character('('), character(')'), digits())
+
+  // Parse a comma-separated list of identifiers
+  fun identifier_list() : Parser<List<string>> =
+    sep_by(token(character(',')), token(identifier()))
+
+  // Parse a simple key-value pair: identifier = digits
+  fun key_value_pair() : Parser<(string, string)> =
+    and_then(token(identifier()), fn(key) =>
+      and_then(symbol("="), fn(_) =>
+        map_parser(fn(val) => (key, val), token(digits()))))
+
+
+  // ============================================================================
+  // EXAMPLE RUNS
+  // ============================================================================
+
+  // Basic character parsing
+  let ex1 = run_parser(any_char(), "hello")
+  // Result: (Some("h"), "ello")
+
+  let ex2 = run_parser(character('x'), "xyz")
+  // Result: (Some("x"), "yz")
+
+  let ex3 = run_parser(digit(), "42abc")
+  // Result: (Some("4"), "2abc")
+
+  // String parsing
+  let ex4 = run_parser(parse_string("hello"), "hello world")
+  // Result: (Some("hello"), " world")
+
+  // Choice combinator
+  let ex5 = run_parser(or_else(character('a'), character('b')), "bcd")
+  // Result: (Some("b"), "cd")
+
+  // Sequencing
+  let ex6 = run_parser(seq(character('a'), character('b')), "abc")
+  // Result: (Some(("a", "b")), "c")
+
+  // Repetition
+  let ex7 = run_parser(many(digit()), "12345abc")
+  // Result: (Some(["1", "2", "3", "4", "5"]), "abc")
+
+  let ex8 = run_parser(some(letter()), "hello123")
+  // Result: (Some(["h", "e", "l", "l", "o"]), "123")
+
+  // Complex parsers
+  let ex9 = run_parser(digits(), "12345abc")
+  // Result: (Some("12345"), "abc")
+
+  let ex10 = run_parser(signed_int(), "-42xyz")
+  // Result: (Some("-42"), "xyz")
+
+  let ex11 = run_parser(identifier(), "foo123bar")
+  // Result: (Some("foo123bar"), "")
+
+  let ex12 = run_parser(parens_digits(), "(12345)abc")
+  // Result: (Some("12345"), "abc")
+
+  let ex13 = run_parser(identifier_list(), "foo, bar, baz")
+  // Result: (Some(["foo", "bar", "baz"]), "")
+
+  let ex14 = run_parser(key_value_pair(), "count = 42")
+  // Result: (Some(("count", "42")), "")
+
+  // ============================================================================
+  // DEMONSTRATION
+  // ============================================================================
+
+  fun show_result(desc : string, result : (Option<a>, string)) : IO<unit> =
+    match(result) {
+      | (Some(_), rest) =>
+          do {
+            _ <- IO.print_string(desc);
+            _ <- IO.print_string(": Success, remaining: '");
+            _ <- IO.print_string(rest);
+            IO.println_string("'");
+          }
+      | (None, rest) =>
+          do {
+            _ <- IO.print_string(desc);
+            _ <- IO.print_string(": Failed, remaining: '");
+            _ <- IO.print_string(rest);
+            IO.println_string("'");
+          }
+    }
+
+  fun main() =
+    do {
+      _ <- IO.println_string("=== Coal Parser Combinator Library Examples ===");
+      _ <- IO.println_string("");
+      
+      _ <- IO.println_string("--- Basic Character Parsing ---");
+      _ <- show_result("any_char on 'hello'", ex1);
+      _ <- show_result("character('x') on 'xyz'", ex2);
+      _ <- show_result("digit on '42abc'", ex3);
+      _ <- IO.println_string("");
+      
+      _ <- IO.println_string("--- String Parsing ---");
+      _ <- show_result("parse_string('hello') on 'hello world'", ex4);
+      _ <- IO.println_string("");
+      
+      _ <- IO.println_string("--- Choice Combinator ---");
+      _ <- show_result("character('a') or character('b') on 'bcd'", ex5);
+      _ <- IO.println_string("");
+
+      _ <- IO.println_string("--- Sequencing ---");
+      _ <- show_result("seq(character('a'), character('b')) on 'abc'", ex6);
+      _ <- IO.println_string("");
+      
+      _ <- IO.println_string("--- Repetition ---");
+      _ <- show_result("many(digit) on '12345abc'", ex7);
+      _ <- show_result("some(letter) on 'hello123'", ex8);
+      _ <- IO.println_string("");
+  
+      _ <- IO.println_string("--- Complex Parsers ---");
+      _ <- show_result("digits on '12345abc'", ex9);
+      _ <- show_result("signed_int on '-42xyz'", ex10);
+      _ <- show_result("identifier on 'foo123bar'", ex11);
+      _ <- show_result("parens_digits on '(12345)abc'", ex12);
+      _ <- show_result("identifier_list on 'foo, bar, baz'", ex13);
+      _ <- show_result("key_value_pair on 'count = 42'", ex14);
+
+      IO.println_string("");
+    }
+
+}
