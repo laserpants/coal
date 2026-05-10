@@ -42,4 +42,31 @@ module Char {
   fun chr(n : int32) : char =
     char$_chr(n)
 
+  /**
+   * Check if character is a digit (0-9)
+   */
+  fun is_digit(c : char) : bool =
+    match(c) {      
+      | '0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9' => true
+      | _ => false
+    }
+
+  /**
+   * Check if character is whitespace
+   */
+  fun is_whitespace(c : char) : bool =
+    match(c) {
+      | ' ' or '\t' or '\n' or '\r' => true
+      | _ => false
+    }
+
+  /**
+   * Check if character is a letter (a-z, A-Z)
+   */
+  fun is_alpha(c : char) : bool =
+    let 
+      ordC = ord(c)
+    in
+      (ordC >= ord('a') && ordC <= ord('z')) || (ordC >= ord('A') && ordC <= ord('Z'))
+
 }

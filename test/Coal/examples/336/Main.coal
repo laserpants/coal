@@ -2,41 +2,13 @@ module Main {
 
   import namespace IO
   import namespace String
+  import namespace Char
   import Process(process, map_process, receive, observe)
   import String(is_prefix_of, drop, length, is_empty)
   import Nat(pack)
 
   // Generic parser type - parses input string and produces Option<a> with remaining input
   type alias Parser<a> = Process<(Option<a>, string), string>
-
-  // ============================================================================
-  // HELPER FUNCTIONS
-  // ============================================================================
-
-  // Check if character is a digit (0-9)
-  fun is_digit_char(c : char) : bool =
-    match(c) {      
-      | '0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9' => true
-      | _ => false
-    }
-
-  // Check if character is a letter (a-z, A-Z)  
-  fun is_alpha_char(c : char) : bool =
-    match(c) {
-      | 'a' or 'b' or 'c' or 'd' or 'e' or 'f' or 'g' or 'h' or 'i' or 'j' or 'k' or 'l' or 'm'
-      or 'n' or 'o' or 'p' or 'q' or 'r' or 's' or 't' or 'u' or 'v' or 'w' or 'x' or 'y' or 'z'
-      or 'A' or 'B' or 'C' or 'D' or 'E' or 'F' or 'G' or 'H' or 'I' or 'J' or 'K' or 'L' or 'M'
-      or 'N' or 'O' or 'P' or 'Q' or 'R' or 'S' or 'T' or 'U' or 'V' or 'W' or 'X' or 'Y' or 'Z'
-        => true
-      | _ => false
-    }
-
-  // Check if character is whitespace
-  fun is_whitespace_char(c : char) : bool =
-    match(c) {
-      | ' ' or '\t' or '\n' or '\r' => true
-      | _ => false
-    }
 
   // ============================================================================
   // PRIMITIVE PARSERS
@@ -85,15 +57,15 @@ module Main {
 
   // Parse a digit character (0-9)
   fun digit() : Parser<char> =
-    satisfy(is_digit_char)
+    satisfy(Char.is_digit)
 
   // Parse a letter character (a-z, A-Z)
   fun letter() : Parser<char> =
-    satisfy(is_alpha_char)
+    satisfy(Char.is_alpha)
 
   // Parse a whitespace character
   fun whitespace() : Parser<char> =
-    satisfy(is_whitespace_char)
+    satisfy(Char.is_whitespace)
 
   // ============================================================================
   // STRING PARSERS
