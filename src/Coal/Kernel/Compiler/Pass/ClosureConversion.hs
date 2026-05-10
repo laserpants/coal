@@ -13,6 +13,7 @@ import Control.Arrow ((>>>))
 import Control.Monad.RWS (RWS, evalRWS, tell)
 import Data.Fix (Fix (..))
 import Data.Function (on)
+import Data.Foldable (foldr')
 import Data.Functor.Foldable (cata, embed)
 import Data.List (nubBy)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -29,7 +30,7 @@ closeObjects objs = uncurry app (evalWS0 (traverse closed objs))
     | null (snd =<< args) =
         objs1
     | otherwise =
-        closeObjects (foldr (uncurry (fmap . fmap <$$> applyArgs)) objs1 args)
+        closeObjects (foldr' (uncurry (fmap . fmap <$$> applyArgs)) objs1 args)
   names =
     Set.fromList (objectName <$> objs)
   closed obj = do
