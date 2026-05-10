@@ -47,6 +47,7 @@ import Coal.Language
 import Coal.Language.AST.Builders
 import Control.Monad.IO.Class (MonadIO)
 import Data.Data (Data)
+import Data.Foldable (foldr')
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -140,7 +141,7 @@ instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
   desugarDoNotation =
     \case
       EDoBlock _ es ->
-        pure (foldr go e' es')
+        pure (foldr' go e' es')
        where
         (e', es') = normalize es
         bind e1 e2 = applicationE (varE "bind") (e1 :| [e2])
