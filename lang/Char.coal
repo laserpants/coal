@@ -65,8 +65,8 @@ module Char {
    */
   fun is_alpha(c : char) : bool =
     let 
-      ordC = ord(c)
+      ord_c = ord(c)
     in
-      (ordC >= ord('a') && ordC <= ord('z')) || (ordC >= ord('A') && ordC <= ord('Z'))
+      (ord_c >= ord('a') && ord_c <= ord('z')) || (ord_c >= ord('A') && ord_c <= ord('Z'))
 
 }
