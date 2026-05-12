@@ -79,6 +79,12 @@ module String {
     char_to_string(c) <> str
 
   /**
+   * Return the head and tail of a string, as a pair.
+   */
+  fun uncons(str : string) : (Option<char>, string) =
+    (head(str), tail(str))
+
+  /**
    * Reverse the characters in the string.
    */
   fun reverse(s : string) : string =
