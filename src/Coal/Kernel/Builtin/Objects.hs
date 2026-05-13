@@ -1565,13 +1565,26 @@ objects =
               |]
         , OFunction
             "Builtin$.machine$_machine"
-            [ undefined
-            , undefined
-            , undefined
+            [ Label Kernel.opaque "seed"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "transition"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "view" 
             ]
             [r| 
-
-
+                  let
+                    x : ? =
+                      ?
+                  in
+                  @<Machine(*,*,*)>
+                    ( Machine : ?
+                    , @<record({ ?? })>
+                        ( $Record : ??
+                        , { state = seed : *
+                          | step = ??
+                          | view = view : */*
+                          | {}
+                          }
+                        )
+                    )
               |]
         , OFunction
             "Builtin$.process$_process"
