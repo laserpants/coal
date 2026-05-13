@@ -1,0 +1,12 @@
+module Machine {
+
+  fun observe(Machine({ state, view | _ }) : Machine<s, i, o>) : o = 
+    view(state)
+
+  fun receive(input : i, machine : Machine<s, i, o>) : Machine<s, i, o> =
+    ?
+
+  fun machine(seed : s, transition : i -> s -> Machine<s, i, o>, view : s -> o) : Machine<s, i, o> =
+    machine$_machine(seed, transition, view)
+
+}
