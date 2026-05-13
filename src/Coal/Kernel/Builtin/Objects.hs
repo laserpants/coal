@@ -1567,19 +1567,29 @@ objects =
             "Builtin$.machine$_machine"
             [ Label Kernel.opaque "seed"
             , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "transition"
-            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "view" 
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "view"
             ]
             [r| 
                   let
-                    x : ? =
-                      ?
+                    step : */*/Machine(*,*,*) =
+                      fn(input : *, current_state : *) =>
+                        @<Machine(*,*,*)>
+                          ( `Builtin$.machine$_machine` : */(*/*/*)/(*/*)/Machine(*,*,*)
+                          , @<*>
+                              ( transition : */*/*
+                              , input : *
+                              , current_state : *
+                              )
+                          , transition : */*/*
+                          , view : */*
+                          )
                   in
                   @<Machine(*,*,*)>
-                    ( Machine : ?
-                    , @<record({ ?? })>
-                        ( $Record : ??
+                    ( Machine : record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })/Machine(*,*,*)
+                    , @<record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })>
+                        ( $Record : { state : * | step : */*/Machine(*,*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })
                         , { state = seed : *
-                          | step = ??
+                          | step = step : */*/Machine(*,*,*)
                           | view = view : */*
                           | {}
                           }

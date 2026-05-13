@@ -34,6 +34,7 @@ builtinNames =
     , "Semigroup"
     , "Some"
     , "Process"
+    , "Machine"
     , "compare"
     , "from_int32"
     , "from_int64"

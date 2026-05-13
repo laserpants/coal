@@ -47,6 +47,10 @@ builtinModules =
     , $(embedFile "lang/Process.coal")
     )
   ,
+    ( "Machine"
+    , $(embedFile "lang/Machine.coal")
+    )
+  ,
     ( "Stream"
     , $(embedFile "lang/Stream.coal")
     )

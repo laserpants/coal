@@ -34,8 +34,8 @@ data BuiltinCategory
     Number
   | -- | Character operations (ord, chr)
     Char
-  | -- | Process operations (map, contramap, duplicate)
-    Process
+  | -- | Codata operations
+    Codata
   deriving (Eq, Ord, Show)
 
 -- | Registry of all built-in function names with their categories
@@ -91,11 +91,12 @@ builtinNames =
       , ("char$_chr", Char)
       ]
       ++
-      -- Process operations
-      [ ("process$_process", Process)
-      , ("process$_map_process", Process)
-      , ("process$_contramap_input", Process)
-      , ("process$_duplicate", Process)
+      -- Codata operations
+      [ ("process$_process", Codata)
+      , ("process$_map_process", Codata)
+      , ("process$_contramap_input", Codata)
+      , ("process$_duplicate", Codata)
+      , ("machine$_machine", Codata)
       ]
 
 -- | All built-in names as a set (for faster lookup)

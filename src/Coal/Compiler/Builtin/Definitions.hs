@@ -194,5 +194,54 @@ builtinDefinitions =
               )
           ]
       )
+  , DType
+      mempty
+      "Machine"
+      ( TypeDefinition
+          [Parameter () "s", Parameter () "i", Parameter () "o"]
+          [ DataConstructor
+              "Machine"
+              1
+              ( Forall
+                  (Set.fromList [Parameter () "s", Parameter () "i", Parameter () "o"])
+                  mempty
+                  ( TRecord
+                      ( TRow
+                          ( RExtend
+                              "state"
+                              (TVariable (Parameter () "s"))
+                              ( RExtend
+                                  "step"
+                                  ( TVariable (Parameter () "i")
+                                      `TArrow` TVariable (Parameter () "s")
+                                      `TArrow` applyTypeArgs
+                                        ()
+                                        (TConstructor () "Machine")
+                                        ( TVariable (Parameter () "s")
+                                            :| [ TVariable (Parameter () "i")
+                                               , TVariable (Parameter () "o")
+                                               ]
+                                        )
+                                  )
+                                  ( RExtend
+                                      "view"
+                                      (TVariable (Parameter () "s") `TArrow` TVariable (Parameter () "o"))
+                                      RNil
+                                  )
+                              )
+                          )
+                      )
+                      `TArrow` applyTypeArgs
+                        ()
+                        (TConstructor () "Machine")
+                        ( TVariable (Parameter () "s")
+                            :| [ TVariable (Parameter () "i")
+                               , TVariable (Parameter () "o")
+                               ]
+                        )
+                  )
+              )
+          ]
+      )
   ]
     <> builtinTraits
