@@ -61,4 +61,38 @@ builtinDataConstructors =
       , dataConstructorEntryConstructorSet =
           Set.fromList ["Process"]
       }
+  , DataConstructorEntry
+      { dataConstructorEntryMetaData = mempty
+      , dataConstructorEntryName = "Machine"
+      , dataConstructorEntryConstructor =
+          DataConstructor
+            "Machine"
+            1
+            ( forall3
+                ( \s i o ->
+                    TRecord
+                      ( TRow
+                          ( RExtend
+                              "state"
+                              s
+                              ( RExtend
+                                  "step"
+                                  ( i
+                                      `TArrow` s
+                                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Machine") (s :| [i, o])
+                                  )
+                                  ( RExtend
+                                      "view"
+                                      (s `TArrow` o)
+                                      RNil
+                                  )
+                              )
+                          )
+                      )
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Machine") (s :| [i, o])
+                )
+            )
+      , dataConstructorEntryConstructorSet =
+          Set.fromList ["Machine"]
+      }
   ]

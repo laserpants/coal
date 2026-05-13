@@ -1564,6 +1564,16 @@ objects =
                   }
               |]
         , OFunction
+            "Builtin$.machine$_machine"
+            [ undefined
+            , undefined
+            , undefined
+            ]
+            [r| 
+
+
+              |]
+        , OFunction
             "Builtin$.process$_process"
             [ Label Kernel.opaque "seed"
             , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
