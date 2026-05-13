@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import Machine(machine)
+ 
+  fun main() =
+    IO.println_string("FF")
+
+}
