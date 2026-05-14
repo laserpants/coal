@@ -1,5 +1,7 @@
 module Machine {
 
+  import Coal.Combinators(identity)
+
   fun observe(Machine({ state, view | _ }) : Machine<s, i, o>) : o = 
     view(state)
 
@@ -26,5 +28,19 @@ module Machine {
       , fn((_, q)) => 
           observe(q)
       )
+
+  fun duplicate(m : Machine<s, i, o>) : Machine<Machine<s, i, o>, i, Machine<s, i, o>> =
+    machine(
+      m, 
+      fn(input, current) => receive(input, current), 
+      identity
+    )
+
+  fun zip(m1 : Machine<s1, i, o1>, m2 : Machine<s2, i, o2>) : Machine<(Machine<s1, i, o1>, Machine<s2, i, o2>), i, (o1, o2)> =
+    machine(
+      (m1, m2),
+      fn(input, (p,q)) => (receive(input, p), receive(input, q)),
+      fn((p,q)) => (observe(p), observe(q))
+    )
 
 }
