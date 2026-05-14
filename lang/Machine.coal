@@ -16,6 +16,15 @@ module Machine {
     machine$_contramap_input(f, machine)
 
   fun compose(m1 : Machine<s1, a, b>, m2 : Machine<s2, b, c>) : Machine<(Machine<s1, a, b>, Machine<s2, b, c>), a, c> =
-    machine$_compose(m1, m2)
+    machine
+      ( (m1, m2)
+      , fn(input, (p, q)) =>
+          let p1 = receive(input, p) in
+          let b  = observe(p1) in
+          let q1 = receive(b, q)
+          in (p1, q1)
+      , fn((_, q)) => 
+          observe(q)
+      )
 
 }

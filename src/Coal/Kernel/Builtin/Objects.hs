@@ -1659,7 +1659,6 @@ objects =
                         }
                   }
               |]
-
         , OFunction
             "Builtin$.machine$_contramap_input"
             [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
@@ -1707,15 +1706,6 @@ objects =
                                             )
                         }
                   }
-              |]
-        , OFunction
-            "Builtin$.machine$_compose"
-            [ Label (Kernel.TCon "Machine" [opaque, opaque, opaque]) "m1"
-            , Label (Kernel.TCon "Machine" [opaque, opaque, opaque]) "m2"
-            ]
-            [r| 
-
-
               |]
         , OFunction
             "Builtin$.process$_process"

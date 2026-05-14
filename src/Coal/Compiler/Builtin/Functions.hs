@@ -259,8 +259,4 @@ builtinFunctions =
     ( "machine$_contramap_input"
     , forall4 $ \t0 t1 t2 t3 -> (t3 ~> t1) ~> machineType t0 t1 t2 ~> machineType t0 t3 t2
     )
-  ,
-    ( "machine$_compose"
-    , forall5 $ \s1 s2 a b c -> machineType s1 a b ~> machineType s2 b c ~> machineType (tupleType undefined) a c
-    )
   ]
