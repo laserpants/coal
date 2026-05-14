@@ -15,4 +15,7 @@ module Machine {
   fun contramap_input(f : j -> i, machine : Machine<s, i, o>) : Machine<s, j, o> =
     machine$_contramap_input(f, machine)
 
+  fun compose(m1 : Machine<s1, a, b>, m2 : Machine<s2, b, c>) : Machine<(Machine<s1, a, b>, Machine<s2, b, c>), a, c> =
+    machine$_compose(m1, m2)
+
 }

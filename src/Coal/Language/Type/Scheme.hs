@@ -23,6 +23,8 @@ module Coal.Language.Type.Scheme (
   forall3',
   forall4,
   forall4',
+  forall5,
+  forall5',
   forallN,
   forallN',
   IndexedScheme,
@@ -116,6 +118,17 @@ forall4' f = Forall (Set.fromList [a0, a1, a2, a3]) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3)
   (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)
+
+forall5 :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
+forall5 f = Forall (Set.fromList [a0, a1, a2, a3, a4]) mempty (f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3) (TVariable a4))
+ where
+  (a0, a1, a2, a3, a4) = (index 0, index 1, index 2, index 3, index 4)
+
+forall5' :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
+forall5' f = Forall (Set.fromList [a0, a1, a2, a3, a4]) traits t
+ where
+  (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3) (TVariable a4)
+  (a0, a1, a2, a3, a4) = (index 0, index 1, index 2, index 3, index 4)
 
 forallN :: Int -> ([IndexedType] -> IndexedType) -> IndexedScheme
 forallN n f = Forall (Set.fromList ixs) mempty (f (TVariable <$> ixs))
