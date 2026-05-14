@@ -249,6 +249,14 @@ builtinFunctions =
     )
   ,
     ( "machine$_machine"
-    , forall3 $ \t0 t1 t2 -> t0 ~> (t1 ~> t0 ~> machineType t0 t1 t2) ~> (t0 ~> t2) ~> machineType t0 t1 t2
+    , forall3 $ \t0 t1 t2 -> t0 ~> (t1 ~> t0 ~> t0) ~> (t0 ~> t2) ~> machineType t0 t1 t2
+    )
+  ,
+    ( "machine$_map_machine"
+    , forall4 $ \t0 t1 t2 t3 -> (t2 ~> t3) ~> machineType t0 t1 t2 ~> machineType t0 t1 t3
+    )
+  ,
+    ( "machine$_contramap_input"
+    , forall4 $ \t0 t1 t2 t3 -> (t3 ~> t1) ~> machineType t0 t1 t2 ~> machineType t0 t3 t2
     )
   ]
