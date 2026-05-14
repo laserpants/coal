@@ -6,7 +6,23 @@ module Machine {
   fun receive(input : i, Machine({ state, step, view }) : Machine<s, i, o>) : Machine<s, i, o> =
     step(input, state)
 
-  fun machine(seed : s, transition : i -> s -> Machine<s, i, o>, view : s -> o) : Machine<s, i, o> =
+  fun machine(seed : s, transition : i -> s -> s, view : s -> o) : Machine<s, i, o> =
     machine$_machine(seed, transition, view)
+
+  fun map_machine(f : o -> p, machine : Machine<s, i, o>) : Machine<s, i, p> =
+    machine$_map_machine(f, machine)
+
+  fun contramap_input(f : j -> i, machine : Machine<s, i, o>) : Machine<s, j, o> =
+    machine$_contramap_input(f, machine)
+
+//  fun compose() =
+//    machine$_map_machine(f, machine)
+//
+//  fun machine_map(f : o -> p, Machine({ state, step, view }) : Machine<s, i, o>) : Machine<s, i, p> =
+//     machine(
+//       state,
+//       fn(input, s) => machine_map(f, step(input, s)),
+//       fn(s) => f(view(s))
+//     ) 
 
 }
