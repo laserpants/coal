@@ -15,8 +15,4 @@ module Machine {
   fun contramap_input(f : j -> i, machine : Machine<s, i, o>) : Machine<s, j, o> =
     machine$_contramap_input(f, machine)
 
-//  fun compose() =
-//    machine$_map_machine(f, machine)
-//
-
 }

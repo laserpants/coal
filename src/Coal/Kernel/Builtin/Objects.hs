@@ -1659,16 +1659,54 @@ objects =
                         }
                   }
               |]
-
---        , OFunction
---            "machine$_contramap_input"
---            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
---            , Label (Kernel.TCon "Machine" [opaque, opaque, opaque]) "m"
---            ]
---            [r| 
---
---              |]
-
+        , OFunction
+            "machine$_contramap_input"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label (Kernel.TCon "Machine" [opaque, opaque, opaque]) "m"
+            ]
+            [r| 
+                  match<Machine(*,*,*)>(m : Machine(*,*,*)) {
+                    | ( Machine : record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })/Machine(*,*,*)
+                      , $r : record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })
+                      ) =>
+                        match<Machine(*,*,*)>($r : record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })) {
+                          | ( $Record : { state : * | step : */*/Machine(*,*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })
+                            , $row : { state : * | step : */*/Machine(*,*,*) | view : */* | {} }
+                            ) =>
+                              select
+                                { state = $state : * | q : { step : */*/Machine(*,*,*) | view : */* | {} } } =
+                                  $row : { state : * | step : */*/Machine(*,*,*) | view : */* | {} }
+                                in
+                                  select
+                                    { step = $step : */*/Machine(*,*,*) | r : { view : */* | {} } } = 
+                                      q : { step : */*/Machine(*,*,*) | view : */* | {} }
+                                    in
+                                      select
+                                        { view = $view : */* | _ : {} } = r : { view : */* | {} }
+                                        in
+                                          @<Machine(*,*,*)>
+                                            ( Machine : record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })/Machine(*,*,*)
+                                            , @<record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })>
+                                                ( $Record : { state : * | step : */*/Machine(*,*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*,*) | view : */* | {} })
+                                                , { state = $state : *
+                                                  | step = 
+                                                     fn(inp : *, s : *) =>
+                                                       @<Machine(*,*,*)>
+                                                         ( $step : */*/Machine(*,*,*)
+                                                         , @<*>
+                                                             ( f : */*
+                                                             , inp : *
+                                                             )
+                                                         , s : *
+                                                         )
+                                                  | view = $view : */*
+                                                  | {}
+                                                  }
+                                                )
+                                            )
+                        }
+                  }
+              |]
         , OFunction
             "Builtin$.process$_process"
             [ Label Kernel.opaque "seed"
