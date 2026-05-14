@@ -97,6 +97,8 @@ builtinNames =
       , ("process$_contramap_input", Codata)
       , ("process$_duplicate", Codata)
       , ("machine$_machine", Codata)
+      , ("machine$_map_machine", Codata)
+      , ("machine$_contramap_input", Codata)
       ]
 
 -- | All built-in names as a set (for faster lookup)
