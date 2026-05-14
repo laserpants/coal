@@ -1,6 +1,7 @@
 module Main {
 
   import namespace IO
+  import namespace Char
   import Machine(machine, observe, receive, map_machine)
 
   fun main() =
@@ -10,11 +11,11 @@ module Main {
         let 
           m =
             machine
-              ( 1
+              ( Char.ord('a')
               , fn(i, s) => s + i
               , view
               )
     in
-    IO.println_int32(m |. receive(1) |. receive(2) |. observe)
+    IO.println_char(m |. receive(1) |. receive(2) |. map_machine(Char.chr) |. observe)
 
 }

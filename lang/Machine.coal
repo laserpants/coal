@@ -18,11 +18,5 @@ module Machine {
 //  fun compose() =
 //    machine$_map_machine(f, machine)
 //
-//  fun machine_map(f : o -> p, Machine({ state, step, view }) : Machine<s, i, o>) : Machine<s, i, p> =
-//     machine(
-//       state,
-//       fn(input, s) => machine_map(f, step(input, s)),
-//       fn(s) => f(view(s))
-//     ) 
 
 }
