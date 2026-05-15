@@ -43,4 +43,14 @@ module Machine {
       fn((p,q)) => (observe(p), observe(q))
     )
 
+  fun cons(state : s, Machine(m) : Machine<s, i, o>) : Machine<s, i, o> =
+    Machine(
+      { state = state
+      , step = fn(_, _) => Machine(m)
+      , view = m.view
+      })
+
+  fun process(seed : a, f : v -> a -> a) : Machine<a, v, a> =
+    machine(seed, f, identity)
+
 }
