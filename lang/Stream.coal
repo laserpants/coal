@@ -1,8 +1,8 @@
 module Stream {
 
-  import Process(receive, observe, process)
+  import Machine(receive, observe, process)
 
-  type alias Stream<a> = Process<a, unit>
+  type alias Stream<a> = Machine<a, unit, a>
 
   fun repeat(state : a) : Stream<a> =
     process(state, fn(_, _) => state)
