@@ -113,14 +113,14 @@ inferTypes m = do
       , ..
       }
 
-inferKinds :: (MonadIO m) => Module a Kind () -> CompilerT a m (Module a Kind ())
+inferKinds :: (MonadIO m, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 inferKinds m = do
   generateKindConstraints m
   constraints <- gets compilerKindConstraints
   case kindUnifierMonad (solveKindConstraints constraints) of
     Left err -> do
       -- Kind inference failed - report as KindError
-      tellErrors [KindError err (ErrorLocation (principalPath (modulePath m)) undefined)]
+      tellErrors [KindError err (ErrorLocation (principalPath (modulePath m)) mempty)]
       throwError CompilerError
     Right sub -> do
       modify (overCompilerNameStore (replaceVariables . applyKinds sub))
