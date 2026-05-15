@@ -1,7 +1,7 @@
 module Main {
 
   import IO(println_string, println_int32, println_bool)
-  import Machine(machine, receive, observe, map_machine)
+  import Codata.Machine(machine, receive, observe, map_machine)
   import Coal.Combinators(identity)
 
   type alias Counter = Machine<int32, int32, int32>

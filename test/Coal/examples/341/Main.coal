@@ -2,7 +2,7 @@ module Main {
 
   import namespace IO
   import namespace Char
-  import Machine(machine, observe, receive, map_machine, contramap_input)
+  import Codata.Machine(machine, observe, receive, map_machine, contramap_input)
 
 //  type Machine<s, i, o> =
 //    Machine(

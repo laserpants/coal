@@ -4,8 +4,8 @@ module Main {
   import String(is_prefix_of, length, drop)
   import Containers.Set(Set)
   import namespace Containers.Set
-  import Stream(Stream, nats, head, tail, repeat)
-  import Machine(receive, cons, observe, duplicate, machine, map_machine)
+  import Codata.Stream(Stream, nats, head, tail, repeat)
+  import Codata.Machine(receive, cons, observe, duplicate, machine, map_machine)
   import Coal.Combinators(identity)
 
   type alias Parser = Machine<(Option<string>, string), string, (Option<string>, string)>

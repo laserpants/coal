@@ -5,7 +5,7 @@ module Main {
   import Containers.Set(Set)
   import namespace Containers.Set
   import Coal.Combinators(snd, identity)
-  import Machine(machine)
+  import Codata.Machine(machine)
 
 //  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
 //     process$_process(seed, f)

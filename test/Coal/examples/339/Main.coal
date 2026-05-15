@@ -1,7 +1,7 @@
 module Main {
 
   import namespace IO
-  import Machine(machine, observe, receive, map_machine)
+  import Codata.Machine(machine, observe, receive, map_machine)
 
   fun main() =
     let

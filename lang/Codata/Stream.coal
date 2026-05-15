@@ -1,6 +1,6 @@
-module Stream {
+module Codata.Stream {
 
-  import Machine(receive, observe, process)
+  import Codata.Machine(receive, observe, process)
 
   type alias Stream<a> = Machine<a, unit, a>
 

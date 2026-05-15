@@ -2,7 +2,7 @@ module Main {
 
   import namespace IO
   import namespace List
-  import Machine(process, receive, observe, map_machine)
+  import Codata.Machine(process, receive, observe, map_machine)
   import String(is_prefix_of, drop, length)
   import Coal.Applicative(Applicative)
   import Nat(unpack)
