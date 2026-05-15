@@ -92,11 +92,7 @@ builtinNames =
       ]
       ++
       -- Codata operations
-      [ ("process$_process", Codata)
-      , ("process$_map_process", Codata)
-      , ("process$_contramap_input", Codata)
-      , ("process$_duplicate", Codata)
-      , ("machine$_machine", Codata)
+      [ ("machine$_machine", Codata)
       , ("machine$_map_machine", Codata)
       , ("machine$_contramap_input", Codata)
       ]

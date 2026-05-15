@@ -2,12 +2,12 @@ module Main {
 
   import namespace IO
   import namespace List
-  import Process(process, receive, observe, map_process)
+  import Machine(process, receive, observe, map_machine)
   import String(is_prefix_of, drop, length)
   import Coal.Applicative(Applicative)
   import Nat(unpack)
 
-  type alias Parser<a> = Process<(Option<a>, string), string>
+  type alias Parser<a> = Machine<(Option<a>, string), string, (Option<a>, string)>
 
   fun character(c_str : string) : Parser<string> =
     let
@@ -68,7 +68,7 @@ module Main {
       process((None, ""), step)
 
   fun map_parser(f : a -> b, parser : Parser<a>) : Parser<b> =
-    map_process(fn(state) =>
+    map_machine(fn(state) =>
       match(state) {
         | (Some(result), rest) => (Some(f(result)), rest)
         | (None, rest) => (None, rest)

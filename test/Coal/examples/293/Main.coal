@@ -2,6 +2,7 @@ module Main {
 
   import IO(println_int32, println_string)
   import String(is_prefix_of, length, drop)
+  import Machine(process, map_machine, cons)
   import Containers.Set(Set)
   import namespace Containers.Set
   import Coal.Combinators(snd)
@@ -11,39 +12,39 @@ module Main {
 //  type Process<a, v> =
 //    Process({ state : a, step : v -> a -> Process<a, v> })
 
-  fun observe(Process({ state | _ }) : Process<a, v>) : a = 
+  fun observe(Machine({ state | _ }) : Machine<a, v, a>) : a = 
     state
 
-  fun receive(input : v, Process({ state, step }) : Process<a, v>) : Process<a, v> =
+  fun receive(input : v, Machine({ state, step | _ }) : Machine<a, v, a>) : Machine<a, v, a> =
     step(input, state)
 
-  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
-    process$_process(seed, f)
-
-  fun map_process(f : a -> b, process : Process<a, v>) : Process<b, v> = 
-    process$_map_process(f, process)
-
-  fun contramap_input(f : w -> v, process : Process<a, v>) : Process<a, w> = 
-    process$_contramap_input(f, process)
-
-  fun zip_processes(p : Process<b, a>, q : Process<c, b>) : Process<(Process<b, a>, Process<c, b>), a> =
-    let
-      step(v, (source, sink)) =
-        ( source 
-            |.receive(v)
-        , sink 
-            |.receive(source |.observe) )
-      in
-        process((p, q), step)
-
-  fun compose(p : Process<b, a>, q : Process<c, b>) : Process<c, a> =
-    map_process(observe << snd, zip_processes(p, q))
-
-  fun cons(state : a, process : Process<a, v>) : Process<a, v> =
-    Process(
-      { state = state
-      , step = fn(_, _) => process
-      })
+//  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
+//    process$_process(seed, f)
+//
+//  fun map_process(f : a -> b, process : Process<a, v>) : Process<b, v> = 
+//    process$_map_process(f, process)
+//
+//  fun contramap_input(f : w -> v, process : Process<a, v>) : Process<a, w> = 
+//    process$_contramap_input(f, process)
+//
+//  fun zip_processes(p : Process<b, a>, q : Process<c, b>) : Process<(Process<b, a>, Process<c, b>), a> =
+//    let
+//      step(v, (source, sink)) =
+//        ( source 
+//            |.receive(v)
+//        , sink 
+//            |.receive(source |.observe) )
+//      in
+//        process((p, q), step)
+//
+//  fun compose(p : Process<b, a>, q : Process<c, b>) : Process<c, a> =
+//    map_process(observe << snd, zip_processes(p, q))
+//
+//  fun cons(state : a, process : Process<a, v>) : Machine<a, v> =
+//    Process(
+//      { state = state
+//      , step = fn(_, _) => process
+//      })
 
   // Stream
 
@@ -167,7 +168,7 @@ module Main {
     | KeyUp           => Rotate
     | KeyDown or Tick => MoveDown
 
-  let game : Process<GameState, Move> =
+  let game : Machine<GameState, Move, GameState> =
     let
       step(move, { board, current_block }) =
         match(move) {
@@ -200,7 +201,7 @@ module Main {
 
   let
     yy =
-      map_process(fn(x) => x + 2, xx)
+      map_machine(fn(x) => x + 2, xx)
 
   let
     example1 =

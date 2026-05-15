@@ -43,10 +43,6 @@ builtinModules =
     , $(embedFile "lang/Option.coal")
     )
   ,
-    ( "Process"
-    , $(embedFile "lang/Process.coal")
-    )
-  ,
     ( "Machine"
     , $(embedFile "lang/Machine.coal")
     )

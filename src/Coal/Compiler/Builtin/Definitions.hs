@@ -159,43 +159,6 @@ builtinDefinitions =
       (TypeDefinition [Parameter () "a"] [])
   , DType
       mempty
-      "Process"
-      ( TypeDefinition
-          [Parameter () "a", Parameter () "v"]
-          [ DataConstructor
-              "Process"
-              1
-              ( Forall
-                  (Set.fromList [Parameter () "a", Parameter () "v"])
-                  mempty
-                  ( TRecord
-                      ( TRow
-                          ( RExtend
-                              "state"
-                              (TVariable (Parameter () "a"))
-                              ( RExtend
-                                  "step"
-                                  ( TVariable (Parameter () "v")
-                                      `TArrow` TVariable (Parameter () "a")
-                                      `TArrow` applyTypeArgs
-                                        ()
-                                        (TConstructor () "Process")
-                                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
-                                  )
-                                  RNil
-                              )
-                          )
-                      )
-                      `TArrow` applyTypeArgs
-                        ()
-                        (TConstructor () "Process")
-                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
-                  )
-              )
-          ]
-      )
-  , DType
-      mempty
       "Machine"
       ( TypeDefinition
           [Parameter () "s", Parameter () "i", Parameter () "o"]

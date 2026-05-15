@@ -14,6 +14,5 @@ builtinConstructors =
     , ("$Zero", 1)
     , ("Some", 1)
     , ("None", 0)
-    , ("Process", 0)
     , ("Machine", 0)
     ]

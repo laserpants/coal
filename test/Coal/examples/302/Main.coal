@@ -5,9 +5,10 @@ module Main {
   import Containers.Set(Set)
   import namespace Containers.Set
   import Stream(Stream, nats, head, tail, repeat)
-  import Process(receive, cons, observe, duplicate, process, map_process)
+  import Machine(receive, cons, observe, duplicate, machine, map_machine)
+  import Coal.Combinators(identity)
 
-  type alias Parser = Process<(Option<string>, string), string>
+  type alias Parser = Machine<(Option<string>, string), string, (Option<string>, string)>
 
   fun parse_string(str : string) : Parser =
     let
@@ -28,7 +29,7 @@ module Main {
             state
         }
     in
-    process((Some(""), str), step)
+    machine((Some(""), str), step, identity)
 
   // Game
 
@@ -134,7 +135,7 @@ module Main {
               }
         }
     in
-    process(initial_game_state, step)
+    machine(initial_game_state, step, identity)
 
 
   //
@@ -145,7 +146,7 @@ module Main {
 
   let
     yy =
-      map_process(fn(x) => x + 2, xx)
+      map_machine(fn(x) => x + 2, xx)
 
   let
     example1 =
