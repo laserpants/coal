@@ -113,7 +113,7 @@ module Main {
     | KeyUp           => Rotate
     | KeyDown or Tick => MoveDown
 
-  let game : Process<GameState, Move> =
+  let game : Machine<GameState, Move, GameState> =
     let
       step(move, { board, current_block }) =
         match(move) {

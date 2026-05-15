@@ -48,7 +48,7 @@ module Main {
 
   // Stream
 
-  type alias Stream<a> = Process<a, unit>
+  type alias Stream<a> = Machine<a, unit, a>
 
   fun repeat(state : a) : Stream<a> =
     process(state, fn(_, _) => state)
@@ -63,7 +63,7 @@ module Main {
 
   // Parser
 
-  type alias Parser = Process<(Option<string>, string), string>
+  type alias Parser = Machine<(Option<string>, string), string, (Option<string>, string)>
 
   fun parse_string(str : string) : Parser =
     let
