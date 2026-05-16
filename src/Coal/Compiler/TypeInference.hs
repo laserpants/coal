@@ -235,7 +235,9 @@ runConstraintsGen stack = do
   return (result, constraintsGenStateAnnotationIndexes, output)
 
 define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
-define name t = insertNameC name (Forall (typeIndexesIn s) mempty s)
+define name t = do
+  insertNameC name (Forall (typeIndexesIn s) mempty s)
+  return ()
  where
   s = normalizeTypeIndexes t
 

@@ -273,8 +273,11 @@ clearAssumptionsC = modify (overCompilerAssumptions (const mempty))
 -- * Name store
 
 {-# INLINE insertNameC #-}
-insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m ()
-insertNameC name scheme_ = modify (overCompilerNameStore (Environment.insert name scheme_))
+insertNameC :: (Monad m) => Name -> IndexedScheme -> CompilerT a m Bool
+insertNameC name scheme_ = do
+  env <- gets compilerNameStore
+  modify (overCompilerNameStore (Environment.insert name scheme_))
+  return (not (Environment.contains name env))
 
 {-# INLINE insertNamesC #-}
 insertNamesC :: (Monad m) => [(Name, IndexedScheme)] -> CompilerT a m ()

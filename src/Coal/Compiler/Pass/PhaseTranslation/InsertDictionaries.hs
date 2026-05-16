@@ -144,7 +144,8 @@ insertTraitDictionariesInDef =
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
 insertName (DLet _ _ LetDefinition{letDefinitionType = With ts t}) name = do
   let s = Forall (typeIndexesIn t) (Set.fromList ts) t
-  insertNameC name s
+  _ <- insertNameC name s
+  pure ()
 insertName _ _ = pure () -- Other definitions do not need name insertion
 
 {- | Collect all trait constraints required by a name at the given type.

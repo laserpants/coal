@@ -472,9 +472,9 @@ collectDataConstructors =
                           Nothing -> do
                             currentPath <- lift $ lift $ gets compilerCurrentPath
                             lift $ lift $ tellErrors [NoDataConstructorForType ctor name path (ErrorLocation (principalPath currentPath) loc)]
-                          Just entry@DataConstructorEntry{dataConstructorEntryConstructor = DataConstructor{..}} -> do
+                          Just entry@DataConstructorEntry{dataConstructorEntryMetaData, dataConstructorEntryConstructor = DataConstructor{..}} -> do
                             insertDataConstructor ctor entry
-                            lift $ lift $ insertNameC constructorName constructorScheme
+                            lift $ lift $ insertNewName constructorName dataConstructorEntryMetaData constructorScheme
                    where
                     dataConstructors
                       | ["*"] == ctors = typeConstructorEntryDataConstructors
@@ -562,7 +562,8 @@ collectTraits =
                             \case
                               info@(NName n s) -> do
                                 insertNameEntry info
-                                lift $ lift $ insertNameC n s
+                                _ <- lift $ lift $ insertNameC n s
+                                pure ()
                               _ ->
                                 pure ()
           _ ->
@@ -604,7 +605,7 @@ collectTraitsInterface =
               )
           let normalizedScheme = normalizeScheme s
           insertNameEntry (NName traitDefinitionInterfaceEntryName normalizedScheme)
-          lift $ lift $ insertNameC traitDefinitionInterfaceEntryName normalizedScheme
+          _ <- lift $ lift $ insertNameC traitDefinitionInterfaceEntryName normalizedScheme
 
           exportList <- ask
           let exportName =
@@ -638,7 +639,8 @@ collectTraitsInterface =
                             \case
                               info@(NName _ s) -> do
                                 modify (insertBuildNameEntry info)
-                                lift $ lift $ insertNameC member s
+                                _ <- lift $ lift $ insertNameC member s
+                                pure ()
                               _ -> do
                                 pure ()
                         _ ->
@@ -738,7 +740,8 @@ collectInstances =
                   \case
                     info@(NName n s) -> do
                       insertNameEntry info
-                      lift $ lift $ insertNameC n s
+                      _ <- lift $ lift $ insertNameC n s
+                      pure ()
                     _ ->
                       pure ()
     DNamespaceImport _ path -> do
@@ -756,7 +759,8 @@ collectInstances =
                   \case
                     info@(NName n s) -> do
                       insertNameEntry info
-                      lift $ lift $ insertNameC n s
+                      _ <- lift $ lift $ insertNameC n s
+                      pure ()
                     _ ->
                       pure ()
     _ ->
@@ -816,7 +820,7 @@ collectImports =
                   \case
                     info@(NName _ s) -> do
                       modify (insertBuildNameEntry info)
-                      lift $ lift $ insertNameC name s
+                      lift $ lift $ insertNewName name iloc s
                     _ -> do
                       pure ()
             | otherwise -> do
@@ -846,7 +850,8 @@ collectImports =
             \case
               NName name s -> do
                 modify (insertBuildNameEntry (NName (qualifiedName name) s))
-                lift $ lift $ insertNameC (qualifiedName name) s
+                _ <- lift $ lift $ insertNameC (qualifiedName name) s
+                pure ()
               NType name k ->
                 modify (insertBuildNameEntry (NType (qualifiedName name) k))
               NTrait name ->
@@ -868,3 +873,11 @@ importedBuild path = do
       return emptyBuild
     Just build ->
       return build
+
+insertNewName :: (Monad m) => Name -> a -> IndexedScheme -> CompilerT a m ()
+insertNewName name loc s = do
+  r <- insertNameC name s
+  unless r $ do
+    currentPath <- gets compilerCurrentPath
+    tellErrors [NameAlreadyDefined name (ErrorLocation (principalPath currentPath) loc)]
+    throwError PreflightFailure

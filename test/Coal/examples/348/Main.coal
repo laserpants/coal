@@ -1,0 +1,11 @@
+module Main {
+
+  import namespace IO
+
+  import String(length)
+  import List(length)
+
+  fun main() =
+    IO.println_string("!!")
+
+}
