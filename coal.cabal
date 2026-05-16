@@ -32,7 +32,6 @@ library
       Coal.Compiler.Build.Envelope
       Coal.Compiler.Build.Hash256
       Coal.Compiler.Build.NameEntry
-      Coal.Compiler.Builtin.DataConstructors
       Coal.Compiler.Builtin.Definitions
       Coal.Compiler.Builtin.Functions
       Coal.Compiler.Builtin.Instances

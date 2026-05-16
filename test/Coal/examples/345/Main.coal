@@ -1,0 +1,13 @@
+module Main {
+
+  import namespace IO
+
+  fun main() =
+    let zz = Succ(Zero)
+    in
+    match(zz) {
+      | Succ(z) => IO.println_string("S")
+      | _ => IO.println_string("Z")
+    }
+
+}
