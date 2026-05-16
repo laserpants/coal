@@ -145,6 +145,87 @@ module Main {
       pure_parser(None)
     )
 
+  // We need a bound here because of recursion being structural
+  fun many_bounded_by(bound : nat, p : Parser<tok, a>) : Parser<tok, List<a>> =
+    fold(bound) {
+      | Zero => pure_parser([])
+      | Succ(@rest) =>
+          or_else(
+            and_then(p, fn(x) =>
+              map_parser(fn(xs) => x :: xs, rest)
+            ),
+            pure_parser([])
+          )
+    }
+
+  fun many(p : Parser<tok, a>) : Parser<tok, List<a>> =
+    many_bounded_by(1000, p) // At least for now
+
+  fun some(p : Parser<tok, a>) : Parser<tok, List<a>> =
+    and_then(p, fn(x) =>
+      map_parser(
+        fn(xs) => x :: xs,
+        many(p)
+      )
+    )
+
+  fun between(
+    open  : Parser<tok, a>,
+    close : Parser<tok, b>,
+    p     : Parser<tok, c>
+  ) : Parser<tok, c> =
+    and_then(open, fn(_) =>
+      and_then(p, fn(result) =>
+        and_then(close, fn(_) =>
+          pure_parser(result)
+        )
+      )
+    )
+
+  fun sep_by(p : Parser<tok, a>, sep : Parser<tok, b>) : Parser<tok, List<a>> =
+    or_else(
+      and_then(p, fn(first) =>
+        map_parser(
+          fn(rest) => first :: rest,
+          many(
+            and_then(sep, fn(_) => p)
+          )
+        )
+      ),
+      pure_parser([])
+    )
+
+  fun eof() : Parser<tok, unit> =
+    machine(
+      None,
+      fn(_, _) => None,  // Always fail on any input
+      fn(state) => state  // Success only when no more input
+    )
+
+  fun choice(ps : List<Parser<tok, a>>) : Parser<tok, a> =
+    fold(ps) {
+      | [] => fail_parser()
+      | p :: @rest => or_else(p, rest)
+    }
+
+  fun many_until_bounded_by(bound : nat, p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
+    fold(bound) {
+      | Zero => pure_parser([])
+      | Succ(@rest) =>
+          or_else(
+            map_parser(fn(_) => [], stop),
+            and_then(p, fn(x) =>
+              map_parser(
+                fn(xs) => x :: xs,
+                rest
+              )
+            )
+          )
+    }
+
+  fun many_until(p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
+    many_until_bounded_by(1000, p, stop)
+
   fun main() =
     IO.println_string("@")
 
