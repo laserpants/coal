@@ -29,7 +29,7 @@ module Main {
   fun any_token() : Machine<Option<tok>, tok, Option<tok>> =
     satisfy(always(true))
 
-  fun parse_token(expected : tok) : Machine<Option<tok>, tok, Option<tok>> =
+  fun parse_token(expected : tok) : Machine<Option<tok>, tok, Option<tok>> with (Comparable<tok>) =
     satisfy(fn(tok) => tok == expected)
 
   fun map_parser(f : a -> b, p : Machine<s, tok, Option<a>>) : Machine<s, tok, Option<b>> =
@@ -151,7 +151,6 @@ module Main {
       map_parser(fn(x) => Some(x), p),
       pure_parser(None)
     )
-
 
   fun main() =
     IO.println_string("@")
