@@ -26,7 +26,7 @@ insertExtraDefinitions :: (Monoid a) => [Definition a () ()] -> [Definition a ()
 insertExtraDefinitions = (extraDefinitions <>)
 
 builtinFunctionNames :: [Name]
-builtinFunctionNames = for builtinFunctions fst
+builtinFunctionNames = "machine$_machine" : for builtinFunctions fst
 
 builtinTraitInstances :: [Name]
 builtinTraitInstances =

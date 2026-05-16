@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Builtin.Functions (builtinFunctions) where
+module Coal.Compiler.Builtin.Functions (machineType, builtinFunctions) where
 
 import Coal.Language
 import Data.List.NonEmpty (NonEmpty (..))
@@ -227,10 +227,6 @@ builtinFunctions =
   ,
     ( "(!=)"
     , forall1' (\t0 -> (Set.fromList [Trait "Comparable" t0], t0 ~> t0 ~> TIntrinsic IBool))
-    )
-  ,
-    ( "machine$_machine"
-    , forall2 $ \t1 t2 -> TVariable (TypeIndex KType 99999999) ~> (t1 ~> TVariable (TypeIndex KType 99999999) ~> TVariable (TypeIndex KType 99999999)) ~> (TVariable (TypeIndex KType 99999999) ~> t2) ~> machineType t1 t2
     )
   ,
     ( "machine$_map_machine"
