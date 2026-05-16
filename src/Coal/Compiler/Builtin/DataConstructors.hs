@@ -38,28 +38,28 @@ builtinDataConstructors =
           DataConstructor
             "Machine"
             1
-            ( forall3
-                ( \s i o ->
+            ( forall2
+                ( \i o ->
                     TRecord
                       ( TRow
                           ( RExtend
                               "state"
-                              s
+                              (TVariable (TypeIndex KType 9999999999))
                               ( RExtend
                                   "step"
                                   ( i
-                                      `TArrow` s
-                                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Machine") (s :| [i, o])
+                                      `TArrow` TVariable (TypeIndex KType 9999999999)
+                                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Machine") (i :| [o])
                                   )
                                   ( RExtend
                                       "view"
-                                      (s `TArrow` o)
+                                      (TVariable (TypeIndex KType 9999999999) `TArrow` o)
                                       RNil
                                   )
                               )
                           )
                       )
-                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Machine") (s :| [i, o])
+                      `TArrow` applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Machine") (i :| [o])
                 )
             )
       , dataConstructorEntryConstructorSet =

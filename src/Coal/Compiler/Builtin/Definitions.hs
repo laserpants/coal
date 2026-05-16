@@ -161,12 +161,12 @@ builtinDefinitions =
       mempty
       "Machine"
       ( TypeDefinition
-          [Parameter () "s", Parameter () "i", Parameter () "o"]
+          [Parameter () "i", Parameter () "o"]
           [ DataConstructor
               "Machine"
               1
               ( Forall
-                  (Set.fromList [Parameter () "s", Parameter () "i", Parameter () "o"])
+                  (Set.fromList [Parameter () "i", Parameter () "o"])
                   mempty
                   ( TRecord
                       ( TRow
@@ -180,10 +180,7 @@ builtinDefinitions =
                                       `TArrow` applyTypeArgs
                                         ()
                                         (TConstructor () "Machine")
-                                        ( TVariable (Parameter () "s")
-                                            :| [ TVariable (Parameter () "i")
-                                               , TVariable (Parameter () "o")
-                                               ]
+                                        ( TVariable (Parameter () "i") :| [ TVariable (Parameter () "o") ]
                                         )
                                   )
                                   ( RExtend
@@ -197,10 +194,7 @@ builtinDefinitions =
                       `TArrow` applyTypeArgs
                         ()
                         (TConstructor () "Machine")
-                        ( TVariable (Parameter () "s")
-                            :| [ TVariable (Parameter () "i")
-                               , TVariable (Parameter () "o")
-                               ]
+                        ( TVariable (Parameter () "i") :| [ TVariable (Parameter () "o") ]
                         )
                   )
               )

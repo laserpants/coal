@@ -2,22 +2,22 @@ module Codata.Machine {
 
   import Coal.Combinators(identity)
 
-  fun observe(Machine({ state, view | _ }) : Machine<s, i, o>) : o = 
+  fun observe(Machine({ state, view | _ }) : Machine<i, o>) : o = 
     view(state)
 
-  fun receive(input : i, Machine({ state, step, view }) : Machine<s, i, o>) : Machine<s, i, o> =
+  fun receive(input : i, Machine({ state, step, view }) : Machine<i, o>) : Machine<i, o> =
     step(input, state)
 
-  fun machine(seed : s, transition : i -> s -> s, view : s -> o) : Machine<s, i, o> =
+  fun machine(seed : s, transition: i -> s -> s, view : s -> o) : Machine<i, o> =
     machine$_machine(seed, transition, view)
 
-  fun map_machine(f : o -> p, machine : Machine<s, i, o>) : Machine<s, i, p> =
+  fun map_machine(f : o -> p, machine : Machine<i, o>) : Machine<i, p> =
     machine$_map_machine(f, machine)
 
-  fun contramap_input(f : j -> i, machine : Machine<s, i, o>) : Machine<s, j, o> =
+  fun contramap_input(f : j -> i, machine : Machine<i, o>) : Machine<j, o> =
     machine$_contramap_input(f, machine)
 
-  fun compose(m1 : Machine<s1, a, b>, m2 : Machine<s2, b, c>) : Machine<(Machine<s1, a, b>, Machine<s2, b, c>), a, c> =
+  fun compose(m1 : Machine<a, b>, m2 : Machine<b, c>) : Machine<a, c> =
     machine
       ( (m1, m2)
       , fn(input, (p, q)) =>
@@ -29,28 +29,28 @@ module Codata.Machine {
           observe(q)
       )
 
-  fun duplicate(m : Machine<s, i, o>) : Machine<Machine<s, i, o>, i, Machine<s, i, o>> =
+  fun duplicate(m : Machine<i, o>) : Machine<i, Machine<i, o>> =
     machine(
       m, 
       fn(input, current) => receive(input, current), 
       identity
     )
 
-  fun zip(m1 : Machine<s1, i, o1>, m2 : Machine<s2, i, o2>) : Machine<(Machine<s1, i, o1>, Machine<s2, i, o2>), i, (o1, o2)> =
+  fun zip(m1 : Machine<i, o1>, m2 : Machine<i, o2>) : Machine<i, (o1, o2)> =
     machine(
       (m1, m2),
       fn(input, (p,q)) => (receive(input, p), receive(input, q)),
       fn((p,q)) => (observe(p), observe(q))
     )
 
-  fun cons(state : s, Machine(m) : Machine<s, i, o>) : Machine<s, i, o> =
+  fun cons(state, Machine(m)) =
     Machine(
       { state = state
       , step = fn(_, _) => Machine(m)
       , view = m.view
       })
 
-  fun process(seed : a, f : v -> a -> a) : Machine<a, v, a> =
+  fun process(seed, f) =
     machine(seed, f, identity)
 
 }

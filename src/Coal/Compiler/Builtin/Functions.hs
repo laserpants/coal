@@ -7,8 +7,8 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name)
 
-machineType :: IndexedType -> IndexedType -> IndexedType -> IndexedType
-machineType s i o = applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Machine") (s :| [i, o])
+machineType :: IndexedType -> IndexedType -> IndexedType
+machineType i o = applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Machine") (i :| [o])
 
 builtinFunctions :: [(Name, IndexedScheme)]
 builtinFunctions =
@@ -230,14 +230,14 @@ builtinFunctions =
     )
   ,
     ( "machine$_machine"
-    , forall3 $ \t0 t1 t2 -> t0 ~> (t1 ~> t0 ~> t0) ~> (t0 ~> t2) ~> machineType t0 t1 t2
+    , forall2 $ \t1 t2 -> TVariable (TypeIndex KType 99999999) ~> (t1 ~> TVariable (TypeIndex KType 99999999) ~> TVariable (TypeIndex KType 99999999)) ~> (TVariable (TypeIndex KType 99999999) ~> t2) ~> machineType t1 t2
     )
   ,
     ( "machine$_map_machine"
-    , forall4 $ \t0 t1 t2 t3 -> (t2 ~> t3) ~> machineType t0 t1 t2 ~> machineType t0 t1 t3
+    , forall3 $ \t1 t2 t3 -> (t2 ~> t3) ~> machineType t1 t2 ~> machineType t1 t3
     )
   ,
     ( "machine$_contramap_input"
-    , forall4 $ \t0 t1 t2 t3 -> (t3 ~> t1) ~> machineType t0 t1 t2 ~> machineType t0 t3 t2
+    , forall3 $ \t1 t2 t3 -> (t3 ~> t1) ~> machineType t1 t2 ~> machineType t3 t2
     )
   ]
