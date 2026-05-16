@@ -1,0 +1,152 @@
+module Main {
+
+  import namespace IO
+  import Coal.Combinators(identity, always)
+  import Coal.Functor(Functor)
+  import Codata.Machine(machine, map_machine, observe, receive)
+
+  fun pure_parser(value : s) : Machine<Option<s>, tok, Option<s>> =
+    machine(
+      Some(value),
+      fn(_, state) => state,
+      identity
+    )
+
+  fun fail_parser() : Machine<Option<s>, tok, Option<s>> =
+    machine(
+      None,
+      fn(_, state) => state,
+      identity 
+    )
+
+  fun satisfy(pred : tok -> bool) : Machine<Option<tok>, tok, Option<tok>> =
+    machine(
+      None,
+      fn(input, _) => if pred(input) then Some(input) else None,
+      fn(state) => state
+    )
+
+  fun any_token() : Machine<Option<tok>, tok, Option<tok>> =
+    satisfy(always(true))
+
+  fun parse_char(expected : string) : Machine<Option<string>, string, Option<string>> =
+    satisfy(fn(tok) => tok == expected)
+
+  fun map_parser(f : a -> b, p : Machine<s, tok, Option<a>>) : Machine<s, tok, Option<b>> =
+    map_machine(
+      map(f),
+      p
+    )
+
+  type SeqState<s1, s2, tok, a, b> 
+    = RunningFirst(Machine<s1, tok, Option<a>>)
+    | RunningSecond(Machine<s2, tok, Option<b>>)
+
+  fun and_then(
+    p1 : Machine<s1, tok, Option<a>>, 
+    f  : a -> Machine<s2, tok, Option<b>>
+  ) : Machine<SeqState<s1, s2, tok, a, b>, tok, Option<b>> =
+    machine(
+      // Initial state
+      RunningFirst(p1),
+      // Transition function
+      fn(input, state) =>
+        match(state) {
+          // Phase 1: still running first parser
+          | RunningFirst(current_p1) =>
+              let
+                next_p1 =
+                  receive(input, current_p1)
+              in
+              match(observe(next_p1)) {
+                // First parser not done yet
+                | None =>
+                    RunningFirst(next_p1)
+                // First parser succeeded
+                | Some(value) =>
+                    let
+                      p2 =
+                        f(value)
+                    in
+                      RunningSecond(p2)
+              }
+          // Phase 2: running second parser
+          | RunningSecond(current_p2) =>
+              RunningSecond(
+                receive(input, current_p2)
+              )
+        },
+      // Observation function
+      fn(state) =>
+        match(state) {
+          // No final result yet
+          | RunningFirst(_) =>
+              None
+          // Delegate to second parser
+          | RunningSecond(p2) =>
+              observe(p2)
+        }
+    )
+
+  type OrElseState<s1, s2, tok, a>
+    = BothRunning(Machine<s1, tok, Option<a>>, Machine<s2, tok, Option<a>>)
+    | FirstSucceeded(Machine<s1, tok, Option<a>>)
+    | SecondSucceeded(Machine<s2, tok, Option<a>>)
+
+  fun or_else(
+    p1 : Machine<s1, tok, Option<a>>,
+    p2 : Machine<s2, tok, Option<a>>
+  ) : Machine<OrElseState<s1, s2, tok, a>, tok, Option<a>> =
+    machine(
+      // Initial state - run both parsers in parallel
+      BothRunning(p1, p2),
+      // Transition function
+      fn(input, state) =>
+        match(state) {
+          // Both parsers still running
+          | BothRunning(current_p1, current_p2) =>
+              let next_p1 = receive(input, current_p1) in
+              let next_p2 = receive(input, current_p2) in
+              let obs1 = observe(next_p1) in
+              let obs2 = observe(next_p2)
+              in
+              match(obs1) {
+                // First parser succeeded - use it
+                | Some(_) =>
+                    FirstSucceeded(next_p1)
+                // First parser hasn't succeeded, check second
+                | None =>
+                    match(obs2) {
+                      // Second parser succeeded - use it
+                      | Some(_) =>
+                          SecondSucceeded(next_p2)
+                      // Neither succeeded yet - keep running both
+                      | None =>
+                          BothRunning(next_p1, next_p2)
+                    }
+              }
+          // First parser already succeeded - keep using it
+          | FirstSucceeded(p) =>
+              FirstSucceeded(receive(input, p))
+          // Second parser already succeeded - keep using it
+          | SecondSucceeded(p) =>
+              SecondSucceeded(receive(input, p))
+        },
+      // Observation function
+      fn(state) =>
+        match(state) {
+          // Neither parser succeeded yet
+          | BothRunning(_, _) =>
+              None
+          // Return result from whichever parser succeeded
+          | FirstSucceeded(p) =>
+              observe(p)
+          | SecondSucceeded(p) =>
+              observe(p)
+        }
+    )
+
+  fun main() =
+    IO.println_string("@")
+
+}
