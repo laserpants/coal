@@ -1,0 +1,16 @@
+module Main {
+
+  import namespace IO
+
+  fun some_function(a) = 
+    ""
+
+  let first = "x"
+
+  fun example_function() =
+    fn(_snd) => some_function(first)
+
+  fun main() =
+    IO.println_string("xx")
+
+}

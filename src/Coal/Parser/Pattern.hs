@@ -16,7 +16,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language (Pattern (..), Primitive (LUnit))
 import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)
 import Coal.Parser.Core (Parser, lexeme, lexeme_, spaces)
-import Coal.Parser.Identifier (name)
+import Coal.Parser.Identifier (name, validChar)
 import Coal.Parser.Metadata (withMetadata)
 import qualified Coal.Parser.Primitive as Primitive
 import Coal.Parser.Symbol
@@ -26,7 +26,7 @@ import Control.Monad.Combinators.Expr
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Name)
-import Text.Megaparsec (option, optional, some, try, (<|>))
+import Text.Megaparsec (notFollowedBy, option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
@@ -36,7 +36,7 @@ parseAtom =
     <|> parseAtVariablePattern
     <|> parseLiteralPattern
     <|> parseRecordPattern
-    <|> parseWildcardPattern
+    <|> try parseWildcardPattern
     <|> try parseAtFunction
     <|> parseVariablePattern
     <|> try (parens parsePattern)
@@ -79,7 +79,9 @@ patternOperators =
 parseWildcardPattern :: Parser (Pattern Metadata () ())
 parseWildcardPattern =
   withMetadata $ do
-    symbol_ "_"
+    lexeme_ $ do
+      void (char '_')
+      notFollowedBy validChar
     pure (`PAny` ())
 
 parseVariablePattern :: Parser (Pattern Metadata () ())

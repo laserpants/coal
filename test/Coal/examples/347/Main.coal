@@ -1,0 +1,30 @@
+module Main {
+
+  import namespace IO
+
+  // Test that wildcard pattern still works
+  fun test_wildcard() =
+    fn(_) => "wildcard works"
+
+  // Test that underscore-prefixed identifier works
+  fun test_underscore_id() =
+    fn(_x) => "underscore id works"
+
+  // Test mixed
+  fun test_mixed() =
+    fn(_, _y) => "mixed works"
+
+  fun main() =
+    let
+      f1 = test_wildcard();
+      f2 = test_underscore_id();
+      f3 = test_mixed()
+    in
+    do {
+      IO.println_string(f1("ignored"));
+      IO.println_string(f2("value"));
+      IO.println_string(f3("a", "b"));
+      IO.return();
+    }
+
+}
