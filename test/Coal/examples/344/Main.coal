@@ -141,7 +141,7 @@ module Main {
 
   fun optional(p : Parser<tok, a>) : Parser<tok, Option<a>> =
     or_else(
-      map_parser(fn(x) => Some(x), p),
+      map_parser(Some, p),
       pure_parser(None)
     )
 
