@@ -4,7 +4,7 @@ module Main {
   import Codata.Machine(machine, receive, observe, map_machine)
   import Coal.Combinators(identity)
 
-  type alias Counter = Machine<int32, int32, int32>
+  type alias Counter = Machine<int32, int32>
 
   fun counter() : Counter =
     machine(1, fn(s, n) => s + n, identity)

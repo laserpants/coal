@@ -3,14 +3,14 @@ module Main {
   import namespace IO
   import Codata.Machine(machine, compose, observe, receive, map_machine)
 
-  fun accumulator(seed : int32) : Machine<int32, int32, int32> =
+  fun accumulator(seed : int32) : Machine<int32, int32> =
     machine(
       seed,
       fn(input, state) => state + input,
       fn(state) => state
     )
 
-  fun doubler(seed : int32) : Machine<int32, int32, int32> =
+  fun doubler(seed : int32) : Machine<int32, int32> =
     machine(
       seed,
       fn(input, _) => input,

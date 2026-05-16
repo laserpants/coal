@@ -5,6 +5,8 @@ module Main {
   import Coal.Functor(Functor)
   import Codata.Machine(machine, map_machine, observe, receive)
 
+  type alias Parser<tok, a> = Machine<tok, Option<a>>
+
 //  fun pure_parser(value : s) : Machine<Option<s>, tok, Option<s>> =
 //    machine(
 //      Some(value),

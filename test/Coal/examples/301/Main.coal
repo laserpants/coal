@@ -19,7 +19,7 @@ module Main {
   //
 
   let
-    foo : Machine<GameState, unit, GameState> = 
+    foo : Machine<unit, GameState> = 
      let
        step(_, x) = x
      in

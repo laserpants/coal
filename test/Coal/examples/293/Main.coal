@@ -12,10 +12,10 @@ module Main {
 //  type Process<a, v> =
 //    Process({ state : a, step : v -> a -> Process<a, v> })
 
-  fun observe(Machine({ state | _ }) : Machine<a, v, a>) : a = 
+  fun observe(Machine({ state | _ }) : Machine<v, a>) : a = 
     state
 
-  fun receive(input : v, Machine({ state, step | _ }) : Machine<a, v, a>) : Machine<a, v, a> =
+  fun receive(input : v, Machine({ state, step | _ }) : Machine<v, a>) : Machine<v, a> =
     step(input, state)
 
 //  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
@@ -48,7 +48,7 @@ module Main {
 
   // Stream
 
-  type alias Stream<a> = Machine<a, unit, a>
+  type alias Stream<a> = Machine<unit, a>
 
   fun repeat(state : a) : Stream<a> =
     process(state, fn(_, _) => state)
@@ -63,7 +63,7 @@ module Main {
 
   // Parser
 
-  type alias Parser = Machine<(Option<string>, string), string, (Option<string>, string)>
+  type alias Parser = Machine<string, (Option<string>, string)>
 
   fun parse_string(str : string) : Parser =
     let
@@ -168,7 +168,7 @@ module Main {
     | KeyUp           => Rotate
     | KeyDown or Tick => MoveDown
 
-  let game : Machine<GameState, Move, GameState> =
+  let game : Machine<Move, GameState> =
     let
       step(move, { board, current_block }) =
         match(move) {

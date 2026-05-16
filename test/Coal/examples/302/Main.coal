@@ -8,7 +8,7 @@ module Main {
   import Codata.Machine(receive, cons, observe, duplicate, machine, map_machine)
   import Coal.Combinators(identity)
 
-  type alias Parser = Machine<(Option<string>, string), string, (Option<string>, string)>
+  type alias Parser = Machine<string, (Option<string>, string)>
 
   fun parse_string(str : string) : Parser =
     let
@@ -113,7 +113,7 @@ module Main {
     | KeyUp           => Rotate
     | KeyDown or Tick => MoveDown
 
-  let game : Machine<GameState, Move, GameState> =
+  let game : Machine<Move, GameState> =
     let
       step(move, { board, current_block }) =
         match(move) {
