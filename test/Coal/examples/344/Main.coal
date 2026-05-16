@@ -197,8 +197,7 @@ module Main {
       pure_parser(None)
     )
 
-  // We need a bound here because of recursion being structural
-  fun many_bounded_by(bound : nat, p : Parser<tok, a>) : Parser<tok, List<a>> =
+  fun at_most(bound : nat, p : Parser<tok, a>) : Parser<tok, List<a>> =
     fold(bound) {
       | Zero => pure_parser([])
       | Succ(@rest) =>
@@ -211,7 +210,7 @@ module Main {
     }
 
   fun many(p : Parser<tok, a>) : Parser<tok, List<a>> =
-    many_bounded_by(1000, p) 
+    at_most(1000, p) 
 
   fun some(p : Parser<tok, a>) : Parser<tok, List<a>> =
     and_then(p, fn(x) =>
@@ -260,7 +259,7 @@ module Main {
       | p :: @rest => or_else(p, rest)
     }
 
-  fun many_until_bounded_by(bound : nat, p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
+  fun until_at_most(bound : nat, p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
     fold(bound) {
       | Zero => pure_parser([])
       | Succ(@rest) =>
@@ -276,7 +275,7 @@ module Main {
     }
 
   fun many_until(p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
-    many_until_bounded_by(1000, p, stop)
+    until_at_most(1000, p, stop)
 
   fun main() =
     IO.println_string("@")
