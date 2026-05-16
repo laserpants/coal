@@ -1,8 +1,8 @@
-module Stream {
+module Codata.Stream {
 
-  import Process(receive, observe, process)
+  import Codata.Machine(receive, observe, process)
 
-  type alias Stream<a> = Process<a, unit>
+  type alias Stream<a> = Machine<unit, a>
 
   fun repeat(state : a) : Stream<a> =
     process(state, fn(_, _) => state)

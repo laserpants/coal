@@ -26,7 +26,7 @@ insertExtraDefinitions :: (Monoid a) => [Definition a () ()] -> [Definition a ()
 insertExtraDefinitions = (extraDefinitions <>)
 
 builtinFunctionNames :: [Name]
-builtinFunctionNames = for builtinFunctions fst
+builtinFunctionNames = "machine$_machine" : for builtinFunctions fst
 
 builtinTraitInstances :: [Name]
 builtinTraitInstances =
@@ -159,37 +159,43 @@ builtinDefinitions =
       (TypeDefinition [Parameter () "a"] [])
   , DType
       mempty
-      "Process"
+      "Machine"
       ( TypeDefinition
-          [Parameter () "a", Parameter () "v"]
+          [Parameter () "i", Parameter () "o"]
           [ DataConstructor
-              "Process"
+              "Machine"
               1
               ( Forall
-                  (Set.fromList [Parameter () "a", Parameter () "v"])
+                  (Set.fromList [Parameter () "i", Parameter () "o"])
                   mempty
                   ( TRecord
                       ( TRow
                           ( RExtend
                               "state"
-                              (TVariable (Parameter () "a"))
+                              (TVariable (Parameter () "s"))
                               ( RExtend
                                   "step"
-                                  ( TVariable (Parameter () "v")
-                                      `TArrow` TVariable (Parameter () "a")
+                                  ( TVariable (Parameter () "i")
+                                      `TArrow` TVariable (Parameter () "s")
                                       `TArrow` applyTypeArgs
                                         ()
-                                        (TConstructor () "Process")
-                                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
+                                        (TConstructor () "Machine")
+                                        ( TVariable (Parameter () "i") :| [TVariable (Parameter () "o")]
+                                        )
                                   )
-                                  RNil
+                                  ( RExtend
+                                      "view"
+                                      (TVariable (Parameter () "s") `TArrow` TVariable (Parameter () "o"))
+                                      RNil
+                                  )
                               )
                           )
                       )
                       `TArrow` applyTypeArgs
                         ()
-                        (TConstructor () "Process")
-                        (TVariable (Parameter () "a") :| [TVariable (Parameter () "v")])
+                        (TConstructor () "Machine")
+                        ( TVariable (Parameter () "i") :| [TVariable (Parameter () "o")]
+                        )
                   )
               )
           ]

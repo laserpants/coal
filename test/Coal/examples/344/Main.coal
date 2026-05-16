@@ -1,0 +1,283 @@
+module Main {
+
+  import namespace IO
+  import Coal.Combinators(identity, always)
+  import Coal.Functor(Functor)
+  import Codata.Machine(machine, map_machine, observe, receive)
+
+  type ParseError
+    = ExpectedToken
+    | UnexpectedEOF
+    | CustomError(string)
+
+  type ParseResult<a>
+    = Error(ParseError)
+    | NeedMoreInput
+    | ResultOk(a)
+
+  instance Functor<ParseResult> {
+    fun map(f, result) =
+      match(result) {
+        | ResultOk(r) =>
+            ResultOk(f(r))
+        | res =>
+            res
+      }
+  }
+
+  type alias Parser<tok, a> = Machine<tok, ParseResult<a>>
+
+  fun pure_parser(value : s) : Parser<tok, s> =
+    machine(
+      ResultOk(value),
+      fn(_, state) => state,
+      identity
+    )
+
+  fun fail_parser() : Parser<tok, s> =
+    machine(
+      Error(ExpectedToken),
+      fn(_, state) => state,
+      identity 
+    )
+
+  fun satisfy(pred : tok -> bool) : Parser<tok, tok> =
+    machine(
+      NeedMoreInput,
+      fn(input, _) => if pred(input) then ResultOk(input) else Error(ExpectedToken),
+      identity 
+    )
+
+  fun any_token() : Parser<tok, tok> =
+    satisfy(always(true))
+
+  fun parse_token(expected : tok) : Parser<tok, tok> with (Comparable<tok>) =
+    satisfy(fn(tok) => tok == expected)
+
+  fun map_parser(f : a -> b, p : Parser<tok, a>) : Parser<tok, b> =
+    map_machine(map(f), p)
+
+  type SeqState<tok, a, b> 
+    = RunningFirst(Parser<tok, a>)
+    | RunningSecond(Parser<tok, b>)
+
+  fun and_then(p1 : Parser<tok, a>, f : a -> Parser<tok, b>) : Parser<tok, b> =
+    machine(
+      // Initial state
+      RunningFirst(p1),
+      // Transition function
+      fn(input, state) =>
+        match(state) {
+          // Phase 1: still running first parser
+          | RunningFirst(current_p1) =>
+              let
+                next_p1 =
+                  receive(input, current_p1)
+              in
+              match(observe(next_p1)) {
+                // First parser not done yet
+                | NeedMoreInput =>
+                    RunningFirst(next_p1)
+                // First parser failed
+                | Error(_) =>
+                    RunningFirst(next_p1)
+                // First parser succeeded
+                | ResultOk(value) =>
+                    let
+                      p2 =
+                        f(value)
+                    in
+                      RunningSecond(p2)
+              }
+          // Phase 2: running second parser
+          | RunningSecond(current_p2) =>
+              RunningSecond(
+                receive(input, current_p2)
+              )
+        },
+      // Observation function
+      fn(state) =>
+        match(state) {
+          // No final result yet
+          | RunningFirst(q1) =>
+              match(observe(q1)) {
+                | NeedMoreInput => NeedMoreInput
+                | Error(e) => Error(e)
+                | ResultOk(_) => NeedMoreInput  // Should not happen
+              }
+          // Delegate to second parser
+          | RunningSecond(p2) =>
+              observe(p2)
+        }
+    )
+
+  type OrElseState<tok, a>
+    = BothRunning(Parser<tok, a>, Parser<tok, a>)
+    | FirstSucceeded(Parser<tok, a>)
+    | SecondSucceeded(Parser<tok, a>)
+
+  fun or_else(p1 : Parser<tok, a>, p2 : Parser<tok, a>) : Parser<tok, a> =
+    machine(
+      // Initial state - run both parsers in parallel
+      BothRunning(p1, p2),
+      // Transition function
+      fn(input, state) =>
+        match(state) {
+          // Both parsers still running
+          | BothRunning(current_p1, current_p2) =>
+              let next_p1 = receive(input, current_p1) in
+              let next_p2 = receive(input, current_p2) in
+              let obs1 = observe(next_p1) in
+              let obs2 = observe(next_p2)
+              in
+              match(obs1) {
+                // First parser succeeded - use it
+                | ResultOk(_) =>
+                    FirstSucceeded(next_p1)
+                // First parser hasn't succeeded, check second
+                | NeedMoreInput =>
+                    match(obs2) {
+                      // Second parser succeeded - use it
+                      | ResultOk(_) =>
+                          SecondSucceeded(next_p2)
+                      // Neither succeeded yet - keep running both
+                      | NeedMoreInput =>
+                          BothRunning(next_p1, next_p2)
+                      // Second failed, keep trying first
+                      | Error(_) =>
+                          BothRunning(next_p1, next_p2)
+                    }
+                // First parser failed, try second
+                | Error(_) =>
+                    match(obs2) {
+                      // Second parser succeeded - use it
+                      | ResultOk(_) =>
+                          SecondSucceeded(next_p2)
+                      // Second still needs input - use it
+                      | NeedMoreInput =>
+                          SecondSucceeded(next_p2)
+                      // Both failed
+                      | Error(_) =>
+                          SecondSucceeded(next_p2)  // Use second's error
+                    }
+              }
+          // First parser already succeeded - keep using it
+          | FirstSucceeded(p) =>
+              FirstSucceeded(receive(input, p))
+          // Second parser already succeeded - keep using it
+          | SecondSucceeded(p) =>
+              SecondSucceeded(receive(input, p))
+        },
+      // Observation function
+      fn(state) =>
+        match(state) {
+          // Neither parser succeeded yet
+          | BothRunning(q1, q2) =>
+              match(observe(q1)) {
+                | ResultOk(_) => observe(q1)
+                | Error(_) => observe(q2)
+                | NeedMoreInput =>
+                    match(observe(q2)) {
+                      | ResultOk(_) => observe(q2)
+                      | Error(_) => observe(q2)
+                      | NeedMoreInput => NeedMoreInput
+                    }
+              }
+          // Return result from whichever parser succeeded
+          | FirstSucceeded(p) =>
+              observe(p)
+          | SecondSucceeded(p) =>
+              observe(p)
+        }
+    )
+
+  fun optional(p : Parser<tok, a>) : Parser<tok, Option<a>> =
+    or_else(
+      map_parser(Some, p),
+      pure_parser(None)
+    )
+
+  fun at_most(bound : nat, p : Parser<tok, a>) : Parser<tok, List<a>> =
+    fold(bound) {
+      | Zero => pure_parser([])
+      | Succ(@rest) =>
+          or_else(
+            and_then(p, fn(x) =>
+              map_parser(fn(xs) => x :: xs, rest)
+            ),
+            pure_parser([])
+          )
+    }
+
+  fun many(p : Parser<tok, a>) : Parser<tok, List<a>> =
+    at_most(1000, p) 
+
+  fun some(p : Parser<tok, a>) : Parser<tok, List<a>> =
+    and_then(p, fn(x) =>
+      map_parser(
+        fn(xs) => x :: xs,
+        many(p)
+      )
+    )
+
+  fun between(
+    open  : Parser<tok, a>,
+    close : Parser<tok, b>,
+    p     : Parser<tok, c>
+  ) : Parser<tok, c> =
+    and_then(open, fn(_) =>
+      and_then(p, fn(result) =>
+        and_then(close, fn(_) =>
+          pure_parser(result)
+        )
+      )
+    )
+
+  fun sep_by(p : Parser<tok, a>, sep : Parser<tok, b>) : Parser<tok, List<a>> =
+    or_else(
+      and_then(p, fn(first) =>
+        map_parser(
+          fn(rest) => first :: rest,
+          many(
+            and_then(sep, fn(_) => p)
+          )
+        )
+      ),
+      pure_parser([])
+    )
+
+  fun eof() : Parser<tok, unit> =
+    machine(
+      NeedMoreInput,
+      fn(_, _) => Error(ExpectedToken),  // Always fail on any input
+      fn(state) => state  // Success only when no more input
+    )
+
+  fun choice(ps : List<Parser<tok, a>>) : Parser<tok, a> =
+    fold(ps) {
+      | [] => fail_parser()
+      | p :: @rest => or_else(p, rest)
+    }
+
+  fun until_at_most(bound : nat, p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
+    fold(bound) {
+      | Zero => pure_parser([])
+      | Succ(@rest) =>
+          or_else(
+            map_parser(fn(_) => [], stop),
+            and_then(p, fn(x) =>
+              map_parser(
+                fn(xs) => x :: xs,
+                rest
+              )
+            )
+          )
+    }
+
+  fun many_until(p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
+    until_at_most(1000, p, stop)
+
+  fun main() =
+    IO.println_string("@")
+
+}

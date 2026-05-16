@@ -1564,179 +1564,148 @@ objects =
                   }
               |]
         , OFunction
-            "Builtin$.process$_process"
+            "Builtin$.machine$_machine"
             [ Label Kernel.opaque "seed"
-            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "transition"
+            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "view"
             ]
             [r| 
                   let
-                    step : */*/Process(*,*) =
-                      fn(v : *, a2 : *) =>
-                        @<Process(*,*)>
-                          ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                          , @<record({ state : * | step : */*/Process(*,*) | {} })>
-                              ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
-                              , { state = 
+                    step : */*/Machine(*,*) =
+                      fn(input : *, current_state : *) =>
+                        @<Machine(*,*)>
+                          ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                          , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                              ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                              , { state =
                                     @<*>
-                                      ( f : */*/*
-                                      , v : *
-                                      , a2 : *
+                                      ( transition : */*/*
+                                      , input : *
+                                      , current_state : *
                                       )
-                                | step = step : */*/Process(*,*)
+                                | step = step : */*/Machine(*,*)
+                                | view = view : */*
                                 | {}
                                 }
                               )
                           )
                   in
-                  @<Process(*,*)>
-                    ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                    , @<record({ state : * | step : */*/Process(*,*) | {} })>
-                        ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
+                  @<Machine(*,*)>
+                    ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                    , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                        ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
                         , { state = seed : *
-                          | step = step : */*/Process(*,*)
+                          | step = step : */*/Machine(*,*)
+                          | view = view : */*
                           | {}
                           }
                         )
                     )
               |]
         , OFunction
-            "Builtin$.process$_map_process"
+            "Builtin$.machine$_map_machine"
             [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            , Label (Kernel.TCon "Process" [opaque, opaque]) "p"
+            , Label (Kernel.TCon "Machine" [opaque, opaque]) "m"
             ]
             [r| 
-                  match<Process(*,*)>(p : Process(*,*)) {
-                    | ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                      , $r : record({ state : * | step : */*/Process(*,*) | {} })
+                  match<Machine(*,*)>(m : Machine(*,*)) {
+                    | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                      , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
                       ) =>
-                        match<Process(*,*)>($r : record({ state : * | step : */*/Process(*,*) | {} })) {
-                          | ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
-                            , $row : { state : * | step : */*/Process(*,*) | {} }
+                        match<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                          | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                            , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
                             ) =>
                               select
-                                { state = $state : * | q : { step : */*/Process(*,*) | {} } } =
-                                  $row : { state : * | step : */*/Process(*,*) | {} }
+                                { state = $state : * | q : { step : */*/Machine(*,*) | view : */* | {} } } =
+                                  $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
                                 in
                                   select
-                                    { step = $step : */*/Process(*,*) | _ : {} } = 
-                                      q : { step : */*/Process(*,*) | {} }
+                                    { step = $step : */*/Machine(*,*) | r : { view : */* | {} } } = 
+                                      q : { step : */*/Machine(*,*) | view : */* | {} }
                                     in
-                                    @<Process(*,*)>
-                                      ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                                      , @<record({ state : * | step : */*/Process(*,*) | {} })>
-                                          ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
-                                          , { state = 
-                                                @<*>
-                                                  ( f : */*
-                                                  , $state : *
-                                                  )
-                                            | step = 
-                                                fn(v : *, _ : *) =>
-                                                  @<Process(*,*)>
-                                                    ( `Builtin$.process$_map_process` : (*/*)/Process(*,*)/Process(*,*)
-                                                    , f : */*
-                                                    , @<Process(*,*)>
-                                                        ( $step : */*/Process(*,*)
-                                                        , v : *
-                                                        , $state : *
-                                                        )
-                                                    )
-                                            | {}
-                                            }
-                                          )
-                                      )
-                        }
-                  }
-              |]
-        , OFunction
-            "Builtin$.process$_contramap_input"
-            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            , Label (Kernel.TCon "Process" [opaque, opaque]) "p"
-            ]
-            [r| 
-                  match<Process(*,*)>(p : Process(*,*)) {
-                    | ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                      , $r : record({ state : * | step : */*/Process(*,*) | {} })
-                      ) =>
-                        match<Process(*,*)>($r : record({ state : * | step : */*/Process(*,*) | {} })) {
-                          | ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
-                            , $row : { state : * | step : */*/Process(*,*) | {} }
-                            ) =>
-                              select
-                                { state = $state : * | q : { step : */*/Process(*,*) | {} } } =
-                                  $row : { state : * | step : */*/Process(*,*) | {} }
-                                in
-                                  select
-                                    { step = $step : */*/Process(*,*) | _ : {} } = 
-                                      q : { step : */*/Process(*,*) | {} }
-                                    in
-                                    @<Process(*,*)>
-                                      ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                                      , @<record({ state : * | step : */*/Process(*,*) | {} })>
-                                          ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
-                                          , { state = $state : *
-                                            | step = 
-                                                fn(v : *, a : *) =>
-                                                  @<Process(*,*)>
-                                                    ( `Builtin$.process$_contramap_input` : (*/*)/Process(*,*)/Process(*,*)
-                                                    , f : */*
-                                                    , @<Process(*,*)>
-                                                        ( $step : */*/Process(*,*)
-                                                        , @<*>
-                                                            ( f : */*
-                                                            , v : *
-                                                            )
-                                                        , a : *
-                                                        )
-                                                    )
-                                            | {}
-                                            }
-                                          )
-                                      )
-                        }
-                  }
-              |]
-        , OFunction
-            "Builtin$.process$_duplicate"
-            [ Label (Kernel.TCon "Process" [opaque, opaque]) "p"
-            ]
-            [r| 
-                  let
-                    step : */Process(*,*)/Process(Process(*,*),*) =
-                      fn(v : *, p2 : Process(*,*)) =>
-                        match<Process(*,*)>(p2 : Process(*,*)) {
-                          | ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                            , $r : record({ state : * | step : */*/Process(*,*) | {} })
-                            ) =>
-                              match<Process(*,*)>($r : record({ state : * | step : */*/Process(*,*) | {} })) {
-                                | ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
-                                  , $row : { state : * | step : */*/Process(*,*) | {} }
-                                  ) =>
-                                    select
-                                      { step = $step : */*/Process(*,*) | _ : { state : * | {} } } = 
-                                        $row : { state : * | step : */*/Process(*,*) | {} }
-                                      in
-                                      @<Process(Process(*,*),*)>
-                                        ( `Builtin$.process$_duplicate` : Process(*,*)/Process(Process(*,*),*)
-                                        , @<Process(Process(*,*),*)>
-                                            ( $step : */*/Process(*,*)
-                                            , v : *
-                                            , p2 : Process(*,*)
+                                      select
+                                        { view = $view : */* | _ : {} } = r : { view : */* | {} }
+                                        in
+                                          @<Machine(*,*)>
+                                            ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                            , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                                                ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                                , { state = $state : *
+                                                  | step = 
+                                                      fn(inp : *, s : *) =>
+                                                        @<Machine(*,*)>
+                                                          ( `Builtin$.machine$_map_machine` : (*/*)/Machine(*,*)/Machine(*,*)
+                                                          , f : */*
+                                                          , @<Machine(*,*)>
+                                                              ( $step : */*/Machine(*,*)
+                                                              , inp : *
+                                                              , s : *
+                                                              )
+                                                          )
+                                                  | view = 
+                                                      fn(s : *) =>
+                                                        @<*>
+                                                          ( f : */*
+                                                          , @<*>
+                                                              ( $view : */*
+                                                              , s : *
+                                                              )
+                                                          )
+                                                  | {}
+                                                  }
+                                                )
                                             )
-                                        )
-                              }
                         }
-                  in
-                  @<Process(Process(*,*),*)>
-                    ( Process : record({ state : * | step : */*/Process(*,*) | {} })/Process(*,*)
-                    , @<record({ state : * | step : */*/Process(*,*) | {} })>
-                        ( $Record : { state : * | step : */*/Process(*,*) | {} }/record({ state : * | step : */*/Process(*,*) | {} })
-                        , { state = p : Process(*,*)
-                          | step = step : */Process(*,*)/Process(Process(*,*),*)
-                          | {}
-                          }
-                        )
-                    )
+                  }
+              |]
+        , OFunction
+            "Builtin$.machine$_contramap_input"
+            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
+            , Label (Kernel.TCon "Machine" [opaque, opaque]) "m"
+            ]
+            [r| 
+                  match<Machine(*,*)>(m : Machine(*,*)) {
+                    | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                      , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                      ) =>
+                        match<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                          | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                            , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                            ) =>
+                              select
+                                { state = $state : * | q : { step : */*/Machine(*,*) | view : */* | {} } } =
+                                  $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                in
+                                  select
+                                    { step = $step : */*/Machine(*,*) | r : { view : */* | {} } } = 
+                                      q : { step : */*/Machine(*,*) | view : */* | {} }
+                                    in
+                                      select
+                                        { view = $view : */* | _ : {} } = r : { view : */* | {} }
+                                        in
+                                          @<Machine(*,*)>
+                                            ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                            , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                                                ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                                , { state = $state : *
+                                                  | step = 
+                                                     fn(inp : *, s : *) =>
+                                                       @<Machine(*,*)>
+                                                         ( $step : */*/Machine(*,*)
+                                                         , @<*>
+                                                             ( f : */*
+                                                             , inp : *
+                                                             )
+                                                         , s : *
+                                                         )
+                                                  | view = $view : */*
+                                                  | {}
+                                                  }
+                                                )
+                                            )
+                        }
+                  }
               |]
         ]
     }

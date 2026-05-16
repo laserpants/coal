@@ -28,10 +28,12 @@ and produces 'Module Metadata Kind ()' (with kind annotations but no types yet).
 module Coal.Compiler.Pass.PhaseTypeChecking.KindIndexing (passKindIndexing) where
 
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build (Build (..), emptyBuild, insertHash)
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
+import Coal.Compiler.Builtin.Functions (machineType)
 import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
@@ -39,7 +41,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT, clearAssumptionsC, clearNameStoreC, insertBuildC, insertNameC, setCurrentModuleC, updateCurrentBuildPureC)
 import Coal.Compiler.State
-import Coal.Language (Kind, constructors)
+import Coal.Language (Kind (..), Type (..), TypeIndex (..), constructors, forall2, (~>))
 import Coal.Language.Definition (AliasDefinition (..), Definition (..))
 import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Import (Import (..))
@@ -86,6 +88,15 @@ kindIndexing m = do
     clearNameStoreC
     setCurrentModuleC m
     forM_ builtinFunctions (uncurry insertNameC)
+
+    special <- supplied (TVariable . (TypeIndex KType))
+    -- This type is special since it involves an existentially quantified
+    -- type 's', which we need to instantiate using a fresh type index.
+    --
+    -- machine : s -> (i -> s -> s) -> (s -> o) -> Machine<i, o>
+    --
+    insertNameC "machine$_machine" $ forall2 (\t1 t2 -> special ~> (t1 ~> special ~> special) ~> (special ~> t2) ~> machineType t1 t2)
+
     toKindIndexed m
 
   prepareBuildAliases indexedM

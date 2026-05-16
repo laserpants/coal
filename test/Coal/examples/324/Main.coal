@@ -1,7 +1,7 @@
 module Main {
 
   import namespace IO
-  import Stream(Stream, nats, tail, head)
+  import Codata.Stream(Stream, nats, tail, head)
 
   let
     n =

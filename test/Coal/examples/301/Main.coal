@@ -4,10 +4,11 @@ module Main {
   import String(is_prefix_of, length, drop)
   import Containers.Set(Set)
   import namespace Containers.Set
-  import Coal.Combinators(snd)
+  import Coal.Combinators(snd, identity)
+  import Codata.Machine(machine)
 
-  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
-     process$_process(seed, f)
+//  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
+//     process$_process(seed, f)
  
   type alias GameState = { a : int32 }
 
@@ -18,11 +19,11 @@ module Main {
   //
 
   let
-    foo : Process<GameState, unit> = 
+    foo : Machine<unit, GameState> = 
      let
        step(_, x) = x
      in
-       process({ a = 0 }, step)
+       machine({ a = 0 }, step, identity)
 
 //
 

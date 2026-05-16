@@ -1,14 +1,15 @@
 module Main {
 
   import IO(println_string, println_int32, println_bool)
-  import Process(process, receive, observe, map_process)
+  import Codata.Machine(machine, receive, observe, map_machine)
+  import Coal.Combinators(identity)
 
-  type alias Counter = Process<int32, int32>
+  type alias Counter = Machine<int32, int32>
 
   fun counter() : Counter =
-    process(1, fn(s, n) => s + n)
+    machine(1, fn(s, n) => s + n, identity)
 
-  let counter_2 = map_process(fn(x) => x * 1103515245 + 12345, counter())
+  let counter_2 = map_machine(fn(x) => x * 1103515245 + 12345, counter())
 
   let increment = receive
 

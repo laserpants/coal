@@ -1761,10 +1761,52 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/334" [ "Main.coal" ]
       res `shouldBe` Left TypeError
 
-  describe "335" $ do
+--  describe "335" $ do
+--    expectOutput
+--      "5"
+--      "test/Coal/examples/335" 
+--      [ "Main.coal" 
+--      ]
+
+  describe "339" $ do
     expectOutput
-      "5"
-      "test/Coal/examples/335" 
+      "4"
+      "test/Coal/examples/339" 
+      [ "Main.coal" 
+      ]
+
+  describe "340" $ do
+    expectOutput
+      "d"
+      "test/Coal/examples/340" 
+      [ "Main.coal" 
+      ]
+
+  describe "341" $ do
+    expectOutput
+      "104"
+      "test/Coal/examples/341" 
+      [ "Main.coal" 
+      ]
+
+  describe "342" $ do
+    expectOutput
+      "0"
+      "test/Coal/examples/342" 
+      [ "Main.coal" 
+      ]
+
+  describe "343" $ do
+    expectOutput
+      "6"
+      "test/Coal/examples/343" 
+      [ "Main.coal" 
+      ]
+
+  describe "345" $ do
+    expectOutput
+      "S"
+      "test/Coal/examples/345" 
       [ "Main.coal" 
       ]
 

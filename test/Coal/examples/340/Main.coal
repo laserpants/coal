@@ -1,0 +1,21 @@
+module Main {
+
+  import namespace IO
+  import namespace Char
+  import Codata.Machine(machine, observe, receive, map_machine)
+
+  fun main() =
+    let
+      view(s) = s
+      in
+        let 
+          m =
+            machine
+              ( Char.ord('a')
+              , fn(i, s) => s + i
+              , view
+              )
+    in
+    IO.println_char(m |. receive(1) |. receive(2) |. map_machine(Char.chr) |. observe)
+
+}

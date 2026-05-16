@@ -1,0 +1,56 @@
+module Codata.Machine {
+
+  import Coal.Combinators(identity)
+
+  fun observe(Machine({ state, view | _ }) : Machine<i, o>) : o = 
+    view(state)
+
+  fun receive(input : i, Machine({ state, step, view }) : Machine<i, o>) : Machine<i, o> =
+    step(input, state)
+
+  fun machine(seed : s, transition: i -> s -> s, view : s -> o) : Machine<i, o> =
+    machine$_machine(seed, transition, view)
+
+  fun map_machine(f : o -> p, machine : Machine<i, o>) : Machine<i, p> =
+    machine$_map_machine(f, machine)
+
+  fun contramap_input(f : j -> i, machine : Machine<i, o>) : Machine<j, o> =
+    machine$_contramap_input(f, machine)
+
+  fun compose(m1 : Machine<a, b>, m2 : Machine<b, c>) : Machine<a, c> =
+    machine
+      ( (m1, m2)
+      , fn(input, (p, q)) =>
+          let p1 = receive(input, p) in
+          let b  = observe(p1) in
+          let q1 = receive(b, q)
+          in (p1, q1)
+      , fn((_, q)) => 
+          observe(q)
+      )
+
+  fun duplicate(m : Machine<i, o>) : Machine<i, Machine<i, o>> =
+    machine(
+      m, 
+      fn(input, current) => receive(input, current), 
+      identity
+    )
+
+  fun zip(m1 : Machine<i, o1>, m2 : Machine<i, o2>) : Machine<i, (o1, o2)> =
+    machine(
+      (m1, m2),
+      fn(input, (p,q)) => (receive(input, p), receive(input, q)),
+      fn((p,q)) => (observe(p), observe(q))
+    )
+
+  fun cons(state, Machine(m)) =
+    Machine(
+      { state = state
+      , step = fn(_, _) => Machine(m)
+      , view = m.view
+      })
+
+  fun process(seed, f) =
+    machine(seed, f, identity)
+
+}

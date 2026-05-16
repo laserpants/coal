@@ -6,8 +6,8 @@ module Main {
   import namespace Containers.Set
   import Coal.Combinators(snd)
 
-  fun process(seed : a, f : v -> a -> a) : Process<a, v> =
-     process$_process(seed, f)
+//  fun process(seed : a, f : v -> a -> a) : Machine<a, v, a> =
+//     process$_process(seed, f)
  
   type alias GameState = int32 // { a : int32 }
 

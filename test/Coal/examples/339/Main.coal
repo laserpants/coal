@@ -1,0 +1,20 @@
+module Main {
+
+  import namespace IO
+  import Codata.Machine(machine, observe, receive, map_machine)
+
+  fun main() =
+    let
+      view(s) = s
+      in
+        let 
+          m =
+            machine
+              ( 1
+              , fn(i, s) => s + i
+              , view
+              )
+    in
+    IO.println_int32(m |. receive(1) |. receive(2) |. observe)
+
+}

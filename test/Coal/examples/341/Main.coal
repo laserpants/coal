@@ -1,0 +1,29 @@
+module Main {
+
+  import namespace IO
+  import namespace Char
+  import Codata.Machine(machine, observe, receive, map_machine, contramap_input)
+
+//  type Machine<s, i, o> =
+//    Machine(
+//      { state : s
+//      , step : i -> s -> o
+//      , view : s -> o
+//      }
+//    )
+
+  fun main() =
+    let
+      view(s) = s
+      in
+        let 
+          m =
+            machine
+              ( 5
+              , fn(i, s) => s + i
+              , view
+              )
+    in
+    IO.println_int32(m |. receive(1) |. contramap_input(Char.ord) |. receive('b') |. observe)
+
+}

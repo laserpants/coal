@@ -43,12 +43,12 @@ builtinModules =
     , $(embedFile "lang/Option.coal")
     )
   ,
-    ( "Process"
-    , $(embedFile "lang/Process.coal")
+    ( "Codata.Machine"
+    , $(embedFile "lang/Codata/Machine.coal")
     )
   ,
-    ( "Stream"
-    , $(embedFile "lang/Stream.coal")
+    ( "Codata.Stream"
+    , $(embedFile "lang/Codata/Stream.coal")
     )
   ,
     ( "Coal.Combinators"
