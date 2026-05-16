@@ -5,26 +5,46 @@ module Main {
   import Coal.Functor(Functor)
   import Codata.Machine(machine, map_machine, observe, receive)
 
-  type alias Parser<tok, a> = Machine<tok, Option<a>>
+  type ParseError
+    = ExpectedToken
+    | UnexpectedEOF
+    | CustomError(string)
+
+  type ParseResult<a>
+    = Error(ParseError)
+    | NeedMoreInput
+    | ResultOk(a)
+
+  instance Functor<ParseResult> {
+    fun map(f, result) =
+      match(result) {
+        | ResultOk(r) =>
+            ResultOk(f(r))
+        | res =>
+            res
+      }
+  }
+
+  type alias Parser<tok, a> = Machine<tok, ParseResult<a>>
 
   fun pure_parser(value : s) : Parser<tok, s> =
     machine(
-      Some(value),
+      ResultOk(value),
       fn(_, state) => state,
       identity
     )
 
   fun fail_parser() : Parser<tok, s> =
     machine(
-      None,
+      Error(ExpectedToken),
       fn(_, state) => state,
       identity 
     )
 
   fun satisfy(pred : tok -> bool) : Parser<tok, tok> =
     machine(
-      None,
-      fn(input, _) => if pred(input) then Some(input) else None,
+      NeedMoreInput,
+      fn(input, _) => if pred(input) then ResultOk(input) else Error(ExpectedToken),
       identity 
     )
 
@@ -56,10 +76,13 @@ module Main {
               in
               match(observe(next_p1)) {
                 // First parser not done yet
-                | None =>
+                | NeedMoreInput =>
+                    RunningFirst(next_p1)
+                // First parser failed
+                | Error(_) =>
                     RunningFirst(next_p1)
                 // First parser succeeded
-                | Some(value) =>
+                | ResultOk(value) =>
                     let
                       p2 =
                         f(value)
@@ -76,8 +99,12 @@ module Main {
       fn(state) =>
         match(state) {
           // No final result yet
-          | RunningFirst(_) =>
-              None
+          | RunningFirst(q1) =>
+              match(observe(q1)) {
+                | NeedMoreInput => NeedMoreInput
+                | Error(e) => Error(e)
+                | ResultOk(_) => NeedMoreInput  // Should not happen
+              }
           // Delegate to second parser
           | RunningSecond(p2) =>
               observe(p2)
@@ -105,17 +132,33 @@ module Main {
               in
               match(obs1) {
                 // First parser succeeded - use it
-                | Some(_) =>
+                | ResultOk(_) =>
                     FirstSucceeded(next_p1)
                 // First parser hasn't succeeded, check second
-                | None =>
+                | NeedMoreInput =>
                     match(obs2) {
                       // Second parser succeeded - use it
-                      | Some(_) =>
+                      | ResultOk(_) =>
                           SecondSucceeded(next_p2)
                       // Neither succeeded yet - keep running both
-                      | None =>
+                      | NeedMoreInput =>
                           BothRunning(next_p1, next_p2)
+                      // Second failed, keep trying first
+                      | Error(_) =>
+                          BothRunning(next_p1, next_p2)
+                    }
+                // First parser failed, try second
+                | Error(_) =>
+                    match(obs2) {
+                      // Second parser succeeded - use it
+                      | ResultOk(_) =>
+                          SecondSucceeded(next_p2)
+                      // Second still needs input - use it
+                      | NeedMoreInput =>
+                          SecondSucceeded(next_p2)
+                      // Both failed
+                      | Error(_) =>
+                          SecondSucceeded(next_p2)  // Use second's error
                     }
               }
           // First parser already succeeded - keep using it
@@ -129,8 +172,17 @@ module Main {
       fn(state) =>
         match(state) {
           // Neither parser succeeded yet
-          | BothRunning(_, _) =>
-              None
+          | BothRunning(q1, q2) =>
+              match(observe(q1)) {
+                | ResultOk(_) => observe(q1)
+                | Error(_) => observe(q2)
+                | NeedMoreInput =>
+                    match(observe(q2)) {
+                      | ResultOk(_) => observe(q2)
+                      | Error(_) => observe(q2)
+                      | NeedMoreInput => NeedMoreInput
+                    }
+              }
           // Return result from whichever parser succeeded
           | FirstSucceeded(p) =>
               observe(p)
@@ -197,8 +249,8 @@ module Main {
 
   fun eof() : Parser<tok, unit> =
     machine(
-      None,
-      fn(_, _) => None,  // Always fail on any input
+      NeedMoreInput,
+      fn(_, _) => Error(ExpectedToken),  // Always fail on any input
       fn(state) => state  // Success only when no more input
     )
 
