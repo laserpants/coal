@@ -211,7 +211,7 @@ module Main {
     }
 
   fun many(p : Parser<tok, a>) : Parser<tok, List<a>> =
-    many_bounded_by(1000, p) // At least for now
+    many_bounded_by(1000, p) 
 
   fun some(p : Parser<tok, a>) : Parser<tok, List<a>> =
     and_then(p, fn(x) =>
