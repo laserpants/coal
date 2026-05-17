@@ -1564,6 +1564,21 @@ objects =
                   }
               |]
         , OFunction
+            ( builtinInstance (Trait.comparable (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(==)"
+            )
+            [ Label (Kernel.TCon "Comparable" [opaque]) "$a"
+            , Label (Kernel.TCon "List" [Kernel.TOpq, Kernel.TOpq]) "l1"
+            , Label (Kernel.TCon "List" [Kernel.TOpq, Kernel.TOpq]) "l2"
+            ]
+            [r| 
+                  @<bool>
+                    ( are_equal : Comparable(*)/list(*)/list(*)/bool
+                    , $a : Comparable(*)
+                    , l1 : list(*)
+                    , l2 : list(*)
+                    )
+              |]
+        , OFunction
             "Builtin$.machine$_machine"
             [ Label Kernel.opaque "seed"
             , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "transition"
