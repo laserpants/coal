@@ -130,23 +130,24 @@ inferKinds m = do
 storeDefinitionType :: (Monad m) => Definition Metadata Kind IndexedType -> CompilerT Metadata m ()
 storeDefinitionType =
   \case
-    def@(DFunction _ name _) ->
-      define name (typeOf def)
-    def@(DLet _ name _) ->
-      define name (typeOf def)
+    def@(DFunction loc name _) ->
+      define loc name (typeOf def)
+    def@(DLet loc name _) ->
+      define loc name (typeOf def)
     DInstance
       _
       InstanceDefinition
         { instanceDefinitionTraitName
+        , instanceDefinitionMetadata
         , instanceDefinitionType
         , instanceDefinitionImplementations
         } -> do
         let trait = Trait instanceDefinitionTraitName instanceDefinitionType
         forM_ instanceDefinitionImplementations $ \case
           def@(DFunction _ name _) ->
-            define (instanceLabel trait name) (typeOf def)
+            define instanceDefinitionMetadata (instanceLabel trait name) (typeOf def)
           def@(DLet _ name _) ->
-            define (instanceLabel trait name) (typeOf def)
+            define instanceDefinitionMetadata (instanceLabel trait name) (typeOf def)
           _ ->
             return ()
     -- Type definitions, aliases, traits don't need type storage

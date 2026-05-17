@@ -2,6 +2,7 @@ module Main {
 
   import IO(println_int32, println_bool, println_string, println_char)
   import String(int32_to_string, to_list)
+  import Coal.Functor(Functor)
 
   fun digit_to_int32(ch) : Option<int32> =
     match(ch) {
@@ -18,19 +19,19 @@ module Main {
       | _ => None
     }
 
-  trait Functor<f> {
-    map : (a -> b) -> f<a> -> f<b>
-  }
-
-  instance Functor<Option> {
-    fun map(f, opt) = 
-      match(opt) {
-        | None => 
-            None
-        | Some(val) =>
-            Some(f(val))
-      }
-  }
+//  trait Functor<f> {
+//    map : (a -> b) -> f<a> -> f<b>
+//  }
+//
+//  instance Functor<Option> {
+//    fun map(f, opt) = 
+//      match(opt) {
+//        | None => 
+//            None
+//        | Some(val) =>
+//            Some(f(val))
+//      }
+//  }
 
   fun parse_unsigned(str : string) : Option<int32> =
     let 

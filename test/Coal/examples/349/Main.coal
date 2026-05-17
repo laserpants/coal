@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+
+  fun foo() = 123 : int32
+
+  fun foo() = 456 : int32
+
+  fun main() =
+    IO.println_string("!!")
+
+}

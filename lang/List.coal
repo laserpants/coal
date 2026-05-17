@@ -2,7 +2,7 @@ module List {
 
   import Coal.Combinators(always, identity)
 
-  instance Comparable<List<a>> {
+  instance Comparable<List<a>> with (Comparable<a>) {
     fun `==`(xs, ys) =
       if (length(xs) != length(ys)) 
         then

@@ -59,9 +59,7 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module.Path (principalPath)
-import Coal.TypeSystem.Constraint (
-  Constraint (Equality, Explicit),
- )
+import Coal.TypeSystem.Constraint (Constraint (Equality, Explicit))
 import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
@@ -74,6 +72,7 @@ import Control.Monad.Except (forM_, throwError)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (get, gets)
 import Control.Monad.Writer (MonadWriter, execWriter, tell)
+import Control.Monad (unless)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List.Extra (groupSortOn)
@@ -234,9 +233,13 @@ runConstraintsGen stack = do
   updateSupplyC constraintsGenStateSupply
   return (result, constraintsGenStateAnnotationIndexes, output)
 
-define :: (Monad m) => Name -> IndexedType -> CompilerT a m ()
-define name t = do
-  insertNameC name (Forall (typeIndexesIn s) mempty s)
+define :: (Monad m, Monoid a) => a -> Name -> IndexedType -> CompilerT a m ()
+define loc name t = do
+  r <- insertNameC name (Forall (typeIndexesIn s) mempty s)
+  unless r $ do
+    currentPath <- gets compilerCurrentPath
+    tellErrors [NameAlreadyDefined name (ErrorLocation (principalPath currentPath) loc)]
+    throwError PreflightFailure
   return ()
  where
   s = normalizeTypeIndexes t

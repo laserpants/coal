@@ -1,0 +1,14 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+
+  // Already defined
+  trait Functor<f> {
+    map : (a -> b) -> f<a> -> f<b>
+  }
+
+  fun main() =
+    IO.println_string("..")
+
+}

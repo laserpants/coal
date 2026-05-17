@@ -1399,22 +1399,22 @@ testG = do
 -- updateNames defs =
 --  forM_ defs $
 
-defineName :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m ()
+defineName :: (Monad m, Monoid a, Data a) => Definition a Kind IndexedType -> CompilerT a m ()
 defineName =
   \case
     def@(DFunction _ name FunctionDefinition{..}) ->
-      define name (typeOf def)
+      define mempty name (typeOf def)
     def@(DLet _ name LetDefinition{..}) ->
-      define name (typeOf def)
+      define mempty name (typeOf def)
     DInstance _ InstanceDefinition{..} -> do
       let trait = Trait instanceDefinitionTraitName instanceDefinitionType
       forM_ instanceDefinitionImplementations $
         \case
           def@(DFunction _ name _) -> do
             let to = (typeOf def)
-            define (instanceLabel trait name) to
+            define mempty (instanceLabel trait name) to
           def@(DLet _ name _) ->
-            define (instanceLabel trait name) (typeOf def)
+            define mempty (instanceLabel trait name) (typeOf def)
           _ ->
             pure ()
     _ ->
@@ -1498,7 +1498,7 @@ inferKinds modul = do
     Right sub ->
       return (applyKinds sub indexed)
 
-inferTypes :: (MonadIO m, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
+inferTypes :: (MonadIO m, Monoid a, Data a, Show a, Eq a) => Module a Kind () -> CompilerT a m (Module a Kind IndexedType)
 inferTypes modul = do
   Module{..} <- indexTypes modul
   forM_ moduleDefinitions $

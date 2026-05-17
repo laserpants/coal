@@ -1,31 +1,33 @@
 module Main {
 
   import IO(println_int32, println_bool, println_string, println_char)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
 
-  trait Functor<f> {
-    map : (a -> b) -> f<a> -> f<b>
-  }
-
-  instance Functor<List> {
-    fun map(f, xs) =
-      fold(xs) {
-        | [] => []
-        | head :: @tail => f(head) :: tail
-      }
-  }
-
-  instance Functor<Option> {
-    fun map(f, opt) =
-      match(opt) {
-        | None => None
-        | Some(x) => Some(f(x))
-      }
-  }
-
-  trait Applicative<f> {
-    fmap : f<a -> b> -> f<a> -> f<b>
-    pure : a -> f<a>
-  }
+//  trait Functor<f> {
+//    map : (a -> b) -> f<a> -> f<b>
+//  }
+//
+//  instance Functor<List> {
+//    fun map(f, xs) =
+//      fold(xs) {
+//        | [] => []
+//        | head :: @tail => f(head) :: tail
+//      }
+//  }
+//
+//  instance Functor<Option> {
+//    fun map(f, opt) =
+//      match(opt) {
+//        | None => None
+//        | Some(x) => Some(f(x))
+//      }
+//  }
+//
+//  trait Applicative<f> {
+//    fmap : f<a -> b> -> f<a> -> f<b>
+//    pure : a -> f<a>
+//  }
 
   trait Monad<m> {
     bind : m<a> -> (a -> m<b>) -> m<b>
