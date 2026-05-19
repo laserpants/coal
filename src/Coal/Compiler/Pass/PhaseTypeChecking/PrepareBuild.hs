@@ -52,7 +52,8 @@ import Coal.Compiler.Error
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT, insertNameC, updateCurrentBuildC)
+import Coal.Compiler.Stack
+import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module.Export (Export (..), includesName)
 import Coal.Language.Module.Import (Import (..))
