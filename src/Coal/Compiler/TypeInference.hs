@@ -68,11 +68,11 @@ import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstr
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
 import Coal.TypeSystem.Substitution
 import Control.Arrow ((>>>))
+import Control.Monad (unless)
 import Control.Monad.Except (forM_, throwError)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (get, gets)
 import Control.Monad.Writer (MonadWriter, execWriter, tell)
-import Control.Monad (unless)
 import Data.Data (Data)
 import Data.Either.Extra (partitionEithers)
 import Data.List.Extra (groupSortOn)

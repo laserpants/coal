@@ -7,7 +7,7 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
-import Coal.Language.Type.Operations (tupleType, listType)
+import Coal.Language.Type.Operations (listType, tupleType)
 import Coal.Language.Type.Scheme (Scheme (Forall))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
