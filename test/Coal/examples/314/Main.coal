@@ -1,7 +1,7 @@
 module Main {
 
   import namespace IO
-  import List(head)
+//  import List(head, length, is_prefix_of)
 
 //  instance Comparable<List<a>> with (Comparable<a>) {
 //    fun `==`(xs, ys) =

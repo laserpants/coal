@@ -11,7 +11,6 @@ import Coal.Language.Type.Operations (tupleType, listType)
 import Coal.Language.Type.Scheme (Scheme (Forall))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import Extras (Name)
 
 builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
@@ -560,7 +559,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty mempty (listType (TVariable (TypeIndex KType 0)) `TArrow` listType (TVariable (TypeIndex KType 0)) `TArrow` TIntrinsic IBool)
+              , Forall mempty [Trait "Comparable" (TVariable (TypeIndex KType 0))] (listType (TVariable (TypeIndex KType 0)) `TArrow` listType (TVariable (TypeIndex KType 0)) `TArrow` TIntrinsic IBool)
               )
             ]
         )

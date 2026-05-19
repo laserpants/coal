@@ -2,12 +2,14 @@ module List {
 
   import Coal.Combinators(always, identity)
 
-  fun are_equal(xs : List<a>, ys : List<a>) with (Comparable<a>) =
-    if (length(xs) != length(ys)) 
-      then
-        false
-      else
-        is_prefix_of(xs, ys)
+  instance Comparable<List<a>> with (Comparable<a>) {
+    fun `==`(xs, ys) =
+      if (length(xs) != length(ys))
+        then
+          false
+        else
+          is_prefix_of(xs, ys)
+  }
 
   /**
    * Return the first element of the list wrapped in `Some`, or `None` if the
