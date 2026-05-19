@@ -127,7 +127,7 @@ replaceParamInScheme :: Parameter Kind -> Type Parameter Kind -> Scheme Paramete
 replaceParamInScheme p o Forall{schemeTypeVariables, schemeTraits, schemeTypeBody} =
   Forall
     (paramsIn o <> Set.filter (on (/=) parameterName p) schemeTypeVariables)
-    (Set.map replaceParamTrait schemeTraits)
+    (fmap replaceParamTrait schemeTraits)
     (replaceParam schemeTypeBody)
  where
   paramsIn =

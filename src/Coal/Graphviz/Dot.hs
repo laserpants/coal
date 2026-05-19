@@ -358,7 +358,7 @@ instance (Dot t, Dot (o k)) => Dot (Scheme o k t) where
       Forall{..} -> do
         dotId <- emitShape RectangleShape "Scheme"
         emitEdges dotId (Set.toList schemeTypeVariables)
-        emitEdges dotId (Set.toList schemeTraits)
+        emitEdges dotId schemeTraits
         emitEdge dotId schemeTypeBody
         return dotId
 

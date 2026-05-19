@@ -345,7 +345,7 @@ checkTraitAnnotations Module{..} = do
 instantiate :: (MonadIO m) => IndexedScheme -> CompilerT Metadata m (Qualified IndexedType)
 instantiate (Forall qs ts t) = do
   sub <- foldrM go mempty qs
-  return (With (apply sub (Set.toList ts)) (apply sub t))
+  return (With (apply sub ts) (apply sub t))
  where
   go (TypeIndex k index) sub = do
     s <- supplied id

@@ -143,7 +143,7 @@ insertTraitDictionariesInDef =
 -- | Insert a name and its scheme into the compiler's name store from a let definition
 insertName :: (Monad m) => Definition a k IndexedType -> Name -> CompilerT a m ()
 insertName (DLet _ _ LetDefinition{letDefinitionType = With ts t}) name = do
-  let s = Forall (typeIndexesIn t) (Set.fromList ts) t
+  let s = Forall (typeIndexesIn t) ts t
   _ <- insertNameC name s
   pure ()
 insertName _ _ = pure () -- Other definitions do not need name insertion
@@ -158,7 +158,7 @@ collectTraits u name = do
     Nothing ->
       pure mempty
     Just (Forall _ s _)
-      | Set.null s ->
+      | null s ->
           pure mempty
     Just (Forall vs ts t) -> do
       sub1 <- foldrM instantiate mempty vs
@@ -169,7 +169,7 @@ collectTraits u name = do
           -- Return empty set and let type checker catch the error
           pure mempty
         Right sub2 ->
-          pure (apply (sub2 <> sub1) ts)
+          pure (apply (sub2 <> sub1) (Set.fromList ts))
  where
   instantiate (TypeIndex k index) acc = do
     var <- supplied (TVariable . TypeIndex k)
@@ -238,13 +238,13 @@ isConcrete (Trait _ TRecord{}) = True
 isConcrete _ = False
 
 -- | Apply trait dictionaries to a variable reference, wrapping in application if needed
-applyTraits :: (Show a, Monoid a, Data a, Data k, Show k, Monad m) => a -> Label IndexedType -> Set (Trait IndexedType) -> CompilerT a m (Expression a k IndexedType)
+applyTraits :: (Show a, Monoid a, Data a, Data k, Show k, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a k IndexedType)
 applyTraits loc (Label t name) traits =
-  if Set.null traits
+  if null traits
     then pure (EVariable mempty (Label t name))
-    else EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insert_ (NonEmpty.fromList (Set.toList traits))
+    else EApplication mempty t (EVariable mempty (Label t1 name)) <$> traverse insert_ (NonEmpty.fromList traits)
  where
-  t1 = foldTypeOf t (Set.toList traits)
+  t1 = foldTypeOf t traits
   insert_ trait = do
     fields <- lookupTraitInstance loc trait
     case fields of
@@ -295,7 +295,7 @@ instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (Expressio
             pure var
       EVariable loc (Label t name) -> do
         traits <- collectTraits t name
-        applyTraits loc (Label t name) traits
+        applyTraits loc (Label t name) (Set.toList traits)
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       -- Transform a binding to collect trait dependencies and wrap the body in dictionary lambdas
@@ -309,11 +309,11 @@ transformBindingWithTraits =
     BPattern a var@(PVariable _ (Label t name)) e
       | "$fold" `isPrefixOf` name -> do
           (body, traits) <- listenDictionaryTraits (expandTraits e)
-          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) traits t)])
+          pure (BPattern a var body, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
     BPattern _ (PVariable a (Label t name)) e -> do
       (e1, traits) <- transformScopeWithTraits e
       let ll = Label (foldTypeOf t (Set.toList traits)) name
-      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) traits t)])
+      pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
     BPattern a (PAnnotation _ _ p) e ->
       transformBindingWithTraits (BPattern a p e)
     binding ->

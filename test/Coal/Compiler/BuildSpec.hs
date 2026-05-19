@@ -75,49 +75,49 @@ testModuleBuiltinsPreKinds =
                         "from_int32"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
                             (TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "from_int64"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
                             (TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "from_bignum"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
                             (TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "negate"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "(+)"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "(-)"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "(*)"
                         ( Forall
                             (Set.fromList [Parameter () "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter () "a"))])
+                            [Trait "Numeric" (TVariable (Parameter () "a"))]
                             (TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
                         )
                     ]
@@ -330,49 +330,49 @@ testModuleBuiltins =
                         "from_int32"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
                             (TIntrinsic IInt32 `TArrow` TVariable (Parameter KType "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "from_int64"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
                             (TIntrinsic IInt64 `TArrow` TVariable (Parameter KType "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "from_bignum"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
                             (TIntrinsic IBignum `TArrow` TVariable (Parameter KType "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "negate"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "(+)"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "(-)"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     , TraitDefinitionInterfaceEntry
                         "(*)"
                         ( Forall
                             (Set.fromList [Parameter KType "a"])
-                            (Set.fromList [Trait "Numeric" (TVariable (Parameter KType "a"))])
+                            [Trait "Numeric" (TVariable (Parameter KType "a"))]
                             (TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a") `TArrow` TVariable (Parameter KType "a"))
                         )
                     ]

@@ -201,8 +201,8 @@ instance (CoalPretty k, CoalPretty (o k), CoalPretty t) => CoalPretty (Scheme o 
     prettyCoal t <> traits
    where
     traits
-      | Set.null ts = ""
-      | otherwise = " with " <> hsep (intersperse "," (prettyCoal <$> Set.toList ts))
+      | null ts = ""
+      | otherwise = " with " <> hsep (intersperse "," (prettyCoal <$> ts))
 
 instance (CoalPretty t) => CoalPretty (Trait t) where
   prettyCoalPrec _ (Trait name t) =
