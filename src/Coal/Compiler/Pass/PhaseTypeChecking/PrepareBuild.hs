@@ -276,7 +276,7 @@ qualifiedImports Build{..} =
             nsb <- concatForM (Environment.lookupWithDefault mempty name buildNames) $
               \case
                 (NName _ s) -> do
-                  concatForM (Set.toList (schemeTraits s)) $
+                  concatForM (schemeTraits s) $
                     \Trait{..} -> do
                       if Path ["Builtin$"] == path
                         then pure []
@@ -600,7 +600,7 @@ collectTraitsInterface =
             instantiateScheme
               ( Forall
                   schemeTypeVariables
-                  (Set.fromList [Trait name (TVariable traitDefinitionParameter)])
+                  [Trait name (TVariable traitDefinitionParameter)]
                   schemeTypeBody
               )
           let normalizedScheme = normalizeScheme s

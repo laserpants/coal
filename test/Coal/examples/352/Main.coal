@@ -1,0 +1,8 @@
+module Main {
+
+  import namespace IO
+
+  fun main() =
+    IO.println_bool((true, "a") == (true, "a"))
+
+}

@@ -49,7 +49,7 @@ import GHC.Generics (Generic)
 
 data Scheme o k t = Forall
   { schemeTypeVariables :: Set (o k)
-  , schemeTraits :: Set (Trait t)
+  , schemeTraits :: [Trait t]
   , schemeTypeBody :: t
   }
   deriving
@@ -80,7 +80,7 @@ forall1 f = Forall (Set.singleton a0) mempty (f (TVariable a0))
  where
   a0 = index 0
 
-forall1' :: (IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
+forall1' :: (IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
 forall1' f = Forall (Set.singleton a0) traits t
  where
   (traits, t) = f (TVariable a0)
@@ -91,7 +91,7 @@ forall2 f = Forall (Set.fromList [a0, a1]) mempty (f (TVariable a0) (TVariable a
  where
   (a0, a1) = (index 0, index 1)
 
-forall2' :: (IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
+forall2' :: (IndexedType -> IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
 forall2' f = Forall (Set.singleton a0) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1)
@@ -102,7 +102,7 @@ forall3 f = Forall (Set.fromList [a0, a1, a2]) mempty (f (TVariable a0) (TVariab
  where
   (a0, a1, a2) = (index 0, index 1, index 2)
 
-forall3' :: (IndexedType -> IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
+forall3' :: (IndexedType -> IndexedType -> IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
 forall3' f = Forall (Set.fromList [a0, a1, a2]) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2)
@@ -113,7 +113,7 @@ forall4 f = Forall (Set.fromList [a0, a1, a2, a3]) mempty (f (TVariable a0) (TVa
  where
   (a0, a1, a2, a3) = (index 0, index 1, index 2, index 3)
 
-forall4' :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
+forall4' :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
 forall4' f = Forall (Set.fromList [a0, a1, a2, a3]) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3)
@@ -124,7 +124,7 @@ forall5 f = Forall (Set.fromList [a0, a1, a2, a3, a4]) mempty (f (TVariable a0) 
  where
   (a0, a1, a2, a3, a4) = (index 0, index 1, index 2, index 3, index 4)
 
-forall5' :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedType -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
+forall5' :: (IndexedType -> IndexedType -> IndexedType -> IndexedType -> IndexedType -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
 forall5' f = Forall (Set.fromList [a0, a1, a2, a3, a4]) traits t
  where
   (traits, t) = f (TVariable a0) (TVariable a1) (TVariable a2) (TVariable a3) (TVariable a4)
@@ -135,7 +135,7 @@ forallN n f = Forall (Set.fromList ixs) mempty (f (TVariable <$> ixs))
  where
   ixs = [index i | i <- [0 .. n - 1]]
 
-forallN' :: Int -> ([IndexedType] -> (Set (Trait IndexedType), IndexedType)) -> IndexedScheme
+forallN' :: Int -> ([IndexedType] -> ([Trait IndexedType], IndexedType)) -> IndexedScheme
 forallN' n f = Forall (Set.fromList ixs) traits t
  where
   (traits, t) = f (TVariable <$> ixs)

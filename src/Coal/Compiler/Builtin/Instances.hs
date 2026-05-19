@@ -3,16 +3,16 @@
 module Coal.Compiler.Builtin.Instances (builtinInstances) where
 
 import Coal.Compiler.Build.NameEntry (InstanceEntry (InstanceEntry))
+import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
 import Coal.Language.Type.Operations (tupleType)
 import Coal.Language.Type.Scheme (Scheme (Forall))
-import Coal.Language.Trait (Trait (..))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Extras (Name)
 import qualified Data.Set as Set
+import Extras (Name)
 
 builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
 builtinInstances =
@@ -545,7 +545,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(==)"
-              , Forall mempty (Set.fromList [Trait "Comparable" (TVariable (TypeIndex KType 0)), Trait "Comparable" (TVariable (TypeIndex KType 1))]) (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
+              , Forall mempty [Trait "Comparable" (TVariable (TypeIndex KType 0)), Trait "Comparable" (TVariable (TypeIndex KType 1))] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
               )
             ]
         )
