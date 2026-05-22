@@ -295,9 +295,21 @@ qualifiedImports Build{..} =
                 _ ->
                   pure mempty
 
+            -- Importing any value from a module should also qualify its
+            -- instance implementation names. Otherwise unconstrained imports
+            -- (e.g. head) can miss required instance symbols at lowering time.
+            nsi <-
+              if Path ["Builtin$"] == path
+                then pure []
+                else do
+                  Build{buildNames = importNames, buildInstances = importInstances} <-
+                    lift $ lift $ importedBuild path
+                  generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+
             return $
               [(name, principalPath path <.> name)]
                 <> nsb
+                <> nsi
           TypeImport _ name names ->
             case Environment.lookup name buildTypeConstructors of
               Just TypeConstructorEntry{..} -> do

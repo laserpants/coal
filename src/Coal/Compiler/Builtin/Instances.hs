@@ -7,7 +7,7 @@ import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
-import Coal.Language.Type.Operations (listType, tupleType)
+import Coal.Language.Type.Operations (tupleType)
 import Coal.Language.Type.Scheme (Scheme (Forall))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
@@ -545,21 +545,6 @@ builtinInstances =
             [
               ( "(==)"
               , Forall mempty [Trait "Comparable" (TVariable (TypeIndex KType 0)), Trait "Comparable" (TVariable (TypeIndex KType 1))] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TIntrinsic IBool)
-              )
-            ]
-        )
-    )
-  ,
-    ( "Comparable"
-    , listType (TVariable (TypeIndex KType 0))
-    , InstanceEntry
-        mempty
-        (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (Parameter KType "a") :| []))
-        (listType (TVariable (TypeIndex KType 0)))
-        ( Map.fromList
-            [
-              ( "(==)"
-              , Forall mempty [Trait "Comparable" (TVariable (TypeIndex KType 0))] (listType (TVariable (TypeIndex KType 0)) `TArrow` listType (TVariable (TypeIndex KType 0)) `TArrow` TIntrinsic IBool)
               )
             ]
         )

@@ -1635,7 +1635,7 @@ e2eSpec = do
 
   describe "314" $ do
     expectOutput
-      "123"
+      "true"
       "test/Coal/examples/314"
       [ "Main.coal"
       ]
