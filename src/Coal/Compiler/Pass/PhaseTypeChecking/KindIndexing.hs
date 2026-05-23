@@ -149,9 +149,21 @@ collectTypeAliases :: (Monad m, Monoid a) => Definition a Kind () -> ReaderT (Ex
 collectTypeAliases =
   \case
     DTypeAlias loc name AliasDefinition{..} -> do
-      insertNameEntry (NTypeAlias name)
-      insertExportedName name
-      insertAlias name entry
+      build <- get
+      if Environment.contains name (buildAliases build)
+        || Environment.contains name (buildTypeConstructors build)
+        || Environment.contains name (buildTraits build)
+        then lift $ lift $ do
+          currentPath <- gets compilerCurrentPath
+          let existingKind
+                | Environment.contains name (buildAliases build) = "type alias"
+                | Environment.contains name (buildTraits build) = "trait"
+                | otherwise = "type"
+          tellErrors [DuplicateTypeName name existingKind (ErrorLocation (principalPath currentPath) loc)]
+        else do
+          insertNameEntry (NTypeAlias name)
+          insertExportedName name
+          insertAlias name entry
      where
       entry =
         AliasEntry

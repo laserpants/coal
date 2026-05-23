@@ -373,9 +373,21 @@ collectTypeConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ExportL
 collectTypeConstructors =
   \case
     DType loc name TypeDefinition{..} -> do
-      insertNameEntry (NType name kind)
-      insertExportedName name
-      insertTypeConstructor name entry
+      build <- get
+      let existingKind
+            | Environment.contains name (buildTypeConstructors build) = Just "type"
+            | Environment.contains name (buildTraits build) = Just "trait"
+            | Environment.contains name (buildAliases build) = Just "type alias"
+            | otherwise = Nothing
+      case existingKind of
+        Just k ->
+          lift $ lift $ do
+            currentPath <- gets compilerCurrentPath
+            tellErrors [DuplicateTypeName name k (ErrorLocation (principalPath currentPath) loc)]
+        Nothing -> do
+          insertNameEntry (NType name kind)
+          insertExportedName name
+          insertTypeConstructor name entry
      where
       kind = foldKindOf KType typeDefinitionParameters
       entry =
@@ -424,8 +436,25 @@ insertTypeName Build{..} loc name =
             lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
             return False
           Just entry -> do
-            insertTypeConstructor name entry
-            return True
+            Build
+              { buildTypeConstructors = curTCs
+              , buildTraits = curTraits
+              , buildAliases = curAliases
+              , buildExportedNames = curExported
+              } <-
+              get
+            if ( Environment.contains name curTCs
+                  || Environment.contains name curTraits
+                  || Environment.contains name curAliases
+               )
+              && Set.member name curExported
+              then do
+                path <- lift $ lift $ gets compilerCurrentPath
+                lift $ lift $ tellErrors [DuplicateTypeName name "type" (ErrorLocation (principalPath path) loc)]
+                return False
+              else do
+                insertTypeConstructor name entry
+                return True
       NTrait{} ->
         case Environment.lookup name buildTraits of
           Nothing -> do
@@ -433,8 +462,25 @@ insertTypeName Build{..} loc name =
             lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
             return False
           Just entry -> do
-            insertTrait name entry
-            return True
+            Build
+              { buildTypeConstructors = curTCs
+              , buildTraits = curTraits
+              , buildAliases = curAliases
+              , buildExportedNames = curExported
+              } <-
+              get
+            if ( Environment.contains name curTraits
+                  || Environment.contains name curTCs
+                  || Environment.contains name curAliases
+               )
+              && Set.member name curExported
+              then do
+                path <- lift $ lift $ gets compilerCurrentPath
+                lift $ lift $ tellErrors [DuplicateTypeName name "trait" (ErrorLocation (principalPath path) loc)]
+                return False
+              else do
+                insertTrait name entry
+                return True
       NTypeAlias{} ->
         case Environment.lookup name buildAliases of
           Nothing -> do
@@ -521,9 +567,20 @@ collectTraits :: (Monad m) => Definition a Kind t -> ReaderT (ExportList a) (Sta
 collectTraits =
   \case
     DTrait loc name TraitDefinition{..} -> do
-      insertNameEntry (NTrait name)
-      insertExportedName name
-      insertTrait name entry
+      build <- get
+      let existingKind
+            | Environment.contains name (buildTraits build) = Just "trait"
+            | Environment.contains name (buildTypeConstructors build) = Just "type"
+            | Environment.contains name (buildAliases build) = Just "type alias"
+            | otherwise = Nothing
+      case existingKind of
+        Just k -> lift $ lift $ do
+          currentPath <- gets compilerCurrentPath
+          tellErrors [DuplicateTypeName name k (ErrorLocation (principalPath currentPath) loc)]
+        Nothing -> do
+          insertNameEntry (NTrait name)
+          insertExportedName name
+          insertTrait name entry
      where
       entry =
         TraitEntry
