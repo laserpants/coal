@@ -412,8 +412,9 @@ collectTypeConstructors =
                 build <- lift $ lift $ importedBuild path
                 found <- insertTypeName build loc name
                 unless found $ do
-                  currentPath <- lift $ lift $ gets compilerCurrentPath
-                  lift $ lift $ tellErrors [MissingType name path (ErrorLocation (principalPath currentPath) loc)]
+                  lift $ lift $ do
+                    currentPath <- gets compilerCurrentPath
+                    tellErrors [MissingType name path (ErrorLocation (principalPath currentPath) loc)]
             | otherwise ->
                 pure ()
           _ ->
@@ -432,8 +433,9 @@ insertTypeName Build{..} loc name =
       NType{} ->
         case Environment.lookup name buildTypeConstructors of
           Nothing -> do
-            path <- lift $ lift $ gets compilerCurrentPath
-            lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+            lift $ lift $ do
+              path <- gets compilerCurrentPath
+              tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
             return False
           Just entry -> do
             Build
@@ -448,19 +450,20 @@ insertTypeName Build{..} loc name =
                   || Environment.contains name curAliases
                )
               && Set.member name curExported
-              then do
-                path <- lift $ lift $ gets compilerCurrentPath
-                lift $ lift $ tellErrors [DuplicateTypeName name "type" (ErrorLocation (principalPath path) loc)]
+              then lift $ lift $ do
+                path <- gets compilerCurrentPath
+                tellErrors [DuplicateTypeName name "type" (ErrorLocation (principalPath path) loc)]
                 return False
               else do
                 insertTypeConstructor name entry
                 return True
       NTrait{} ->
         case Environment.lookup name buildTraits of
-          Nothing -> do
-            path <- lift $ lift $ gets compilerCurrentPath
-            lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
-            return False
+          Nothing ->
+            lift $ lift $ do
+              path <- gets compilerCurrentPath
+              tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+              return False
           Just entry -> do
             Build
               { buildTypeConstructors = curTCs
@@ -474,19 +477,20 @@ insertTypeName Build{..} loc name =
                   || Environment.contains name curAliases
                )
               && Set.member name curExported
-              then do
-                path <- lift $ lift $ gets compilerCurrentPath
-                lift $ lift $ tellErrors [DuplicateTypeName name "trait" (ErrorLocation (principalPath path) loc)]
+              then lift $ lift $ do
+                path <- gets compilerCurrentPath
+                tellErrors [DuplicateTypeName name "trait" (ErrorLocation (principalPath path) loc)]
                 return False
               else do
                 insertTrait name entry
                 return True
       NTypeAlias{} ->
         case Environment.lookup name buildAliases of
-          Nothing -> do
-            path <- lift $ lift $ gets compilerCurrentPath
-            lift $ lift $ tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
-            return False
+          Nothing ->
+            lift $ lift $ do
+              path <- gets compilerCurrentPath
+              tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+              return False
           Just AliasEntry{..} -> do
             forM_ (constructors aliasEntryType) (insertTypeName Build{..} loc)
             return True
@@ -527,9 +531,10 @@ collectDataConstructors =
                     forM_ dataConstructors $
                       \ctor ->
                         case Environment.lookup ctor buildDataConstructors of
-                          Nothing -> do
-                            currentPath <- lift $ lift $ gets compilerCurrentPath
-                            lift $ lift $ tellErrors [NoDataConstructorForType ctor name path (ErrorLocation (principalPath currentPath) loc)]
+                          Nothing ->
+                            lift $ lift $ do
+                              currentPath <- gets compilerCurrentPath
+                              tellErrors [NoDataConstructorForType ctor name path (ErrorLocation (principalPath currentPath) loc)]
                           Just entry@DataConstructorEntry{dataConstructorEntryMetaData, dataConstructorEntryConstructor = DataConstructor{..}} -> do
                             insertDataConstructor ctor entry
                             lift $ lift $ insertNewName constructorName dataConstructorEntryMetaData constructorScheme
@@ -538,8 +543,9 @@ collectDataConstructors =
                       | ["*"] == ctors = typeConstructorEntryDataConstructors
                       | otherwise = ctors
             | otherwise -> do
-                currentPath <- lift $ lift $ gets compilerCurrentPath
-                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
+                lift $ lift $ do
+                  currentPath <- gets compilerCurrentPath
+                  tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
           _ ->
             pure ()
     -- Namespace imports are handled in collectImports and qualifiedImports
@@ -610,9 +616,10 @@ collectTraits =
                     insertNameEntry (NTrait name)
                     insertTrait name TraitEntry{..}
                     qualifiedInstanceNames (traitInstances name buildInstances)
-            | otherwise -> do
-                currentPath <- lift $ lift $ gets compilerCurrentPath
-                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
+            | otherwise ->
+                lift $ lift $ do
+                  currentPath <- gets compilerCurrentPath
+                  tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
            where
             qualifiedInstanceNames instances =
               forM_ instances $
@@ -718,9 +725,10 @@ collectTraitsInterface =
                     names
                       | ["*"] == members = Environment.names traitEntryInterface
                       | otherwise = members
-            | otherwise -> do
-                currentPath <- lift $ lift $ gets compilerCurrentPath
-                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
+            | otherwise ->
+                lift $ lift $ do
+                  currentPath <- gets compilerCurrentPath
+                  tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
           _ ->
             pure ()
     -- Namespace imports are handled in collectImports and qualifiedImports
@@ -787,9 +795,10 @@ collectInstances =
                   , instanceEntryTypeSchemes = normalizeScheme <$> env
                   }
           insertInstance instanceDefinitionTraitName t entry
-        Nothing -> do
-          currentPath <- lift $ lift $ gets compilerCurrentPath
-          lift $ lift $ tellErrors [TraitNotInScope instanceDefinitionTraitName (ErrorLocation (principalPath currentPath) instanceDefinitionMetadata)]
+        Nothing ->
+          lift $ lift $ do
+            currentPath <- gets compilerCurrentPath
+            tellErrors [TraitNotInScope instanceDefinitionTraitName (ErrorLocation (principalPath currentPath) instanceDefinitionMetadata)]
     -- Import all instances from imported modules
     DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
@@ -892,9 +901,10 @@ collectImports =
                       lift $ lift $ insertNewName name iloc s
                     _ -> do
                       pure ()
-            | otherwise -> do
-                currentPath <- lift $ lift $ gets compilerCurrentPath
-                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) iloc)]
+            | otherwise ->
+                lift $ lift $ do
+                  currentPath <- gets compilerCurrentPath
+                  tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) iloc)]
           TypeImport _ name _
             | name `elem` buildExportedNames ->
                 forM_ (Environment.lookupWithDefault mempty name buildNames) $
@@ -907,9 +917,10 @@ collectImports =
                       modify (insertBuildNameEntry info)
                     _ ->
                       pure ()
-            | otherwise -> do
-                currentPath <- lift $ lift $ gets compilerCurrentPath
-                lift $ lift $ tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
+            | otherwise ->
+                lift $ lift $ do
+                  currentPath <- gets compilerCurrentPath
+                  tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
     DNamespaceImport _ path -> do
       Build{..} <- lift $ lift $ importedBuild path
       let qualifiedName name = principalPath buildPath <.> name
