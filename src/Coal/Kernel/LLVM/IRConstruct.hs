@@ -22,14 +22,16 @@ data IRLinkage
 
 -- | Top-level IR language constructs
 data IRConstruct a
-  = -- | External symbol
+  = -- | External symbol declaration (function)
     CDeclare Name IRType [IRType]
+  | -- | External global variable declaration
+    CExternGlobal Name IRType
   | -- | IR type definition
     CType Name IRType
   | -- | Global symbol
     CGlobal Name IRType (Maybe IRLinkage) IRValue
-  | -- | Top-level string constant
-    CString Name ByteString
+  | -- | Top-level string constant (Nothing = external linkage, Just l = explicit linkage)
+    CString Name ByteString (Maybe IRLinkage)
   | -- | Function definition
     CDefine Name IRType (Maybe IRLinkage) [Label IRType] a
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)

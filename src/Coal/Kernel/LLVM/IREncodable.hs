@@ -158,14 +158,22 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
             <> " = type"
             <> space
             <> irEncode t
-      CString name str ->
+      CString name str ln ->
         linebreak $
           irGlobalName name
-            <> " = private constant"
+            <> " = "
+            <> maybe "" (\l -> irEncode l <> " ") ln
+            <> "constant"
             <> space
             <> irEncode (TArray (ByteString.length str + 1) i8)
             <> space
             <> Text.concat ["c\"", escapeString str, "\\00\""]
+      CExternGlobal name t ->
+        linebreak $
+          irGlobalName name
+            <> " = external constant"
+            <> space
+            <> irEncode t
       CGlobal name t ln v ->
         linebreak $
           irGlobalName name

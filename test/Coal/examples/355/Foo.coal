@@ -1,5 +1,5 @@
 module Foo {
 
-  let hello = "hello"
+  let hello = "aaa"
 
 }

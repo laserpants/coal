@@ -109,7 +109,7 @@ interpretObject =
     OConstant name (Fix (Syntax.ELit (Syntax.PChar c))) ->
       pure [CGlobal name TInt32 Nothing (I32 c)]
     OConstant name (Fix (Syntax.ELit (Syntax.PString str))) ->
-      pure [CString name str]
+      pure [CString name str Nothing]
     OConstant name e -> do
       ir <- interpretFunction name (irEvalFun [] e) []
       pure [ir]
@@ -118,7 +118,7 @@ interpretObject =
         TFun t ts ->
           pure [CDeclare name t ts]
         _ ->
-          throwIRError (InvalidExternalType name it)
+          pure [CExternGlobal name it]
     OData{} ->
       pure []
 
@@ -126,7 +126,7 @@ interpretArtifact :: IRInterpreterArtifact -> IRInterpreter [IRConstruct [IRLine
 interpretArtifact =
   \case
     AHashMapKey name ->
-      pure [CString ("label." <> name) (encodeUtf8 name)]
+      pure [CString ("label." <> name) (encodeUtf8 name) (Just LPrivate)]
     ADataConstructor name t ->
       pure [CType name t]
     AMemoizedConstant name ->
@@ -136,9 +136,9 @@ interpretArtifact =
     ACFunctionCall name t ts ->
       pure [CDeclare name t ts]
     AStringLiteral name str ->
-      pure [CString name str]
+      pure [CString name str (Just LPrivate)]
     ABignum name n ->
-      pure [CString name (encodeUtf8 (showt n))]
+      pure [CString name (encodeUtf8 (showt n)) (Just LPrivate)]
 
 interpreter :: IRInstrOp (IRInterpreter a) -> IRInterpreter a
 interpreter =
