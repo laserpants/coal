@@ -50,10 +50,11 @@ import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Control.Monad (when)
 import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
-import Control.Monad.State (StateT, execStateT, get, gets, modify)
+import Control.Monad.State (StateT, execStateT, foldM, get, gets, modify)
 import Control.Monad.Trans (lift)
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (Name, forM, forM_, traverse_)
+import Extras (Name, forM, forM_)
 
 {- | The kind indexing compiler pass.
 
@@ -124,7 +125,9 @@ insertBuildHash = do
       updateCurrentBuildPureC (insertHash source)
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
-prepareDefinitions = traverse_ collectTypeAliases
+prepareDefinitions defs = do
+  _ <- foldM collectTypeAliases Map.empty defs
+  return ()
 
 insertExportedName :: (Monad m) => Name -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertExportedName name
@@ -146,69 +149,70 @@ insertNameEntry entry = modify (Build.insertBuildNameEntry entry)
 insertAlias :: (Monad m) => Name -> AliasEntry a -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertAlias name entry = modify (Build.insertBuildAlias name entry)
 
-collectTypeAliases :: (Monad m, Monoid a) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
-collectTypeAliases =
-  \case
-    DTypeAlias loc name AliasDefinition{..} -> do
-      build <- get
-      if Environment.contains name (buildAliases build)
-        || Environment.contains name (buildTypeConstructors build)
-        || Environment.contains name (buildTraits build)
-        then lift $ lift $ do
-          currentPath <- gets compilerCurrentPath
-          let existingKind
-                | Environment.contains name (buildAliases build) = "type alias"
-                | Environment.contains name (buildTraits build) = "trait"
-                | otherwise = "type"
-          tellErrors [DuplicateTypeName name existingKind (ErrorLocation (principalPath currentPath) loc)]
-          throwError PreflightFailure
-        else do
-          insertNameEntry (NTypeAlias name)
-          insertExportedName name
-          insertAlias name entry
-     where
-      entry =
-        AliasEntry
-          { aliasEntryMetadata = loc
-          , aliasEntryName = name
-          , aliasEntryParams = aliasDefinitionParameters
-          , aliasEntryType = aliasDefinitionType
-          }
-    -- Skip built-in imports as they are handled separately
-    DImport _ (Path ["Builtin$"]) _ ->
-      pure ()
-    DImport _ path imports -> do
-      Build{..} <- lift $ lift $ importedBuild path
-      forM_ imports $
-        \case
-          TypeImport loc name _
-            | name `elem` buildExportedNames -> do
-                Build
-                  { buildExportedNames = curExported
-                  , buildAliases = curAliases
-                  } <-
-                  get
-                if not (Set.member name curExported)
-                  && Environment.contains name curAliases
-                  then lift $ lift $ do
-                    currentPath <- gets compilerCurrentPath
-                    tellErrors [ConflictingImports name path (ErrorLocation (principalPath currentPath) loc)]
-                    throwError PreflightFailure
-                  else do
-                    build <- lift $ lift $ importedBuild path
-                    _ <- insertTypeName build loc name
-                    pure ()
-            | otherwise ->
-                -- Type not found in exported names; silently skip
-                -- (error reporting happens in later phases)
-                pure ()
-          -- Non-type imports (value imports, etc.) are handled in other passes
-          _ ->
-            pure ()
-    DNamespaceImport _ _ ->
-      pure ()
-    _ ->
-      pure ()
+collectTypeAliases :: (Monad m, Monoid a) => Map.Map Name Path -> Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (Map.Map Name Path)
+collectTypeAliases importSources = \case
+  DTypeAlias loc name AliasDefinition{..} -> do
+    build <- get
+    if Environment.contains name (buildAliases build)
+      || Environment.contains name (buildTypeConstructors build)
+      || Environment.contains name (buildTraits build)
+      then lift $ lift $ do
+        currentPath <- gets compilerCurrentPath
+        let existingKind
+              | Environment.contains name (buildAliases build) = "type alias"
+              | Environment.contains name (buildTraits build) = "trait"
+              | otherwise = "type"
+        tellErrors [DuplicateTypeName name existingKind (ErrorLocation (principalPath currentPath) loc)]
+        throwError PreflightFailure
+      else do
+        insertNameEntry (NTypeAlias name)
+        insertExportedName name
+        insertAlias name entry
+    return importSources
+   where
+    entry =
+      AliasEntry
+        { aliasEntryMetadata = loc
+        , aliasEntryName = name
+        , aliasEntryParams = aliasDefinitionParameters
+        , aliasEntryType = aliasDefinitionType
+        }
+  -- Skip built-in imports as they are handled separately
+  DImport _ (Path ["Builtin$"]) _ ->
+    return importSources
+  DImport _ path imports -> do
+    Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
+    newSources <- foldM (checkAndImportType path exportedNames) importSources imports
+    return newSources
+  DNamespaceImport _ _ ->
+    return importSources
+  _ ->
+    return importSources
+ where
+  checkAndImportType path exportedNames sources import' =
+    case import' of
+      TypeImport loc name _
+        | name `Set.member` exportedNames -> do
+            -- Check if already imported from a different module
+            case Map.lookup name sources of
+              Just existingPath
+                | existingPath /= path -> do
+                    lift $ lift $ do
+                      currentPath <- gets compilerCurrentPath
+                      tellErrors [ConflictingImports name existingPath (ErrorLocation (principalPath currentPath) loc)]
+                      throwError PreflightFailure
+              _ -> do
+                build <- lift $ lift $ importedBuild path
+                _ <- insertTypeName build loc name
+                -- Track this import
+                return (Map.insert name path sources)
+        | otherwise ->
+            -- Type not found in exported names; silently skip
+            -- (error reporting happens in later phases)
+            return sources
+      -- Non-type imports (value imports, etc.) are handled in other passes
+      _ ->
+        return sources
 
 insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) Bool
 insertTypeName Build{..} loc name =

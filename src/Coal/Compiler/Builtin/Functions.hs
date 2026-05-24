@@ -4,7 +4,6 @@ module Coal.Compiler.Builtin.Functions (machineType, builtinFunctions) where
 
 import Coal.Language
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.Set as Set
 import Extras (Name)
 
 machineType :: IndexedType -> IndexedType -> IndexedType

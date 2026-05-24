@@ -65,7 +65,7 @@ import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (..), MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
-import Control.Monad.State (StateT, execStateT, get, gets, modify)
+import Control.Monad.State (StateT, execStateT, foldM, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.List (intersect)
 import qualified Data.Map.Strict as Map
@@ -169,7 +169,8 @@ prepareDefinitions defs = do
 
   -- Step 1: Collect type constructors
   -- Must happen first because data constructors reference their parent type
-  traverse_ collectTypeConstructors defs
+  -- Track import sources to detect conflicts (same name from different modules)
+  _ <- foldM collectTypeConstructors Map.empty defs
 
   -- Step 2: Collect data constructors
   -- Depends on type constructors being registered (Step 1)
@@ -369,80 +370,75 @@ expandExports = do
       return
         (Exports newExports)
 
-collectTypeConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
-collectTypeConstructors =
-  \case
-    DType loc name TypeDefinition{..} -> do
-      build <- get
-      let existingKind
-            | Environment.contains name (buildTypeConstructors build) = Just "type"
-            | Environment.contains name (buildTraits build) = Just "trait"
-            | Environment.contains name (buildAliases build) = Just "type alias"
-            | otherwise = Nothing
-      case existingKind of
-        Just k ->
-          lift $ lift $ do
-            currentPath <- gets compilerCurrentPath
-            tellErrors [DuplicateTypeName name k (ErrorLocation (principalPath currentPath) loc)]
-            throwError PreflightFailure
-        Nothing -> do
-          insertNameEntry (NType name kind)
-          insertExportedName name
-          insertTypeConstructor name entry
-     where
-      kind = foldKindOf KType typeDefinitionParameters
-      entry =
-        TypeConstructorEntry
-          { typeConstructorEntryMetadata = loc
-          , typeConstructorEntryName = name
-          , typeConstructorEntryKind = kind
-          , typeConstructorEntryDataConstructors =
-              for typeDefinitionConstructors constructorName
-          }
+collectTypeConstructors :: (Monad m) => Map.Map Name Path -> Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (Map.Map Name Path)
+collectTypeConstructors importSources = \case
+  DType loc name TypeDefinition{..} -> do
+    build <- get
+    let existingKind
+          | Environment.contains name (buildTypeConstructors build) = Just "type"
+          | Environment.contains name (buildTraits build) = Just "trait"
+          | Environment.contains name (buildAliases build) = Just "type alias"
+          | otherwise = Nothing
+    case existingKind of
+      Just k ->
+        lift $ lift $ do
+          currentPath <- gets compilerCurrentPath
+          tellErrors [DuplicateTypeName name k (ErrorLocation (principalPath currentPath) loc)]
+          throwError PreflightFailure
+      Nothing -> do
+        insertNameEntry (NType name kind)
+        insertExportedName name
+        insertTypeConstructor name entry
+    return importSources
+   where
+    kind = foldKindOf KType typeDefinitionParameters
+    entry =
+      TypeConstructorEntry
+        { typeConstructorEntryMetadata = loc
+        , typeConstructorEntryName = name
+        , typeConstructorEntryKind = kind
+        , typeConstructorEntryDataConstructors =
+            for typeDefinitionConstructors constructorName
+        }
 
-    -- Special case: Builtin$ is a compiler-internal module that should not be processed
-    -- It's used for bootstrapping and its definitions are handled separately
-    DImport _ (Path ["Builtin$"]) _ -> do
-      pure ()
-    DImport _ path imports -> do
-      Build{..} <- lift $ lift $ importedBuild path
-      forM_ imports $
-        \case
-          TypeImport loc name _
-            | name `elem` buildExportedNames -> do
-                Build
-                  { buildExportedNames = curExported
-                  , buildTypeConstructors = curTCs
-                  , buildTraits = curTraits
-                  , buildAliases = curAliases
-                  } <-
-                  get
-                let alreadyImported =
-                      not (Set.member name curExported)
-                        && ( Environment.contains name curTCs
-                              || Environment.contains name curTraits
-                              || Environment.contains name curAliases
-                           )
-                if alreadyImported
-                  then lift $ lift $ do
+  -- Special case: Builtin$ is a compiler-internal module that should not be processed
+  -- It's used for bootstrapping and its definitions are handled separately
+  DImport _ (Path ["Builtin$"]) _ -> do
+    return importSources
+  DImport _ path imports -> do
+    Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
+    newSources <- foldM (checkAndImportType path exportedNames) importSources imports
+    return newSources
+  DNamespaceImport _ _ ->
+    return importSources
+  _ ->
+    return importSources
+ where
+  checkAndImportType path exportedNames sources import' =
+    case import' of
+      TypeImport loc name _
+        | name `Set.member` exportedNames -> do
+            -- Check if already imported from a different module
+            case Map.lookup name sources of
+              Just existingPath
+                | existingPath /= path -> do
+                    lift $ lift $ do
+                      currentPath <- gets compilerCurrentPath
+                      tellErrors [ConflictingImports name existingPath (ErrorLocation (principalPath currentPath) loc)]
+                      throwError PreflightFailure
+              _ -> do
+                build <- lift $ lift $ importedBuild path
+                found <- insertTypeName build loc name
+                unless found $ do
+                  lift $ lift $ do
                     currentPath <- gets compilerCurrentPath
-                    tellErrors [ConflictingImports name path (ErrorLocation (principalPath currentPath) loc)]
-                    throwError PreflightFailure
-                  else do
-                    build <- lift $ lift $ importedBuild path
-                    found <- insertTypeName build loc name
-                    unless found $ do
-                      lift $ lift $ do
-                        currentPath <- gets compilerCurrentPath
-                        tellErrors [MissingType name path (ErrorLocation (principalPath currentPath) loc)]
-            | otherwise ->
-                pure ()
-          _ ->
-            pure ()
-    DNamespaceImport _ _ ->
-      pure ()
-    _ ->
-      pure ()
+                    tellErrors [MissingType name path (ErrorLocation (principalPath currentPath) loc)]
+                -- Track this import
+                return (Map.insert name path sources)
+        | otherwise ->
+            return sources
+      _ ->
+        return sources
 
 insertTypeName :: (Monad m) => Build a -> a -> Name -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) Bool
 insertTypeName Build{..} loc name =
@@ -547,25 +543,29 @@ collectDataConstructors =
     DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
     DImport loc path imports -> do
-      Build{..} <- lift $ lift $ importedBuild path
+      Build{buildExportedNames = importedExportedNames, buildTypeConstructors = importedTypeConstructors, buildDataConstructors = importedDataConstructors} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
           TypeImport _ name ctors
-            | name `elem` buildExportedNames ->
-                case Environment.lookup name buildTypeConstructors of
+            | name `elem` importedExportedNames ->
+                case Environment.lookup name importedTypeConstructors of
                   Nothing ->
                     pure ()
                   Just TypeConstructorEntry{..} ->
                     forM_ dataConstructors $
                       \ctor ->
-                        case Environment.lookup ctor buildDataConstructors of
+                        case Environment.lookup ctor importedDataConstructors of
                           Nothing ->
                             lift $ lift $ do
                               currentPath <- gets compilerCurrentPath
                               tellErrors [NoDataConstructorForType ctor name path (ErrorLocation (principalPath currentPath) loc)]
                           Just entry@DataConstructorEntry{dataConstructorEntryMetaData, dataConstructorEntryConstructor = DataConstructor{..}} -> do
-                            insertDataConstructor ctor entry
-                            lift $ lift $ insertNewName constructorName dataConstructorEntryMetaData constructorScheme
+                            -- Check if already inserted (happens with duplicate imports from same module)
+                            Build{buildDataConstructors = currentDataConstructors} <- get
+                            let alreadyExists = Environment.contains ctor currentDataConstructors
+                            unless alreadyExists $ do
+                              insertDataConstructor ctor entry
+                              lift $ lift $ insertNewName constructorName dataConstructorEntryMetaData constructorScheme
                    where
                     dataConstructors
                       | ["*"] == ctors = typeConstructorEntryDataConstructors
