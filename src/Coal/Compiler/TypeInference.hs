@@ -233,14 +233,13 @@ runConstraintsGen stack = do
   updateSupplyC constraintsGenStateSupply
   return (result, constraintsGenStateAnnotationIndexes, output)
 
-define :: (Monad m, Monoid a) => a -> Name -> IndexedType -> CompilerT a m ()
+define :: (Monad m) => a -> Name -> IndexedType -> CompilerT a m ()
 define loc name t = do
   r <- insertNameC name (Forall (typeIndexesIn s) mempty s)
   unless r $ do
     currentPath <- gets compilerCurrentPath
     tellErrors [NameAlreadyDefined name (ErrorLocation (principalPath currentPath) loc)]
     throwError PreflightFailure
-  return ()
  where
   s = normalizeTypeIndexes t
 

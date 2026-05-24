@@ -108,7 +108,7 @@ solve constraints =
       solve cs
 
 {-# INLINE generalize #-}
-generalize :: (TypeIndexed k t, Ord t) => Monomorphic (TypeIndex k) -> t -> Scheme TypeIndex k t
+generalize :: (TypeIndexed k t) => Monomorphic (TypeIndex k) -> t -> Scheme TypeIndex k t
 generalize (Monomorphic m) t = Forall (notBoundIn m (typeIndexesIn t)) mempty t
 
 instantiate :: IndexedScheme -> Solver s IndexedType

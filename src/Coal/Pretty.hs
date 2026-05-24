@@ -55,7 +55,6 @@ import Coal.Utils (intToVar)
 import Data.List (intersperse)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
-import qualified Data.Set as Set
 import Extras.Prettyprinter (Prec, parensIf, precApp, precArrow, precAtom, typeBrackets)
 import Prettyprinter (
   Doc,

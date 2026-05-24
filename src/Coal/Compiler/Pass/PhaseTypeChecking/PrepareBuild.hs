@@ -392,10 +392,10 @@ collectTypeConstructors importSources = \case
         -- OR those quantified in the scheme itself (for existential types)
         let declaredParams = Set.fromList (map parameterName typeDefinitionParameters)
         forM_ typeDefinitionConstructors $ \ctor -> do
-          let scheme = constructorScheme ctor
-          let schemeVars = Set.map parameterName (schemeTypeVariables scheme)
+          let scheme_ = constructorScheme ctor
+          let schemeVars = Set.map parameterName (schemeTypeVariables scheme_)
           let allowedVars = declaredParams <> schemeVars
-          let usedVars = collectTypeVarNames (schemeTypeBody scheme)
+          let usedVars = collectTypeVarNames (schemeTypeBody scheme_)
           let unboundVars = usedVars Set.\\ allowedVars
           -- Machine is a special builtin with an intentional existential type variable
           -- The 's' parameter is hidden (not a type parameter) but used in the constructor

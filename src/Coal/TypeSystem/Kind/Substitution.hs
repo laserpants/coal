@@ -75,7 +75,7 @@ instance (KindSubstitutable n, KindSubstitutable k) => KindSubstitutable (n, k) 
   applyKinds sub (a, b) = (applyKinds sub a, applyKinds sub b)
   replaceVariables = fmap replaceVariables
 
-instance (Ord (o k), Ord t, KindSubstitutable (o k), KindSubstitutable t) => KindSubstitutable (Scheme o k t) where
+instance (Ord (o k), KindSubstitutable (o k), KindSubstitutable t) => KindSubstitutable (Scheme o k t) where
   applyKinds sub =
     \case
       Forall{..} ->
@@ -211,7 +211,7 @@ instance (KindSubstitutable n, KindSubstitutable (o n), KindSubstitutable k) => 
       RNil ->
         RNil
 
-instance (KindSubstitutable k, KindSubstitutable t, Ord k, Ord t) => KindSubstitutable (DataConstructor Parameter k t) where
+instance (KindSubstitutable k, KindSubstitutable t, Ord k) => KindSubstitutable (DataConstructor Parameter k t) where
   applyKinds sub DataConstructor{..} =
     DataConstructor{constructorScheme = applyKinds sub constructorScheme, ..}
   replaceVariables DataConstructor{..} =

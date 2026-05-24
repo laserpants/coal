@@ -303,7 +303,7 @@ instance ToKindIndexed (Pattern a k ()) (Pattern a Kind ()) where
       PTraitInstance a t trait ->
         PTraitInstance a <$> toKindIndexed t <*> toKindIndexed trait
 
-instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind), Ord u) => ToKindIndexed (Scheme o k t) (Scheme o Kind u) where
+instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind)) => ToKindIndexed (Scheme o k t) (Scheme o Kind u) where
   toKindIndexed =
     \case
       Forall{..} ->
