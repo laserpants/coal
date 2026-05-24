@@ -410,12 +410,31 @@ collectTypeConstructors =
         \case
           TypeImport loc name _
             | name `elem` buildExportedNames -> do
-                build <- lift $ lift $ importedBuild path
-                found <- insertTypeName build loc name
-                unless found $ do
-                  lift $ lift $ do
+                Build
+                  { buildExportedNames = curExported
+                  , buildTypeConstructors = curTCs
+                  , buildTraits = curTraits
+                  , buildAliases = curAliases
+                  } <-
+                  get
+                let alreadyImported =
+                      not (Set.member name curExported)
+                        && ( Environment.contains name curTCs
+                              || Environment.contains name curTraits
+                              || Environment.contains name curAliases
+                           )
+                if alreadyImported
+                  then lift $ lift $ do
                     currentPath <- gets compilerCurrentPath
-                    tellErrors [MissingType name path (ErrorLocation (principalPath currentPath) loc)]
+                    tellErrors [ConflictingImports name path (ErrorLocation (principalPath currentPath) loc)]
+                    throwError PreflightFailure
+                  else do
+                    build <- lift $ lift $ importedBuild path
+                    found <- insertTypeName build loc name
+                    unless found $ do
+                      lift $ lift $ do
+                        currentPath <- gets compilerCurrentPath
+                        tellErrors [MissingType name path (ErrorLocation (principalPath currentPath) loc)]
             | otherwise ->
                 pure ()
           _ ->

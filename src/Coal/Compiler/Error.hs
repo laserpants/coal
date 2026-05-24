@@ -39,6 +39,7 @@ data CompilerError a
   | MissingInstance (Trait IndexedType) (ErrorLocation a)
   | NameAlreadyDefined Name (ErrorLocation a)
   | DuplicateTypeName Name Name (ErrorLocation a)
+  | ConflictingImports Name Path (ErrorLocation a)
   | ConflictingParameter Name (ErrorLocation a)
   | TypeAliasCycle Name (ErrorLocation a)
   | ImportNotInModule Name Path (ErrorLocation a)
@@ -104,6 +105,8 @@ errorLocation =
     NameAlreadyDefined _ erl ->
       Just erl
     DuplicateTypeName _ _ erl ->
+      Just erl
+    ConflictingImports _ _ erl ->
       Just erl
     ConflictingParameter _ erl ->
       Just erl

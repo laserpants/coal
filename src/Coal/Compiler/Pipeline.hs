@@ -272,6 +272,8 @@ prettyError env =
       errorMessage ["Name already defined: '" <> name <> "'"] env erl
     DuplicateTypeName name kind erl ->
       errorMessage ["'" <> name <> "' is already in scope as a " <> kind] env erl
+    ConflictingImports name path erl ->
+      errorMessage ["'" <> name <> "' conflicts with an earlier import from '" <> principalPath path <> "'"] env erl
     ConflictingParameter name erl ->
       errorMessage ["Conflicting parameter name: '" <> name <> "'"] env erl
     TypeAliasCycle name erl ->

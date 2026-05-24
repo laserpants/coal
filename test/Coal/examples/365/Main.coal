@@ -1,0 +1,12 @@
+// This program, when compiled, should yield an error:
+// "'Printable' conflicts with an earlier import from 'TraitA'"
+// Importing the same trait name from two different modules is not allowed.
+
+module Main {
+
+  import TraitA(Printable)
+  import TraitB(Printable)
+
+  fun main() = ()
+
+}

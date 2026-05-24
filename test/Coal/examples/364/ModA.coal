@@ -1,0 +1,5 @@
+module ModA {
+
+  type Color = Red | Green | Blue
+
+}

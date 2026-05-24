@@ -1,0 +1,7 @@
+module TraitB {
+
+  trait Printable<a> {
+    print : a -> string
+  }
+
+}

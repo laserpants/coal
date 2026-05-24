@@ -1,0 +1,12 @@
+// This program, when compiled, should yield an error:
+// "'Color' conflicts with an earlier import from 'ModA'"
+// Importing the same type name from two different modules is not allowed.
+
+module Main {
+
+  import ModA(Color)
+  import ModB(Color)
+
+  fun main() = ()
+
+}

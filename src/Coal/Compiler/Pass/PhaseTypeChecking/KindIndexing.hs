@@ -52,6 +52,7 @@ import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
+import qualified Data.Set as Set
 import Extras (Name, forM, forM_, traverse_)
 
 {- | The kind indexing compiler pass.
@@ -182,9 +183,21 @@ collectTypeAliases =
         \case
           TypeImport loc name _
             | name `elem` buildExportedNames -> do
-                build <- lift $ lift $ importedBuild path
-                _ <- insertTypeName build loc name
-                pure ()
+                Build
+                  { buildExportedNames = curExported
+                  , buildAliases = curAliases
+                  } <-
+                  get
+                if not (Set.member name curExported)
+                  && Environment.contains name curAliases
+                  then lift $ lift $ do
+                    currentPath <- gets compilerCurrentPath
+                    tellErrors [ConflictingImports name path (ErrorLocation (principalPath currentPath) loc)]
+                    throwError PreflightFailure
+                  else do
+                    build <- lift $ lift $ importedBuild path
+                    _ <- insertTypeName build loc name
+                    pure ()
             | otherwise ->
                 -- Type not found in exported names; silently skip
                 -- (error reporting happens in later phases)
