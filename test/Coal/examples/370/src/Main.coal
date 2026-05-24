@@ -1,0 +1,16 @@
+module Main {
+
+  import namespace IO
+
+  type Foo
+    = A
+    | B
+
+  type Bar
+    = A
+    | C
+
+  fun main() =
+    IO.println_string("@")
+
+}

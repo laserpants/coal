@@ -523,15 +523,23 @@ collectDataConstructors =
     DType loc _ TypeDefinition{..} ->
       forM_ typeDefinitionConstructors $
         \ctor -> do
-          entry <- dataConstructorEntry loc ctorSet ctor
-          case entry of
-            DataConstructorEntry
-              { dataConstructorEntryConstructor = DataConstructor{..}
-              } -> do
-                insertNameEntry (NName constructorName constructorScheme)
-                insertExportedName constructorName
-                insertDataConstructor constructorName entry
-                lift $ lift $ insertNameC constructorName constructorScheme
+          -- Check for duplicate data constructor names
+          build <- get
+          if Environment.contains (constructorName ctor) (buildDataConstructors build)
+            then lift $ lift $ do
+              currentPath <- gets compilerCurrentPath
+              tellErrors [DuplicateTypeName (constructorName ctor) "data constructor" (ErrorLocation (principalPath currentPath) loc)]
+              throwError PreflightFailure
+            else do
+              entry <- dataConstructorEntry loc ctorSet ctor
+              case entry of
+                DataConstructorEntry
+                  { dataConstructorEntryConstructor = DataConstructor{..}
+                  } -> do
+                    insertNameEntry (NName constructorName constructorScheme)
+                    insertExportedName constructorName
+                    insertDataConstructor constructorName entry
+                    lift $ lift $ insertNameC constructorName constructorScheme
      where
       ctorSet = Set.fromList (for typeDefinitionConstructors constructorName)
 

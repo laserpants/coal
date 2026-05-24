@@ -1,0 +1,13 @@
+module Main {
+
+  import namespace IO
+
+  // Trying to redefine builtin "Some" constructor
+  type MyOption<a>
+    = Some(a)
+    | Missing
+
+  fun main() =
+    IO.println_string("@")
+
+}

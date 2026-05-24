@@ -1,0 +1,26 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+
+  type ParseResult<a>
+    = Error(ParseError)
+    | NeedMoreInput
+    | Ok(a)
+
+  instance Functor<ParseResult> {
+    fun map(f, result) =
+      match(result) {
+        | Ok(r) =>
+            Ok(f(r))
+        | NeedMoreInput =>
+            NeedMoreInput
+        | Error(err) =>
+            Error(err)
+      }
+  }
+
+  fun main() =
+    IO.println_string("@")
+
+}
