@@ -1,0 +1,12 @@
+// This program, when compiled, should yield an error:
+// "'Color' is already in scope as a type"
+
+module Main {
+
+  type Color = Red | Green | Blue
+
+  type Color = Red | Green | Blue
+
+  fun main() = ()
+
+}

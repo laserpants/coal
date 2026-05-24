@@ -1,0 +1,12 @@
+// This program, when compiled, should yield an error:
+// "'Label' is already in scope as a type alias"
+
+module Main {
+
+  type alias Label = string
+
+  type alias Label = string
+
+  fun main() = ()
+
+}

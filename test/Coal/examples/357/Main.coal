@@ -1,0 +1,13 @@
+// This program should compile successfully and print "hello".
+// It tests that string constants exported from one module and imported
+// into another are correctly emitted with external linkage in the LLVM IR.
+
+module Main {
+
+  import namespace IO
+  import Greeting(message)
+
+  fun main() =
+    IO.println_string(message)
+
+}

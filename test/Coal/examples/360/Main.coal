@@ -1,0 +1,13 @@
+// This program, when compiled, should yield an error:
+// "'Functor' is already in scope as a trait"
+// A locally-defined type cannot shadow an imported trait name.
+
+module Main {
+
+  import Coal.Functor(Functor)
+
+  type Functor = MkFunctor
+
+  fun main() = ()
+
+}

@@ -1,0 +1,13 @@
+// This program, when compiled, should yield an error:
+// "'Color' is already in scope as a type alias"
+// A type definition cannot reuse a name already bound to a type alias.
+
+module Main {
+
+  type alias Color = string
+
+  type Color = Red | Green | Blue
+
+  fun main() = ()
+
+}

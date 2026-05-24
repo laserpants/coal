@@ -1,0 +1,15 @@
+// This program, when compiled, should yield an error:
+// "'Color' is already in scope as a type"
+// A locally-defined trait cannot shadow an existing type name.
+
+module Main {
+
+  type Color = Red | Green | Blue
+
+  trait Color<a> {
+    describe : a -> string
+  }
+
+  fun main() = ()
+
+}

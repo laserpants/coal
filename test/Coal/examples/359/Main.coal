@@ -1,0 +1,16 @@
+// This program, when compiled, should yield an error:
+// "'Describable' is already in scope as a trait"
+
+module Main {
+
+  trait Describable<a> {
+    describe : a -> string
+  }
+
+  trait Describable<a> {
+    describe : a -> string
+  }
+
+  fun main() = ()
+
+}
