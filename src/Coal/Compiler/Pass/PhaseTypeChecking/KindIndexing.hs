@@ -39,15 +39,16 @@ import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeVarNames)
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT, clearAssumptionsC, clearNameStoreC, insertBuildC, insertNameC, setCurrentModuleC, updateCurrentBuildPureC)
 import Coal.Compiler.State
-import Coal.Language (Kind (..), Type (..), TypeIndex (..), constructors, forall2, (~>))
+import Coal.Language (Kind (..), Parameter (..), Type (..), TypeIndex (..), constructors, forall2, (~>))
 import Coal.Language.Definition (AliasDefinition (..), Definition (..))
 import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Control.Monad.State (StateT, execStateT, foldM, get, gets, modify)
@@ -165,6 +166,22 @@ collectTypeAliases importSources = \case
         tellErrors [DuplicateTypeName name existingKind (ErrorLocation (principalPath currentPath) loc)]
         throwError PreflightFailure
       else do
+        -- Check for unbound type variables in the alias definition
+        let declaredParams = Set.fromList (map parameterName aliasDefinitionParameters)
+        let usedVars = collectTypeVarNames aliasDefinitionType
+        let unboundVars = usedVars Set.\\ declaredParams
+        unless (Set.null unboundVars) $ do
+          forM_ (Set.toList unboundVars) $ \var -> do
+            lift $ lift $ do
+              currentPath <- gets compilerCurrentPath
+              tellErrors
+                [ UnboundTypeVariable
+                    var
+                    name
+                    (map parameterName aliasDefinitionParameters)
+                    (ErrorLocation (principalPath currentPath) loc)
+                ]
+              throwError PreflightFailure
         insertNameEntry (NTypeAlias name)
         insertExportedName name
         insertAlias name entry

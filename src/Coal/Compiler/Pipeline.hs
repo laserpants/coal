@@ -288,6 +288,13 @@ prettyError env =
       errorMessage ["No constructor '" <> ctor <> "' for type '" <> name <> "' in scope"] env erl
     TraitNotInScope trait erl ->
       errorMessage ["No trait '" <> trait <> "' in scope"] env erl
+    UnboundTypeVariable var typeName params erl ->
+      errorMessage
+        [ "Type variable '" <> var <> "' is not bound in the definition of '" <> typeName <> "'"
+        , "  Declared parameters: " <> Text.intercalate ", " params
+        ]
+        env
+        erl
     MissingTraitDefinition name trait erl ->
       errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
     UnexpectedTraitDefinition name trait erl ->

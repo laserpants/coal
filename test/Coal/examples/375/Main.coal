@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+
+  type Bar<a, b> = Bar(Tuple<a, c, d>)
+
+  fun main() =
+    IO.println_string("@")
+}

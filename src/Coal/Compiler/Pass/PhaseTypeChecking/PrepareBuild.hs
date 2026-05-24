@@ -52,6 +52,7 @@ import Coal.Compiler.Error
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
+import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeVarNames)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
@@ -386,6 +387,31 @@ collectTypeConstructors importSources = \case
           tellErrors [DuplicateTypeName name k (ErrorLocation (principalPath currentPath) loc)]
           throwError PreflightFailure
       Nothing -> do
+        -- Check for unbound type variables in constructors
+        -- Valid variables are those declared in the type definition parameters
+        -- OR those quantified in the scheme itself (for existential types)
+        let declaredParams = Set.fromList (map parameterName typeDefinitionParameters)
+        forM_ typeDefinitionConstructors $ \ctor -> do
+          let scheme = constructorScheme ctor
+          let schemeVars = Set.map parameterName (schemeTypeVariables scheme)
+          let allowedVars = declaredParams <> schemeVars
+          let usedVars = collectTypeVarNames (schemeTypeBody scheme)
+          let unboundVars = usedVars Set.\\ allowedVars
+          -- Machine is a special builtin with an intentional existential type variable
+          -- The 's' parameter is hidden (not a type parameter) but used in the constructor
+          let isExistentialBuiltin = name == "Machine"
+          unless (Set.null unboundVars || isExistentialBuiltin) $ do
+            forM_ (Set.toList unboundVars) $ \var -> do
+              lift $ lift $ do
+                currentPath <- gets compilerCurrentPath
+                tellErrors
+                  [ UnboundTypeVariable
+                      var
+                      name
+                      (map parameterName typeDefinitionParameters)
+                      (ErrorLocation (principalPath currentPath) loc)
+                  ]
+                throwError PreflightFailure
         insertNameEntry (NType name kind)
         insertExportedName name
         insertTypeConstructor name entry

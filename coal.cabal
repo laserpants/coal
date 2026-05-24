@@ -99,6 +99,7 @@ library
       Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild
       Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors
       Coal.Compiler.Pass.PhaseTypeChecking.TypeInference
+      Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables
       Coal.Compiler.Path.Resolve
       Coal.Compiler.PatternMatching.AnomalyDetection
       Coal.Compiler.PatternMatching.Compiler

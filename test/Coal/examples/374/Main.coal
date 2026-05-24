@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+
+  type alias Dict<k> = Map<k, v>
+
+  fun main() =
+    IO.println_string("@")
+}

@@ -54,6 +54,7 @@ data CompilerError a
   | OrPatternVariableMismatch (Set Name) (Set Name) (ErrorLocation a)
   | CallCycle [[Name]] (ErrorLocation a)
   | MissingTraitAnnotation Name [Trait IndexedType] (ErrorLocation a)
+  | UnboundTypeVariable Name Name [Name] (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -137,4 +138,6 @@ errorLocation =
     NamedFoldNotAllowed erl ->
       Just erl
     MissingTraitAnnotation _ _ erl ->
+      Just erl
+    UnboundTypeVariable _ _ _ erl ->
       Just erl
