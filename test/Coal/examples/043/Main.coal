@@ -3,9 +3,9 @@ module Main {
   import IO(println_int32, println_bool, println_string, println_char)
   import Codata.Stream(Stream, head)
 
-  type List<a> 
+  type MyList<a> 
     = Nil 
-    | Cons(a, List<a>)
+    | Cons(a, MyList<a>)
 
   fun len(lst) =
     fold(lst) {

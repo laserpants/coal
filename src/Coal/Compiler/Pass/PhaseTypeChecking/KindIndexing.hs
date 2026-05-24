@@ -95,7 +95,7 @@ kindIndexing m = do
     --
     -- machine : s -> (i -> s -> s) -> (s -> o) -> Machine<i, o>
     --
-    insertNameC "machine$_machine" $ forall2 (\t1 t2 -> special ~> (t1 ~> special ~> special) ~> (special ~> t2) ~> machineType t1 t2)
+    _ <- insertNameC "machine$_machine" $ forall2 (\t1 t2 -> special ~> (t1 ~> special ~> special) ~> (special ~> t2) ~> machineType t1 t2)
 
     toKindIndexed m
 
@@ -160,6 +160,7 @@ collectTypeAliases =
                 | Environment.contains name (buildTraits build) = "trait"
                 | otherwise = "type"
           tellErrors [DuplicateTypeName name existingKind (ErrorLocation (principalPath currentPath) loc)]
+          throwError PreflightFailure
         else do
           insertNameEntry (NTypeAlias name)
           insertExportedName name

@@ -384,6 +384,7 @@ collectTypeConstructors =
           lift $ lift $ do
             currentPath <- gets compilerCurrentPath
             tellErrors [DuplicateTypeName name k (ErrorLocation (principalPath currentPath) loc)]
+            throwError PreflightFailure
         Nothing -> do
           insertNameEntry (NType name kind)
           insertExportedName name
@@ -453,7 +454,7 @@ insertTypeName Build{..} loc name =
               then lift $ lift $ do
                 path <- gets compilerCurrentPath
                 tellErrors [DuplicateTypeName name "type" (ErrorLocation (principalPath path) loc)]
-                return False
+                throwError PreflightFailure
               else do
                 insertTypeConstructor name entry
                 return True
@@ -480,7 +481,7 @@ insertTypeName Build{..} loc name =
               then lift $ lift $ do
                 path <- gets compilerCurrentPath
                 tellErrors [DuplicateTypeName name "trait" (ErrorLocation (principalPath path) loc)]
-                return False
+                throwError PreflightFailure
               else do
                 insertTrait name entry
                 return True
@@ -583,6 +584,7 @@ collectTraits =
         Just k -> lift $ lift $ do
           currentPath <- gets compilerCurrentPath
           tellErrors [DuplicateTypeName name k (ErrorLocation (principalPath currentPath) loc)]
+          throwError PreflightFailure
         Nothing -> do
           insertNameEntry (NTrait name)
           insertExportedName name

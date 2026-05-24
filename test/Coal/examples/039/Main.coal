@@ -23,10 +23,10 @@ module Main {
 //    fmap : f<a -> b> -> f<a> -> f<b>
 //    pure : a -> f<a>
 //  }
-
-  trait Monad<m> {
-    bind : m<a> -> (a -> m<b>) -> m<b>
-  }
+//
+//  trait Monad<m> {
+//    bind : m<a> -> (a -> m<b>) -> m<b>
+//  }
 
   fun main() =
     let
