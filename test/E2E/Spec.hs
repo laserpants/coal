@@ -1917,6 +1917,11 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/365" [ "Main.coal", "TraitA.coal", "TraitB.coal" ]
       res `shouldBe` Left PreflightFailure
 
+  describe "366" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/366" [ "Main.coal" ]
+      res `shouldBe` Left PreflightFailure
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
