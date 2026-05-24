@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+
+  let xs = pure(1) : List<int32>
+
+  fun pure(a) = 123 : int32
+
+  fun main() =
+    match(xs) {
+      | [] => IO.println_string("@")
+      | fst :: _ => IO.println_int32(fst)
+    }
+
+}
