@@ -1,0 +1,11 @@
+module Main {
+
+  import namespace IO
+
+  fun main() = 
+    do {
+       _ <- IO.println_string("---");
+       _ <- IO.println_string("---");
+    }
+
+}

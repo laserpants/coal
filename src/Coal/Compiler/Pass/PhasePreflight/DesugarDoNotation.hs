@@ -141,7 +141,11 @@ instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
   desugarDoNotation =
     \case
       EDoBlock _ es ->
-        pure (foldr' go e' es')
+        case es of
+          (p, e2) :| [] -> do
+            pure (lambdaE (p :| []) e2)
+          _ ->
+            pure (foldr' go e' es')
        where
         (e', es') = normalize es
         bind e1 e2 = applicationE (varE "bind") (e1 :| [e2])

@@ -1952,6 +1952,24 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/375" [ "Main.coal" ]
       res `shouldBe` Left PreflightFailure
 
+  describe "376" $ do
+    expectOutput
+      "---"
+      "test/Coal/examples/376" 
+      [ "Main.coal" ]
+
+  describe "377" $ do
+    expectOutput
+      "---\n---"
+      "test/Coal/examples/377" 
+      [ "Main.coal" ]
+
+  describe "378" $ do
+    expectOutput
+      "---"
+      "test/Coal/examples/378" 
+      [ "Main.coal" ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
