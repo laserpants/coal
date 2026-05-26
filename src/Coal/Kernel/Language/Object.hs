@@ -17,7 +17,6 @@ module Coal.Kernel.Language.Object (
 
 import Coal.Common.FreeVars (FreeVars (..), boundIn, exceptNames)
 import Coal.Common.Label (Label (..))
-import Coal.Kernel.LLVM.IRType (IRTyped (..))
 import Coal.Kernel.Language.Expr (Binding (..), Expr, ExprF (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Arrow (functionTypeOf)
