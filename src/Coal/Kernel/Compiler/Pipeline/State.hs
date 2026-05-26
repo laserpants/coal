@@ -9,6 +9,7 @@ module Coal.Kernel.Compiler.Pipeline.State (
   overPipelineStateInterpreterEnv,
   overPipelineStateInterpreterValueEnv,
   overPipelineStateInterpreterConstructorEnv,
+  overPipelineStateInterpreterIRTypes,
   overPipelineStateArtifacts,
   overPipelineStateCode,
   overPipelineStateNames,
@@ -34,13 +35,13 @@ data PipelineState = PipelineState
 
 {-# INLINE initialPipelineState #-}
 initialPipelineState :: PipelineState
-initialPipelineState = PipelineState 0 (IRInterpreterEnv mempty mempty) [] [] mempty mempty mempty
+initialPipelineState = PipelineState 0 (IRInterpreterEnv mempty mempty mempty) [] [] mempty mempty mempty
 
 resetPipelineState :: PipelineState -> PipelineState
 resetPipelineState PipelineState{..} =
   PipelineState
     { pipelineSupply = 0
-    , pipelineInterpreterEnv = IRInterpreterEnv mempty mempty
+    , pipelineInterpreterEnv = IRInterpreterEnv mempty mempty pipelineIRTypes
     , pipelineArtifacts = []
     , pipelineCode = []
     , ..
@@ -61,6 +62,10 @@ overPipelineStateInterpreterValueEnv = overPipelineStateInterpreterEnv . inValue
 {-# INLINE overPipelineStateInterpreterConstructorEnv #-}
 overPipelineStateInterpreterConstructorEnv :: Over PipelineState (Environment Int)
 overPipelineStateInterpreterConstructorEnv = overPipelineStateInterpreterEnv . inConstructorEnv
+
+{-# INLINE overPipelineStateInterpreterIRTypes #-}
+overPipelineStateInterpreterIRTypes :: Over PipelineState (Environment IRType)
+overPipelineStateInterpreterIRTypes = overPipelineStateInterpreterEnv . inIRTypes
 
 {-# INLINE overPipelineStateArtifacts #-}
 overPipelineStateArtifacts :: Over PipelineState [IRInterpreterArtifact]

@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -113,12 +114,15 @@ interpretObject =
     OConstant name e -> do
       ir <- interpretFunction name (irEvalFun [] e) []
       pure [ir]
-    OExternal name it _ ->
-      case it of
-        TFun t ts ->
+    OExternal name _ -> do
+      irTypes <- asks irInterpreterIRTypes
+      case Environment.lookup name irTypes of
+        Just (TFun t ts) ->
           pure [CDeclare name t ts]
-        _ ->
+        Just it ->
           pure [CExternGlobal name it]
+        Nothing ->
+          error $ "IRType not found for external: " <> Text.unpack name
     OData{} ->
       pure []
 

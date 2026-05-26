@@ -898,7 +898,7 @@ instance Dot (Kernel.Object Kernel.Type (Kernel.Expr Kernel.Type)) where
         dotId <- emitShape ParallelogramShape ("OConstant\\n" <> name)
         emitEdge dotId e
         return dotId
-      Kernel.OExternal name _ _ -> do
+      Kernel.OExternal name _ -> do
         -- TODO
         emitShape ParallelogramShape ("OExternal\\n" <> name)
       Kernel.OData name _ _ -> do

@@ -63,7 +63,9 @@ irCodeGen names objs = do
 compile :: (MonadIO m) => Environment Int -> Pass m ObjectList ()
 compile importedCtors input = do
   objs <- corePass input
-  extendInterpreterValueEnv (objectEnvironment objs)
+  irTypes <- gets pipelineIRTypes
+  extendInterpreterValueEnv (objectEnvironment irTypes objs)
+  extendInterpreterIRTypes irTypes
   extendInterpreterConstructorEnv (builtinConstructors <> importedCtors <> objectConstructors objs)
   void (irCodeGen names objs)
  where
