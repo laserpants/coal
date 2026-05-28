@@ -44,8 +44,8 @@ closeObjects objs = uncurry app (evalWS0 (traverse closed objs))
       OConstant name expr -> do
         tell [(name, extra)]
         pure (OFunction name extra expr)
-      OExternal name it t ->
-        pure (OExternal name it t)
+      OExternal name t ->
+        pure (OExternal name t)
       OData name i t ->
         pure (OData name i t)
 

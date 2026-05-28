@@ -9,7 +9,6 @@ module Coal.Compiler.Pass.PhaseLowering.KernelCode (
   compileEnvelopes,
 ) where
 
-import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
@@ -100,18 +99,9 @@ compileEnvelopes units = do
 
   compileModule :: (MonadIO m) => [(Name, Int)] -> Module Type (Name, Type) KernelExpr -> PipelineT m [IRConstruct [IRLine]]
   compileModule ctors Module{..} = do
-    names <- gets pipelineIRTypes
-    let external = toExternal names <$> moduleImports
+    let external = uncurry OExternal <$> moduleImports
     compile (Environment.fromList ctors) (external <> moduleObjects)
     gets pipelineCode
-
-  toExternal :: Environment IRType -> (Name, Type) -> Object Type KernelExpr
-  toExternal env (name, t) =
-    case Environment.lookup name env of
-      Nothing ->
-        error ("Name not in scope: '" <> Text.unpack name <> "'")
-      Just it ->
-        OExternal name it t
 
 -- TODO: cache?
 builtin :: BuildEnvelope (Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type))

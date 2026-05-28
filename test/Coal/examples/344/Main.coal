@@ -27,6 +27,9 @@ module Main {
 
   type alias Parser<tok, a> = Machine<tok, ParseResult<a>>
 
+  fun run_parser(parser : Parser<tok, a>, input : tok) : ParseResult<a> =
+    parser |.receive(input) |.observe
+
   fun pure_parser(value : s) : Parser<tok, s> =
     machine(
       ResultOk(value),

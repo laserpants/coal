@@ -6,6 +6,7 @@ module Coal.Kernel.Compiler.Pipeline (
   evalPipelineT,
   extendInterpreterValueEnv,
   extendInterpreterConstructorEnv,
+  extendInterpreterIRTypes,
   pipelineInsertArtifacts,
   pipelineInsertCode,
   pipelineInsertNames,
@@ -50,6 +51,10 @@ extendInterpreterValueEnv env = modify (overPipelineStateInterpreterValueEnv (<>
 {-# INLINE extendInterpreterConstructorEnv #-}
 extendInterpreterConstructorEnv :: (Monad m) => Environment Int -> PipelineT m ()
 extendInterpreterConstructorEnv env = modify (overPipelineStateInterpreterConstructorEnv (<> env))
+
+{-# INLINE extendInterpreterIRTypes #-}
+extendInterpreterIRTypes :: (Monad m) => Environment IRType -> PipelineT m ()
+extendInterpreterIRTypes env = modify (overPipelineStateInterpreterIRTypes (<> env))
 
 {-# INLINE pipelineInsertArtifacts #-}
 pipelineInsertArtifacts :: (Monad m) => [IRInterpreterArtifact] -> PipelineT m ()

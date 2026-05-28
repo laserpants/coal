@@ -155,7 +155,7 @@ instance ToKindIndexed (AliasDefinition a k) (AliasDefinition a Kind) where
           <$> toKindIndexed aliasDefinitionParameters
           <*> toKindIndexed aliasDefinitionType
 
-instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind), Ord u) => ToKindIndexed (DataConstructor o k t) (DataConstructor o Kind u) where
+instance (ToKindIndexed t u, ToKindIndexed (o k) (o Kind), Ord (o Kind)) => ToKindIndexed (DataConstructor o k t) (DataConstructor o Kind u) where
   toKindIndexed =
     \case
       DataConstructor{..} ->
