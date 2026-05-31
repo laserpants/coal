@@ -396,9 +396,8 @@ interpretMeta = \case
    where
     t1 = TNamed name t
   MakeKey name next -> do
-    let labelName = "label." <> name
     addArtifact (AHashMapKey name)
-    next (Global (ptr (stringLiteral (Text.length name + 1))) labelName)
+    next (Global (ptr (stringLiteral (Text.length name + 1))) ("label." <> name))
   MakeString str next -> do
     d <- nextLabelIndex
     let name = "str." <> showt d
