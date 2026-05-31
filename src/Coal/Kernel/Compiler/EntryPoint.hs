@@ -8,7 +8,7 @@ entryPoint :: IRConstruct [IRLine]
 entryPoint = CDefine "main" i32 Nothing [] instructions
  where
   instructions =
-    [ LInstruction ["call void @init()"]
+    [ LInstruction ["call void @rt_runtime_init()"]
     , LInstruction ["call void @\"Main.main\"(i8* null)"]
     , LInstruction ["ret i32 0"]
     ]
