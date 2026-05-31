@@ -1,0 +1,164 @@
+# Build directories
+build/
+bin/
+lib/
+obj/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Testing/
+*.cmake
+!CMakeLists.txt
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Test executables
+test_gc
+test_closure
+test_apply
+test_bignum
+test_string
+test_io
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# Editor and IDE files
+.vscode/
+.vs/
+.idea/
+*.swp
+*.swo
+*~
+.*.swp
+.*.swo
+*.sublime-workspace
+*.sublime-project
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Dependency directories
+.deps/
+deps/
+
+# Package manager
+*.tar.gz
+*.zip
+
+# Logs
+*.log
+
+# Core dumps
+core
+core.*
+vgcore.*
+
+# Valgrind
+*.valgrind
+valgrind-out.*
+
+# GDB
+.gdb_history
+
+# Tags
+tags
+TAGS
+.tags
+.TAGS
+
+# Backup files
+*.bak
+*.orig
+*.rej
+
+# Profiling
+*.gcno
+*.gcda
+*.gcov
+gmon.out
+perf.data
+perf.data.old
