@@ -148,7 +148,9 @@ instance IREval (Syntax.Expr Syntax.Type) where
         Syntax.ECall (Label _ ll) es e ->
           irCommentBlock "ECall" $ do
             rs <- traverse (irEval NotInTail) es -- Arguments not in tail
-            v1 <- ccall i8Ptr ll rs
+            rsc <- traverse irConceal rs -- Conceal arguments for C ABI
+            unless (rs == rsc) (irComment ["^ Conceal external call args"])
+            v1 <- ccall i8Ptr ll rsc
             v2 <- irEval NotInTail e -- Continuation not in tail (C call)
             case v2 of
               Local{} -> do

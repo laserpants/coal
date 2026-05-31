@@ -1707,6 +1707,13 @@ objects =
                         }
                   }
               |]
+        , OFunction
+            "Builtin$.machine$_cofix"
+            [ Label (Kernel.TCon "Machine" [opaque, opaque] `Kernel.arrow` Kernel.TCon "Machine" [opaque, opaque]) "f"
+            ]
+            [r| 
+                  0 : int32
+              |]
         ]
     }
 

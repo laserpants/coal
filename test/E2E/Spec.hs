@@ -1745,230 +1745,247 @@ e2eSpec = do
 
   describe "332" $ do
     it "is TraitAnnotationError" $ do
-      res <- runSpec "test/Coal/examples/332" [ "Main.coal" , "Containers/Map.coal" ]
+      res <- runSpec "test/Coal/examples/332" ["Main.coal", "Containers/Map.coal"]
       res `shouldBe` Left TraitAnnotationError
 
   describe "333" $ do
     expectOutput
       "3"
-      "test/Coal/examples/333" 
-      [ "Main.coal" 
-      , "Containers/Map.coal" 
+      "test/Coal/examples/333"
+      [ "Main.coal"
+      , "Containers/Map.coal"
       ]
 
   describe "334" $ do
     it "is TypeError" $ do
-      res <- runSpec "test/Coal/examples/334" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/334" ["Main.coal"]
       res `shouldBe` Left TypeError
 
---  describe "335" $ do
---    expectOutput
---      "5"
---      "test/Coal/examples/335" 
---      [ "Main.coal" 
---      ]
+  --  describe "335" $ do
+  --    expectOutput
+  --      "5"
+  --      "test/Coal/examples/335"
+  --      [ "Main.coal"
+  --      ]
 
   describe "339" $ do
     expectOutput
       "4"
-      "test/Coal/examples/339" 
-      [ "Main.coal" 
+      "test/Coal/examples/339"
+      [ "Main.coal"
       ]
 
   describe "340" $ do
     expectOutput
       "d"
-      "test/Coal/examples/340" 
-      [ "Main.coal" 
+      "test/Coal/examples/340"
+      [ "Main.coal"
       ]
 
   describe "341" $ do
     expectOutput
       "104"
-      "test/Coal/examples/341" 
-      [ "Main.coal" 
+      "test/Coal/examples/341"
+      [ "Main.coal"
       ]
 
   describe "342" $ do
     expectOutput
       "0"
-      "test/Coal/examples/342" 
-      [ "Main.coal" 
+      "test/Coal/examples/342"
+      [ "Main.coal"
       ]
 
   describe "343" $ do
     expectOutput
       "6"
-      "test/Coal/examples/343" 
-      [ "Main.coal" 
+      "test/Coal/examples/343"
+      [ "Main.coal"
       ]
+
+  describe "344" $ do
+    expectOutput
+      "1"
+      "test/Coal/examples/344"
+      ["Main.coal"]
 
   describe "345" $ do
     expectOutput
       "S"
-      "test/Coal/examples/345" 
-      [ "Main.coal" 
+      "test/Coal/examples/345"
+      [ "Main.coal"
       ]
 
   describe "346" $ do
     expectOutput
       "xx"
-      "test/Coal/examples/346" 
-      [ "Main.coal" 
+      "test/Coal/examples/346"
+      [ "Main.coal"
       ]
 
   describe "347" $ do
     expectOutput
       "wildcard works\nunderscore id works\nmixed works"
-      "test/Coal/examples/347" 
-      [ "Main.coal" 
+      "test/Coal/examples/347"
+      [ "Main.coal"
       ]
 
   describe "348" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/348" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/348" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
-
 
   describe "349" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/349" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/349" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "352" $ do
     expectOutput
       "true"
-      "test/Coal/examples/352" 
-      [ "Main.coal" 
+      "test/Coal/examples/352"
+      [ "Main.coal"
       ]
 
   describe "353" $ do
     expectOutput
       "true"
-      "test/Coal/examples/353" 
-      [ "Main.coal" 
+      "test/Coal/examples/353"
+      [ "Main.coal"
       ]
 
   describe "354" $ do
     expectOutput
       "false"
-      "test/Coal/examples/354" 
-      [ "Main.coal" 
+      "test/Coal/examples/354"
+      [ "Main.coal"
       ]
 
   describe "355" $ do
     expectOutput
       "aaa"
-      "test/Coal/examples/355" 
-      [ "Main.coal" 
-      , "Foo.coal" 
+      "test/Coal/examples/355"
+      [ "Main.coal"
+      , "Foo.coal"
       ]
 
   describe "356" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/356" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/356" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "357" $ do
     expectOutput
       "hello"
-      "test/Coal/examples/357" 
-      [ "Main.coal" 
-      , "Greeting.coal" 
+      "test/Coal/examples/357"
+      [ "Main.coal"
+      , "Greeting.coal"
       ]
 
   describe "358" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/358" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/358" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "359" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/359" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/359" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "360" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/360" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/360" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "361" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/361" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/361" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "362" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/362" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/362" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "363" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/363" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/363" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "364" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/364" [ "Main.coal", "ModA.coal", "ModB.coal" ]
+      res <- runSpec "test/Coal/examples/364" ["Main.coal", "ModA.coal", "ModB.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "365" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/365" [ "Main.coal", "TraitA.coal", "TraitB.coal" ]
+      res <- runSpec "test/Coal/examples/365" ["Main.coal", "TraitA.coal", "TraitB.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "366" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/366" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/366" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "367" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/367" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/367" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "369" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/369/src" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/369/src" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "370" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/370/src" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/370/src" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "373" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/373" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/373" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "374" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/374" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/374" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "375" $ do
     it "is PreflightFailure" $ do
-      res <- runSpec "test/Coal/examples/375" [ "Main.coal" ]
+      res <- runSpec "test/Coal/examples/375" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
   describe "376" $ do
     expectOutput
       "---"
-      "test/Coal/examples/376" 
-      [ "Main.coal" ]
+      "test/Coal/examples/376"
+      ["Main.coal"]
 
   describe "377" $ do
     expectOutput
       "---\n---"
-      "test/Coal/examples/377" 
-      [ "Main.coal" ]
+      "test/Coal/examples/377"
+      ["Main.coal"]
 
   describe "378" $ do
     expectOutput
       "---"
-      "test/Coal/examples/378" 
-      [ "Main.coal" ]
+      "test/Coal/examples/378"
+      ["Main.coal"]
+
+  describe "379" $ do
+    expectOutput
+      "54.000000"
+      "test/Coal/examples/379"
+      ["Main.coal"]
+
+  describe "380" $ do
+    expectOutput
+      "9.000000000000000"
+      "test/Coal/examples/380"
+      ["Main.coal"]
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

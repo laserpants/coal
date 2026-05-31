@@ -68,27 +68,41 @@ module IO {
 
   type FileIOError 
     = FileNotFound
+    | InvalidInput
     | IOError
     | OutOfMemory
     | UnknownError
 
-  fun decode_file_result(r : FileIOResult) : Result<string, FileIOError> =
-    #{result_status : FileIOResult -> int32}(r)(
-      fn(status) => 
-        match(status) {
-          | 0 => #{result_value : FileIOResult -> string}(r)(Ok)
-          | 1 => Err(FileNotFound)
-          | 2 => Err(IOError)
-          | 3 => Err(OutOfMemory)
-          | _ => Err(UnknownError)
-        })
-
   fun read_file(path : string) : IO<Result<string, FileIOError>> =
+    let
+      decode_file_result(r : FileIOResult) =
+        #{result_status : FileIOResult -> int32}(r)(
+          fn(status) => 
+            match(status) {
+              | 0 => #{result_value : FileIOResult -> string}(r)(Ok)
+              | 1 => Err(FileNotFound)
+              | 2 => Err(IOError)
+              | 3 => Err(OutOfMemory)
+              | _ => Err(UnknownError)
+            })
+    in
     #{read_file : string -> FileIOResult}(path)(
       fn(res) => __return_io(decode_file_result(res)))
 
-  fun write_file(path : string, data : string) : IO<unit> =
-    #{write_file : string -> string -> unit}(path, data)(fn(_) => __return_io())
+  fun write_file(path : string, data : string) : IO<Option<FileIOError>> =
+    let
+      decode_write_result(r : FileIOResult) =
+        #{result_status : FileIOResult -> int32}(r)(
+          fn(status) => 
+            match(status) {
+              | 0 => None
+              | 1 => Some(InvalidInput)
+              | 2 => Some(IOError)
+              | _ => Some(UnknownError)
+            })
+    in
+    #{write_file : string -> string -> FileIOResult}(path, data)(
+      fn(res) => __return_io(decode_write_result(res)))
 
   fun readln(_ : unit) : IO<string> =
     #{readln : unit -> string}(())(fn(str) => __return_io(str))

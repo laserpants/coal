@@ -8,8 +8,8 @@
 #include <stdbool.h>
 #include <stddef.h> // for ptrdiff_t
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <wchar.h>
 
@@ -279,27 +279,27 @@ println_string(const char* str)
 }
 
 void
-print_float(float f)
+print_float(float* f)
 {
-  printf("%f", f);
+  printf("%f", *f);
 }
 
 void
-println_float(float f)
+println_float(float* f)
 {
-  printf("%f\n", f);
+  printf("%f\n", *f);
 }
 
 void
-print_double(double d)
+print_double(double* d)
 {
-  printf("%.15f", d);
+  printf("%.15f", *d);
 }
 
 void
-println_double(double d)
+println_double(double* d)
 {
-  printf("%.15f\n", d);
+  printf("%.15f\n", *d);
 }
 
 void
@@ -342,6 +342,10 @@ println_bignum(mpz_t* big_int)
 #define READ_STATUS_FILE_NOT_FOUND 1
 #define READ_STATUS_IO_ERROR 2
 #define READ_STATUS_OUT_OF_MEMORY 3
+
+#define WRITE_STATUS_OK 0
+#define WRITE_STATUS_INVALID_INPUT 1
+#define WRITE_STATUS_IO_ERROR 2
 
 typedef struct
 {
@@ -426,16 +430,26 @@ read_file(const char* filename)
   return res;
 }
 
-int
+result_t*
 write_file(const char* filename, const char* data)
 {
+  result_t* res = gc_malloc(sizeof(result_t));
+  if (!res) {
+    /* Failure: runtime out of memory */
+    return NULL;
+  }
+
   if (!filename || !data) {
-    return -1;
+    res->status = WRITE_STATUS_INVALID_INPUT;
+    res->value = NULL;
+    return res;
   }
 
   FILE* file = fopen(filename, "wb");
   if (!file) {
-    return -1;
+    res->status = WRITE_STATUS_IO_ERROR;
+    res->value = NULL;
+    return res;
   }
 
   size_t length = strlen(data);
@@ -443,12 +457,17 @@ write_file(const char* filename, const char* data)
 
   if (written != length) {
     fclose(file);
-    return -1;
+    res->status = WRITE_STATUS_IO_ERROR;
+    res->value = NULL;
+    return res;
   }
 
   fclose(file);
 
-  return 0;
+  /* Success */
+  res->status = WRITE_STATUS_OK;
+  res->value = NULL; /* write operations don't return data */
+  return res;
 }
 
 char*
@@ -501,33 +520,33 @@ readln(void)
  */
 
 int32_t
-float_to_int32(float f)
+float_to_int32(float* f)
 {
-  int32_t n = (int32_t)f;
+  int32_t n = (int32_t)*f;
 
   return n;
 }
 
 int32_t
-double_to_int32(double d)
+double_to_int32(double* d)
 {
-  int32_t n = (int32_t)d;
+  int32_t n = (int32_t)*d;
 
   return n;
 }
 
 int64_t
-float_to_int64(float f)
+float_to_int64(float* f)
 {
-  int64_t n = (int64_t)f;
+  int64_t n = (int64_t)*f;
 
   return n;
 }
 
 int64_t
-double_to_int64(double d)
+double_to_int64(double* d)
 {
-  int64_t n = (int64_t)d;
+  int64_t n = (int64_t)*d;
 
   return n;
 }
@@ -651,7 +670,7 @@ int32_to_string(int32_t value)
 }
 
 char*
-float_to_string(float value)
+float_to_string(float* value)
 {
   const size_t buffer_size = 32; // enough to hold float with precision
 
@@ -660,13 +679,13 @@ float_to_string(float value)
   if (!result)
     return NULL;
 
-  snprintf(result, buffer_size, "%g", value);
+  snprintf(result, buffer_size, "%g", *value);
 
   return result;
 }
 
 char*
-double_to_string(double value)
+double_to_string(double* value)
 {
   const size_t buffer_size = 64; // enough to hold double with precision
 
@@ -675,7 +694,7 @@ double_to_string(double value)
   if (!result)
     return NULL;
 
-  snprintf(result, buffer_size, "%g", value);
+  snprintf(result, buffer_size, "%g", *value);
 
   return result;
 }
@@ -1028,6 +1047,7 @@ exit_failure(void)
 void*
 debug_call_n_bounds(int32_t argn)
 {
-  fprintf(stderr, "DEBUG: call_n called with argN = %d (max allowed = 256)\n", argn);
+  fprintf(
+    stderr, "DEBUG: call_n called with argN = %d (max allowed = 256)\n", argn);
   return exit_failure();
 }

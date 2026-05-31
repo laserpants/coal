@@ -1,6 +1,7 @@
 module Coal.Functor {
 
   import namespace List
+  import Coal.Combinators(always)
   import IO(return, __eval_io)
 
   trait Functor<f> {
@@ -24,5 +25,7 @@ module Coal.Functor {
             Some(f(val))
       }
   }
+
+  let void = map(always(())) 
 
 }

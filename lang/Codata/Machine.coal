@@ -53,4 +53,7 @@ module Codata.Machine {
   fun process(seed, f) =
     machine(seed, f, identity)
 
+  fun cofix(f : Machine<i, o> -> Machine<i, o>) : Machine<i, o> =
+    machine$_cofix(f)
+    
 }

@@ -2,13 +2,13 @@
 
 module Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec) where
 
-import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Environment
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
 import Coal.Compiler.State
