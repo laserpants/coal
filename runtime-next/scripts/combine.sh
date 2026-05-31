@@ -62,6 +62,7 @@ HEADERS=(
     "apply.h"
     "io.h"
     "runtime.h"
+    "value_api.h"
 )
 
 # Inline headers, removing include guards and coal/ includes
