@@ -231,6 +231,13 @@ coal_readln(void)
  * ============================================================================
  */
 
+/** Create a bignum from a decimal string */
+rt_value_t
+coal_bignum_init(char *s)
+{
+    return rt_bignum_box(rt_bignum_new(s));
+}
+
 /** Create bignum from boxed int64 */
 rt_value_t
 coal_bignum_from_i64(rt_value_t v)

@@ -78,8 +78,8 @@ module Number {
    */
   fun parse_bignum(input : string) : Option<bignum> =
     #{rt_bignum_new : string -> bignum}(input)(fn(res) => 
-      #{rt_is_null : bignum -> bool}(res)(fn(yes) => 
-        if (yes) then None else Some(res)))
+      #{rt_is_null : bignum -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(res)))
 
   /**
    * Convert a bignum to a float.
