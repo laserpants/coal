@@ -138,21 +138,21 @@ objects =
             [ Label Kernel.int32 "n"
             ]
             [r|
-                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
+                  #(coal_print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_print_int64"
             [ Label Kernel.int64 "n"
             ]
             [r|
-                  #(print_int64 : int64/*, n : int64) (fn(a : *) => a : *)
+                  #(coal_print_int64 : int64/*, n : int64) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_print_bignum"
             [ Label Kernel.bignum "n"
             ]
             [r|
-                  #(print_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
+                  #(coal_print_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_print_string"
@@ -166,49 +166,49 @@ objects =
             [ Label Kernel.bool "b"
             ]
             [r|
-                  #(print_bool : bool/*, b : bool) (fn(a : *) => a : *)
+                  #(coal_print_bool : bool/*, b : bool) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_print_char"
             [ Label Kernel.char "c"
             ]
             [r|
-                  #(print_char : char/*, c : char) (fn(a : *) => a : *)
+                  #(coal_print_char : char/*, c : char) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_print_float"
             [ Label Kernel.float "f"
             ]
             [r|
-                  #(print_float : float/*, f : float) (fn(a : *) => a : *)
+                  #(coal_print_float : float/*, f : float) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_print_double"
             [ Label Kernel.double "d"
             ]
             [r|
-                  #(print_double : double/*, d : double) (fn(a : *) => a : *)
+                  #(coal_print_double : double/*, d : double) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_int32"
             [ Label Kernel.int32 "n"
             ]
             [r|
-                  #(println_int32 : int32/*, n : int32) (fn(a : *) => a : *)
+                  #(coal_println_int32 : int32/*, n : int32) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_int64"
             [ Label Kernel.int64 "n"
             ]
             [r|
-                  #(println_int64 : int64/*, n : int64) (fn(a : *) => a : *)
+                  #(coal_println_int64 : int64/*, n : int64) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_bignum"
             [ Label Kernel.bignum "n"
             ]
             [r|
-                  #(println_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
+                  #(coal_println_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_string"
@@ -222,28 +222,28 @@ objects =
             [ Label Kernel.bool "b"
             ]
             [r|
-                  #(println_bool : bool/*, b : bool) (fn(a : *) => a : *)
+                  #(coal_println_bool : bool/*, b : bool) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_char"
             [ Label Kernel.char "c"
             ]
             [r|
-                  #(println_char : char/*, c : char) (fn(a : *) => a : *)
+                  #(coal_println_char : char/*, c : char) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_float"
             [ Label Kernel.float "f"
             ]
             [r|
-                  #(println_float : float/*, f : float) (fn(a : *) => a : *)
+                  #(coal_println_float : float/*, f : float) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_double"
             [ Label Kernel.double "d"
             ]
             [r|
-                  #(println_double : double/*, d : double) (fn(a : *) => a : *)
+                  #(coal_println_double : double/*, d : double) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.operator$__string_concatenation"
@@ -541,14 +541,14 @@ objects =
             [ Label Kernel.int32 "n"
             ]
             [r|
-                  #(int32_to_float : int32/float, n : int32) (fn(f : float) => f : float)
+                  #(coal_int32_to_float : int32/float, n : int32) (fn(f : float) => f : float)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
-                  #(int64_to_float : int64/float, n : int64) (fn(f : float) => f : float)
+                  #(coal_int64_to_float : int64/float, n : int64) (fn(f : float) => f : float)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_bignum")
@@ -594,14 +594,14 @@ objects =
             [ Label Kernel.int32 "n"
             ]
             [r|
-                  #(int32_to_double : int32/double, n : int32) (fn(d : double) => d : double)
+                  #(coal_int32_to_double : int32/double, n : int32) (fn(d : double) => d : double)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
-                  #(int64_to_double : int64/double, n : int64) (fn(d : double) => d : double)
+                  #(coal_int64_to_double : int64/double, n : int64) (fn(d : double) => d : double)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_bignum")
