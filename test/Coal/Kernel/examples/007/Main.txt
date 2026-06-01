@@ -7,7 +7,7 @@ Main.main(_ : *) =
     msg : string =
       Main.message : string
     in
-      #(print_string : string/*, msg : string)
+      #(coal_print_string : string/*, msg : string)
       (fn(a : *) => 0)
 
 }

@@ -1,6 +1,6 @@
 # Coding style guide
 
-This document defines the coding standards and style conventions for the Coal Runtime project. Following these guidelines ensures consistency and maintainability across the codebase.
+This document defines the coding standards and style conventions for this project. Following these guidelines ensures consistency and maintainability across the codebase.
 
 ---
 
@@ -358,7 +358,7 @@ Use `bool` from `<stdbool.h>`:
 ```c
 #include <stdbool.h>
 
-bool rt_string_equal(rt_string_t *a, rt_string_t *b);
+bool rt_string_compare(rt_string_t *a, rt_string_t *b);
 
 bool is_valid = true;
 if (is_valid) { }

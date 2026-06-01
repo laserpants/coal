@@ -1,4 +1,4 @@
-{- | Surface language type library
+{- | Surface language modules
 
 This barrel re-exports the core language modules that form Coal's type system,
 expression language, and program structure. It serves as a convenience for

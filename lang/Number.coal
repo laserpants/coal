@@ -77,7 +77,7 @@ module Number {
    * Returns `None` if parsing fails, otherwise `Some(bignum)`.
    */
   fun parse_bignum(input : string) : Option<bignum> =
-    #{rt_bignum_new : string -> bignum}(input)(fn(res) => 
+    #{coal_bignum_init : string -> bignum}(input)(fn(res) => 
       #{rt_is_null : bignum -> bool}(res)(fn(is_null) => 
         if (is_null) then None else Some(res)))
 

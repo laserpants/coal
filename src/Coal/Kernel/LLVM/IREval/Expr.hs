@@ -105,7 +105,7 @@ instance IREval (Syntax.Expr Syntax.Type) where
           bitcast v1 i8Ptr
         Syntax.ELit (Syntax.PBignum n) -> do
           p1 <- makeBignum n
-          callg i8Ptr "bignum_init" [p1]
+          callg i8Ptr "coal_bignum_init" [p1]
         Syntax.ELit prim ->
           pure (irPrimValue prim)
         Syntax.EVar (Label t var) ->
@@ -170,7 +170,7 @@ instance IREval (Syntax.Expr Syntax.Type) where
         Syntax.EExt field e1 e2 ->
           irCommentBlock "EExt" $ do
             k1 <- makeKey field
-            t2 <- getelementptr (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)
+            t2 <- getelementptr1 (stringLiteral (Text.length field + 1)) k1 (I32 0)
             v1 <- irEval NotInTail e1
             v2 <- irEval NotInTail e2
             v3 <- irConceal v1
@@ -178,7 +178,7 @@ instance IREval (Syntax.Expr Syntax.Type) where
         Syntax.ESel (Syntax.Focus field (Label t var) (Label _ r)) e1 e2 ->
           irCommentBlock "ESel" $ do
             k1 <- makeKey field
-            t2 <- getelementptr (stringLiteral (Text.length field + 1)) k1 (I32 0) (I32 0)
+            t2 <- getelementptr1 (stringLiteral (Text.length field + 1)) k1 (I32 0)
             v1 <- irEval NotInTail e1
             v2 <- callg i8Ptr "hashmap_lookup" [v1, t2]
             v3 <- irReveal v2 (irTypeOf t)

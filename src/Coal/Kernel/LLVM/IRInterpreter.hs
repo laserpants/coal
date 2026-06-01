@@ -67,7 +67,7 @@ support =
   , CDeclare "hashmap_init" i8Ptr []
   , CDeclare "hashmap_insert" i8Ptr [i8Ptr, i8Ptr, i8Ptr]
   , CDeclare "hashmap_lookup" i8Ptr [i8Ptr, i8Ptr]
-  , CDeclare "bignum_init" i8Ptr [i8Ptr]
+  , CDeclare "coal_bignum_init" i8Ptr [i8Ptr]
   ]
 
 interpretFunction :: Name -> IRInstr a -> [Label IRType] -> IRInterpreter (IRConstruct [IRLine])
@@ -123,7 +123,7 @@ cofixExtractMachineHashmap realMachine = do
 cofixLookupField :: IRValue -> Text -> IRInstr IRValue
 cofixLookupField hashmap field = do
   keyGlobal <- makeKey field
-  keyPtr <- getelementptr (stringLiteral (Text.length field + 1)) keyGlobal (I32 0) (I32 0)
+  keyPtr <- getelementptr1 (stringLiteral (Text.length field + 1)) keyGlobal (I32 0)
   callg i8Ptr "hashmap_lookup" [hashmap, keyPtr]
 
 {- | Body of @Builtin$.machine$_cofix$view(cell_ptr: i8*) -> i8*@
@@ -181,13 +181,13 @@ cofixMainBody = do
   -- Build the row hashmap: { state = cellI8, step = stepClosure, view = viewClosure }
   hashmap <- callg i8Ptr "hashmap_init" []
   stateKey <- makeKey "state"
-  stateKeyPtr <- getelementptr (stringLiteral (Text.length "state" + 1)) stateKey (I32 0) (I32 0)
+  stateKeyPtr <- getelementptr1 (stringLiteral (Text.length "state" + 1)) stateKey (I32 0)
   void $ callg i8Ptr "hashmap_insert" [hashmap, stateKeyPtr, cellI8]
   stepKey <- makeKey "step"
-  stepKeyPtr <- getelementptr (stringLiteral (Text.length "step" + 1)) stepKey (I32 0) (I32 0)
+  stepKeyPtr <- getelementptr1 (stringLiteral (Text.length "step" + 1)) stepKey (I32 0)
   void $ callg i8Ptr "hashmap_insert" [hashmap, stepKeyPtr, stepClosure]
   viewKey <- makeKey "view"
-  viewKeyPtr <- getelementptr (stringLiteral (Text.length "view" + 1)) viewKey (I32 0) (I32 0)
+  viewKeyPtr <- getelementptr1 (stringLiteral (Text.length "view" + 1)) viewKey (I32 0)
   void $ callg i8Ptr "hashmap_insert" [hashmap, viewKeyPtr, viewClosure]
   -- Build the $Record node: { i32 tag=0, i8* hashmap }
   IRConstructor _ recordType <- makeConstructor (struct [i32, i8Ptr]) "$Record"
@@ -262,12 +262,12 @@ interpretArtifact :: IRInterpreterArtifact -> IRInterpreter [IRConstruct [IRLine
 interpretArtifact =
   \case
     AHashMapKey name ->
-      pure [CString ("label." <> name) (encodeUtf8 name) (Just LPrivate)]
+      pure [COldStyleString ("label." <> name) (encodeUtf8 name) (Just LPrivate)]
     ADataConstructor name t ->
       pure [CType name t]
     AMemoizedConstant name ->
       pure [CGlobal name i8Ptr (Just LPrivate) Null]
-    ACFunctionCall "bignum_init" _ _ ->
+    ACFunctionCall "coal_bignum_init" _ _ ->
       pure []
     ACFunctionCall name t ts ->
       pure [CDeclare name t ts]
@@ -402,7 +402,7 @@ interpretMeta = \case
     d <- nextLabelIndex
     let name = "str." <> showt d
     addArtifact (AStringLiteral name str)
-    next (Global (ptr (TArray (ByteString.length str + 1) i8)) name)
+    next (Global (ptr (struct [i64, TArray (ByteString.length str + 1) i8])) name)
   MakeBignum n next -> do
     d <- nextLabelIndex
     let name = "bignum." <> showt d

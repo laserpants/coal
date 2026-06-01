@@ -3,7 +3,7 @@ module Main {
   import IO(__return_io)
 
   fun print(str) =
-    #{println_string : string -> IO<unit>}(str)(fn(_) => __return_io())
+    #{coal_println_string : string -> IO<unit>}(str)(fn(_) => __return_io())
 
   fun main() =
     let 

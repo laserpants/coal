@@ -64,7 +64,7 @@ objects =
             [ Label Kernel.string "input"
             ]
             [r| 
-                  #(rt_bignum_new : string/*, input : string) (fn(a : *) => a : *)
+                  #(coal_bignum_init : string/*, input : string) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.operator$__reverse_composition"
@@ -159,7 +159,7 @@ objects =
             [ Label Kernel.string "s"
             ]
             [r|
-                  #(print_string : string/*, s : string) (fn(a : *) => a : *)
+                  #(coal_print_string : string/*, s : string) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_print_bool"
@@ -215,7 +215,7 @@ objects =
             [ Label Kernel.string "s"
             ]
             [r|
-                  #(println_string : string/*, s : string) (fn(a : *) => a : *)
+                  #(coal_println_string : string/*, s : string) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.io$_println_bool"
@@ -251,42 +251,42 @@ objects =
             , Label Kernel.string "t"
             ]
             [r|
-                  #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
+                  #(coal_string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
               |]
         , OFunction
             "Builtin$.string$_int32_to_string"
             [ Label Kernel.int32 "n"
             ]
             [r| 
-                  #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
+                  #(coal_int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
               |]
         , OFunction
             "Builtin$.string$_float_to_string"
             [ Label Kernel.float "f"
             ]
             [r| 
-                  #(float_to_string : float/string, f : float) (fn(r : string) => r : string)
+                  #(coal_float_to_string : float/string, f : float) (fn(r : string) => r : string)
               |]
         , OFunction
             "Builtin$.string$_double_to_string"
             [ Label Kernel.double "d"
             ]
             [r| 
-                  #(double_to_string : double/string, d : double) (fn(r : string) => r : string)
+                  #(coal_double_to_string : double/string, d : double) (fn(r : string) => r : string)
               |]
         , OFunction
             "Builtin$.string$_char_to_string"
             [ Label Kernel.char "c"
             ]
             [r| 
-                  #(char_to_string : char/string, c : char) (fn(r : string) => r : string)
+                  #(coal_char_to_string : char/string, c : char) (fn(r : string) => r : string)
               |]
         , OFunction
             "Builtin$.string$_bool_to_string"
             [ Label Kernel.bool "b"
             ]
             [r| 
-                  #(bool_to_string : bool/string, b : bool) (fn(r : string) => r : string)
+                  #(coal_bool_to_string : bool/string, b : bool) (fn(r : string) => r : string)
               |]
         , OFunction
             "Builtin$.nat$_unpack"
@@ -1183,35 +1183,35 @@ objects =
             [ Label Kernel.string "str"
             ]
             [r| 
-                  #(string_length : string/int32, str : string) (fn(a : int32) => a : int32)
+                  #(coal_string_length : string/int32, str : string) (fn(a : int32) => a : int32)
               |]
         , OFunction
             "Builtin$.string$_head_unsafe"
             [ Label Kernel.string "str"
             ]
             [r| 
-                  #(string_head : string/char, str : string) (fn(a : char) => a : char)
+                  #(coal_string_head : string/char, str : string) (fn(a : char) => a : char)
               |]
         , OFunction
             "Builtin$.string$_tail"
             [ Label Kernel.string "str"
             ]
             [r| 
-                  #(string_tail : string/string, str : string) (fn(a : string) => a : string)
+                  #(coal_string_tail : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
             "Builtin$.string$_reverse"
             [ Label Kernel.string "str"
             ]
             [r| 
-                  #(string_reverse : string/string, str : string) (fn(a : string) => a : string)
+                  #(coal_string_reverse : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
             "Builtin$.string$_remove_whitespace"
             [ Label Kernel.string "str"
             ]
             [r| 
-                  #(string_remove_whitespace : string/string, str : string) (fn(a : string) => a : string)
+                  #(coal_string_remove_whitespace : string/string, str : string) (fn(a : string) => a : string)
               |]
         , OFunction
             "Builtin$.string$_from_list"
@@ -1382,7 +1382,7 @@ objects =
             , Label Kernel.string "str2"
             ]
             [r| 
-                  #(string_compare : string/string/bool, str1 : string, str2 : string) (fn(r : bool) => r : bool)
+                  #(coal_string_compare : string/string/bool, str1 : string, str2 : string) (fn(r : bool) => r : bool)
               |]
         , OFunction
             (builtinInstance (Trait.comparable (TIntrinsic IBignum)) "(==)")

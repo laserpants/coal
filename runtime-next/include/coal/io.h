@@ -17,6 +17,11 @@ void rt_print_int32(int32_t n);
 void rt_print_int64(int64_t n);
 
 /**
+ * Print a string to stdout.
+ */
+void rt_print_string(const char *s);
+
+/**
  * Print a C string to stdout.
  */
 void rt_print_string(const char *s);
@@ -57,6 +62,11 @@ void rt_println_int32(int32_t n);
  * Print a 64-bit integer followed by newline.
  */
 void rt_println_int64(int64_t n);
+
+/**
+ * Print a string followed by newline.
+ */
+void rt_println_string(const char *s);
 
 /**
  * Print a boolean followed by newline.

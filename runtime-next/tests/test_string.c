@@ -67,39 +67,61 @@ test_char_to_string(void)
 }
 
 static void
-test_string_equal(void)
+test_string_compare(void)
 {
-    // Test equal strings
+    /* Test equal strings */
     rt_string_t *a1 = rt_string_new("Hello");
     rt_string_t *a2 = rt_string_new("Hello");
-    assert(rt_string_equal(a1, a2) == true);
+    assert(rt_string_compare(a1, a2) == true);
 
-    // Test different strings
+    /* Test different strings */
     rt_string_t *b1 = rt_string_new("Hello");
     rt_string_t *b2 = rt_string_new("World");
-    assert(rt_string_equal(b1, b2) == false);
+    assert(rt_string_compare(b1, b2) == false);
 
-    // Test different lengths
+    /* Test different lengths */
     rt_string_t *c1 = rt_string_new("Hello");
     rt_string_t *c2 = rt_string_new("Hello!");
-    assert(rt_string_equal(c1, c2) == false);
+    assert(rt_string_compare(c1, c2) == false);
 
-    // Test empty strings
+    /* Test empty strings */
     rt_string_t *d1 = rt_string_new("");
     rt_string_t *d2 = rt_string_new("");
-    assert(rt_string_equal(d1, d2) == true);
+    assert(rt_string_compare(d1, d2) == true);
 
-    // Test UTF-8 strings with multibyte characters
+    /* Test UTF-8 strings with multibyte characters */
     rt_string_t *e1 = rt_string_new("Hello 😀");
     rt_string_t *e2 = rt_string_new("Hello 😀");
-    assert(rt_string_equal(e1, e2) == true);
+    assert(rt_string_compare(e1, e2) == true);
 
-    // Test different UTF-8 strings
+    /* Test different UTF-8 strings */
     rt_string_t *f1 = rt_string_new("Hello 😀");
     rt_string_t *f2 = rt_string_new("Hello 😁");
-    assert(rt_string_equal(f1, f2) == false);
+    assert(rt_string_compare(f1, f2) == false);
 
-    printf("test_string_equal: PASS\n");
+    /* Test strings with different multibyte characters at start */
+    rt_string_t *g1 = rt_string_new("café");
+    rt_string_t *g2 = rt_string_new("cafe");
+    assert(rt_string_compare(g1, g2) == false);
+
+    /* Test identical multibyte strings */
+    rt_string_t *h1 = rt_string_new("こんにちは"); /* Japanese: Hello */
+    rt_string_t *h2 = rt_string_new("こんにちは");
+    assert(rt_string_compare(h1, h2) == true);
+
+    /* Test different multibyte strings */
+    rt_string_t *i1 = rt_string_new("こんにちは");
+    rt_string_t *i2 = rt_string_new("さようなら"); /* Japanese: Goodbye */
+    assert(rt_string_compare(i1, i2) == false);
+
+    /* Test with coal_string_compare wrapper */
+    rt_value_t v1 = rt_string_box(rt_string_new("test"));
+    rt_value_t v2 = rt_string_box(rt_string_new("test"));
+    rt_value_t v3 = rt_string_box(rt_string_new("other"));
+    assert(rt_bool_unbox(coal_string_compare(v1, v2)) == true);
+    assert(rt_bool_unbox(coal_string_compare(v1, v3)) == false);
+
+    printf("test_string_compare: PASS\n");
 }
 
 static void
@@ -338,7 +360,7 @@ main(void)
     test_string_concat();
     test_string_length();
     test_char_to_string();
-    test_string_equal();
+    test_string_compare();
     test_string_reverse();
     test_bool_to_string();
     test_to_string_conversions();

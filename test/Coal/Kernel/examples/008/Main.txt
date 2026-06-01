@@ -5,7 +5,7 @@ Main.main(_ : *) =
     msg : string =
       "🤖🤖 Hello, world!"
     in
-      #(print_string : string/*, msg : string)
+      #(coal_print_string : string/*, msg : string)
       (fn(a : *) => 0)
 
 }

@@ -175,9 +175,13 @@ rt_string_data(const rt_string_t *s)
 }
 
 bool
-rt_string_equal(const rt_string_t *a, const rt_string_t *b)
+rt_string_compare(const rt_string_t *a, const rt_string_t *b)
 {
-    /* Quick length check */
+    if (!a || !b) {
+        rt_panic("NULL string pointer in rt_string_compare");
+    }
+
+    /* Quick length check - if lengths differ, strings are not equal */
     if (a->length != b->length) {
         return false;
     }
@@ -185,6 +189,7 @@ rt_string_equal(const rt_string_t *a, const rt_string_t *b)
     const char *pa = a->data;
     const char *pb = b->data;
 
+    /* Character-by-character comparison using UTF-8 decoding */
     while (*pa && *pb) {
         uint32_t ca = utf8_decode(pa);
         uint32_t cb = utf8_decode(pb);

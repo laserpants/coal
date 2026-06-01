@@ -32,6 +32,8 @@ data IRConstruct a
     CGlobal Name IRType (Maybe IRLinkage) IRValue
   | -- | Top-level string constant (Nothing = external linkage, Just l = explicit linkage)
     CString Name ByteString (Maybe IRLinkage)
+  | -- | Old-style string constant (array format for compatibility with old runtime)
+    COldStyleString Name ByteString (Maybe IRLinkage)
   | -- | Function definition
     CDefine Name IRType (Maybe IRLinkage) [Label IRType] a
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable)

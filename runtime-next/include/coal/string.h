@@ -44,12 +44,17 @@ int64_t rt_string_length(const rt_string_t *s);
 char *rt_string_data(const rt_string_t *s);
 
 /**
- * Compare two strings for equality.
+ * Compare two strings character-by-character.
+ * Performs UTF-8 aware comparison, comparing each Unicode code point.
+ *
+ * Parameters:
+ *   a - First string to compare
+ *   b - Second string to compare
  *
  * Returns:
- *   true if strings are equal
+ *   true if strings are equal, false otherwise
  */
-bool rt_string_equal(const rt_string_t *a, const rt_string_t *b);
+bool rt_string_compare(const rt_string_t *a, const rt_string_t *b);
 
 /**
  * Reverse a string.

@@ -184,6 +184,13 @@ coal_println_int64(rt_value_t v)
     rt_println_int64(rt_int64_unbox(v));
 }
 
+/** Print boxed string with newline */
+void
+coal_println_string(rt_value_t v)
+{
+    rt_println_string(rt_string_data(rt_string_unbox(v)));
+}
+
 /** Print boxed boolean with newline */
 void
 coal_println_bool(rt_value_t v)
@@ -233,9 +240,9 @@ coal_readln(void)
 
 /** Create a bignum from a decimal string */
 rt_value_t
-coal_bignum_init(char *s)
+coal_bignum_init(rt_value_t v)
 {
-    return rt_bignum_box(rt_bignum_new(s));
+    return rt_bignum_box(rt_bignum_new(rt_string_data(rt_string_unbox(v))));
 }
 
 /** Create bignum from boxed int64 */
@@ -363,11 +370,12 @@ coal_string_length(rt_value_t v)
     return rt_int64_box(rt_string_length(rt_string_unbox(v)));
 }
 
-/** Test if two boxed strings are equal */
+/** Compare two boxed strings character-by-character */
 rt_value_t
-coal_string_equal(rt_value_t a, rt_value_t b)
+coal_string_compare(rt_value_t a, rt_value_t b)
 {
-    return rt_bool_box(rt_string_equal(rt_string_unbox(a), rt_string_unbox(b)));
+    return rt_bool_box(
+        rt_string_compare(rt_string_unbox(a), rt_string_unbox(b)));
 }
 
 /** Reverse a boxed string */

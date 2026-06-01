@@ -21,7 +21,7 @@ import Coal.Kernel.Language
 import Control.Monad (void, (>=>))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
-import Data.List (nub)
+import Data.List (nub, sort)
 import Extras (Name, (||.))
 
 type KernelExpr = Expr Type
@@ -55,7 +55,7 @@ irCodeGen :: (MonadIO m) => [Name] -> Pass m ObjectList [IRConstruct [IRLine]]
 irCodeGen names objs = do
   c1 <- transformInterpreter (traverse interpretObject objs)
   c2 <- gets pipelineArtifacts
-  c3 <- transformInterpreter (traverse interpretArtifact (nub c2))
+  c3 <- transformInterpreter (traverse interpretArtifact (nub (sort c2)))
   c4 <- traverse (setLinkage names) (concat c1)
   pipelineInsertCode (support <> closureSupport <> concat c3 <> c4)
   gets pipelineCode

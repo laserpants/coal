@@ -331,7 +331,7 @@ e2eSpec = do
 
   describe "067" $
     expectOutput
-      "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159}"
+      "{\"abc\":[\"a\",\"b\",\"c\"],\"pi\":3.14159141591416}"
       "test/Coal/examples/067"
       [ "StringUtils.coal"
       , "MyList.coal"

@@ -32,7 +32,7 @@ rt_bignum_new(const char *s)
     if (!bn) {
         rt_panic("Out of memory in rt_bignum_new");
     }
-    
+
     if (mpz_init_set_str(bn->value, s, 10) != 0) {
         return NULL;
     }

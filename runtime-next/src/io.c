@@ -78,6 +78,16 @@ rt_println_int64(int64_t n)
 }
 
 void
+rt_println_string(const char *s)
+{
+    if (!s) {
+        rt_panic("NULL string in rt_println_string");
+    }
+
+    printf("%s\n", s);
+}
+
+void
 rt_print_bool(bool b)
 {
     printf("%s", b ? "true" : "false");

@@ -17,7 +17,7 @@ module Coal.Kernel.LLVM.IREncodable (
 import Coal.Common.Label (Label (..))
 import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..), IRLinkage (..))
 import Coal.Kernel.LLVM.IRType (IRType (..), IRTyped (..))
-import Coal.Kernel.LLVM.IRType.Syntax (i8)
+import Coal.Kernel.LLVM.IRType.Syntax (i64, i8)
 import Coal.Kernel.LLVM.IRValue (IRValue (..))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
@@ -159,15 +159,34 @@ instance (IREncodable a) => IREncodable (IRConstruct a) where
             <> space
             <> irEncode t
       CString name str ln ->
-        linebreak $
-          irGlobalName name
-            <> " = "
-            <> maybe "" (\l -> irEncode l <> " ") ln
-            <> "constant"
-            <> space
-            <> irEncode (TArray (ByteString.length str + 1) i8)
-            <> space
-            <> Text.concat ["c\"", escapeString str, "\\00\""]
+        let len = ByteString.length str
+         in linebreak $
+              irGlobalName name
+                <> " = "
+                <> maybe "" (\l -> irEncode l <> " ") ln
+                <> "constant"
+                <> space
+                <> irEncode (TStruct [i64, TArray (len + 1) i8])
+                <> space
+                <> braces
+                  ( "i64 "
+                      <> showt len
+                      <> ", "
+                      <> irEncode (TArray (len + 1) i8)
+                      <> space
+                      <> Text.concat ["c\"", escapeString str, "\\00\""]
+                  )
+      COldStyleString name str ln ->
+        let len = ByteString.length str
+         in linebreak $
+              irGlobalName name
+                <> " = "
+                <> maybe "" (\l -> irEncode l <> " ") ln
+                <> "constant"
+                <> space
+                <> irEncode (TArray (len + 1) i8)
+                <> space
+                <> Text.concat ["c\"", escapeString str, "\\00\""]
       CExternGlobal name t ->
         linebreak $
           irGlobalName name

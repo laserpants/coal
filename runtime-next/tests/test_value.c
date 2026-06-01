@@ -324,10 +324,10 @@ test_string_wrappers(void)
 
     // Test string equality
     rt_value_t str3 = rt_string_box(rt_string_new("Hello, World!"));
-    rt_value_t equal = coal_string_equal(concat, str3);
+    rt_value_t equal = coal_string_compare(concat, str3);
     assert(rt_bool_unbox(equal) == true);
 
-    rt_value_t not_equal = coal_string_equal(str1, str2);
+    rt_value_t not_equal = coal_string_compare(str1, str2);
     assert(rt_bool_unbox(not_equal) == false);
 
     // Test string reverse
