@@ -64,7 +64,7 @@ objects =
             [ Label Kernel.string "input"
             ]
             [r| 
-                  #(bignum_init : string/*, input : string) (fn(a : *) => a : *)
+                  #(rt_bignum_new : string/*, input : string) (fn(a : *) => a : *)
               |]
         , OFunction
             "Builtin$.operator$__reverse_composition"
