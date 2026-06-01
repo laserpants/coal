@@ -81,6 +81,44 @@ test_bignum_div(void)
 }
 
 static void
+test_bignum_neg(void)
+{
+    rt_bignum_t *a = rt_bignum_from_i64(42);
+    rt_bignum_t *result = rt_bignum_neg(a);
+
+    char *str = rt_bignum_to_cstring(result);
+    assert(strcmp(str, "-42") == 0);
+
+    rt_bignum_t *b = rt_bignum_from_i64(-99);
+    rt_bignum_t *result2 = rt_bignum_neg(b);
+
+    char *str2 = rt_bignum_to_cstring(result2);
+    assert(strcmp(str2, "99") == 0);
+
+    printf("test_bignum_neg: PASS\n");
+}
+
+static void
+test_bignum_mod(void)
+{
+    rt_bignum_t *a = rt_bignum_from_i64(17);
+    rt_bignum_t *b = rt_bignum_from_i64(5);
+    rt_bignum_t *result = rt_bignum_mod(a, b);
+
+    char *str = rt_bignum_to_cstring(result);
+    assert(strcmp(str, "2") == 0);
+
+    rt_bignum_t *c = rt_bignum_from_i64(100);
+    rt_bignum_t *d = rt_bignum_from_i64(7);
+    rt_bignum_t *result2 = rt_bignum_mod(c, d);
+
+    char *str2 = rt_bignum_to_cstring(result2);
+    assert(strcmp(str2, "2") == 0);
+
+    printf("test_bignum_mod: PASS\n");
+}
+
+static void
 test_bignum_cmp(void)
 {
     rt_bignum_t *a = rt_bignum_from_i64(10);
@@ -136,6 +174,38 @@ test_bignum_eq(void)
     printf("test_bignum_eq: PASS\n");
 }
 
+static void
+test_int32_to_bignum(void)
+{
+    rt_bignum_t *bn1 = rt_int32_to_bignum(42);
+    char *str1 = rt_bignum_to_cstring(bn1);
+    assert(strcmp(str1, "42") == 0);
+
+    rt_bignum_t *bn2 = rt_int32_to_bignum(-123);
+    char *str2 = rt_bignum_to_cstring(bn2);
+    assert(strcmp(str2, "-123") == 0);
+
+    rt_bignum_t *bn3 = rt_int32_to_bignum(0);
+    char *str3 = rt_bignum_to_cstring(bn3);
+    assert(strcmp(str3, "0") == 0);
+
+    printf("test_int32_to_bignum: PASS\n");
+}
+
+static void
+test_int64_to_bignum(void)
+{
+    rt_bignum_t *bn1 = rt_int64_to_bignum(9223372036854775807LL);
+    char *str1 = rt_bignum_to_cstring(bn1);
+    assert(strcmp(str1, "9223372036854775807") == 0);
+
+    rt_bignum_t *bn2 = rt_int64_to_bignum(-9223372036854775807LL);
+    char *str2 = rt_bignum_to_cstring(bn2);
+    assert(strcmp(str2, "-9223372036854775807") == 0);
+
+    printf("test_int64_to_bignum: PASS\n");
+}
+
 int
 main(void)
 {
@@ -148,10 +218,14 @@ main(void)
     test_bignum_sub();
     test_bignum_mul();
     test_bignum_div();
+    test_bignum_neg();
+    test_bignum_mod();
     test_bignum_cmp();
     test_bignum_lt();
     test_bignum_gt();
     test_bignum_eq();
+    test_int32_to_bignum();
+    test_int64_to_bignum();
     printf("All bignum tests passed!\n");
 
     return 0;

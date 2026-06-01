@@ -277,6 +277,25 @@ test_bignum_wrappers(void)
     char *prod_str = rt_bignum_to_cstring(prod_bn);
     assert(strcmp(prod_str, "200") == 0);
 
+    /* Test modulo */
+    rt_value_t c = rt_bignum_box(rt_bignum_from_i64(17));
+    rt_value_t d = rt_bignum_box(rt_bignum_from_i64(5));
+    rt_value_t mod = coal_bignum_mod(c, d);
+    rt_bignum_t *mod_bn = rt_bignum_unbox(mod);
+    char *mod_str = rt_bignum_to_cstring(mod_bn);
+    assert(strcmp(mod_str, "2") == 0);
+
+    /* Test negation */
+    rt_value_t neg_a = coal_bignum_neg(a);
+    rt_bignum_t *neg_bn = rt_bignum_unbox(neg_a);
+    char *neg_str = rt_bignum_to_cstring(neg_bn);
+    assert(strcmp(neg_str, "-10") == 0);
+
+    rt_value_t neg_neg_a = coal_bignum_neg(neg_a);
+    rt_bignum_t *neg_neg_bn = rt_bignum_unbox(neg_neg_a);
+    char *neg_neg_str = rt_bignum_to_cstring(neg_neg_bn);
+    assert(strcmp(neg_neg_str, "10") == 0);
+
     /* Test comparisons */
     rt_value_t lt = coal_bignum_lt(a, b);
     assert(rt_bool_unbox(lt) == true);
@@ -383,6 +402,59 @@ test_char_wrappers(void)
     printf("test_char_wrappers: PASS (predicates & conversions)\n");
 }
 
+static void
+test_bignum_conversion_wrappers(void)
+{
+    /* Test bignum to int32 */
+    rt_value_t bn1 = rt_bignum_box(rt_bignum_from_i64(42));
+    rt_value_t i32 = coal_bignum_to_int32(bn1);
+    assert(rt_int32_unbox(i32) == 42);
+
+    /* Test bignum to int64 */
+    rt_value_t bn2 = rt_bignum_box(rt_bignum_from_i64(123456789));
+    rt_value_t i64 = coal_bignum_to_int64(bn2);
+    assert(rt_int64_unbox(i64) == 123456789);
+
+    /* Test bignum to float */
+    rt_value_t bn3 = rt_bignum_box(rt_bignum_from_i64(100));
+    rt_value_t f = coal_bignum_to_float(bn3);
+    assert(rt_float_unbox(f) == 100.0f);
+
+    /* Test bignum to double */
+    rt_value_t bn4 = rt_bignum_box(rt_bignum_from_i64(999));
+    rt_value_t d = coal_bignum_to_double(bn4);
+    assert(rt_double_unbox(d) == 999.0);
+
+    /* Test with negative values */
+    rt_value_t bn5 = rt_bignum_box(rt_bignum_from_i64(-42));
+    rt_value_t i32_neg = coal_bignum_to_int32(bn5);
+    assert(rt_int32_unbox(i32_neg) == -42);
+
+    rt_value_t f_neg = coal_bignum_to_float(bn5);
+    assert(rt_float_unbox(f_neg) == -42.0f);
+
+    /* Test with large bignum */
+    rt_value_t bn_large = rt_bignum_box(rt_bignum_new("123456789012345"));
+    rt_value_t d_large = coal_bignum_to_double(bn_large);
+    assert(rt_double_unbox(d_large) == 123456789012345.0);
+
+    /* Test int32 to bignum */
+    rt_value_t i32_val = rt_int32_box(42);
+    rt_value_t bn_from_i32 = coal_int32_to_bignum(i32_val);
+    rt_bignum_t *bn_i32 = rt_bignum_unbox(bn_from_i32);
+    char *str_i32 = rt_bignum_to_cstring(bn_i32);
+    assert(strcmp(str_i32, "42") == 0);
+
+    /* Test int64 to bignum */
+    rt_value_t i64_val = rt_int64_box(-999999);
+    rt_value_t bn_from_i64 = coal_int64_to_bignum(i64_val);
+    rt_bignum_t *bn_i64 = rt_bignum_unbox(bn_from_i64);
+    char *str_i64 = rt_bignum_to_cstring(bn_i64);
+    assert(strcmp(str_i64, "-999999") == 0);
+
+    printf("test_bignum_conversion_wrappers: PASS (bignum to primitives)\n");
+}
+
 int
 main(void)
 {
@@ -409,6 +481,7 @@ main(void)
     printf("\nRunning wrapper tests...\n");
     test_io_wrappers();
     test_bignum_wrappers();
+    test_bignum_conversion_wrappers();
     test_string_wrappers();
     test_char_wrappers();
 

@@ -62,6 +62,29 @@ rt_bignum_t *rt_bignum_mul(const rt_bignum_t *a, const rt_bignum_t *b);
 rt_bignum_t *rt_bignum_div(const rt_bignum_t *a, const rt_bignum_t *b);
 
 /**
+ * Negate a bignum.
+ *
+ * Parameters:
+ *   n - Bignum to negate
+ *
+ * Returns:
+ *   -n
+ */
+rt_bignum_t *rt_bignum_neg(const rt_bignum_t *n);
+
+/**
+ * Compute the modulo of two bignums.
+ *
+ * Parameters:
+ *   m - Dividend bignum
+ *   n - Divisor bignum
+ *
+ * Returns:
+ *   m mod n (result is always non-negative)
+ */
+rt_bignum_t *rt_bignum_mod(const rt_bignum_t *m, const rt_bignum_t *n);
+
+/**
  * Compare two bignums.
  *
  * Returns:
@@ -100,6 +123,72 @@ bool rt_bignum_eq(const rt_bignum_t *a, const rt_bignum_t *b);
  *   String representation in base 10
  */
 char *rt_bignum_to_cstring(const rt_bignum_t *n);
+
+/**
+ * Convert a 32-bit signed integer to a bignum.
+ *
+ * Parameters:
+ *   n - Integer value to convert
+ *
+ * Returns:
+ *   New bignum representing n
+ */
+rt_bignum_t *rt_int32_to_bignum(int32_t n);
+
+/**
+ * Convert a 64-bit signed integer to a bignum.
+ *
+ * Parameters:
+ *   n - Integer value to convert
+ *
+ * Returns:
+ *   New bignum representing n
+ */
+rt_bignum_t *rt_int64_to_bignum(int64_t n);
+
+/**
+ * Convert a bignum to a 32-bit signed integer.
+ *
+ * Parameters:
+ *   n - Bignum to convert
+ *
+ * Returns:
+ *   32-bit integer value (truncated if bignum is out of range)
+ */
+int32_t rt_bignum_to_int32(const rt_bignum_t *n);
+
+/**
+ * Convert a bignum to a 64-bit signed integer.
+ *
+ * Parameters:
+ *   n - Bignum to convert
+ *
+ * Returns:
+ *   64-bit integer value (truncated if bignum is out of range)
+ */
+int64_t rt_bignum_to_int64(const rt_bignum_t *n);
+
+/**
+ * Convert a bignum to a single-precision floating point.
+ *
+ * Parameters:
+ *   n - Bignum to convert
+ *
+ * Returns:
+ *   Float approximation of the bignum value
+ */
+float rt_bignum_to_float(const rt_bignum_t *n);
+
+/**
+ * Convert a bignum to a double-precision floating point.
+ *
+ * Parameters:
+ *   n - Bignum to convert
+ *
+ * Returns:
+ *   Double approximation of the bignum value
+ */
+double rt_bignum_to_double(const rt_bignum_t *n);
 
 /**
  * Get the underlying GMP value.

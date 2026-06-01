@@ -449,7 +449,7 @@ objects =
             [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_to_int32 : bignum/int32, n : bignum)(fn(m : int32) => m : int32)
+                  #(coal_bignum_to_int32 : bignum/int32, n : bignum)(fn(m : int32) => m : int32)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(+)")
@@ -502,7 +502,7 @@ objects =
             [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_to_int64 : bignum/int64, n : bignum)(fn(m : int64) => m : int64)
+                  #(coal_bignum_to_int64 : bignum/int64, n : bignum)(fn(m : int64) => m : int64)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(+)")
@@ -555,7 +555,7 @@ objects =
             [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_to_float : bignum/float, n : bignum) (fn(m : float) => m : float)
+                  #(coal_bignum_to_float : bignum/float, n : bignum) (fn(m : float) => m : float)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(+)")
@@ -608,7 +608,7 @@ objects =
             [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_to_double : bignum/double, n : bignum)(fn(m : double) => m : double)
+                  #(coal_bignum_to_double : bignum/double, n : bignum)(fn(m : double) => m : double)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(+)")
@@ -668,7 +668,7 @@ objects =
             [ Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => 
+                  #(coal_bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => 
                     @<$Nat>
                       ( `Builtin$.nat$_pack` : int32/$Nat
                       , m : int32
@@ -753,14 +753,14 @@ objects =
             [ Label Kernel.int32 "n"
             ]
             [r|
-                  #(int32_to_bignum : int32/bignum, n : int32) (fn(a : *) => a : *)
+                  #(coal_int32_to_bignum : int32/bignum, n : int32) (fn(a : *) => a : *)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int64")
             [ Label Kernel.int64 "n"
             ]
             [r|
-                  #(int64_to_bignum : int64/bignum, n : int64) (fn(a : *) => a : *)
+                  #(coal_int64_to_bignum : int64/bignum, n : int64) (fn(a : *) => a : *)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_bignum")
@@ -775,7 +775,7 @@ objects =
             , Label Kernel.bignum "q"
             ]
             [r| 
-                  #(bignum_add : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
+                  #(coal_bignum_add : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(-)")
@@ -783,7 +783,7 @@ objects =
             , Label Kernel.bignum "q"
             ]
             [r| 
-                  #(bignum_sub : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
+                  #(coal_bignum_sub : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(*)")
@@ -791,14 +791,14 @@ objects =
             , Label Kernel.bignum "q"
             ]
             [r| 
-                  #(bignum_mul : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
+                  #(coal_bignum_mul : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
               |]
         , OFunction
             (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "negate")
             [ Label Kernel.bignum "p"
             ]
             [r| 
-                  #(bignum_neg : bignum/bignum, p : bignum) (fn(r : bignum) => r : bignum)
+                  #(coal_bignum_neg : bignum/bignum, p : bignum) (fn(r : bignum) => r : bignum)
               |]
         , -- /
           OFunction
@@ -1169,11 +1169,11 @@ objects =
             , Label Kernel.bignum "y"
             ]
             [r| 
-                  #(bignum_lt : bignum/bignum/bool, x : bignum, y : bignum) (fn(is_lt : bool) => 
+                  #(coal_bignum_lt : bignum/bignum/bool, x : bignum, y : bignum) (fn(is_lt : bool) => 
                     if (is_lt : bool)
                       then LessThan : Ordering
                       else 
-                        #(bignum_gt : bignum/bignum/bool, x : bignum, y : bignum) (fn(is_gt : bool) =>
+                        #(coal_bignum_gt : bignum/bignum/bool, x : bignum, y : bignum) (fn(is_gt : bool) =>
                           if (is_gt : bool)
                             then GreaterThan : Ordering
                             else EqualTo : Ordering))
@@ -1390,7 +1390,7 @@ objects =
             , Label Kernel.bignum "n"
             ]
             [r| 
-                  #(bignum_eq : bignum/bignum/bool, m : bignum, n : bignum) (fn(r : bool) => r : bool)
+                  #(coal_bignum_eq : bignum/bignum/bool, m : bignum, n : bignum) (fn(r : bool) => r : bool)
               |]
         , OFunction
             (builtinInstance (Trait.divisible (TIntrinsic IFloat)) "(/)")
@@ -1414,7 +1414,7 @@ objects =
             , Label Kernel.int32 "r"
             ]
             [r| 
-                  #(int32_mod : int32/int32/int32, q : int32, r : int32) (fn(s : int32) => s : int32)
+                  #(coal_int32_mod : int32/int32/int32, q : int32, r : int32) (fn(s : int32) => s : int32)
               |]
         , OFunction
             (builtinInstance (Trait.modulo (TIntrinsic IInt64)) "(%)")
@@ -1422,7 +1422,7 @@ objects =
             , Label Kernel.int64 "r"
             ]
             [r| 
-                  #(int64_mod : int64/int64/int64, q : int64, r : int64) (fn(s : int64) => s : int64)
+                  #(coal_int64_mod : int64/int64/int64, q : int64, r : int64) (fn(s : int64) => s : int64)
               |]
         , OFunction
             (builtinInstance (Trait.modulo (TIntrinsic IBignum)) "(%)")
@@ -1430,7 +1430,7 @@ objects =
             , Label Kernel.bignum "r"
             ]
             [r| 
-                  #(bignum_mod : bignum/bignum/bignum, q : bignum, r : bignum) (fn(s : bignum) => s : bignum)
+                  #(coal_bignum_mod : bignum/bignum/bignum, q : bignum, r : bignum) (fn(s : bignum) => s : bignum)
               |]
         , OFunction
             (builtinInstance (Trait.semigroup (TIntrinsic IString)) "(<>)")
