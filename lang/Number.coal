@@ -27,49 +27,49 @@ module Number {
    * Convert a 32-bit integer to a float.
    */
   fun int32_to_float(n : int32) : float =
-    #{int32_to_float : int32 -> float}(n)(fn(f) => f)
+    #{coal_int32_to_float : int32 -> float}(n)(fn(f) => f)
 
   /**
    * Convert a 32-bit integer to a double.
    */
   fun int32_to_double(n : int32) : double =
-    #{int32_to_double : int32 -> double}(n)(fn(d) => d)
+    #{coal_int32_to_double : int32 -> double}(n)(fn(d) => d)
 
   /**
    * Convert a 64-bit integer to a float.
    */
   fun int64_to_float(n : int64) : float =
-    #{int64_to_float : int64 -> float}(n)(fn(f) => f)
+    #{coal_int64_to_float : int64 -> float}(n)(fn(f) => f)
 
   /**
    * Convert a 64-bit integer to a double.
    */
   fun int64_to_double(n : int64) : double =
-    #{int64_to_double : int64 -> double}(n)(fn(d) => d)
+    #{coal_int64_to_double : int64 -> double}(n)(fn(d) => d)
 
   /**
    * Convert a float to a 32-bit integer.
    */
   fun float_to_int32(f : float) : int32 =
-    #{float_to_int32 : float -> int32}(f)(fn(n) => n)
+    #{coal_float_to_int32 : float -> int32}(f)(fn(n) => n)
 
   /**
    * Convert a double to a 32-bit integer.
    */
   fun double_to_int32(d : double) : int32 =
-    #{double_to_int32 : double -> int32}(d)(fn(n) => n)
+    #{coal_double_to_int32 : double -> int32}(d)(fn(n) => n)
 
   /**
    * Convert a float to a 64-bit integer.
    */
   fun float_to_int64(f : float) : int64 =
-    #{float_to_int64 : float -> int64}(f)(fn(n) => n)
+    #{coal_float_to_int64 : float -> int64}(f)(fn(n) => n)
 
   /**
    * Convert a double to a 64-bit integer.
    */
   fun double_to_int64(d : double) : int64 =
-    #{double_to_int64 : double -> int64}(d)(fn(n) => n)
+    #{coal_double_to_int64 : double -> int64}(d)(fn(n) => n)
 
   /**
    * Parse a decimal string into a bignum.

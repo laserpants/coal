@@ -1,6 +1,6 @@
 module Core$ {
 
 Core$.trace_int32(n : int32) =
-  #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
+  #(coal_print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
 
 }

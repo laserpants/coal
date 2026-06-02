@@ -34,6 +34,6 @@ Main.main(_ : *) =
         , 5
         )
     in
-      #(print_int32 : int32/*, r : int32)
+      #(coal_print_int32 : int32/*, r : int32)
       (fn(a : *) => 0)
 }

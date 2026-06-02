@@ -29,7 +29,7 @@ Main.main(_ : *) =
         , Main.sample_data : list(int32)
         )
     in
-      #(print_int32 : int32/*, r : int32)
+      #(coal_print_int32 : int32/*, r : int32)
       (fn(a : *) => r : int32)
 
 }

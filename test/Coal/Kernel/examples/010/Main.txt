@@ -12,13 +12,13 @@ Main.main(_ : *) =
         x : float =
           [/ float](9.0f, 2.0f)
         in
-          #(println_float : float/*, x : float)
+          #(coal_println_float : float/*, x : float)
           (fn(a : *) =>
             let
               y : int32 =
                 [/ int32](8, 2)
               in
-                #(print_int32 : int32/*, y : int32)
+                #(coal_print_int32 : int32/*, y : int32)
                 (fn(a : *) => 0)
           )
 }

@@ -11,16 +11,16 @@ import Coal.Kernel.LLVM.IRValue (IRValue (..))
 
 irMalloc :: IRType -> IRInstr IRValue
 irMalloc t = do
-  irCommentBlock "gc_malloc" $ do
+  irCommentBlock "rt_alloc" $ do
     r1 <- gepsize t (I32 1)
     r2 <- ptrtoint r1 i64
-    r3 <- callg i8Ptr "gc_malloc" [r2]
+    r3 <- callg i8Ptr "rt_alloc" [r2]
     bitcast r3 (ptr t)
 
 irMallocN :: IRType -> IRValue -> IRInstr IRValue
 irMallocN t n = do
-  irCommentBlock "gc_malloc" $ do
+  irCommentBlock "rt_alloc" $ do
     r1 <- gepsize t n
     r2 <- ptrtoint r1 i64
-    r3 <- callg i8Ptr "gc_malloc" [r2]
+    r3 <- callg i8Ptr "rt_alloc" [r2]
     bitcast r3 (ptr t)

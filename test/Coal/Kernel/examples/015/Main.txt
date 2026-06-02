@@ -98,10 +98,10 @@ Main.main(_ : *) =
               , x : int32
               , _ : list(int32)
               ) =>
-                #(print_int32 : int32/*, x : int32) (fn(a : *) => 0)
+                #(coal_print_int32 : int32/*, x : int32) (fn(a : *) => 0)
             | ( $Nil : list(int32)
               ) =>
-                #(print_int32 : int32/*, 7) (fn(a : *) => 0)
+                #(coal_print_int32 : int32/*, 7) (fn(a : *) => 0)
           }
 
 }

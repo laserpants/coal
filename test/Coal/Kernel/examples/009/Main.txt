@@ -5,7 +5,7 @@ Main.main(_ : *) =
     chr : char =
       '🎷'
     in
-      #(print_char : char/*, chr : char)
+      #(coal_print_char : char/*, chr : char)
       (fn(a : *) => 0)
 
 }

@@ -23,7 +23,7 @@ Main.main(_ : *) =
       , 3
       )
     in
-      #(print_int32 : int32/*, r : int32)
+      #(coal_print_int32 : int32/*, r : int32)
       (fn(a : *) => r : int32)
 
 }

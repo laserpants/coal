@@ -53,7 +53,7 @@ irClosureExtend argF argN argAs = do
   r12 <- zext r8 i64
   r13 <- mul i64 r12 (I64 8)
   r14 <- add i64 r11 r13
-  r15 <- callg i8Ptr "gc_malloc" [r14]
+  r15 <- callg i8Ptr "rt_alloc" [r14]
   r16 <- bitcast r15 (ptr t)
   r17 <- getelementptr t r16 (I32 0) (I32 0)
   store r8 r17
