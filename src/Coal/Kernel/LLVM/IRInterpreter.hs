@@ -64,9 +64,9 @@ support =
   , CDeclare "exit_failure" i8Ptr []
   , CDeclare "debug_call_n_bounds" i8Ptr [i32]
   , CDeclare "rt_alloc" i8Ptr [i64]
-  , CDeclare "hashmap_init" i8Ptr []
-  , CDeclare "hashmap_insert" i8Ptr [i8Ptr, i8Ptr, i8Ptr]
-  , CDeclare "hashmap_lookup" i8Ptr [i8Ptr, i8Ptr]
+  , CDeclare "rt_record_empty" i8Ptr []
+  , CDeclare "rt_record_extend" i8Ptr [i8Ptr, i8Ptr, i8Ptr]
+  , CDeclare "rt_record_lookup" i8Ptr [i8Ptr, i8Ptr]
   , CDeclare "coal_bignum_init" i8Ptr [i8Ptr]
   ]
 
@@ -119,12 +119,12 @@ cofixExtractMachineHashmap realMachine = do
   hashmapSlot <- getelementptr recordType recordTyped (I32 0) (I32 1)
   load i8Ptr hashmapSlot
 
--- | Lookup a named field in a Machine's row hashmap.
+-- | Lookup a named field in a Machine's row record.
 cofixLookupField :: IRValue -> Text -> IRInstr IRValue
-cofixLookupField hashmap field = do
+cofixLookupField record field = do
   keyGlobal <- makeKey field
   keyPtr <- getelementptr1 (stringLiteral (Text.length field + 1)) keyGlobal (I32 0)
-  callg i8Ptr "hashmap_lookup" [hashmap, keyPtr]
+  callg i8Ptr "rt_record_lookup" [record, keyPtr]
 
 {- | Body of @Builtin$.machine$_cofix$view(cell_ptr: i8*) -> i8*@
   Loads the real Machine from the cell and calls its view.
@@ -134,9 +134,9 @@ cofixViewBody = do
   let cellPtrArg = Local i8Ptr "cell_ptr"
   cell <- bitcast cellPtrArg (ptr i8Ptr)
   realMachine <- load i8Ptr cell
-  hashmap <- cofixExtractMachineHashmap realMachine
-  stateVal <- cofixLookupField hashmap "state"
-  viewClosure <- cofixLookupField hashmap "view"
+  record <- cofixExtractMachineHashmap realMachine
+  stateVal <- cofixLookupField record "state"
+  viewClosure <- cofixLookupField record "view"
   argsArr <- irMallocN i8Ptr (I32 1)
   slot0 <- getelementptr1 i8Ptr argsArr (I32 0)
   store stateVal slot0
@@ -152,9 +152,9 @@ cofixStepBody = do
   let cellPtrArg = Local i8Ptr "cell_ptr"
   cell <- bitcast cellPtrArg (ptr i8Ptr)
   realMachine <- load i8Ptr cell
-  hashmap <- cofixExtractMachineHashmap realMachine
-  stateVal <- cofixLookupField hashmap "state"
-  stepClosure <- cofixLookupField hashmap "step"
+  record <- cofixExtractMachineHashmap realMachine
+  stateVal <- cofixLookupField record "state"
+  stepClosure <- cofixLookupField record "step"
   argsArr <- irMallocN i8Ptr (I32 2)
   slot0 <- getelementptr1 i8Ptr argsArr (I32 0)
   store inputArg slot0
@@ -178,24 +178,24 @@ cofixMainBody = do
   -- Build helper closures (0 captured args each)
   stepClosure <- cofixBuildClosure "Builtin$.machine$_cofix$step" 2
   viewClosure <- cofixBuildClosure "Builtin$.machine$_cofix$view" 1
-  -- Build the row hashmap: { state = cellI8, step = stepClosure, view = viewClosure }
-  hashmap <- callg i8Ptr "hashmap_init" []
+  -- Build the row record functionally: { state = cellI8, step = stepClosure, view = viewClosure }
+  record0 <- callg i8Ptr "rt_record_empty" []
   stateKey <- makeKey "state"
   stateKeyPtr <- getelementptr1 (stringLiteral (Text.length "state" + 1)) stateKey (I32 0)
-  void $ callg i8Ptr "hashmap_insert" [hashmap, stateKeyPtr, cellI8]
+  record1 <- callg i8Ptr "rt_record_extend" [record0, stateKeyPtr, cellI8]
   stepKey <- makeKey "step"
   stepKeyPtr <- getelementptr1 (stringLiteral (Text.length "step" + 1)) stepKey (I32 0)
-  void $ callg i8Ptr "hashmap_insert" [hashmap, stepKeyPtr, stepClosure]
+  record2 <- callg i8Ptr "rt_record_extend" [record1, stepKeyPtr, stepClosure]
   viewKey <- makeKey "view"
   viewKeyPtr <- getelementptr1 (stringLiteral (Text.length "view" + 1)) viewKey (I32 0)
-  void $ callg i8Ptr "hashmap_insert" [hashmap, viewKeyPtr, viewClosure]
-  -- Build the $Record node: { i32 tag=0, i8* hashmap }
+  record3 <- callg i8Ptr "rt_record_extend" [record2, viewKeyPtr, viewClosure]
+  -- Build the $Record node: { i32 tag=0, i8* record }
   IRConstructor _ recordType <- makeConstructor (struct [i32, i8Ptr]) "$Record"
   recPtr <- irMalloc recordType
   recTagSlot <- getelementptr recordType recPtr (I32 0) (I32 0)
   store (I32 0) recTagSlot
   recMapSlot <- getelementptr recordType recPtr (I32 0) (I32 1)
-  store hashmap recMapSlot
+  store record3 recMapSlot
   recI8 <- bitcast recPtr i8Ptr
   -- Build the Machine node: { i32 tag=0, i8* $Record }
   IRConstructor _ machineType <- makeConstructor (struct [i32, i8Ptr]) "Machine"

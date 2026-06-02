@@ -166,7 +166,7 @@ instance IREval (Syntax.Expr Syntax.Type) where
             irEvalMatch tailCtx t e1 cs -- Pass tail context to match
         Syntax.ENil ->
           irCommentBlock "ENil" $
-            callg i8Ptr "hashmap_init" []
+            callg i8Ptr "rt_record_empty" []
         Syntax.EExt field e1 e2 ->
           irCommentBlock "EExt" $ do
             k1 <- makeKey field
@@ -174,13 +174,13 @@ instance IREval (Syntax.Expr Syntax.Type) where
             v1 <- irEval NotInTail e1
             v2 <- irEval NotInTail e2
             v3 <- irConceal v1
-            callg i8Ptr "hashmap_insert" [v2, t2, v3]
+            callg i8Ptr "rt_record_extend" [v2, t2, v3]
         Syntax.ESel (Syntax.Focus field (Label t var) (Label _ r)) e1 e2 ->
           irCommentBlock "ESel" $ do
             k1 <- makeKey field
             t2 <- getelementptr1 (stringLiteral (Text.length field + 1)) k1 (I32 0)
             v1 <- irEval NotInTail e1
-            v2 <- callg i8Ptr "hashmap_lookup" [v1, t2]
+            v2 <- callg i8Ptr "rt_record_lookup" [v1, t2]
             v3 <- irReveal v2 (irTypeOf t)
             bind [(var, v3), (r, v1)] (irEval tailCtx e2) -- Body inherits tail context
         Syntax.EMem e ->
