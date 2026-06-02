@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+
+  fun add(x : int32, y : int32) = x + y
+
+  fun add5(x : int32) = add(5, x)
+
+  fun main() =
+    IO.println_int32(add5(3))
+
+}
