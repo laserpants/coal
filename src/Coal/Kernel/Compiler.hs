@@ -33,9 +33,9 @@ corePass =
   astSortMatchClauses
     >=> astSuffix
     >=> astFlatten
-    >=> astLiftLetNodes
-    >=> astMemoize
     >=> astSaturateConstructors
+    >=> astMemoize
+    >=> astLiftLetNodes
     >=> astLiftLambdaNodes
     >=> astSimplify1
     >=> astSimplify2
