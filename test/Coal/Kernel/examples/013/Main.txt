@@ -74,19 +74,19 @@ module Main {
               )
             )
           )
-        ;
-      ys : list(int32) =
-        @<list(int32)>
-          ( Main.increment_each : record({ from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * })/list(int32)/list(int32)
-          , @<record({ from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * })>
-              ( $Record : { from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * }/record({ from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * })
-              , { from_int32 = fn(x : int32) => x : int32
-                | operator_plus = fn(x : int32, y : int32) => [+ int32](x : int32, y : int32)
-                | {}
-                }
-              )
-          , xs : list(int32)
-          )
+      in let
+        ys : list(int32) =
+          @<list(int32)>
+            ( Main.increment_each : record({ from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * })/list(int32)/list(int32)
+            , @<record({ from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * })>
+                ( $Record : { from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * }/record({ from_int32 : int32/int32 | operator_plus : int32/int32/int32 | * })
+                , { from_int32 = fn(x : int32) => x : int32
+                  | operator_plus = fn(x : int32, y : int32) => [+ int32](x : int32, y : int32)
+                  | {}
+                  }
+                )
+            , xs : list(int32)
+            )
       in
         match<int32>(ys : list(int32)) {
           | ($Cons : int32/list(int32)/list(int32), r : int32, _ : list(int32)) =>
