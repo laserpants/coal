@@ -1,6 +1,6 @@
 # Coding style guide
 
-This document defines the coding standards and style conventions for this project. Following these guidelines ensures consistency and maintainability across the codebase.
+This document defines the C11 coding standards and style conventions for this project. Following these guidelines ensures consistency and maintainability across the codebase.
 
 ---
 
