@@ -194,8 +194,6 @@ extern rt_value_t coal_closure_new(void *fn, rt_value_t arity);
 /** Extend boxed closure with arguments */
 extern rt_value_t coal_closure_extend(rt_value_t closure, rt_value_t argc,
                                       void **args);
-/** Apply arguments to boxed closure */
-extern rt_value_t coal_apply(rt_value_t closure, rt_value_t argc, void **args);
 
 /* ============================================================================
  * Math operations

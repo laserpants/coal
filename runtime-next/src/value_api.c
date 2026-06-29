@@ -448,13 +448,6 @@ coal_closure_extend(rt_value_t closure, rt_value_t argc, void **args)
                                             rt_int32_unbox(argc), args));
 }
 
-rt_value_t
-coal_apply(rt_value_t closure, rt_value_t argc, void **args)
-{
-    return (rt_value_t) rt_apply(rt_closure_unbox(closure),
-                                 rt_int32_unbox(argc), args);
-}
-
 /* ============================================================================
  * Math operations
  * ============================================================================
