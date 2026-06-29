@@ -31,79 +31,34 @@ typedef struct rt_float rt_float_t;
 typedef struct rt_double rt_double_t;
 
 /* ============================================================================
- * Primitive type boxing (inline)
+ * Primitive type boxing
  * ============================================================================
  */
 
-/** Box int32 into a value (inline, no allocation) */
-static inline rt_value_t
-rt_int32_box(int32_t n)
-{
-    return (void *) (uintptr_t) n;
-}
-
+/** Box int32 into a value (no allocation) */
+extern rt_value_t rt_int32_box(int32_t n);
 /** Unbox int32 from a value */
-static inline int32_t
-rt_int32_unbox(rt_value_t v)
-{
-    return (int32_t) (uintptr_t) v;
-}
+extern int32_t rt_int32_unbox(rt_value_t v);
 
-/** Box int64 into a value (inline, no allocation) */
-static inline rt_value_t
-rt_int64_box(int64_t n)
-{
-    return (void *) (uintptr_t) n;
-}
-
+/** Box int64 into a value (no allocation) */
+extern rt_value_t rt_int64_box(int64_t n);
 /** Unbox int64 from a value */
-static inline int64_t
-rt_int64_unbox(rt_value_t v)
-{
-    return (int64_t) (uintptr_t) v;
-}
+extern int64_t rt_int64_unbox(rt_value_t v);
 
-/** Box boolean into a value (inline, no allocation) */
-static inline rt_value_t
-rt_bool_box(bool b)
-{
-    return (void *) (uintptr_t) b;
-}
-
+/** Box boolean into a value (no allocation) */
+extern rt_value_t rt_bool_box(bool b);
 /** Unbox boolean from a value */
-static inline bool
-rt_bool_unbox(rt_value_t v)
-{
-    return (bool) (uintptr_t) v;
-}
+extern bool rt_bool_unbox(rt_value_t v);
 
-/** Box Unicode codepoint into a value (inline, no allocation) */
-static inline rt_value_t
-rt_char_box(uint32_t cp)
-{
-    return (void *) (uintptr_t) cp;
-}
-
+/** Box Unicode codepoint into a value (no allocation) */
+extern rt_value_t rt_char_box(uint32_t cp);
 /** Unbox Unicode codepoint from a value */
-static inline uint32_t
-rt_char_unbox(rt_value_t v)
-{
-    return (uint32_t) (uintptr_t) v;
-}
+extern uint32_t rt_char_unbox(rt_value_t v);
 
 /** Box raw pointer into a value */
-static inline rt_value_t
-rt_ptr_box(void *ptr)
-{
-    return ptr;
-}
-
+extern rt_value_t rt_ptr_box(void *ptr);
 /** Unbox raw pointer from a value */
-static inline void *
-rt_ptr_unbox(rt_value_t v)
-{
-    return v;
-}
+extern void *rt_ptr_unbox(rt_value_t v);
 
 /* ============================================================================
  * Heap-allocated type boxing
@@ -111,60 +66,24 @@ rt_ptr_unbox(rt_value_t v)
  */
 
 /** Box bignum pointer into a value */
-static inline rt_value_t
-rt_bignum_box(rt_bignum_t *bn)
-{
-    return (rt_value_t) bn;
-}
-
+extern rt_value_t rt_bignum_box(rt_bignum_t *bn);
 /** Unbox bignum pointer from a value */
-static inline rt_bignum_t *
-rt_bignum_unbox(rt_value_t v)
-{
-    return (rt_bignum_t *) v;
-}
+extern rt_bignum_t *rt_bignum_unbox(rt_value_t v);
 
 /** Box string pointer into a value */
-static inline rt_value_t
-rt_string_box(rt_string_t *str)
-{
-    return (rt_value_t) str;
-}
-
+extern rt_value_t rt_string_box(rt_string_t *str);
 /** Unbox string pointer from a value */
-static inline rt_string_t *
-rt_string_unbox(rt_value_t v)
-{
-    return (rt_string_t *) v;
-}
+extern rt_string_t *rt_string_unbox(rt_value_t v);
 
 /** Box closure pointer into a value */
-static inline rt_value_t
-rt_closure_box(rt_closure_t *closure)
-{
-    return (rt_value_t) closure;
-}
-
+extern rt_value_t rt_closure_box(rt_closure_t *closure);
 /** Unbox closure pointer from a value */
-static inline rt_closure_t *
-rt_closure_unbox(rt_value_t v)
-{
-    return (rt_closure_t *) v;
-}
+extern rt_closure_t *rt_closure_unbox(rt_value_t v);
 
 /** Box record pointer into a value */
-static inline rt_value_t
-rt_record_box(rt_record_t *record)
-{
-    return (rt_value_t) record;
-}
-
+extern rt_value_t rt_record_box(rt_record_t *record);
 /** Unbox record pointer from a value */
-static inline rt_record_t *
-rt_record_unbox(rt_value_t v)
-{
-    return (rt_record_t *) v;
-}
+extern rt_record_t *rt_record_unbox(rt_value_t v);
 
 /* ============================================================================
  * Float/double boxing (requires heap allocation)
