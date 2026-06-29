@@ -1,6 +1,18 @@
 #include "coal/io.h"
 #include "coal/gc.h"
 #include "coal/panic.h"
+
+int32_t
+rt_result_status(rt_result_t *r)
+{
+    return r->status;
+}
+
+char *
+rt_result_value(rt_result_t *r)
+{
+    return (char *) r->value;
+}
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdbool.h>

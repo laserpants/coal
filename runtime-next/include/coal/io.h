@@ -22,11 +22,6 @@ void rt_print_int64(int64_t n);
 void rt_print_string(const char *s);
 
 /**
- * Print a C string to stdout.
- */
-void rt_print_string(const char *s);
-
-/**
  * Print a Unicode character to stdout.
  * Encoded as UTF-8.
  */
@@ -118,17 +113,8 @@ typedef struct rt_result {
 } rt_result_t;
 
 /* Result accessors */
-static inline int32_t
-rt_result_status(rt_result_t *r)
-{
-    return r->status;
-}
-
-static inline char *
-rt_result_value(rt_result_t *r)
-{
-    return (char *) r->value;
-}
+extern int32_t rt_result_status(rt_result_t *r);
+extern char *rt_result_value(rt_result_t *r);
 
 /**
  * Read the entire contents of a file.

@@ -107,6 +107,7 @@ SOURCES=(
     "apply.c"
     "io.c"
     "runtime.c"
+    "value_api.c"
 )
 
 # Concatenate source files, removing coal/ includes
