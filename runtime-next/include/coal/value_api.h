@@ -26,88 +26,29 @@
  */
 
 /** Convert boxed float to int32 (truncates) */
-rt_value_t
-coal_float_to_int32(rt_value_t v)
-{
-    return rt_int32_box((int32_t) rt_float_unbox(v));
-}
-
+extern rt_value_t coal_float_to_int32(rt_value_t v);
 /** Convert boxed float to int64 (truncates) */
-rt_value_t
-coal_float_to_int64(rt_value_t v)
-{
-    return rt_int64_box((int64_t) rt_float_unbox(v));
-}
-
+extern rt_value_t coal_float_to_int64(rt_value_t v);
 /** Convert boxed double to int32 (truncates) */
-rt_value_t
-coal_double_to_int32(rt_value_t v)
-{
-    return rt_int32_box((int32_t) rt_double_unbox(v));
-}
-
+extern rt_value_t coal_double_to_int32(rt_value_t v);
 /** Convert boxed double to int64 (truncates) */
-rt_value_t
-coal_double_to_int64(rt_value_t v)
-{
-    return rt_int64_box((int64_t) rt_double_unbox(v));
-}
-
+extern rt_value_t coal_double_to_int64(rt_value_t v);
 /** Convert boxed int32 to float */
-rt_value_t
-coal_int32_to_float(rt_value_t v)
-{
-    return rt_float_box((float) rt_int32_unbox(v));
-}
-
+extern rt_value_t coal_int32_to_float(rt_value_t v);
 /** Convert boxed int32 to double */
-rt_value_t
-coal_int32_to_double(rt_value_t v)
-{
-    return rt_double_box((double) rt_int32_unbox(v));
-}
-
+extern rt_value_t coal_int32_to_double(rt_value_t v);
 /** Convert boxed int64 to float */
-rt_value_t
-coal_int64_to_float(rt_value_t v)
-{
-    return rt_float_box((float) rt_int64_unbox(v));
-}
-
+extern rt_value_t coal_int64_to_float(rt_value_t v);
 /** Convert boxed int64 to double */
-rt_value_t
-coal_int64_to_double(rt_value_t v)
-{
-    return rt_double_box((double) rt_int64_unbox(v));
-}
-
+extern rt_value_t coal_int64_to_double(rt_value_t v);
 /** Convert boxed float to double */
-rt_value_t
-coal_float_to_double(rt_value_t v)
-{
-    return rt_double_box((double) rt_float_unbox(v));
-}
-
+extern rt_value_t coal_float_to_double(rt_value_t v);
 /** Convert boxed double to float */
-rt_value_t
-coal_double_to_float(rt_value_t v)
-{
-    return rt_float_box((float) rt_double_unbox(v));
-}
-
+extern rt_value_t coal_double_to_float(rt_value_t v);
 /** Convert boxed int32 to bignum */
-rt_value_t
-coal_int32_to_bignum(rt_value_t v)
-{
-    return rt_bignum_box(rt_int32_to_bignum(rt_int32_unbox(v)));
-}
-
+extern rt_value_t coal_int32_to_bignum(rt_value_t v);
 /** Convert boxed int64 to bignum */
-rt_value_t
-coal_int64_to_bignum(rt_value_t v)
-{
-    return rt_bignum_box(rt_int64_to_bignum(rt_int64_unbox(v)));
-}
+extern rt_value_t coal_int64_to_bignum(rt_value_t v);
 
 /* ============================================================================
  * I/O operations
@@ -115,123 +56,39 @@ coal_int64_to_bignum(rt_value_t v)
  */
 
 /** Print boxed int32 */
-void
-coal_print_int32(rt_value_t v)
-{
-    rt_print_int32(rt_int32_unbox(v));
-}
-
+extern void coal_print_int32(rt_value_t v);
 /** Print boxed int64 */
-void
-coal_print_int64(rt_value_t v)
-{
-    rt_print_int64(rt_int64_unbox(v));
-}
-
+extern void coal_print_int64(rt_value_t v);
 /** Print boxed string */
-void
-coal_print_string(rt_value_t v)
-{
-    rt_print_string(rt_string_data(rt_string_unbox(v)));
-}
-
+extern void coal_print_string(rt_value_t v);
 /** Print boxed character */
-void
-coal_print_char(rt_value_t v)
-{
-    rt_print_char(rt_char_unbox(v));
-}
-
+extern void coal_print_char(rt_value_t v);
 /** Print boxed boolean */
-void
-coal_print_bool(rt_value_t v)
-{
-    rt_print_bool(rt_bool_unbox(v));
-}
-
+extern void coal_print_bool(rt_value_t v);
 /** Print boxed float */
-void
-coal_print_float(rt_value_t v)
-{
-    rt_print_float(rt_float_unbox(v));
-}
-
+extern void coal_print_float(rt_value_t v);
 /** Print boxed double */
-void
-coal_print_double(rt_value_t v)
-{
-    rt_print_double(rt_double_unbox(v));
-}
-
+extern void coal_print_double(rt_value_t v);
 /** Print boxed bignum */
-void
-coal_print_bignum(rt_value_t v)
-{
-    rt_print_bignum(rt_bignum_value(rt_bignum_unbox(v)));
-}
-
+extern void coal_print_bignum(rt_value_t v);
 /** Print boxed int32 with newline */
-void
-coal_println_int32(rt_value_t v)
-{
-    rt_println_int32(rt_int32_unbox(v));
-}
-
+extern void coal_println_int32(rt_value_t v);
 /** Print boxed int64 with newline */
-void
-coal_println_int64(rt_value_t v)
-{
-    rt_println_int64(rt_int64_unbox(v));
-}
-
+extern void coal_println_int64(rt_value_t v);
 /** Print boxed string with newline */
-void
-coal_println_string(rt_value_t v)
-{
-    rt_println_string(rt_string_data(rt_string_unbox(v)));
-}
-
+extern void coal_println_string(rt_value_t v);
 /** Print boxed boolean with newline */
-void
-coal_println_bool(rt_value_t v)
-{
-    rt_println_bool(rt_bool_unbox(v));
-}
-
+extern void coal_println_bool(rt_value_t v);
 /** Print boxed character with newline */
-void
-coal_println_char(rt_value_t v)
-{
-    rt_println_char(rt_char_unbox(v));
-}
-
+extern void coal_println_char(rt_value_t v);
 /** Print boxed float with newline */
-void
-coal_println_float(rt_value_t v)
-{
-    rt_println_float(rt_float_unbox(v));
-}
-
+extern void coal_println_float(rt_value_t v);
 /** Print boxed double with newline */
-void
-coal_println_double(rt_value_t v)
-{
-    rt_println_double(rt_double_unbox(v));
-}
-
+extern void coal_println_double(rt_value_t v);
 /** Print boxed bignum with newline */
-void
-coal_println_bignum(rt_value_t v)
-{
-    rt_println_bignum(rt_bignum_value(rt_bignum_unbox(v)));
-}
-
+extern void coal_println_bignum(rt_value_t v);
 /** Read a line from stdin, returns boxed string */
-rt_value_t
-coal_readln(void)
-{
-    return rt_string_box(rt_string_new(rt_readln()));
-}
+extern rt_value_t coal_readln(void);
 
 /* ============================================================================
  * Bignum operations
@@ -239,116 +96,37 @@ coal_readln(void)
  */
 
 /** Create a bignum from a decimal string */
-rt_value_t
-coal_bignum_init(rt_value_t v)
-{
-    return rt_bignum_box(rt_bignum_new(rt_string_data(rt_string_unbox(v))));
-}
-
+extern rt_value_t coal_bignum_init(rt_value_t v);
 /** Create bignum from boxed int64 */
-rt_value_t
-coal_bignum_from_i64(rt_value_t v)
-{
-    return rt_bignum_box(rt_bignum_from_i64(rt_int64_unbox(v)));
-}
-
+extern rt_value_t coal_bignum_from_i64(rt_value_t v);
 /** Add two boxed bignums */
-rt_value_t
-coal_bignum_add(rt_value_t a, rt_value_t b)
-{
-    return rt_bignum_box(rt_bignum_add(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_add(rt_value_t a, rt_value_t b);
 /** Subtract two boxed bignums */
-rt_value_t
-coal_bignum_sub(rt_value_t a, rt_value_t b)
-{
-    return rt_bignum_box(rt_bignum_sub(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_sub(rt_value_t a, rt_value_t b);
 /** Multiply two boxed bignums */
-rt_value_t
-coal_bignum_mul(rt_value_t a, rt_value_t b)
-{
-    return rt_bignum_box(rt_bignum_mul(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_mul(rt_value_t a, rt_value_t b);
 /** Divide two boxed bignums */
-rt_value_t
-coal_bignum_div(rt_value_t a, rt_value_t b)
-{
-    return rt_bignum_box(rt_bignum_div(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_div(rt_value_t a, rt_value_t b);
 /** Negate a boxed bignum */
-rt_value_t
-coal_bignum_neg(rt_value_t v)
-{
-    return rt_bignum_box(rt_bignum_neg(rt_bignum_unbox(v)));
-}
-
+extern rt_value_t coal_bignum_neg(rt_value_t v);
 /** Compute modulo of two boxed bignums */
-rt_value_t
-coal_bignum_mod(rt_value_t m, rt_value_t n)
-{
-    return rt_bignum_box(rt_bignum_mod(rt_bignum_unbox(m), rt_bignum_unbox(n)));
-}
-
+extern rt_value_t coal_bignum_mod(rt_value_t m, rt_value_t n);
 /** Compare two boxed bignums */
-rt_value_t
-coal_bignum_cmp(rt_value_t a, rt_value_t b)
-{
-    return rt_int32_box(rt_bignum_cmp(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_cmp(rt_value_t a, rt_value_t b);
 /** Test if boxed bignum a < b */
-rt_value_t
-coal_bignum_lt(rt_value_t a, rt_value_t b)
-{
-    return rt_bool_box(rt_bignum_lt(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_lt(rt_value_t a, rt_value_t b);
 /** Test if boxed bignum a > b */
-rt_value_t
-coal_bignum_gt(rt_value_t a, rt_value_t b)
-{
-    return rt_bool_box(rt_bignum_gt(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_gt(rt_value_t a, rt_value_t b);
 /** Test if boxed bignum a == b */
-rt_value_t
-coal_bignum_eq(rt_value_t a, rt_value_t b)
-{
-    return rt_bool_box(rt_bignum_eq(rt_bignum_unbox(a), rt_bignum_unbox(b)));
-}
-
+extern rt_value_t coal_bignum_eq(rt_value_t a, rt_value_t b);
 /** Convert boxed bignum to int32 */
-rt_value_t
-coal_bignum_to_int32(rt_value_t v)
-{
-    return rt_int32_box(rt_bignum_to_int32(rt_bignum_unbox(v)));
-}
-
+extern rt_value_t coal_bignum_to_int32(rt_value_t v);
 /** Convert boxed bignum to int64 */
-rt_value_t
-coal_bignum_to_int64(rt_value_t v)
-{
-    return rt_int64_box(rt_bignum_to_int64(rt_bignum_unbox(v)));
-}
-
+extern rt_value_t coal_bignum_to_int64(rt_value_t v);
 /** Convert boxed bignum to float */
-rt_value_t
-coal_bignum_to_float(rt_value_t v)
-{
-    return rt_float_box(rt_bignum_to_float(rt_bignum_unbox(v)));
-}
-
+extern rt_value_t coal_bignum_to_float(rt_value_t v);
 /** Convert boxed bignum to double */
-rt_value_t
-coal_bignum_to_double(rt_value_t v)
-{
-    return rt_double_box(rt_bignum_to_double(rt_bignum_unbox(v)));
-}
+extern rt_value_t coal_bignum_to_double(rt_value_t v);
 
 /* ============================================================================
  * String operations
@@ -356,105 +134,33 @@ coal_bignum_to_double(rt_value_t v)
  */
 
 /** Concatenate two boxed strings */
-rt_value_t
-coal_string_concat(rt_value_t a, rt_value_t b)
-{
-    return rt_string_box(
-        rt_string_concat(rt_string_unbox(a), rt_string_unbox(b)));
-}
-
+extern rt_value_t coal_string_concat(rt_value_t a, rt_value_t b);
 /** Get length of boxed string */
-rt_value_t
-coal_string_length(rt_value_t v)
-{
-    return rt_int64_box(rt_string_length(rt_string_unbox(v)));
-}
-
+extern rt_value_t coal_string_length(rt_value_t v);
 /** Compare two boxed strings character-by-character */
-rt_value_t
-coal_string_compare(rt_value_t a, rt_value_t b)
-{
-    return rt_bool_box(
-        rt_string_compare(rt_string_unbox(a), rt_string_unbox(b)));
-}
-
+extern rt_value_t coal_string_compare(rt_value_t a, rt_value_t b);
 /** Reverse a boxed string */
-rt_value_t
-coal_string_reverse(rt_value_t v)
-{
-    return rt_string_box(rt_string_reverse(rt_string_unbox(v)));
-}
-
+extern rt_value_t coal_string_reverse(rt_value_t v);
 /** Get first character of boxed string */
-rt_value_t
-coal_string_head(rt_value_t v)
-{
-    return rt_int32_box(rt_string_head(rt_string_unbox(v)));
-}
-
+extern rt_value_t coal_string_head(rt_value_t v);
 /** Get all but first character of boxed string */
-rt_value_t
-coal_string_tail(rt_value_t v)
-{
-    return rt_string_box(rt_string_tail(rt_string_unbox(v)));
-}
-
+extern rt_value_t coal_string_tail(rt_value_t v);
 /** Remove whitespace from boxed string */
-rt_value_t
-coal_string_remove_whitespace(rt_value_t v)
-{
-    return rt_string_box(rt_string_remove_whitespace(rt_string_unbox(v)));
-}
-
+extern rt_value_t coal_string_remove_whitespace(rt_value_t v);
 /** Convert boxed boolean to string */
-rt_value_t
-coal_bool_to_string(rt_value_t v)
-{
-    return rt_string_box(rt_bool_to_string(rt_bool_unbox(v)));
-}
-
+extern rt_value_t coal_bool_to_string(rt_value_t v);
 /** Convert boxed int32 to string */
-rt_value_t
-coal_int32_to_string(rt_value_t v)
-{
-    return rt_string_box(rt_int32_to_string(rt_int32_unbox(v)));
-}
-
+extern rt_value_t coal_int32_to_string(rt_value_t v);
 /** Convert boxed int64 to string */
-rt_value_t
-coal_int64_to_string(rt_value_t v)
-{
-    return rt_string_box(rt_int64_to_string(rt_int64_unbox(v)));
-}
-
+extern rt_value_t coal_int64_to_string(rt_value_t v);
 /** Convert boxed float to string */
-rt_value_t
-coal_float_to_string(rt_value_t v)
-{
-    return rt_string_box(rt_float_to_string(rt_float_unbox(v)));
-}
-
+extern rt_value_t coal_float_to_string(rt_value_t v);
 /** Convert boxed double to string */
-rt_value_t
-coal_double_to_string(rt_value_t v)
-{
-    return rt_string_box(rt_double_to_string(rt_double_unbox(v)));
-}
-
+extern rt_value_t coal_double_to_string(rt_value_t v);
 /** Convert boxed bignum to string */
-rt_value_t
-coal_bignum_to_string(rt_value_t v)
-{
-    return rt_string_box(
-        rt_bignum_to_string(rt_bignum_value(rt_bignum_unbox(v))));
-}
-
+extern rt_value_t coal_bignum_to_string(rt_value_t v);
 /** Convert boxed character to string */
-rt_value_t
-coal_char_to_string(rt_value_t v)
-{
-    return rt_string_box(rt_char_to_string(rt_char_unbox(v)));
-}
+extern rt_value_t coal_char_to_string(rt_value_t v);
 
 /* ============================================================================
  * Character operations
@@ -462,60 +168,21 @@ coal_char_to_string(rt_value_t v)
  */
 
 /** Compare two boxed characters */
-rt_value_t
-coal_char_cmp(rt_value_t a, rt_value_t b)
-{
-    return rt_int32_box(rt_char_cmp(rt_char_unbox(a), rt_char_unbox(b)));
-}
-
+extern rt_value_t coal_char_cmp(rt_value_t a, rt_value_t b);
 /** Test if boxed character is a digit */
-rt_value_t
-coal_char_is_digit(rt_value_t v)
-{
-    return rt_bool_box(rt_char_is_digit(rt_char_unbox(v)));
-}
-
+extern rt_value_t coal_char_is_digit(rt_value_t v);
 /** Test if boxed character is alphabetic */
-rt_value_t
-coal_char_is_alpha(rt_value_t v)
-{
-    return rt_bool_box(rt_char_is_alpha(rt_char_unbox(v)));
-}
-
+extern rt_value_t coal_char_is_alpha(rt_value_t v);
 /** Test if boxed character is whitespace */
-rt_value_t
-coal_char_is_whitespace(rt_value_t v)
-{
-    return rt_bool_box(rt_char_is_whitespace(rt_char_unbox(v)));
-}
-
+extern rt_value_t coal_char_is_whitespace(rt_value_t v);
 /** Test if boxed character is uppercase */
-rt_value_t
-coal_char_is_upper(rt_value_t v)
-{
-    return rt_bool_box(rt_char_is_upper(rt_char_unbox(v)));
-}
-
+extern rt_value_t coal_char_is_upper(rt_value_t v);
 /** Test if boxed character is lowercase */
-rt_value_t
-coal_char_is_lower(rt_value_t v)
-{
-    return rt_bool_box(rt_char_is_lower(rt_char_unbox(v)));
-}
-
+extern rt_value_t coal_char_is_lower(rt_value_t v);
 /** Convert boxed character to uppercase */
-rt_value_t
-coal_char_to_upper(rt_value_t v)
-{
-    return rt_char_box(rt_char_to_upper(rt_char_unbox(v)));
-}
-
+extern rt_value_t coal_char_to_upper(rt_value_t v);
 /** Convert boxed character to lowercase */
-rt_value_t
-coal_char_to_lower(rt_value_t v)
-{
-    return rt_char_box(rt_char_to_lower(rt_char_unbox(v)));
-}
+extern rt_value_t coal_char_to_lower(rt_value_t v);
 
 /* ============================================================================
  * Closure and function application
@@ -523,27 +190,12 @@ coal_char_to_lower(rt_value_t v)
  */
 
 /** Create a new boxed closure */
-rt_value_t
-coal_closure_new(void *fn, rt_value_t arity)
-{
-    return rt_closure_box(rt_closure_new(fn, rt_int32_unbox(arity)));
-}
-
+extern rt_value_t coal_closure_new(void *fn, rt_value_t arity);
 /** Extend boxed closure with arguments */
-rt_value_t
-coal_closure_extend(rt_value_t closure, rt_value_t argc, void **args)
-{
-    return rt_closure_box(rt_closure_extend(rt_closure_unbox(closure),
-                                            rt_int32_unbox(argc), args));
-}
-
+extern rt_value_t coal_closure_extend(rt_value_t closure, rt_value_t argc,
+                                      void **args);
 /** Apply arguments to boxed closure */
-rt_value_t
-coal_apply(rt_value_t closure, rt_value_t argc, void **args)
-{
-    return (rt_value_t) rt_apply(rt_closure_unbox(closure),
-                                 rt_int32_unbox(argc), args);
-}
+extern rt_value_t coal_apply(rt_value_t closure, rt_value_t argc, void **args);
 
 /* ============================================================================
  * Math operations
@@ -551,18 +203,9 @@ coal_apply(rt_value_t closure, rt_value_t argc, void **args)
  */
 
 /** Compute modulo of two boxed int32 values */
-rt_value_t
-coal_int32_mod(rt_value_t m, rt_value_t n)
-{
-    return rt_int32_box(rt_int32_mod(rt_int32_unbox(m), rt_int32_unbox(n)));
-}
-
+extern rt_value_t coal_int32_mod(rt_value_t m, rt_value_t n);
 /** Compute modulo of two boxed int64 values */
-rt_value_t
-coal_int64_mod(rt_value_t m, rt_value_t n)
-{
-    return rt_int64_box(rt_int64_mod(rt_int64_unbox(m), rt_int64_unbox(n)));
-}
+extern rt_value_t coal_int64_mod(rt_value_t m, rt_value_t n);
 
 /* ============================================================================
  * Random number generation
@@ -570,18 +213,9 @@ coal_int64_mod(rt_value_t m, rt_value_t n)
  */
 
 /** Generate random boxed float in [0.0, 1.0) */
-rt_value_t
-coal_float_random(void)
-{
-    return rt_float_box(rt_float_random());
-}
-
+extern rt_value_t coal_float_random(void);
 /** Generate random boxed double in [0.0, 1.0) */
-rt_value_t
-coal_double_random(void)
-{
-    return rt_double_box(rt_double_random());
-}
+extern rt_value_t coal_double_random(void);
 
 /* ============================================================================
  * File I/O
@@ -589,33 +223,12 @@ coal_double_random(void)
  */
 
 /** Read file, returns boxed result */
-rt_value_t
-coal_read_file(rt_value_t filename)
-{
-    return rt_ptr_box(rt_read_file(rt_string_data(rt_string_unbox(filename))));
-}
-
+extern rt_value_t coal_read_file(rt_value_t filename);
 /** Write file, returns boxed result */
-rt_value_t
-coal_write_file(rt_value_t filename, rt_value_t data)
-{
-    return rt_ptr_box(rt_write_file(rt_string_data(rt_string_unbox(filename)),
-                                    rt_string_data(rt_string_unbox(data))));
-}
-
+extern rt_value_t coal_write_file(rt_value_t filename, rt_value_t data);
 /** Get status from boxed result */
-rt_value_t
-coal_result_status(rt_value_t result)
-{
-    return rt_int32_box(rt_result_status((rt_result_t *) rt_ptr_unbox(result)));
-}
-
+extern rt_value_t coal_result_status(rt_value_t result);
 /** Get value from boxed result */
-rt_value_t
-coal_result_value(rt_value_t result)
-{
-    char *val = rt_result_value((rt_result_t *) rt_ptr_unbox(result));
-    return val ? rt_string_box(rt_string_new(val)) : rt_ptr_box(NULL);
-}
+extern rt_value_t coal_result_value(rt_value_t result);
 
 #endif
