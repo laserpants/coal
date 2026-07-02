@@ -59,7 +59,7 @@ makeRecord :: NK.Type -> Expr NK.Type -> Expr NK.Type
 makeRecord t e1 =
   EApp
     t
-    (EVar (Label (NKT.arrow t1 (NK.TCon "record" [t1])) "$Record"))
+    (ECon (Label (NKT.arrow t1 (NK.TCon "record" [t1])) "$Record"))
     (e1 :| [])
  where
   t1 = typeOf e1
