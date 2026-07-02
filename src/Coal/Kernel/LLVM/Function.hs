@@ -85,11 +85,12 @@ Creates three entities:
   * @force#_\<name\>@: an external function that checks the cache, evaluates
     if needed, and stores the result
 -}
-irThunk :: (Expr Type -> IRCodegen ()) -> Name -> Expr Type -> IRCodegen ()
-irThunk irTail name expr = do
+irThunk :: (Expr Type -> IRCodegen IROperand) -> Name -> Expr Type -> IRCodegen ()
+irThunk irValue name expr = do
   emitGlobal (IRVar LExternal cellName TPtr (CNull TPtr))
-  define TPtr makeName [] LInternal [] $
-    irTail expr
+  define TPtr makeName [] LInternal [] $ do
+    val <- Boxing.irBoxed irValue expr
+    ret val
   define TPtr forceName [] LExternal [] $ mdo
     entryL <- block "entry"
     val <- load TPtr (OGlobal TPtr cellName)

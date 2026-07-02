@@ -84,16 +84,22 @@ nameLookup t name = do
     Just op ->
       return op
 
-{- | Automatically force a thunk (nullary function) if needed.
+{- | Automatically force a thunk (nullary function) if needed, and load
+global constants.
 
 When an operand refers to a global nullary function, it represents a lazy
-thunk that must be called to obtain the actual value.
+thunk that must be called to obtain the actual value. When an operand refers
+to a global constant (e.g. @i32@, @i64@), a 'load' is emitted because global
+references always have pointer type in LLVM IR.
 -}
 forceThunk :: IROperand -> IRCodegen IROperand
 forceThunk op =
   case op of
     OGlobal (TFun t []) _ ->
       call NoTail t op []
+    OGlobal t name
+      | t /= TPtr ->
+          load t (OGlobal TPtr name)
     _ ->
       return op
 
@@ -341,4 +347,4 @@ irDataConstructor :: Name -> Constructor.ConstructorDefinition -> IRCodegen ()
 irDataConstructor = Constructor.irDataConstructor
 
 irThunk :: Name -> Expr Type -> IRCodegen ()
-irThunk = Function.irThunk irTail
+irThunk = Function.irThunk irValue

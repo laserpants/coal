@@ -11,13 +11,16 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import Coal.Compiler.Pass.DebugOutput (writeDotFile)
 import Coal.Compiler.Pass.PhaseLowering.KernelCode (passKernelCode)
+import Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen)
 import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)
+import Coal.Compiler.Pass.PhaseLowering.KernelTranslateNew (passKernelTranslateNew)
 import Coal.Compiler.Pass.PhaseLowering.LLVMOutput (passLLVMOutput)
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State (CompilerState (..))
-import Coal.LegacyKernel.Compiler (KernelModule)
-import Coal.LegacyKernel.Language (moduleName)
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module
+import Coal.LegacyKernel.Compiler (KernelModule)
+import Coal.LegacyKernel.Language (moduleName)
 import Control.Monad (when)
 import Control.Monad.Catch (MonadMask)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -38,7 +41,22 @@ generateDebugArtifacts ll = Pass{runPass = run}
 
 phaseLowering :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
 phaseLowering =
+  Pass
+    { runPass = \input -> do
+        CompilerConfig{configUseNewKernel} <- gets compilerConfig
+        if configUseNewKernel
+          then runPass phaseLoweringNew input
+          else runPass phaseLoweringLegacy input
+    }
+
+phaseLoweringLegacy :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
+phaseLoweringLegacy =
   mapPass passKernelTranslate
     >-> mapPass (liftPass (generateDebugArtifacts "Kernel"))
     >-> passKernelCode
     >-> passLLVMOutput
+
+phaseLoweringNew :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
+phaseLoweringNew =
+  mapPass passKernelTranslateNew
+    >-> passKernelCodegen

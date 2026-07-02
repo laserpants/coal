@@ -44,6 +44,13 @@ library
       Coal.Compiler.HasMetadata
       Coal.Compiler.Journal
       Coal.Compiler.Kernel.Environment
+      Coal.Compiler.Kernel.NewTranslate.Definition
+      Coal.Compiler.Kernel.NewTranslate.Expression
+      Coal.Compiler.Kernel.NewTranslate.Operator
+      Coal.Compiler.Kernel.NewTranslate.Pattern
+      Coal.Compiler.Kernel.NewTranslate.Primitive
+      Coal.Compiler.Kernel.NewTranslate.Record
+      Coal.Compiler.Kernel.NewTranslate.Type
       Coal.Compiler.Kernel.Translate.Definition
       Coal.Compiler.Kernel.Translate.Expression
       Coal.Compiler.Kernel.Translate.Operator
@@ -58,7 +65,9 @@ library
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.PhaseLowering
       Coal.Compiler.Pass.PhaseLowering.KernelCode
+      Coal.Compiler.Pass.PhaseLowering.KernelCodegen
       Coal.Compiler.Pass.PhaseLowering.KernelTranslate
+      Coal.Compiler.Pass.PhaseLowering.KernelTranslateNew
       Coal.Compiler.Pass.PhaseLowering.Linking
       Coal.Compiler.Pass.PhaseLowering.LLVMOutput
       Coal.Compiler.Pass.PhaseParsing
@@ -324,6 +333,8 @@ library
       Coal.TypeSystem.Substitution
       Coal.TypeSystem.Unification
       Coal.Utils
+      Common
+      Common.Environment
       Extras
       Extras.Control.Applicative
       Extras.Control.Monad
@@ -360,6 +371,7 @@ library
     , file-embed
     , filepath
     , free
+    , ir-builder
     , megaparsec
     , memory
     , mtl
@@ -425,6 +437,7 @@ executable coal
     , file-embed
     , filepath
     , free
+    , ir-builder
     , megaparsec
     , memory
     , mtl
@@ -485,6 +498,7 @@ test-suite coal-test
     , filepath
     , free
     , hspec
+    , ir-builder
     , megaparsec
     , memory
     , mtl

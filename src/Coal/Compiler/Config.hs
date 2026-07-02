@@ -27,6 +27,7 @@ data CompilerConfig = CompilerConfig
   , configCFiles :: [FilePath]
   , configSilent :: Bool
   , configNoCache :: Bool
+  , configUseNewKernel :: Bool
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -41,6 +42,7 @@ defaultConfig =
     , configCFiles = []
     , configSilent = False
     , configNoCache = False
+    , configUseNewKernel = False
     }
 
 {-# INLINE silentConfig #-}
