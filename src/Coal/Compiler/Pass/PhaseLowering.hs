@@ -58,5 +58,13 @@ phaseLoweringLegacy =
 
 phaseLoweringNew :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
 phaseLoweringNew =
-  mapPass passKernelTranslateNew
-    >-> passKernelCodegen
+  Pass
+    { runPass = \input -> do
+        -- Compile the new-kernel modules.
+        newResult <- runPass (mapPass passKernelTranslateNew >-> passKernelCodegen) input
+        -- Also run the legacy builtin/closure pipeline with no source modules so
+        -- that Builtin$ and the closures module are linked in.  The new kernel uses
+        -- the same C runtime and closure-apply ABI as the legacy kernel.
+        builtinResult <- runPass (passKernelCode >-> passLLVMOutput) []
+        pure (builtinResult <> newResult)
+    }
