@@ -165,6 +165,13 @@ builtinObjects =
       "record"
       [("$Record", NKC.arrow NKT.TOpq (NKT.TCon "record" [NKT.TOpq]))]
     :
+    -- Nat: $Succ (tag 0) < $Zero (tag 1) lexicographically
+    NKObj.DData
+      "nat"
+      [ ("$Succ", NKC.arrow (NKT.TCon "int32" []) (NKT.TCon "nat" []))
+      , ("$Zero", NKT.TCon "nat" [])
+      ]
+    :
     -- Tuples $Tuple1 .. $Tuple8 (each type has one constructor at tag 0)
     [ NKObj.DData
       ("tuple" <> showt n)
