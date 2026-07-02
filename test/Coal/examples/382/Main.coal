@@ -1,0 +1,21 @@
+module Main {
+
+  import namespace IO
+
+  fun foo(vs) = vs
+
+  fun main() =
+    let
+      zs = [3]
+        ;
+      ys = foo(zs)
+      in
+        match(ys) {
+          | Cons(r, _) =>
+              IO.println_int32(r)
+          | Nil =>
+              0
+        }
+    
+
+}
