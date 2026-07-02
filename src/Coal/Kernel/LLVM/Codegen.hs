@@ -28,7 +28,7 @@ proper terminator instruction, eliminating unnecessary temporary variables.
 -}
 module Coal.Kernel.LLVM.Codegen (irModule) where
 
-import Control.Monad.Except (forM_, throwError)
+import Control.Monad.Except (forM_, throwError, when)
 import Control.Monad.Reader (ask, local)
 import Control.Monad.State (gets, modify)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -336,6 +336,13 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
                 irTrampoline LInternal name labels retType
               _ ->
                 return ()
+    -- Emit the C main entry point for the program's Main module.
+    when (moduleName == "Main") $ do
+      declare "rt_runtime_init" TVoid []
+      define i32 "main" [] LExternal [] $ do
+        callVoid NoTail TVoid (OGlobal (TFun TVoid []) "rt_runtime_init") []
+        callVoid NoTail TPtr (OGlobal (TFun TPtr [TPtr]) "Main.main") [O.nullPtr TPtr]
+        ret (O.i32 @Int 0)
 
 irFunction :: Name -> [Label Type] -> Expr Type -> IRCodegen ()
 irFunction = Function.irFunction irTail
