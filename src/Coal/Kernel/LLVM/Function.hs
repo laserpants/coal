@@ -44,9 +44,9 @@ body.
 The function signature uses the concrete IR types for each parameter, and the
 body is evaluated as a tail expression.
 -}
-irFunction :: (Expr Type -> IRCodegen ()) -> Name -> [Label Type] -> Expr Type -> IRCodegen ()
-irFunction irTail name lls expr =
-  define rty name argts LExternal [] $
+irFunction :: IRLinkage -> (Expr Type -> IRCodegen ()) -> Name -> [Label Type] -> Expr Type -> IRCodegen ()
+irFunction linkage irTail name lls expr =
+  define rty name argts linkage [] $
     local
       (Environment.insertMultiple [(n, OLocal t n) | (t, n) <- argts])
       (irTail expr)

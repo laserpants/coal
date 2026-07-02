@@ -320,8 +320,9 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
                   , Constructor.constructorFieldCount = arity ctorType
                   }
           DFunction name lls expr -> do
-            irFunction name lls expr
-            irTrampoline LExternal name lls (typeOf expr)
+            let lnk = if "lam." `Text.isPrefixOf` name then LInternal else LExternal
+            irFunction lnk name lls expr
+            irTrampoline lnk name lls (typeOf expr)
           DConstant name (ELit prim)
             | Just (irt, irc) <- primToIRConstant prim ->
                 emitGlobal (IRConstant LExternal name irt irc)
@@ -344,8 +345,8 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
         callVoid NoTail TPtr (OGlobal (TFun TPtr [TPtr]) "Main.main") [O.nullPtr TPtr]
         ret (O.i32 @Int 0)
 
-irFunction :: Name -> [Label Type] -> Expr Type -> IRCodegen ()
-irFunction = Function.irFunction irTail
+irFunction :: IRLinkage -> Name -> [Label Type] -> Expr Type -> IRCodegen ()
+irFunction lnk = Function.irFunction lnk irTail
 
 irTrampoline :: IRLinkage -> Name -> [Label Type] -> Type -> IRCodegen ()
 irTrampoline = Function.irTrampoline
