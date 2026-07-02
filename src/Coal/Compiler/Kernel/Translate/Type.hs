@@ -3,7 +3,7 @@
 
 module Coal.Compiler.Kernel.Translate.Type (translateType) where
 
-import qualified Coal.Kernel.Language as Kernel
+import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Language.Type (Type (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Operations (typeArgs)

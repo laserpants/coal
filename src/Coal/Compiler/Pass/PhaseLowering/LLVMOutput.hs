@@ -19,9 +19,9 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Debug (writeDebugFile)
-import Coal.Kernel.LLVM.IRConstruct (IRConstruct (..))
-import Coal.Kernel.LLVM.IREncodable (irEncode)
-import Coal.Kernel.LLVM.IRInterpreter.Monad (IRLine)
+import Coal.LegacyKernel.LLVM.IRConstruct (IRConstruct (..))
+import Coal.LegacyKernel.LLVM.IREncodable (irEncode)
+import Coal.LegacyKernel.LLVM.IRInterpreter.Monad (IRLine)
 import Coal.Language.Module.Path
 import Control.Exception (SomeException, try)
 import Control.Monad.Catch (MonadMask)

@@ -78,8 +78,8 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Build.NameEntry
-import Coal.Kernel.LLVM.IRType (IRType)
-import qualified Coal.Kernel.Language as Kernel
+import Coal.LegacyKernel.LLVM.IRType (IRType)
+import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Language (IndexedScheme, IndexedType)
 import Coal.Language.Module.Path (Path (..))
 import Control.Monad.State (execState, modify)

@@ -11,12 +11,12 @@ import Coal.Compiler.Pass.PhaseLowering.KernelCode (compileEnvelopes)
 import Coal.Compiler.Pass.PhaseLowering.LLVMOutput (generateLLOutput)
 import Coal.Compiler.Pass.PhaseLowering.Linking (compileBitcode)
 import Coal.Compiler.Stack
-import Coal.Kernel.Builtin.Objects (builtinObjects)
-import Coal.Kernel.Compiler.Pipeline (evalPipelineT)
-import qualified Coal.Kernel.Language as Kernel
-import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Parser (spaces)
-import Coal.Kernel.Parser.Module (module_)
+import Coal.LegacyKernel.Builtin.Objects (builtinObjects)
+import Coal.LegacyKernel.Compiler.Pipeline (evalPipelineT)
+import qualified Coal.LegacyKernel.Language as Kernel
+import Coal.LegacyKernel.Language.Module (Module (..))
+import Coal.LegacyKernel.Parser (spaces)
+import Coal.LegacyKernel.Parser.Module (module_)
 import Control.Monad (void)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (liftIO)

@@ -113,72 +113,6 @@ library
       Coal.Compiler.TypeInference.Errors
       Coal.Debug
       Coal.Graphviz.Dot
-      Coal.Kernel.Builtin.Constructors
-      Coal.Kernel.Builtin.Objects
-      Coal.Kernel.Compiler
-      Coal.Kernel.Compiler.AST
-      Coal.Kernel.Compiler.EntryPoint
-      Coal.Kernel.Compiler.Pass
-      Coal.Kernel.Compiler.Pass.ClosureConversion
-      Coal.Kernel.Compiler.Pass.ExtraArgs
-      Coal.Kernel.Compiler.Pass.LambdaLifting
-      Coal.Kernel.Compiler.Pass.LetLifting
-      Coal.Kernel.Compiler.Pass.Memoize
-      Coal.Kernel.Compiler.Pass.PartialConstructors
-      Coal.Kernel.Compiler.Pass.Suffix
-      Coal.Kernel.Compiler.Pipeline
-      Coal.Kernel.Compiler.Pipeline.State
-      Coal.Kernel.Language
-      Coal.Kernel.Language.Expr
-      Coal.Kernel.Language.Expr.Composite
-      Coal.Kernel.Language.Expr.Replace
-      Coal.Kernel.Language.Expr.Syntax
-      Coal.Kernel.Language.Module
-      Coal.Kernel.Language.Object
-      Coal.Kernel.Language.Op
-      Coal.Kernel.Language.Prim
-      Coal.Kernel.Language.Type
-      Coal.Kernel.Language.Type.Arrow
-      Coal.Kernel.Language.Type.Row
-      Coal.Kernel.Language.Type.Syntax
-      Coal.Kernel.Language.Typed
-      Coal.Kernel.LLVM
-      Coal.Kernel.LLVM.IR
-      Coal.Kernel.LLVM.IRConstruct
-      Coal.Kernel.LLVM.IREncodable
-      Coal.Kernel.LLVM.IRError
-      Coal.Kernel.LLVM.IREval
-      Coal.Kernel.LLVM.IREval.Closure
-      Coal.Kernel.LLVM.IREval.Closure.Apply
-      Coal.Kernel.LLVM.IREval.Closure.Call
-      Coal.Kernel.LLVM.IREval.Closure.Extend
-      Coal.Kernel.LLVM.IREval.Closure.Finalize
-      Coal.Kernel.LLVM.IREval.Comment
-      Coal.Kernel.LLVM.IREval.Conceal
-      Coal.Kernel.LLVM.IREval.Expr
-      Coal.Kernel.LLVM.IREval.Expr.Match
-      Coal.Kernel.LLVM.IREval.Expr.Op
-      Coal.Kernel.LLVM.IREval.Expr.Var
-      Coal.Kernel.LLVM.IREval.Malloc
-      Coal.Kernel.LLVM.IRInstruction
-      Coal.Kernel.LLVM.IRInstruction.Builders
-      Coal.Kernel.LLVM.IRInterpreter
-      Coal.Kernel.LLVM.IRInterpreter.Artifact
-      Coal.Kernel.LLVM.IRInterpreter.Environment
-      Coal.Kernel.LLVM.IRInterpreter.Instruction
-      Coal.Kernel.LLVM.IRInterpreter.Monad
-      Coal.Kernel.LLVM.IRInterpreter.State
-      Coal.Kernel.LLVM.IRType
-      Coal.Kernel.LLVM.IRType.Syntax
-      Coal.Kernel.LLVM.IRValue
-      Coal.Kernel.Parser
-      Coal.Kernel.Parser.Expr
-      Coal.Kernel.Parser.Identifier
-      Coal.Kernel.Parser.Module
-      Coal.Kernel.Parser.Op
-      Coal.Kernel.Parser.Prim
-      Coal.Kernel.Parser.Symbol
-      Coal.Kernel.Parser.Type
       Coal.Language
       Coal.Language.AST.Builders
       Coal.Language.AST.Flattening
@@ -209,6 +143,72 @@ library
       Coal.Language.Type.Operations
       Coal.Language.Type.Row
       Coal.Language.Type.Scheme
+      Coal.LegacyKernel.Builtin.Constructors
+      Coal.LegacyKernel.Builtin.Objects
+      Coal.LegacyKernel.Compiler
+      Coal.LegacyKernel.Compiler.AST
+      Coal.LegacyKernel.Compiler.EntryPoint
+      Coal.LegacyKernel.Compiler.Pass
+      Coal.LegacyKernel.Compiler.Pass.ClosureConversion
+      Coal.LegacyKernel.Compiler.Pass.ExtraArgs
+      Coal.LegacyKernel.Compiler.Pass.LambdaLifting
+      Coal.LegacyKernel.Compiler.Pass.LetLifting
+      Coal.LegacyKernel.Compiler.Pass.Memoize
+      Coal.LegacyKernel.Compiler.Pass.PartialConstructors
+      Coal.LegacyKernel.Compiler.Pass.Suffix
+      Coal.LegacyKernel.Compiler.Pipeline
+      Coal.LegacyKernel.Compiler.Pipeline.State
+      Coal.LegacyKernel.Language
+      Coal.LegacyKernel.Language.Expr
+      Coal.LegacyKernel.Language.Expr.Composite
+      Coal.LegacyKernel.Language.Expr.Replace
+      Coal.LegacyKernel.Language.Expr.Syntax
+      Coal.LegacyKernel.Language.Module
+      Coal.LegacyKernel.Language.Object
+      Coal.LegacyKernel.Language.Op
+      Coal.LegacyKernel.Language.Prim
+      Coal.LegacyKernel.Language.Type
+      Coal.LegacyKernel.Language.Type.Arrow
+      Coal.LegacyKernel.Language.Type.Row
+      Coal.LegacyKernel.Language.Type.Syntax
+      Coal.LegacyKernel.Language.Typed
+      Coal.LegacyKernel.LLVM
+      Coal.LegacyKernel.LLVM.IR
+      Coal.LegacyKernel.LLVM.IRConstruct
+      Coal.LegacyKernel.LLVM.IREncodable
+      Coal.LegacyKernel.LLVM.IRError
+      Coal.LegacyKernel.LLVM.IREval
+      Coal.LegacyKernel.LLVM.IREval.Closure
+      Coal.LegacyKernel.LLVM.IREval.Closure.Apply
+      Coal.LegacyKernel.LLVM.IREval.Closure.Call
+      Coal.LegacyKernel.LLVM.IREval.Closure.Extend
+      Coal.LegacyKernel.LLVM.IREval.Closure.Finalize
+      Coal.LegacyKernel.LLVM.IREval.Comment
+      Coal.LegacyKernel.LLVM.IREval.Conceal
+      Coal.LegacyKernel.LLVM.IREval.Expr
+      Coal.LegacyKernel.LLVM.IREval.Expr.Match
+      Coal.LegacyKernel.LLVM.IREval.Expr.Op
+      Coal.LegacyKernel.LLVM.IREval.Expr.Var
+      Coal.LegacyKernel.LLVM.IREval.Malloc
+      Coal.LegacyKernel.LLVM.IRInstruction
+      Coal.LegacyKernel.LLVM.IRInstruction.Builders
+      Coal.LegacyKernel.LLVM.IRInterpreter
+      Coal.LegacyKernel.LLVM.IRInterpreter.Artifact
+      Coal.LegacyKernel.LLVM.IRInterpreter.Environment
+      Coal.LegacyKernel.LLVM.IRInterpreter.Instruction
+      Coal.LegacyKernel.LLVM.IRInterpreter.Monad
+      Coal.LegacyKernel.LLVM.IRInterpreter.State
+      Coal.LegacyKernel.LLVM.IRType
+      Coal.LegacyKernel.LLVM.IRType.Syntax
+      Coal.LegacyKernel.LLVM.IRValue
+      Coal.LegacyKernel.Parser
+      Coal.LegacyKernel.Parser.Expr
+      Coal.LegacyKernel.Parser.Identifier
+      Coal.LegacyKernel.Parser.Module
+      Coal.LegacyKernel.Parser.Op
+      Coal.LegacyKernel.Parser.Prim
+      Coal.LegacyKernel.Parser.Symbol
+      Coal.LegacyKernel.Parser.Type
       Coal.Parser
       Coal.Parser.BuiltinNames
       Coal.Parser.Common

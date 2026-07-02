@@ -7,7 +7,7 @@ module Coal.Compiler.Kernel.Translate.Pattern (translatePattern) where
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
-import qualified Coal.Kernel.Language as Kernel
+import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Language
 import Data.Data (Data)
 

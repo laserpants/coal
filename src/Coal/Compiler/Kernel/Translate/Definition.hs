@@ -10,8 +10,8 @@ import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
 import Coal.Compiler.Kernel.Translate.Expression (translateExpression, translatePattern)
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack
-import qualified Coal.Kernel.Language as Kernel
-import Coal.Kernel.Language.Object (KernelObject)
+import qualified Coal.LegacyKernel.Language as Kernel
+import Coal.LegacyKernel.Language.Object (KernelObject)
 import Coal.Language
 import Control.Monad (forM)
 import Control.Monad.Extra (concatForM)

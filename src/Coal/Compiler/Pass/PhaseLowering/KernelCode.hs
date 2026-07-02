@@ -15,15 +15,15 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, updateBuildC)
-import Coal.Kernel.Builtin.Objects (builtinObjects)
-import Coal.Kernel.Compiler (KernelExpr, compile, compileClosureCode)
-import Coal.Kernel.Compiler.EntryPoint (entryPoint)
-import Coal.Kernel.Compiler.Pass (transformInterpreter)
-import Coal.Kernel.Compiler.Pipeline
-import Coal.Kernel.Compiler.Pipeline.State (PipelineState (..))
-import Coal.Kernel.LLVM
-import Coal.Kernel.Language
-import qualified Coal.Kernel.Language as Kernel
+import Coal.LegacyKernel.Builtin.Objects (builtinObjects)
+import Coal.LegacyKernel.Compiler (KernelExpr, compile, compileClosureCode)
+import Coal.LegacyKernel.Compiler.EntryPoint (entryPoint)
+import Coal.LegacyKernel.Compiler.Pass (transformInterpreter)
+import Coal.LegacyKernel.Compiler.Pipeline
+import Coal.LegacyKernel.Compiler.Pipeline.State (PipelineState (..))
+import Coal.LegacyKernel.LLVM
+import Coal.LegacyKernel.Language
+import qualified Coal.LegacyKernel.Language as Kernel
 import Control.Monad (unless)
 import Control.Monad.IO.Class (MonadIO (..))
 import Control.Monad.State (gets)

@@ -20,7 +20,7 @@ module Coal.Graphviz.Dot (Dot (..), generateDotSyntax) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
-import qualified Coal.Kernel.Language as Kernel
+import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))

@@ -1,0 +1,29 @@
+module Coal.LegacyKernel.Language (
+  module Coal.LegacyKernel.Language.Prim,
+  module Coal.LegacyKernel.Language.Type,
+  module Coal.LegacyKernel.Language.Typed,
+  module Coal.LegacyKernel.Language.Module,
+  module Coal.LegacyKernel.Language.Op,
+  module Coal.LegacyKernel.Language.Expr,
+  module Coal.LegacyKernel.Language.Expr.Composite,
+  module Coal.LegacyKernel.Language.Object,
+  module Coal.LegacyKernel.Language.Expr.Syntax,
+  module Coal.LegacyKernel.Language.Expr.Replace,
+  module Coal.LegacyKernel.Language.Type.Syntax,
+  module Coal.LegacyKernel.Language.Type.Row,
+  module Coal.LegacyKernel.Language.Type.Arrow,
+) where
+
+import Coal.LegacyKernel.Language.Expr
+import Coal.LegacyKernel.Language.Expr.Composite
+import Coal.LegacyKernel.Language.Expr.Replace
+import Coal.LegacyKernel.Language.Expr.Syntax
+import Coal.LegacyKernel.Language.Module
+import Coal.LegacyKernel.Language.Object
+import Coal.LegacyKernel.Language.Op
+import Coal.LegacyKernel.Language.Prim
+import Coal.LegacyKernel.Language.Type
+import Coal.LegacyKernel.Language.Type.Arrow
+import Coal.LegacyKernel.Language.Type.Row
+import Coal.LegacyKernel.Language.Type.Syntax
+import Coal.LegacyKernel.Language.Typed
