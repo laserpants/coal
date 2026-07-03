@@ -68,8 +68,8 @@ letBindingSimplification m =
 simplifyObject :: Object Type -> Object Type
 simplifyObject obj =
   case obj of
-    DFunction name params body ->
-      DFunction name params (simplifyExpr Map.empty body)
+    DFunction scope name params body ->
+      DFunction scope name params (simplifyExpr Map.empty body)
     DConstant name expr ->
       DConstant name (simplifyExpr Map.empty expr)
     DExternal{} ->

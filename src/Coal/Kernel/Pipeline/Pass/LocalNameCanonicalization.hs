@@ -56,12 +56,12 @@ localNameCanonicalization m = do
 canonicalizeObject :: (Monad m) => Object Type -> PipelineT m (Object Type)
 canonicalizeObject obj =
   case obj of
-    DFunction name params body -> do
+    DFunction scope name params body -> do
       -- Parameters at top level are NOT locally-bound in the "local name"
       -- sense; they belong to the top-level binding, so we do not rename them
       -- here. However we do rename everything inside the body.
       body' <- canonicalizeExpr Map.empty body
-      pure (DFunction name params body')
+      pure (DFunction scope name params body')
     DConstant name expr -> do
       expr' <- canonicalizeExpr Map.empty expr
       pure (DConstant name expr')

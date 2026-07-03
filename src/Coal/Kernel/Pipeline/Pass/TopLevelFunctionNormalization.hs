@@ -35,7 +35,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 
 import Coal.Kernel.Language.Expr (Expr (..))
 import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Language.Object (Object (..))
+import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Pipeline (Pass)
 
@@ -65,11 +65,11 @@ normalizeObject :: Object Type -> Object Type
 normalizeObject obj =
   case obj of
     -- Rule 1: function whose body is a lambda → merge params.
-    DFunction name params (ELam innerParams body) ->
-      DFunction name (params ++ NonEmpty.toList innerParams) body
+    DFunction scope name params (ELam innerParams body) ->
+      DFunction scope name (params ++ NonEmpty.toList innerParams) body
     -- Rule 2: constant whose RHS is a lambda → promote to function.
     DConstant name (ELam params body) ->
-      DFunction name (NonEmpty.toList params) body
+      DFunction Exported name (NonEmpty.toList params) body
     -- Everything else is already normalized.
     DFunction{} ->
       obj

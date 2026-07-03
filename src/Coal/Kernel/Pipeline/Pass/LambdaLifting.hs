@@ -50,7 +50,7 @@ import qualified Data.Set as Set
 import Coal.Kernel.FreeVars (freeVars)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Language.Object (Object (..))
+import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.HasType (foldType, typeOf)
 import Coal.Kernel.Pipeline (Pass, PipelineT, freshName)
@@ -96,7 +96,7 @@ lambdaLifting m = do
 objectNames :: Object t -> [Name]
 objectNames obj =
   case obj of
-    DFunction n _ _ -> [n]
+    DFunction _ n _ _ -> [n]
     DConstant n _ -> [n]
     DExternal n _ -> [n]
     DData _ ctors -> map fst ctors
@@ -119,10 +119,10 @@ liftObject ::
   PipelineT m (Object Type, [Object Type])
 liftObject globals obj =
   case obj of
-    DFunction name params body -> do
+    DFunction fscope name params body -> do
       let scope = Map.fromList [(n, lbl) | lbl@(Label _ n) <- params]
       (body', new) <- liftExpr globals scope body
-      pure (DFunction name params body', new)
+      pure (DFunction fscope name params body', new)
     DConstant name expr -> do
       (expr', new) <- liftExpr globals Map.empty expr
       pure (DConstant name expr', new)
@@ -187,7 +187,7 @@ liftExpr globals scope expr =
       -- 4. Build the parameter list for the lifted function.
       let allParams = fvLabels ++ NonEmpty.toList params
       let liftedFnType = foldType (typeOf body') (map typeOf allParams)
-      let liftedFn = DFunction liftedName allParams body'
+      let liftedFn = DFunction Local liftedName allParams body'
       -- 5. Build the call site expression.
       let lambdaType = foldType (typeOf body') (map typeOf (NonEmpty.toList params))
       let callSite = case NonEmpty.nonEmpty fvLabels of
@@ -306,7 +306,7 @@ liftBinding globals scope (Binding lbl e) = case e of
         -- For recursive lambdas, replace the self-reference with callSite so
         -- the lifted function calls itself by its new top-level name.
         body'' = if isRecursive then substituteVar bindingName callSite body' else body'
-        liftedFn = DFunction liftedName allParams body''
+        liftedFn = DFunction Local liftedName allParams body''
     pure (Binding lbl callSite, newFromBody ++ [liftedFn])
   _ -> do
     (e', new) <- liftExpr globals scope e

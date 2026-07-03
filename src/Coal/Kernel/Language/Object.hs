@@ -17,13 +17,25 @@ be used both before and after type checking.
 For 'DData', the first 'Name' is the type name; the list contains constructor
 names and their types, sorted lexicographically by constructor name.
 -}
-module Coal.Kernel.Language.Object (Object (..)) where
+module Coal.Kernel.Language.Object (Object (..), FunctionScope (..)) where
 
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Common (Name)
 
+{- | Visibility scope of a top-level function.
+
+'Exported' functions are visible to other modules and are emitted with
+external linkage by the code generator. 'Local' functions are private to
+their translation unit (e.g. lambda-lifted closures) and are emitted with
+internal linkage.
+-}
+data FunctionScope
+  = Exported
+  | Local
+  deriving (Show, Eq, Ord, Read)
+
 data Object t
-  = DFunction Name [Label t] (Expr t)
+  = DFunction FunctionScope Name [Label t] (Expr t)
   | DConstant Name (Expr t)
   | DExternal Name t
   | DData Name [(Name, t)]

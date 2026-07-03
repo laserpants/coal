@@ -58,9 +58,9 @@ constructorSaturation m = do
 saturateObject :: (Monad m) => Object Type -> PipelineT m (Object Type)
 saturateObject obj =
   case obj of
-    DFunction name params body -> do
+    DFunction scope name params body -> do
       body' <- saturateExpr body
-      pure (DFunction name params body')
+      pure (DFunction scope name params body')
     DConstant name expr -> do
       expr' <- saturateExpr expr
       pure (DConstant name expr')

@@ -93,8 +93,8 @@ administrativeNormalForm m = do
 anfObject :: (Monad m) => Object Type -> PipelineT m (Object Type)
 anfObject =
   \case
-    DFunction name params body ->
-      DFunction name params <$> anfTail body
+    DFunction scope name params body ->
+      DFunction scope name params <$> anfTail body
     DConstant name expr ->
       DConstant name <$> anfTail expr
     other ->

@@ -89,7 +89,7 @@ buildGlobalEnv externTable modules = do
 
 registerObject :: GlobalEnv -> Object Type -> [(Name, Value)]
 registerObject globalEnv = \case
-  DFunction name params body ->
+  DFunction _ name params body ->
     let closure =
           Closure
             { closureName = name

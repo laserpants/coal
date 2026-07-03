@@ -24,7 +24,7 @@ import Coal.Kernel.TypeCheck.Expr (Check, checkExpr)
 checkObject :: Object Type -> Check ()
 checkObject =
   \case
-    DFunction name params body ->
+    DFunction _ name params body ->
       let bindings = [(n, t) | Label t n <- params]
        in local (setContext (InObject name) . withLocals bindings) $
             void (checkExpr body)

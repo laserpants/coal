@@ -39,7 +39,7 @@ import Common (Name)
 objectGlobalBinding :: Object Type -> Maybe (Name, IROperand)
 objectGlobalBinding =
   \case
-    DFunction name lls expr ->
+    DFunction _ name lls expr ->
       let tfun = TFun (irTypeRep (typeOf expr)) (map (irValueTypeRep . typeOf) lls)
        in Just (name, OGlobal tfun name)
     DConstant name (ELit prim)
@@ -77,7 +77,7 @@ collectImportedFunctions allModules importNames =
   [ (name, length params)
   | importName <- importNames
   , Module{moduleObjects} <- allModules
-  , DFunction name params _ <- moduleObjects
+  , DFunction _ name params _ <- moduleObjects
   , name == importName
   ]
 
@@ -89,7 +89,7 @@ Delegates to 'freeVars' from "Coal.Kernel.FreeVars"; parameters of a
 -}
 objectExprVarRefs :: Object Type -> [(Name, Type)]
 objectExprVarRefs = \case
-  DFunction _ lls expr ->
+  DFunction _ _ lls expr ->
     let paramNames = Set.fromList [n | Label _ n <- lls]
      in [(n, t) | Label t n <- Set.toList (freeVars expr), Set.notMember n paramNames]
   DConstant _ expr ->

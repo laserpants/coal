@@ -41,7 +41,7 @@ translateDefinition =
       qs <- traverse translatePattern (toList functionDefinitionPatterns)
       f <- withLocalNames (nkLabelName <$> qs) (translateExpression functionDefinitionExpression)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [NKObj.DFunction (moduleName <.> name) qs f]
+      pure [NKObj.DFunction NKObj.Exported (moduleName <.> name) qs f]
     DLet _ name LetDefinition{letDefinitionType = With{}, ..} -> do
       c <- translateExpression letDefinitionExpression
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
@@ -81,7 +81,7 @@ traitAccessor trait fn t = do
   moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
   let dict = NK.Label (NKT.TCon trait [NKT.TOpq]) "$a"
   pure $
-    NKObj.DFunction
+    NKObj.DFunction NKObj.Exported
       (moduleName <.> fn)
       [dict]
       (NK.EGet (NK.Label t fn) (NK.EVar dict))

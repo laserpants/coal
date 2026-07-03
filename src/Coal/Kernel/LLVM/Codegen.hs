@@ -53,7 +53,7 @@ import Coal.Kernel.LLVM.Runtime (callRuntime)
 import Coal.Kernel.LLVM.RuntimeDefs
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Language.Object (Object (..))
+import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
@@ -319,8 +319,8 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
                   { Constructor.constructorIndex = index
                   , Constructor.constructorFieldCount = arity ctorType
                   }
-          DFunction name lls expr -> do
-            let lnk = if "lam." `Text.isPrefixOf` name then LInternal else LExternal
+          DFunction scope name lls expr -> do
+            let lnk = toIRLinkage scope
             irFunction lnk name lls expr
             irTrampoline lnk name lls (typeOf expr)
           DConstant name (ELit prim)
@@ -356,3 +356,8 @@ irDataConstructor = Constructor.irDataConstructor
 
 irThunk :: Name -> Expr Type -> IRCodegen ()
 irThunk = Function.irThunk irValue
+
+-- | Map a kernel-language 'FunctionScope' to the corresponding LLVM linkage.
+toIRLinkage :: FunctionScope -> IRLinkage
+toIRLinkage Exported = LExternal
+toIRLinkage Local = LInternal

@@ -10,15 +10,13 @@ module Coal.Kernel.Prettyprinter.Object (
   prettyObject,
 ) where
 
-import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
-import Prettyprinter (Doc, Pretty (..), angles, line, nest, parens, punctuate, vsep, (<+>))
+import Prettyprinter (Doc, Pretty (..), line, nest, parens, punctuate, vsep, (<+>))
 
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.HasType (returnTypeOf, unfoldType)
 import Coal.Kernel.Prettyprinter.Expr (prettyExpr, prettyLabel, prettyLeadingCommaList)
-import Coal.Kernel.Prettyprinter.Type (prettyType)
 
 {- | Pretty print a top-level object.
 
@@ -43,11 +41,11 @@ prettyObject pt obj =
                   else
                     pretty ctorName
                       <> parens
-                        (mconcat $ punctuate (", ") (map pt fieldTypes))
+                        (mconcat $ punctuate ", " (map pt fieldTypes))
           firstCtor = "  = " <> prettyConstructor (head ctors)
           restCtors = map (("  | " <>) . prettyConstructor) (tail ctors)
        in vsep $ ("data " <> pt retType) : firstCtor : restCtors
-    DFunction name params body ->
+    DFunction _ name params body ->
       if length params == 1
         then -- Single param: Name(param) = body
 

@@ -57,7 +57,7 @@ moduleVars m = foldMap objectVar (moduleObjects m)
 
 objectVar :: Object Type -> Map Name Type
 objectVar = \case
-  DFunction name params body ->
+  DFunction _ name params body ->
     Map.singleton name (foldType (typeOf body) (typeOf <$> params))
   DConstant name expr ->
     Map.singleton name (typeOf expr)

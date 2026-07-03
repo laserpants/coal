@@ -36,7 +36,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Language.Object (Object (..))
+import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.Function (isFunction)
 import Coal.Kernel.Language.Type.HasType (typeOf, unfoldType)
@@ -68,17 +68,17 @@ functionResultsSaturation m = do
 saturateObject :: (Monad m) => Object Type -> PipelineT m (Object Type)
 saturateObject obj =
   case obj of
-    DFunction name params body ->
+    DFunction scope name params body ->
       if isFunction body
         then do
           (extraParams, body') <- etaExpand body
-          pure (DFunction name (params ++ extraParams) body')
+          pure (DFunction scope name (params ++ extraParams) body')
         else pure obj
     DConstant name body ->
       if isFunction body
         then do
           (extraParams, body') <- etaExpand body
-          pure (DFunction name extraParams body')
+          pure (DFunction Exported name extraParams body')
         else pure obj
     DExternal{} ->
       pure obj

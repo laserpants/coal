@@ -346,7 +346,7 @@ instance (Dot t) => Dot (Expr t) where
 instance (Dot t) => Dot (Object t) where
   toDot =
     \case
-      DFunction name params body -> do
+      DFunction _ name params body -> do
         funcId <- emitNamedShape FolderShape (Just name) "DFunction"
         emitEdgesWithLabels numberedLabels funcId params
         emitEdgeWithLabel "=" funcId body

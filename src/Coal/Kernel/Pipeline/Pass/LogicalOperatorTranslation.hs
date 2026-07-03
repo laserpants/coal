@@ -51,8 +51,8 @@ logicalOperatorTranslation m =
 translateObject :: Object Type -> Object Type
 translateObject =
   \case
-    DFunction name params body ->
-      DFunction name params (translateExpr body)
+    DFunction scope name params body ->
+      DFunction scope name params (translateExpr body)
     DConstant name expr ->
       DConstant name (translateExpr expr)
     obj@DExternal{} ->

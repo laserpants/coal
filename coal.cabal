@@ -162,6 +162,7 @@ library
       Coal.Kernel.Parser.Prim
       Coal.Kernel.Parser.Symbol
       Coal.Kernel.Parser.Type
+      Coal.Kernel.Parser.Unsafe
       Coal.Kernel.Pipeline
       Coal.Kernel.Pipeline.Invariant
       Coal.Kernel.Pipeline.Invariant.AdministrativeNormalForm

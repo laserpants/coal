@@ -54,7 +54,7 @@ checkTopLevelFunctionsNormalized obj = case obj of
         [ConstantContainsLambda name]
       _ ->
         []
-  DFunction name _ body ->
+  DFunction _ name _ body ->
     case body of
       ELam _ _ ->
         [FunctionBodyIsLambda name]

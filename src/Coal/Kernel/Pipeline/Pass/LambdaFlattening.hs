@@ -46,8 +46,8 @@ lambdaFlattening m =
 flattenObject :: Object Type -> Object Type
 flattenObject obj =
   case obj of
-    DFunction name params body ->
-      DFunction name params (flattenExpr body)
+    DFunction scope name params body ->
+      DFunction scope name params (flattenExpr body)
     DConstant name expr ->
       DConstant name (flattenExpr expr)
     DExternal{} ->

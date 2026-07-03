@@ -42,7 +42,7 @@ Returns an empty list when the invariant holds, or one error per violation.
 -}
 checkFunctionResultsSaturated :: Object Type -> [InvariantError]
 checkFunctionResultsSaturated obj = case obj of
-  DFunction name _ body ->
+  DFunction _ name _ body ->
     ([FunctionResultIsFunction name | isFunction body])
   DConstant name body ->
     [FunctionResultIsFunction name | isFunction body]

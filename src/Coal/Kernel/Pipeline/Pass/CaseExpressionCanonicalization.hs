@@ -58,8 +58,8 @@ caseExpressionCanonicalization m = do
 canonicalizeObject :: Object Type -> Object Type
 canonicalizeObject =
   \case
-    DFunction name params body ->
-      DFunction name params (canonicalizeExpr body)
+    DFunction scope name params body ->
+      DFunction scope name params (canonicalizeExpr body)
     DConstant name expr ->
       DConstant name (canonicalizeExpr expr)
     obj@DExternal{} ->

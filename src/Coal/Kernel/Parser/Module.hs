@@ -17,21 +17,19 @@ module Coal.Kernel.Parser.Module (
 
 import Control.Monad (void)
 import Data.List (sortBy)
-import qualified Data.List.NonEmpty as NonEmpty
 import Data.Ord (comparing)
 
 import Text.Megaparsec ((<|>))
 import qualified Text.Megaparsec as P
 import qualified Text.Megaparsec.Char as C
-import qualified Text.Megaparsec.Char.Lexer as L
 
 import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Language.Object (Object (..))
+import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type (..))
-import Coal.Kernel.Language.Type.HasType (foldType, unfoldType)
+import Coal.Kernel.Language.Type.HasType (foldType)
 import Coal.Kernel.Parser (Parser, lexeme, qualifiedConstructor, qualifiedName, spaces)
 import Coal.Kernel.Parser.Expr (expr, label)
-import Coal.Kernel.Parser.Symbol (angleBrackets, braces, commaSep1, equals, pipe)
+import Coal.Kernel.Parser.Symbol (braces, commaSep1, equals, pipe)
 import Coal.Kernel.Parser.Type (type_)
 import Common (Name)
 
@@ -132,7 +130,7 @@ pFunction = do
   params <- parens (commaSep1 label)
   equals
   body <- expr
-  return $ DFunction name params body
+  return $ DFunction Exported name params body
  where
   parens :: Parser a -> Parser a
   parens p = do
