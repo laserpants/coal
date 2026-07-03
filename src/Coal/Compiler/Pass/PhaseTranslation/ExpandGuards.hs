@@ -144,9 +144,17 @@ expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadat
 expandClauseGuards _ _ _ (trivialClause@EClause{clauseChoices = CPlain _ [] _ :| []} : _) =
   return trivialClause
 expandClauseGuards loc clauseType scrutinee (EClause{..} : remainingClauses) = do
-  let fallbackClause = buildFallbackClause remainingClauses
-      fallbackMatch = EMatch loc clauseType scrutinee (NonEmpty.fromList $ remainingClauses <> [fallbackClause])
-  nextExpr <- expandExpression fallbackMatch
+  -- Build the fallback expression. When there are no remaining clauses the
+  -- last guard must be `otherwise`, so nextExpr is placed in an unreachable
+  -- else-branch. Use the body of the last choice as a type-correct placeholder.
+  nextExpr <- case NonEmpty.nonEmpty remainingClauses of
+    Nothing ->
+      pure $ case NonEmpty.last clauseChoices of
+        CPlain _ _ body -> body
+    Just _ -> do
+      let fallbackClause = buildFallbackClause remainingClauses
+          fallbackMatch = EMatch loc clauseType scrutinee (NonEmpty.fromList $ remainingClauses <> [fallbackClause])
+      expandExpression fallbackMatch
   expanded <- foldrM buildGuardedIf nextExpr clauseChoices
 
   return $ EClause clauseMetadata clausePattern (CPlain loc [] expanded :| [])
@@ -159,6 +167,9 @@ expandClauseGuards loc clauseType scrutinee (EClause{..} : remainingClauses) = d
           } = last clauses
      in EClause fallbackMeta (PAny fallbackMeta (typeOf fallbackPattern)) fallbackChoices
 
+  -- `otherwise` desugars to an empty guard list — always taken, no condition.
+  buildGuardedIf (CPlain _ [] expr) _ =
+    return expr
   buildGuardedIf (CPlain loc1 guards expr) elseExpr =
     return $ EIf loc1 (typeOf elseExpr) combinedGuard expr elseExpr
    where
