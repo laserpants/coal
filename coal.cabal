@@ -122,6 +122,7 @@ library
       Coal.Compiler.TypeInference.Errors
       Coal.Debug
       Coal.Graphviz.Dot
+      Coal.Kernel.Builtin.Objects
       Coal.Kernel.Compiler
       Coal.Kernel.Eval
       Coal.Kernel.Eval.Expr
