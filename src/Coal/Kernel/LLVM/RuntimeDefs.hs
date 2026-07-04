@@ -127,4 +127,4 @@ rtAlloc = rtFun "rt_alloc" TPtr [i32]
 rtRecordEmpty, rtRecordExtend, rtRecordLookup :: RuntimeFun
 rtRecordEmpty = rtFun "rt_record_empty" TPtr []
 rtRecordExtend = rtFun "rt_record_extend" TPtr [TPtr, TPtr, TPtr]
-rtRecordLookup = rtFun "rt_record_lookup" TPtr [TPtr, TPtr, TPtr]
+rtRecordLookup = rtFun "rt_record_lookup" TPtr [TPtr, TPtr]
