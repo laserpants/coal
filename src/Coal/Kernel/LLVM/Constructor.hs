@@ -25,16 +25,19 @@ module Coal.Kernel.LLVM.Constructor (
 ) where
 
 import Control.Monad (forM, forM_)
-import Control.Monad.Reader (local)
+import Control.Monad.Except (throwError)
+import Control.Monad.Reader (asks, local)
+import Data.Char (isUpper)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 
 import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
-import Coal.Kernel.LLVM.Monad (IRCodegen)
+import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..), IRCodegenError (..))
 import Coal.Kernel.LLVM.Runtime (callRuntime)
 import Coal.Kernel.LLVM.RuntimeDefs (rtAlloc)
 import Coal.Kernel.Language.Expr (Clause (..), Expr (..), Label (..))
@@ -108,26 +111,61 @@ irClause irTail op (Clause (Label _ con :| lls) body) = do
           r2 <- load TPtr r1 <##> name
           r3 <- Boxing.irUnbox t r2
           return (name, r3)
-      local (Environment.insertMultiple bound) (irTail body)
+      local (\e -> e{codegenVarEnv = Environment.insertMultiple bound (codegenVarEnv e)}) (irTail body)
   return label
 
 {- | Generate a switch statement for pattern matching on a data constructor.
 Loads the constructor index (tag) from the scrutinee and dispatches to the
 appropriate clause.
+
+If the last clause is a wildcard (head label name is not an uppercase-initial
+constructor name), it is compiled as the @switch@ default arm. All other
+clauses are assigned switch values by their constructor tag, looked up from
+'codegenTagEnv'. The canonicalization pass guarantees that named constructor
+clauses are sorted in lexicographic order (matching the tag assignment order
+from the @data@ declaration), and wildcards always sort last.
 -}
 irCase :: (Expr Type -> IRCodegen IROperand) -> (Expr Type -> IRCodegen ()) -> Expr Type -> NonEmpty (Clause Type) -> IRCodegen ()
 irCase irValue irTail e1 cs = mdo
   r1 <- irValue e1
   r2 <- loadConstructorIndex r1
-  switch r2 defaultL blocks
-  blocks <- forM (zip [0 ..] (NonEmpty.toList cs)) $
-    \(i, clause) -> do
+  switch r2 defaultL namedBlocks
+  namedBlocks <- forM namedClauses $
+    \clause@(Clause (Label _ con :| _) _) -> do
+      tagMap <- asks codegenTagEnv
+      tag <- case Map.lookup con tagMap of
+        Just idx -> return idx
+        Nothing -> throwError (UnboundVariable con)
       label <- irClause irTail r1 clause
-      return (CInt 32 i, label)
+      return (CInt 32 (fromIntegral tag), label)
   defaultL <- block "default"
-  unreachable
+  case mbWildcard of
+    Just (Clause _ body) -> irTail body
+    Nothing -> unreachable
  where
+  (namedClauses, mbWildcard) = splitWildcard (NonEmpty.toList cs)
+
   loadConstructorIndex :: IROperand -> IRCodegen IROperand
   loadConstructorIndex op = do
     tag <- gep (TStruct [i32]) op [O.i32 @Int 0, O.i32 @Int 0]
     load i32 tag
+
+{- | Returns @(namedClauses, Just wildcard)@ if the last clause is a wildcard
+(head label name is not an uppercase-initial constructor), otherwise
+@(allClauses, Nothing)@.
+-}
+splitWildcard :: [Clause t] -> ([Clause t], Maybe (Clause t))
+splitWildcard [] = ([], Nothing)
+splitWildcard clauses
+  | isWildcard (last clauses) = (init clauses, Just (last clauses))
+  | otherwise = (clauses, Nothing)
+
+{- | A wildcard clause has a head-label name whose final component does not
+start with uppercase (after stripping any leading @$@). This mirrors the
+'qualifiedConstructor' parser rule, which requires that final component to
+start with uppercase.
+-}
+isWildcard :: Clause t -> Bool
+isWildcard (Clause (Label _ name :| _) _) =
+  let lastComp = Text.dropWhile (== '$') $ last $ Text.splitOn "." name
+   in Text.null lastComp || not (isUpper (Text.head lastComp))

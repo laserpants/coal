@@ -16,7 +16,7 @@ IR builder.
 -}
 module Coal.Kernel.LLVM.Monad (
   IRCodegenError (..),
-  IRCodegenEnv,
+  IRCodegenEnv (..),
   IRCodegenT (..),
   IRCodegen,
   runIRCodegenT,
@@ -48,7 +48,16 @@ data IRCodegenError
   | IRMissingModules [(Name, Name)]
   deriving (Show, Eq, Ord)
 
-type IRCodegenEnv = Environment IROperand
+data IRCodegenEnv = IRCodegenEnv
+  { codegenVarEnv :: Environment IROperand
+  , codegenTagEnv :: Map Name Int
+  }
+
+instance Semigroup IRCodegenEnv where
+  e1 <> e2 = IRCodegenEnv (codegenVarEnv e1 <> codegenVarEnv e2) (codegenTagEnv e1 <> codegenTagEnv e2)
+
+instance Monoid IRCodegenEnv where
+  mempty = IRCodegenEnv mempty Map.empty
 
 newtype IRCodegenT m a = IRCodegen
   { getIRCodegen :: StateT (Set Name, Int, Map ByteString Name) (ExceptT IRCodegenError (ReaderT IRCodegenEnv m)) a

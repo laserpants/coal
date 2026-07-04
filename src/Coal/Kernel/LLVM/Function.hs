@@ -31,7 +31,7 @@ import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
-import Coal.Kernel.LLVM.Monad (IRCodegen)
+import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..))
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.HasType (HasType (typeOf))
@@ -48,7 +48,7 @@ irFunction :: IRLinkage -> (Expr Type -> IRCodegen ()) -> Name -> [Label Type] -
 irFunction linkage irTail name lls expr =
   define rty name argts linkage [] $
     local
-      (Environment.insertMultiple [(n, OLocal t n) | (t, n) <- argts])
+      (\e -> e{codegenVarEnv = Environment.insertMultiple [(n, OLocal t n) | (t, n) <- argts] (codegenVarEnv e)})
       (irTail expr)
  where
   rty = Boxing.irTypeRep (typeOf expr)

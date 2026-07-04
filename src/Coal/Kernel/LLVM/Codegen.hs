@@ -29,10 +29,11 @@ proper terminator instruction, eliminating unnecessary temporary variables.
 module Coal.Kernel.LLVM.Codegen (irModule) where
 
 import Control.Monad.Except (forM_, throwError, when)
-import Control.Monad.Reader (ask, local)
+import Control.Monad.Reader (asks, local)
 import Control.Monad.State (gets, modify)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
+import qualified Data.Map.Strict as Map
 import Data.Maybe (mapMaybe)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
@@ -72,7 +73,7 @@ irCase = Constructor.irCase irValue irTail
 
 nameLookup :: Type -> Name -> IRCodegen IROperand
 nameLookup t name = do
-  env <- ask
+  env <- asks codegenVarEnv
   case Environment.lookup name env of
     Nothing ->
       case irTypeRep t of
@@ -108,7 +109,7 @@ irLet eval vs e = foldr step (eval e) vs
  where
   step (Binding (Label _ name) e1) cont = do
     r1 <- irValue e1
-    local (Environment.insert name r1) cont
+    local (\env -> env{codegenVarEnv = Environment.insert name r1 (codegenVarEnv env)}) cont
 
 irTail :: Expr Type -> IRCodegen ()
 irTail =
@@ -294,6 +295,13 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
     forM_ (collectImportedFunctions allModules moduleImports) $
       uncurry irImportedFunctionTrampoline
     let bindings = mapMaybe objectGlobalBinding moduleObjects
+        allTagBindings =
+          Map.fromList
+            [ (ctorName, idx)
+            | Module{moduleObjects = objs} <- allModules
+            , DData _ ctors <- objs
+            , (idx, (ctorName, _)) <- zip [0 ..] ctors
+            ]
         boundNames = Set.fromList (map fst bindings)
         importedNames = Set.fromList [n | (n, _) <- collectImportedFunctions allModules moduleImports]
         excludedNames = Set.union boundNames importedNames
@@ -309,34 +317,40 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
       , not (Set.member name excludedNames)
       ]
       (uncurry irInlineExternalTrampoline)
-    local (Environment.insertMultiple bindings) $
-      forM_ moduleObjects $
-        \case
-          DData _ ctors ->
-            forM_ (zip [0 ..] ctors) $ \(index, (ctorName, ctorType)) ->
-              irDataConstructor ctorName $
-                Constructor.ConstructorDefinition
-                  { Constructor.constructorIndex = index
-                  , Constructor.constructorFieldCount = arity ctorType
-                  }
-          DFunction scope name lls expr -> do
-            let lnk = toIRLinkage scope
-            irFunction lnk name lls expr
-            irTrampoline lnk name lls (typeOf expr)
-          DConstant name (ELit prim)
-            | Just (irt, irc) <- primToIRConstant prim ->
-                emitGlobal (IRConstant LExternal name irt irc)
-          DConstant name expr ->
-            irThunk name expr
-          DExternal name t ->
-            case irTypeRep t of
-              TFun rty ts -> do
-                declare name rty ts
-                let (argTypes, retType) = unsnoc (unfoldType t)
-                    labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
-                irTrampoline LInternal name labels retType
-              _ ->
-                return ()
+    local
+      ( \e ->
+          e
+            { codegenVarEnv = Environment.insertMultiple bindings (codegenVarEnv e)
+            , codegenTagEnv = allTagBindings <> codegenTagEnv e
+            }
+      )
+      $ forM_ moduleObjects
+      $ \case
+        DData _ ctors ->
+          forM_ (zip [0 ..] ctors) $ \(index, (ctorName, ctorType)) ->
+            irDataConstructor ctorName $
+              Constructor.ConstructorDefinition
+                { Constructor.constructorIndex = index
+                , Constructor.constructorFieldCount = arity ctorType
+                }
+        DFunction scope name lls expr -> do
+          let lnk = toIRLinkage scope
+          irFunction lnk name lls expr
+          irTrampoline lnk name lls (typeOf expr)
+        DConstant name (ELit prim)
+          | Just (irt, irc) <- primToIRConstant prim ->
+              emitGlobal (IRConstant LExternal name irt irc)
+        DConstant name expr ->
+          irThunk name expr
+        DExternal name t ->
+          case irTypeRep t of
+            TFun rty ts -> do
+              declare name rty ts
+              let (argTypes, retType) = unsnoc (unfoldType t)
+                  labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
+              irTrampoline LInternal name labels retType
+            _ ->
+              return ()
     -- Emit the C main entry point for the program's Main module.
     when (moduleName == "Main") $ do
       declare "rt_runtime_init" TVoid []
