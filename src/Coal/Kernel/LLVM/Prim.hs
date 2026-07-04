@@ -255,7 +255,7 @@ irPrim =
     PDouble d ->
       return (O.double d)
     PUnit ->
-      return O.true
+      return (O.nullPtr TPtr)
     PChar c ->
       return (O.i32 c)
     PString bs -> do

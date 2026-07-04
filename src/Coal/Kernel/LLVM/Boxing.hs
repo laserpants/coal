@@ -55,7 +55,7 @@ typeToIRType =
     TCon "bool" [] ->
       i1
     TCon "unit" [] ->
-      i1
+      TPtr
     TCon "int32" [] ->
       i32
     TCon "int64" [] ->
@@ -94,7 +94,7 @@ irBox t op =
     TCon "bool" [] ->
       callRuntime rtBoolBox [op]
     TCon "unit" [] ->
-      callRuntime rtBoolBox [op]
+      return op
     TCon "char" [] ->
       callRuntime rtCharBox [op]
     TCon "float" [] ->
@@ -121,7 +121,7 @@ irUnbox t op =
     TCon "bool" [] ->
       callRuntime rtBoolUnbox [op]
     TCon "unit" [] ->
-      callRuntime rtBoolUnbox [op]
+      return op
     TCon "char" [] ->
       callRuntime rtCharUnbox [op]
     TCon "float" [] ->
