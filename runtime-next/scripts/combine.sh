@@ -78,7 +78,8 @@ for header in "${HEADERS[@]}"; do
         -e '/^#define COAL_.*_H$/d' \
         -e '/^#include "coal\//d' \
         -e '/^#include "[a-z_]*\.h"$/d' \
-        "$INCLUDE_DIR/$header" | sed '$d' >> "$OUTPUT_FILE"
+        -e '/^#endif$/d' \
+        "$INCLUDE_DIR/$header" >> "$OUTPUT_FILE"
 
     echo "" >> "$OUTPUT_FILE"
 done

@@ -4,9 +4,16 @@
 #include <stdint.h>
 
 /**
+ * Magic number for closure type identification.
+ * Used to verify that a pointer is actually a closure.
+ */
+#define RT_CLOSURE_MAGIC 0x12345678
+
+/**
  * Closure structure containing a function pointer and captured arguments.
  */
 typedef struct rt_closure {
+    int32_t magic;     /** Magic number for type checking (RT_CLOSURE_MAGIC) */
     int32_t captured;  /** Number of captured arguments */
     int32_t remaining; /** Number of arguments still needed */
     void *fn;          /** Function pointer */
@@ -40,3 +47,4 @@ rt_closure_t *rt_closure_extend(rt_closure_t *closure, int32_t argc,
                                 void **args);
 
 #endif
+

@@ -50,8 +50,19 @@ rt_apply(void *closure_ptr, int32_t argc, void **args)
 
         /* Apply remaining arguments to the result */
         int32_t remaining_argc = argc - needed;
-        void **remaining_args = args + needed;
+        if (remaining_argc > 0) {
+            /* Check if result is a closure before applying more arguments */
+            rt_closure_t *result_closure = (rt_closure_t *) result;
+            /* Verify it looks like a closure by checking magic number */
+            if (result_closure->magic != RT_CLOSURE_MAGIC) {
+                rt_panic(
+                    "Over-application: function returned non-closure value");
+            }
+            void **remaining_args = args + needed;
+            return rt_apply(result, remaining_argc, remaining_args);
+        }
 
-        return rt_apply(result, remaining_argc, remaining_args);
+        return result;
     }
 }
+

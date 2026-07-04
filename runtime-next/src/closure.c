@@ -7,8 +7,7 @@
 #include <string.h>
 
 /* Verify flexible array member doesn't add to struct size */
-_Static_assert(sizeof(rt_closure_t) ==
-                   sizeof(int32_t) + sizeof(int32_t) + sizeof(void *),
+_Static_assert(sizeof(rt_closure_t) == 4 * sizeof(int32_t) + sizeof(void *),
                "Flexible array should not add to struct size");
 
 rt_closure_t *
@@ -26,6 +25,7 @@ rt_closure_new(void *fn, int32_t arity)
         rt_panic("Out of memory in rt_closure_new");
     }
 
+    closure->magic = RT_CLOSURE_MAGIC;
     closure->fn = fn;
     closure->captured = 0;
     closure->remaining = arity;
@@ -57,6 +57,7 @@ rt_closure_extend(rt_closure_t *closure, int32_t argc, void **args)
         rt_panic("Out of memory in rt_closure_extend");
     }
 
+    new_closure->magic = RT_CLOSURE_MAGIC;
     new_closure->fn = closure->fn;
     new_closure->captured = new_captured;
     new_closure->remaining = new_remaining;
