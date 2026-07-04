@@ -174,9 +174,9 @@ builtinDData =
       , ("$Zero", NKT.TCon "nat" [])
       ]
     :
-    -- Tuples $Tuple1 .. $Tuple8 (each type has one constructor at tag 0)
+    -- Tuples $Tuple2 .. $Tuple8 (each type has one constructor at tag 0)
     [ NKObj.DData
       ("tuple" <> showt n)
       [("$Tuple" <> showt n, foldr NKC.arrow (NKT.TCon "tuple" (replicate n NKT.TOpq)) (replicate n NKT.TOpq))]
-    | n <- [1 .. 8 :: Int]
+    | n <- [2 .. 8 :: Int]
     ]
