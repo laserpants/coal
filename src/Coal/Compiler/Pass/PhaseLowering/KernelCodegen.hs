@@ -1,7 +1,5 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TupleSections #-}
 
 {- | New-kernel LLVM codegen pass.
@@ -21,6 +19,7 @@ import Coal.Compiler.Pass (Pass (..), tickBar)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State
 import Coal.Debug (writeDebugFile)
+import qualified Coal.Kernel.Builtin.Objects as Builtin
 import qualified Coal.Kernel.Compiler as NK
 import Coal.Kernel.Language.Module (Module (..))
 import qualified Coal.Kernel.Language.Object as NKObj
@@ -30,7 +29,6 @@ import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Coal.Language.Module.Path (principalPath)
 import Control.Exception (SomeException, try)
 import Control.Monad (forM_, when)
-import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
@@ -49,12 +47,12 @@ import qualified System.Process.ByteString as ProcessBS
 import TextShow (showt)
 
 passKernelCodegen ::
-  (MonadIO m, MonadMask m) =>
+  (MonadIO m) =>
   Pass Metadata m [BuildEnvelope (Module NKT.Type)] [(Name, ByteString)]
 passKernelCodegen = Pass{runPass = pass}
 
 pass ::
-  (MonadIO m, MonadMask m) =>
+  (MonadIO m) =>
   [BuildEnvelope (Module NKT.Type)] ->
   CompilerT Metadata m [(Name, ByteString)]
 pass envelopes = do
@@ -79,11 +77,14 @@ pass envelopes = do
 
   -- Inject built-in constructor DData into every source module so the LLVM
   -- codegen emits the required struct type declarations and make_% functions.
-  let augmented = map (\m -> m{moduleObjects = builtinObjects <> moduleObjects m}) (snd <$> sources)
+  -- Also inject into the Builtin$ module itself, since it uses $Cons/$Nil etc.
+  let injectDData m = m{moduleObjects = builtinDData <> moduleObjects m}
+      builtinMod = injectDData Builtin.builtinObjects
+      augmented = map injectDData (snd <$> sources)
 
   -- Run the new-kernel compiler purely on all source modules together
   -- (cross-module context is required for LLVM codegen).
-  irs <- case NK.runCompiler (NK.compileModules augmented) of
+  irs <- case NK.runCompiler (NK.compileModules (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError
@@ -91,7 +92,8 @@ pass envelopes = do
       pure irs
 
   -- Assemble each module's LLVM IR to bitcode via llvm-as.
-  let named = zip (fst <$> sources) irs
+  -- irs[0] is Builtin$'s IR; irs[1..n] correspond to augmented[0..n-1].
+  let named = ("Builtin$", head irs) : zip (fst <$> sources) (tail irs)
   results <- liftIO $
     withSystemTempDirectory "coal-build-nk" $ \tmpDir ->
       traverse (assembleOne configGenerateLLVMOutput tmpDir) named
@@ -142,17 +144,17 @@ nameToPath = map (\c -> if c == '.' then '_' else c) . Text.unpack
 
 {- | Built-in constructor 'DData' objects injected into every source module.
 
-The LLVM codegen emits a struct type declaration and a @make_%@ function
-for each constructor that appears in a 'DData'. Built-in constructors
-($Nil, $Cons, $Record, $TupleN) are synthesised at the expression level
-and never arise from a 'DType' definition, so they must be injected here.
+Distinct from 'Coal.Kernel.Builtin.Objects.builtinObjects' (the full builtin
+function module): this list only provides the struct type declarations and
+@make_%@ constructor functions for built-in data constructors whose DData is
+never produced by normal @DType@ translation.
 
-Constructors within each 'DData' are listed in lexicographic order because
+Constructors are listed in lexicographic order because
 'CaseExpressionCanonicalization' sorts 'ECase' clauses lexicographically
 and the LLVM codegen assigns switch tags by clause position.
 -}
-builtinObjects :: [NKObj.Object NKT.Type]
-builtinObjects =
+builtinDData :: [NKObj.Object NKT.Type]
+builtinDData =
   -- List: $Cons (tag 0) < $Nil (tag 1) lexicographically
   NKObj.DData
     "list"

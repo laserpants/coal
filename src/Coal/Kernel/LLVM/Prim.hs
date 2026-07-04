@@ -32,7 +32,6 @@ import qualified Data.Text.Encoding as Text
 import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
-import Coal.Kernel.LLVM.Boxing (irBox, irUnbox)
 import Coal.Kernel.LLVM.Monad (IRCodegen)
 import Coal.Kernel.LLVM.Runtime (callRuntime)
 import Coal.Kernel.LLVM.RuntimeDefs (rtBignumNew, rtStringNew)
@@ -40,7 +39,6 @@ import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type)
-import qualified Coal.Kernel.Language.Type.Constructors as T
 
 irOp :: (Expr Type -> IRCodegen IROperand) -> Op (Expr Type) -> IRCodegen IROperand
 irOp irValue =
@@ -54,19 +52,13 @@ irOp irValue =
       o2 <- irValue e2
       add i64 o1 o2
     OAddFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
-      r <- fadd TFloat o1 o2
-      irBox T.float r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fadd TFloat o1 o2
     OAddDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
-      r <- fadd TDouble o1 o2
-      irBox T.double r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fadd TDouble o1 o2
     OSubInt32 e1 e2 -> do
       o1 <- irValue e1
       o2 <- irValue e2
@@ -76,19 +68,13 @@ irOp irValue =
       o2 <- irValue e2
       sub i64 o1 o2
     OSubFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
-      r <- fsub TFloat o1 o2
-      irBox T.float r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fsub TFloat o1 o2
     OSubDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
-      r <- fsub TDouble o1 o2
-      irBox T.double r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fsub TDouble o1 o2
     OMulInt32 e1 e2 -> do
       o1 <- irValue e1
       o2 <- irValue e2
@@ -98,19 +84,13 @@ irOp irValue =
       o2 <- irValue e2
       mul i64 o1 o2
     OMulFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
-      r <- fmul TFloat o1 o2
-      irBox T.float r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fmul TFloat o1 o2
     OMulDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
-      r <- fmul TDouble o1 o2
-      irBox T.double r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fmul TDouble o1 o2
     ODivInt32 e1 e2 -> do
       o1 <- irValue e1
       o2 <- irValue e2
@@ -120,19 +100,13 @@ irOp irValue =
       o2 <- irValue e2
       udiv i64 o1 o2
     ODivFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
-      r <- fdiv TFloat o1 o2
-      irBox T.float r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fdiv TFloat o1 o2
     ODivDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
-      r <- fdiv TDouble o1 o2
-      irBox T.double r
+      o1 <- irValue e1
+      o2 <- irValue e2
+      fdiv TDouble o1 o2
     OEqInt32 e1 e2 -> do
       o1 <- irValue e1
       o2 <- irValue e2
@@ -142,16 +116,12 @@ irOp irValue =
       o2 <- irValue e2
       icmp ICmpEq i64 o1 o2
     OEqFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOEq TFloat o1 o2
     OEqDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOEq TDouble o1 o2
     OEqChar e1 e2 -> do
       o1 <- irValue e1
@@ -170,16 +140,12 @@ irOp irValue =
       o2 <- irValue e2
       icmp ICmpNe i64 o1 o2
     ONeFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpONe TFloat o1 o2
     ONeDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpONe TDouble o1 o2
     ONeChar e1 e2 -> do
       o1 <- irValue e1
@@ -198,16 +164,12 @@ irOp irValue =
       o2 <- irValue e2
       icmp ICmpSLt i64 o1 o2
     OLtFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOLt TFloat o1 o2
     OLtDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOLt TDouble o1 o2
     OLteInt32 e1 e2 -> do
       o1 <- irValue e1
@@ -218,16 +180,12 @@ irOp irValue =
       o2 <- irValue e2
       icmp ICmpSLe i64 o1 o2
     OLteFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOLe TFloat o1 o2
     OLteDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOLe TDouble o1 o2
     OGtInt32 e1 e2 -> do
       o1 <- irValue e1
@@ -238,16 +196,12 @@ irOp irValue =
       o2 <- irValue e2
       icmp ICmpSGt i64 o1 o2
     OGtFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOGt TFloat o1 o2
     OGtDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOGt TDouble o1 o2
     OGteInt32 e1 e2 -> do
       o1 <- irValue e1
@@ -258,16 +212,12 @@ irOp irValue =
       o2 <- irValue e2
       icmp ICmpSGe i64 o1 o2
     OGteFloat e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.float ptr1
-      o2 <- irUnbox T.float ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOGe TFloat o1 o2
     OGteDouble e1 e2 -> do
-      ptr1 <- irValue e1
-      ptr2 <- irValue e2
-      o1 <- irUnbox T.double ptr1
-      o2 <- irUnbox T.double ptr2
+      o1 <- irValue e1
+      o2 <- irValue e2
       fcmp FCmpOGe TDouble o1 o2
     ONot e -> do
       o1 <- irValue e
@@ -279,15 +229,11 @@ irOp irValue =
       o1 <- irValue e
       sub i64 (O.i64 @Int 0) o1
     ONegFloat e -> do
-      ptr1 <- irValue e
-      o1 <- irUnbox T.float ptr1
-      r <- fneg TFloat o1
-      irBox T.float r
+      o1 <- irValue e
+      fneg TFloat o1
     ONegDouble e -> do
-      ptr1 <- irValue e
-      o1 <- irUnbox T.double ptr1
-      r <- fneg TDouble o1
-      irBox T.double r
+      o1 <- irValue e
+      fneg TDouble o1
     OAnd{} ->
       error "Internal error: Unexpected OAnd"
     OOr{} ->
@@ -305,9 +251,9 @@ irPrim =
     PInt64 n ->
       return (O.i64 n)
     PFloat f ->
-      irBox T.float (O.float f)
+      return (O.float f)
     PDouble d ->
-      irBox T.double (O.double d)
+      return (O.double d)
     PUnit ->
       return O.true
     PChar c ->

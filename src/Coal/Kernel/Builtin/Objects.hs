@@ -44,6 +44,12 @@ objectList =
       , ("GreaterThan", NKT.TCon "Ordering" [])
       , ("LessThan", NKT.TCon "Ordering" [])
       ]
+  , -- Machine: single constructor taking one opaque argument (the state record).
+    -- Declared here so Builtin$ bodies can use the unqualified name.
+    DData
+      "Machine"
+      [ ("Machine", NKC.arrow NKT.TOpq (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]))
+      ]
   , DFunction
       Exported
       "Builtin$.operator$__not"

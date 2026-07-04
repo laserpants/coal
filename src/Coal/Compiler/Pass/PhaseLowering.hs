@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Pass.PhaseLowering (phaseLowering) where
 
@@ -15,7 +14,6 @@ import Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen)
 import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)
 import Coal.Compiler.Pass.PhaseLowering.KernelTranslateNew (passKernelTranslateNew)
 import Coal.Compiler.Pass.PhaseLowering.LLVMOutput (passLLVMOutput)
-import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State (CompilerState (..))
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module
@@ -56,15 +54,7 @@ phaseLoweringLegacy =
     >-> passKernelCode
     >-> passLLVMOutput
 
-phaseLoweringNew :: (MonadIO m, MonadMask m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
+phaseLoweringNew :: (MonadIO m) => Pass Metadata m [BuildEnvelope (Module Metadata Kind IndexedType)] [(Name, ByteString)]
 phaseLoweringNew =
-  Pass
-    { runPass = \input -> do
-        -- Compile the new-kernel modules.
-        newResult <- runPass (mapPass passKernelTranslateNew >-> passKernelCodegen) input
-        -- Also run the legacy builtin/closure pipeline with no source modules so
-        -- that Builtin$ and the closures module are linked in.  The new kernel uses
-        -- the same C runtime and closure-apply ABI as the legacy kernel.
-        builtinResult <- runPass (passKernelCode >-> passLLVMOutput) []
-        pure (builtinResult <> newResult)
-    }
+  mapPass passKernelTranslateNew
+    >-> passKernelCodegen
