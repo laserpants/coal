@@ -101,24 +101,28 @@ translateExpression =
       d2 <- withLocalNames [n1, n2] (translateExpression e2)
       let kft1 = translateType ft1
           kft2 = translateType ft2
-          t1 =
-            case NKHT.typeOf d1 of
-              NKT.TCon _ [r] ->
-                r
-              q ->
-                -- TODO: should throw error
-                q -- error (show q) -- "Implementation error"
-          unwrapped =
-            NK.ECase
-              t1
-              d1
-              ( NK.Clause
-                  (NK.Label (NKT.TCon "record" [t1]) "$Record" :| [NK.Label t1 "$row"])
-                  (NK.EVar (NK.Label t1 "$row"))
-                  :| []
-              )
-          fieldBinding = NK.Binding (NK.Label kft1 n1) (NK.EGet (NK.Label kft1 name0) unwrapped)
-          tailBinding = NK.Binding (NK.Label kft2 n2) unwrapped
+
+          fieldBinding = NK.Binding (NK.Label kft1 n1) (NK.EGet (NK.Label kft1 name0) d1)
+          tailBinding = NK.Binding (NK.Label kft2 n2) d1
+
+      --          t1 =
+      --            case NKHT.typeOf d1 of
+      --              NKT.TCon _ [r] ->
+      --                r
+      --              q ->
+      --                -- TODO: should throw error
+      --                q -- error (show q) -- "Implementation error"
+      --          unwrapped =
+      --            NK.ECase
+      --              t1
+      --              d1
+      --              ( NK.Clause
+      --                  (NK.Label (NKT.TCon "record" [t1]) "$Record" :| [NK.Label t1 "$row"])
+      --                  (NK.EVar (NK.Label t1 "$row"))
+      --                  :| []
+      --              )
+      --          fieldBinding = NK.Binding (NK.Label kft1 n1) (NK.EGet (NK.Label kft1 name0) unwrapped)
+      --          tailBinding = NK.Binding (NK.Label kft2 n2) unwrapped
       pure (NK.ELet (fieldBinding :| [tailBinding]) d2)
     ETraitInstance _ t trait ->
       pure (NK.EVar (NK.Label (translateType t) (dictionaryLabel trait)))

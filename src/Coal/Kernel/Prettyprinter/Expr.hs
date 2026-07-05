@@ -22,6 +22,7 @@ module Coal.Kernel.Prettyprinter.Expr (
   prettyLeadingCommaList,
 ) where
 
+import Data.List (intersperse)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Text (Text)
 
@@ -68,7 +69,7 @@ prettyExpr pt expr =
         <> nest
           2
           ( line
-              <> vsep (punctuate (";" <> line) (map (prettyBinding pt) (NonEmpty.toList bindings)))
+              <> vsep (intersperse ";" (map (prettyBinding pt) (NonEmpty.toList bindings)))
               <> line
               <> "in"
               <> nest 2 (line <> prettyExpr pt body)
@@ -164,12 +165,6 @@ prettyCommaSep :: [a] -> (a -> Doc ann) -> Doc ann
 prettyCommaSep [] _ = mempty
 prettyCommaSep [x] f = f x
 prettyCommaSep (x : xs) f = f x <> "," <+> prettyCommaSep xs f
-
--- | Helper: punctuate a list with a separator
-punctuate :: Doc ann -> [Doc ann] -> [Doc ann]
-punctuate _ [] = []
-punctuate _ [x] = [x]
-punctuate sep (x : xs) = (x <> sep) : punctuate sep xs
 
 {- | Helper: render a list with leading commas (manual format style)
 Renders as:
