@@ -7,8 +7,8 @@ module Coal.Compiler.Kernel.Translate.Pattern (translatePattern) where
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
-import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Language
+import qualified Coal.LegacyKernel.Language as Kernel
 import Data.Data (Data)
 
 translatePattern :: (Monad m, Data a) => Pattern a k IndexedType -> CompilerT a m (Label Kernel.Type)

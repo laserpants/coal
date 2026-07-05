@@ -7,9 +7,9 @@ module Coal.Compiler.Kernel.Translate.Operator (translateOperator) where
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Language
 import Coal.LegacyKernel.Compiler (KernelExpr)
 import qualified Coal.LegacyKernel.Language as Kernel
-import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 

@@ -20,11 +20,11 @@ module Coal.Graphviz.Dot (Dot (..), generateDotSyntax) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
-import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Language
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (principalPath)
+import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Pretty (CoalPretty (..))
 import Control.Monad.State (State, forM, forM_, modify, runState)
 import Data.Foldable (foldrM)

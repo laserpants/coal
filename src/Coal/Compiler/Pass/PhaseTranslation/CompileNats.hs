@@ -45,8 +45,8 @@ import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.LegacyKernel.Builtin.Objects (builtinInstance)
 import Coal.Language
+import Coal.LegacyKernel.Builtin.Objects (builtinInstance)
 import Control.Monad ((<=<))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)

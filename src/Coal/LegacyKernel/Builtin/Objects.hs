@@ -5,10 +5,10 @@ module Coal.LegacyKernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
 import Coal.Common.Label (Label (..))
 import qualified Coal.Compiler.Builtin.Traits as Trait
+import Coal.Language
 import Coal.LegacyKernel.Language (Module (..), Object (..), char, opaque)
 import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.LegacyKernel.Parser.Expr (expr)
-import Coal.Language
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name)

@@ -15,9 +15,9 @@ import Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive)
 import Coal.Compiler.Kernel.Translate.Record (extractRow, translateRecord)
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Language
 import Coal.LegacyKernel.Compiler (KernelExpr)
 import qualified Coal.LegacyKernel.Language as Kernel
-import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Text as Text

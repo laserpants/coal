@@ -12,13 +12,14 @@ import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language.Expr as NK
 import qualified Coal.Kernel.Language.Object as NKObj
 import qualified Coal.Kernel.Language.Type as NKT
+import qualified Coal.Kernel.Language.Type.Constructors as T
 import Coal.Language
 import Control.Monad (forM)
 import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
-import Data.List.NonEmpty (toList)
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Name, (<.>))
 
 type NKObject = NKObj.Object NKT.Type
@@ -36,7 +37,7 @@ translateDefinition =
             [ (moduleName <.> cName, translateType cType)
             | DataConstructor cName _ (Forall _ _ cType) <- ctors
             ]
-      pure (if null ctorPairs then [] else [NKObj.DData (moduleName <.> typeName) ctorPairs])
+      pure ([NKObj.DData (moduleName <.> typeName) ctorPairs | not (null ctorPairs)])
     DFunction _ name FunctionDefinition{..} -> do
       qs <- traverse translatePattern (toList functionDefinitionPatterns)
       f <- withLocalNames (nkLabelName <$> qs) (translateExpression functionDefinitionExpression)
@@ -80,11 +81,22 @@ traitAccessor :: (Monad m) => Name -> Name -> NKT.Type -> CompilerT a m NKObject
 traitAccessor trait fn t = do
   moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
   let dict = NK.Label (NKT.TCon trait [NKT.TOpq]) "$a"
+      rt = NKT.RExt fn t NKT.TOpq
+      row = NK.Label rt "$r"
   pure $
-    NKObj.DFunction NKObj.Exported
+    NKObj.DFunction
+      NKObj.Exported
       (moduleName <.> fn)
       [dict]
-      (NK.EGet (NK.Label t fn) (NK.EVar dict))
+      ( NK.ECase
+          t
+          (NK.EVar dict)
+          ( NK.Clause
+              (NK.Label (rt `T.arrow` NKT.TCon "record" [rt]) "$Record" :| [row])
+              (NK.EGet (NK.Label t fn) (NK.EVar row))
+              :| []
+          )
+      )
 
 {-# INLINE nkLabelName #-}
 nkLabelName :: NK.Label t -> Name

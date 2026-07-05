@@ -13,10 +13,10 @@ import Coal.Compiler.Kernel.Translate.Definition (translateDefinition)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), tickBar)
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, setCurrentPathC)
-import qualified Coal.LegacyKernel.Language as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module (Module (Module))
 import Coal.Language.Module.Path (principalPath)
+import qualified Coal.LegacyKernel.Language as Kernel
 import Control.Monad.IO.Class (MonadIO)
 import Extras (Name, concatForM)
 

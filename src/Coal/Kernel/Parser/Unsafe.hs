@@ -27,4 +27,4 @@ unsafeParseExpr :: String -> Expr Type
 unsafeParseExpr src =
   case runParser expr "<builtin>" (Text.pack src) of
     Left err -> error ("unsafeParseExpr: " <> errorBundlePretty err)
-    Right e  -> e
+    Right e -> e

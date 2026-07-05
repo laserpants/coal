@@ -48,7 +48,7 @@ phaseTranslation =
     >-> generateBuildInfo "InsertDictionaries"
     >-> passCompileNats
     >-> generateDebugArtifacts "CompileNats"
---    >-> passDetectCallCycles
+    --    >-> passDetectCallCycles
     >-> generateDebugArtifacts "DetectCallCycles"
     >-> passDenormalizeAST
     >-> generateDebugArtifacts "DenormalizeAST"

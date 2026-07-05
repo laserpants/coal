@@ -10,9 +10,9 @@ module Coal.Compiler.Kernel.Translate.Record (
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Language (Expression, IndexedType, Kind, Type)
 import Coal.LegacyKernel.Compiler (KernelExpr)
 import qualified Coal.LegacyKernel.Language as Kernel
-import Coal.Language (Expression, IndexedType, Kind, Type)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary)
