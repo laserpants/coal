@@ -96,6 +96,7 @@ translateExpression =
               (NK.EGet (NK.Label (translateType t) field) (NK.EVar (NK.Label t1 "$row")))
               :| []
           )
+    -- TODO: This is convoluted
     EFocus _ name0 (Label ft1 n1) (Label ft2 n2) e1 e2 -> do
       d1 <- translateExpression e1
       d2 <- withLocalNames [n1, n2] (translateExpression e2)
@@ -103,7 +104,18 @@ translateExpression =
           kft2 = translateType ft2
 
           fieldBinding = NK.Binding (NK.Label kft1 n1) (NK.EGet (NK.Label kft1 name0) d1)
-          tailBinding = NK.Binding (NK.Label kft2 n2) d1
+
+          t4 = case kft2 of
+            NKT.TCon _ [r] -> r
+            _ -> error "Implementation error"
+
+          d3 =
+            NK.EApp
+              kft2
+              (NK.ECon (NK.Label (t4 `NKC.arrow` kft2) "$Record"))
+              (d1 :| [])
+
+          tailBinding = NK.Binding (NK.Label kft2 n2) d3 -- d1
 
       --          t1 =
       --            case NKHT.typeOf d1 of
