@@ -3,6 +3,7 @@
 #include "coal/panic.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <string.h>
 
 // Record structure using a simple linked list
@@ -62,7 +63,23 @@ rt_record_lookup(rt_record_t *record, const char *field)
     }
 
     /* Field not found - this indicates a compiler bug */
-    rt_panic("Record field not found (compiler bug)");
+    char *msg;
+    if (record == NULL) {
+        if (asprintf(&msg,
+                     "Record field not found: %s (record is NULL pointer)",
+                     field) != -1) {
+            rt_panic(msg);
+        } else {
+            rt_panic("Record field not found (record is NULL pointer)");
+        }
+    } else {
+        if (asprintf(&msg, "Record field not found: %s (compiler bug)",
+                     field) != -1) {
+            rt_panic(msg);
+        } else {
+            rt_panic("Record field not found (compiler bug)");
+        }
+    }
 }
 
 bool
