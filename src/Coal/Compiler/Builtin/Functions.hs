@@ -184,6 +184,10 @@ builtinFunctions =
     , forall0 (TIntrinsic IString ~> TIntrinsic IBignum)
     )
   ,
+    ( "number$_int32_to_float"
+    , forall0 (TIntrinsic IInt32 ~> TIntrinsic IFloat)
+    )
+  ,
     ( "from_int32"
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
     )

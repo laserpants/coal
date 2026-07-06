@@ -98,6 +98,19 @@ objectList =
       )
   , DFunction
       Exported
+      "Builtin$.number$_int32_to_float"
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<float>
+                    ( coal_int32_to_float : int32/float
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
       "Builtin$.number$_unsafe_parse_bignum"
       [ NK.Label NKC.string "input"
       ]
@@ -402,7 +415,7 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<*>
-                    ( coal_println_float : float/*
+                    ( rt_println_float : float/*
                     , f : float
                     )
         |]
@@ -415,7 +428,7 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<*>
-                    ( coal_println_double : double/*
+                    ( rt_println_double : double/*
                     , d : double
                     )
         |]
