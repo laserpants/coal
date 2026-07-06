@@ -584,12 +584,12 @@ e2eSpec = do
   --          ]
   --      res `shouldBe` Left PreflightFailure
 
-  --  describe "129" $ do
-  --    expectOutput
-  --      "Hello, World!\n"
-  --      "test/Coal/examples/129"
-  --      [ "Main.coal"
-  --      ]
+  describe "129" $ do
+    expectOutput
+      "Hello, World!\n"
+      "test/Coal/examples/129"
+      [ "Main.coal"
+      ]
 
   describe "131" $ do
     expectOutput
@@ -840,19 +840,19 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "172" $ do
-  --    expectOutput
-  --      "5.000000000000000"
-  --      "test/Coal/examples/172"
-  --      [ "Main.coal"
-  --      ]
+  describe "172" $ do
+    expectOutput
+      "5.000000000000000"
+      "test/Coal/examples/172"
+      [ "Main.coal"
+      ]
 
-  --  describe "173" $ do
-  --    expectOutput
-  --      "5.000000"
-  --      "test/Coal/examples/173"
-  --      [ "Main.coal"
-  --      ]
+  describe "173" $ do
+    expectOutput
+      "5.000000"
+      "test/Coal/examples/173"
+      [ "Main.coal"
+      ]
 
   describe "174" $ do
     it "is TypeError" $ do
@@ -870,12 +870,12 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "176" $ do
-  --    expectOutput
-  --      "one\ntwo\nthree"
-  --      "test/Coal/examples/176"
-  --      [ "Main.coal"
-  --      ]
+  describe "176" $ do
+    expectOutput
+      "one\ntwo\nthree"
+      "test/Coal/examples/176"
+      [ "Main.coal"
+      ]
 
   describe "178" $ do
     expectOutput
@@ -990,14 +990,14 @@ e2eSpec = do
   --          ]
   --      res `shouldBe` Left PreflightFailure
 
-  --  describe "196" $ do
-  --    expectOutput
-  --      "8\n55\n101\n102\n103\n104\n105\n106\n107\n109\n234\n999"
-  --      "test/Coal/examples/196"
-  --      [ "Main.coal"
-  --      , "Tree.coal"
-  --      , "Qsort.coal"
-  --      ]
+  describe "196" $ do
+    expectOutput
+      "8\n55\n101\n102\n103\n104\n105\n106\n107\n109\n234\n999"
+      "test/Coal/examples/196"
+      [ "Main.coal"
+      , "Tree.coal"
+      , "Qsort.coal"
+      ]
 
   --  ========================= COMMENTED OUT =========================
   --  describe "197" $ do

@@ -111,6 +111,19 @@ objectList =
       )
   , DFunction
       Exported
+      "Builtin$.number$_int32_to_double"
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<double>
+                    ( coal_int32_to_double : int32/double
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
       "Builtin$.number$_unsafe_parse_bignum"
       [ NK.Label NKC.string "input"
       ]

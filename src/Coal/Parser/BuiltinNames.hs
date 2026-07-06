@@ -86,6 +86,7 @@ builtinNames =
       -- Number operations
       [ ("number$_unsafe_parse_bignum", Number)
       , ("number$_int32_to_float", Number)
+      , ("number$_int32_to_double", Number)
       ]
       ++
       -- Char operations

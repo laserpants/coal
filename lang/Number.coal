@@ -33,7 +33,7 @@ module Number {
    * Convert a 32-bit integer to a double.
    */
   fun int32_to_double(n : int32) : double =
-    #{coal_int32_to_double : int32 -> double}(n)(fn(d) => d)
+    number$_int32_to_double(n)
 
   /**
    * Convert a 64-bit integer to a float.
