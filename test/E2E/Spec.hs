@@ -692,16 +692,16 @@ e2eSpec = do
           ]
       res `shouldBe` Left PreflightFailure
 
-  --  describe "145" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/145"
-  --          [ "Eq.coal"
-  --          , "Stuff.coal"
-  --          , "Main.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
+  describe "145" $ do
+    it "is TraitError" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/145"
+          [ "Eq.coal"
+          , "Stuff.coal"
+          , "Main.coal"
+          ]
+      res `shouldBe` Left TraitError
 
   describe "146" $ do
     expectOutput
