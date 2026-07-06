@@ -84,12 +84,13 @@ translateExpression =
         <*> traverse translateClause cs
     ESelect _ (Label t field) e -> do
       d1 <- translateExpression e
-      let t1 = case NKHT.typeOf d1 of
-            NKT.TCon _ [r] -> r
-            _ -> error "Implementation error"
+      let t1 =
+            case NKHT.typeOf d1 of
+              NKT.TCon _ [r] -> r
+              _ -> error "Implementation error"
       pure $
         NK.ECase
-          t1
+          (translateType t)
           d1
           ( NK.Clause
               (NK.Label (NKT.TCon "record" [t1]) "$Record" :| [NK.Label t1 "$row"])
