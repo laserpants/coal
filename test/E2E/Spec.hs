@@ -536,12 +536,12 @@ e2eSpec = do
           ]
       res `shouldBe` Left NoSuchIdentifier
 
-  --  describe "123" $ do
-  --    expectOutput
-  --      "4.1"
-  --      "test/Coal/examples/123"
-  --      [ "Main.coal"
-  --      ]
+    describe "123" $ do
+      expectOutput
+        "4.1"
+        "test/Coal/examples/123"
+        [ "Main.coal"
+        ]
 
   describe "124" $ do
     expectOutput

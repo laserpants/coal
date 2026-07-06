@@ -469,7 +469,7 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<string>
-                    ( coal_float_to_string : float/string
+                    ( rt_float_to_string : float/string
                     , f : float
                     )
         |]

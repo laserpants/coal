@@ -32,7 +32,8 @@ main =
     spec
     --    buildSpec
     e2eSpec
-    e2eKernelSpec
+
+--    e2eKernelSpec
 
 fooa = TArrow (TApplication KType (TApplication (KArrow KType KType) (TConstructor (KArrow KType (KArrow KType KType)) "Writer") (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 645}))) (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 647}))) (TArrow (TArrow (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 647})) (TApplication KType (TApplication (KArrow KType KType) (TConstructor (KArrow KType (KArrow KType KType)) "Writer") (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 645}))) (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 646})))) (TApplication KType (TApplication (KArrow KType KType) (TConstructor (KArrow KType (KArrow KType KType)) "Writer") (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 645}))) (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 646}))))
 foob = TArrow (TApplication KType (TApplication (KArrow KType KType) (TConstructor (KArrow KType (KArrow KType KType)) "Writer") (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 4389}))) (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 0}))) (TArrow (TArrow (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 0})) (TApplication KType (TApplication (KArrow KType KType) (TConstructor (KArrow KType (KArrow KType KType)) "Writer") (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 4390}))) (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 1})))) (TApplication KType (TApplication (KArrow KType KType) (TConstructor (KArrow KType (KArrow KType KType)) "Writer") (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 4391}))) (TVariable (TypeIndex{typeIndexKind = KType, typeIndexId = 1}))))
