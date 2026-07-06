@@ -158,7 +158,7 @@ checkExpr =
     ENil ->
       pure RNil
     -- -----------------------------------------------------------------------
-    -- Field projection: get^field<t>(row)
+    -- Field projection: get?_field<t>(row)
     EGet (Label t field) row -> do
       rowT <- checkExpr row
       checkFieldAccess t field rowT

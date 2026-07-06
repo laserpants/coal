@@ -559,7 +559,7 @@ objectList =
                     | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
                       , $r : { from_int32 : int32/* | * }
                       ) =>
-                        get^from_int32<int32/*>($r : { from_int32 : int32/* | * })
+                        get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
                   }
         |]
       )
@@ -574,7 +574,7 @@ objectList =
                     | ( $Record : { from_int64 : int64/* | * }/Numeric(*)
                       , $r : { from_int64 : int64/* | * }
                       ) =>
-                        get^from_int64<int64/*>($r : { from_int64 : int64/* | * })
+                        get?_from_int64<int64/*>($r : { from_int64 : int64/* | * })
                   }
         |]
       )
@@ -589,7 +589,7 @@ objectList =
                     | ( $Record : { from_bignum : bignum/* | * }/Numeric(*)
                       , $r : { from_bignum : bignum/* | * }
                       ) =>
-                        get^from_bignum<bignum/*>($r : { from_bignum : bignum/* | * })
+                        get?_from_bignum<bignum/*>($r : { from_bignum : bignum/* | * })
                   }
         |]
       )
@@ -604,7 +604,7 @@ objectList =
                     | ( $Record : { negate : */* | * }/Numeric(*)
                       , $r : { negate : */* | * }
                       ) =>
-                        get^negate<*/*>($r : { negate : */* | * })
+                        get?_negate<*/*>($r : { negate : */* | * })
                   }
         |]
       )
@@ -619,7 +619,7 @@ objectList =
                     | ( $Record : { `(+)` : */*/* | * }/Numeric(*)
                       , $r : { `(+)` : */*/* | * }
                       ) =>
-                        get^`(+)`<*/*/*>($r : { `(+)` : */*/* | * })
+                        get?_`(+)`<*/*/*>($r : { `(+)` : */*/* | * })
                   }
         |]
       )
@@ -634,7 +634,7 @@ objectList =
                     | ( $Record : { `(-)` : */*/* | * }/Numeric(*)
                       , $r : { `(-)` : */*/* | * }
                       ) =>
-                        get^`(-)`<*/*/*>($r : { `(-)` : */*/* | * })
+                        get?_`(-)`<*/*/*>($r : { `(-)` : */*/* | * })
                   }
         |]
       )
@@ -649,7 +649,7 @@ objectList =
                     | ( $Record : { `(*)` : */*/* | * }/Numeric(*)
                       , $r : { `(*)` : */*/* | * }
                       ) =>
-                        get^`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
+                        get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
                   }
         |]
       )
@@ -1202,7 +1202,7 @@ objectList =
                     | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
                       , $r : { compare : */*/Ordering | * }
                       ) =>
-                        get^compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                        get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                   }
         |]
       )
@@ -1221,11 +1221,11 @@ objectList =
                       ) =>
                         let
                           $f : */*/* =
-                            get^`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
+                            get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
                           in
                             let
                               $g : int32/* =
-                                get^from_int32<int32/*>($r : { from_int32 : int32/* | * })
+                                get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
                             in
                               let 
                                 one : * =
@@ -1281,7 +1281,7 @@ objectList =
                       ) =>
                         let
                           $f : */*/Ordering =
-                            get^compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
                             case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => false
@@ -1306,7 +1306,7 @@ objectList =
                       ) =>
                         let
                           $f : */*/Ordering =
-                            get^compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
                             case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => true
@@ -1331,7 +1331,7 @@ objectList =
                       ) =>
                         let
                           $f : */*/Ordering =
-                            get^compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
                             case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => false
@@ -1356,7 +1356,7 @@ objectList =
                       ) =>
                         let
                           $f : */*/Ordering =
-                            get^compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
                             case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => true
@@ -1785,7 +1785,7 @@ objectList =
                     | ( $Record : { `(==)` : */*/bool | * }/Comparable(*)
                       , $r : { `(==)` : */*/bool | * }
                       ) =>
-                        get^`(==)`<*/*/bool>($r : { `(==)` : */*/bool | * })
+                        get?_`(==)`<*/*/bool>($r : { `(==)` : */*/bool | * })
                   }
         |]
       )
@@ -2191,15 +2191,15 @@ objectList =
                             ) =>
                               let 
                                 $state : * =
-                                  get^state<*>($row : { state : * | * })
+                                  get?_state<*>($row : { state : * | * })
                                 in
                                   let
                                     $step : */*/Machine(*,*) =
-                                      get^step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                      get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
                                     in
                                       let
                                         $view : */* =
-                                          get^view<*/*>($row : { view : */* | * })
+                                          get?_view<*/*>($row : { view : */* | * })
                                         in
                                           @<Machine(*,*)>
                                             ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
@@ -2252,15 +2252,15 @@ objectList =
                             ) =>
                               let 
                                 $state : * =
-                                  get^state<*>($row : { state : * | * })
+                                  get?_state<*>($row : { state : * | * })
                                 in
                                   let
                                     $step : */*/Machine(*,*) =
-                                      get^step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                      get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
                                     in
                                       let
                                         $view : */* =
-                                          get^view<*/*>($row : { view : */* | * })
+                                          get?_view<*/*>($row : { view : */* | * })
                                         in
                                           @<Machine(*,*)>
                                             ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)

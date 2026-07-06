@@ -127,7 +127,7 @@ prettyExpr pt expr =
             <> line
             <> "}"
     EGet (Label t fieldName) rowExpr ->
-      "get^"
+      "get?_"
         <> pretty fieldName
         <> "<"
         <> pt t

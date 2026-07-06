@@ -211,11 +211,11 @@ pMatch = do
     Nothing ->
       fail "Case requires at least one clause"
 
--- | Parse field projection: get^fieldName<type>(expr)
+-- | Parse field projection: get?_fieldName<type>(expr)
 pProj :: Parser (Expr Type)
 pProj = do
   reserved "get"
-  void $ lexeme (C.char '^')
+  void $ lexeme (C.string "?_")
   fieldName <- field
   t <- angleBrackets type_
   rowExpr <- parens pExpr

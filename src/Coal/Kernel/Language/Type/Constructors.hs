@@ -13,6 +13,9 @@ All functions are inlined for zero-cost abstraction over raw 'TCon'
 constructors.
 -}
 module Coal.Kernel.Language.Type.Constructors (
+  tycon0,
+  tycon1,
+  tycon2,
   arrow,
   bool,
   char,

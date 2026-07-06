@@ -11,7 +11,6 @@ on startup.
 -}
 module Coal.Kernel.Parser.Unsafe (unsafeParseExpr) where
 
-import Data.Text (Text)
 import qualified Data.Text as Text
 import Text.Megaparsec (errorBundlePretty, runParser)
 
