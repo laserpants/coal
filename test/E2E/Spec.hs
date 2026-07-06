@@ -514,8 +514,8 @@ e2eSpec = do
   describe "118" $ do
     expectOutput "hellohello" "test/Coal/examples/118" ["Main.coal"]
 
-  --  describe "119" $ do
-  --    expectOutput "hello" "test/Coal/examples/119" ["Main.coal"]
+  describe "119" $ do
+    expectOutput "hello" "test/Coal/examples/119" ["Main.coal"]
 
   describe "120" $ do
     expectOutput "true" "test/Coal/examples/120" ["Main.coal"]
@@ -536,12 +536,12 @@ e2eSpec = do
           ]
       res `shouldBe` Left NoSuchIdentifier
 
-    describe "123" $ do
-      expectOutput
-        "4.1"
-        "test/Coal/examples/123"
-        [ "Main.coal"
-        ]
+  describe "123" $ do
+    expectOutput
+      "4.1"
+      "test/Coal/examples/123"
+      [ "Main.coal"
+      ]
 
   describe "124" $ do
     expectOutput
@@ -681,17 +681,17 @@ e2eSpec = do
   --          ]
   --      res `shouldBe` Left PreflightFailure
 
-  --  describe "144" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/144"
-  --          [ "Eq.coal"
-  --          , "Stuff.coal"
-  --          , "Main.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
-  --
+  describe "144" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/144"
+          [ "Eq.coal"
+          , "Stuff.coal"
+          , "Main.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
   --  describe "145" $ do
   --    it "is PreflightFailure" $ do
   --      res <-
