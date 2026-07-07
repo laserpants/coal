@@ -466,6 +466,36 @@ test-suite coal-test
   other-modules:
       Coal.Compiler.BuildSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
+      Coal.Kernel.Eval.EvalSpec
+      Coal.Kernel.FreeVarsSpec
+      Coal.Kernel.LLVM.CodegenSpec
+      Coal.Kernel.LLVM.IntegrationTestUtils
+      Coal.Kernel.LLVM.TestUtils
+      Coal.Kernel.Module.DependencyGraphSpec
+      Coal.Kernel.Parser.ExprSpec
+      Coal.Kernel.Parser.ModuleSpec
+      Coal.Kernel.Parser.OpSpec
+      Coal.Kernel.Parser.PrimSpec
+      Coal.Kernel.Parser.TypeSpec
+      Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonicalSpec
+      Coal.Kernel.Pipeline.Invariant.LambdasFlattenedSpec
+      Coal.Kernel.Pipeline.Invariant.LambdasLiftedSpec
+      Coal.Kernel.Pipeline.Invariant.LocalNamesUniqueSpec
+      Coal.Kernel.Pipeline.Invariant.LogicalOperatorsTranslatedSpec
+      Coal.Kernel.Pipeline.Invariant.TopLevelFunctionsNormalizedSpec
+      Coal.Kernel.Pipeline.Pass.AdministrativeNormalFormSpec
+      Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalizationSpec
+      Coal.Kernel.Pipeline.Pass.ConstructorSaturationSpec
+      Coal.Kernel.Pipeline.Pass.FunctionResultsSaturationSpec
+      Coal.Kernel.Pipeline.Pass.LambdaFlatteningSpec
+      Coal.Kernel.Pipeline.Pass.LambdaLiftingSpec
+      Coal.Kernel.Pipeline.Pass.LetBindingSimplificationSpec
+      Coal.Kernel.Pipeline.Pass.LocalNameCanonicalizationSpec
+      Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslationSpec
+      Coal.Kernel.Pipeline.Pass.TestHelpers
+      Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec
+      Coal.Kernel.Prettyprinter.RoundtripSpec
+      Coal.Kernel.Spec
       Coal.Language.TypeSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
