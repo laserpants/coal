@@ -228,7 +228,7 @@ irValue =
       irUnbox t r1
     ECall (Label t name) args k -> do
       -- External C call: unbox each argument to its raw C type,
-      -- call via C ABI, then box the result and pass to continuation.
+      -- call via C ABI, then box the result and apply the continuation.
       -- t is the full function type (e.g. int64 -> double); extract the
       -- return-type portion for the declare/call/box signatures.
       rawArgs <- traverse (\a -> irUnbox (typeOf a) =<< irValue a) args
@@ -238,8 +238,13 @@ irValue =
       _ <- declare name retIRType argIRTypes
       rawResult <- call NoTail retIRType (OGlobal (TFun retIRType argIRTypes) name) rawArgs
       boxedResult <- irBox resultType rawResult
-      local (\env -> env{codegenVarEnv = Environment.insert "_" boxedResult (codegenVarEnv env)}) $
-        irValue k
+      -- Apply the continuation to the boxed result.
+      kv <- irValue k
+      argSlot <- alloca TPtr (O.i32 @Int 1)
+      gepSlot <- gep TPtr argSlot [O.i32 @Int 0]
+      store boxedResult gepSlot
+      applied <- callRuntime rtApply [kv, O.i32 @Int 1, argSlot]
+      irUnbox resultType applied
     e ->
       throwError (UnsupportedExpression e)
 

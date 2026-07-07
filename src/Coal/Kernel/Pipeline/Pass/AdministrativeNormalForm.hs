@@ -210,6 +210,10 @@ anfValue expr cont
       ELam params body -> do
         body' <- anfTail body
         bindFresh (ELam params body') cont
+      ECall (Label t name) args k ->
+        anfAll args $ \argAtoms ->
+          anfValue k $ \kAtom ->
+            cont (ECall (Label t name) argAtoms kAtom)
       _ ->
         anfLetRhs expr $ \expr' ->
           bindFresh expr' cont
@@ -261,6 +265,10 @@ anfLetRhs expr cont
       EGet lbl e ->
         anfValue e $ \eAtom ->
           cont (EGet lbl eAtom)
+      ECall (Label t name) args k ->
+        anfAll args $ \argAtoms ->
+          anfValue k $ \kAtom ->
+            cont (ECall (Label t name) argAtoms kAtom)
       other -> cont other
 
 -- ---------------------------------------------------------------------------

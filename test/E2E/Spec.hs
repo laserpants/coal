@@ -574,15 +574,15 @@ e2eSpec = do
   --          , "Foo.coal"
   --          ]
   --      res `shouldBe` Left PreflightFailure
-  --
-  --  describe "128" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/128"
-  --          [ "Main.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
+
+  describe "128" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/128"
+          [ "Main.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
 
   describe "129" $ do
     expectOutput
@@ -784,16 +784,15 @@ e2eSpec = do
       , "Json.coal"
       ]
 
-  --  ========================= COMMENTED OUT =========================
-  --  describe "159" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/159"
-  --          [ "Hello.coal"
-  --          , "Main.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
+  describe "159" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/159"
+          [ "Hello.coal"
+          , "Main.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
 
   describe "160" $ do
     expectOutput
