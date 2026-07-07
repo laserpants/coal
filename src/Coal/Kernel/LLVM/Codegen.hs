@@ -46,7 +46,7 @@ import Coal.Kernel.LLVM.Boxing (irTypeRep, irUnbox)
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
 import qualified Coal.Kernel.LLVM.Function as Function
-import qualified Coal.Kernel.LLVM.Module as MA
+import qualified Coal.Kernel.LLVM.Module as MA (collectImportedConstants, collectImportedDData, collectImportedFunctions, objectExprVarRefs, objectGlobalBinding)
 import Coal.Kernel.LLVM.Monad
 import Coal.Kernel.LLVM.Prim (irPrim)
 import qualified Coal.Kernel.LLVM.Prim as Prim
@@ -235,6 +235,12 @@ DData constructors are not bound here; they are referenced via make_% in irApply
 objectGlobalBinding :: Object Type -> Maybe (Name, IROperand)
 objectGlobalBinding = MA.objectGlobalBinding
 
+{- | Search all modules for 'DConstant' objects whose name appears in the given
+import list, returning (name, operand) pairs.
+-}
+collectImportedConstants :: [Module Type] -> [Name] -> [(Name, IROperand)]
+collectImportedConstants = MA.collectImportedConstants
+
 {- | Search all modules for 'DData' objects whose name appears in the given
 import list, returning (constructorName, fieldCount) pairs.
 -}
@@ -294,7 +300,14 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
     -- Declare $apply trampolines for imported functions.
     forM_ (collectImportedFunctions allModules moduleImports) $
       uncurry irImportedFunctionTrampoline
-    let bindings = mapMaybe objectGlobalBinding moduleObjects
+    let importedConstantBindings = collectImportedConstants allModules moduleImports
+    forM_ importedConstantBindings $ \(_, op) ->
+      case op of
+        OGlobal (TFun rty []) thunkName ->
+          declare thunkName rty []
+        _ ->
+          return ()
+    let bindings = mapMaybe objectGlobalBinding moduleObjects ++ importedConstantBindings
         allTagBindings =
           Map.fromList
             [ (ctorName, idx)

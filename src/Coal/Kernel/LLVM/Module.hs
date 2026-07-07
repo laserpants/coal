@@ -10,6 +10,7 @@ global bindings, imported symbols, and variable references. Used by the main
 code generator to build the IR environment before compiling function bodies.
 -}
 module Coal.Kernel.LLVM.Module (
+  collectImportedConstants,
   collectImportedDData,
   collectImportedFunctions,
   objectGlobalBinding,
@@ -79,6 +80,23 @@ collectImportedFunctions allModules importNames =
   , Module{moduleObjects} <- allModules
   , DFunction _ name params _ <- moduleObjects
   , name == importName
+  ]
+
+{- | Search all modules for 'DConstant' objects whose name appears in the given
+import list, returning (name, operand) pairs suitable for insertion into the
+codegen variable environment.
+
+String and bignum constants are thunks (@force#_\<name\>@; arity 0 functions);
+directly representable constants (int32, bool, etc.) are global references.
+-}
+collectImportedConstants :: [Module Type] -> [Name] -> [(Name, IROperand)]
+collectImportedConstants allModules importNames =
+  [ (name, op)
+  | importName <- importNames
+  , Module{moduleObjects} <- allModules
+  , obj@(DConstant name _) <- moduleObjects
+  , name == importName
+  , Just (_, op) <- [objectGlobalBinding obj]
   ]
 
 {- | Collect free variable references from the body of an object as (name,
