@@ -1872,13 +1872,13 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "355" $ do
-  --    expectOutput
-  --      "aaa"
-  --      "test/Coal/examples/355"
-  --      [ "Main.coal"
-  --      , "Foo.coal"
-  --      ]
+  describe "355" $ do
+    expectOutput
+      "aaa"
+      "test/Coal/examples/355"
+      [ "Main.coal"
+      , "Foo.coal"
+      ]
 
   describe "356" $ do
     it "is PreflightFailure" $ do
