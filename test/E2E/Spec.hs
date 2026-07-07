@@ -1885,13 +1885,13 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/356" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
-  --  describe "357" $ do
-  --    expectOutput
-  --      "hello"
-  --      "test/Coal/examples/357"
-  --      [ "Main.coal"
-  --      , "Greeting.coal"
-  --      ]
+  describe "357" $ do
+    expectOutput
+      "hello"
+      "test/Coal/examples/357"
+      [ "Main.coal"
+      , "Greeting.coal"
+      ]
 
   describe "358" $ do
     it "is PreflightFailure" $ do
