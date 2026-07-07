@@ -26,7 +26,7 @@ import qualified Coal.Kernel.Pipeline.Pass.LocalNameCanonicalizationSpec
 import qualified Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslationSpec
 import qualified Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec
 import qualified Coal.Kernel.Prettyprinter.RoundtripSpec
-import Test.Hspec (Spec, describe, hspec)
+import Test.Hspec (Spec, describe)
 
 kernelSpec :: Spec
 kernelSpec = do

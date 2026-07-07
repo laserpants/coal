@@ -1,0 +1,40 @@
+module Main {
+
+  data Nat 
+    = Succ(Nat)
+    | Zero
+
+  Main.foo(n : Nat) =
+    case<*>(n : Nat) {
+      | ( Zero : Nat
+        ) => 
+            @<*>
+              ( rt_println_int32 : int32/*
+              , 0
+              )
+      | ( _ : Nat
+        ) => 
+            @<*>
+              ( rt_println_int32 : int32/*
+              , 5
+              )
+    }
+
+  Main.main(_ : *) =
+    let
+      n : Nat =
+        @<Nat>
+          ( Succ : Nat/Nat
+          , Zero : Nat
+          )
+    in
+    let
+      q : * =
+        @<*>
+          ( Main.foo : Nat/*
+          , n : Nat
+          )
+      in
+        0
+
+}

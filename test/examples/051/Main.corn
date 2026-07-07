@@ -1,0 +1,114 @@
+module Main {
+
+Main.mul_int32(a : int32, b : int32) =
+  [* int32](a : int32, b : int32)
+
+Main.mul(rec : { mul : */*/* | * }) =
+  get?_mul<*/*/*>(rec : { mul : */*/* | * })
+
+Main.main($v.6273 : unit) =
+  let
+    r : int32 =
+      @<int32>
+        ( @<int32/int32/int32>
+            ( Main.mul : { mul : int32/int32/int32 | * }/int32/int32/int32
+            , @<record({ mul : int32/int32/int32 | * })>
+                ( $Record : { mul : int32/int32/int32 | * }/record({ mul : int32/int32/int32 | * }) 
+                , { mul = Main.mul_int32 : int32/int32/int32
+                  | {}
+                  } 
+                )
+            )
+        , 5
+        , 3
+        )
+    in
+      @<IO(unit)>
+        ( coal_println_int32 : int32/IO(unit)
+        , r : int32
+        )
+
+
+//  let
+//    r : int32 =
+//      @<int32>
+//        ( @<int32/int32/int32>
+//            ( Main.(*) : Numeric(int32)/int32/int32/int32
+//            , @<Numeric(int32)>
+//                ( $Record : { (*) : int32/int32/int32 | (+) : int32/int32/int32 | (-) : int32/int32/int32 | from_bignum : bignum/int32 | from_int32 : int32/int32 | from_int64 : int64/int32 | negate : int32/int32 | {} }/record({ (*) : int32/int32/int32 | (+) : int32/int32/int32 | (-) : int32/int32/int32 | from_bignum : bignum/int32 | from_int32 : int32/int32 | from_int64 : int64/int32 | negate : int32/int32 | {} })
+//                , { (*) =
+//                    Builtin$.(*)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                  | (+) =
+//                    Builtin$.(+)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                  | (-) =
+//                    Builtin$.(-)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                  | from_bignum =
+//                    Builtin$.from_bignum__$impl_Numeric(TIntrinsic(IInt32)) : bignum/int32
+//                  | from_int32 =
+//                    Builtin$.from_int32__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32
+//                  | from_int64 =
+//                    Builtin$.from_int64__$impl_Numeric(TIntrinsic(IInt32)) : int64/int32
+//                  | negate =
+//                    Builtin$.negate__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32
+//                  | {}
+//                  }
+//                )
+//            )
+//        , @<int32>
+//            ( @<int32/int32>
+//                ( Builtin$.from_int32 : Numeric(int32)/int32/int32
+//                , @<Numeric(int32)>
+//                    ( $Record : { (*) : int32/int32/int32 | (+) : int32/int32/int32 | (-) : int32/int32/int32 | from_bignum : bignum/int32 | from_int32 : int32/int32 | from_int64 : int64/int32 | negate : int32/int32 | {} }/record({ (*) : int32/int32/int32 | (+) : int32/int32/int32 | (-) : int32/int32/int32 | from_bignum : bignum/int32 | from_int32 : int32/int32 | from_int64 : int64/int32 | negate : int32/int32 | {} })
+//                    , { (*) =
+//                        Builtin$.(*)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                      | (+) =
+//                        Builtin$.(+)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                      | (-) =
+//                        Builtin$.(-)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                      | from_bignum =
+//                        Builtin$.from_bignum__$impl_Numeric(TIntrinsic(IInt32)) : bignum/int32
+//                      | from_int32 =
+//                        Builtin$.from_int32__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32
+//                      | from_int64 =
+//                        Builtin$.from_int64__$impl_Numeric(TIntrinsic(IInt32)) : int64/int32
+//                      | negate =
+//                        Builtin$.negate__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32
+//                      | {}
+//                      }
+//                    )
+//                )
+//            , 8
+//            )
+//        , @<int32>
+//            ( @<int32/int32>
+//                ( Builtin$.from_int32 : Numeric(int32)/int32/int32
+//                , @<Numeric(int32)>
+//                    ( $Record : { (*) : int32/int32/int32 | (+) : int32/int32/int32 | (-) : int32/int32/int32 | from_bignum : bignum/int32 | from_int32 : int32/int32 | from_int64 : int64/int32 | negate : int32/int32 | {} }/record({ (*) : int32/int32/int32 | (+) : int32/int32/int32 | (-) : int32/int32/int32 | from_bignum : bignum/int32 | from_int32 : int32/int32 | from_int64 : int64/int32 | negate : int32/int32 | {} })
+//                    , { (*) =
+//                        Builtin$.(*)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                      | (+) =
+//                        Builtin$.(+)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                      | (-) =
+//                        Builtin$.(-)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+//                      | from_bignum =
+//                        Builtin$.from_bignum__$impl_Numeric(TIntrinsic(IInt32)) : bignum/int32
+//                      | from_int32 =
+//                        Builtin$.from_int32__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32
+//                      | from_int64 =
+//                        Builtin$.from_int64__$impl_Numeric(TIntrinsic(IInt32)) : int64/int32
+//                      | negate =
+//                        Builtin$.negate__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32
+//                      | {}
+//                      }
+//                    )
+//                )
+//            , 5
+//            )
+//        )
+//    in
+//      @<IO(unit)>
+//        ( IO.println_int32 : int32/IO(unit)
+//        , r : int32
+//        )
+
+}

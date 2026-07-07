@@ -1,0 +1,124 @@
+module Tree {
+
+  import List.Cons
+  import List.Nil
+  
+  import Ord.Eq
+  import Ord.Gt
+  import Ord.Lt
+
+  data Tree
+    = Tree.Leaf
+    | Tree.Node(*, Tree(*), Tree(*))
+
+  Tree.insert
+    ( comparable : { compare : */*/Ord | * }
+    , e : *
+    , tree : Tree(*)
+    ) =
+    case<Tree(*)>(tree : Tree(*)) {
+      | ( Tree.Leaf : Tree(*)
+        ) =>
+        @<Tree(*)>
+          ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+          , e : *
+          , Tree.Leaf : Tree(*)
+          , Tree.Leaf : Tree(*)
+          )
+      | ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+        , v : *
+        , lhs : Tree(*)
+        , rhs : Tree(*)
+        ) =>
+        let
+          res : Ord =
+            @<Ord>
+              ( get?_compare<*/*/Ord>(comparable : { compare : */*/Ord | * })
+              , v : *
+              , e : *
+              )
+        in
+        case<Tree(*)>(res : Ord) {
+          | ( Ord.Lt : Ord ) =>
+            @<Tree(*)>
+              ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+              , v : *
+              , lhs : Tree(*)
+              , @<Tree(*)>
+                  ( Tree.insert : { compare : */*/Ord | * }/*/Tree(*)/Tree(*)
+                  , comparable : { compare : */*/Ord | * }
+                  , e : *
+                  , rhs : Tree(*)
+                  )
+              )
+          | ( Ord.Gt : Ord ) =>
+            @<Tree(*)>
+              ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+              , v : *
+              , @<Tree(*)>
+                  ( Tree.insert : { compare : */*/Ord | * }/*/Tree(*)/Tree(*)
+                  , comparable : { compare : */*/Ord | * }
+                  , e : *
+                  , lhs : Tree(*)
+                  )
+              , rhs : Tree(*)
+              )
+          | ( Ord.Eq : Ord ) =>
+            @<Tree(*)>
+              ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+              , v : *
+              , lhs : Tree(*)
+              , rhs : Tree(*)
+              )
+        }
+    }
+
+  Tree.list_to_tree
+    ( comparable : { compare : */*/Ord | * }
+    , xs : List(*)
+    ) =
+      @<Tree(*)>
+        ( List.fold_list : (*/Tree(*)/Tree(*))/Tree(*)/List(*)/Tree(*)
+        , @<*/Tree(*)/Tree(*)>
+            ( Tree.insert : { compare : */*/Ord | * }/*/Tree(*)/Tree(*)
+            , comparable : { compare : */*/Ord | * }
+            )
+        , Tree.Leaf : Tree(*)
+        , xs : List(*)
+        )
+
+  Tree.flatten_tree(tree : Tree(*)) =
+    case<List(*)>(tree : Tree(*)) {
+      | ( Tree.Leaf : Tree(*)
+        ) =>
+        List.Nil : List(*)
+      | ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+        , v : *
+        , lhs : Tree(*)
+        , rhs : Tree(*)
+        ) =>
+        let
+          ls : List(*) =
+            @<List(*)>
+              ( Tree.flatten_tree : Tree(*)/List(*)
+              , lhs : Tree(*)
+              ) 
+          ;
+          rs : List(*) =
+            @<List(*)>
+              ( List.Cons : */List(*)/List(*)
+              , v : *
+              , @<List(*)>
+                  ( Tree.flatten_tree : Tree(*)/List(*)
+                  , rhs : Tree(*)
+                  )
+              )
+        in
+          @<List(*)>
+            ( List.list_concat : List(*)/List(*)/List(*)
+            , ls : List(*)
+            , rs : List(*)
+            )
+    }
+
+}

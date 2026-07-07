@@ -1,0 +1,112 @@
+module Ordering {
+
+import Utils.Function.compose
+import Utils.not
+
+data Ordering
+  = Ordering.EqualTo
+  | Ordering.GreaterThan
+  | Ordering.LessThan
+
+Ordering.compare( a_1 : record({ compare : */*/Ordering | * })
+                , a_2 : *
+                , a_3 : *
+                ) =
+  case<Ordering>(a_1 : record({ compare : */*/Ordering | * })) {
+    | ( $Record : { compare : */*/Ordering | * }/record({ compare : */*/Ordering | * })
+      , r_1 : { compare : */*/Ordering | * }
+      ) =>
+        @<Ordering>
+          ( get?_compare<*/*/Ordering>(r_1 : { compare : */*/Ordering | * })
+          , a_2 : *
+          , a_3 : *
+          )
+  }
+
+Ordering.from_int32( a_1 : record({ from_int32 : int32/* | * })
+                   , a_2 : int32
+                   ) =
+  case<*>(a_1 : record({ from_int32 : int32/* | * })) {
+    | ( $Record : { from_int32 : int32/* | * }/record({ from_int32 : int32/* | * })
+      , r_1 : { from_int32 : int32/* | * }
+      ) =>
+        @<*>
+          ( get?_from_int32<int32/*>(r_1 : { from_int32 : int32/* | * })
+          , a_2 : int32
+          )
+  }
+
+Ordering.lte(d_1 : record({ compare : */*/Ordering | * }), x : *, y : *) =
+  let
+    cmp : Ordering =
+      @<Ordering>
+        ( Ordering.compare : record({ compare : */*/Ordering | * })/*/*/Ordering
+        , d_1 : record({ compare : */*/Ordering | * })
+        , x : *
+        , y : *
+        )
+  in
+    case<bool>(cmp : Ordering) {
+      | (Ordering.EqualTo : Ordering) =>
+          true
+      | (Ordering.GreaterThan : Ordering) =>
+          false
+      | (Ordering.LessThan : Ordering) =>
+          true
+    }
+
+Ordering.gt(d_1 : record({ compare : */*/Ordering | * }), x : *, $extra : *) =
+  let
+    lte_partial : */bool =
+      @<*/bool>
+        ( Ordering.lte : record({ compare : */*/Ordering | * })/*/*/bool
+        , d_1 : record({ compare : */*/Ordering | * })
+        , x : *
+        )
+  in
+    @<bool>
+      ( Utils.Function.compose : (bool/bool)/(*/bool)/*/bool
+      , Utils.not : bool/bool
+      , lte_partial : */bool
+      , $extra : *
+      )
+
+Ordering.in_range( d_1 : record({ compare : */*/Ordering | * })
+                 , range : record({ max : * | min : * | * })
+                 , n : *
+                 ) =
+  let
+    min : * = get?_min<*>(range : record({ max : * | min : * | * }))
+  ; max : * = get?_max<*>(range : record({ max : * | min : * | * }))
+  in
+  let
+    gt_n_min : bool =
+              @<bool>
+                ( Ordering.gt : record({ compare : */*/Ordering | * })/*/*/bool
+                , d_1 : record({ compare : */*/Ordering | * })
+                , n : *
+                , min : *
+                )
+          ; gt_min_max : bool =
+              @<bool>
+                ( Ordering.gt : record({ compare : */*/Ordering | * })/*/*/bool
+                , d_1 : record({ compare : */*/Ordering | * })
+                , min : *
+                , max : *
+                )
+          ; lte_n_max : bool =
+              @<bool>
+                ( Ordering.lte : record({ compare : */*/Ordering | * })/*/*/bool
+                , d_1 : record({ compare : */*/Ordering | * })
+                , n : *
+                , max : *
+                )
+          in
+            if (gt_n_min : bool)
+              then
+                if (gt_min_max : bool)
+                  then true
+                  else lte_n_max : bool
+              else false
+
+}

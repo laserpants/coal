@@ -1,0 +1,131 @@
+module Tree {
+
+import List.concat
+import Utils.Function.forward_application
+import Ordering.in_range
+import Ordering.from_int32
+
+data Tree.Tree(*)
+  = Tree.Leaf
+  | Tree.Node(*, Tree.Tree(*), Tree.Tree(*))
+
+// Flatten a Tree into a list
+Tree.flatten(tree : Tree.Tree(*)) =
+  let
+    __fold__ : Tree.Tree(*)/list(*) =
+      fn(a_0 : Tree.Tree(*)) =>
+        case<list(*)>(a_0 : Tree.Tree(*)) {
+          | ( Tree.Node : */Tree.Tree(*)/Tree.Tree(*)/Tree.Tree(*)
+            , y : *
+            , lhs : Tree.Tree(*)
+            , rhs : Tree.Tree(*)
+            ) =>
+              @<list(*)>
+                ( List.concat : list(*)/list(*)/list(*)
+                , @<list(*)>
+                    ( __fold__ : Tree.Tree(*)/list(*)
+                    , lhs : Tree.Tree(*))
+                , @<list(*)>
+                    ( $Cons : */list(*)/list(*)
+                    , y : *
+                    , @<list(*)>
+                        ( __fold__ : Tree.Tree(*)/list(*)
+                        , rhs : Tree.Tree(*))))
+          | (Tree.Leaf : Tree.Tree(*)) =>
+              $Nil : list(*)
+        }
+    in
+      @<list(*)>
+        ( __fold__ : Tree.Tree(*)/list(*)
+        , tree : Tree.Tree(*)
+        )
+
+// Build binary tree from list
+Tree.from_list(d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })) =
+  fn(list : list(*)) =>
+    let
+      __fold__ : list(*)/record({ max : * | min : * | * })/Tree(*) =
+        fn(a_0 : list(*)) =>
+          case<Tree(*)>(a_0 : list(*)) {
+            | ( $Cons : */list(*)/list(*)
+              , p : *
+              , g : list(*)
+              ) =>
+                fn(range : record({ max : * | min : * | * })) =>
+                  if ( @<bool>
+                         ( Utils.Function.forward_application : */(*/bool)/bool
+                         , p : *
+                         , @<*/bool>
+                             ( Ordering.in_range : record({ compare : */*/Ordering | * })/record({ max : * | min : * | * })/*/bool
+                             , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+                             , range : record({ max : * | min : * | * })
+                             )
+                         )
+                     )
+                    then
+                      @<Tree(*)>
+                        ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+                        , p : *
+                        , @<Tree(*)>
+                            ( __fold__ : list(*)/record({ max : * | min : * | * })/Tree(*)
+                            , g : list(*)
+                            , @<record({ max : * | min : * | * })>
+                                ( $Record : { max : * | min : * | * }/record({ max : * | min : * | * })
+                                , { min =
+                                      case<*>(range : record({ max : * | min : * | * })) {
+                                        | ($Record : { max : * | min : * | * }/record({ max : * | min : * | * }), row_2 : { max : * | min : * | * }) =>
+                                            get?_min<*>(row_2 : { max : * | min : * | * })
+                                      }
+                                  | max = p : *
+                                  | {}
+                                  }
+                                )
+                            )
+                        , @<Tree(*)>
+                            ( __fold__ : list(*)/record({ max : * | min : * | * })/Tree(*)
+                            , g : list(*)
+                            , @<record({ max : * | min : * | * })>
+                                ( $Record : { max : * | min : * | * }/record({ max : * | min : * | * })
+                                , { min = p : *
+                                  | max =
+                                      case<*>(range : record({ max : * | min : * | * })) {
+                                        | ($Record : { max : * | min : * | * }/record({ max : * | min : * | * }), row_2 : { max : * | min : * | * }) =>
+                                            get?_max<*>(row_2 : { max : * | min : * | * })
+                                      }
+                                  | {}
+                                  }
+                                )
+                            )
+                        )
+                    else
+                      @<Tree(*)>
+                        ( __fold__ : list(*)/record({ max : * | min : * | * })/Tree(*)
+                        , g : list(*)
+                        , range : record({ max : * | min : * | * })
+                        )
+            | ($Nil : list(*)) =>
+                fn(_ : record({ max : * | min : * | * })) =>
+                  Tree.Leaf : Tree(*)
+          }
+      in
+        @<Tree(*)>
+          ( __fold__ : list(*)/record({ max : * | min : * | * })/Tree(*)
+          , list : list(*)
+          , @<record({ max : * | min : * | {} })>
+              ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+              , { min =
+                    @<*>
+                      ( Ordering.from_int32 : record({ from_int32 : int32/* | * })/int32/*
+                      , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+                      , 0 )
+                | max =
+                    @<*>
+                      ( Ordering.from_int32 : record({ from_int32 : int32/* | * })/int32/*
+                      , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+                      , -1 )
+                | {}
+                }
+              )
+          )
+
+}

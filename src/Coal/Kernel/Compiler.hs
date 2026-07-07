@@ -44,14 +44,17 @@ import Control.Monad.Except (ExceptT, MonadError, MonadTrans (..), runExceptT, t
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Identity (Identity, runIdentity)
 import Control.Monad.State (runStateT)
+import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
 import LLVM.IR
 
 import Coal.Kernel.LLVM.Codegen (
+  irMainModule,
   irModule,
  )
 import Coal.Kernel.LLVM.Monad (
+  IRCodegen,
   IRCodegenError,
   runIRCodegen,
  )
@@ -142,26 +145,36 @@ normalizeModule m =
     either (throwError . CompilerPipelineError) return $
       evalPipeline initialPipelineState (pipeline m)
 
+{- | Run the LLVM IR builder and 'IRCodegen' action, producing an 'IRModule'
+or a 'CompilerError'.
+-}
+buildIR :: IRCodegen IRModule -> Either CompilerError IRModule
+buildIR action =
+  case runIdentity $
+    runExceptT $
+      runStateT
+        (runIRBuilder (runIRCodegen mempty action))
+        (emptyIRBuilderEnv :: IRBuilderEnv) of
+    Left builderErr ->
+      Left (CompilerIRBuilderError builderErr)
+    Right (Left codeGenErr, _) ->
+      Left (CompilerIRCodegenError codeGenErr)
+    Right (Right ir, _) ->
+      Right ir
+
 {- | Run LLVM IR code generation for one normalized module, given the full
 list of all (normalized) modules for cross-module context.
+
+For the Main module, additionally emits the C main entry point via
+'irMainModule'.
 -}
 codeGenModule :: (Monad m) => [Module Type] -> Module Type -> CompilerT m IRModule
 codeGenModule allModules m =
   CompilerT $
-    either throwError return result
- where
-  result =
-    case runIdentity $
-      runExceptT $
-        runStateT
-          (runIRBuilder (runIRCodegen mempty (irModule allModules m)))
-          (emptyIRBuilderEnv :: IRBuilderEnv) of
-      Left builderErr ->
-        Left (CompilerIRBuilderError builderErr)
-      Right (Left codeGenErr, _) ->
-        Left (CompilerIRCodegenError codeGenErr)
-      Right (Right ir, _) ->
-        Right ir
+    either throwError return $
+      if moduleName m == Text.pack "Main"
+        then buildIR (irModule allModules m irMainModule)
+        else buildIR (irModule allModules m (return ()))
 
 -- ---------------------------------------------------------------------------
 -- Public entry points

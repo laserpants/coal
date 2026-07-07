@@ -1,0 +1,49 @@
+module Main {
+
+  Main.plus(x : int32, y : int32) =
+    [+ int32](x : int32, y : int32)
+
+  Main.minus(x : int32, y : int32) =
+    [- int32](x : int32, y : int32)
+
+  Main.choose(flag : bool, x : int32, y : int32) =
+    if (flag : bool) 
+      then
+        @<int32>
+          ( Main.plus : int32/int32/int32 
+          , x : int32
+          , y : int32
+          )
+      else
+        @<int32>
+          ( Main.minus : int32/int32/int32 
+          , x : int32
+          , y : int32
+          )
+
+  Main.cont(a : *) =
+    0
+
+  Main.main(_ : *) =
+    let
+      r : int32 =
+        @<int32>
+          ( Main.choose : bool/int32/int32/int32
+          , false
+          , 5
+          , 3
+          )
+    in
+      let
+        __call : * =
+          @<*>
+            ( coal_print_int32 : int32/*
+            , r : int32
+            )
+      in
+        @<int32>
+          ( Main.cont : */int32
+          , __call : *
+          )
+
+}

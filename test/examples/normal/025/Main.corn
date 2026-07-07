@@ -1,0 +1,40 @@
+module Main {
+
+  // head_or_zero: $Nil clause comes FIRST to exercise $-prefixed constructor
+  // pattern matching. For a non-empty list the $Cons branch must be taken.
+  Main.head_or_zero(xs : list(int32)) =
+    case<int32>(xs : list(int32)) {
+      | ($Nil : list(int32)) =>
+          0
+      | ($Cons : int32/list(int32)/list(int32), x : int32, _ : list(int32)) =>
+          x : int32
+    }
+
+  Main.cont(a : *) =
+    0
+
+  Main.main(_ : *) =
+    let
+      list : list(int32) =
+        @<list(int32)>
+          ( $Cons : int32/list(int32)/list(int32)
+          , 77
+          , $Nil : list(int32)
+          )
+    ; r : int32 =
+        @<int32>
+          ( Main.head_or_zero : list(int32)/int32
+          , list : list(int32)
+          )
+    ; __call : * =
+        @<*>
+          ( coal_print_int32 : int32/*
+          , r : int32
+          )
+    in
+      @<int32>
+        ( Main.cont : */int32
+        , __call : *
+        )
+
+}

@@ -77,13 +77,12 @@ testCompilePipelineWithC cornFiles extraCFiles = do
   callProcess "clang" $
     ["-Wno-override-module", "-lgc", "-lgmp"]
       <> llFiles
-      <> [mainLl, runtimeC]
+      <> [runtimeC]
       <> extraCFiles
       <> ["-o", buildDir </> "dist"]
  where
   buildDir = ".build"
   debugDir = ".debug"
-  mainLl = ".tmp/main.ll"
   runtimeC = "runtime-next/dist/runtime-combined.c"
   writeNormalized m = do
     let outFile = debugDir </> Text.unpack (moduleName m) <> ".normalized.corn"
@@ -132,11 +131,10 @@ testCompile cornFiles = do
   callProcess "clang" $
     ["-Wno-override-module", "-lgc", "-lgmp"]
       <> llFiles
-      <> [mainLl, runtimeC]
+      <> [runtimeC]
       <> ["-o", buildDir </> "dist"]
  where
   buildDir = ".build"
-  mainLl = ".tmp/main.ll"
   runtimeC = "runtime-next/dist/runtime-combined.c"
   parseOne fname = do
     content <- Text.readFile fname

@@ -1,0 +1,1553 @@
+module Main {
+
+import Data.Set.Set
+import Data.Set.empty
+import Data.Set.insert
+import Data.Set.delete
+import Data.Set.is_member
+import Data.Ord.Eq
+import Data.Ord.Lt
+import Data.Ord.Gt
+
+data List(*)
+  = Main.Nil
+  | Main.Cons(*, List(*))
+
+data Pair(*, *) = Main.Pair(*, *)
+
+data Shape
+  = Main.ShapeI
+  | Main.ShapeO
+  | Main.ShapeT
+  | Main.ShapeS
+  | Main.ShapeZ
+  | Main.ShapeJ
+  | Main.ShapeL
+
+data Rotation
+  = Main.R0
+  | Main.R90
+  | Main.R180
+  | Main.R270
+
+Main.spin(r : Rotation) =
+  case<Rotation>(r : Rotation) {
+    | ( Main.R0   : Rotation ) => Main.R90  : Rotation
+    | ( Main.R90  : Rotation ) => Main.R180 : Rotation
+    | ( Main.R180 : Rotation ) => Main.R270 : Rotation
+    | ( Main.R270 : Rotation ) => Main.R0   : Rotation
+  }
+
+Main.shape_from_int(n : int32) =
+  if ([== int32](n : int32, 0)) then Main.ShapeI : Shape
+  else if ([== int32](n : int32, 1)) then Main.ShapeO : Shape
+  else if ([== int32](n : int32, 2)) then Main.ShapeT : Shape
+  else if ([== int32](n : int32, 3)) then Main.ShapeS : Shape
+  else if ([== int32](n : int32, 4)) then Main.ShapeZ : Shape
+  else if ([== int32](n : int32, 5)) then Main.ShapeJ : Shape
+  else Main.ShapeL : Shape
+
+Main.rotation_from_int(n : int32) =
+  if ([== int32](n : int32, 0)) then Main.R0   : Rotation
+  else if ([== int32](n : int32, 1)) then Main.R90  : Rotation
+  else if ([== int32](n : int32, 2)) then Main.R180 : Rotation
+  else Main.R270 : Rotation
+
+data Event
+  = Main.KeyLeft
+  | Main.KeyRight
+  | Main.KeyDown
+  | Main.KeyUp
+  | Main.KeySpace
+  | Main.KeyEsc
+  | Main.Tick
+  | Main.NoOp
+
+Main.intial_block =
+  { shape = Main.ShapeI : Shape
+  | rotation = Main.R0 : Rotation
+  | pos_x = 0 
+  | pos_y = 0 
+  | {}
+  }
+
+Main.random_block(_ : *) =
+  let
+    shape_n    : int32 = @<int32>(random_shape    : unit/int32, ())
+    ;
+    rotation_n : int32 = @<int32>(random_rotation : unit/int32, ())
+  in
+  let
+    shape    : Shape    = @<Shape>   (Main.shape_from_int    : int32/Shape,    shape_n    : int32)
+    ;
+    rotation : Rotation = @<Rotation>(Main.rotation_from_int : int32/Rotation, rotation_n : int32)
+  in
+    { shape    = shape    : Shape
+    | rotation = rotation : Rotation
+    | pos_x    = 0
+    | pos_y    = 0
+    | {}
+    }
+
+data State 
+  = Main.State
+    ( { board : Set(Pair(int32, int32))
+      | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }
+      | {} }
+    )
+
+Main.initial_game_state =
+  @<State>
+    ( Main.State : */State
+    , { board = Main.board_empty : Set(Pair(int32, int32))
+      | current_block = Main.intial_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }
+      | {} 
+      }
+    )
+
+Main.fold_list
+  ( f : */*/*         // a/b/b
+  , acc : *           // b
+  , xs : List(*)      // [a]
+                      // b
+  ) =
+    case<*>(xs : List(*)) {
+      | ( Main.Cons : */List(*)/List(*)
+        , hd : *                 // a
+        , tl : List(*)           // [a]
+        ) => 
+        @<*>                     // b
+          ( Main.fold_list : (*/*/*)/*/List(*)/*
+          , f : */*/*
+          , @<*>                 // b
+              ( f : */*/*        // a/b/b
+              , hd : *           // a
+              , acc : *          // b
+              )
+          , tl : List(*)
+          )
+      | ( Main.Nil : List(*)
+        ) => 
+        acc : *
+    }
+
+Main.any(f : */bool, xs : List(*)) =
+  @<bool>
+    ( Main.fold_list : (*/*/*)/*/List(*)/*
+    , fn(x : *, acc : bool) =>
+        [||]
+          ( acc : bool
+          , @<bool>
+              ( f : */bool
+              , x : *
+              )
+          )
+    , false 
+    , xs : List(*)
+    )
+
+// ---------------------------------------------------------------------------
+// Pair comparison (lexicographic: y first, then x)
+// ---------------------------------------------------------------------------
+
+Main.pair_compare(a : Pair(int32, int32), b : Pair(int32, int32)) =
+  case<Ord>(a : Pair(int32, int32)) {
+    | ( Main.Pair : int32/int32/Pair(int32, int32)
+      , ax : int32
+      , ay : int32
+      ) =>
+        case<Ord>(b : Pair(int32, int32)) {
+          | ( Main.Pair : int32/int32/Pair(int32, int32)
+            , bx : int32
+            , by : int32
+            ) =>
+              if ([== int32](ay : int32, by : int32))
+                then
+                  if ([== int32](ax : int32, bx : int32)) then Data.Ord.Eq : Ord
+                  else if ([< int32](ax : int32, bx : int32)) then Data.Ord.Lt : Ord
+                  else Data.Ord.Gt : Ord
+                else
+                  if ([< int32](ay : int32, by : int32)) then Data.Ord.Lt : Ord
+                  else Data.Ord.Gt : Ord
+        }
+  }
+
+// ---------------------------------------------------------------------------
+// Board API  (board = Set(Pair(int32, int32)))
+// ---------------------------------------------------------------------------
+
+Main.board_empty =
+  @<Set(Pair(int32, int32))>
+    ( Data.Set.empty : unit/Set(Pair(int32, int32))
+    , ()
+    )
+
+Main.board_member(x : int32, y : int32, board : Set(Pair(int32, int32))) =
+  @<bool>
+    ( Data.Set.is_member : (Pair(int32, int32)/Pair(int32, int32)/Ord)/Pair(int32, int32)/Set(Pair(int32, int32))/bool
+    , Main.pair_compare : Pair(int32, int32)/Pair(int32, int32)/Ord
+    , @<Pair(int32, int32)>
+        ( Main.Pair : int32/int32/Pair(int32, int32)
+        , x : int32
+        , y : int32
+        )
+    , board : Set(Pair(int32, int32))
+    )
+
+Main.board_insert(cell : Pair(int32, int32), board : Set(Pair(int32, int32))) =
+  @<Set(Pair(int32, int32))>
+    ( Data.Set.insert : (Pair(int32, int32)/Pair(int32, int32)/Ord)/Pair(int32, int32)/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+    , Main.pair_compare : Pair(int32, int32)/Pair(int32, int32)/Ord
+    , cell : Pair(int32, int32)
+    , board : Set(Pair(int32, int32))
+    )
+
+Main.board_insert_cells
+  ( cells : List(Pair(int32, int32))
+  , board : Set(Pair(int32, int32))
+  ) =
+    case<Set(Pair(int32, int32))>(cells : List(Pair(int32, int32))) {
+      | ( Main.Nil : List(Pair(int32, int32))
+        ) =>
+          board : Set(Pair(int32, int32))
+      | ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+        , hd : Pair(int32, int32)
+        , tl : List(Pair(int32, int32))
+        ) =>
+          @<Set(Pair(int32, int32))>
+            ( Main.board_insert_cells : List(Pair(int32, int32))/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+            , tl : List(Pair(int32, int32))
+            , @<Set(Pair(int32, int32))>
+                ( Main.board_insert : Pair(int32, int32)/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+                , hd : Pair(int32, int32)
+                , board : Set(Pair(int32, int32))
+                )
+            )
+    }
+
+// Count filled cells in row y, iterating x from x0 to 9.
+Main.board_count_x(y : int32, x : int32, board : Set(Pair(int32, int32))) =
+  if ([>= int32](x : int32, 10))
+    then 0
+    else
+      let
+        rest : int32 =
+          @<int32>
+            ( Main.board_count_x : int32/int32/Set(Pair(int32, int32))/int32
+            , y : int32
+            , [+ int32](x : int32, 1)
+            , board : Set(Pair(int32, int32))
+            )
+      in
+        if ( @<bool>
+               ( Main.board_member : int32/int32/Set(Pair(int32, int32))/bool
+               , x : int32
+               , y : int32
+               , board : Set(Pair(int32, int32))
+               )
+           )
+          then [+ int32](1, rest : int32)
+          else rest : int32
+
+Main.board_count_in_row(y : int32, board : Set(Pair(int32, int32))) =
+  @<int32>
+    ( Main.board_count_x : int32/int32/Set(Pair(int32, int32))/int32
+    , y : int32
+    , 0
+    , board : Set(Pair(int32, int32))
+    )
+
+// Delete all cells (x,y) for x in 0..9.
+Main.board_remove_row_x(y : int32, x : int32, board : Set(Pair(int32, int32))) =
+  if ([>= int32](x : int32, 10))
+    then board : Set(Pair(int32, int32))
+    else
+      @<Set(Pair(int32, int32))>
+        ( Main.board_remove_row_x : int32/int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+        , y : int32
+        , [+ int32](x : int32, 1)
+        , @<Set(Pair(int32, int32))>
+            ( Data.Set.delete : (Pair(int32, int32)/Pair(int32, int32)/Ord)/Pair(int32, int32)/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+            , Main.pair_compare : Pair(int32, int32)/Pair(int32, int32)/Ord
+            , @<Pair(int32, int32)>
+                ( Main.Pair : int32/int32/Pair(int32, int32)
+                , x : int32
+                , y : int32
+                )
+            , board : Set(Pair(int32, int32))
+            )
+        )
+
+Main.board_remove_row(y : int32, board : Set(Pair(int32, int32))) =
+  @<Set(Pair(int32, int32))>
+    ( Main.board_remove_row_x : int32/int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+    , y : int32
+    , 0
+    , board : Set(Pair(int32, int32))
+    )
+
+// Shift cells in row y (x from x0..9) down by 1.
+Main.board_shift_row_x(y : int32, x : int32, board : Set(Pair(int32, int32))) =
+  if ([>= int32](x : int32, 10))
+    then board : Set(Pair(int32, int32))
+    else
+      let
+        board1 : Set(Pair(int32, int32)) =
+          if ( @<bool>
+                 ( Main.board_member : int32/int32/Set(Pair(int32, int32))/bool
+                 , x : int32
+                 , y : int32
+                 , board : Set(Pair(int32, int32))
+                 )
+             )
+            then
+              let
+                board_del : Set(Pair(int32, int32)) =
+                  @<Set(Pair(int32, int32))>
+                    ( Data.Set.delete : (Pair(int32, int32)/Pair(int32, int32)/Ord)/Pair(int32, int32)/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+                    , Main.pair_compare : Pair(int32, int32)/Pair(int32, int32)/Ord
+                    , @<Pair(int32, int32)>
+                        ( Main.Pair : int32/int32/Pair(int32, int32)
+                        , x : int32
+                        , y : int32
+                        )
+                    , board : Set(Pair(int32, int32))
+                    )
+              in
+                @<Set(Pair(int32, int32))>
+                  ( Data.Set.insert : (Pair(int32, int32)/Pair(int32, int32)/Ord)/Pair(int32, int32)/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+                  , Main.pair_compare : Pair(int32, int32)/Pair(int32, int32)/Ord
+                  , @<Pair(int32, int32)>
+                      ( Main.Pair : int32/int32/Pair(int32, int32)
+                      , x : int32
+                      , [+ int32](y : int32, 1)
+                      )
+                  , board_del : Set(Pair(int32, int32))
+                  )
+            else
+              board : Set(Pair(int32, int32))
+      in
+        @<Set(Pair(int32, int32))>
+          ( Main.board_shift_row_x : int32/int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+          , y : int32
+          , [+ int32](x : int32, 1)
+          , board1 : Set(Pair(int32, int32))
+          )
+
+// Shift rows start_y down to 0 bottom-up (avoids double-shifting).
+Main.board_shift_rows_above_from(start_y : int32, board : Set(Pair(int32, int32))) =
+  if ([< int32](start_y : int32, 0))
+    then board : Set(Pair(int32, int32))
+    else
+      let
+        board1 : Set(Pair(int32, int32)) =
+          @<Set(Pair(int32, int32))>
+            ( Main.board_shift_row_x : int32/int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+            , start_y : int32
+            , 0
+            , board : Set(Pair(int32, int32))
+            )
+      in
+        @<Set(Pair(int32, int32))>
+          ( Main.board_shift_rows_above_from : int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+          , [- int32](start_y : int32, 1)
+          , board1 : Set(Pair(int32, int32))
+          )
+
+Main.board_shift_rows_above(cleared_y : int32, board : Set(Pair(int32, int32))) =
+  @<Set(Pair(int32, int32))>
+    ( Main.board_shift_rows_above_from : int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+    , [- int32](cleared_y : int32, 1)
+    , board : Set(Pair(int32, int32))
+    )
+
+Main.board_clear_full_rows_from(y : int32, board : Set(Pair(int32, int32))) =
+  if ([< int32](y : int32, 0))
+    then board : Set(Pair(int32, int32))
+    else
+      let
+        row_count : int32 =
+          @<int32>
+            ( Main.board_count_in_row : int32/Set(Pair(int32, int32))/int32
+            , y : int32
+            , board : Set(Pair(int32, int32))
+            )
+      in
+        if ([== int32](row_count : int32, 10))
+          then
+            let
+              board1 : Set(Pair(int32, int32)) =
+                @<Set(Pair(int32, int32))>
+                  ( Main.board_remove_row : int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+                  , y : int32
+                  , board : Set(Pair(int32, int32))
+                  )
+            in
+            let
+              board2 : Set(Pair(int32, int32)) =
+                @<Set(Pair(int32, int32))>
+                  ( Main.board_shift_rows_above : int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+                  , y : int32
+                  , board1 : Set(Pair(int32, int32))
+                  )
+            in
+              @<Set(Pair(int32, int32))>
+                ( Main.board_clear_full_rows_from : int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+                , y : int32
+                , board2 : Set(Pair(int32, int32))
+                )
+          else
+            @<Set(Pair(int32, int32))>
+              ( Main.board_clear_full_rows_from : int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+              , [- int32](y : int32, 1)
+              , board : Set(Pair(int32, int32))
+              )
+
+Main.board_clear_full_rows(board : Set(Pair(int32, int32))) =
+  @<Set(Pair(int32, int32))>
+    ( Main.board_clear_full_rows_from : int32/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+    , 19
+    , board : Set(Pair(int32, int32))
+    )
+
+// Convert the Set board to a List for the C renderer (iterates the 10x20 grid).
+Main.board_to_list_xy(y : int32, x : int32, board : Set(Pair(int32, int32))) =
+  if ([>= int32](y : int32, 20))
+    then Main.Nil : List(Pair(int32, int32))
+    else
+      if ([>= int32](x : int32, 10))
+        then
+          @<List(Pair(int32, int32))>
+            ( Main.board_to_list_xy : int32/int32/Set(Pair(int32, int32))/List(Pair(int32, int32))
+            , [+ int32](y : int32, 1)
+            , 0
+            , board : Set(Pair(int32, int32))
+            )
+        else
+          let
+            rest : List(Pair(int32, int32)) =
+              @<List(Pair(int32, int32))>
+                ( Main.board_to_list_xy : int32/int32/Set(Pair(int32, int32))/List(Pair(int32, int32))
+                , y : int32
+                , [+ int32](x : int32, 1)
+                , board : Set(Pair(int32, int32))
+                )
+          in
+            if ( @<bool>
+                   ( Main.board_member : int32/int32/Set(Pair(int32, int32))/bool
+                   , x : int32
+                   , y : int32
+                   , board : Set(Pair(int32, int32))
+                   )
+               )
+              then
+                @<List(Pair(int32, int32))>
+                  ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+                  , @<Pair(int32, int32)>
+                      ( Main.Pair : int32/int32/Pair(int32, int32)
+                      , x : int32
+                      , y : int32
+                      )
+                  , rest : List(Pair(int32, int32))
+                  )
+              else
+                rest : List(Pair(int32, int32))
+
+Main.board_to_list(board : Set(Pair(int32, int32))) =
+  @<List(Pair(int32, int32))>
+    ( Main.board_to_list_xy : int32/int32/Set(Pair(int32, int32))/List(Pair(int32, int32))
+    , 0
+    , 0
+    , board : Set(Pair(int32, int32))
+    )
+
+// ---------------------------------------------------------------------------
+
+Main.board_cell_is_set(x : int32, y : int32, state : State) =
+  case<bool>(state : State) {
+    | ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State 
+      , info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }
+      ) =>
+        @<bool>
+          ( Main.board_member : int32/int32/Set(Pair(int32, int32))/bool
+          , x : int32
+          , y : int32
+          , get?_board<Set(Pair(int32, int32))>(info : { board : Set(Pair(int32, int32)) | * })
+          )
+  }
+
+// ---------------------------------------------------------------------------
+// Collision detection
+// ---------------------------------------------------------------------------
+
+Main.cell_collides(cell : Pair(int32, int32), state : State) =
+  case<bool>(cell : Pair(int32, int32)) {
+    | ( Main.Pair : int32/int32/Pair(int32, int32)
+      , x : int32
+      , y : int32
+      ) =>
+        [||]
+          ( [||]
+              ( [< int32](x : int32, 0)
+              , [>= int32](x : int32, 10)
+              )
+          , [||]
+              ( [>= int32](y : int32, 20)
+              , @<bool>
+                  ( Main.board_cell_is_set : int32/int32/State/bool
+                  , x : int32
+                  , y : int32
+                  , state : State
+                  )
+              )
+          )
+  }
+
+Main.cells_collide(cells : List(Pair(int32, int32)), state : State) =
+  @<bool>
+    ( Main.any : (*/bool)/List(*)/bool
+    , fn(cell : Pair(int32, int32)) =>
+        @<bool>
+          ( Main.cell_collides : Pair(int32, int32)/State/bool
+          , cell : Pair(int32, int32)
+          , state : State
+          )
+    , cells : List(Pair(int32, int32))
+    )
+
+// ---------------------------------------------------------------------------
+
+Main.to_cells
+  ( cell_1 : Pair(int32, int32)
+  , cell_2 : Pair(int32, int32)
+  , cell_3 : Pair(int32, int32)
+  , cell_4 : Pair(int32, int32)
+  ) =
+    @<List(Pair(int32, int32))>
+      ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+      , cell_1 : Pair(int32, int32)
+      , @<List(Pair(int32, int32))>
+          ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+          , cell_2 : Pair(int32, int32)
+          , @<List(Pair(int32, int32))>
+              ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+              , cell_3 : Pair(int32, int32)
+              , @<List(Pair(int32, int32))>
+                  ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+                  , cell_4 : Pair(int32, int32)
+                  , Main.Nil : List(Pair(int32, int32))
+                  )
+              )
+          )
+      )
+
+Main.translate_cell(d_x : int32, d_y : int32, cell : Pair(int32, int32)) =
+  case<Pair(int32, int32)>(cell : Pair(int32, int32)) {
+    | ( Main.Pair : int32/int32/Pair(int32, int32)
+      , x : int32
+      , y : int32
+      ) => 
+        @<Pair(int32, int32)>
+          ( Main.Pair : int32/int32/Pair(int32, int32)
+          , [+ int32](x : int32, d_x : int32)
+          , [+ int32](y : int32, d_y : int32)
+          )
+  }
+
+Main.translate_cells(d_x : int32, d_y : int32, cells : List(Pair(int32, int32))) =
+  case<List(Pair(int32, int32))>(cells : List(Pair(int32, int32))) {
+    | ( Main.Nil : List(Pair(int32, int32))
+      ) =>
+        Main.Nil : List(Pair(int32, int32))
+    | ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+      , hd : Pair(int32, int32)
+      , tl : List(Pair(int32, int32))
+      ) =>
+        @<List(Pair(int32, int32))>
+          ( Main.Cons : Pair(int32, int32)/List(Pair(int32, int32))/List(Pair(int32, int32))
+          , @<Pair(int32, int32)>
+              ( Main.translate_cell : int32/int32/Pair(int32, int32)/Pair(int32, int32)
+              , d_x : int32
+              , d_y : int32
+              , hd : Pair(int32, int32)
+              )
+          , @<List(Pair(int32, int32))>
+              ( Main.translate_cells : int32/int32/List(Pair(int32, int32))/List(Pair(int32, int32))
+              , d_x : int32
+              , d_y : int32
+              , tl : List(Pair(int32, int32))
+              )
+          )
+  }
+
+Main.shape_cells(shape : Shape, rotation : Rotation) =
+  case<List(Pair(int32, int32))>(shape : Shape) {
+    | ( Main.ShapeO : Shape ) =>
+        //   - - - -
+        //   - # # -
+        //   - # # -
+        //   - - - -
+        @<List(Pair(int32, int32))>
+          ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+          , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+          , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+          , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+          , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+          )
+    | ( Main.ShapeI : Shape 
+      ) =>
+        case<List(Pair(int32, int32))>(rotation : Rotation) {
+          | ( Main.R0 : Rotation ) =>
+              //   - # - -
+              //   - # - -
+              //   - # - -
+              //   - # - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 3)
+                )
+          | ( Main.R90 : Rotation ) =>
+              //   - - - -
+              //   # # # #
+              //   - - - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 1)
+                )
+          | ( Main.R180 : Rotation ) =>
+              //   - - # -
+              //   - - # -
+              //   - - # -
+              //   - - # -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 3)
+                )
+          | ( Main.R270 : Rotation ) =>
+              //   - - - -
+              //   - - - -
+              //   # # # #
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 2)
+                )
+        }
+    | ( Main.ShapeT : Shape 
+      ) =>
+        case<List(Pair(int32, int32))>(rotation : Rotation) {
+          | ( Main.R0 : Rotation ) =>
+              //   - # - -
+              //   # # # -
+              //   - - - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                )
+          | ( Main.R90 : Rotation ) =>
+              //   - - # -
+              //   - - # #
+              //   - - # -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                )
+          | ( Main.R180 : Rotation ) =>
+              //   - - - -
+              //   - - - -
+              //   - # # #
+              //   - - # -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 3)
+                )
+          | ( Main.R270 : Rotation ) =>
+              //   - - - -
+              //   - # - -
+              //   # # - -
+              //   - # - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 3)
+                )
+        }
+    | ( Main.ShapeS : Shape 
+      ) =>
+        case<List(Pair(int32, int32))>(rotation : Rotation) {
+          | ( Main.R0 : Rotation ) =>
+              //   # - - -
+              //   # # - -
+              //   - # - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                )
+          | ( Main.R90 : Rotation ) =>
+              //   - - # #
+              //   - # # -
+              //   - - - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                )
+          | ( Main.R180 : Rotation ) =>
+              //   - - - -
+              //   - - # -
+              //   - - # #
+              //   - - - #
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 3)
+                )
+          | ( Main.R270 : Rotation ) =>
+              //   - - - -
+              //   - - - -
+              //   - # # -
+              //   # # - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 3)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 3)
+                )
+        }
+    | ( Main.ShapeZ : Shape 
+      ) =>
+        case<List(Pair(int32, int32))>(rotation : Rotation) {
+          | ( Main.R0 : Rotation ) =>
+              //   - # - -
+              //   # # - -
+              //   # - - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 2)
+                )
+          | ( Main.R90 : Rotation ) =>
+              //   - # # -
+              //   - - # #
+              //   - - - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 1)
+                )
+          | ( Main.R180 : Rotation ) =>
+              //   - - - -
+              //   - - - #
+              //   - - # #
+              //   - - # -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 3)
+                )
+          | ( Main.R270 : Rotation ) =>
+              //   - - - -
+              //   - - - -
+              //   # # - -
+              //   - # # -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 3)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 3)
+                )
+        }
+    | ( Main.ShapeJ : Shape 
+      ) =>
+        case<List(Pair(int32, int32))>(rotation : Rotation) {
+          | ( Main.R0 : Rotation ) =>
+              //   - # # -
+              //   - # - -
+              //   - # - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                )
+          | ( Main.R90 : Rotation ) =>
+              //   - - - -
+              //   - # # #
+              //   - - - #
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 2)
+                )
+          | ( Main.R180 : Rotation ) =>
+              //   - - - -
+              //   - - # -
+              //   - - # -
+              //   - # # -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 3)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 3)
+                )
+          | ( Main.R270 : Rotation ) =>
+              //   - - - -
+              //   # - - -
+              //   # # # -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                )
+        }
+    | ( Main.ShapeL : Shape 
+      ) =>
+        case<List(Pair(int32, int32))>(rotation : Rotation) {
+          | ( Main.R0 : Rotation ) =>
+              //   # # - -
+              //   - # - -
+              //   - # - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                )
+          | ( Main.R90 : Rotation ) =>
+              //   - - - #
+              //   - # # #
+              //   - - - -
+              //   - - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 0)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 1)
+                )
+          | ( Main.R180 : Rotation ) =>
+              //   - - - -
+              //   - - # -
+              //   - - # -
+              //   - - # #
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 1)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 3)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 3, 3)
+                )
+          | ( Main.R270 : Rotation ) =>
+              //   - - - -
+              //   - - - -
+              //   # # # -
+              //   # - - -
+              @<List(Pair(int32, int32))>
+                ( Main.to_cells : Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/Pair(int32, int32)/List(Pair(int32, int32))
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 1, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 2, 2)
+                , @<Pair(int32, int32)>(Main.Pair : int32/int32/Pair(int32, int32), 0, 3)
+                )
+        }
+  }
+
+Main.current_block_cells(state : State) =
+  case<List(Pair(int32, int32))>(state : State) {
+    | ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State 
+      , info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }
+      ) =>
+        let 
+          block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } =
+            get?_current_block<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>(info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} })
+        in
+        let 
+          shape : Shape = get?_shape<Shape>(block : { shape : Shape | * })
+          ;
+          rotation : Rotation = get?_rotation<Rotation>(block : { rotation : Rotation | * })
+          ;
+          pos_x : int32 = get?_pos_x<int32>(block : { pos_x : int32 | * })
+          ;
+          pos_y : int32 = get?_pos_y<int32>(block : { pos_y : int32 | * })
+        in
+        let
+          cells : List(Pair(int32, int32)) =
+            @<List(Pair(int32, int32))>
+              ( Main.shape_cells : Shape/Rotation/List(Pair(int32, int32))
+              , shape : Shape
+              , rotation : Rotation
+              )
+          in
+            @<List(Pair(int32, int32))>
+              ( Main.translate_cells : int32/int32/List(Pair(int32, int32))/List(Pair(int32, int32))
+              , pos_x : int32
+              , pos_y : int32
+              , cells : List(Pair(int32, int32))
+              )
+  }
+
+Main.board_of_state(state : State) =
+  case<Set(Pair(int32, int32))>(state : State) {
+    | ( Main.State : */State
+      , info : { board : Set(Pair(int32, int32)) | * }
+      ) =>
+        get?_board<Set(Pair(int32, int32))>(info : { board : Set(Pair(int32, int32)) | * })
+  }
+
+Main.shape_to_string(shape : Shape) =
+  case<string>(shape : Shape) {
+    | ( Main.ShapeI : Shape ) => "ShapeI"
+    | ( Main.ShapeO : Shape ) => "ShapeO"
+    | ( Main.ShapeT : Shape ) => "ShapeT"
+    | ( Main.ShapeS : Shape ) => "ShapeS"
+    | ( Main.ShapeZ : Shape ) => "ShapeZ"
+    | ( Main.ShapeJ : Shape ) => "ShapeJ"
+    | ( Main.ShapeL : Shape ) => "ShapeL"
+  }
+
+Main.rotation_to_string(rotation : Rotation) =
+  case<string>(rotation : Rotation) {
+    | ( Main.R0    : Rotation ) => "0"
+    | ( Main.R90   : Rotation ) => "90"
+    | ( Main.R180  : Rotation ) => "180"
+    | ( Main.R270  : Rotation ) => "270"
+  }
+
+Main.event_to_string(event : Event) =
+  case<string>(event : Event) {
+    | ( Main.KeyLeft   : Event ) => "KeyLeft"
+    | ( Main.KeyRight  : Event ) => "KeyRight"
+    | ( Main.KeyDown   : Event ) => "KeyDown"
+    | ( Main.KeyUp     : Event ) => "KeyUp"
+    | ( Main.KeySpace  : Event ) => "KeySpace"
+    | ( Main.KeyEsc    : Event ) => "KeyEsc"
+    | ( Main.Tick      : Event ) => "Tick"
+    | ( Main.NoOp      : Event ) => "NoOp"
+  }
+
+Main.print_current_block(state : State) =
+  case<unit>(state : State) {
+    | ( Main.State : */State 
+      , info : 
+          { current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } 
+          | * 
+          }
+      ) =>
+        let
+          current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } =
+            get?_current_block<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>(info : { current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | * })
+          in
+            let
+              shape : Shape = get?_shape<Shape>(current_block : { shape : Shape | * }) 
+              ; 
+              rotation : Rotation = get?_rotation<Rotation>(current_block : { rotation : Rotation | * }) 
+              ;
+              pos_x : int32 = get?_pos_x<int32>(current_block : { pos_x : int32 | * }) 
+              ;
+              pos_y : int32 = get?_pos_y<int32>(current_block : { pos_y : int32 | * }) 
+            in
+              let
+                shape_str : string = 
+                  @<string>
+                     ( Main.shape_to_string : Shape/string
+                     , shape : Shape
+                     ) 
+                ; 
+                rotation_str : string =
+                  @<string>
+                     ( Main.rotation_to_string : Rotation/string
+                     , rotation : Rotation
+                     )
+                in
+                  let
+                    _ : * =
+                      @<*>
+                        ( coal_println_string : string/*
+                        , shape_str : string
+                        )
+                    ;
+                    _ : * =
+                      @<*>
+                        ( coal_println_string : string/*
+                        , rotation_str : string
+                        )
+                    ;
+                    _ : * =
+                      @<*>
+                        ( coal_println_int32 : int32/*
+                        , pos_x : int32
+                        )
+                    ;
+                    _ : * =
+                      @<*>
+                        ( coal_println_int32 : int32/*
+                        , pos_y : int32
+                        )
+                    in
+                      ()
+  }
+
+Main.parse_event(ev_code : int32) =
+  if ([== int32](0, ev_code : int32)) then Main.Tick : Event
+    else if ([== int32](68, ev_code : int32)) then Main.KeyLeft : Event
+    else if ([== int32](67, ev_code : int32)) then Main.KeyRight : Event
+    else if ([== int32](66, ev_code : int32)) then Main.KeyDown : Event
+    else if ([== int32](65, ev_code : int32)) then Main.KeyUp : Event
+    else if ([== int32](32, ev_code : int32)) then Main.KeySpace : Event
+    else if ([== int32](27, ev_code : int32)) then Main.KeyEsc : Event
+    else Main.NoOp : Event
+
+Main.update_current_block(f : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }/{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }, state : State) =
+  case<State>(state : State) {
+    | ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State 
+      , info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }
+      ) =>
+        let 
+          new_current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } =
+            @<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>
+              ( f : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }/{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }
+              , get?_current_block<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>(info : { current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | * })
+              )
+        in
+          let
+            new_info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} } =
+              { board = get?_board<Set(Pair(int32, int32))>(info : { board : Set(Pair(int32, int32)) | * })
+              | current_block = new_current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }
+              | {}
+              }
+            in
+              @<State>
+                ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State
+                , new_info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }
+                )
+  }
+
+Main.move_current_block(d_x : int32, d_y : int32, state : State) =
+  @<State>
+    ( Main.update_current_block : ({ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }/{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} })/State/State
+    , fn(current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }) =>
+        { shape = get?_shape<Shape>(current_block : { shape : Shape | * }) 
+        | rotation = get?_rotation<Rotation>(current_block : { rotation : Rotation | * }) 
+        | pos_x = [+ int32](get?_pos_x<int32>(current_block : { pos_x : int32 | * }), d_x : int32)
+        | pos_y = [+ int32](get?_pos_y<int32>(current_block : { pos_y : int32 | * }), d_y : int32)
+        | {} 
+        } 
+    , state : State
+    )
+
+Main.rotate_current_block(state : State) =
+  @<State>
+    ( Main.update_current_block : ({ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }/{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} })/State/State
+    , fn(current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }) =>
+        { shape = get?_shape<Shape>(current_block : { shape : Shape | * }) 
+        | rotation = 
+            @<Rotation>
+              ( Main.spin : Rotation/Rotation
+              , get?_rotation<Rotation>(current_block : { rotation : Rotation | * })
+              )
+        | pos_x = get?_pos_x<int32>(current_block : { pos_x : int32 | * })
+        | pos_y = get?_pos_y<int32>(current_block : { pos_y : int32 | * })
+        | {} 
+        } 
+    , state : State
+    )
+
+// ---------------------------------------------------------------------------
+// Piece locking
+// ---------------------------------------------------------------------------
+
+Main.lock_current_block(state : State) =
+  case<State>(state : State) {
+    | ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State
+      , info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }
+      ) =>
+        let
+          new_board : Set(Pair(int32, int32)) =
+            @<Set(Pair(int32, int32))>
+              ( Main.board_insert_cells : List(Pair(int32, int32))/Set(Pair(int32, int32))/Set(Pair(int32, int32))
+              , @<List(Pair(int32, int32))>
+                  ( Main.current_block_cells : State/List(Pair(int32, int32))
+                  , state : State
+                  )
+              , get?_board<Set(Pair(int32, int32))>(info : { board : Set(Pair(int32, int32)) | * })
+              )
+        in
+          @<State>
+            ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State
+            , { board = new_board : Set(Pair(int32, int32))
+              | current_block = get?_current_block<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>(info : { current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | * })
+              | {}
+              }
+            )
+  }
+
+// ---------------------------------------------------------------------------
+// Collision guards
+// ---------------------------------------------------------------------------
+
+Main.can_move_left(state : State) =
+  [!]
+    ( @<bool>
+        ( Main.cells_collide : List(Pair(int32, int32))/State/bool
+        , @<List(Pair(int32, int32))>
+            ( Main.translate_cells : int32/int32/List(Pair(int32, int32))/List(Pair(int32, int32))
+            , -1
+            , 0
+            , @<List(Pair(int32, int32))>
+                ( Main.current_block_cells : State/List(Pair(int32, int32))
+                , state : State
+                )
+            )
+        , state : State
+        )
+    )
+
+Main.can_move_right(state : State) =
+  [!]
+    ( @<bool>
+        ( Main.cells_collide : List(Pair(int32, int32))/State/bool
+        , @<List(Pair(int32, int32))>
+            ( Main.translate_cells : int32/int32/List(Pair(int32, int32))/List(Pair(int32, int32))
+            , 1
+            , 0
+            , @<List(Pair(int32, int32))>
+                ( Main.current_block_cells : State/List(Pair(int32, int32))
+                , state : State
+                )
+            )
+        , state : State
+        )
+    )
+
+Main.can_move_down(state : State) =
+  [!]
+    ( @<bool>
+        ( Main.cells_collide : List(Pair(int32, int32))/State/bool
+        , @<List(Pair(int32, int32))>
+            ( Main.translate_cells : int32/int32/List(Pair(int32, int32))/List(Pair(int32, int32))
+            , 0
+            , 1
+            , @<List(Pair(int32, int32))>
+                ( Main.current_block_cells : State/List(Pair(int32, int32))
+                , state : State
+                )
+            )
+        , state : State
+        )
+    )
+
+Main.can_rotate(state : State) =
+  case<bool>(state : State) {
+    | ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State
+      , info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }
+      ) =>
+        let
+          block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } =
+            get?_current_block<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>(info : { current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | * })
+        in
+        let
+          shape : Shape  = get?_shape<Shape>(block : { shape : Shape | * })
+          ;
+          pos_x : int32  = get?_pos_x<int32>(block : { pos_x : int32 | * })
+          ;
+          pos_y : int32  = get?_pos_y<int32>(block : { pos_y : int32 | * })
+          ;
+          next_rot : Rotation =
+            @<Rotation>
+              ( Main.spin : Rotation/Rotation
+              , get?_rotation<Rotation>(block : { rotation : Rotation | * })
+              )
+        in
+        let
+          rotated_cells : List(Pair(int32, int32)) =
+            @<List(Pair(int32, int32))>
+              ( Main.translate_cells : int32/int32/List(Pair(int32, int32))/List(Pair(int32, int32))
+              , pos_x : int32
+              , pos_y : int32
+              , @<List(Pair(int32, int32))>
+                  ( Main.shape_cells : Shape/Rotation/List(Pair(int32, int32))
+                  , shape : Shape
+                  , next_rot : Rotation
+                  )
+              )
+        in
+          [!]
+            ( @<bool>
+                ( Main.cells_collide : List(Pair(int32, int32))/State/bool
+                , rotated_cells : List(Pair(int32, int32))
+                , state : State
+                )
+            )
+  }
+
+Main.move_left(state : State) =
+  let
+    can_move : bool =
+      @<bool>
+        ( Main.can_move_left : State/bool
+        , state : State
+        )
+  in
+    if (can_move : bool)
+      then
+        @<State>
+          ( Main.move_current_block : int32/int32/State/State
+          , -1
+          , 0
+          , state : State
+          )
+      else 
+        state : State
+
+Main.move_right(state : State) =
+  let
+    can_move : bool =
+      @<bool>
+        ( Main.can_move_right : State/bool
+        , state : State
+        )
+  in
+    if (can_move : bool)
+      then
+        @<State>
+          ( Main.move_current_block : int32/int32/State/State
+          , 1
+          , 0
+          , state : State
+          )
+      else 
+        state : State
+
+Main.move_down(state : State) =
+  let
+    can_move : bool =
+      @<bool>
+        ( Main.can_move_down : State/bool
+        , state : State
+        )
+  in
+    if (can_move : bool)
+      then
+        @<State>
+          ( Main.move_current_block : int32/int32/State/State
+          , 0
+          , 1
+          , state : State
+          )
+      else 
+        state : State
+
+Main.rotate(state : State) =
+  let
+    can_rotate : bool =
+      @<bool>
+        ( Main.can_rotate : State/bool
+        , state : State
+        )
+  in
+    if (can_rotate : bool)
+      then
+        @<State>
+          ( Main.rotate_current_block : State/State
+          , state : State
+          )
+      else 
+        state : State
+
+// ---------------------------------------------------------------------------
+// Spawn, landing, tick
+// ---------------------------------------------------------------------------
+
+Main.spawn_next_block(state : State) =
+  @<State>
+    ( Main.update_current_block : ({ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }/{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} })/State/State
+    , fn(_ : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }) =>
+        @<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>
+          ( Main.random_block : */{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }
+          , ()
+          )
+    , state : State
+    )
+
+Main.on_piece_landed(state : State) =
+  let
+    locked : State =
+      @<State>
+        ( Main.lock_current_block : State/State
+        , state : State
+        )
+  in
+  case<State>(locked : State) {
+    | ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State
+      , info : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }
+      ) =>
+        let
+          cleared : State =
+            @<State>
+              ( Main.State : { board : Set(Pair(int32, int32)) | current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | {} }/State
+              , { board =
+                    @<Set(Pair(int32, int32))>
+                      ( Main.board_clear_full_rows : Set(Pair(int32, int32))/Set(Pair(int32, int32))
+                      , get?_board<Set(Pair(int32, int32))>(info : { board : Set(Pair(int32, int32)) | * })
+                      )
+                | current_block =
+                    get?_current_block<{ shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} }>(info : { current_block : { shape : Shape | rotation : Rotation | pos_x : int32 | pos_y : int32 | {} } | * })
+                | {}
+                }
+              )
+        in
+        let
+          spawned : State =
+            @<State>
+              ( Main.spawn_next_block : State/State
+              , cleared : State
+              )
+        in
+          if ( @<bool>
+                 ( Main.cells_collide : List(Pair(int32, int32))/State/bool
+                 , @<List(Pair(int32, int32))>
+                     ( Main.current_block_cells : State/List(Pair(int32, int32))
+                     , spawned : State
+                     )
+                 , spawned : State
+                 )
+             )
+            then cleared : State   // game over: freeze rather than corrupt state
+            else spawned : State
+  }
+
+Main.tick(state : State) =
+  if ( @<bool>
+         ( Main.can_move_down : State/bool
+         , state : State
+         )
+     )
+    then
+      @<State>
+        ( Main.move_current_block : int32/int32/State/State
+        , 0
+        , 1
+        , state : State
+        )
+    else
+      @<State>
+        ( Main.on_piece_landed : State/State
+        , state : State
+        )
+
+Main.hard_drop(state : State) =
+  if ( @<bool>
+         ( Main.can_move_down : State/bool
+         , state : State
+         )
+     )
+    then
+      @<State>
+        ( Main.hard_drop : State/State
+        , @<State>
+            ( Main.move_current_block : int32/int32/State/State
+            , 0
+            , 1
+            , state : State
+            )
+        )
+    else
+      @<State>
+        ( Main.on_piece_landed : State/State
+        , state : State
+        )
+
+// ---------------------------------------------------------------------------
+
+Main.handle_event
+  ( event : Event
+  , state : State
+  ) =
+    case<State>(event : Event) {
+      | ( Main.KeyLeft : Event ) => 
+        @<State>
+          ( Main.move_left : State/State
+          , state : State
+          )
+      | ( Main.KeyRight : Event ) => 
+        @<State>
+          ( Main.move_right : State/State
+          , state : State
+          )
+      | ( Main.KeyDown : Event ) => 
+        @<State>
+          ( Main.tick : State/State
+          , state : State
+          )
+      | ( Main.KeyUp : Event ) => 
+        @<State>
+          ( Main.rotate : State/State
+          , state : State
+          )
+      | ( Main.KeySpace : Event ) => 
+        @<State>
+          ( Main.hard_drop : State/State
+          , state : State
+          )
+      | ( Main.KeyEsc : Event ) => 
+        state : State
+      | ( Main.Tick : Event ) => 
+        @<State>
+          ( Main.tick : State/State
+          , state : State
+          )
+      | ( Main.NoOp : Event ) => 
+        state : State
+    }
+
+Main.handle
+  ( ev_code : int32
+  , state : State
+  ) =
+    let 
+      event : Event =
+        @<Event>
+          ( Main.parse_event : int32/Event
+          , ev_code : int32
+          )
+    in
+      let
+        new_state : State =
+          @<State>
+            ( Main.handle_event : Event/State/State
+            , event : Event
+            , state : State
+            )
+        ;
+        event_str : string =
+          @<string>
+            ( Main.event_to_string : Event/string
+            , event : Event
+            )
+        ;
+        _ : * =
+          @<*>
+            ( coal_render_board : List(Pair(int32, int32))/List(Pair(int32, int32))/*
+            , @<List(Pair(int32, int32))>
+                ( Main.board_to_list : Set(Pair(int32, int32))/List(Pair(int32, int32))
+                , @<Set(Pair(int32, int32))>
+                    ( Main.board_of_state : State/Set(Pair(int32, int32))
+                    , new_state : State
+                    )
+                )
+            , @<List(Pair(int32, int32))>
+                ( Main.current_block_cells : State/List(Pair(int32, int32))
+                , new_state : State
+                )
+            )
+        in
+          let
+            _ : * =
+              @<*>
+                ( coal_println_string : string/*
+                , event_str : string
+                )
+            in
+              new_state : State
+
+Main.loop(state : State) =
+  let
+    has_next : bool =
+      @<bool>
+        ( event_loop_has_next : unit/bool
+        , ()
+        )
+    in
+      if (has_next : bool)
+        then
+          let ev_code : int32 = 
+            @<int32>
+              ( event_loop_next : unit/int32
+              , ()
+              )
+          in  
+            let
+              next_state : State =
+                @<State>
+                  ( Main.handle : int32/State/State
+                  , ev_code : int32 
+                  , state : State 
+                  )
+              in
+                @<State>
+                  ( Main.loop : State/State
+                  , next_state : State
+                  )
+        else
+          state : State
+
+Main.main(_ : *) =
+  let 
+    _ : * =
+      @<*>
+        ( event_loop_init : int32/*
+        , 1000
+        )
+  in  
+    @<State>
+      ( Main.loop : State/State
+      , Main.initial_game_state : State
+      )
+
+}

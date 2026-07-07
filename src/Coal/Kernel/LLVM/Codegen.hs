@@ -26,7 +26,7 @@ Expressions are compiled in two modes:
 The tail-call optimization strategy ensures that functions always end with a
 proper terminator instruction, eliminating unnecessary temporary variables.
 -}
-module Coal.Kernel.LLVM.Codegen (irModule) where
+module Coal.Kernel.LLVM.Codegen (irModule, irMainModule) where
 
 import Control.Monad.Except (forM_, throwError, when)
 import Control.Monad.Reader (asks, local)
@@ -313,8 +313,8 @@ irImportedFunctionTrampoline :: Name -> Int -> IRCodegen ()
 irImportedFunctionTrampoline name arity_ =
   declare (name <> "$apply") TPtr (replicate arity_ TPtr)
 
-irModule :: [Module Type] -> Module Type -> IRCodegen IRModule
-irModule allModules Module{moduleName, moduleObjects, moduleImports} =
+irModule :: [Module Type] -> Module Type -> IRCodegen () -> IRCodegen IRModule
+irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
   buildModuleM moduleName $ do
     -- Emit struct types and external declarations for constructors defined in
     -- other modules so that 'irClause' can use sized getelementptr.
@@ -387,14 +387,7 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} =
               irTrampoline LInternal name labels retType
             _ ->
               return ()
-    -- Emit the C main entry point for the program's Main module.
-    when (moduleName == "Main") $ do
-      declare "rt_runtime_init" TVoid []
-      define i32 "main" [] LExternal [] $ do
-        callVoid NoTail TVoid (OGlobal (TFun TVoid []) "rt_runtime_init") []
-        callVoid NoTail TPtr (OGlobal (TFun TPtr [TPtr]) "Main.main") [O.nullPtr TPtr]
-        ret (O.i32 @Int 0)
-
+    k
 irFunction :: IRLinkage -> Name -> [Label Type] -> Expr Type -> IRCodegen ()
 irFunction lnk = Function.irFunction lnk irTail
 
@@ -411,3 +404,16 @@ irThunk = Function.irThunk irValue
 toIRLinkage :: FunctionScope -> IRLinkage
 toIRLinkage Exported = LExternal
 toIRLinkage Local = LInternal
+
+{- | Emit the C main entry point for a Main module.
+
+This must be called after 'irModule' on the Main module to add the
+program entry point that initializes the runtime and calls Main.main.
+-}
+irMainModule :: IRCodegen ()
+irMainModule = do
+  declare "rt_runtime_init" TVoid []
+  define i32 "main" [] LExternal [] $ do
+    callVoid NoTail TVoid (OGlobal (TFun TVoid []) "rt_runtime_init") []
+    callVoid NoTail TPtr (OGlobal (TFun TPtr [TPtr]) "Main.main") [O.nullPtr TPtr]
+    ret (O.i32 @Int 0)

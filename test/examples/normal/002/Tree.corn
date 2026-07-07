@@ -1,0 +1,190 @@
+module Tree {
+
+import List.concat
+import Utils.Function.forward_application
+import Ordering.in_range
+import Ordering.from_int32
+
+data Tree(*) 
+  = Tree.Leaf
+  | Tree.Node(*, Tree(*), Tree(*))
+
+Tree.anon_fun1(a_0 : Tree(*)) =
+  case<list(*)>(a_0 : Tree(*)) {
+    | ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+      , y : *
+      , lhs : Tree(*)
+      , rhs : Tree(*)
+      ) =>
+        let
+          lhs_flat : list(*) =
+            @<list(*)>
+              ( Tree.anon_fun1 : Tree(*)/list(*)
+              , lhs : Tree(*)
+              )
+        ; rhs_flat : list(*) =
+            @<list(*)>
+              ( Tree.anon_fun1 : Tree(*)/list(*)
+              , rhs : Tree(*)
+              )
+        ; rhs_cons : list(*) =
+            @<list(*)>
+              ( $Cons : */list(*)/list(*)
+              , y : *
+              , rhs_flat : list(*)
+              )
+        in
+          @<list(*)>
+            ( List.concat : list(*)/list(*)/list(*)
+            , lhs_flat : list(*)
+            , rhs_cons : list(*)
+            )
+    | (Tree.Leaf : Tree(*)) =>
+        $Nil : list(*)
+  }
+
+// Flatten a Tree into a list
+// (alias __fold__ = Tree.anon_fun1 eliminated by pass 009)
+Tree.flatten(tree : Tree(*)) =
+  @<list(*)>
+    ( Tree.anon_fun1 : Tree(*)/list(*)
+    , tree : Tree(*)
+    )
+
+// Lifted from the $Nil branch of Tree.anon_fun2:
+//   fn(_ : record({ max : * | min : * | * })) => Tree.Leaf
+// No free variables.
+Tree.anon_fun4(_ : record({ max : * | min : * | * })) =
+  Tree.Leaf : Tree(*)
+
+// Lifted from the $Cons branch inner lambda of Tree.anon_fun2.
+// Captured free variables: d_1 (ordering dict), g (list tail), p (list head).
+// Proper parameter: range.
+// Mutually recursive with Tree.anon_fun2.
+Tree.anon_fun3( d_1 : record({ compare : */*/Ordering | * })
+              , g : list(*)
+              , p : *
+              , range : record({ max : * | min : * | * })
+              ) =
+  let
+    in_range_fn : */bool =
+      @<*/bool>
+        ( Ordering.in_range : record({ compare : */*/Ordering | * })/record({ max : * | min : * | * })/*/bool
+        , d_1 : record({ compare : */*/Ordering | * })
+        , range : record({ max : * | min : * | * })
+        )
+  ; p_in_range : bool =
+      @<bool>
+        ( Utils.Function.forward_application : */(*/bool)/bool
+        , p : *
+        , in_range_fn : */bool
+        )
+  ; fold_step : record({ max : * | min : * | * })/Tree(*) =
+      @<record({ max : * | min : * | * })/Tree(*)>
+        ( Tree.anon_fun2 : record({ compare : */*/Ordering | * })/list(*)/record({ max : * | min : * | * })/Tree(*)
+        , d_1 : record({ compare : */*/Ordering | * })
+        , g : list(*)
+        )
+  in
+    if (p_in_range : bool)
+      then
+        let
+          range_min : * = get?_min<*>(range : record({ max : * | min : * | * }))
+        ; range_max : * = get?_max<*>(range : record({ max : * | min : * | * }))
+        in
+        let
+          left_range_row : { min : * | max : * | {} } =
+                    { min = range_min : * | max = p : * | {} }
+                ; left_range : record({ min : * | max : * | {} }) =
+                    @<record({ min : * | max : * | {} })>
+                      ( $Record : { min : * | max : * | {} }/record({ min : * | max : * | {} })
+                      , left_range_row : { min : * | max : * | {} }
+                      )
+                ; right_range_row : { min : * | max : * | {} } =
+                    { min = p : * | max = range_max : * | {} }
+                ; right_range : record({ min : * | max : * | {} }) =
+                    @<record({ min : * | max : * | {} })>
+                      ( $Record : { min : * | max : * | {} }/record({ min : * | max : * | {} })
+                      , right_range_row : { min : * | max : * | {} }
+                      )
+                ; left_subtree : Tree(*) =
+                    @<Tree(*)>
+                      ( fold_step : record({ max : * | min : * | * })/Tree(*)
+                      , left_range : record({ min : * | max : * | {} })
+                      )
+                ; right_subtree : Tree(*) =
+                    @<Tree(*)>
+                      ( fold_step : record({ max : * | min : * | * })/Tree(*)
+                      , right_range : record({ min : * | max : * | {} })
+                      )
+                in
+                  @<Tree(*)>
+                    ( Tree.Node : */Tree(*)/Tree(*)/Tree(*)
+                    , p : *
+                    , left_subtree : Tree(*)
+                    , right_subtree : Tree(*)
+                    )
+      else
+        @<Tree(*)>
+          ( fold_step : record({ max : * | min : * | * })/Tree(*)
+          , range : record({ max : * | min : * | * })
+          )
+
+// Fold step for building a BST from a list.
+// d_1: ordering dictionary (genuine free variable, added as param by lambda lifting).
+// a_0: remaining list element. Returns: range -> Tree(*).
+Tree.anon_fun2( d_1 : record({ compare : */*/Ordering | * })
+              , a_0 : list(*)
+              ) =
+  case<*>(a_0 : list(*)) {
+    | ( $Cons : */list(*)/list(*)
+      , p : *
+      , g : list(*)
+      ) =>
+        @<record({ max : * | min : * | * })/Tree(*)>
+          ( Tree.anon_fun3 : record({ compare : */*/Ordering | * })/list(*)/*/record({ max : * | min : * | * })/Tree(*)
+          , d_1 : record({ compare : */*/Ordering | * })
+          , g : list(*)
+          , p : *
+          )
+    | ($Nil : list(*)) =>
+        Tree.anon_fun4 : record({ max : * | min : * | * })/Tree(*)
+  }
+
+// Build binary tree from list
+Tree.from_list( d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+              , list : list(*)
+              ) =
+  let
+    __fold__ : list(*)/record({ max : * | min : * | * })/Tree(*) =
+      @<list(*)/record({ max : * | min : * | * })/Tree(*)>
+        ( Tree.anon_fun2 : record({ compare : */*/Ordering | * })/list(*)/record({ max : * | min : * | * })/Tree(*)
+        , d_1 : record({ compare : */*/Ordering | * })
+        )
+  ; min_val : * =
+      @<*>
+        ( Ordering.from_int32 : record({ from_int32 : int32/* | * })/int32/*
+        , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+        , 0
+        )
+  ; max_val : * =
+      @<*>
+        ( Ordering.from_int32 : record({ from_int32 : int32/* | * })/int32/*
+        , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+        , -1
+        )
+  ; initial_range_row : { min : * | max : * | {} } =
+      { min = min_val : * | max = max_val : * | {} }
+  ; initial_range : record({ min : * | max : * | {} }) =
+      @<record({ min : * | max : * | {} })>
+        ( $Record : { min : * | max : * | {} }/record({ min : * | max : * | {} })
+        , initial_range_row : { min : * | max : * | {} }
+        )
+  in
+    @<Tree(*)>
+      ( __fold__ : list(*)/record({ max : * | min : * | * })/Tree(*)
+      , list : list(*)
+      , initial_range : record({ min : * | max : * | {} })
+      )
+
+}

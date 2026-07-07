@@ -1,0 +1,53 @@
+module List {
+
+  data List
+    = List.Nil
+    | List.Cons(*, List(*))
+
+  List.fold_list
+    ( f : */*/*         // a/b/b
+    , acc : *           // b
+    , xs : List(*)      // [a]
+                        // b
+    ) =
+      case<*>(xs : List(*)) {
+        | ( List.Cons : */List(*)/List(*)
+          , hd : *                 // a
+          , tl : List(*)           // [a]
+          ) => 
+          @<*>                     // b
+            ( List.fold_list : (*/*/*)/*/List(*)/*
+            , f : */*/*
+            , @<*>                 // b
+                ( f : */*/*        // a/b/b
+                , hd : *           // a
+                , acc : *          // b
+                )
+            , tl : List(*)
+            )
+        | ( List.Nil : List(*)
+          ) => 
+          acc : *
+      }
+
+  List.list_concat(xs : List(*), ys : List(*)) =
+    case<List(*)>(xs : List(*)) {
+      | ( List.Nil : List(*)
+        ) =>
+        ys : List(*)
+      | ( List.Cons : */List(*)/List(*)
+        , hd : *
+        , tl : List(*)
+        ) =>
+        @<List(*)>
+          ( List.Cons : */List(*)/List(*)
+          , hd : *
+          , @<List(*)>
+              ( List.list_concat : List(*)/List(*)/List(*)
+              , tl : List(*) 
+              , ys : List(*)
+              )
+          )
+    }
+
+}

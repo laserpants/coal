@@ -1,0 +1,154 @@
+module Main {
+
+  import Data.Option.Some
+  import Data.Option.None
+
+  import Data.Ord.Eq
+  import Data.Ord.Gt
+  import Data.Ord.Lt
+
+  import Data.Map.Empty
+  import Data.Map.Map
+  import Data.Map.size
+  import Data.Map.lookup
+  import Data.Map.insert
+  import Data.Map.delete
+
+  import Data.Set.insert
+  import Data.Set.delete
+  import Data.Set.singleton
+  import Data.Set.empty
+  import Data.Set.is_empty
+  import Data.Set.is_member
+  import Data.Set.size
+
+  Main.main(_ : *) =
+    let
+      compare : int32/int32/Ord =
+        fn(a : int32, b : int32) =>
+          if ([== int32](a : int32, b : int32)) then Data.Ord.Eq : Ord
+          else if ([< int32](a : int32, b : int32)) then Data.Ord.Lt : Ord
+          else Data.Ord.Gt : Ord
+    in
+    // Build set {5, 2, 8, 1, 3} inserting out-of-order to exercise AVL rotations.
+    let
+      s0 : Set(int32) =
+        @<Set(int32)>
+          ( Data.Set.empty : unit/Set(int32)
+          , ()
+          )
+      ;
+      s1 : Set(int32) =
+        @<Set(int32)>
+          ( Data.Set.insert : (int32/int32/Ord)/int32/Set(int32)/Set(int32)
+          , compare : int32/int32/Ord
+          , 5
+          , s0 : Set(int32)
+          )
+      ;
+      s2 : Set(int32) =
+        @<Set(int32)>
+          ( Data.Set.insert : (int32/int32/Ord)/int32/Set(int32)/Set(int32)
+          , compare : int32/int32/Ord
+          , 2
+          , s1 : Set(int32)
+          )
+      ;
+      s3 : Set(int32) =
+        @<Set(int32)>
+          ( Data.Set.insert : (int32/int32/Ord)/int32/Set(int32)/Set(int32)
+          , compare : int32/int32/Ord
+          , 8
+          , s2 : Set(int32)
+          )
+      ;
+      s4 : Set(int32) =
+        @<Set(int32)>
+          ( Data.Set.insert : (int32/int32/Ord)/int32/Set(int32)/Set(int32)
+          , compare : int32/int32/Ord
+          , 1
+          , s3 : Set(int32)
+          )
+      ;
+      s5 : Set(int32) =
+        @<Set(int32)>
+          ( Data.Set.insert : (int32/int32/Ord)/int32/Set(int32)/Set(int32)
+          , compare : int32/int32/Ord
+          , 3
+          , s4 : Set(int32)
+          )
+    in
+    let
+      // Expected: 1 (s0 is empty)
+      empty_check : bool =
+        @<bool>
+          ( Data.Set.is_empty : Set(int32)/bool
+          , s0 : Set(int32)
+          )
+      ;
+      // Expected: 5
+      sz1 : int32 =
+        @<int32>
+          ( Data.Set.size : Set(int32)/int32
+          , s5 : Set(int32)
+          )
+      ;
+      // Expected: 1 (3 is in set)
+      mem3 : bool =
+        @<bool>
+          ( Data.Set.is_member : (int32/int32/Ord)/int32/Set(int32)/bool
+          , compare : int32/int32/Ord
+          , 3
+          , s5 : Set(int32)
+          )
+      ;
+      // Expected: 0 (7 is not in set)
+      mem7 : bool =
+        @<bool>
+          ( Data.Set.is_member : (int32/int32/Ord)/int32/Set(int32)/bool
+          , compare : int32/int32/Ord
+          , 7
+          , s5 : Set(int32)
+          )
+      ;
+      // Delete 3
+      s6 : Set(int32) =
+        @<Set(int32)>
+          ( Data.Set.delete : (int32/int32/Ord)/int32/Set(int32)/Set(int32)
+          , compare : int32/int32/Ord
+          , 3
+          , s5 : Set(int32)
+          )
+      ;
+      // Expected: 4
+      sz2 : int32 =
+        @<int32>
+          ( Data.Set.size : Set(int32)/int32
+          , s6 : Set(int32)
+          )
+      ;
+      // Expected: 0 (3 was deleted)
+      mem3_del : bool =
+        @<bool>
+          ( Data.Set.is_member : (int32/int32/Ord)/int32/Set(int32)/bool
+          , compare : int32/int32/Ord
+          , 3
+          , s6 : Set(int32)
+          )
+    in
+    let
+      _ : * = @<*>(coal_println_int32 : int32/*, if (empty_check : bool) then 1 else 0)  // 1
+      ;
+      _ : * = @<*>(coal_println_int32 : int32/*, sz1 : int32)                      // 5
+      ;
+      _ : * = @<*>(coal_println_int32 : int32/*, if (mem3 : bool) then 1 else 0)          // 1
+      ;
+      _ : * = @<*>(coal_println_int32 : int32/*, if (mem7 : bool) then 1 else 0)          // 0
+      ;
+      _ : * = @<*>(coal_println_int32 : int32/*, sz2 : int32)                      // 4
+      ;
+      _ : * = @<*>(coal_println_int32 : int32/*, if (mem3_del : bool) then 1 else 0)      // 0
+    in
+      0
+
+}

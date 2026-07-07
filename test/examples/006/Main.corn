@@ -1,0 +1,38 @@
+module Main {
+
+Main.f1(a : int32, b : int32, c : int32) =
+  [+ int32]
+    ( a : int32
+    , [+ int32]
+        ( b : int32
+        , c : int32
+        )
+    )
+
+Main.f2 =
+  @<int32/int32/int32>
+    ( Main.f1 : int32/int32/int32/int32
+    , 1
+    )
+
+Main.main(_ : *) =
+  let r : int32 =
+    @<int32>
+      ( Main.f2 : int32/int32/int32
+      , 2
+      , 3
+      )
+    in
+      let
+        __call_tmp : * =
+          @<*>
+            ( coal_print_int32 : int32/*
+            , r : int32
+            )
+        in
+          @<int32>
+            ( fn(a : *) => r : int32
+            , __call_tmp : *
+            )
+
+}

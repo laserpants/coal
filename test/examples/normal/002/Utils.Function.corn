@@ -1,0 +1,9 @@
+module Utils.Function {
+
+Utils.Function.compose(f : */*, g : */*, x : *) =
+  @<*>(f : */*, @<*>(g : */*, x : *))
+
+Utils.Function.forward_application(x : *, f : */*) =
+  @<*>(f : */*, x : *)
+
+}

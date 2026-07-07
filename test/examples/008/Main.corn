@@ -1,0 +1,21 @@
+module Main {
+
+Main.main(_ : *) =
+  let
+    msg : string =
+      "🤖🤖 Hello, world!"
+    in
+      let
+        __call_tmp : * =
+          @<*>
+            ( coal_print_string : string/*
+            , msg : string
+            )
+        in
+          @<int32>
+            ( fn(a : *) => 0
+            , __call_tmp : *
+            )
+
+}
+
