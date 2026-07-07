@@ -69,6 +69,9 @@ checkLambdasLifted expr = case expr of
       ++ checkLambdasLifted e2
   EGet _ e ->
     checkLambdasLifted e
+  ECall _ args k ->
+    foldMap checkLambdasLifted args
+      ++ checkLambdasLifted k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

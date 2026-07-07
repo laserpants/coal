@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 {- |
 Normalization pass 4: Constructor saturation.
 
@@ -120,6 +122,10 @@ saturateExpr expr =
     EGet lbl e -> do
       e' <- saturateExpr e
       pure (EGet lbl e')
+    ECall (Label t name) args k -> do
+      args' <- traverse saturateExpr args
+      k' <- saturateExpr k
+      pure (ECall (Label t name) args' k')
 
 -- --------------------------------------------------------------------------
 -- Constructor saturation helper

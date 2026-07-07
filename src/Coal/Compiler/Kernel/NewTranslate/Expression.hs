@@ -142,16 +142,7 @@ translateExpression =
     EFFICall _ _ (Label t name) es e -> do
       translatedEs <- traverse translateExpression es
       body <- translateExpression e
-      let callT = translateType t
-      case NonEmpty.nonEmpty translatedEs of
-        Nothing ->
-          pure body
-        Just args ->
-          let fnType = NKHT.foldType callT (NKHT.typeOf <$> args)
-           in pure $
-                NK.ELet
-                  (NK.Binding (NK.Label callT "_") (NK.EApp callT (NK.EVar (NK.Label fnType name)) args) :| [])
-                  body
+      pure (NK.ECall (NK.Label (translateType t) name) translatedEs body)
     EMatch{} ->
       error "Implementation error"
     ELambdaMatch{} ->

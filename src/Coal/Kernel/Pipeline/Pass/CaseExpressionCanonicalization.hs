@@ -105,6 +105,8 @@ canonicalizeExpr expr =
       EExt name (canonicalizeExpr e1) (canonicalizeExpr e2)
     EGet lbl e ->
       EGet lbl (canonicalizeExpr e)
+    ECall (Label t name) args k ->
+      ECall (Label t name) (fmap canonicalizeExpr args) (canonicalizeExpr k)
 
 -- --------------------------------------------------------------------------
 -- Helpers

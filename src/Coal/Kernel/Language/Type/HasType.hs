@@ -216,3 +216,5 @@ instance (HasType t) => HasType (Expr t) where
         RNil
       EGet t _ ->
         typeOf t
+      ECall (Label t _) _ _ ->
+        typeOf t

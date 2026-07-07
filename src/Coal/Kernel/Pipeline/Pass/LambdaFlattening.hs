@@ -22,7 +22,7 @@ module Coal.Kernel.Pipeline.Pass.LambdaFlattening (
   lambdaFlattening,
 ) where
 
-import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..))
+import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
@@ -92,6 +92,8 @@ flattenExpr expr =
       EExt name (flattenExpr e1) (flattenExpr e2)
     EGet lbl e ->
       EGet lbl (flattenExpr e)
+    ECall (Label t name) args k ->
+      ECall (Label t name) (fmap flattenExpr args) (flattenExpr k)
 
 -- --------------------------------------------------------------------------
 -- Helpers

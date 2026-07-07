@@ -133,6 +133,14 @@ prettyExpr pt expr =
         <> pt t
         <> ">"
         <> parens (prettyExpr pt rowExpr)
+    ECall (Label t name) args k ->
+      "#{"
+        <> pretty name
+        <> " : "
+        <> pt t
+        <> "}"
+        <> parens (prettyCommaSep args (prettyExpr pt))
+        <> parens (prettyExpr pt k)
 
 {- | Helper: collect all fields from nested EExt expressions
 Returns (list of fields, final rest expression)

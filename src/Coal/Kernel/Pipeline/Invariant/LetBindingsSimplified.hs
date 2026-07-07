@@ -72,6 +72,9 @@ checkLetBindingsSimplified expr = case expr of
       ++ checkLetBindingsSimplified e2
   EGet _ e ->
     checkLetBindingsSimplified e
+  ECall _ args k ->
+    foldMap checkLetBindingsSimplified args
+      ++ checkLetBindingsSimplified k
 
 -- | Check if a binding is a trivial alias (x = y) and report it as an error.
 checkBindingNotTrivial :: Binding Type -> [InvariantError]

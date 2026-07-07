@@ -224,6 +224,10 @@ liftExpr globals scope expr =
     EGet lbl e -> do
       (e', new) <- liftExpr globals scope e
       pure (EGet lbl e', new)
+    ECall (Label t name) args k -> do
+      (args', new1) <- liftAll globals scope args
+      (k', new2) <- liftExpr globals scope k
+      pure (ECall (Label t name) args' k', new1 ++ new2)
 
 -- --------------------------------------------------------------------------
 -- Helpers

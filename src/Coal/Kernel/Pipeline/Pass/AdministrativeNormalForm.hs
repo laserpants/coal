@@ -158,6 +158,10 @@ anfTail expr =
     EGet lbl e ->
       anfValue e $ \eAtom ->
         pure (EGet lbl eAtom)
+    ECall (Label t name) args k ->
+      anfAll args $ \argAtoms ->
+        anfValue k $ \kAtom ->
+          pure (ECall (Label t name) argAtoms kAtom)
 
 -- --------------------------------------------------------------------------
 -- Operand-position (let-binding RHS) normalization

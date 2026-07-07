@@ -117,6 +117,10 @@ canonicalizeExpr env expr =
       e1' <- canonicalizeExpr env e1
       e2' <- canonicalizeExpr env e2
       pure (EExt name e1' e2')
+    ECall (Label t name) args k -> do
+      args' <- mapM (canonicalizeExpr env) args
+      k' <- canonicalizeExpr env k
+      pure (ECall (Label t name) args' k')
     EGet (Label t name) e -> do
       e' <- canonicalizeExpr env e
       -- Field labels in EGet use the label name as a field, not a variable.

@@ -42,7 +42,7 @@ import qualified Data.Text.Encoding as Text
 import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
-import Coal.Kernel.LLVM.Boxing (irTypeRep, irUnbox)
+import Coal.Kernel.LLVM.Boxing (irBox, irTypeRep, irUnbox)
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
 import qualified Coal.Kernel.LLVM.Function as Function
@@ -59,7 +59,7 @@ import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Function (arity)
-import Coal.Kernel.Language.Type.HasType (HasType (typeOf), unfoldType)
+import Coal.Kernel.Language.Type.HasType (HasType (typeOf), returnTypeOf, unfoldType)
 import Common (Name, unsnoc)
 import qualified Common.Environment as Environment
 
@@ -144,6 +144,10 @@ irTail =
         _ -> do
           irValue expr
       ret r2
+    ECall (Label t name) args k -> do
+      -- External C call in tail position: evaluate as value, return
+      r1 <- irValue (ECall (Label t name) args k)
+      ret r1
     expr -> do
       r1 <- irValue expr
       ret r1
@@ -222,6 +226,20 @@ irValue =
       field <- irLabel fieldName
       r1 <- callRuntime rtRecordLookup [row, field]
       irUnbox t r1
+    ECall (Label t name) args k -> do
+      -- External C call: unbox each argument to its raw C type,
+      -- call via C ABI, then box the result and pass to continuation.
+      -- t is the full function type (e.g. int64 -> double); extract the
+      -- return-type portion for the declare/call/box signatures.
+      rawArgs <- traverse (\a -> irUnbox (typeOf a) =<< irValue a) args
+      let argIRTypes = map irTypeRep (map typeOf args)
+          resultType = returnTypeOf t
+          retIRType = irTypeRep resultType
+      _ <- declare name retIRType argIRTypes
+      rawResult <- call NoTail retIRType (OGlobal (TFun retIRType argIRTypes) name) rawArgs
+      boxedResult <- irBox resultType rawResult
+      local (\env -> env{codegenVarEnv = Environment.insert "_" boxedResult (codegenVarEnv env)}) $
+        irValue k
     e ->
       throwError (UnsupportedExpression e)
 

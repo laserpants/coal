@@ -24,7 +24,7 @@ module Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (
   logicalOperatorTranslation,
 ) where
 
-import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..))
+import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Op (Op (..))
@@ -100,6 +100,8 @@ translateExpr =
       EExt name (translateExpr e1) (translateExpr e2)
     EGet lbl e ->
       EGet lbl (translateExpr e)
+    ECall (Label t name) args k ->
+      ECall (Label t name) (fmap translateExpr args) (translateExpr k)
 
 -- --------------------------------------------------------------------------
 -- Helpers

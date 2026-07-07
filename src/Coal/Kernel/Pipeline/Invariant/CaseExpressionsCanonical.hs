@@ -67,6 +67,9 @@ checkCaseExpressionsCanonical expr = case expr of
       ++ checkCaseExpressionsCanonical e2
   EGet _ e ->
     checkCaseExpressionsCanonical e
+  ECall _ args k ->
+    foldMap checkCaseExpressionsCanonical args
+      ++ checkCaseExpressionsCanonical k
  where
   checkBinding (Binding _ e) = checkCaseExpressionsCanonical e
   checkClauseBody (Clause _ body) = checkCaseExpressionsCanonical body

@@ -109,6 +109,8 @@ simplifyExpr subst expr =
       EExt name (simplifyExpr subst e1) (simplifyExpr subst e2)
     EGet lbl e ->
       EGet lbl (simplifyExpr subst e)
+    ECall (Label t name) args k ->
+      ECall (Label t name) (fmap (simplifyExpr subst) args) (simplifyExpr subst k)
 
 -- --------------------------------------------------------------------------
 -- Let simplification

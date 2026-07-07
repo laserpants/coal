@@ -123,6 +123,12 @@ eval =
           return (VRecord (Map.insert fieldName vv m))
         other ->
           throwEval (TypeMismatch "VRecord" (describeValueKind other))
+    -- External C call: evaluate arguments, delegate to extern handler
+    ECall (Label _ name) args k -> do
+      avs <- traverse eval args
+      r <- callExtern name avs
+      kv <- eval k
+      apply kv [r]
     -- Field projection: evaluate the row, return the named field value directly.
     EGet (Label _ fieldName) rowExpr -> do
       rowVal <- eval rowExpr

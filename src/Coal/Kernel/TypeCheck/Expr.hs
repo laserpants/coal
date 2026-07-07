@@ -158,6 +158,13 @@ checkExpr =
     ENil ->
       pure RNil
     -- -----------------------------------------------------------------------
+    -- External C call: trust the annotation
+    ECall (Label t _) args k -> do
+      mapM_ checkExpr args
+      _ <- checkExpr k
+      pure t
+
+    -- -----------------------------------------------------------------------
     -- Field projection: get?_field<t>(row)
     EGet (Label t field) row -> do
       rowT <- checkExpr row

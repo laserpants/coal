@@ -20,6 +20,7 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
+import qualified Data.List as List
 
 {- | Compute the set of /free/ variables occurring in an expression.
 
@@ -81,6 +82,9 @@ freeVars expr =
     -- Record projection: free variables in the record expression
     EGet _ e ->
       freeVars e
+    -- External C call: free variables in arguments and continuation
+    ECall _ args k ->
+      foldMap freeVars args `Set.union` freeVars k
 
 -- | Extract the label (name) from a let binding.
 bindingName :: Binding t -> Label t

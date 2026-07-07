@@ -81,6 +81,9 @@ checkLogicalOperatorsTranslated expr = case expr of
       ++ checkLogicalOperatorsTranslated e2
   EGet _ e ->
     checkLogicalOperatorsTranslated e
+  ECall _ args k ->
+    foldMap checkLogicalOperatorsTranslated args
+      ++ checkLogicalOperatorsTranslated k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

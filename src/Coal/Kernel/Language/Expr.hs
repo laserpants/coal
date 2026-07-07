@@ -45,6 +45,7 @@ The expression grammar supports:
   * Pattern matching (@case@)
   * Primitive literals and operators
   * Record construction, extension and projections
+  * External C function calls
 -}
 data Expr t
   = -- | Variable
@@ -71,6 +72,8 @@ data Expr t
     ENil
   | -- | Field projection
     EGet (Label t) (Expr t)
+  | -- | External C function call
+    ECall (Label t) [Expr t] (Expr t)
   deriving
     ( Show
     , Eq
