@@ -2,6 +2,7 @@
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
+import Coal.Kernel.Spec (kernelSpec)
 import Coal.Language.Type
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (..), applyTypeArgs)
 import Coal.Language.Type.Kind
@@ -30,6 +31,7 @@ main :: IO ()
 main =
   hspec $ do
     spec
+    kernelSpec
     --    buildSpec
     e2eSpec
 

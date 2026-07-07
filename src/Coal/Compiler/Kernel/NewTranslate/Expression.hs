@@ -22,7 +22,6 @@ import qualified Coal.Kernel.Language.Type.HasType as NKHT
 import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
-import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as Text
 import Extras (Name)
 import TextShow (showt)

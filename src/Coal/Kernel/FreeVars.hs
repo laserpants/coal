@@ -20,7 +20,6 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
-import qualified Data.List as List
 
 {- | Compute the set of /free/ variables occurring in an expression.
 
