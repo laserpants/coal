@@ -394,7 +394,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "compare"
-              , Forall mempty mempty (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
+              , Forall mempty [Trait "Ordered" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 1))] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
               )
             ]
         )
