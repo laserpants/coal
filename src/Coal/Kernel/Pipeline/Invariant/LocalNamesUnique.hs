@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 {- |
 Invariant checker for local name canonicalization (pass 2).
 
@@ -55,38 +57,42 @@ checkLocalNamesUnique expr =
 expression tree.
 -}
 collectLocalBinders :: Expr Type -> [Name]
-collectLocalBinders expr = case expr of
-  EVar _ ->
-    []
-  ECon _ ->
-    []
-  ELit _ ->
-    []
-  ENil ->
-    []
-  ELet bindings body ->
-    foldMap bindingBinders (NonEmpty.toList bindings)
-      ++ collectLocalBinders body
-  ELam params body ->
-    map labelName (NonEmpty.toList params)
-      ++ collectLocalBinders body
-  EApp _ f args ->
-    collectLocalBinders f
-      ++ foldMap collectLocalBinders args
-  EIf cond t f ->
-    collectLocalBinders cond
-      ++ collectLocalBinders t
-      ++ collectLocalBinders f
-  EOp op ->
-    foldMap collectLocalBinders op
-  ECase _ scrutinee clauses ->
-    collectLocalBinders scrutinee
-      ++ foldMap clauseBinders (NonEmpty.toList clauses)
-  EExt _ e1 e2 ->
-    collectLocalBinders e1
-      ++ collectLocalBinders e2
-  EGet _ e ->
-    collectLocalBinders e
+collectLocalBinders =
+  \case
+    EVar _ ->
+      []
+    ECon _ ->
+      []
+    ELit _ ->
+      []
+    ENil ->
+      []
+    ELet bindings body ->
+      foldMap bindingBinders (NonEmpty.toList bindings)
+        ++ collectLocalBinders body
+    ELam params body ->
+      map labelName (NonEmpty.toList params)
+        ++ collectLocalBinders body
+    EApp _ f args ->
+      collectLocalBinders f
+        ++ foldMap collectLocalBinders args
+    EIf cond t f ->
+      collectLocalBinders cond
+        ++ collectLocalBinders t
+        ++ collectLocalBinders f
+    EOp op ->
+      foldMap collectLocalBinders op
+    ECase _ scrutinee clauses ->
+      collectLocalBinders scrutinee
+        ++ foldMap clauseBinders (NonEmpty.toList clauses)
+    EExt _ e1 e2 ->
+      collectLocalBinders e1
+        ++ collectLocalBinders e2
+    EGet _ e ->
+      collectLocalBinders e
+    ECall _ es e ->
+      foldMap collectLocalBinders es
+        ++ collectLocalBinders e
 
 {- | Collect the binder name introduced by a @let@ binding and then recurse
 into the binding's definition expression.
