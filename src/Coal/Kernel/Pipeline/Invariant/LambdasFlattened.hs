@@ -64,6 +64,9 @@ checkLambdasFlattened expr = case expr of
       ++ checkLambdasFlattened e2
   EGet _ e ->
     checkLambdasFlattened e
+  ECall _ args k ->
+    foldMap checkLambdasFlattened args
+      ++ checkLambdasFlattened k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

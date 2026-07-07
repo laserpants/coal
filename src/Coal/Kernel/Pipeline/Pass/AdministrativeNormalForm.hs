@@ -191,32 +191,33 @@ anfValue ::
   PipelineT m (Expr Type)
 anfValue expr cont
   | isAtomic expr = cont expr
-  | otherwise = case expr of
-      EIf cond th el ->
-        anfValue cond $ \condAtom -> do
-          th' <- anfValue th cont
-          el' <- anfValue el cont
-          pure (EIf condAtom th' el')
-      ECase _t scrutinee clauses ->
-        anfValue scrutinee $ \scrutAtom -> do
-          clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfValue b cont) clauses
-          -- The continuation changes the branch type; derive the new case
-          -- result type from the transformed first branch rather than reusing
-          -- the now-stale pre-continuation type.
-          let newT = let Clause _ body = NonEmpty.head clauses' in typeOf body
-          pure (ECase newT scrutAtom clauses')
-      ELet bs body ->
-        anfLetSeq (NonEmpty.toList bs) (anfValue body cont)
-      ELam params body -> do
-        body' <- anfTail body
-        bindFresh (ELam params body') cont
-      ECall (Label t name) args k ->
-        anfAll args $ \argAtoms ->
-          anfValue k $ \kAtom ->
-            cont (ECall (Label t name) argAtoms kAtom)
-      _ ->
-        anfLetRhs expr $ \expr' ->
-          bindFresh expr' cont
+  | otherwise =
+      case expr of
+        EIf cond th el ->
+          anfValue cond $ \condAtom -> do
+            th' <- anfValue th cont
+            el' <- anfValue el cont
+            pure (EIf condAtom th' el')
+        ECase _t scrutinee clauses ->
+          anfValue scrutinee $ \scrutAtom -> do
+            clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfValue b cont) clauses
+            -- The continuation changes the branch type; derive the new case
+            -- result type from the transformed first branch rather than reusing
+            -- the now-stale pre-continuation type.
+            let newT = let Clause _ body = NonEmpty.head clauses' in typeOf body
+            pure (ECase newT scrutAtom clauses')
+        ELet bs body ->
+          anfLetSeq (NonEmpty.toList bs) (anfValue body cont)
+        ELam params body -> do
+          body' <- anfTail body
+          bindFresh (ELam params body') cont
+        ECall (Label t name) args k ->
+          anfAll args $ \argAtoms ->
+            anfValue k $ \kAtom ->
+              cont (ECall (Label t name) argAtoms kAtom)
+        _ ->
+          anfLetRhs expr $
+            \expr' -> bindFresh expr' cont
 
 -- ---------------------------------------------------------------------------
 -- Let-binding RHS normalization
@@ -269,7 +270,8 @@ anfLetRhs expr cont
         anfAll args $ \argAtoms ->
           anfValue k $ \kAtom ->
             cont (ECall (Label t name) argAtoms kAtom)
-      other -> cont other
+      other ->
+        cont other
 
 -- ---------------------------------------------------------------------------
 -- Let-binding sequence processing

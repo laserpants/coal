@@ -227,17 +227,17 @@ irValue =
       r1 <- callRuntime rtRecordLookup [row, field]
       irUnbox t r1
     ECall (Label t name) args k -> do
-      -- External C call: unbox each argument to its raw C type,
-      -- call via C ABI, then box the result and apply the continuation.
-      -- t is the full function type (e.g. int64 -> double); extract the
-      -- return-type portion for the declare/call/box signatures.
-      rawArgs <- traverse (\a -> irUnbox (typeOf a) =<< irValue a) args
-      let argIRTypes = map irTypeRep (map typeOf args)
-          resultType = returnTypeOf t
-          retIRType = irTypeRep resultType
-      _ <- declare name retIRType argIRTypes
-      rawResult <- call NoTail retIRType (OGlobal (TFun retIRType argIRTypes) name) rawArgs
-      boxedResult <- irBox resultType rawResult
+      -- External C call via coal_* wrapper API.
+      -- coal_* functions take and return rt_value_t (boxed TPtr), so we
+      -- box each argument, call through C ABI with all-pointer signature,
+      -- and the result is already boxed.
+      -- t is the full function type (e.g. float -> int32); we ignore the
+      -- per-argument IR types here because the runtime API uses TPtr for
+      -- everything.
+      boxedArgs <- traverse (Boxing.irBoxed irValue) args
+      let resultType = returnTypeOf t
+      _ <- declare name TPtr (replicate (length args) TPtr)
+      boxedResult <- call NoTail TPtr (OGlobal (TFun TPtr (replicate (length args) TPtr)) name) boxedArgs
       -- Apply the continuation to the boxed result.
       kv <- irValue k
       argSlot <- alloca TPtr (O.i32 @Int 1)
