@@ -35,10 +35,10 @@ import qualified Data.Set as Set
 
 import LLVM.IR
 
+import Coal.Common.Environment (Environment)
 import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Type (Type)
 import Common (Name)
-import Common.Environment (Environment)
 
 data IRCodegenError
   = UnboundVariable Name

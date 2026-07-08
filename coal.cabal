@@ -261,7 +261,6 @@ library
       Coal.TypeSystem.Unification
       Coal.Utils
       Common
-      Common.Environment
       Extras
       Extras.Control.Applicative
       Extras.Control.Monad

@@ -30,13 +30,13 @@ import Control.Monad.Reader (local)
 import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
+import qualified Coal.Common.Environment as Environment
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..))
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.HasType (HasType (typeOf))
 import Common (Name)
-import qualified Common.Environment as Environment
 
 {- | Generate a function definition with the specified name, parameters, and
 body.
