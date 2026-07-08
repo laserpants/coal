@@ -337,6 +337,11 @@ instance (Dot t) => Dot (Expr t) where
         return extId
       ENil ->
         emitShape HexagonShape "ENil"
+      ECall (Label t name) args cont -> do
+        callId <- emitNamedShape RectangleShape (Just name) "ECall"
+        emitEdgesWithLabels numberedLabels callId args
+        emitEdgeWithLabel "cont" callId cont
+        return callId
       EGet (Label t fieldName) record -> do
         (getId, _) <- withTypeInfo t $ emitNamedShape HexagonShape (Just fieldName) "EGet"
         emitEdgeWithLabel "from" getId record
