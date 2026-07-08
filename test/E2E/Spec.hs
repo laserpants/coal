@@ -806,13 +806,13 @@ e2eSpec = do
       ]
 
   describe "163" $ do
-    it "is TraitError" $ do
+    it "is PreflightFailure" $ do
       res <-
         runSpec
           "test/Coal/examples/163"
           [ "Main.coal"
           ]
-      res `shouldBe` Left TraitError
+      res `shouldBe` Left PreflightFailure
 
   describe "166" $ do
     expectOutput
@@ -975,14 +975,14 @@ e2eSpec = do
       ]
 
   describe "195" $ do
-    it "is NoSuchIdentifier" $ do
+    it "is PreflightFailure" $ do
       res <-
         runSpec
           "test/Coal/examples/195"
           [ "Main.coal"
           , "Stuff.coal"
           ]
-      res `shouldBe` Left NoSuchIdentifier
+      res `shouldBe` Left PreflightFailure
 
   describe "196" $ do
     expectOutput

@@ -49,7 +49,7 @@ import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Error
-import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeVarNames)
@@ -64,7 +64,7 @@ import Coal.TypeSystem.Parameterized (Parameterized (instantiateTypeIndexes), To
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless)
-import Control.Monad.Except (MonadError (..), MonadIO)
+import Control.Monad.Except (MonadError (throwError), MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, foldM, get, gets, modify)
 import Control.Monad.Trans (lift)
@@ -81,7 +81,8 @@ passPrepareBuild = Pass{runPass = passImpl}
 
 passImpl :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 passImpl m = do
-  prepareBuild m
+  (_, errors) <- listenErrors (prepareBuild m)
+  unless (null errors) (throwError PreflightFailure)
   return m
 
 insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ExportList a) (StateT (Build a) m) ()
