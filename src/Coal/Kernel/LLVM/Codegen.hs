@@ -231,18 +231,18 @@ irValue =
       -- Arguments are boxed to TPtr. The function is declared with its
       -- actual return type; we box the raw result ourselves.
       boxedArgs <- traverse (Boxing.irBoxed irValue) args
-      let resultType = returnTypeOf t
-          resultIrType = irTypeRep resultType
-      _ <- declare name resultIrType (replicate (length args) TPtr)
-      rawResult <- call NoTail resultIrType (OGlobal (TFun resultIrType (replicate (length args) TPtr)) name) boxedArgs
-      boxedResult <- Boxing.irBox resultType rawResult
+      let foreignResultType = returnTypeOf t
+          foreignResultIrType = irTypeRep foreignResultType
+      _ <- declare name foreignResultIrType (replicate (length args) TPtr)
+      rawResult <- call NoTail foreignResultIrType (OGlobal (TFun foreignResultIrType (replicate (length args) TPtr)) name) boxedArgs
+      boxedResult <- Boxing.irBox foreignResultType rawResult
       -- Apply the continuation to the boxed result.
       kv <- irValue k
       argSlot <- alloca TPtr (O.i32 @Int 1)
       gepSlot <- gep TPtr argSlot [O.i32 @Int 0]
       store boxedResult gepSlot
       applied <- callRuntime rtApply [kv, O.i32 @Int 1, argSlot]
-      irUnbox resultType applied
+      irUnbox (returnTypeOf k) applied
     e ->
       throwError (UnsupportedExpression e)
 

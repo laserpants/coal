@@ -4,11 +4,11 @@ module E2E.Spec (e2eSpec, runSpec) where
 
 import Coal.Compiler (pipeline)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
-import Coal.Compiler.Environment
+import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
-import System.Process
-import Test.Hspec
+import System.Process (readProcess)
+import Test.Hspec (Spec, describe, it, shouldBe)
 
 e2eSpec :: Spec
 e2eSpec = do
@@ -1039,12 +1039,12 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "205" $ do
-  --    expectOutput
-  --      "Merry Christmas!"
-  --      "test/Coal/examples/205"
-  --      [ "Main.coal"
-  --      ]
+  describe "205" $ do
+    expectOutput
+      "Merry Christmas!"
+      "test/Coal/examples/205"
+      [ "Main.coal"
+      ]
 
   describe "206" $ do
     expectOutput
@@ -1116,12 +1116,12 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "217" $ do
-  --    expectOutput
-  --      "File not found"
-  --      "test/Coal/examples/217"
-  --      [ "Main.coal"
-  --      ]
+  describe "217" $ do
+    expectOutput
+      "File not found"
+      "test/Coal/examples/217"
+      [ "Main.coal"
+      ]
 
   describe "218" $ do
     expectOutput
@@ -1144,19 +1144,19 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "221" $ do
-  --    expectOutput
-  --      "123"
-  --      "test/Coal/examples/221"
-  --      [ "Main.coal"
-  --      ]
+  describe "221" $ do
+    expectOutput
+      "123"
+      "test/Coal/examples/221"
+      [ "Main.coal"
+      ]
 
-  --  describe "222" $ do
-  --    expectOutput
-  --      "no"
-  --      "test/Coal/examples/222"
-  --      [ "Main.coal"
-  --      ]
+  describe "222" $ do
+    expectOutput
+      "no"
+      "test/Coal/examples/222"
+      [ "Main.coal"
+      ]
 
   describe "223" $ do
     expectOutput
