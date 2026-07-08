@@ -392,6 +392,7 @@ substituteVar n replacement = go
       ECase t (go scrutinee) (fmap goClause clauses)
     EExt name e1 e2 -> EExt name (go e1) (go e2)
     EGet l e -> EGet l (go e)
+    ECall label args k -> ECall label (map go args) (go k)
   goClause (Clause labels body)
     | any (\(Label _ pn) -> pn == n) (NonEmpty.tail labels) =
         -- n is a pattern variable; do not substitute in the clause body.
