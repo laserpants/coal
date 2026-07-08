@@ -77,6 +77,7 @@ library
       Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses
       Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles
       Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams
+      Coal.Compiler.Pass.PhasePreflight.DetectInvalidExports
       Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing
       Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements
       Coal.Compiler.Pass.PhasePreflight.DetectShadowing

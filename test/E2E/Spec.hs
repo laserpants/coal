@@ -993,16 +993,15 @@ e2eSpec = do
       , "Qsort.coal"
       ]
 
-  --  ========================= COMMENTED OUT =========================
-  --  describe "197" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/197"
-  --          [ "Main.coal"
-  --          , "Foo.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
+  describe "197" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/197"
+          [ "Main.coal"
+          , "Foo.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
 
   describe "198" $ do
     it "is PreflightFailure" $ do
