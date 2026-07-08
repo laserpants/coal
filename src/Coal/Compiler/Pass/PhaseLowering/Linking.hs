@@ -115,4 +115,4 @@ execProcess p = do
   void $ waitForProcess handle
 
 runtimeLib :: ByteString
-runtimeLib = $(embedFile "runtime-next/dist/runtime-combined.c")
+runtimeLib = $(embedFile "runtime/dist/runtime-combined.c")

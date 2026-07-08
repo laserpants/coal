@@ -83,7 +83,7 @@ testCompilePipelineWithC cornFiles extraCFiles = do
  where
   buildDir = ".build"
   debugDir = ".debug"
-  runtimeC = "runtime-next/dist/runtime-combined.c"
+  runtimeC = "runtime/dist/runtime-combined.c"
   writeNormalized m = do
     let outFile = debugDir </> Text.unpack (moduleName m) <> ".normalized.corn"
     Text.writeFile outFile (renderModule m)
@@ -135,7 +135,7 @@ testCompile cornFiles = do
       <> ["-o", buildDir </> "dist"]
  where
   buildDir = ".build"
-  runtimeC = "runtime-next/dist/runtime-combined.c"
+  runtimeC = "runtime/dist/runtime-combined.c"
   parseOne fname = do
     content <- Text.readFile fname
     case parse Parser.module_ "" content of

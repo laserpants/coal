@@ -1,5 +1,5 @@
 #!/bin/bash
-# Combine all runtime-next modules into a single C file
+# Combine all runtime modules into a single C file
 
 set -e
 
@@ -20,8 +20,8 @@ cat > "$OUTPUT_FILE" << 'EOF'
  * Combined Coal Runtime Library
  * Auto-generated - DO NOT EDIT
  *
- * This file is generated from runtime-next/ source modules.
- * To regenerate: cd runtime-next && ./scripts/combine.sh
+ * This file is generated from runtime/ source modules.
+ * To regenerate: cd runtime && ./scripts/combine.sh
  */
 
 /* ============================================================================
