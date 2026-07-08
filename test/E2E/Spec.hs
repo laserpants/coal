@@ -975,14 +975,14 @@ e2eSpec = do
       ]
 
   describe "195" $ do
-    it "is PreflightFailure" $ do
+    it "is NoSuchIdentifier" $ do
       res <-
         runSpec
           "test/Coal/examples/195"
           [ "Main.coal"
           , "Stuff.coal"
           ]
-      res `shouldBe` Left PreflightFailure
+      res `shouldBe` Left NoSuchIdentifier
 
   describe "196" $ do
     expectOutput

@@ -62,4 +62,10 @@ compileCmdParser = do
           <> help "Disable caching"
       )
 
+  useNewKernel <-
+    switch
+      ( long "use-new-kernel"
+          <> help "Use new kernel pipeline"
+      )
+
   pure CompileCmdOptions{..}

@@ -20,5 +20,5 @@ compileCommand CompileCmdOptions{..} = do
       , configCFiles = extraSourceFiles
       , configSilent = silent
       , configNoCache = noCache
-      , configUseNewKernel = False
+      , configUseNewKernel = useNewKernel
       }
