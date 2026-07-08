@@ -18,7 +18,14 @@ import Coal.Parser.Identifier (constructor, identifier, name)
 import Coal.Parser.Module.Definition (parseDefinition)
 import Coal.Parser.Symbol
 import Extras (Name)
-import Text.Megaparsec
+import Text.Megaparsec (
+  MonadParsec (eof),
+  getSourcePos,
+  many,
+  option,
+  sepBy1,
+  (<|>),
+ )
 import Text.Megaparsec.Char (upperChar)
 
 {-# INLINE parseModulePath #-}
