@@ -87,6 +87,9 @@ checkConstructorsSaturated =
         ++ checkConstructorsSaturated e2
     EGet _ e ->
       checkConstructorsSaturated e
+    ECall _ args k ->
+      foldMap checkConstructorsSaturated args
+        ++ checkConstructorsSaturated k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

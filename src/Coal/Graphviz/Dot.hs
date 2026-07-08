@@ -27,7 +27,6 @@ import Coal.Language.Module.Path (principalPath)
 import Coal.Pretty (CoalPretty (..))
 import Control.Monad.State (State, forM, forM_, modify, runState)
 import Data.Foldable (foldrM)
-import Data.Functor.Foldable (cata)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set

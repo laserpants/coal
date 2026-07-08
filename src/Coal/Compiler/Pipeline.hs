@@ -49,7 +49,6 @@ import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad (replicateM_)
-import Control.Monad.Catch (MonadMask)
 import Control.Monad.Except (MonadIO, forM_)
 import Data.List (nub)
 import Data.Text (Text)
@@ -61,7 +60,7 @@ import System.Console.AsciiProgress (Default (def), Options (..), displayConsole
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
-pipeline :: (MonadIO m, MonadMask m) => Pass Metadata m [FilePath] ()
+pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
   phaseParsing
     >-> phasePreflight

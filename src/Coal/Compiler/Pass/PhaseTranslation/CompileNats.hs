@@ -46,7 +46,6 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.Serializable (Serializable, instanceLabel)
 import Control.Monad ((<=<))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
@@ -146,7 +145,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
                       (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")))
                       ( EVariable mempty (Label (TIntrinsic IInt32) name)
                           <| ELiteral mempty (LInt32 0)
-                            :| []
+                          :| []
                       )
                   )
                   (EConstructor mempty (Label natType "$Zero"))
@@ -160,7 +159,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
                           (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")))
                           ( EVariable mempty (Label (TIntrinsic IInt32) name)
                               <| ELiteral mempty (LInt32 1)
-                                :| []
+                              :| []
                           )
                           :| []
                       )

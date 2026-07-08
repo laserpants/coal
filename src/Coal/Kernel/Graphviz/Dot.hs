@@ -337,7 +337,7 @@ instance (Dot t) => Dot (Expr t) where
         return extId
       ENil ->
         emitShape HexagonShape "ENil"
-      ECall (Label t name) args cont -> do
+      ECall (Label _ name) args cont -> do
         callId <- emitNamedShape RectangleShape (Just name) "ECall"
         emitEdgesWithLabels numberedLabels callId args
         emitEdgeWithLabel "cont" callId cont

@@ -28,7 +28,7 @@ proper terminator instruction, eliminating unnecessary temporary variables.
 -}
 module Coal.Kernel.LLVM.Codegen (irModule, irMainModule) where
 
-import Control.Monad.Except (forM_, throwError, when)
+import Control.Monad.Except (forM_, throwError)
 import Control.Monad.Reader (asks, local)
 import Control.Monad.State (gets, modify)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -42,7 +42,7 @@ import qualified Data.Text.Encoding as Text
 import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
-import Coal.Kernel.LLVM.Boxing (irBox, irTypeRep, irUnbox)
+import Coal.Kernel.LLVM.Boxing (irTypeRep, irUnbox)
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
 import qualified Coal.Kernel.LLVM.Function as Function

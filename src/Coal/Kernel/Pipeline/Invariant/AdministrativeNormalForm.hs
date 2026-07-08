@@ -100,6 +100,10 @@ checkInTailPosition expr =
     EGet _ record ->
       -- Record operand must be atomic
       checkAtomic record
+    ECall _ args k ->
+      -- All arguments must be atomic; continuation is in tail position
+      foldMap checkAtomic args
+        ++ checkInTailPosition k
 
 -- | Check that an expression is atomic, report error if not
 checkAtomic :: Expr Type -> [InvariantError]
@@ -169,6 +173,10 @@ checkInOperandPosition expr =
     EGet _ record ->
       -- Record operand must be atomic
       checkAtomic record
+    ECall _ args k ->
+      -- All arguments must be atomic; continuation is in operand position
+      foldMap checkAtomic args
+        ++ checkInOperandPosition k
 
 -- | Check a clause body (in tail position)
 checkClauseBody :: Clause Type -> [InvariantError]
