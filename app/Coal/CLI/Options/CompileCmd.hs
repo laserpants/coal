@@ -11,6 +11,5 @@ data CompileCmdOptions = CompileCmdOptions
   , extraSourceFiles :: [FilePath]
   , silent :: Bool
   , noCache :: Bool
-  , useNewKernel :: Bool
   }
   deriving (Show)

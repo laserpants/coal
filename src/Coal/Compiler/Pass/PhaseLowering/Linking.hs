@@ -46,9 +46,7 @@ compileBitcode CompilerConfig{..} files =
           print err
           pure (Just CompilerError)
         Right objFiles -> do
-          ByteString.writeFile (tmpDir </> "runtime_old.c") runtimeLibOld
-          ByteString.writeFile (tmpDir </> "runtime_new.c") runtimeLibNew
-          ByteString.writeFile (tmpDir </> "hashmap.h") hashmapLib
+          ByteString.writeFile (tmpDir </> "runtime.c") runtimeLib
 
           cFiles <- traverse canonicalizePath configCFiles
           forM_ cFiles $
@@ -104,7 +102,7 @@ runGCC dir objFiles cFiles = do
   flags = ["-g", "-I.", "-fsanitize=address"]
 
   commonArgs =
-    ["runtime_old.c", "runtime_new.c"]
+    ["runtime.c"]
       <> cFiles
       <> objFiles
       <> ["-o", "dist"]
@@ -116,11 +114,5 @@ execProcess p = do
   (_, _, _, handle) <- createProcess p
   void $ waitForProcess handle
 
-runtimeLibOld :: ByteString
-runtimeLibOld = $(embedFile "runtime/lib.c")
-
-runtimeLibNew :: ByteString
-runtimeLibNew = $(embedFile "runtime-next/dist/runtime-combined.c")
-
-hashmapLib :: ByteString
-hashmapLib = $(embedFile "runtime/hashmap.h")
+runtimeLib :: ByteString
+runtimeLib = $(embedFile "runtime-next/dist/runtime-combined.c")

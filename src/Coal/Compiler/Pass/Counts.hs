@@ -48,10 +48,10 @@ ticksTranslation :: Int
 ticksTranslation = 26
 
 {- | Lowering phase tick count (per module)
-Includes: passKernelTranslate, generateDebugArtifacts, passKernelCode, passLLVMOutput
+Includes: passKernelTranslateNew, passKernelCodegen
 -}
 ticksLowering :: Int
-ticksLowering = 4
+ticksLowering = 2
 
 -- | Linking phase tick count (total)
 ticksLinking :: Int

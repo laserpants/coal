@@ -51,25 +51,15 @@ library
       Coal.Compiler.Kernel.NewTranslate.Primitive
       Coal.Compiler.Kernel.NewTranslate.Record
       Coal.Compiler.Kernel.NewTranslate.Type
-      Coal.Compiler.Kernel.Translate.Definition
-      Coal.Compiler.Kernel.Translate.Expression
-      Coal.Compiler.Kernel.Translate.Operator
-      Coal.Compiler.Kernel.Translate.Pattern
-      Coal.Compiler.Kernel.Translate.Primitive
-      Coal.Compiler.Kernel.Translate.Record
-      Coal.Compiler.Kernel.Translate.Type
       Coal.Compiler.KindEnvironment
       Coal.Compiler.Metadata
       Coal.Compiler.Pass
       Coal.Compiler.Pass.Counts
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.PhaseLowering
-      Coal.Compiler.Pass.PhaseLowering.KernelCode
       Coal.Compiler.Pass.PhaseLowering.KernelCodegen
-      Coal.Compiler.Pass.PhaseLowering.KernelTranslate
       Coal.Compiler.Pass.PhaseLowering.KernelTranslateNew
       Coal.Compiler.Pass.PhaseLowering.Linking
-      Coal.Compiler.Pass.PhaseLowering.LLVMOutput
       Coal.Compiler.Pass.PhaseParsing
       Coal.Compiler.Pass.PhaseParsing.Parsing
       Coal.Compiler.Pass.PhasePreflight
@@ -232,72 +222,6 @@ library
       Coal.Language.Type.Operations
       Coal.Language.Type.Row
       Coal.Language.Type.Scheme
-      Coal.LegacyKernel.Builtin.Constructors
-      Coal.LegacyKernel.Builtin.Objects
-      Coal.LegacyKernel.Compiler
-      Coal.LegacyKernel.Compiler.AST
-      Coal.LegacyKernel.Compiler.EntryPoint
-      Coal.LegacyKernel.Compiler.Pass
-      Coal.LegacyKernel.Compiler.Pass.ClosureConversion
-      Coal.LegacyKernel.Compiler.Pass.ExtraArgs
-      Coal.LegacyKernel.Compiler.Pass.LambdaLifting
-      Coal.LegacyKernel.Compiler.Pass.LetLifting
-      Coal.LegacyKernel.Compiler.Pass.Memoize
-      Coal.LegacyKernel.Compiler.Pass.PartialConstructors
-      Coal.LegacyKernel.Compiler.Pass.Suffix
-      Coal.LegacyKernel.Compiler.Pipeline
-      Coal.LegacyKernel.Compiler.Pipeline.State
-      Coal.LegacyKernel.Language
-      Coal.LegacyKernel.Language.Expr
-      Coal.LegacyKernel.Language.Expr.Composite
-      Coal.LegacyKernel.Language.Expr.Replace
-      Coal.LegacyKernel.Language.Expr.Syntax
-      Coal.LegacyKernel.Language.Module
-      Coal.LegacyKernel.Language.Object
-      Coal.LegacyKernel.Language.Op
-      Coal.LegacyKernel.Language.Prim
-      Coal.LegacyKernel.Language.Type
-      Coal.LegacyKernel.Language.Type.Arrow
-      Coal.LegacyKernel.Language.Type.Row
-      Coal.LegacyKernel.Language.Type.Syntax
-      Coal.LegacyKernel.Language.Typed
-      Coal.LegacyKernel.LLVM
-      Coal.LegacyKernel.LLVM.IR
-      Coal.LegacyKernel.LLVM.IRConstruct
-      Coal.LegacyKernel.LLVM.IREncodable
-      Coal.LegacyKernel.LLVM.IRError
-      Coal.LegacyKernel.LLVM.IREval
-      Coal.LegacyKernel.LLVM.IREval.Closure
-      Coal.LegacyKernel.LLVM.IREval.Closure.Apply
-      Coal.LegacyKernel.LLVM.IREval.Closure.Call
-      Coal.LegacyKernel.LLVM.IREval.Closure.Extend
-      Coal.LegacyKernel.LLVM.IREval.Closure.Finalize
-      Coal.LegacyKernel.LLVM.IREval.Comment
-      Coal.LegacyKernel.LLVM.IREval.Conceal
-      Coal.LegacyKernel.LLVM.IREval.Expr
-      Coal.LegacyKernel.LLVM.IREval.Expr.Match
-      Coal.LegacyKernel.LLVM.IREval.Expr.Op
-      Coal.LegacyKernel.LLVM.IREval.Expr.Var
-      Coal.LegacyKernel.LLVM.IREval.Malloc
-      Coal.LegacyKernel.LLVM.IRInstruction
-      Coal.LegacyKernel.LLVM.IRInstruction.Builders
-      Coal.LegacyKernel.LLVM.IRInterpreter
-      Coal.LegacyKernel.LLVM.IRInterpreter.Artifact
-      Coal.LegacyKernel.LLVM.IRInterpreter.Environment
-      Coal.LegacyKernel.LLVM.IRInterpreter.Instruction
-      Coal.LegacyKernel.LLVM.IRInterpreter.Monad
-      Coal.LegacyKernel.LLVM.IRInterpreter.State
-      Coal.LegacyKernel.LLVM.IRType
-      Coal.LegacyKernel.LLVM.IRType.Syntax
-      Coal.LegacyKernel.LLVM.IRValue
-      Coal.LegacyKernel.Parser
-      Coal.LegacyKernel.Parser.Expr
-      Coal.LegacyKernel.Parser.Identifier
-      Coal.LegacyKernel.Parser.Module
-      Coal.LegacyKernel.Parser.Op
-      Coal.LegacyKernel.Parser.Prim
-      Coal.LegacyKernel.Parser.Symbol
-      Coal.LegacyKernel.Parser.Type
       Coal.Parser
       Coal.Parser.BuiltinNames
       Coal.Parser.Common
@@ -507,7 +431,6 @@ test-suite coal-test
       Coal.TypeSystem.TypeIndexedSpec
       Coal.TypeSystem.UnificationSpec
       Coal.TypeSystemSpec
-      E2E.Kernel.Spec
       E2E.Spec
       Paths_coal
   hs-source-dirs:

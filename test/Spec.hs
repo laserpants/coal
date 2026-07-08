@@ -15,7 +15,6 @@ import Coal.TypeSystemSpec (typeSystemSpec)
 import Control.Monad.Reader
 import Control.Monad.State
 import qualified Data.Set as Set
-import E2E.Kernel.Spec (e2eKernelSpec)
 import E2E.Spec
 import Test.Hspec
 

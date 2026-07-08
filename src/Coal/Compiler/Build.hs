@@ -62,11 +62,6 @@ module Coal.Compiler.Build (
   -- * Type alias operations
   insertBuildAlias,
 
-  -- * Kernel IR operations
-  setBuildKernelNames,
-  setBuildKernelIRTypes,
-  setBuildKernelConstructors,
-
   -- * Qualified names
   setQualifiedNames,
 
@@ -80,8 +75,6 @@ import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Build.NameEntry
 import Coal.Language (IndexedScheme, IndexedType)
 import Coal.Language.Module.Path (Path (..))
-import Coal.LegacyKernel.LLVM.IRType (IRType)
-import qualified Coal.LegacyKernel.Language as Kernel
 import Control.Monad.State (execState, modify)
 import Crypto.Hash (hash)
 import Data.Binary (Binary)
@@ -137,9 +130,6 @@ data Build a = Build
   , buildQualifiedNames :: Environment Name
   , buildBitcode :: Maybe ByteString
   , buildHash :: Maybe Hash256
-  , buildKernelNames :: Environment Kernel.Type
-  , buildKernelIRTypes :: Environment IRType
-  , buildKernelConstructors :: Environment Int
   }
   deriving (Show, Eq, Ord, Generic, Functor, Foldable, Traversable)
 
@@ -166,9 +156,6 @@ emptyBuild =
     , buildQualifiedNames = mempty
     , buildBitcode = Nothing
     , buildHash = Nothing
-    , buildKernelNames = mempty
-    , buildKernelIRTypes = mempty
-    , buildKernelConstructors = mempty
     }
 
 -- -----------------------------------------------------------------------------
@@ -377,34 +364,6 @@ overBuildAliases f Build{..} =
 -- | Register a type alias definition
 insertBuildAlias :: Name -> AliasEntry a -> Build a -> Build a
 insertBuildAlias name = overBuildAliases . Environment.insert name
-
--- -----------------------------------------------------------------------------
-
--- * Kernel IR operations
-
--- | Set the kernel IR type environment (used during kernel compilation)
-setBuildKernelNames :: Environment Kernel.Type -> Build a -> Build a
-setBuildKernelNames env Build{..} =
-  Build
-    { buildKernelNames = env
-    , ..
-    }
-
--- | Set the LLVM IR type mappings for the kernel
-setBuildKernelIRTypes :: Environment IRType -> Build a -> Build a
-setBuildKernelIRTypes env Build{..} =
-  Build
-    { buildKernelIRTypes = env
-    , ..
-    }
-
--- | Set the constructor tag mappings for data types
-setBuildKernelConstructors :: Environment Int -> Build a -> Build a
-setBuildKernelConstructors env Build{..} =
-  Build
-    { buildKernelConstructors = env
-    , ..
-    }
 
 -- -----------------------------------------------------------------------------
 
