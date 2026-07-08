@@ -13,10 +13,10 @@ steps or propose code changes before completing the investigation.
    that should have been closed."
 3. **Produce hypotheses.** List concrete possible causes. Rank them by
    plausibility. A hypothesis must predict a specific observable difference.
-4. **Compare old and new implementations.** If the new pipeline diverges from
-   legacy behaviour, compare the legacy pass (`src/Coal/LegacyKernel/Compiler.hs`)
-   with the corresponding new pass (`src/Coal/Kernel/Pipeline/Pass/`). Isolate
-   the specific transformation step that differs.
+4. **Isolate the divergent pass.** Use `coal compile` with kernel IR dump flags
+   to inspect the output after each normalization pass. Compare the IR with the
+   expected structure given the pass invariants. Identify the specific
+   transformation step that produces incorrect output.
 5. **Identify the smallest semantic difference.** Reduce the input program to
    a minimal example that still exhibits the problem. The minimal example
    should ideally be a single function or expression.
@@ -26,8 +26,8 @@ steps or propose code changes before completing the investigation.
 ## Avoid speculative edits
 
 Do not make changes without understanding the root cause. If multiple fixes
-are possible, test each hypothesis against the legacy compiler's output before
-committing to one.
+are possible, isolate the divergence to a specific pass and test each hypothesis
+before committing to one.
 
 ## Key invariants to check
 
@@ -42,7 +42,7 @@ committing to one.
 
 - End-to-end tests: `test/E2E/Spec.hs` — runs example Coal programs and checks
   their output.
-- Individual test programs: `test/Coal/examples/` — numbered directories
-  containing `Main.coal` files with expected output in `.expected` files.
+- Individual test programs: `test/examples/` — numbered directories containing
+  `Main.coal` files with expected output in `.expected` files.
 - Do **not** run `stack test` (takes too long). Run individual tests or hand
   control back to the user to evaluate.

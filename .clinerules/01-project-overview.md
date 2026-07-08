@@ -7,15 +7,11 @@ For build instructions and language documentation, see `README.md` and [coal-lan
 
 ## Key facts for working on this project
 
-- **Two compiler pipelines exist side by side:**
-  - **Legacy compiler** (`src/Coal/LegacyKernel/`) — the behavioural reference.
-  - **New compiler** (`src/Coal/Compiler/` + `src/Coal/Kernel/`) — the active development target.
+- **The compiler pipeline** (`src/Coal/Compiler/`) processes source files through six sequential phases: parsing → preflight → type checking → translation → lowering → linking.
 
-- **Two runtimes exist:**
-  - **Legacy runtime** (`runtime/`) — loose C files, used by the legacy compiler.
-  - **New runtime** (`runtime-next/`) — C11, CMake, structured headers and sources. Uses Boehm GC and GMP. This is the development target.
+- **The kernel** (`src/Coal/Kernel/`) provides the intermediate representation, a normalization pipeline, and the LLVM code generation backend.
 
-- **The legacy compiler is the ground truth.** Any change to the new compiler or kernel must preserve the behaviour already exhibited by the legacy compiler. Correctness comes before optimization.
+- **The runtime** (`runtime/`) is a C11 library built with CMake. It uses Boehm GC for memory management and GMP for arbitrary-precision integer arithmetic.
 
 - **Do NOT run `stack test`.** The full test suite takes a very long time. After implementing changes, hand control back to the user to evaluate, or run ad-hoc localized tests when it is straightforward to do so.
 
@@ -23,11 +19,10 @@ For build instructions and language documentation, see `README.md` and [coal-lan
 
 | Directory | Purpose |
 |-----------|---------|
-| `src/Coal/Compiler/` | New high-level pipeline (parsing → linking) |
+| `src/Coal/Compiler/` | High-level pipeline (parsing → linking) |
 | `src/Coal/Kernel/` | Kernel IR, normalization passes, LLVM codegen |
 | `src/Coal/Language/` | AST definitions, types, expressions, modules |
-| `src/Coal/LegacyKernel/` | Legacy kernel pipeline and LLVM backend |
 | `src/Coal/Parser/` | Source text → AST |
 | `src/Coal/TypeSystem/` | Kinds, constraints, unification |
-| `runtime-next/` | New C11 runtime library |
+| `runtime/` | C11 runtime library |
 | `test/E2E/` | End-to-end tests |

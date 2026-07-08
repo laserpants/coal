@@ -1,35 +1,45 @@
-# Migration policy
+# Compiler design principles and invariants
 
-## Rule
+The compiler pipeline has been fully migrated from the legacy codebase. The
+legacy kernel (`src/Coal/LegacyKernel/`) and legacy runtime have been removed.
+This document captures the design principles and invariants that guide ongoing
+development.
 
-**The legacy compiler is the behavioural reference.** Any change to the new
-compiler or kernel must preserve the behaviour already exhibited by the legacy
-compiler. If a Coal program compiled with the old pipeline produces a certain
-output, the new pipeline must produce the same output.
-
-## What this means in practice
+## Design principles
 
 - **Correctness before optimization.** Do not sacrifice behavioural fidelity for
   performance or code cleanliness. Get it right first.
-- **When in doubt, compare.** If a change to the new compiler produces unexpected
-  behaviour, run the same input through the legacy compiler and compare results.
-  See `workflows/compare-pipelines.md`.
-- **Do not delete the legacy code.** It remains as the specification, even after
-  the new pipeline fully replaces it at runtime.
+- **Pipeline isolation.** Each compiler pass should have a single, well-defined
+  responsibility. Passes are composed sequentially; each pass depends on the
+  invariants established by prior passes.
+- **Pure transformations where possible.** Normalization passes operate purely
+  within the `PipelineT` monad (`StateT` over `ExceptT`). IO is only used at
+  the outermost level for file I/O.
+- **Immutable intermediate representations.** Each phase produces a new
+  representation; phases do not mutate shared state (beyond the metadata
+  environment).
 
-## Migration status (high-level)
+## Key invariants
 
-| Component | Legacy | New | Status |
-|-----------|--------|-----|--------|
-| Parsing | — | `src/Coal/Parser/` | Shared by both |
-| Type checking | — | `src/Coal/Compiler/Pass/PhaseTypeChecking` | Shared |
-| Kernel IR AST | `Coal.LegacyKernel.Language` | `Coal.Kernel.Language` | Separate |
-| Normalization passes | `Coal.LegacyKernel.Compiler` (inline) | `Coal.Kernel.Pipeline.Passes` (10 structured passes) | Migrated |
-| LLVM backend | `Coal.LegacyKernel.LLVM` | `Coal.Kernel.LLVM` | Migrated |
-| Runtime | `runtime/` | `runtime-next/` | Migrated |
+- **ANF**: After `controlFlowNorm`, every non-atomic sub-expression must be a
+  let-binding.
+- **Constructor saturation**: All constructor applications are fully saturated.
+- **Lambda flattening**: No nested `fn(a) => fn(b) => ...` remain.
+- **Name uniqueness**: After `localNameCanonicalization`, every local name is
+  globally unique within its module.
 
-## Target state
+## Pipeline contract
 
-The new pipeline (`src/Coal/Compiler/` + `src/Coal/Kernel/`) and new runtime
-(`runtime-next/`) are the active development targets. New features and fixes
-should land there. The legacy code exists only as a reference.
+Each normalization pass must preserve the semantics of the input program. If a
+pass transforms a module from `M` to `M'`, then `M` and `M'` must evaluate to
+the same result. Passes may only strengthen invariants (e.g., by extracting
+sub-expressions into let-bindings), never weaken them.
+
+## Test infrastructure
+
+- End-to-end tests: `test/E2E/Spec.hs` — runs example Coal programs and checks
+  their output.
+- Individual test programs: `test/examples/` — numbered directories containing
+  `Main.coal` files with expected output in `.expected` files.
+- Do **not** run `stack test` (takes too long). Run individual tests or hand
+  control back to the user to evaluate.

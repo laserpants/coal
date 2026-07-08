@@ -1,80 +1,70 @@
 # Compare pipelines
 
-When the new compiler pipeline produces unexpected output, compare its behaviour
-against the legacy compiler to isolate the divergent pass.
+When the compiler pipeline produces unexpected output, use this workflow to
+isolate the divergent pass. Since there is no longer a legacy pipeline to
+compare against, the workflow focuses on comparing intermediate representations
+at different stages.
 
 ## 1. Produce a minimal test program
 
-Create a single `Main.coal` that exhibits the difference. Keep it as small
+Create a single `Main.coal` that exhibits the problem. Keep it as small
 as possible — ideally one function.
 
-## 2. Run both pipelines
+## 2. Run the compiler
 
-**Legacy compiler** (uses `runtime/`):
 ```bash
-coal compile --legacy -I. Main.coal -o /tmp/legacy && /tmp/legacy
+coal compile -I. Main.coal -o /tmp/test && /tmp/test
 ```
 
-**New compiler** (uses `runtime-next/`):
+Capture the exact output, exit code, and any error messages.
+
+## 3. Inspect kernel IR at each normalization stage
+
+Use compiler flags to dump kernel IR at various stages:
+
 ```bash
-coal compile -I. Main.coal -o /tmp/new && /tmp/new
+coal compile --dump-kernel Main.coal
 ```
 
-If the `--legacy` flag is not available, consult the CLI help (`coal --help`)
-or check `app/Coal/CLI/Options/` for the correct flag.
-
-## 3. Compare kernel IR
-
-If both compilers can dump kernel IR, capture the output after each
+If the compiler supports per-pass dump flags, capture the output after each
 normalization phase:
 
-```bash
-coal compile --dump-kernel Main.coal > new.ir
-coal compile --legacy --dump-kernel Main.coal > legacy.ir
-diff legacy.ir new.ir
+```
+structuralNorm → functionalNorm → controlFlowNorm
 ```
 
-Focus on differences in:
+## 4. Compare with known-good output
+
+If a regression is suspected, use `git bisect` or compare against a known-good
+build of the compiler. Focus on differences in:
+
 - Variable names and bindings
 - Constructor application arity
 - Let-binding structure
 - Closure representations
 
-## 4. If only one pipeline can be run at a time
+## 5. Compare the IR against expected invariants
 
-If the legacy pipeline is not accessible via CLI, compare the source code of
-the normalization passes directly:
+Check the kernel IR against the documented invariants (`03-migration-policy.md`):
 
-- Legacy passes: `src/Coal/LegacyKernel/Compiler.hs`
-- New passes: `src/Coal/Kernel/Pipeline/Pass/`
+- The program is in ANF after `controlFlowNorm`
+- All constructor applications are fully saturated
+- Lambdas are flattened (no nested `fn(a) => fn(b) =>`)
+- Local names are unique after `localNameCanonicalization`
 
-Identify which pass in the new pipeline corresponds to which step in the
-legacy pipeline. The legacy pass sequence is:
-```
-astSortMatchClauses → astSuffix → astFlatten → astSaturateConstructors →
-astLiftLambdaNodes → astSimplify1 → astSimplify2 → astCloseObjects → astAddExtraArgs
-```
+## 6. Isolate the divergent pass
 
-The new pass sequence is:
-```
-caseExpressionCanonicalization → localNameCanonicalization → lambdaFlattening →
-constructorSaturation → lambdaLifting → topLevelFunctionNormalization →
-functionResultsSaturation → logicalOperatorTranslation →
-letBindingSimplification → administrativeNormalForm
-```
+Once you identify which pass produces incorrect output, read the pass
+implementation in `src/Coal/Kernel/Pipeline/Pass/`. Look for:
 
-## 5. Isolate the divergent pass
-
-Once you identify which pass produces different output, focus on that pass
-alone. Read both the legacy and new implementations. Look for:
 - Different traversal orders
 - Different handling of edge cases (empty expressions, unit values, etc.)
-- Missing cases in the new implementation
-- Different freshness strategies for generated names
+- Missing cases in the implementation
+- Incorrect freshness strategies for generated names
 
-## 6. Verify the fix
+## 7. Verify the fix
 
-After making a change, re-run the comparison to confirm the outputs now match.
+After making a change, re-run the comparison to confirm the output is correct.
 Then run the full test program to confirm end-to-end correctness.
 
 Do **not** run `stack test` to verify; hand control back to the user or run a

@@ -30,8 +30,8 @@ Haskell source under `src/` follows a hierarchical module structure:
 
 ## C (runtime)
 
-The new runtime (`runtime-next/`) follows comprehensive C11 coding standards
-documented in `runtime-next/CODING_STYLE.md`. Key highlights:
+The runtime (`runtime/`) follows comprehensive C11 coding standards documented
+in `runtime/CODING_STYLE.md`. Key highlights:
 
 - Use `rt_` prefix for all public API functions and types
 - Use Boehm GC allocation (`rt_alloc`, `rt_alloc_atomic`) — never `malloc`/`free`
