@@ -260,7 +260,6 @@ library
       Coal.TypeSystem.Substitution
       Coal.TypeSystem.Unification
       Coal.Utils
-      Common
       Extras
       Extras.Control.Applicative
       Extras.Control.Monad
@@ -270,6 +269,7 @@ library
       Extras.Data.Functor
       Extras.Data.Functor.Foldable
       Extras.Data.List
+      Extras.Data.List.NonEmpty
       Extras.Data.Set
       Extras.Data.Text
       Extras.Data.Traversable

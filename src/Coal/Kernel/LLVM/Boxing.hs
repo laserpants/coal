@@ -37,7 +37,7 @@ import Coal.Kernel.Language.Expr (Expr)
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Function (arity)
 import Coal.Kernel.Language.Type.HasType (HasType (typeOf), unfoldType)
-import Common (unsnoc)
+import Extras.Data.List.NonEmpty (unsnoc)
 
 irTypeRep :: Type -> IRType
 irTypeRep t

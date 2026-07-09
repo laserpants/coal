@@ -25,12 +25,12 @@ module Coal.Kernel.TypeCheck.Env (
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.HasType (HasType (..), foldType)
 import Coal.Kernel.TypeCheck.Error (Context (..))
-import Common (Name)
 
 data CheckEnv = CheckEnv
   { globalVars :: Map Name Type

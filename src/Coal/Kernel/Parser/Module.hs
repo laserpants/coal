@@ -23,6 +23,7 @@ import Text.Megaparsec ((<|>))
 import qualified Text.Megaparsec as P
 import qualified Text.Megaparsec.Char as C
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type (..))
@@ -31,7 +32,6 @@ import Coal.Kernel.Parser (Parser, lexeme, qualifiedConstructor, qualifiedName, 
 import Coal.Kernel.Parser.Expr (expr, label)
 import Coal.Kernel.Parser.Symbol (braces, commaSep1, equals, pipe)
 import Coal.Kernel.Parser.Type (type_)
-import Common (Name)
 
 -- | Parse a module
 module_ :: Parser (Module Type)

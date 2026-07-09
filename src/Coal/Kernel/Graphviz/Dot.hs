@@ -36,6 +36,7 @@ import Prettyprinter.Render.Text (renderStrict)
 
 import TextShow (showt)
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
@@ -43,7 +44,6 @@ import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Prettyprinter.Type as KernelType
-import Common (Name)
 
 -- | Shapes available for DOT nodes
 data DotShape

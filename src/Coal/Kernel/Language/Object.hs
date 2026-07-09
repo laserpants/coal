@@ -19,8 +19,8 @@ names and their types, sorted lexicographically by constructor name.
 -}
 module Coal.Kernel.Language.Object (Object (..), FunctionScope (..)) where
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
-import Common (Name)
 
 {- | Visibility scope of a top-level function.
 

@@ -21,9 +21,9 @@ module Coal.Kernel.Language.Expr (
 
 import Data.List.NonEmpty (NonEmpty)
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Op (Op)
 import Coal.Kernel.Language.Prim (Prim)
-import Common (Name)
 
 data Label t = Label t Name
   deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)

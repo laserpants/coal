@@ -21,6 +21,7 @@ import qualified Data.Set as Set
 
 import LLVM.IR
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.FreeVars (freeVars)
 import Coal.Kernel.LLVM.Boxing (irTypeRep, irValueTypeRep)
 import Coal.Kernel.LLVM.Prim (primToIRConstant)
@@ -30,7 +31,6 @@ import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.Function (arity)
 import Coal.Kernel.Language.Type.HasType (HasType (typeOf))
-import Common (Name)
 
 {- | Compute the global environment binding for an object, if any.
 

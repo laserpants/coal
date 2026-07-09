@@ -29,6 +29,7 @@ module Coal.Kernel.Pipeline.Pass.ConstructorSaturation (
 import Control.Monad.Error.Class (throwError)
 import qualified Data.List.NonEmpty as NonEmpty
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
@@ -36,7 +37,6 @@ import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.Function (arity)
 import Coal.Kernel.Language.Type.HasType (unfoldType)
 import Coal.Kernel.Pipeline (Pass, PipelineError (..), PipelineT, freshName)
-import Common (Name)
 
 {- | Eta-expand every partially applied data constructor into a lambda.
 

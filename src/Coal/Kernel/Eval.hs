@@ -38,6 +38,7 @@ import Data.Text (Text)
 
 import Text.Megaparsec (errorBundlePretty)
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Eval.Expr (apply)
 import Coal.Kernel.Eval.External
 import Coal.Kernel.Eval.Link (buildGlobalEnv)
@@ -46,7 +47,6 @@ import Coal.Kernel.Eval.State
 import Coal.Kernel.Eval.Value
 import Coal.Kernel.Language.Module (Module)
 import Coal.Kernel.Language.Type (Type)
-import Common (Name)
 
 -- ---------------------------------------------------------------------------
 -- Public result type

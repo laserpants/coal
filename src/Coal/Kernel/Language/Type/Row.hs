@@ -28,8 +28,8 @@ module Coal.Kernel.Language.Type.Row (
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Type (Type (..))
-import Common (Name)
 
 {-# INLINE extend #-}
 extend :: Name -> Type -> Type -> Type

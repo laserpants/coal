@@ -16,8 +16,8 @@ module Coal.Kernel.TypeCheck.Error (
   Context (..),
 ) where
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Type (Type)
-import Common (Name)
 
 data Context
   = InModule Name

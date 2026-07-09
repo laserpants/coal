@@ -14,9 +14,9 @@ module Coal.Kernel.LLVM.Runtime (
 
 import LLVM.IR
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.LLVM.Monad (IRCodegen)
 import Coal.Kernel.LLVM.RuntimeDefs (RuntimeFun (..))
-import Common (Name)
 
 irCallExternal :: Name -> IRType -> [IROperand] -> IRCodegen IROperand
 irCallExternal name (TFun rty ts) args = do

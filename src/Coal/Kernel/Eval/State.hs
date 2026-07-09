@@ -33,8 +33,8 @@ import Control.Monad.Reader (MonadReader, ReaderT, ask, local, runReaderT)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Eval.Value (Value (..))
-import Common (Name)
 
 -- ---------------------------------------------------------------------------
 -- Error model

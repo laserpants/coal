@@ -28,9 +28,9 @@ import qualified Data.ByteString.Char8 as BS
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Eval.State (EvalError (..), EvalM, getExterns, liftIO, throwEval)
 import Coal.Kernel.Eval.Value (Value (..))
-import Common (Name)
 
 {- | A map from external function names to host handlers.
 

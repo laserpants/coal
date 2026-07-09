@@ -17,8 +17,8 @@ during type checking and compilation.
 -}
 module Coal.Kernel.Language.Module (Module (..)) where
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Object (Object (..))
-import Common (Name)
 
 data Module t = Module
   { moduleName :: Name

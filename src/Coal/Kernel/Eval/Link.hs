@@ -23,6 +23,7 @@ module Coal.Kernel.Eval.Link (
 
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Eval.Expr (eval)
 import Coal.Kernel.Eval.External (ExternTable)
 import Coal.Kernel.Eval.State (EvalEnv (..), EvalError (..), runEvalM)
@@ -30,7 +31,6 @@ import Coal.Kernel.Eval.Value (Closure (..), Value (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
-import Common (Name)
 
 -- | The global evaluation environment built from a list of parsed modules.
 type GlobalEnv = EvalEnv

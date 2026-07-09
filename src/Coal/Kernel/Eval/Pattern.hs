@@ -29,11 +29,11 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as Text
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Eval.State (EvalError (..), EvalM, throwEval)
 import Coal.Kernel.Eval.Value (Value (..))
 import Coal.Kernel.Language.Expr (Clause (..), Label (..))
 import Coal.Kernel.Language.Type (Type)
-import Common (Name)
 
 {- | Try each clause in order against a scrutinee value.
 

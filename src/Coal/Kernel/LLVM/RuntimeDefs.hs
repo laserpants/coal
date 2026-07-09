@@ -58,7 +58,7 @@ module Coal.Kernel.LLVM.RuntimeDefs (
 
 import LLVM.IR
 
-import Common (Name)
+import Coal.Common.Name (Name)
 
 {- | Description of a single C runtime function that the code generator can
 call.

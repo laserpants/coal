@@ -37,13 +37,13 @@ import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.Name (Name)
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..), IRCodegenError (..))
 import Coal.Kernel.LLVM.Runtime (callRuntime)
 import Coal.Kernel.LLVM.RuntimeDefs (rtAlloc)
 import Coal.Kernel.Language.Expr (Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Type (Type)
-import Common (Name)
 
 data ConstructorDefinition = ConstructorDefinition
   { constructorFieldCount :: Int

@@ -12,7 +12,7 @@ module Coal.Kernel.Pipeline.Invariant.Error (
   InvariantError (..),
 ) where
 
-import Common (Name)
+import Coal.Common.Name (Name)
 
 {- | A violation of a compiler-pass invariant discovered by one of the pure
 checker functions in @Coal.Kernel.Pipeline.Invariant.*@.

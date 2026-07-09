@@ -21,7 +21,7 @@ structural comparison of record types.
 -}
 module Coal.Kernel.Language.Type (Type (..)) where
 
-import Common (Name)
+import Coal.Common.Name (Name)
 
 {- | Core language types.
 

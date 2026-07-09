@@ -29,8 +29,8 @@ module Coal.Kernel.Language.Type.Constructors (
   unit,
 ) where
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Type (Type (..))
-import Common (Name)
 
 {-# INLINE tycon0 #-}
 tycon0 :: Name -> Type

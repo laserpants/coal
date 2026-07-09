@@ -41,7 +41,7 @@ module Coal.Kernel.Pipeline (
   freshName,
 ) where
 
-import Common (Name)
+import Coal.Common.Name (Name)
 import Control.Monad.Except (
   ExceptT,
   MonadError,

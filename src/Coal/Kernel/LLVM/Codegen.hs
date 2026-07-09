@@ -43,6 +43,7 @@ import LLVM.IR
 import qualified LLVM.IROperand.Constructors as O
 
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.Name (Name)
 import Coal.Kernel.LLVM.Boxing (irTypeRep, irUnbox)
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
@@ -61,7 +62,7 @@ import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.Function (arity)
 import Coal.Kernel.Language.Type.HasType (HasType (typeOf), returnTypeOf, unfoldType)
-import Common (Name, unsnoc)
+import Extras.Data.List.NonEmpty (unsnoc)
 
 {-# INLINE irOp #-}
 irOp :: Op (Expr Type) -> IRCodegen IROperand

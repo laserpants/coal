@@ -1,8 +1,5 @@
-module Common (Name, unsnoc) where
+module Extras.Data.List.NonEmpty (unsnoc) where
 
--- TODO: REMOVE
-
-import Coal.Common.Name (Name)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 

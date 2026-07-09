@@ -26,9 +26,9 @@ import Data.List (intercalate)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Expr, Label)
 import Coal.Kernel.Language.Type (Type)
-import Common (Name)
 
 -- | Runtime values produced by evaluating language expressions.
 data Value

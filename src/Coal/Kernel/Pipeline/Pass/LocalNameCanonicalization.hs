@@ -30,12 +30,12 @@ import qualified Data.List.NonEmpty as NonEmpty
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Pipeline (Pass, PipelineT, freshName)
-import Common (Name)
 
 {- | Alpha-rename every locally bound name to a globally unique @x.[n]@
 identifier.

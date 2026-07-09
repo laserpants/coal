@@ -30,7 +30,7 @@ import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Language.Type.Constructors as Type
 import Coal.Kernel.Pipeline (Pass, PipelineError, evalPipeline, initialPipelineState)
-import Common (Name)
+import Coal.Common.Name (Name)
 import Control.Monad.Identity (Identity)
 import Data.Text (Text)
 

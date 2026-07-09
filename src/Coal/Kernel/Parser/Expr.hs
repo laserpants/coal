@@ -28,6 +28,7 @@ import qualified Data.List.NonEmpty as NonEmpty
 
 import Text.Megaparsec ((<|>))
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Parser (
@@ -56,7 +57,6 @@ import Coal.Kernel.Parser.Symbol (
   semicolonSep1,
  )
 import Coal.Kernel.Parser.Type (type_)
-import Common (Name)
 import qualified Text.Megaparsec as P
 import qualified Text.Megaparsec.Char as C
 

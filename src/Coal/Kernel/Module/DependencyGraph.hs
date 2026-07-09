@@ -13,8 +13,8 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Module (Module (..))
-import Common (Name)
 
 {- | Given a set of known module names, find which module a qualified import
 belongs to. Uses longest-prefix matching so that @"Utils.Function"@ is

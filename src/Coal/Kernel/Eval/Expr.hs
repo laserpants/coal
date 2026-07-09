@@ -28,6 +28,7 @@ module Coal.Kernel.Eval.Expr (
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Eval.External (callExtern)
 import Coal.Kernel.Eval.Pattern (matchClause)
 import Coal.Kernel.Eval.Prim (evalOp, evalPrim)
@@ -48,7 +49,6 @@ import Coal.Kernel.Language.Expr (
   Label (..),
  )
 import Coal.Kernel.Language.Type (Type)
-import Common (Name)
 
 -- ---------------------------------------------------------------------------
 -- Expression evaluator

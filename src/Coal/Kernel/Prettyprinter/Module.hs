@@ -13,11 +13,11 @@ module Coal.Kernel.Prettyprinter.Module (
 
 import Prettyprinter (Doc, Pretty (..), braces, line, vsep, (<+>))
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object)
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Prettyprinter.Object (prettyObject)
-import Common (Name)
 
 {- | Pretty print a module.
 

@@ -47,6 +47,7 @@ import Data.Ord (comparing)
 import Data.Set (Set)
 import qualified Data.Set as Set
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.FreeVars (freeVars)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
@@ -54,7 +55,6 @@ import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.HasType (foldType, typeOf)
 import Coal.Kernel.Pipeline (Pass, PipelineT, freshName)
-import Common (Name)
 
 {- | Lift all lambda expressions to top-level functions, parameterizing over
 free variables.

@@ -34,6 +34,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Type (Type (..))
@@ -43,7 +44,6 @@ import Coal.Kernel.Language.Type.Row (toNormalForm)
 import Coal.Kernel.TypeCheck.Compat (compatible)
 import Coal.Kernel.TypeCheck.Env (CheckEnv (..), lookupCon, lookupName, withLocals)
 import Coal.Kernel.TypeCheck.Error (TypeError (..), TypeErrorKind (..))
-import Common (Name)
 
 type Check = ReaderT CheckEnv (Writer [TypeError])
 
