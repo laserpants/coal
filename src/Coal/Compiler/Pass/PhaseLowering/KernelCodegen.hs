@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
@@ -11,12 +12,13 @@ it to bitcode via @llvm-as@.
 module Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen) where
 
 import Coal.Compiler.Build (Build (..))
+import Coal.Compiler.Build.Cache (buildCacheDir, writeBuildFile)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Error (CompilerFailureMode (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), tickBar)
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Stack (CompilerT, getBuildC, setBitcodeC)
 import Coal.Compiler.State
 import Coal.Debug (writeDebugFile)
 import qualified Coal.Kernel.Builtin.Objects as Builtin
@@ -102,7 +104,14 @@ pass envelopes = do
     Left ex -> do
       liftIO $ putStrLn ("llvm-as failed: " <> show ex)
       throwError CompilerError
-    Right assembled ->
+    Right assembled -> do
+      -- Persist build artifacts to the .build/ cache for incremental compilation.
+      -- Skip Builtin$ (first entry in assembled), write only user source modules.
+      forM_ (zip (fst <$> sources) (map snd (drop 1 assembled))) $ \(name, bc) -> do
+        setBitcodeC name bc
+        getBuildC name >>= \case
+          Nothing -> pure ()
+          Just build_ -> writeBuildFile buildCacheDir name build_
       pure (assembled <> cached)
 
 {- | Render one IR module to text, optionally write a debug @.ll@ file,

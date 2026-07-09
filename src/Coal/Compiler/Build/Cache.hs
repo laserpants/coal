@@ -7,7 +7,7 @@ Build artifact caching for incremental compilation.
 
 Manages reading and writing serialized build data to the `.build/` directory.
 -}
-module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where
+module Coal.Compiler.Build.Cache (buildCacheDir, cachedData, cachedBuild, writeBuildFile) where
 
 import Coal.Compiler.Build (Build (buildHash))
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
@@ -27,6 +27,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import Extras (Name)
+import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((<.>), (</>))
 
 -- Build cache constants
@@ -60,6 +61,7 @@ writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> Build a -> Compil
 writeBuildFile buildDir name build = do
   CompilerConfig{..} <- gets compilerConfig
   liftIO $ do
+    createDirectoryIfMissing True buildDir
     unless configSilent $
       putStrLn file
     ByteString.writeFile (buildDir </> file) (toStrict (encode build))
