@@ -447,7 +447,26 @@ module Main {
 
   // ---------------------------------------------------------------------------
 
+  fun loop(game_state : GameState) =
+    #{event_loop_has_next : unit -> bool}(())(
+      fn(has_next) =>
+        if (has_next)
+          then
+            #{event_loop_next : unit -> int32}(())(
+              fn(ev) =>
+                loop(game_state)
+            )
+          else
+            game_state
+    )
+
   fun main() = 
-    IO.println_string("abc")
+    let
+      prog =
+        #{event_loop_init : int32 -> unit}(3000 : int32)(
+          fn(_) => loop(initial_game_state)
+        )
+      in
+        IO.println_string("end")
 
 }
