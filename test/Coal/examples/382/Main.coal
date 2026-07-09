@@ -26,11 +26,12 @@ module Main {
     reduce(insert, Leaf, xs)
 
   fun flatten(tree : Tree<a>) : List<a> =
-    fold(tree) {
+    fold(tree, []) {
       | Leaf => 
-          []
+          fn(acc) => acc
       | Node(v, @left, @right) =>
-          left <> (v :: right)
+          fn(acc) =>
+            left(v :: right(acc))
     }
 
   let sort =
