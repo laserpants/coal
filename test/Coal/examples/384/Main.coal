@@ -384,6 +384,39 @@ module Main {
   fun board_cell_is_set(cell : (int32, int32), game_state : GameState) : bool =
     is_board_member(cell, game_state.board)
 
+//  fun board_count_x() =
+//    ?
+//
+//  fun board_count_in_row() =
+//    ?
+//  
+//  fun board_remove_row_x() =
+//    ?
+//
+//  fun board_remove_row() =
+//    ?
+//  
+//  fun board_shift_row_x() =
+//    ?
+//  
+//  fun board_shift_rows_above_from() =
+//    ?
+//
+//  fun board_shift_rows_above() =
+//    ?
+//  
+//  fun board_clear_full_rows_from() =
+//    ?
+//  
+//  fun board_clear_full_rows() =
+//    ?
+//  
+//  fun board_to_list_xy() =
+//    ?
+//  
+//  fun board_to_list() =
+//    ?
+
   // ---------------------------------------------------------------------------
   // Cells
   // ---------------------------------------------------------------------------
