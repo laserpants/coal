@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Coal.Compiler.Kernel.NewTranslate.Primitive (translatePrimitive) where
+module Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive) where
 
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Language (Primitive (..))

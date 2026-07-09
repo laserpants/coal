@@ -1,13 +1,13 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.NewTranslate.Record (
+module Coal.Compiler.Kernel.Translate.Record (
   translateRecord,
   extractRow,
   makeRecord,
 ) where
 
-import Coal.Compiler.Kernel.NewTranslate.Type (translateType)
+import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Language.Expr (Clause (..), Expr (..), Label (..))
 import qualified Coal.Kernel.Language.Type as NK

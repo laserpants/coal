@@ -1,7 +1,5 @@
 # Compiler design principles and invariants
 
-The compiler pipeline has been fully migrated from the legacy codebase. The
-legacy kernel (`src/Coal/LegacyKernel/`) and legacy runtime have been removed.
 This document captures the design principles and invariants that guide ongoing
 development.
 

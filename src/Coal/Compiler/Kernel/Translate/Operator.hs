@@ -2,9 +2,9 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.NewTranslate.Operator (translateOperator) where
+module Coal.Compiler.Kernel.Translate.Operator (translateOperator) where
 
-import Coal.Compiler.Kernel.NewTranslate.Type (translateType)
+import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Op (Op (..))

@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Kernel.NewTranslate.Type (translateType) where
+module Coal.Compiler.Kernel.Translate.Type (translateType) where
 
 import qualified Coal.Kernel.Language.Type as NK
 import qualified Coal.Kernel.Language.Type.Constructors as NKT

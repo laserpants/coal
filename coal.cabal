@@ -44,13 +44,13 @@ library
       Coal.Compiler.HasMetadata
       Coal.Compiler.Journal
       Coal.Compiler.Kernel.Environment
-      Coal.Compiler.Kernel.NewTranslate.Definition
-      Coal.Compiler.Kernel.NewTranslate.Expression
-      Coal.Compiler.Kernel.NewTranslate.Operator
-      Coal.Compiler.Kernel.NewTranslate.Pattern
-      Coal.Compiler.Kernel.NewTranslate.Primitive
-      Coal.Compiler.Kernel.NewTranslate.Record
-      Coal.Compiler.Kernel.NewTranslate.Type
+      Coal.Compiler.Kernel.Translate.Definition
+      Coal.Compiler.Kernel.Translate.Expression
+      Coal.Compiler.Kernel.Translate.Operator
+      Coal.Compiler.Kernel.Translate.Pattern
+      Coal.Compiler.Kernel.Translate.Primitive
+      Coal.Compiler.Kernel.Translate.Record
+      Coal.Compiler.Kernel.Translate.Type
       Coal.Compiler.KindEnvironment
       Coal.Compiler.Metadata
       Coal.Compiler.Pass

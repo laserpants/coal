@@ -6,7 +6,7 @@
 {- | New kernel translation pass.
 
 Translates surface language modules to new kernel language modules using
-'Coal.Compiler.Kernel.NewTranslate.Definition.translateDefinition'.
+'Coal.Compiler.Kernel.Translate.Definition.translateDefinition'.
 This pass runs in parallel with 'passKernelTranslate' (the legacy pass)
 during the migration period.
 -}
@@ -16,7 +16,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)
-import Coal.Compiler.Kernel.NewTranslate.Definition (translateDefinition)
+import Coal.Compiler.Kernel.Translate.Definition (translateDefinition)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), tickBar)
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, setCurrentPathC)

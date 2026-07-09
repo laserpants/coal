@@ -3,11 +3,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.Compiler.Kernel.NewTranslate.Definition (translateDefinition) where
+module Coal.Compiler.Kernel.Translate.Definition (translateDefinition) where
 
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
-import Coal.Compiler.Kernel.NewTranslate.Expression (translateExpression, translatePattern)
-import Coal.Compiler.Kernel.NewTranslate.Type (translateType)
+import Coal.Compiler.Kernel.Translate.Expression (translateExpression, translatePattern)
+import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack
 import qualified Coal.Kernel.Language.Expr as NK
 import qualified Coal.Kernel.Language.Object as NKObj
