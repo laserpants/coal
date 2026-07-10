@@ -1,0 +1,13 @@
+module Main {
+
+    import namespace IO
+
+    type alias MyType = int32
+    
+    let empty_list : MyType = 
+      []
+
+    fun main() =
+      IO.println_string("123")
+
+}

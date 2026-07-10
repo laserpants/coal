@@ -369,7 +369,11 @@ module Main {
       }
 
   fun can_move_down(state : GameState) = 
-    true
+    let 
+      translated_block_cells =
+        translate_cells(0, 1, current_block_cells(state))
+    in
+    ! cells_collide(translated_block_cells, state)
 
   fun move_current_block(d_x : int32, d_y : int32, state : GameState) : GameState =
     { board = state.board
@@ -380,6 +384,18 @@ module Main {
         , pos_y = state.current_block.pos_y + d_y
         }
     }
+
+  fun move_left(state : GameState) =
+    todo
+    
+  fun move_right(state : GameState) =
+    todo
+  
+  fun move_down(state : GameState) =
+    todo
+
+  fun rotate(state : GameState) =
+    todo
 
   // ---------------------------------------------------------------------------
   // Board API  
@@ -500,15 +516,14 @@ module Main {
 
   fun handle(ev_code : int32, state : GameState) =
     let event = parse_event(ev_code) in
-    let new_state = handle_event(event, state) in
-    let foo = board_to_list(new_state.board)
+    let new_state = handle_event(event, state) 
     in
-//    let _ =
-//      #{coal_render_board : List<(int32, int32)> -> List<(int32, int32)> -> unit}(
-//        [], // board_to_list(new_state.board),
-//        current_block_cells(new_state)
-//      )(fn(_) => ())
-//    in
+    let _ =
+      #{coal_render_board : List<(int32, int32)> -> List<(int32, int32)> -> unit}(
+        board_to_list(new_state.board),
+        current_block_cells(new_state)
+      )(fn(_) => ())
+    in
     new_state
 
   fun loop(game_state : GameState) =
@@ -531,7 +546,7 @@ module Main {
   fun main() = 
     let
       prog =
-        #{event_loop_init : int32 -> unit}(1000 : int32)(
+        #{event_loop_init : int32 -> unit}(100 : int32)(
           fn(_) => loop(initial_game_state)
         )
       in

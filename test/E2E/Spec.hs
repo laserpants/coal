@@ -2003,6 +2003,11 @@ e2eSpec = do
       "test/Coal/examples/382"
       ["Main.coal"]
 
+  describe "386" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/386" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
