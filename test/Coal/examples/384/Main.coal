@@ -369,10 +369,18 @@ module Main {
       }
 
   fun can_move_left(state : GameState) = 
-    false
+    let 
+      translated_block_cells =
+        translate_cells(-1, 0, current_block_cells(state))
+    in
+    ! cells_collide(translated_block_cells, state)
 
   fun can_move_right(state : GameState) = 
-    false
+    let 
+      translated_block_cells =
+        translate_cells(1, 0, current_block_cells(state))
+    in
+    ! cells_collide(translated_block_cells, state)
 
   fun can_move_down(state : GameState) = 
     let 
