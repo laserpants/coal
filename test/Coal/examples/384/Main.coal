@@ -394,26 +394,30 @@ module Main {
         }
     }
 
+  fun rotate_current_block(state : GameState) : GameState =
+    { board = state.board
+    , current_block = 
+        { shape = state.current_block.shape
+        , rotation = spin(state.current_block.rotation)
+        , pos_x = state.current_block.pos_x 
+        , pos_y = state.current_block.pos_y 
+        }
+    }
+
   fun move_left(state : GameState) =
     if (can_move_left(state))
-      then
-        state
-      else
-        state
+      then move_current_block(-1, 0, state)
+      else state
     
   fun move_right(state : GameState) =
     if (can_move_right(state))
-      then
-        state
-      else
-        state
+      then move_current_block(1, 0, state)
+      else state
   
   fun move_down(state : GameState) =
     if (can_move_down(state))
-      then
-        state
-      else
-        state
+      then move_current_block(0, 1, state)
+      else state
 
   fun rotate(state : GameState) =
     if (can_rotate(state))
@@ -421,6 +425,9 @@ module Main {
         state
       else
         state
+
+  fun hard_drop(state : GameState) =
+    state
 
   // ---------------------------------------------------------------------------
   // Board API  
@@ -438,32 +445,32 @@ module Main {
   fun board_cell_is_set(cell : (int32, int32), game_state : GameState) : bool =
     is_board_member(cell, game_state.board)
 
-//  fun board_count_x() =
-//    ?
-//
-//  fun board_count_in_row() =
-//    ?
-//  
-//  fun board_remove_row_x() =
-//    ?
-//
-//  fun board_remove_row() =
-//    ?
-//  
-//  fun board_shift_row_x() =
-//    ?
-//  
-//  fun board_shift_rows_above_from() =
-//    ?
-//
-//  fun board_shift_rows_above() =
-//    ?
-//  
-//  fun board_clear_full_rows_from() =
-//    ?
-//  
-//  fun board_clear_full_rows() =
-//    ?
+  fun board_count_x(y : int32, x : int32, board : Board) =
+    ?
+
+  fun board_count_in_row(y : int32, board : Board) =
+    ?
+  
+  fun board_remove_row_x(y : int32, x : int32, board : Board) =
+    ?
+
+  fun board_remove_row(y : int32, board : Board) =
+    board_remove_row_x(y, 0, board)
+  
+  fun board_shift_row_x(y : int32, x : int32, board : Board) =
+    ?
+  
+  fun board_shift_rows_above_from(start_y : int32, board : Board) =
+    ?
+
+  fun board_shift_rows_above(cleared_y : int32, board : Board) =
+    board_shift_rows_above_from(cleared_y - 1, board)
+  
+  fun board_clear_full_rows_from(y : int32, board : Board) =
+    ?
+  
+  fun board_clear_full_rows(board : Board) =
+    board_clear_full_rows_from(19, board)
 
   fun board_to_list(board : Board) : List<(int32, int32)> =
     Containers.Set.to_list(board)
@@ -514,24 +521,51 @@ module Main {
       | _  => NoOp
     }
 
+  fun spawn_next_block(state : GameState) =
+    { board = state.board
+    , current_block = state.current_block // TODO
+    }
+  
+  fun on_piece_landed(state : GameState) =
+    let
+      locked =
+        lock_current_block(state)
+    in
+    let
+      cleared =
+        { board = board_clear_full_rows(locked)
+        , current_block = locked.current_block
+        }
+    in
+    let
+      spawned =
+        spawn_next_block(cleared)
+    in
+    if (cells_collide(current_block_cells(spawned), spawned))
+      then cleared
+      else spawned
+
   fun tick(state : GameState) =
     if (can_move_down(state))
-      then move_current_block(0, 1, state)
-      else state // TODO
+      then 
+        move_current_block(0, 1, state)
+      else 
+        on_piece_landed(state)
 
   fun handle_event(event : Event, state : GameState) =
     match(event) {
       | KeyLeft =>
-          state
+          move_left(state)
       | KeyRight =>
-          state
+          move_right(state)
       | KeyDown =>
-          state
+          tick(state)
       | KeyUp =>
-          state
+          rotate(state)
       | KeySpace =>
-          state
+          hard_drop(state)
       | KeyEsc =>
+          // TODO
           state
       | Tick =>
           tick(state)
@@ -557,7 +591,7 @@ module Main {
         if (has_next)
           then
             #{event_loop_next : unit -> int32}(())(
-              fn(ev_code) =>
+              fn(ev_code : int32) =>
                 let
                   next_state = 
                     handle(ev_code, game_state)
