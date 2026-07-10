@@ -82,7 +82,7 @@ module Main {
   type alias Board = Set<(int32, int32)>
 
   let empty_board : Board =
-    []
+    Containers.Set.empty
 
   type alias GameState =
     { board : Board
