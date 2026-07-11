@@ -597,14 +597,13 @@ module Main {
       | _  => NoOp
     }
 
-  // fun spawn_next_block(state : GameState) : GameState =
-  fun spawn_next_block(state : GameState)  =
+  fun spawn_next_block(state : GameState) =
     { board = state.board
-    , current_block = // state.current_block
+    , current_block = 
         { shape = ShapeI
         , rotation = R0
-        , pos_x = 0 : int64
-        , pos_y = 0 : int64
+        , pos_x = 0 
+        , pos_y = 0 
         } 
     }
 
