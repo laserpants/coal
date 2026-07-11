@@ -432,7 +432,11 @@ Main.board_shift_row_x(y : int32, board : Set(Pair(int32, int32))) =
     , Main.row_x_coords : List(int32)
     )
 
-// Shift rows start_y down to 0 by folding over row_y_coords (skip rows > start_y).
+// Shift rows start_y down to 0 by folding over row_y_coords in DESCENDING
+// order (skip rows > start_y). Iterating from high y to low y is essential:
+// each row must be shifted down before the row above it is, otherwise the
+// already-shifted cells would be shifted again, cascading all content into a
+// single row.
 Main.board_shift_rows_above_from(start_y : int32, board : Set(Pair(int32, int32))) =
   @<Set(Pair(int32, int32))>
     ( Main.fold_list : (*/*/*)/*/List(*)/*
@@ -447,7 +451,10 @@ Main.board_shift_rows_above_from(start_y : int32, board : Set(Pair(int32, int32)
           else
             acc : Set(Pair(int32, int32))
     , board : Set(Pair(int32, int32))
-    , Main.row_y_coords : List(int32)
+    , @<List(int32)>
+        ( Main.reverse_list : List(*)/List(*)
+        , Main.row_y_coords : List(int32)
+        )
     )
 
 Main.board_shift_rows_above(cleared_y : int32, board : Set(Pair(int32, int32))) =
