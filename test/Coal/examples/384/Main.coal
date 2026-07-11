@@ -71,13 +71,23 @@ module Main {
     , pos_y = 0
     }
 
-  // TODO
   fun random_block() =
     { shape = ShapeI
     , rotation = R0
     , pos_x = 0
     , pos_y = 0
-    }
+    } 
+    //#{random_shape : unit -> int32}(())(
+    //  fn(shape_n : int32) =>
+    //    #{random_rotation : unit -> int32}(())(
+    //      fn(rotation_n : int32) =>
+    //        { shape = shape_from_int(shape_n)
+    //        , rotation = rotation_from_int(rotation_n)
+    //        , pos_x = 0
+    //        , pos_y = 0
+    //        }
+    //    )
+    //)
 
   type alias Board = Set<(int32, int32)>
 
@@ -389,8 +399,22 @@ module Main {
     in
     ! cells_collide(translated_block_cells, state)
 
-  fun can_rotate(state : GameState) = 
-    false
+  fun can_rotate(state : GameState) =
+    let
+      { shape, rotation, pos_x, pos_y } = state.current_block
+    in
+    let
+      next_rot = spin(rotation)
+    in
+    let
+      rotated_cells =
+        translate_cells(
+          pos_x,
+          pos_y,
+          shape_cells(shape, next_rot) |. Containers.Set.to_list
+        )
+    in
+    ! cells_collide(rotated_cells, state)
 
   fun move_current_block(d_x : int32, d_y : int32, state : GameState) : GameState =
     { board = state.board
@@ -430,12 +454,16 @@ module Main {
   fun rotate(state : GameState) =
     if (can_rotate(state))
       then
-        state
+        rotate_current_block(state)
       else
         state
 
   fun hard_drop(state : GameState) =
-    state
+    if (can_move_down(state))
+      then
+        hard_drop(move_current_block(0, 1, state))
+      else
+        on_piece_landed(state)
 
   // ---------------------------------------------------------------------------
   // Board API  
@@ -454,28 +482,63 @@ module Main {
     is_board_member(cell, game_state.board)
 
   fun board_count_x(y : int32, x : int32, board : Board) =
-    ?
+    if (x >= 10)
+      then 0
+      else
+        let rest = board_count_x(y, x + 1, board) in
+        if (is_board_member((x, y), board))
+          then 1 + rest
+          else rest
 
   fun board_count_in_row(y : int32, board : Board) =
-    ?
+    board_count_x(y, 0, board)
   
   fun board_remove_row_x(y : int32, x : int32, board : Board) =
-    ?
+    if (x >= 10)
+      then board
+      else
+        board_remove_row_x(y, x + 1, Containers.Set.delete((x, y), board))
 
   fun board_remove_row(y : int32, board : Board) =
     board_remove_row_x(y, 0, board)
   
   fun board_shift_row_x(y : int32, x : int32, board : Board) =
-    ?
+    if (x >= 10)
+      then board
+      else
+        if (is_board_member((x, y), board))
+          then
+            let
+              board_del = Containers.Set.delete((x, y), board)
+            in
+            board_shift_row_x(y, x + 1, Containers.Set.insert((x, y + 1), board_del))
+          else
+            board_shift_row_x(y, x + 1, board)
   
   fun board_shift_rows_above_from(start_y : int32, board : Board) =
-    ?
+    if (start_y < 0)
+      then board
+      else
+        board_shift_rows_above_from(start_y - 1, board_shift_row_x(start_y, 0, board))
 
   fun board_shift_rows_above(cleared_y : int32, board : Board) =
     board_shift_rows_above_from(cleared_y - 1, board)
   
   fun board_clear_full_rows_from(y : int32, board : Board) =
-    ?
+    if (y < 0)
+      then board
+      else
+        if (board_count_in_row(y, board) == 10)
+          then
+            let
+              removed = board_remove_row(y, board)
+            in
+            let
+              shifted = board_shift_rows_above(y, removed)
+            in
+            board_clear_full_rows_from(y, shifted)
+          else
+            board_clear_full_rows_from(y - 1, board)
   
   fun board_clear_full_rows(board : Board) =
     board_clear_full_rows_from(19, board)
@@ -494,12 +557,13 @@ module Main {
     List.map(translate_cell(d_x, d_y), cells)
 
   fun current_block_cells(game_state : GameState) : List<(int32, int32)> =
-    let 
-      { shape, rotation, pos_x, pos_y } = game_state.current_block
-    in
-    shape_cells(shape, rotation)
-      |. Containers.Set.to_list
-      |. translate_cells(pos_x, pos_y)
+    []
+//    let 
+//      { shape, rotation, pos_x, pos_y } = game_state.current_block
+//    in
+//    shape_cells(shape, rotation)
+//      |. Containers.Set.to_list
+//      |. translate_cells(pos_x, pos_y)
 
   // ---------------------------------------------------------------------------
   // Collision detection
@@ -514,6 +578,11 @@ module Main {
   // ---------------------------------------------------------------------------
   // Piece locking
   // ---------------------------------------------------------------------------
+
+  fun lock_current_block(state : GameState) : GameState =
+    { board = board_insert_cells(current_block_cells(state), state.board)
+    , current_block = state.current_block
+    }
 
   // ---------------------------------------------------------------------------
 
@@ -531,7 +600,7 @@ module Main {
 
   fun spawn_next_block(state : GameState) =
     { board = state.board
-    , current_block = state.current_block // TODO
+    , current_block = random_block()
     }
   
   fun on_piece_landed(state : GameState) =
@@ -541,7 +610,7 @@ module Main {
     in
     let
       cleared =
-        { board = board_clear_full_rows(locked)
+        { board = board_clear_full_rows(locked.board)
         , current_block = locked.current_block
         }
     in
@@ -611,12 +680,10 @@ module Main {
     )
 
   fun main() = 
-    let
-      prog =
-        #{event_loop_init : int32 -> unit}(100 : int32)(
-          fn(_) => loop(initial_game_state)
-        )
-      in
-        IO.println_string("end")
+    IO.__return_io(
+      #{event_loop_init : int32 -> unit}(300 : int32)(
+        fn(_) => loop(initial_game_state)
+      )
+    )
 
 }
