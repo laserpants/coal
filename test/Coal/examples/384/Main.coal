@@ -416,12 +416,12 @@ module Main {
     if (can_move_left(state))
       then move_current_block(-1, 0, state)
       else state
-    
+
   fun move_right(state : GameState) =
     if (can_move_right(state))
       then move_current_block(1, 0, state)
       else state
-  
+
   fun move_down(state : GameState) =
     if (can_move_down(state))
       then move_current_block(0, 1, state)
