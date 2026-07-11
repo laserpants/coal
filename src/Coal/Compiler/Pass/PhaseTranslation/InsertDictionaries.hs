@@ -151,7 +151,7 @@ insertName _ _ = pure () -- Other definitions do not need name insertion
 {- | Collect all trait constraints required by a name at the given type.
 Unifies the name's type scheme with the given type and returns required traits.
 -}
-collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m (Set (Trait IndexedType))
+collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
 collectTraits u name = do
   env <- gets compilerNameStore
   case Environment.lookup name env of
@@ -166,10 +166,14 @@ collectTraits u name = do
       case r of
         Left{} -> do
           -- Type mismatch during trait collection - this shouldn't happen in well-typed code
-          -- Return empty set and let type checker catch the error
+          -- Return empty list and let type checker catch the error
           pure mempty
         Right sub2 ->
-          pure (apply (sub2 <> sub1) (Set.fromList ts))
+          -- Return a list (not Set) to preserve multiplicity from the scheme's trait list.
+          -- Two distinct type variables that both resolve to the same concrete type must
+          -- still produce two separate dictionary arguments to match the two lambda params
+          -- created at the definition site (where the variables were distinct).
+          pure (apply (sub2 <> sub1) ts)
  where
   instantiate (TypeIndex k index) acc = do
     var <- supplied (TVariable . TypeIndex k)
@@ -291,11 +295,11 @@ instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (Expressio
       var@(EVariable _ (Label t name))
         | "$fold" `isPrefixOf` name -> do
             traits <- collectTraits t name
-            tellDictionaryTraits traits
+            tellDictionaryTraits (Set.fromList traits)
             pure var
       EVariable loc (Label t name) -> do
         traits <- collectTraits t name
-        applyTraits loc (Label t name) (Set.toList traits)
+        applyTraits loc (Label t name) traits
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       -- Transform a binding to collect trait dependencies and wrap the body in dictionary lambdas
@@ -390,7 +394,6 @@ expandLetDefinitionTraits name =
                   , ..
                   }
             else -- Check if a trait constraint is on a type variable (not yet resolved)
-
               pure $
                 LetDefinition
                   { letDefinitionType = With (tr : trs) t
@@ -442,11 +445,11 @@ passiveExpandTraitsInExpr =
     var@(EVariable _ (Label t name))
       | "$fold" `isPrefixOf` name -> do
           traits <- collectTraits t name
-          tellDictionaryTraits traits
+          tellDictionaryTraits (Set.fromList traits)
           pure var
     EVariable loc (Label t name) -> do
       traits <- collectTraits t name
-      passiveApplyTraits loc traits
+      passiveApplyTraits loc (Set.fromList traits)
       pure (EVariable loc (Label t name))
     ECompiledMatch a t e cs ->
       ECompiledMatch a t <$> passiveExpandTraitsInExpr e <*> traverse passiveExpandTraitsInClause cs
