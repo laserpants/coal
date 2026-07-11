@@ -658,13 +658,11 @@ module Main {
     let event = parse_event(ev_code) in
     let new_state = handle_event(event, state) 
     in
-    let _ =
-      #{coal_render_board : List<(int32, int32)> -> List<(int32, int32)> -> unit}(
+    #{coal_render_board : List<(int32, int32)> -> List<(int32, int32)> -> unit}(
         board_to_list(new_state.board),
         current_block_cells(new_state)
-      )(fn(_) => ())
-    in
-    new_state
+      )(fn(_) => new_state)
+    
 
   fun loop(game_state : GameState) =
     #{event_loop_has_next : unit -> bool}(())(
