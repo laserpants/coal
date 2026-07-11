@@ -557,13 +557,12 @@ module Main {
     List.map(translate_cell(d_x, d_y), cells)
 
   fun current_block_cells(game_state : GameState) : List<(int32, int32)> =
-    []
-//    let 
-//      { shape, rotation, pos_x, pos_y } = game_state.current_block
-//    in
-//    shape_cells(shape, rotation)
-//      |. Containers.Set.to_list
-//      |. translate_cells(pos_x, pos_y)
+    let 
+      { shape, rotation, pos_x, pos_y } = game_state.current_block
+    in
+    shape_cells(shape, rotation)
+      |. Containers.Set.to_list
+      |. translate_cells(pos_x, pos_y)
 
   // ---------------------------------------------------------------------------
   // Collision detection
@@ -598,11 +597,17 @@ module Main {
       | _  => NoOp
     }
 
-  fun spawn_next_block(state : GameState) =
+  // fun spawn_next_block(state : GameState) : GameState =
+  fun spawn_next_block(state : GameState)  =
     { board = state.board
-    , current_block = random_block()
+    , current_block = // state.current_block
+        { shape = ShapeI
+        , rotation = R0
+        , pos_x = 0 : int64
+        , pos_y = 0 : int64
+        } 
     }
-  
+
   fun on_piece_landed(state : GameState) =
     let
       locked =
