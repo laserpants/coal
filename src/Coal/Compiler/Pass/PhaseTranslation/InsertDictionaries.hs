@@ -323,13 +323,49 @@ transformBindingWithTraits =
     binding ->
       error $ "transformBindingWithTraits: unsupported binding pattern: " ++ show binding
 
--- | Transform an expression scope to collect trait constraints and create dictionary lambdas
+{- | Transform an expression scope to collect trait constraints and create dictionary lambdas
+Only truly polymorphic (unresolvable) traits become dictionary lambda parameters;
+concrete traits that already have instances are kept as inlined ERecord dictionaries.
+-}
 transformScopeWithTraits :: (Monoid a, Data a, Data k, Monad m, Show a, Show k) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType, Set (Trait IndexedType))
 transformScopeWithTraits e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
-  case Set.toList traits of
-    [] -> pure (expr, traits)
-    tr : trs -> pure (dictionaryLambda tr trs expr, traits)
+  -- Partition collected traits into concretely resolvable vs. truly polymorphic.
+  -- If lookupTraitInstance returns Just, the trait has a concrete instance
+  -- (e.g. Numeric int32) and should NOT become a lambda parameter — it should
+  -- be inlined as an ERecord inside the expression body.
+  -- Use isConcrete to determine if a trait has a resolvable instance.
+  -- Concrete traits (e.g. Numeric int32) can be inlined as ERecord dictionaries
+  -- rather than being passed as dictionary lambda parameters.
+  -- isConcrete returns True for TIntrinsic, TRecord, etc. and False for TVariable,
+  -- which is exactly the distinction we need here.
+  let resolved = Set.toList (Set.filter isConcrete traits)
+  let concreteTraits = Set.fromList resolved
+  let polymorphicTraits = traits `Set.difference` concreteTraits
+  -- For any concrete trait, ensure it's represented as an ERecord in the expr,
+  -- not as an ETraitInstance (which would be wrapped in dictionaryLambda).
+  -- We need to replace ETraitInstance nodes with ERecord for these traits.
+  expr' <-
+    if null resolved
+      then pure expr
+      else replaceConcreteTraitInstances expr concreteTraits
+  case Set.toList polymorphicTraits of
+    [] -> pure (expr', mempty)
+    tr : trs -> pure (dictionaryLambda tr trs expr', polymorphicTraits)
+
+{- | Replace ETraitInstance occurrences for traits in the given set with
+concrete ERecord dictionaries obtained from lookupTraitInstance.
+-}
+replaceConcreteTraitInstances :: (Monad m, Monoid a, Data a, Data k, Show a, Show k) => Expression a k IndexedType -> Set (Trait IndexedType) -> CompilerT a m (Expression a k IndexedType)
+replaceConcreteTraitInstances expr traits = descendM go expr
+ where
+  go (ETraitInstance a ty trait)
+    | Set.member trait traits = do
+        mFields <- lookupTraitInstance a trait
+        case mFields of
+          Just fields -> pure (ERecord a ty fields Nothing)
+          Nothing -> pure (ETraitInstance a ty trait)
+  go e = pure e
 
 instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (CompiledClause a k IndexedType) where
   expandTraits =
