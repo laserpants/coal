@@ -2008,6 +2008,12 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/386" ["Main.coal"]
       res `shouldBe` Left TypeError
 
+  describe "387" $ do
+    expectOutput
+      "40\n cells before clear\n\n30\n cells after clear"
+      "test/Coal/examples/387"
+      ["Main.coal", "Containers/Set.coal", "Containers/Map.coal"]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
