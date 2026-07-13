@@ -1,0 +1,8 @@
+module Qsort {
+
+  import Tree(flatten, from_list)
+
+  let sort : List<a> -> List<a> with (Ordered<a>) =
+    flatten << from_list
+
+}

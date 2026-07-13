@@ -330,21 +330,16 @@ concrete traits that already have instances are kept as inlined ERecord dictiona
 transformScopeWithTraits :: (Monoid a, Data a, Data k, Monad m, Show a, Show k) => IndexedType -> Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType, Set (Trait IndexedType))
 transformScopeWithTraits bindingType e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
-  -- Partition collected traits into concretely resolvable vs. truly polymorphic.
-  -- If lookupTraitInstance returns Just, the trait has a concrete instance
-  -- (e.g. Numeric int32) and should NOT become a lambda parameter — it should
-  -- be inlined as an ERecord inside the expression body.
-  -- Use isConcrete to determine if a trait has a resolvable instance.
-  -- Concrete traits (e.g. Numeric int32) can be inlined as ERecord dictionaries
-  -- rather than being passed as dictionary lambda parameters.
-  -- isConcrete returns True for TIntrinsic, TRecord, etc. and False for TVariable,
-  -- which is exactly the distinction we need here.
+  -- Partition traits into concretely resolvable (fully instantiated) vs. truly
+  -- polymorphic (still type-variable-parameterized). Concrete traits are inlined
+  -- as ERecord dictionaries inside the body; polymorphic traits become dictionary
+  -- lambda parameters. isConcrete returns True for TIntrinsic, TRecord, etc. and
+  -- False for TVariable.
   let resolved = Set.toList (Set.filter isConcrete traits)
   let concreteTraits = Set.fromList resolved
   let polymorphicTraits = traits `Set.difference` concreteTraits
-  -- For any concrete trait, ensure it's represented as an ERecord in the expr,
-  -- not as an ETraitInstance (which would be wrapped in dictionaryLambda).
-  -- We need to replace ETraitInstance nodes with ERecord for these traits.
+  -- Replace ETraitInstance nodes with concrete ERecord dictionaries for traits
+  -- that have been resolved, so they aren't wrapped in dictionaryLambda.
   expr' <-
     if null resolved
       then pure expr
@@ -352,12 +347,11 @@ transformScopeWithTraits bindingType e = do
   case Set.toList polymorphicTraits of
     [] -> pure (expr', mempty)
     tr : trs ->
-      -- If all remaining traits are type-variable traits (slipped through type
-      -- inference without being grounded) AND the expression's type is fully
-      -- concrete (no free type variables), resolve them to int32 inline rather
-      -- than deferring to the caller.  This handles the case where a let-bound
-      -- expression uses a polymorphic helper (e.g. board_count_x returning
-      -- Numeric a) but in a fully-concrete context.
+      -- If all remaining traits are type-variable traits (unresolved by inference)
+      -- AND the expression's type is fully concrete (no free type variables),
+      -- resolve them to int32 inline rather than deferring to the caller. This
+      -- handles let-bound expressions whose type is concrete but whose body
+      -- references a polymorphic helper.
       let exprIsConcrete = Set.null (typeIndexesIn bindingType :: Set (TypeIndex Kind))
           allVar = all isVariable (tr : trs)
        in if exprIsConcrete && allVar
