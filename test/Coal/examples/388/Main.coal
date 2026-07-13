@@ -1,6 +1,9 @@
 module Main {
 
   import Qsort(sort)
+  import IO(return)
+  
+  import namespace IO
 
   fun print_1st(xs) =
     match(xs) {

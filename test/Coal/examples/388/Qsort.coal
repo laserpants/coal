@@ -1,4 +1,4 @@
-module Qsort {
+module Qsort(sort) {
 
   import Tree(flatten, from_list)
 
