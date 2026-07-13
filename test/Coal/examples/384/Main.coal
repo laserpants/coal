@@ -134,13 +134,6 @@ module Main {
             _ = IO.print_string("FAIL: Board has remaining cells:\n")
           in
           let
-            _ = IO.println_int32(unpack(length(cells) + 1))
-//            _ = IO.print_int32(8899)
-          in
-          let
-            _ = IO.println_string("wat")
-          in
-          let
             _ = List.map(fn((x, y)) => 
               let
                 _ = IO.print_string("  (")

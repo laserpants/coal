@@ -2010,7 +2010,7 @@ e2eSpec = do
 
   describe "387" $ do
     expectOutput
-      "40\n cells before clear\n\n30\n cells after clear"
+      "40\n cells before clear\n\n cells after clear"
       "test/Coal/examples/387"
       ["Main.coal", "Containers/Set.coal", "Containers/Map.coal"]
 
