@@ -350,7 +350,7 @@ qualified name path = principalPath path <> "." <> name
 expandExports :: (Monad m) => ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
 expandExports = do
   exportList <- ask
-  Build{buildDataConstructors} <- get
+  Build{buildTypeConstructors} <- get
   case exportList of
     ExportAll ->
       return ExportAll
@@ -359,14 +359,14 @@ expandExports = do
         forM exports $
           \case
             TypeExport loc name [] ->
-              case Environment.lookup name buildDataConstructors of
+              case Environment.lookup name buildTypeConstructors of
                 Nothing -> do
                   lift $ lift $ do
                     path <- gets compilerCurrentPath
                     tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
                   return (TypeExport loc name mempty)
-                Just DataConstructorEntry{..} ->
-                  return (TypeExport loc name (Set.toList dataConstructorEntryConstructorSet))
+                Just TypeConstructorEntry{..} ->
+                  return (TypeExport loc name typeConstructorEntryDataConstructors)
             e ->
               return e
       return
@@ -434,8 +434,7 @@ collectTypeConstructors importSources = \case
     return importSources
   DImport _ path imports -> do
     Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
-    newSources <- foldM (checkAndImportType path exportedNames) importSources imports
-    return newSources
+    foldM (checkAndImportType path exportedNames) importSources imports
   DNamespaceImport _ _ ->
     return importSources
   _ ->

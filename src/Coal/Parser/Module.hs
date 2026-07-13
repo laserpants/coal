@@ -41,7 +41,7 @@ parseTypeExport :: Parser (Export Metadata)
 parseTypeExport = do
   start <- getSourcePos
   name_ <- constructor
-  names <- option ["*"] (parens (commaSep1 name))
+  names <- option [] (parens (commaSep1 name))
   end <- getSourcePos
   pure (TypeExport (Metadata start end) name_ names)
 

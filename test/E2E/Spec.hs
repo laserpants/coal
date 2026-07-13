@@ -2014,6 +2014,12 @@ e2eSpec = do
       "test/Coal/examples/387"
       ["Main.coal", "Containers/Set.coal", "Containers/Map.coal"]
 
+  describe "388" $ do
+    expectOutput
+      "1\n2\n3\n4\n5\n6\n7\n8\n34\n42\n99\n102\n103"
+      "test/Coal/examples/388"
+      ["Main.coal", "Tree.coal", "Qsort.coal"]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

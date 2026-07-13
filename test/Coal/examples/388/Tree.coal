@@ -1,4 +1,4 @@
-module Tree(insert, from_list, flatten) {
+module Tree(Tree, insert, from_list, flatten) {
 
   import List(reduce)
 
