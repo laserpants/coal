@@ -1,0 +1,60 @@
+module Monad.ReaderSpec(readerSpec) {
+
+  import Coal.Monad(and_then)
+  import Monad.Reader(Reader, ask, local, run_reader)
+  import MicroTest(Test, check, suite)
+
+  type alias Config = { 
+    api_key : string, 
+    debug : bool 
+  }
+
+  fun get_api_key() =
+    ask()
+      |. and_then(fn(config : Config) => pure(config.api_key))
+
+  fun is_debug_mode() =
+    ask()
+      |. and_then(fn(config : Config) => pure(config.debug))
+
+  fun with_debug_enabled(reader) =
+    local(fn(config : Config) => { api_key = config.api_key, debug = true }, reader)
+
+  fun greeting(name : string) =
+    is_debug_mode()
+      |. and_then(fn(debug) =>
+           if (debug)
+             then pure("DEBUG: Hello, " +++ name)
+             else pure("Hello, " +++ name)
+         )
+
+  fun authenticated_request() =
+    get_api_key()
+      |. and_then(fn(key) =>
+           is_debug_mode()
+             |. and_then(fn(debug) =>
+                  if (debug)
+                    then pure("Request with key: " +++ key)
+                    else pure("Request sent")
+                )
+         )
+
+  let
+    readerSpec : Test =
+      let
+        prod_config = { api_key = "secret123", debug = false } ;
+        dev_config  = { api_key = "test_key", debug = true }
+      in
+      suite([
+        check(run_reader(get_api_key(), prod_config) == "secret123"),
+        check(run_reader(get_api_key(), dev_config) == "test_key"),
+        check(run_reader(is_debug_mode(), prod_config) == false),
+        check(run_reader(is_debug_mode(), dev_config) == true),
+        check(run_reader(greeting("Alice"), prod_config) == "Hello, Alice"),
+        check(run_reader(greeting("Bob"), dev_config) == "DEBUG: Hello, Bob"),
+        check(run_reader(authenticated_request(), prod_config) == "Request sent"),
+        check(run_reader(authenticated_request(), dev_config) == "Request with key: test_key"),
+        check(run_reader(with_debug_enabled(greeting("Charlie")), prod_config) == "DEBUG: Hello, Charlie")
+      ])
+
+}

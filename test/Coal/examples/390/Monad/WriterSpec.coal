@@ -1,0 +1,35 @@
+module Monad.WriterSpec(writerSpec) {
+
+  import Coal.Monad(and_eval)
+  import Coal.Monoid(Monoid)
+  import Monad.Writer(Writer, tell, run_writer)
+  import MicroTest(Test, check, suite)
+  import namespace List
+
+//  instance Comparable<List<a>> with (Comparable<a>) {
+//    fun `==`(xs, ys) =
+//      match((xs, ys)) {
+//        | (a :: _, b :: _) => 
+//            a == b
+//        | _ => 
+//            false
+//      }
+//  }
+
+ fun test_writer() : Writer<List<string>, int32> =
+   tell(["one"])
+     |. and_eval(tell(["two"]))
+     |. and_eval(tell(["three"]))
+     |. and_eval(pure(100))
+
+  let
+    writerSpec : Test =
+      let
+        ((res, log)) = run_writer(test_writer())
+      in
+      suite([ 
+        check(log == ["one", "two", "three"]),
+        check(res == 100)
+      ])
+
+}
