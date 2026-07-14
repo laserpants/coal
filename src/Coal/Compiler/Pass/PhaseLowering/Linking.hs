@@ -28,11 +28,6 @@ import System.IO (hFlush, hPutStr, stderr)
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process
 
-putStatus :: String -> IO ()
-putStatus msg = do
-  hPutStr stderr $ "\r\ESC[2K" ++ msg
-  hFlush stderr
-
 passLinking :: (MonadIO m) => Pass Metadata m [(Name, ByteString)] ()
 passLinking = Pass{runPass = passImpl}
 
@@ -53,12 +48,10 @@ compileBitcode CompilerConfig{..} files =
           pure (Just CompilerError)
         Right objFiles -> do
           ByteString.writeFile (tmpDir </> "runtime.c") runtimeLib
-
           cFiles <- traverse canonicalizePath configCFiles
           forM_ cFiles $
-            \file -> do
+            \file ->
               copyFile file (tmpDir </> takeBaseName file)
-
           gccRes <- runGCC tmpDir objFiles cFiles
           case gccRes of
             Left e -> do
@@ -66,53 +59,36 @@ compileBitcode CompilerConfig{..} files =
               pure (Just CompilerError)
             Right _ -> do
               copyFile (tmpDir </> "dist") configExecutableName
-              unless configSilent $ do
-                putStrLn ("Executable written to: " <> configExecutableName)
+              -- Write success to stderr: clear line + message + final newline
+              unless configSilent $
+                hPutStr stderr ("\r\ESC[2K[100%] Executable written to: " ++ configExecutableName)
+              hPutStr stderr "\n"
               pure Nothing
 
 runLLC :: FilePath -> Name -> ByteString -> IO (Either SomeException FilePath)
 runLLC dir name bcode = do
   ByteString.writeFile file bcode
-
-  let cmd = "llc"
-      args = ["-filetype=obj", "-relocation-model=pic", file, "-o", target]
-      cmdStr = unwords (cmd : args)
-  putStatus $ "Running: " ++ cmdStr
-
   try $ do
-    execProcess process
+    execProcess $ (proc "llc" ["-filetype=obj", "-relocation-model=pic", file, "-o", target]){cwd = Just dir}
     pure target
  where
   file = dir </> Text.unpack name <.> "bc"
   target = takeBaseName file <.> "o"
-  process =
-    (proc "llc" ["-filetype=obj", "-relocation-model=pic", file, "-o", target])
-      { cwd = Just dir
-      }
 
 runGCC :: FilePath -> [FilePath] -> [FilePath] -> IO (Either SomeException ())
 runGCC dir objFiles cFiles = do
   isClang <- ("clang" `isInfixOf`) <$> readProcess "cc" ["--version"] ""
-
   let args =
-        (if isClang then flags else "-no-pie" : flags)
-          <> commonArgs
-
-      process = (proc "gcc" args){cwd = Just dir}
-
-  putStatus $ "Running: " ++ showCommandForUser "gcc" args
-
-  try $ execProcess process
+        (if isClang then flags else "-no-pie" : flags) <> commonArgs
+  try $ execProcess $ (proc "gcc" args){cwd = Just dir}
  where
-  -- Enable AddressSanitizer for memory error detection
   flags = ["-g", "-I.", "-fsanitize=address"]
-
   commonArgs =
     ["runtime.c"]
       <> cFiles
       <> objFiles
       <> ["-o", "dist"]
-      <> ["-fsanitize=address"] -- Link with ASAN runtime
+      <> ["-fsanitize=address"]
       <> ["-lgc", "-lgmp"]
 
 execProcess :: CreateProcess -> IO ()

@@ -107,7 +107,7 @@ pipelineWithProgress ref =
     >-> perModulePasses ref phaseTypeChecking phaseTranslation
     >-> Pass{runPass = extraTicks}
     >-> timedWeighted ref "Lowering" Counts.weightLowering phaseLowering
-    >-> timedWeighted ref "Linking" Counts.weightLinking passLinking
+    >-> passLinking
 
 timedWeighted :: (MonadIO m) => ProgressRef -> String -> Int -> Pass a m i o -> Pass a m i o
 timedWeighted ref label weight p =
@@ -161,7 +161,8 @@ updateTotal ref envelopes = do
       moduleWeight = Counts.weightTypeChecking + Counts.weightTranslation
       globalWeight = Counts.weightParsing + Counts.weightPreflight + Counts.weightLowering + Counts.weightLinking
       total = globalWeight + numSource * moduleWeight
-  liftIO $ modifyIORef' ref (\(done, _) -> (done, total))
+  -- Reset both counters: parsing is already done, so done = parsing weight.
+  liftIO $ modifyIORef' ref (\(_, _) -> (Counts.weightParsing, total))
   pure envelopes
 
 phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
