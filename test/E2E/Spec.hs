@@ -256,10 +256,10 @@ e2eSpec = do
   describe "048" $
     expectOutput "123" "test/Coal/examples/048" ["Main.coal"]
 
-  --  describe "049" $ do
-  --    it "is CallCycleError" $ do
-  --      res <- runSpec "test/Coal/examples/049" ["Main.coal"]
-  --      res `shouldBe` Left CallCycleError
+  describe "049" $ do
+    it "is CallCycleError" $ do
+      res <- runSpec "test/Coal/examples/049" ["Main.coal"]
+      res `shouldBe` Left CallCycleError
 
   describe "050" $
     expectOutput
@@ -1014,15 +1014,14 @@ e2eSpec = do
           ]
       res `shouldBe` Left PreflightFailure
 
-  --  ========================= COMMENTED OUT =========================
-  --  describe "200" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/200"
-  --          [ "Main.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
+  describe "200" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/200"
+          [ "Main.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
 
   describe "201" $ do
     expectOutput
@@ -1650,10 +1649,10 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "316" $ do
-  --    it "is CallCycleError" $ do
-  --      res <- runSpec "test/Coal/examples/316" ["Main.coal"]
-  --      res `shouldBe` Left CallCycleError
+  describe "316" $ do
+    it "is CallCycleError" $ do
+      res <- runSpec "test/Coal/examples/316" ["Main.coal"]
+      res `shouldBe` Left CallCycleError
 
   describe "317" $ do
     expectOutput
