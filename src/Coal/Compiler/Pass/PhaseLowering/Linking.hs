@@ -23,6 +23,7 @@ import Data.List (isInfixOf)
 import qualified Data.Text as Text
 import Extras (Name)
 import System.Directory (canonicalizePath, copyFile)
+import System.Exit (ExitCode (..))
 import System.FilePath (takeBaseName, (<.>), (</>))
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process
@@ -87,7 +88,11 @@ runGCC dir objFiles cFiles = do
       <> ["-lgc", "-lgmp"]
 
 execProcess :: CreateProcess -> IO ()
-execProcess p = void $ readCreateProcessWithExitCode p ""
+execProcess p = do
+  (exitCode, _, stderr) <- readCreateProcessWithExitCode p ""
+  case exitCode of
+    ExitSuccess -> pure ()
+    ExitFailure code -> error $ "Process failed with exit code " ++ show code ++ ":\n" ++ stderr
 
 runtimeLib :: ByteString
 runtimeLib = $(embedFile "runtime/dist/runtime-combined.c")
