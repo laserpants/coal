@@ -19,7 +19,7 @@ module Coal.Kernel.LLVM.Module (
 
 import qualified Data.Set as Set
 
-import LLVM.IR
+import LLVM.IR (IROperand (OGlobal), IRType (TFun, TPtr))
 
 import Coal.Common.Name (Name)
 import Coal.Kernel.FreeVars (freeVars)
