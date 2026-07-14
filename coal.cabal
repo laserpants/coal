@@ -107,6 +107,7 @@ library
       Coal.Compiler.PatternMatching.Equation
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Pipeline
+      Coal.Compiler.Progress
       Coal.Compiler.Stack
       Coal.Compiler.State
       Coal.Compiler.TypeInference

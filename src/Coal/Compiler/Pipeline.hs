@@ -51,7 +51,7 @@ import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad (replicateM_)
 import Control.Monad.Except (forM_)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.IORef (IORef, modifyIORef', newIORef, readIORef)
+import Data.IORef (IORef, modifyIORef', newIORef)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -63,19 +63,7 @@ import System.IO (hFlush, hPutStr, stderr)
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
-type ProgressRef = IORef (Int, Int)
-
-writeStatus :: ProgressRef -> String -> IO ()
-writeStatus ref msg = do
-  (done, total) <- readIORef ref
-  let pct = if total > 0 then (done * 100) `div` total else 0
-  hPutStr stderr $ "\r\ESC[2K[" ++ show pct ++ "%] " ++ msg
-  hFlush stderr
-
-writeStatusSimple :: String -> IO ()
-writeStatusSimple msg = do
-  hPutStr stderr $ "\r\ESC[2K" ++ msg
-  hFlush stderr
+import Coal.Compiler.Progress (ProgressRef, writeStatus, writeStatusSimple)
 
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
