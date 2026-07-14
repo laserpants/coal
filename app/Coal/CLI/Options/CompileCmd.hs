@@ -2,6 +2,8 @@
 
 module Coal.CLI.Options.CompileCmd (CompileCmdOptions (..)) where
 
+import Data.Text (Text)
+
 data CompileCmdOptions = CompileCmdOptions
   { inputFiles :: [FilePath]
   , outputFile :: FilePath
@@ -11,5 +13,6 @@ data CompileCmdOptions = CompileCmdOptions
   , extraSourceFiles :: [FilePath]
   , silent :: Bool
   , noCache :: Bool
+  , entryPoint :: Maybe Text
   }
   deriving (Show)

@@ -49,6 +49,7 @@ import qualified Data.Text.IO as Text
 
 import LLVM.IR
 
+import Coal.Compiler.Config (CompilerConfig (configEntryPoint))
 import Coal.Kernel.LLVM.Codegen (
   irMainModule,
   irModule,
@@ -165,16 +166,25 @@ buildIR action =
 {- | Run LLVM IR code generation for one normalized module, given the full
 list of all (normalized) modules for cross-module context.
 
-For the Main module, additionally emits the C main entry point via
-'irMainModule'.
+For the entry point module (default: "Main"), additionally emits the C main
+entry point via 'irMainModule'.
 -}
-codeGenModule :: (Monad m) => [Module Type] -> Module Type -> CompilerT m IRModule
-codeGenModule allModules m =
-  CompilerT $
-    either throwError return $
-      if moduleName m == Text.pack "Main"
-        then buildIR (irModule allModules m irMainModule)
-        else buildIR (irModule allModules m (return ()))
+codeGenModule :: (Monad m) => CompilerConfig -> [Module Type] -> Module Type -> CompilerT m IRModule
+codeGenModule config allModules m =
+  let isEntryPoint = case configEntryPoint config of
+        Nothing -> moduleName m == Text.pack "Main"
+        Just (entryMod, _) -> moduleName m == entryMod
+      entryPointModule = case configEntryPoint config of
+        Nothing -> Text.pack "Main"
+        Just (entryMod, _) -> entryMod
+      entryPointFunc = case configEntryPoint config of
+        Nothing -> Text.pack "main"
+        Just (_, entryFunc) -> entryFunc
+   in CompilerT $
+        either throwError return $
+          if isEntryPoint
+            then buildIR (irModule allModules m (irMainModule entryPointModule entryPointFunc))
+            else buildIR (irModule allModules m (return ()))
 
 -- ---------------------------------------------------------------------------
 -- Public entry points
@@ -193,10 +203,10 @@ Example:
     Right irs -> mapM_ (Text.putStrLn . runIRRenderer . renderModule) irs
 @
 -}
-compileModules :: (Monad m) => [Module Type] -> CompilerT m [IRModule]
-compileModules mods = do
+compileModules :: (Monad m) => CompilerConfig -> [Module Type] -> CompilerT m [IRModule]
+compileModules config mods = do
   normalized <- traverse normalizeModule mods
-  traverse (codeGenModule normalized) normalized
+  traverse (codeGenModule config normalized) normalized
 
 {- | Read and parse source files from the given paths, then call
 'compileModules'.
@@ -205,10 +215,10 @@ Parse errors for any file abort the compilation and are reported as
 'CompilerParseError' (the bundled message from @megaparsec@'s
 'errorBundlePretty').
 -}
-compileFiles :: [FilePath] -> CompilerT IO [IRModule]
-compileFiles paths = do
+compileFiles :: CompilerConfig -> [FilePath] -> CompilerT IO [IRModule]
+compileFiles config paths = do
   mods <- traverse parseOne paths
-  compileModules mods
+  compileModules config mods
  where
   parseOne path = do
     src <- liftIO (Text.readFile path)

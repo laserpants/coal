@@ -18,7 +18,7 @@ module Coal.Kernel.LLVM.IntegrationTestUtils (
   runTestForFile,
 ) where
 
-import Coal.Kernel.LLVM.TestUtils (evaluateFoo, injectBuiltins)
+import Coal.Kernel.LLVM.TestUtils (evaluateModule, injectBuiltins)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Module.DependencyGraph (checkImportsSatisfied, topoSortModules)
@@ -97,7 +97,7 @@ testCompilePipelineWithC cornFiles extraCFiles = do
       Left err -> error (show err)
       Right m' -> return m'
   compileOne allMods (fname, m) = do
-    ir <- case evaluateFoo mempty emptyIRBuilderEnv allMods m of
+    ir <- case evaluateModule mempty emptyIRBuilderEnv allMods m of
       Left err -> error err
       Right r -> return r
     let outFile = buildDir </> takeBaseName fname <> ".ll"
@@ -142,7 +142,7 @@ testCompile cornFiles = do
       Left err -> error (errorBundlePretty err)
       Right m -> return m
   compileOne allMods (fname, m) = do
-    ir <- case evaluateFoo mempty emptyIRBuilderEnv allMods m of
+    ir <- case evaluateModule mempty emptyIRBuilderEnv allMods m of
       Left err -> error err
       Right r -> return r
     let outFile = buildDir </> takeBaseName fname <> ".ll"
@@ -162,7 +162,7 @@ runTestForFile fname = do
 -- | Run a test on a parsed module, compiling it and printing the LLVM IR.
 runTest :: Module Type -> IO ()
 runTest module_ =
-  case evaluateFoo mempty emptyIRBuilderEnv [] module_ of
+  case evaluateModule mempty emptyIRBuilderEnv [] module_ of
     Right r ->
       Text.putStrLn (LLVM.IRRenderer.renderModule r)
     Left err ->

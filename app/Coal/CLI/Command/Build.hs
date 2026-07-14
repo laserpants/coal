@@ -12,7 +12,10 @@ import Coal.Package.Manifest (PackageManifest (..), filePaths, loadProjectManife
 import Control.Monad.Except
 import Data.List (nub)
 import Data.Maybe (fromMaybe)
+import Data.Text (Text)
 import qualified Data.Text as Text
+import Extras (Name)
+import Text.Read (readMaybe)
 
 buildCommand :: ExceptT CLIError IO ()
 buildCommand = do
@@ -21,7 +24,12 @@ buildCommand = do
 
     (srcPaths, inputFiles) <- packageIncludes
     let localSrcPaths = Text.unpack <$> fromMaybe ["src"] source_dirs
-        config = defaultConfig{configSourcePaths = nub ("src" : srcPaths <> localSrcPaths)}
+        entryPoint = parseEntryPoint entry_point
+        config =
+          defaultConfig
+            { configSourcePaths = nub ("src" : srcPaths <> localSrcPaths)
+            , configEntryPoint = entryPoint
+            }
     localFiles <- filePaths modules EProjectInvalidModuleFormat
     pure (config, inputFiles <> localFiles)
 
@@ -30,3 +38,18 @@ buildCommand = do
       throwError (EPackageError err)
     Right (config, files) ->
       liftIO $ compile config files
+
+-- | Parse an entry point string like "Main.main" into (moduleName, functionName)
+parseEntryPoint :: Maybe Text -> Maybe (Name, Name)
+parseEntryPoint = join . fmap parseDotSeparated
+ where
+  parseDotSeparated t =
+    case Text.breakOnEnd "." t of
+      (func, "") -> Nothing
+      (func, ".") -> Nothing
+      (_, func) ->
+        case Text.unsnoc (Text.dropAround (== '.') t) of
+          Nothing -> Nothing
+          Just (mod, '.') ->
+            Just (mod, func)
+          _ -> Nothing

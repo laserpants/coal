@@ -4,6 +4,8 @@
 module Coal.CLI.Parser.CompileCmd (compileCmdParser) where
 
 import Coal.CLI.Options.CompileCmd (CompileCmdOptions (..))
+import Data.Text (Text)
+import qualified Data.Text as Text
 import Options.Applicative
 
 compileCmdParser :: Parser CompileCmdOptions
@@ -60,6 +62,15 @@ compileCmdParser = do
     switch
       ( long "no-cache"
           <> help "Disable caching"
+      )
+
+  entryPoint <-
+    optional
+      ( strOption
+          ( long "entry-point"
+              <> metavar "MODULE.FUNCTION"
+              <> help "Entry point module and function (e.g., Main.main)"
+          )
       )
 
   pure CompileCmdOptions{..}

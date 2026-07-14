@@ -38,6 +38,7 @@ data PackageManifest = PackageManifest
   , source_dirs :: Maybe [Text]
   , modules :: [Text]
   , dependencies :: Maybe (Map Text PackageDependency)
+  , entry_point :: Maybe Text
   --  , compiler_version :: Text
   }
   deriving (Generic, Show, Eq)

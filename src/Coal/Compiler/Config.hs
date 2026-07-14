@@ -19,6 +19,8 @@ module Coal.Compiler.Config (
   setConfigGenerateLLVMOutput,
 ) where
 
+import Extras (Name)
+
 data CompilerConfig = CompilerConfig
   { configExecutableName :: FilePath
   , configGenerateDebugArtifacts :: Bool
@@ -27,6 +29,7 @@ data CompilerConfig = CompilerConfig
   , configCFiles :: [FilePath]
   , configSilent :: Bool
   , configNoCache :: Bool
+  , configEntryPoint :: Maybe (Name, Name)
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -41,11 +44,12 @@ defaultConfig =
     , configCFiles = []
     , configSilent = False
     , configNoCache = False
+    , configEntryPoint = Nothing
     }
 
 {-# INLINE silentConfig #-}
 silentConfig :: CompilerConfig
-silentConfig = defaultConfig{configSilent = True}
+silentConfig = defaultConfig{configSilent = True, configEntryPoint = Nothing}
 
 {-# INLINE debugConfig #-}
 debugConfig :: CompilerConfig
@@ -54,6 +58,7 @@ debugConfig =
     { configNoCache = True
     , configGenerateDebugArtifacts = True
     , configGenerateLLVMOutput = True
+    , configEntryPoint = Nothing
     }
 
 {-# INLINE setConfigExecutableName #-}

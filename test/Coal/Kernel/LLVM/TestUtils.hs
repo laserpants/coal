@@ -13,7 +13,7 @@ module Coal.Kernel.LLVM.TestUtils (
   injectBuiltins,
 
   -- * Evaluation
-  evaluateFoo,
+  evaluateModule,
 ) where
 
 import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
@@ -21,6 +21,7 @@ import Coal.Kernel.LLVM.Monad (IRCodegenEnv, runIRCodegen)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type (..))
+import Control.Monad (when)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Identity (runIdentity)
 import Control.Monad.State (runStateT)
@@ -71,9 +72,9 @@ injectBuiltins m = m{moduleObjects = builtinObjects <> moduleObjects m}
 This is the core test utility that runs the full IR codegen pipeline on a module,
 returning either an error message or the generated IR module.
 -}
-evaluateFoo :: IRCodegenEnv -> IRBuilderEnv -> [Module Type] -> Module Type -> Either String IRModule
-evaluateFoo codeGenEnv builderEnv allModules module_ =
-  let k = if moduleName module_ == "Main" then irMainModule else return ()
+evaluateModule :: IRCodegenEnv -> IRBuilderEnv -> [Module Type] -> Module Type -> Either String IRModule
+evaluateModule codeGenEnv builderEnv allModules module_ =
+  let k = if moduleName module_ == "Main" then irMainModule "Main" "main" else return ()
    in case runIdentity $ runExceptT $ runStateT (runIRBuilder (runIRCodegen codeGenEnv (irModule allModules module_ k))) builderEnv of
         Left builderErr ->
           Left (show builderErr)

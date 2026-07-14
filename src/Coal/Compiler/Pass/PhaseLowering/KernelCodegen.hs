@@ -58,7 +58,8 @@ pass ::
   [BuildEnvelope (Module NKT.Type)] ->
   CompilerT Metadata m [(Name, ByteString)]
 pass envelopes = do
-  CompilerConfig{configGenerateLLVMOutput, configGenerateDebugArtifacts} <- gets compilerConfig
+  config <- gets compilerConfig
+  let CompilerConfig{configGenerateLLVMOutput, configGenerateDebugArtifacts} = config
 
   -- Separate cached modules (already bitcode) from source modules.
   let sources = [(moduleName m, m) | BSource m <- envelopes]
@@ -85,7 +86,7 @@ pass envelopes = do
 
   -- Run the new-kernel compiler purely on all source modules together
   -- (cross-module context is required for LLVM codegen).
-  irs <- case NK.runCompiler (NK.compileModules (builtinMod : augmented)) of
+  irs <- case NK.runCompiler (NK.compileModules config (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError

@@ -421,15 +421,17 @@ toIRLinkage :: FunctionScope -> IRLinkage
 toIRLinkage Exported = LExternal
 toIRLinkage Local = LInternal
 
-{- | Emit the C main entry point for a Main module.
+{- | Emit the C main entry point for the entry point module.
 
-This must be called after 'irModule' on the Main module to add the
-program entry point that initializes the runtime and calls Main.main.
+This must be called after 'irModule' on the entry point module to add the
+program entry point that initializes the runtime and calls the entry function.
+
+The entry point is specified by module and function name, e.g., ("Main", "main").
 -}
-irMainModule :: IRCodegen ()
-irMainModule = do
+irMainModule :: Name -> Name -> IRCodegen ()
+irMainModule moduleName_ funcName = do
   declare "rt_runtime_init" TVoid []
   define i32 "main" [] LExternal [] $ do
     callVoid NoTail TVoid (OGlobal (TFun TVoid []) "rt_runtime_init") []
-    callVoid NoTail TPtr (OGlobal (TFun TPtr [TPtr]) "Main.main") [O.nullPtr TPtr]
+    callVoid NoTail TPtr (OGlobal (TFun TPtr [TPtr]) (moduleName_ <> "." <> funcName)) [O.nullPtr TPtr]
     ret (O.i32 @Int 0)
