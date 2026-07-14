@@ -42,7 +42,6 @@ dependencies:
   - temporary
   - directory
   - file-embed
-  - ascii-progress
   - data-default
   - binary
   - cryptonite

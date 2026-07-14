@@ -25,12 +25,11 @@ module Coal.Compiler.Pipeline (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Builtin.Modules (builtinModules)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
+import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import qualified Coal.Compiler.Pass.Counts as Counts
 import Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen)
 import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)
@@ -49,10 +48,9 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
-import Control.Monad (replicateM_)
 import Control.Monad.Except (forM_)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.IORef (IORef, modifyIORef', newIORef)
+import Data.IORef (modifyIORef', newIORef)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -60,7 +58,7 @@ import qualified Data.Text.IO as Text
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
-import System.IO (hFlush, hPutStr, stderr)
+import System.IO (hPutStr, stderr)
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
@@ -71,7 +69,6 @@ pipeline =
   timed "Parsing" phaseParsing
     >-> timed "Preflight" phasePreflight
     >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
-    >-> Pass{runPass = extraTicks}
     >-> timed "Kernel translate" (mapPass passKernelTranslate)
     >-> timed "Kernel codegen" passKernelCodegen
     >-> timed "Linking" passLinking
@@ -94,7 +91,6 @@ pipelineWithProgress ref =
     >-> Pass{runPass = updateTotal ref}
     >-> timedWeighted ref "Preflight" Counts.weightPreflight phasePreflight
     >-> perModulePasses ref phaseTypeChecking phaseTranslation
-    >-> Pass{runPass = extraTicks}
     >-> timedWeighted ref "Kernel translate" Counts.weightKernelTranslate (mapPass passKernelTranslate)
     >-> timedWeighted ref "Kernel codegen" Counts.weightKernelCodegen passKernelCodegen
     >-> timedWeighted ref "Linking" Counts.weightLinking passLinking
@@ -156,22 +152,13 @@ updateTotal ref envelopes = do
 phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
 phaseMainPasses = mapPass . liftPass
 
-extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
-extraTicks units = do
-  forM_ units $
-    \case
-      BCached{} -> replicateM_ Counts.cachedModuleTicks tickBar
-      _ -> pure ()
-  pure units
-
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
   ref <- newIORef (0, 0)
-  let go progressBar = do
-        runCompilerT (emptyCompilerEnvironment progressBar) $ do
-          setConfigC config{configCFiles = configCFiles config <> cFiles}
-          runPass (pipelineWithProgress ref) files
-  res <- go Nothing
+  let go = runCompilerT emptyCompilerEnvironment $ do
+        setConfigC config{configCFiles = configCFiles config <> cFiles}
+        runPass (pipelineWithProgress ref) files
+  res <- go
   case res of
     (e, CompilerState{compilerSources}, es) -> do
       forM_ (nub es) $

@@ -284,7 +284,6 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path
   build-depends:
       ansi-terminal
-    , ascii-progress
     , base >=4.7 && <5
     , binary
     , bytestring
@@ -351,7 +350,6 @@ executable coal
       aeson
     , aeson-pretty
     , ansi-terminal
-    , ascii-progress
     , base >=4.7 && <5
     , binary
     , bytestring
@@ -442,7 +440,6 @@ test-suite coal-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       ansi-terminal
-    , ascii-progress
     , base >=4.7 && <5
     , binary
     , bytestring

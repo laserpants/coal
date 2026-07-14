@@ -2041,7 +2041,7 @@ expectOutput expt srcPath files =
 runSpec :: FilePath -> [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec srcPath files = do
   e <-
-    evalCompilerT (emptyCompilerEnvironment Nothing) $ do
+    evalCompilerT emptyCompilerEnvironment $ do
       -- TODO: cache?
       setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
       runPass pipeline files

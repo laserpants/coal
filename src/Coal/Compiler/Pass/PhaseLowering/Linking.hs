@@ -13,7 +13,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (CompilerError), CompilerT)
 import Coal.Compiler.State (CompilerState (compilerConfig))
 import Control.Exception (SomeException, try)
-import Control.Monad.Except (MonadError (throwError), MonadIO (..), forM, forM_, unless, void)
+import Control.Monad.Except (MonadError (throwError), MonadIO (..), forM, forM_, void)
 import Control.Monad.State (gets)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
