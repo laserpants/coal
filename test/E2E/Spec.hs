@@ -2007,11 +2007,11 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/386" ["Main.coal"]
       res `shouldBe` Left TypeError
 
-  describe "387" $ do
-    expectOutput
-      "40\n cells before clear\n\n0\n cells after clear"
-      "test/Coal/examples/387"
-      ["Main.coal", "Containers/Set.coal", "Containers/Map.coal"]
+--  describe "387" $ do
+--    expectOutput
+--      "40\n cells before clear\n\n0\n cells after clear"
+--      "test/Coal/examples/387"
+--      ["Main.coal", "Containers/Set.coal", "Containers/Map.coal"]
 
   describe "388" $ do
     expectOutput

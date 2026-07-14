@@ -52,7 +52,7 @@ import Coal.Compiler.Error
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeVarNames)
+import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeConstructorNames, collectTypeVarNames)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
@@ -727,10 +727,29 @@ traitDefinitionInterfaceEntryToPair TraitDefinitionInterfaceEntry{..} = (traitDe
 collectTraitsInterface :: (Monad m) => Definition a Kind t -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTraitsInterface =
   \case
-    DTrait _ name TraitDefinition{..} ->
+    DTrait loc name TraitDefinition{..} ->
       forM_ traitDefinitionInterface $
         \TraitDefinitionInterfaceEntry{..} -> do
+          -- Check for undefined type constructors in the interface entry scheme
+          -- Type constructors (uppercase names) must be defined in the module or imported
           let Forall{..} = traitDefinitionInterfaceEntryScheme
+          let usedConstructors = collectTypeConstructorNames schemeTypeBody
+          build <- get
+          forM_ (Set.toList usedConstructors) $ \ctor -> do
+            unless
+              ( Environment.contains ctor (buildTypeConstructors build)
+                  || Environment.contains ctor (buildTraits build)
+                  || Environment.contains ctor (buildAliases build)
+              )
+              $ do
+                lift $ lift $ do
+                  currentPath <- gets compilerCurrentPath
+                  tellErrors
+                    [ NameNotInScope
+                        ctor
+                        (ErrorLocation (principalPath currentPath) loc)
+                    ]
+                  throwError PreflightFailure
           (s, _) <-
             instantiateScheme
               ( Forall
