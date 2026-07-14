@@ -58,7 +58,7 @@ library
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.PhaseLowering
       Coal.Compiler.Pass.PhaseLowering.KernelCodegen
-      Coal.Compiler.Pass.PhaseLowering.KernelTranslateNew
+      Coal.Compiler.Pass.PhaseLowering.KernelTranslate
       Coal.Compiler.Pass.PhaseLowering.Linking
       Coal.Compiler.Pass.PhaseParsing
       Coal.Compiler.Pass.PhaseParsing.Parsing
