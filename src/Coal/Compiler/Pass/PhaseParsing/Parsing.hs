@@ -63,7 +63,7 @@ checkCacheAndRegister name src m = do
       insertBuildC build
       pure (BCached build)
     _ -> do
-      setTouched name
+      setTouchedC name
       pure (BSource m)
 
 parseEmbedded :: (MonadIO m) => (Text, B.ByteString) -> CompilerT Metadata m (Either (Text, ParserError) (BuildEnvelope (Module Metadata () ())))

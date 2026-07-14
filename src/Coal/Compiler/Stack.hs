@@ -70,9 +70,9 @@ module Coal.Compiler.Stack (
   setSubstitutionC,
 
   -- * Error reporting
-  compilerReportConstraintsGenErrors,
-  compilerReportKindConstraintsGenErrors,
-  compilerReportSolverRuleViolations,
+  compilerReportConstraintsGenErrorsC,
+  compilerReportKindConstraintsGenErrorsC,
+  compilerReportSolverRuleViolationsC,
   compilerGetConstraintsGenErrorsC,
   compilerGetSolverRuleViolationsC,
 
@@ -84,7 +84,7 @@ module Coal.Compiler.Stack (
 
   -- * Source management
   getSourceC,
-  setTouched,
+  setTouchedC,
 ) where
 
 import Coal.Common.Environment (Environment (..))
@@ -315,17 +315,17 @@ setSubstitutionC sub = modify (overCompilerSubstitution (const sub))
 
 -- * Error reporting
 
-{-# INLINE compilerReportConstraintsGenErrors #-}
-compilerReportConstraintsGenErrors :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
-compilerReportConstraintsGenErrors errors = modify (overCompilerConstraintsGenErrors (<> errors))
+{-# INLINE compilerReportConstraintsGenErrorsC #-}
+compilerReportConstraintsGenErrorsC :: (Monad m) => [ConstraintsGenError a] -> CompilerT a m ()
+compilerReportConstraintsGenErrorsC errors = modify (overCompilerConstraintsGenErrors (<> errors))
 
-{-# INLINE compilerReportKindConstraintsGenErrors #-}
-compilerReportKindConstraintsGenErrors :: (Monad m) => [KindError] -> CompilerT a m ()
-compilerReportKindConstraintsGenErrors errors = modify (overCompilerKindConstraintsGenErrors (<> errors))
+{-# INLINE compilerReportKindConstraintsGenErrorsC #-}
+compilerReportKindConstraintsGenErrorsC :: (Monad m) => [KindError] -> CompilerT a m ()
+compilerReportKindConstraintsGenErrorsC errors = modify (overCompilerKindConstraintsGenErrors (<> errors))
 
-{-# INLINE compilerReportSolverRuleViolations #-}
-compilerReportSolverRuleViolations :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
-compilerReportSolverRuleViolations errors = modify (overCompilerSolverRuleViolations (<> errors))
+{-# INLINE compilerReportSolverRuleViolationsC #-}
+compilerReportSolverRuleViolationsC :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()
+compilerReportSolverRuleViolationsC errors = modify (overCompilerSolverRuleViolations (<> errors))
 
 {-# INLINE compilerGetConstraintsGenErrorsC #-}
 compilerGetConstraintsGenErrorsC :: (Monad m, Eq a) => CompilerT a m [ConstraintsGenError a]
@@ -369,6 +369,6 @@ getSourceC name = do
     Just source ->
       pure source
 
-{-# INLINE setTouched #-}
-setTouched :: (Monad m, BuildName p) => p -> CompilerT a m ()
-setTouched build = modify (overCompilerTouched (Set.insert (buildName build)))
+{-# INLINE setTouchedC #-}
+setTouchedC :: (Monad m, BuildName p) => p -> CompilerT a m ()
+setTouchedC build = modify (overCompilerTouched (Set.insert (buildName build)))

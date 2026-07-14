@@ -86,7 +86,7 @@ generateKindConstraints modul = do
   (_, result) <- runKindConstraintsGen env (emitKindConstraints modul)
   let (errors, constraints) = partitionEithers result
   insertKindConstraintsC constraints
-  compilerReportKindConstraintsGenErrors errors
+  compilerReportKindConstraintsGenErrorsC errors
 
 class GenerateConstraints a c where
   generateConstraints :: (Monad m) => c -> CompilerT a m ()
@@ -210,7 +210,7 @@ generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind 
 generateExpressionConstraints expr = do
   (assumptions, params, result) <- runConstraintsGen (emitConstraints expr)
   let (errors, constraints) = partitionEithers result
-  compilerReportConstraintsGenErrors errors
+  compilerReportConstraintsGenErrorsC errors
   setTypeAnnotationParamsC params
   return (assumptions, constraints)
 
@@ -260,8 +260,8 @@ solveConstraintsT constraints = do
   let (sub, m, rs) = solveConstraints n constraints
   updateSupplyC m
   let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
-  compilerReportSolverRuleViolations (apply sub rs)
-  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
+  compilerReportSolverRuleViolationsC (apply sub rs)
+  compilerReportConstraintsGenErrorsC (EIllFormedTypeAnnotation <$> errors)
   return sub
 
 solveT :: (Monad m, Data a, Eq a) => CompilerT a m Substitution
