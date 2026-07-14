@@ -2020,6 +2020,18 @@ e2eSpec = do
       "test/Coal/examples/388"
       ["Main.coal", "Tree.coal", "Qsort.coal"]
 
+  describe "389" $ do
+    expectOutput
+      "✓ All 47 tests passed"
+      "test/Coal/examples/389"
+      ["Main.coal", "MicroTest.coal", "Containers/Map.coal", "Containers/Set.coal", "Containers/Tree.coal", "Containers/NonEmpty/List.coal", "Containers/MapSpec.coal", "Containers/SetSpec.coal", "Containers/TreeSpec.coal", "Containers/NonEmpty/ListSpec.coal"]
+
+  describe "390" $ do
+    expectOutput
+      "✓ All 13 tests passed"
+      "test/Coal/examples/390"
+      ["Main.coal", "MicroTest.coal", "Monad/Reader.coal", "Monad/ReaderSpec.coal", "Monad/State.coal", "Monad/StateSpec.coal", "Monad/Writer.coal", "Monad/WriterSpec.coal"]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
