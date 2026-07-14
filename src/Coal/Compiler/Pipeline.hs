@@ -25,7 +25,6 @@ module Coal.Compiler.Pipeline (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Builtin.Modules (builtinModules)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
@@ -58,16 +57,15 @@ import qualified Data.Text.IO as Text
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
-import System.Console.AsciiProgress (Default (def), Options (..), displayConsoleRegions, newProgressBar)
-import System.IO (hFlush, hPutStr, hPutStrLn, stderr, stdout)
+import System.IO (hFlush, hPutStr, stderr)
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
 {- | Write a status message to stderr, overwriting the previous line.
 Uses ANSI escape codes: carriage return + clear-to-end-of-line.
 -}
-putStatus :: String -> IO ()
-putStatus msg = do
+writeStatus :: String -> IO ()
+writeStatus msg = do
   hPutStr stderr $ "\r\ESC[2K" ++ msg
   hFlush stderr
 
@@ -84,12 +82,12 @@ timed :: (MonadIO m) => String -> Pass a m i o -> Pass a m i o
 timed label p =
   Pass
     { runPass = \i -> do
-        liftIO $ putStatus ("[pipeline] " ++ label ++ "... ")
+        liftIO $ writeStatus ("[pipeline] " ++ label ++ "... ")
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-        liftIO $ putStatus ("[pipeline] " ++ label ++ "... " ++ show secs ++ "s")
+        liftIO $ writeStatus ("[pipeline] " ++ label ++ "... " ++ show secs ++ "s")
         pure result
     }
 
@@ -106,20 +104,7 @@ extraTicks units = do
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
-  res <-
-    if configSilent config
-      then do
-        go Nothing
-      else do
-        displayConsoleRegions $ do
-          pb <-
-            newProgressBar
-              def
-                { pgTotal = fromIntegral $ Counts.calculateProgressBarTotal (length builtinModules) (length files)
-                , pgWidth = 100
-                , pgFormat = "Compiling [:bar] :percent"
-                }
-          go (Just pb)
+  res <- go Nothing
   case res of
     (e, CompilerState{compilerSources}, es) -> do
       forM_ (nub es) $

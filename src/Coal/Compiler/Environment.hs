@@ -14,7 +14,7 @@ module Coal.Compiler.Environment (
 
 import Coal.Common.Environment (Environment (..))
 import Extras (Name, Over, Set)
-import System.Console.AsciiProgress
+import System.Console.AsciiProgress (ProgressBar)
 
 data KernelEnvironment = KernelEnvironment
   { kernelEnvironmentModule :: Name

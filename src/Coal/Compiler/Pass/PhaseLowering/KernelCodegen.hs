@@ -137,15 +137,14 @@ assembleOne ::
   (Name, IRModule) ->
   IO (Either SomeException (Name, ByteString))
 assembleOne writeDebug tmpDir (name, ir) = do
-  putStr ("[KernelCodegen] assemble " ++ Text.unpack name ++ "... ")
-  hFlush stdout
+  putStatus ("[KernelCodegen] assemble " ++ Text.unpack name ++ "... ")
   let llText = renderModule ir
       llFile = tmpDir </> nameToPath name <.> "ll"
   Text.writeFile llFile llText
   when writeDebug $
     writeDebugFile ("./.debug/" <> nameToPath name <.> "ll") llText
   result <- fmap (name,) <$> runLLVMAs llFile
-  putStrLn "done"
+  putStatus ("[KernelCodegen] assemble " ++ Text.unpack name ++ "... done")
   pure result
 
 runLLVMAs :: FilePath -> IO (Either SomeException ByteString)
