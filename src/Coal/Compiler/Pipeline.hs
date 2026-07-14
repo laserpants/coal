@@ -90,12 +90,12 @@ timed :: (MonadIO m) => String -> Pass a m i o -> Pass a m i o
 timed label p =
   Pass
     { runPass = \i -> do
-        liftIO $ writeStatusSimple ("[pipeline] " ++ label ++ "... ")
+        liftIO $ writeStatusSimple (label ++ "... ")
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-        liftIO $ writeStatusSimple ("[pipeline] " ++ label ++ "... " ++ show secs ++ "s")
+        liftIO $ writeStatusSimple (label ++ "... " ++ show secs ++ "s")
         pure result
     }
 
@@ -113,14 +113,14 @@ timedWeighted :: (MonadIO m) => ProgressRef -> String -> Int -> Pass a m i o -> 
 timedWeighted ref label weight p =
   Pass
     { runPass = \i -> do
-        liftIO $ writeStatus ref ("[pipeline] " ++ label ++ "... ")
+        liftIO $ writeStatus ref (label ++ "... ")
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus ref ("[pipeline] " ++ label ++ "... " ++ show secs ++ "s")
+          writeStatus ref (label ++ "... " ++ show secs ++ "s")
         pure result
     }
 
@@ -132,7 +132,7 @@ perModulePasses ref p1 p2 =
  where
   sourceStage =
     liftPass
-      ( timedWeightedPerModule ref "TypeChecking" Counts.weightTypeChecking p1
+      ( timedWeightedPerModule ref "Type checking" Counts.weightTypeChecking p1
           >-> timedWeightedPerModule ref "Translation" Counts.weightTranslation p2
       )
   cachedStage = liftPass (p1 >-> p2)
@@ -144,14 +144,14 @@ timedWeightedPerModule :: (MonadIO m) => ProgressRef -> String -> Int -> Pass Me
 timedWeightedPerModule ref label weight p =
   Pass
     { runPass = \i -> do
-        liftIO $ writeStatus ref ("[pipeline] " ++ label ++ "... ")
+        liftIO $ writeStatus ref (label ++ "... ")
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus ref ("[pipeline] " ++ label ++ "... " ++ show secs ++ "s")
+          writeStatus ref (label ++ "... " ++ show secs ++ "s")
         pure result
     }
 
