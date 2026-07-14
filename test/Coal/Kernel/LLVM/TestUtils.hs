@@ -74,7 +74,7 @@ returning either an error message or the generated IR module.
 -}
 evaluateModule :: IRCodegenEnv -> IRBuilderEnv -> [Module Type] -> Module Type -> Either String IRModule
 evaluateModule codeGenEnv builderEnv allModules module_ =
-  let k = if moduleName module_ == "Main" then irMainModule "Main" "main" else return ()
+  let k = (when (moduleName module_ == "Main") $ irMainModule "Main" "main")
    in case runIdentity $ runExceptT $ runStateT (runIRBuilder (runIRCodegen codeGenEnv (irModule allModules module_ k))) builderEnv of
         Left builderErr ->
           Left (show builderErr)
