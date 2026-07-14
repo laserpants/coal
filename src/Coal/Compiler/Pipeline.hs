@@ -169,7 +169,7 @@ extraTicks units = do
 
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
-  ref <- newIORef (0, 1)
+  ref <- newIORef (0, 0)
   let go progressBar = do
         runCompilerT (emptyCompilerEnvironment progressBar) $ do
           setConfigC config{configCFiles = configCFiles config <> cFiles}

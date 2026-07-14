@@ -87,9 +87,7 @@ runGCC dir objFiles cFiles = do
       <> ["-lgc", "-lgmp"]
 
 execProcess :: CreateProcess -> IO ()
-execProcess p = do
-  (_, _, _, handle) <- createProcess p
-  void $ waitForProcess handle
+execProcess p = void $ readCreateProcessWithExitCode p ""
 
 runtimeLib :: ByteString
 runtimeLib = $(embedFile "runtime/dist/runtime-combined.c")

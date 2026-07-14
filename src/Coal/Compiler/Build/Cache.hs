@@ -63,9 +63,6 @@ writeBuildFile buildDir name build = do
   CompilerConfig{..} <- gets compilerConfig
   liftIO $ do
     createDirectoryIfMissing True buildDir
-    unless configSilent $
-      hPutStr stderr $
-        "\r\ESC[2K[cache] " ++ file
     ByteString.writeFile (buildDir </> file) (toStrict (encode build))
  where
   file :: FilePath

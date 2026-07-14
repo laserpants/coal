@@ -17,12 +17,12 @@ writeStatus ref msg = do
   (done, total) <- readIORef ref
   let pct = if total > 0 then (done * 100) `div` total else 0
       bar = renderBar done total 30
-  hPutStr stderr $ "\r\ESC[2K" ++ bar ++ " " ++ show pct ++ "% " ++ msg
+  hPutStr stderr $ bar ++ " " ++ show pct ++ "% " ++ msg ++ "\n"
   hFlush stderr
 
 renderBar :: Int -> Int -> Int -> String
 renderBar done total width
-  | total <= 0 = replicate width ' '
+  | total <= 0 = "\ESC[90m" ++ replicate width '━' ++ "\ESC[0m"
   | otherwise =
       let filled = min width ((done * width) `div` total)
           empty_ = width - filled
@@ -30,5 +30,5 @@ renderBar done total width
 
 writeStatusSimple :: String -> IO ()
 writeStatusSimple msg = do
-  hPutStr stderr $ "\r\ESC[2K" ++ msg
+  hPutStr stderr $ msg ++ "\n"
   hFlush stderr
