@@ -27,13 +27,13 @@ module Number {
    * Convert a 32-bit integer to a float.
    */
   fun int32_to_float(n : int32) : float =
-    number$_int32_to_float(n)
+    #{coal_int32_to_float : int32 -> float}(n)(fn(f) => f)
 
   /**
    * Convert a 32-bit integer to a double.
    */
   fun int32_to_double(n : int32) : double =
-    number$_int32_to_double(n)
+    #{coal_int32_to_double : int32 -> double}(n)(fn(d) => d)
 
   /**
    * Convert a 64-bit integer to a float.
