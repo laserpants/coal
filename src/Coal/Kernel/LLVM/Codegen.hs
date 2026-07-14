@@ -46,6 +46,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Name (Name)
 import Coal.Kernel.LLVM.Boxing (irTypeRep, irUnbox)
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
+import Coal.Kernel.LLVM.Constructor (irCaseValue)
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
 import qualified Coal.Kernel.LLVM.Function as Function
 import qualified Coal.Kernel.LLVM.Module as MA (collectImportedConstants, collectImportedDData, collectImportedFunctions, objectExprVarRefs, objectGlobalBinding)
@@ -244,6 +245,22 @@ irValue =
       store boxedResult gepSlot
       applied <- callRuntime rtApply [kv, O.i32 @Int 1, argSlot]
       irUnbox (returnTypeOf k) applied
+    ECase _ e1 cs ->
+      irUnbox (typeOf e1) =<< irCaseValue irValue e1 cs
+    EIf e1 e2 e3 -> mdo
+      r1 <- irValue e1
+      resultSlot <- alloca TPtr (O.i32 @Int 1)
+      condbr r1 thenL elseL
+      thenL <- block "then.value"
+      thenVal <- Boxing.irBoxed irValue e2
+      store thenVal resultSlot
+      br mergeL
+      elseL <- block "else.value"
+      elseVal <- Boxing.irBoxed irValue e3
+      store elseVal resultSlot
+      br mergeL
+      mergeL <- block "merge.if"
+      load TPtr resultSlot
     e ->
       throwError (UnsupportedExpression e)
 

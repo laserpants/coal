@@ -22,6 +22,7 @@ module Coal.Kernel.LLVM.Constructor (
   irApplyConstructor,
   irClause,
   irCase,
+  irCaseValue,
 ) where
 
 import Control.Monad (forM, forM_)
@@ -169,3 +170,73 @@ isWildcard :: Clause t -> Bool
 isWildcard (Clause (Label _ name :| _) _) =
   let lastComp = Text.dropWhile (== '$') $ last $ Text.splitOn "." name
    in Text.null lastComp || not (isUpper (Text.head lastComp))
+
+{- | Compile a single case clause in value context, binding pattern variables
+evaluating the body via 'irValue', boxing it to @ptr@, storing it into the
+shared result slot, and branching to the merge block.
+-}
+irClauseValue ::
+  (Expr Type -> IRCodegen IROperand) ->
+  IROperand ->
+  IROperand ->
+  Name ->
+  Clause Type ->
+  IRCodegen Name
+irClauseValue irValue op slot mergeLabel (Clause (Label _ con :| lls) body) = do
+  label <- block con
+  val <-
+    if null lls
+      then Boxing.irBoxed irValue body
+      else do
+        bound <-
+          forM (zip [1 ..] lls) $
+            \(i, Label t name) -> do
+              r1 <- gep (TNamed con) op [O.i32 @Int 0, O.i32 @Int i]
+              r2 <- load TPtr r1 <##> name
+              r3 <- Boxing.irUnbox t r2
+              return (name, r3)
+        local
+          (\e -> e{codegenVarEnv = Environment.insertMultiple bound (codegenVarEnv e)})
+          (Boxing.irBoxed irValue body)
+  store val slot
+  br mergeLabel
+  return label
+
+{- | Generate a switch for pattern matching in value context.
+Each clause body is evaluated via 'irValue' and boxed; results are stored to
+a shared stack slot and loaded after the merge block.
+
+This is the value-context equivalent of 'irCase' (which uses 'irTail').
+-}
+irCaseValue ::
+  (Expr Type -> IRCodegen IROperand) ->
+  Expr Type ->
+  NonEmpty (Clause Type) ->
+  IRCodegen IROperand
+irCaseValue irValue e1 cs = mdo
+  r1 <- irValue e1
+  r2 <- loadConstructorIndex r1
+  resultSlot <- alloca TPtr (O.i32 @Int 1)
+  switch r2 defaultL namedBlocks
+  namedBlocks <- forM namedClauses $
+    \clause@(Clause (Label _ con :| _) _) -> do
+      tagMap <- asks codegenTagEnv
+      tag <- case Map.lookup con tagMap of
+        Just idx -> return idx
+        Nothing -> throwError (UnboundVariable con)
+      label <- irClauseValue irValue r1 resultSlot mergeL clause
+      return (CInt 32 (fromIntegral tag), label)
+  defaultL <- block "default.value"
+  case mbWildcard of
+    Just (Clause _ body) -> do
+      val <- Boxing.irBoxed irValue body
+      store val resultSlot
+      br mergeL
+    Nothing -> unreachable
+  mergeL <- block "merge.case"
+  load TPtr resultSlot
+ where
+  (namedClauses, mbWildcard) = splitWildcard (NonEmpty.toList cs)
+  loadConstructorIndex op = do
+    tag <- gep (TStruct [i32]) op [O.i32 @Int 0, O.i32 @Int 0]
+    load i32 tag
