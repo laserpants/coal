@@ -10,7 +10,7 @@ Translates surface language modules to new kernel language modules using
 This pass runs in parallel with 'passKernelTranslate' (the legacy pass)
 during the migration period.
 -}
-module Coal.Compiler.Pass.PhaseLowering.KernelTranslateNew (passKernelTranslateNew) where
+module Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..))
@@ -28,14 +28,14 @@ import Coal.Language.Module.Path (principalPath)
 import Control.Monad.IO.Class (MonadIO)
 import Extras (concatForM)
 
-passKernelTranslateNew ::
+passKernelTranslate ::
   (MonadIO m) =>
   Pass
     Metadata
     m
     (BuildEnvelope (SurfModule.Module Metadata Kind IndexedType))
     (BuildEnvelope (NKModule.Module NK.Type))
-passKernelTranslateNew = Pass{runPass = passImpl}
+passKernelTranslate = Pass{runPass = passImpl}
 
 passImpl ::
   (MonadIO m, Traversable t) =>

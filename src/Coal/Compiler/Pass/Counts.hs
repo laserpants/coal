@@ -48,7 +48,7 @@ ticksTranslation :: Int
 ticksTranslation = 26
 
 {- | Lowering phase tick count (per module)
-Includes: passKernelTranslateNew, passKernelCodegen
+Includes: passKernelTranslate, passKernelCodegen
 -}
 ticksLowering :: Int
 ticksLowering = 2
