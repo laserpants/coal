@@ -29,6 +29,7 @@ import qualified Data.Text.Encoding as Text
 import Extras (Name)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((<.>), (</>))
+import System.IO (hFlush, hPutStr, stderr)
 
 -- Build cache constants
 buildCacheDir :: FilePath
@@ -63,7 +64,8 @@ writeBuildFile buildDir name build = do
   liftIO $ do
     createDirectoryIfMissing True buildDir
     unless configSilent $
-      putStrLn file
+      hPutStr stderr $
+        "\r\ESC[2K[cache] " ++ file
     ByteString.writeFile (buildDir </> file) (toStrict (encode build))
  where
   file :: FilePath

@@ -23,6 +23,7 @@ module Coal.Kernel.Pipeline.Pass.TestHelpers (
   mkDData1,
 ) where
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
@@ -30,7 +31,6 @@ import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Language.Type.Constructors as Type
 import Coal.Kernel.Pipeline (Pass, PipelineError, evalPipeline, initialPipelineState)
-import Coal.Common.Name (Name)
 import Control.Monad.Identity (Identity)
 import Data.Text (Text)
 

@@ -24,8 +24,14 @@ import qualified Data.Text as Text
 import Extras (Name)
 import System.Directory (canonicalizePath, copyFile)
 import System.FilePath (takeBaseName, (<.>), (</>))
+import System.IO (hFlush, hPutStr, stderr)
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process
+
+putStatus :: String -> IO ()
+putStatus msg = do
+  hPutStr stderr $ "\r\ESC[2K" ++ msg
+  hFlush stderr
 
 passLinking :: (MonadIO m) => Pass Metadata m [(Name, ByteString)] ()
 passLinking = Pass{runPass = passImpl}
@@ -68,10 +74,10 @@ runLLC :: FilePath -> Name -> ByteString -> IO (Either SomeException FilePath)
 runLLC dir name bcode = do
   ByteString.writeFile file bcode
 
-  -- let cmd = "llc"
-  --     args = ["-filetype=obj", "-relocation-model=pic", file, "-o", target]
-  --     cmdStr = unwords (cmd : args)
-  --  putStrLn $ "Running: " ++ cmdStr
+  let cmd = "llc"
+      args = ["-filetype=obj", "-relocation-model=pic", file, "-o", target]
+      cmdStr = unwords (cmd : args)
+  putStatus $ "Running: " ++ cmdStr
 
   try $ do
     execProcess process
@@ -94,7 +100,7 @@ runGCC dir objFiles cFiles = do
 
       process = (proc "gcc" args){cwd = Just dir}
 
-  --  putStrLn $ "Running: " ++ showCommandForUser "gcc" args
+  putStatus $ "Running: " ++ showCommandForUser "gcc" args
 
   try $ execProcess process
  where

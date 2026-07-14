@@ -2,10 +2,10 @@
 
 module Coal.Kernel.Module.DependencyGraphSpec (spec) where
 
+import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Module.DependencyGraph (checkImportsSatisfied, topoSortModules)
-import Coal.Common.Name (Name)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldMatchList)
 
 -- ---------------------------------------------------------------------------
