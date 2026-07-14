@@ -38,13 +38,11 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
-import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Extras (Name)
 import LLVM.IRModule (IRModule)
 import LLVM.IRRenderer (renderModule)
 import System.Exit (ExitCode (..))
 import System.FilePath ((<.>), (</>))
-import System.IO (stdout)
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process (proc)
 import qualified System.Process.ByteString as ProcessBS
