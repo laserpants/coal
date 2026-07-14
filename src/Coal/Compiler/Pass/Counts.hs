@@ -1,19 +1,59 @@
 {- |
 Module: Coal.Compiler.Pass.Counts
 
-Centralized progress bar tick counts for compiler phases.
+Centralized progress bar tick counts and weights for compiler phases.
 
-This module provides a single source of truth for progress bar calculations.
+This module provides a single source of truth for progress calculations.
 When adding or removing compiler passes, update the corresponding constant here.
 
-The tick counts represent the number of progress bar updates that occur when
-processing modules through each phase. The `>->` operator in Pass.hs ticks
-before running each pass, so the count equals the number of passes in a phase.
+The old tick-based system assigned equal weight to each sub-pass, which made
+the progress bar reach 100% after type-checking while codegen and linking
+(the slowest phases) had barely started. The new weight-based system assigns
+realistic proportional weights that match observed wall-clock time distribution.
 -}
 module Coal.Compiler.Pass.Counts (
   calculateProgressBarTotal,
   cachedModuleTicks,
+  calculateWeightTotal,
+  weightParsing,
+  weightPreflight,
+  weightTypeChecking,
+  weightTranslation,
+  weightLowering,
+  weightLinking,
 ) where
+
+-- * Phase weights (approximate relative wall-clock cost)
+
+-- | Parsing phase weight (per file).  Fast — mostly I/O + megaparsec.
+weightParsing :: Int
+weightParsing = 1
+
+-- | Preflight phase weight (total, not per module).  Scoping, imports, etc.
+weightPreflight :: Int
+weightPreflight = 5
+
+{- | Type checking phase weight (per module).  Kind indexing, fold expand,
+constraint generation, type inference — can be heavy for large modules.
+-}
+weightTypeChecking :: Int
+weightTypeChecking = 25
+
+-- | Translation phase weight (per module).  AST desugaring, dictionary insertion.
+weightTranslation :: Int
+weightTranslation = 15
+
+{- | Lowering phase weight (per module).  Kernel translate + LLVM codegen + llvm-as.
+This is proportionally the most expensive phase per module.
+-}
+weightLowering :: Int
+weightLowering = 35
+
+-- | Linking phase weight (total).  llc + gcc on all object files.
+weightLinking :: Int
+weightLinking = 20
+
+-- * Legacy tick counts (kept for backward compatibility with cached modules)
 
 -- | Parsing phase tick count (per file)
 ticksParsing :: Int
@@ -88,3 +128,16 @@ calculateProgressBarTotal numBuiltinModules numFiles =
       perModuleTicks = numModules * (ticksPerModule + ticksLowering)
       globalTicks = ticksParsing + ticksPreflight + ticksLinking
    in perModuleTicks + globalTicks
+
+-- | Calculate total weight for a compilation session (same formula as ticks but with weights).
+calculateWeightTotal ::
+  -- | Number of builtin modules
+  Int ->
+  -- | Number of user source files
+  Int ->
+  -- | Total progress weight
+  Int
+calculateWeightTotal _builtinModules numFiles =
+  let perModuleWeight = numFiles * (weightTypeChecking + weightTranslation)
+      globalWeight = weightParsing + weightPreflight + weightLowering + weightLinking
+   in perModuleWeight + globalWeight
