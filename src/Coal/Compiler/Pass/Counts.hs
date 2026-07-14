@@ -19,7 +19,8 @@ module Coal.Compiler.Pass.Counts (
   weightPreflight,
   weightTypeChecking,
   weightTranslation,
-  weightLowering,
+  weightKernelTranslate,
+  weightKernelCodegen,
   weightLinking,
 ) where
 
@@ -43,11 +44,15 @@ weightTypeChecking = 25
 weightTranslation :: Int
 weightTranslation = 15
 
-{- | Lowering phase weight (per module).  Kernel translate + LLVM codegen + llvm-as.
+-- | Kernel translate phase weight (per module).  AST to kernel IR translation.
+weightKernelTranslate :: Int
+weightKernelTranslate = 10
+
+{- | Kernel codegen phase weight (per module).  LLVM IR generation + llvm-as.
 This is proportionally the most expensive phase per module.
 -}
-weightLowering :: Int
-weightLowering = 35
+weightKernelCodegen :: Int
+weightKernelCodegen = 25
 
 -- | Linking phase weight (total).  llc + gcc on all object files.
 weightLinking :: Int
@@ -139,5 +144,5 @@ calculateWeightTotal ::
   Int
 calculateWeightTotal _builtinModules numFiles =
   let perModuleWeight = numFiles * (weightTypeChecking + weightTranslation)
-      globalWeight = weightParsing + weightPreflight + weightLowering + weightLinking
+      globalWeight = weightParsing + weightPreflight + weightKernelTranslate + weightKernelCodegen + weightLinking
    in perModuleWeight + globalWeight

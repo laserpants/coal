@@ -18,7 +18,7 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Kernel.Environment (insertQualifiedNames, withModuleName)
 import Coal.Compiler.Kernel.Translate.Definition (translateDefinition)
 import Coal.Compiler.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), tickBar)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, setCurrentPathC)
 import qualified Coal.Kernel.Language.Module as NKModule (Module (..))
 import qualified Coal.Kernel.Language.Type as NK
@@ -41,7 +41,7 @@ passImpl ::
   (MonadIO m, Traversable t) =>
   t (SurfModule.Module Metadata Kind IndexedType) ->
   CompilerT Metadata m (t (NKModule.Module NK.Type))
-passImpl p = tickBar >> traverse pass p
+passImpl = traverse pass
 
 pass ::
   (MonadIO m) =>

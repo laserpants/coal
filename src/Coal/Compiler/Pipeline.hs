@@ -32,7 +32,8 @@ import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
 import qualified Coal.Compiler.Pass.Counts as Counts
-import Coal.Compiler.Pass.PhaseLowering (phaseLowering)
+import Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen)
+import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)
 import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
 import Coal.Compiler.Pass.PhasePreflight (phasePreflight)
@@ -71,7 +72,8 @@ pipeline =
     >-> timed "Preflight" phasePreflight
     >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
     >-> Pass{runPass = extraTicks}
-    >-> timed "Lowering" phaseLowering
+    >-> timed "Kernel translate" (mapPass passKernelTranslate)
+    >-> timed "Kernel codegen" passKernelCodegen
     >-> timed "Linking" passLinking
 
 timed :: (MonadIO m) => String -> Pass a m i o -> Pass a m i o
@@ -94,8 +96,9 @@ pipelineWithProgress ref =
     >-> timedWeighted ref "Preflight" Counts.weightPreflight phasePreflight
     >-> perModulePasses ref phaseTypeChecking phaseTranslation
     >-> Pass{runPass = extraTicks}
-    >-> timedWeighted ref "Lowering" Counts.weightLowering phaseLowering
-    >-> passLinking
+    >-> timedWeighted ref "Kernel translate" Counts.weightKernelTranslate (mapPass passKernelTranslate)
+    >-> timedWeighted ref "Kernel codegen" Counts.weightKernelCodegen passKernelCodegen
+    >-> timedWeighted ref "Linking" Counts.weightLinking passLinking
 
 timedWeighted :: (MonadIO m) => ProgressRef -> String -> Int -> Pass a m i o -> Pass a m i o
 timedWeighted ref label weight p =
@@ -147,7 +150,7 @@ updateTotal :: (MonadIO m) => ProgressRef -> [BuildEnvelope a] -> CompilerT Meta
 updateTotal ref envelopes = do
   let numSource = length [() | BSource _ <- envelopes]
       moduleWeight = Counts.weightTypeChecking + Counts.weightTranslation
-      globalWeight = Counts.weightParsing + Counts.weightPreflight + Counts.weightLowering + Counts.weightLinking
+      globalWeight = Counts.weightParsing + Counts.weightPreflight + Counts.weightKernelTranslate + Counts.weightKernelCodegen + Counts.weightLinking
       total = globalWeight + numSource * moduleWeight
   -- Reset both counters: parsing is already done, so done = parsing weight.
   liftIO $ modifyIORef' ref (\(_, _) -> (Counts.weightParsing, total))
@@ -186,7 +189,8 @@ compileWithCFiles config files cFiles = do
         Left e1 ->
           print e1
         Right{} -> do
-          pure ()
+          liftIO $ writeStatus ref ("Executable written to: " ++ configExecutableName config)
+          hPutStr stderr "\n"
 
 compile :: CompilerConfig -> [FilePath] -> IO ()
 compile config files = compileWithCFiles config files []

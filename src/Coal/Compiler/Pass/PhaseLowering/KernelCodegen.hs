@@ -17,7 +17,7 @@ import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Error (CompilerFailureMode (..))
 import Coal.Compiler.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), tickBar)
+import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, getBuildC, setBitcodeC)
 import Coal.Compiler.State
 import Coal.Debug (writeDebugFile)
@@ -60,7 +60,6 @@ pass ::
   [BuildEnvelope (Module NKT.Type)] ->
   CompilerT Metadata m [(Name, ByteString)]
 pass envelopes = do
-  tickBar
   CompilerConfig{configGenerateLLVMOutput, configGenerateDebugArtifacts} <- gets compilerConfig
 
   -- Separate cached modules (already bitcode) from source modules.
