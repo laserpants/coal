@@ -49,25 +49,49 @@ import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad (replicateM_)
-import Control.Monad.Except (MonadIO, forM_)
+import Control.Monad.Except (forM_)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
 import System.Console.AsciiProgress (Default (def), Options (..), displayConsoleRegions, newProgressBar)
+import System.IO (hFlush, hPutStr, hPutStrLn, stderr, stdout)
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
+{- | Write a status message to stderr, overwriting the previous line.
+Uses ANSI escape codes: carriage return + clear-to-end-of-line.
+-}
+putStatus :: String -> IO ()
+putStatus msg = do
+  hPutStr stderr $ "\r\ESC[2K" ++ msg
+  hFlush stderr
+
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
-  phaseParsing
-    >-> phasePreflight
+  timed "Parsing" phaseParsing
+    >-> timed "Preflight" phasePreflight
     >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
     >-> Pass{runPass = extraTicks}
-    >-> phaseLowering
-    >-> passLinking
+    >-> timed "Lowering" phaseLowering
+    >-> timed "Linking" passLinking
+
+timed :: (MonadIO m) => String -> Pass a m i o -> Pass a m i o
+timed label p =
+  Pass
+    { runPass = \i -> do
+        liftIO $ putStatus ("[pipeline] " ++ label ++ "... ")
+        t0 <- liftIO getCurrentTime
+        result <- runPass p i
+        t1 <- liftIO getCurrentTime
+        let secs = realToFrac (diffUTCTime t1 t0) :: Double
+        liftIO $ putStatus ("[pipeline] " ++ label ++ "... " ++ show secs ++ "s")
+        pure result
+    }
 
 phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
 phaseMainPasses = mapPass . liftPass

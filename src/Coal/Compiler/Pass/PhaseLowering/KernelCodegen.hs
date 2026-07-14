@@ -38,15 +38,25 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Extras (Name)
 import LLVM.IRModule (IRModule)
 import LLVM.IRRenderer (renderModule)
 import System.Exit (ExitCode (..))
 import System.FilePath ((<.>), (</>))
+import System.IO (hFlush, hPutStr, stderr, stdout)
 import System.IO.Temp (withSystemTempDirectory)
 import System.Process (proc)
 import qualified System.Process.ByteString as ProcessBS
 import TextShow (showt)
+
+{- | Write a status message to stderr, overwriting the previous line.
+Uses ANSI escape codes: carriage return + clear-to-end-of-line.
+-}
+putStatus :: String -> IO ()
+putStatus msg = do
+  hPutStr stderr $ "\r\ESC[2K" ++ msg
+  hFlush stderr
 
 passKernelCodegen ::
   (MonadIO m) =>
@@ -86,12 +96,16 @@ pass envelopes = do
 
   -- Run the new-kernel compiler purely on all source modules together
   -- (cross-module context is required for LLVM codegen).
+  liftIO $ putStatus "[KernelCodegen] NK.compileModules (normalize + LLVM codegen)... "
+  t0 <- liftIO getCurrentTime
   irs <- case NK.runCompiler (NK.compileModules (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError
     Right irs ->
       pure irs
+  t1 <- liftIO getCurrentTime
+  liftIO $ putStatus ("[KernelCodegen] NK.compileModules (normalize + LLVM codegen)... " ++ show (realToFrac (diffUTCTime t1 t0) :: Double) ++ "s")
 
   -- Assemble each module's LLVM IR to bitcode via llvm-as.
   -- irs[0] is Builtin$'s IR; irs[1..n] correspond to augmented[0..n-1].
@@ -123,12 +137,16 @@ assembleOne ::
   (Name, IRModule) ->
   IO (Either SomeException (Name, ByteString))
 assembleOne writeDebug tmpDir (name, ir) = do
+  putStr ("[KernelCodegen] assemble " ++ Text.unpack name ++ "... ")
+  hFlush stdout
   let llText = renderModule ir
       llFile = tmpDir </> nameToPath name <.> "ll"
   Text.writeFile llFile llText
   when writeDebug $
     writeDebugFile ("./.debug/" <> nameToPath name <.> "ll") llText
-  fmap (name,) <$> runLLVMAs llFile
+  result <- fmap (name,) <$> runLLVMAs llFile
+  putStrLn "done"
+  pure result
 
 runLLVMAs :: FilePath -> IO (Either SomeException ByteString)
 runLLVMAs src =

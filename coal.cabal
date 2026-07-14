@@ -282,7 +282,8 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path
   build-depends:
-      ascii-progress
+      ansi-terminal
+    , ascii-progress
     , base >=4.7 && <5
     , binary
     , bytestring
@@ -311,6 +312,7 @@ library
     , temporary
     , text
     , text-show
+    , time
     , transformers
     , uniplate
   default-language: Haskell2010
@@ -347,6 +349,7 @@ executable coal
   build-depends:
       aeson
     , aeson-pretty
+    , ansi-terminal
     , ascii-progress
     , base >=4.7 && <5
     , binary
@@ -380,6 +383,7 @@ executable coal
     , temporary
     , text
     , text-show
+    , time
     , transformers
     , uniplate
   default-language: Haskell2010
@@ -436,7 +440,8 @@ test-suite coal-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ascii-progress
+      ansi-terminal
+    , ascii-progress
     , base >=4.7 && <5
     , binary
     , bytestring
@@ -467,6 +472,7 @@ test-suite coal-test
     , temporary
     , text
     , text-show
+    , time
     , transformers
     , uniplate
   default-language: Haskell2010
