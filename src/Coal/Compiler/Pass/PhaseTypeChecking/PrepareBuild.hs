@@ -242,6 +242,8 @@ generateQualifiedInstanceNames path nameEnv instances =
                 \case
                   NName n _ -> do
                     pure [(n, principalPath path <.> n)]
+                  NPlaceholder n -> do
+                    pure [(n, principalPath path <.> n)]
                   _ ->
                     pure mempty
 
@@ -338,9 +340,11 @@ qualifiedImports Build{..} =
                   _ ->
                     pure mempty
     DNamespaceImport _ path -> do
-      Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
-      concatForM (Set.toList exportedNames) $
+      Build{buildExportedNames = exportedNames, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+      n1 <- concatForM (Set.toList exportedNames) $
         \name -> pure [(qualified name path, qualified name path)]
+      n2 <- generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+      pure (n1 <> n2)
     _ ->
       pure mempty
 
