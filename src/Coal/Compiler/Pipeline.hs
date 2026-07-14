@@ -80,7 +80,6 @@ timed :: (MonadIO m) => String -> Pass a m i o -> Pass a m i o
 timed label p =
   Pass
     { runPass = \i -> do
-        liftIO $ writeStatusSimple (label ++ "... ")
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
@@ -104,7 +103,6 @@ timedWeighted :: (MonadIO m) => ProgressRef -> String -> Int -> Pass a m i o -> 
 timedWeighted ref label weight p =
   Pass
     { runPass = \i -> do
-        liftIO $ writeStatus ref (label ++ "... ")
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
@@ -135,7 +133,6 @@ timedWeightedPerModule :: (MonadIO m) => ProgressRef -> String -> Int -> Pass Me
 timedWeightedPerModule ref label weight p =
   Pass
     { runPass = \i -> do
-        liftIO $ writeStatus ref (label ++ "... ")
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
