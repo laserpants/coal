@@ -19,7 +19,7 @@ src/Coal/Compiler/Pass/PhaseTranslation/CompileNats.hs
 
 Transforms the `nat` type and its constructors (`Zero`, `Succ`) into an internal
 `$Nat` type. The `Nat` type becomes `$Nat`, which is backed by `int32`. `Zero`
-becomes `$Zero`, `Succ(n)` becomes `$Succ(unpack(n))`. Pattern matching on nat
+becomes `$Zero`, `Succ(n)` becomes `$Succ(unpack(n))`. Pattern matching on `nat`
 constructors is compiled to efficient integer comparisons, reconstructing the
 recursive structure only when needed.
 
