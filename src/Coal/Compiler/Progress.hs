@@ -7,7 +7,7 @@ module Coal.Compiler.Progress (
   writeStatusSimple,
 ) where
 
-import Data.IORef (IORef, modifyIORef', readIORef)
+import Data.IORef (IORef, readIORef)
 import System.IO (hFlush, hPutStr, stderr)
 
 type ProgressRef = IORef (Int, Int)

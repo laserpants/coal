@@ -57,6 +57,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
+import Coal.Compiler.Config (configEntryPoint)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
@@ -430,8 +431,12 @@ expandLetDefinitionTraits name =
           pure $ LetDefinition{letDefinitionType = With [] t, letDefinitionExpression = expr, ..}
         tr : trs -> do
           path <- gets compilerCurrentPath
+          cfg <- gets compilerConfig
+          let isEntryPoint = case configEntryPoint cfg of
+                Nothing -> "main" == name && Path ["Main"] == path
+                Just (entryMod, entryFunc) -> entryFunc == name && Path [entryMod] == path
           -- Insert default int32 instance for Numeric and Ordered traits for main function
-          if "main" == name && Path ["Main"] == path
+          if isEntryPoint
             then do
               recs <- forM (tr :| trs) $
                 \(Trait trait _) -> do
@@ -459,7 +464,6 @@ expandLetDefinitionTraits name =
                   , ..
                   }
             else -- Check if a trait constraint is on a type variable (not yet resolved)
-
               pure $
                 LetDefinition
                   { letDefinitionType = With (tr : trs) t

@@ -4,8 +4,6 @@
 module Coal.CLI.Parser.CompileCmd (compileCmdParser) where
 
 import Coal.CLI.Options.CompileCmd (CompileCmdOptions (..))
-import Data.Text (Text)
-import qualified Data.Text as Text
 import Options.Applicative
 
 compileCmdParser :: Parser CompileCmdOptions
