@@ -68,7 +68,7 @@ passImpl units = do
         Just (moduleName, _) -> moduleName
         Nothing -> "Main"
   unless (requiredModule `elem` names) $ do
-    tellErrors [NoModuleMain]
+    tellErrors [NoModuleMain requiredModule]
     throwError PreflightFailure
 
   -- Collect edges and listen for any ModuleNotFound errors

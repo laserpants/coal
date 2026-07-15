@@ -24,7 +24,7 @@ data CompilerError a
   = ParserError FilePath ParserError
   | BadModuleName FilePath Name
   | BadFilename FilePath String
-  | NoModuleMain
+  | NoModuleMain Name
   | ModuleCycle [Name]
   | MisplacedImportStatement (ErrorLocation a)
   | ModuleNotFound Name (ErrorLocation a)
@@ -79,7 +79,7 @@ errorLocation =
       Nothing
     ModuleCycle _ ->
       Nothing
-    NoModuleMain ->
+    NoModuleMain _ ->
       Nothing
     BadFilename{} ->
       Nothing

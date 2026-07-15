@@ -25,6 +25,7 @@ compileCommand CompileCmdOptions{..} = do
       , configSilent = silent
       , configNoCache = noCache
       , configEntryPoint = parsedEntryPoint
+      , configPackageNamespaces = []
       }
 
 -- | Parse an entry point string like "Main.main" into (moduleName, functionName)

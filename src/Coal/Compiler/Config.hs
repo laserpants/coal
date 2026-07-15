@@ -19,6 +19,7 @@ module Coal.Compiler.Config (
   setConfigGenerateLLVMOutput,
 ) where
 
+import Data.Text (Text)
 import Extras (Name)
 
 data CompilerConfig = CompilerConfig
@@ -30,6 +31,9 @@ data CompilerConfig = CompilerConfig
   , configSilent :: Bool
   , configNoCache :: Bool
   , configEntryPoint :: Maybe (Name, Name)
+  , configPackageNamespaces :: [(FilePath, Text, [Name])]
+  -- ^ Each triple: (canonical source dir, namespace prefix, unqualified module names).
+  -- Package modules from a given source dir are renamed as @namespace.ModuleName@.
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -45,6 +49,7 @@ defaultConfig =
     , configSilent = False
     , configNoCache = False
     , configEntryPoint = Nothing
+    , configPackageNamespaces = []
     }
 
 {-# INLINE silentConfig #-}
