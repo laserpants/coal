@@ -3,7 +3,14 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/topics/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: ir-builder-0.1.0.0@sha256:bfd39f2970ea4ba07635f8e85807e3ec98e803bb385130f3d54d14ee55457909,5451
+    pantry-tree:
+      sha256: 840a48194c2ce9703151551aa17be781c97e954aa398b3ffc6b3285c263bacd3
+      size: 3295
+  original:
+    hackage: ir-builder-0.1.0.0
 snapshots:
 - completed:
     sha256: a81fb3877c4f9031e1325eb3935122e608d80715dc16b586eb11ddbff8671ecd
