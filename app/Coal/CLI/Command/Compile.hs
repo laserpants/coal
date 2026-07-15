@@ -6,7 +6,6 @@ module Coal.CLI.Command.Compile (compileCommand) where
 import Coal.CLI.Options.CompileCmd (CompileCmdOptions (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config (CompilerConfig (..))
-import Control.Monad (join)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -30,15 +29,9 @@ compileCommand CompileCmdOptions{..} = do
 
 -- | Parse an entry point string like "Main.main" into (moduleName, functionName)
 parseEntryPoint :: Maybe Text -> Maybe (Text, Text)
-parseEntryPoint = join . fmap parseDotSeparated
+parseEntryPoint = (parseDotSeparated =<<)
  where
   parseDotSeparated t =
-    case Text.breakOnEnd "." t of
-      (func, "") -> Nothing
-      (func, ".") -> Nothing
-      (_, func) ->
-        case Text.unsnoc (Text.dropAround (== '.') t) of
-          Nothing -> Nothing
-          Just (mod, '.') ->
-            Just (mod, func)
-          _ -> Nothing
+    case Text.splitOn "." t of
+      [mod_, func] -> Just (mod_, func)
+      _ -> Nothing

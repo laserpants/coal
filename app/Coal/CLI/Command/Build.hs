@@ -44,12 +44,6 @@ parseEntryPoint :: Maybe Text -> Maybe (Name, Name)
 parseEntryPoint = join . fmap parseDotSeparated
  where
   parseDotSeparated t =
-    case Text.breakOnEnd "." t of
-      (func, "") -> Nothing
-      (func, ".") -> Nothing
-      (_, func) ->
-        case Text.unsnoc (Text.dropAround (== '.') t) of
-          Nothing -> Nothing
-          Just (mod, '.') ->
-            Just (mod, func)
-          _ -> Nothing
+    case Text.splitOn "." t of
+      [mod, func] -> Just (mod, func)
+      _ -> Nothing

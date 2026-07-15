@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TupleSections #-}
@@ -29,16 +30,19 @@ module Coal.Compiler.Pass.PhasePreflight.SortModules (
 import Coal.Compiler.Build (Build (buildDependencies))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
 import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
+import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
+import Coal.Compiler.State (CompilerState (..))
 import Coal.Language.Definition (Definition (DImport, DNamespaceImport))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (Path (Path), principalPath)
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.State (get)
 import Data.Graph (SCC (..), stronglyConnComp)
 import Data.List.Extra (notNull)
 import Data.Maybe (mapMaybe)
@@ -59,7 +63,11 @@ passSortModules = Pass{runPass = passImpl}
 
 passImpl :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 passImpl units = do
-  unless ("Main" `elem` names) $ do
+  CompilerState{compilerConfig} <- get
+  let requiredModule = case configEntryPoint compilerConfig of
+        Just (moduleName, _) -> moduleName
+        Nothing -> "Main"
+  unless (requiredModule `elem` names) $ do
     tellErrors [NoModuleMain]
     throwError PreflightFailure
 
