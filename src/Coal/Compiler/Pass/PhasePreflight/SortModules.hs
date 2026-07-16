@@ -118,10 +118,7 @@ dependencies (Module p _ defs)
   | otherwise = imported <> extra
  where
   imported = mapMaybe importPath defs
-  extra =
-    [ (mempty, Path ["Coal", "Applicative"])
-    , (mempty, Path ["Coal", "Monad"])
-    ]
+  extra = for builtinModulesPaths (\name -> (mempty, Path [name]))
 
 importPath :: Definition a k t -> Maybe (a, Path)
 importPath =

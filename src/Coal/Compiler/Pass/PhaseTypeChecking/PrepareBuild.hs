@@ -21,6 +21,7 @@ The pass operates in several strictly ordered steps:
 5. **Trait interface collection**: Register trait member signatures
 6. **Instance collection**: Register trait implementations
 7. **Builtin instance insertion**: Add compiler-provided instances
+7b. **Stdlib instance import**: Import instances from all stdlib modules (always globally available)
 8. **Import collection**: Process imports from other modules
 9. **Placeholder collection**: Register function/let names for type inference
 10. **Qualified name resolution**: Build mapping of local to qualified names
@@ -47,6 +48,7 @@ import Coal.Compiler.Build
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
+import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Error
 import Coal.Compiler.Journal (listenErrors, tellErrors)
@@ -201,6 +203,30 @@ prepareDefinitions defs = do
     -- Standard instances provided by the compiler (e.g., Show for primitives)
     forM_ builtinInstances (modify . uncurry3 insertBuildInstance)
 
+    -- Step 7b: Import all instances from stdlib modules (always globally available).
+    -- This mirrors how builtinInstances are always in scope: stdlib module instances
+    -- (e.g. Comparable<List<a>>, Comparable<Option<a>>) do not require an explicit
+    -- import of the module that defines them.
+    -- `importedBuild` returns emptyBuild for modules not yet compiled (safe for
+    -- stdlib modules compiling themselves).
+    forM_ (map (Path . pure) builtinModulesPaths) $ \path -> do
+      Build{buildInstances, buildNames} <- lift $ lift $ importedBuild path
+      forM_ (Environment.toList buildInstances) $
+        \(traitName, instanceMap) ->
+          forM_ (Map.toList instanceMap) $
+            \(t, InstanceEntry{..}) -> do
+              insertInstance traitName t InstanceEntry{..}
+              forM_ (Map.keys instanceEntryTypeSchemes) $ \member -> do
+                let instanceName = instanceLabel (Trait traitName instanceEntryType) member
+                forM_ (Environment.lookupWithDefault mempty instanceName buildNames) $
+                  \case
+                    info@(NName n s) -> do
+                      insertNameEntry info
+                      _ <- lift $ lift $ insertNameC n s
+                      pure ()
+                    _ ->
+                      pure ()
+
     -- Step 8: Collect imports from other modules
     -- Depends on all prior phases completing in the imported modules
     traverse_ collectImports defs
@@ -211,7 +237,14 @@ prepareDefinitions defs = do
 
   build <- get
   qualifiedNames <- traverse (qualifiedImports build) defs
-  modify (setQualifiedNames (Environment.fromList (concat qualifiedNames)))
+  -- Generate qualified name mappings for all stdlib module instances (complement
+  -- to step 7b). Without this, the code generator resolves instance member names
+  -- against the current module (e.g. Main.Comparable$List<a>$(==)) instead of
+  -- the source module (e.g. List.Comparable$List<a>$(==)), causing linker errors.
+  stdlibInstanceQNames <- concatForM (map (Path . pure) builtinModulesPaths) $ \path -> do
+    Build{buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+    generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+  modify (setQualifiedNames (Environment.fromList (concat qualifiedNames <> stdlibInstanceQNames)))
 
 {- |
 Generate qualified names for trait instance members.

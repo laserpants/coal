@@ -117,7 +117,6 @@ extraDefinitions :: (Monoid a) => [Definition a () ()]
 extraDefinitions =
   [ DImport mempty (Path ["Coal", "Monad"]) [TypeImport mempty "Monad" ["bind"]]
   , DImport mempty (Path ["Coal", "Applicative"]) [TypeImport mempty "Applicative" ["pure"]]
-  , DImport mempty (Path ["List"]) [NameImport mempty "__"] -- TEMP
   ]
 
 builtinDefinitions :: (Monoid a) => [Definition a () ()]
