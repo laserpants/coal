@@ -1,0 +1,71 @@
+module Data.Json.Decoder {
+
+  import Data.Json.Value(JsonValue)
+  import namespace List
+
+  type alias Decoder<a> = JsonValue -> Result<a, string>
+
+  fun null_decoder(json : JsonValue) : Result<unit, string> =
+    match(json) {
+      | JsonNull => Ok(())
+      | _        => Err("Expected null")
+    }
+
+  fun bool_decoder(json : JsonValue) : Result<bool, string> =
+    match(json) {
+      | JsonBool(b) => Ok(b)
+      | _           => Err("Expected bool")
+    }
+
+  fun number_decoder(json : JsonValue) : Result<double, string> =
+    match(json) {
+      | JsonNumber(d) => Ok(d)
+      | _             => Err("Expected number")
+    }
+
+  fun string_decoder(json : JsonValue) : Result<string, string> =
+    match(json) {
+      | JsonString(s) => Ok(s)
+      | _             => Err("Expected string")
+    }
+
+  fun field(key : string, decoder : JsonValue -> Result<a, string>, json : JsonValue) : Result<a, string> =
+    match(json) {
+      | JsonObject(pairs) =>
+          match(List.find(fn((k, _)) => k == key, pairs)) {
+            | Some((_, v)) => decoder(v)
+            | None         => Err("Missing field: " <> key)
+          }
+      | _ => Err("Expected object for field access")
+    }
+
+
+  fun array_decoder(elem : JsonValue -> Result<a, string>, json : JsonValue) : Result<List<a>, string> =
+    match(json) {
+      | JsonArray(elements) =>
+          fold(elements) {
+            | [] => Ok([])
+            | v :: @rest =>
+                match((elem(v), rest)) {
+                  | (Ok(x), Ok(xs)) => Ok(x :: xs)
+                  | (Err(e), _)     => Err(e)
+                  | (_, Err(e))     => Err(e)
+                }
+          }
+      | _ => Err("Expected array")
+    }
+
+  fun map_decoder(f, decoder, json : JsonValue) =
+    match(decoder(json)) {
+      | Ok(v)  => Ok(f(v))
+      | Err(e) => Err(e)
+    }
+
+  fun map2(f, da, db, json : JsonValue) =
+    match((da(json), db(json))) {
+      | (Ok(a), Ok(b))  => Ok(f(a, b))
+      | (Err(e), _)     => Err(e)
+      | (_, Err(e))     => Err(e)
+    }
+
+}

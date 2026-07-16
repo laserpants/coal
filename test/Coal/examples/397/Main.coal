@@ -1,0 +1,14 @@
+module Main {
+
+import namespace IO
+
+fun change_ok_type(r : Result<int32, string>) =
+  match(r) {
+    | Ok(_)  => Ok(true)
+    | Err(e) => Err(e)
+  }
+
+  fun main() =
+    IO.println_string("@")
+
+}

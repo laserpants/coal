@@ -1,0 +1,123 @@
+module Data.Json.Tokenizer(tokenize) {
+
+  import Data.Json.Token(Token)
+  import namespace List
+  import namespace Char
+  import namespace String
+
+  type TokenizerState
+    = TsReady(List<Token>)
+    | TsNumber(List<char>, List<Token>)
+    | TsString(List<char>, bool, List<Token>)
+    | TsKeyword(List<char>, List<Token>)
+    | TsError(string)
+
+  fun is_number_char(c : char) : bool =
+    Char.is_digit(c) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-'
+
+  fun unescape(c : char) : char =
+    match(c) {
+      | 'n'  => '\n'
+      | 't'  => '\t'
+      | 'r'  => '\r'
+      | '"'  => '"'
+      | '\\' => '\\'
+      | '/'  => '/'
+      | 'b'  => Char.chr(8)
+      | 'f'  => Char.chr(12)
+      | _    => c
+    }
+
+  fun finalize_keyword(chars : List<char>) : Option<Token> =
+    if (String.from_list(chars) == "null")
+      then Some(TNull)
+    else if (String.from_list(chars) == "true")
+      then Some(TTrue)
+    else if (String.from_list(chars) == "false")
+      then Some(TFalse)
+    else None
+
+  // Process a single character when the tokenizer is in the Ready state.
+  // Defined separately so that TsNumber and TsKeyword can reuse it when they
+  // encounter a character that terminates the current token.
+  fun dispatch_from_ready(done : List<Token>, c : char) : TokenizerState =
+    match(c) {
+      | '"'  => TsString([], false, done)
+      | '['  => TsReady(TLBracket :: done)
+      | ']'  => TsReady(TRBracket :: done)
+      | '{'  => TsReady(TLBrace :: done)
+      | '}'  => TsReady(TRBrace :: done)
+      | ':'  => TsReady(TColon :: done)
+      | ','  => TsReady(TComma :: done)
+      | '-'  => TsNumber(['-'], done)
+      | _    =>
+          if (Char.is_digit(c))
+            then TsNumber([c], done)
+          else if (Char.is_alpha(c))
+            then TsKeyword([c], done)
+          else if (Char.is_whitespace(c))
+            then TsReady(done)
+          else TsError("Unexpected character in JSON")
+    }
+
+  fun step_tokenizer(state : TokenizerState, c : char) : TokenizerState =
+    match(state) {
+      | TsError(e) => TsError(e)
+
+      | TsString(acc, true, done) =>
+          TsString(unescape(c) :: acc, false, done)
+      | TsString(acc, false, done) =>
+          match(c) {
+            | '"'  => TsReady(TString(String.from_list(List.reverse(acc))) :: done)
+            | '\\' => TsString(acc, true, done)
+            | _    => TsString(c :: acc, false, done)
+          }
+
+      | TsNumber(acc, done) =>
+          if (is_number_char(c))
+            then TsNumber(c :: acc, done)
+            else
+              let num_tok = TNumber(String.from_list(List.reverse(acc)))
+              in dispatch_from_ready(num_tok :: done, c)
+
+      | TsKeyword(acc, done) =>
+          if (Char.is_alpha(c))
+            then TsKeyword(c :: acc, done)
+            else
+              match(finalize_keyword(List.reverse(acc))) {
+                | Some(kw_tok) => dispatch_from_ready(kw_tok :: done, c)
+                | None         => TsError("Unknown keyword")
+              }
+
+      | TsReady(done) => dispatch_from_ready(done, c)
+    }
+
+  fun finalize_tokenizer(state : TokenizerState) : Option<List<Token>> =
+    match(state) {
+      | TsReady(done) => Some(done)
+      | TsNumber(acc, done) =>
+          Some(TNumber(String.from_list(List.reverse(acc))) :: done)
+      | TsKeyword(acc, done) =>
+          match(finalize_keyword(List.reverse(acc))) {
+            | Some(kw_tok) => Some(kw_tok :: done)
+            | None         => None
+          }
+      | TsString(_, _, _) => None
+      | TsError(_)        => None
+    }
+
+  fun tokenize(input : string) : Result<List<Token>, string> =
+    let chars = String.to_list(input) in
+    let final_state = List.reduce_left(step_tokenizer, TsReady([]), chars) in
+      match(finalize_tokenizer(final_state)) {
+        | Some(tokens_rev) => Ok(List.reverse(tokens_rev))
+        | None =>
+            match(final_state) {
+              | TsError(e) => Err(e)
+              | TsString(_, _, _) => Err("Unterminated string literal")
+              | TsKeyword(acc, _) => Err("Unknown keyword: " <> String.from_list(List.reverse(acc)))
+              | _ => Err("Tokenizer error")
+            }
+      }
+
+}

@@ -2049,6 +2049,24 @@ e2eSpec = do
       "test/Coal/examples/394"
       ["Main.coal"]
 
+  describe "395" $ do
+    expectOutput
+      "✓ All 56 tests passed"
+      "test/Coal/examples/395"
+      [ "Main.coal"
+      , "MicroTest.coal"
+      , "Data/Json/Value.coal"
+      , "Data/Json/Token.coal"
+      , "Data/Json/Tokenizer.coal"
+      , "Data/Json/Decoding.coal"
+      , "Data/Json/Decoder.coal"
+      , "Data/Json/FromJson.coal"
+      , "Data/Json/Encoding.coal"
+      , "Data/Json/EncodingSpec.coal"
+      , "Data/Json/ToJson.coal"
+      , "Data/Json/DecodingSpec.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

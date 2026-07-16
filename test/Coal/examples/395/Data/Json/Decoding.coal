@@ -1,0 +1,218 @@
+module Data.Json.Decoding(decode) {
+
+  import Data.Json.Token(Token)
+  import Data.Json.Value(JsonValue)
+  import Data.Json.Tokenizer(tokenize)
+  import namespace List
+  import Number(int32_to_double, double_to_int32)
+  import Nat(pack)
+  import String(to_list)
+  import Char(digit_to_int32)
+
+  // -------------------------------------------------------------------------
+  // Number parsing
+  // -------------------------------------------------------------------------
+
+  // Strip an optional leading sign character.  Returns (is_negative, rest).
+  fun parse_sign(chars : List<char>) : (bool, List<char>) =
+    match(chars) {
+      | '-' :: rest => (true, rest)
+      | '+' :: rest => (false, rest)
+      | _           => (false, chars)
+    }
+
+  // Split a character list at the first character satisfying a predicate.
+  // Returns (before, Some(after)) when pred fires, or (chars, None).
+  // The matching character itself is consumed and not included in either part.
+  fun split_at_pred(
+    pred  : char -> bool,
+    chars : List<char>
+  ) : (List<char>, Option<List<char>>) =
+    let step(pair, c) =
+      let (brev, arev_opt) = pair in
+      match(arev_opt) {
+        | Some(arev) => (brev, Some(c :: arev))
+        | None       =>
+            if (pred(c))
+              then (brev, Some([]))
+              else (c :: brev, None)
+      }
+    in
+    let (final_brev, final_arev_opt) =
+      List.reduce_left(step, ([], None), chars)
+    in
+      match(final_arev_opt) {
+        | Some(final_arev) =>
+            (List.reverse(final_brev), Some(List.reverse(final_arev)))
+        | None =>
+            (List.reverse(final_brev), None)
+      }
+
+  fun split_at_char(target : char, chars : List<char>) : (List<char>, Option<List<char>>) =
+    split_at_pred(fn(c) => c == target, chars)
+
+  fun split_at_exp_marker(chars : List<char>) : (List<char>, Option<List<char>>) =
+    split_at_pred(fn(c) => c == 'e' || c == 'E', chars)
+
+  // Parse a non-empty list of digit characters as a double via left fold.
+  // Returns None if any character is not a digit.
+  fun digits_to_double(digits : List<char>) : Option<double> =
+    let
+      step(acc_opt, c) =
+        match((acc_opt, digit_to_int32(c))) {
+          | (Some(v), Some(n)) => Some(v * 10.0 + int32_to_double(n))
+          | _                  => None
+        }
+    in
+      List.reduce_left(step, Some(0.0), digits)
+
+  // Parse fraction digits (chars after '.') into the fractional double value.
+  // E.g. ['1','4'] → 0.14
+  fun fraction_to_double(digits : List<char>) : Option<double> =
+    let denom = 10.0 ^ List.length(digits) in
+    let step(acc_opt, c) =
+      match((acc_opt, digit_to_int32(c))) {
+        | (Some(v), Some(n)) => Some(v * 10.0 + int32_to_double(n))
+        | _                  => None
+      }
+    in
+    let num_opt = List.reduce_left(step, Some(0.0), digits) in
+      match(num_opt) {
+        | Some(num) => Some(num / denom)
+        | None      => None
+      }
+
+  // Convert a raw JSON number lexeme (e.g. "-3.14e2") to a double.
+  fun parse_double(lexeme : string) : Option<double> =
+    let chars = to_list(lexeme) in
+    let (is_neg, unsigned_chars) = parse_sign(chars) in
+    let (mantissa_chars, exp_opt) = split_at_exp_marker(unsigned_chars) in
+    let (int_chars, frac_opt) = split_at_char('.', mantissa_chars) in
+    let int_opt =
+      match(int_chars) {
+        | [] => Some(0.0)
+        | _  => digits_to_double(int_chars)
+      }
+    in
+    let frac_val_opt =
+      match(frac_opt) {
+        | None    => Some(0.0)
+        | Some(f) => fraction_to_double(f)
+      }
+    in
+    let exp_parts =
+      match(exp_opt) {
+        | None     => (false, [])
+        | Some(ec) => parse_sign(ec)
+      }
+    in
+    let (exp_is_neg, exp_digits) = exp_parts in
+    let exp_val_opt =
+      match(exp_digits) {
+        | [] => Some((0 : int32))
+        | _  =>
+            match(digits_to_double(exp_digits)) {
+              | Some(d) => Some(double_to_int32(d))
+              | None    => None
+            }
+      }
+    in
+      match((int_opt, frac_val_opt, exp_val_opt)) {
+        | (Some(int_val), Some(frac_val), Some(exp_mag)) =>
+            let mantissa = int_val + frac_val in
+            let power    = 10.0 ^ pack(exp_mag) in
+            let scaled   = if (exp_is_neg) then mantissa / power else mantissa * power in
+              Some(if (is_neg) then (0.0 - scaled) else scaled)
+        | _ => None
+      }
+
+  // -------------------------------------------------------------------------
+  // Stack-machine JSON parser
+  // -------------------------------------------------------------------------
+
+  type StackFrame
+    = BuildingArray(List<JsonValue>)
+    | BuildingObjectWaitKey(List<(string, JsonValue)>)
+    | BuildingObjectWaitValue(List<(string, JsonValue)>, string)
+
+  type ParseState
+    = Awaiting(List<StackFrame>)
+    | HaveValue(JsonValue, List<StackFrame>)
+    | PsDone(JsonValue)
+    | PsError(string)
+
+  fun complete_value(v : JsonValue, stack : List<StackFrame>) : ParseState =
+    match(stack) {
+      | [] => PsDone(v)
+      | _  => HaveValue(v, stack)
+    }
+
+  fun step_parser(state : ParseState, token : Token) : ParseState =
+    match((state, token)) {
+
+      // Propagate errors / reject trailing tokens
+      | (PsError(e), _) => PsError(e)
+      | (PsDone(_), _)  => PsError("Trailing tokens after complete JSON value")
+
+      // --- Primitive values ---
+      | (Awaiting(stk), TNull)      => complete_value(JsonNull, stk)
+      | (Awaiting(stk), TTrue)      => complete_value(JsonBool(true), stk)
+      | (Awaiting(stk), TFalse)     => complete_value(JsonBool(false), stk)
+      | (Awaiting(stk), TString(s)) => complete_value(JsonString(s), stk)
+      | (Awaiting(stk), TNumber(s)) =>
+          match(parse_double(s)) {
+            | Some(d) => complete_value(JsonNumber(d), stk)
+            | None    => PsError("Invalid number literal: " <> s)
+          }
+
+      // --- Start array / object ---
+      | (Awaiting(stk), TLBracket) => Awaiting(BuildingArray([]) :: stk)
+      | (Awaiting(stk), TLBrace)   => Awaiting(BuildingObjectWaitKey([]) :: stk)
+
+      // --- Empty array ---
+      | (Awaiting(BuildingArray([]) :: outer), TRBracket) =>
+          complete_value(JsonArray([]), outer)
+
+      // --- Empty object ---
+      | (Awaiting(BuildingObjectWaitKey([]) :: outer), TRBrace) =>
+          complete_value(JsonObject([]), outer)
+
+      // --- Object: received key string, now expect ':' ---
+      | (HaveValue(JsonString(key), BuildingObjectWaitKey(pairs) :: outer), TColon) =>
+          Awaiting(BuildingObjectWaitValue(pairs, key) :: outer)
+
+      // --- Array: comma → expect next element ---
+      | (HaveValue(v, BuildingArray(items) :: outer), TComma) =>
+          Awaiting(BuildingArray(v :: items) :: outer)
+
+      // --- Array: close bracket ---
+      | (HaveValue(v, BuildingArray(items) :: outer), TRBracket) =>
+          complete_value(JsonArray(List.reverse(v :: items)), outer)
+
+      // --- Object: comma → expect next key ---
+      | (HaveValue(v, BuildingObjectWaitValue(pairs, key) :: outer), TComma) =>
+          Awaiting(BuildingObjectWaitKey((key, v) :: pairs) :: outer)
+
+      // --- Object: close brace ---
+      | (HaveValue(v, BuildingObjectWaitValue(pairs, key) :: outer), TRBrace) =>
+          complete_value(JsonObject(List.reverse((key, v) :: pairs)), outer)
+
+      // --- All other combinations are parse errors ---
+      | _ => PsError("Unexpected token")
+    }
+
+  fun parse_tokens(tokens : List<Token>) : Result<JsonValue, string> =
+    match(List.reduce_left(step_parser, Awaiting([]), tokens)) {
+      | PsDone(v)   => Ok(v)
+      | PsError(e)  => Err(e)
+      | Awaiting(_) => Err("Unexpected end of input")
+      | HaveValue(_, _) => Err("Unexpected end of input after value")
+    }
+
+  fun decode(input : string) : Result<JsonValue, string> =
+    match(tokenize(input)) {
+      | Ok(tokens) => parse_tokens(tokens)
+      | Err(e)     => Err(e)
+    }
+
+}

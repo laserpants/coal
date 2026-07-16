@@ -3,11 +3,13 @@ module Main {
   import namespace IO
   import MicroTest(Test, suite, run)
   import Data.Json.EncodingSpec(encodingSpec)
+  import Data.Json.DecodingSpec(decodingSpec)
 
   let
     spec : Test =
       suite([
-        encodingSpec
+        encodingSpec,
+        decodingSpec
       ])
 
   fun main() = 
