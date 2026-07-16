@@ -11,14 +11,11 @@ module Coal.Compiler.Build.Cache (buildCacheDir, cachedData, cachedBuild, writeB
 
 import Coal.Compiler.Build (Build (buildHash))
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
-import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Compiler.State (CompilerState (compilerConfig))
 import Control.Exception (SomeException (..), try)
 import Control.Monad (guard)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.State (gets)
 import Crypto.Hash (hash)
 import Data.Binary (Binary (..), decodeOrFail, encode)
 import Data.ByteString (ByteString, fromStrict, toStrict)
@@ -59,7 +56,6 @@ cachedBuild name src = do
 
 writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> Build a -> CompilerT Metadata m ()
 writeBuildFile buildDir name build = do
-  CompilerConfig{..} <- gets compilerConfig
   liftIO $ do
     createDirectoryIfMissing True buildDir
     ByteString.writeFile (buildDir </> file) (toStrict (encode build))
