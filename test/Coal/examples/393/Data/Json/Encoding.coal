@@ -1,0 +1,37 @@
+module Data.Json.Encoding(encode) {
+
+  import Data.Json.Value(JsonValue)
+  import String(double_to_string, intercalate)
+
+  fun in_quotes(input : string) : string = 
+    "\"" <> input <> "\""
+
+  fold encode_json_value : JsonValue -> string 
+    | JsonNull => 
+        "null"
+    | JsonBool(false) => 
+        "false"
+    | JsonBool(true) => 
+        "true"
+    | JsonNumber(d) => 
+        double_to_string(d)
+    | JsonString(str) => 
+        in_quotes(str)
+    | JsonArray(encode_json_array(@values)) => 
+        "[" <> intercalate(",", values) <> "]"
+    | JsonObject(encode_json_object(@key_value_pairs)) => 
+        "{" <> intercalate(",", key_value_pairs) <> "}"
+
+  fold encode_json_array : List<JsonValue> -> List<string> 
+    | [] => []
+    | encode_json_value(@value) :: encode_json_array(@values) => 
+        value :: values
+
+  fold encode_json_object : List<(string, JsonValue)> -> List<string> 
+    | [] => []
+    | (key, encode_json_value(@value)) :: encode_json_object(@pairs) => 
+        (in_quotes(key) <> ":" <> value) :: pairs
+
+  fun encode(value : JsonValue) = encode_json_value(value)
+
+}

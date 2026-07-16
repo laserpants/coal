@@ -1,0 +1,16 @@
+module Main {
+
+  import namespace IO
+  import IO(return)
+  import MicroTest(Test, suite, run)
+  import Data.Json.EncodingSpec(encodingSpec)
+
+  let
+    spec : Test =
+      suite([
+        encodingSpec
+      ])
+
+  fun main() = run(spec)
+
+}

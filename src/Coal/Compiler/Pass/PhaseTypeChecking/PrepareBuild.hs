@@ -74,6 +74,7 @@ import Data.List (intersect)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, (\\))
 import qualified Data.Set as Set
+import Data.Text (isPrefixOf)
 import Data.Tuple.Extra (uncurry3)
 import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
@@ -888,7 +889,10 @@ collectInstances =
 
           forM_ (constructors t) $
             \constructor ->
-              unless (Environment.contains constructor buildTypeConstructors) $
+              -- #Tuple constructors are builtins with a known kind formula;
+              -- they are handled specially in kind inference and are never
+              -- registered in buildTypeConstructors.
+              unless (Environment.contains constructor buildTypeConstructors || "#Tuple" `isPrefixOf` constructor) $
                 lift $
                   lift $ do
                     currentPath <- gets compilerCurrentPath

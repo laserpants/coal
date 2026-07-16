@@ -1,0 +1,132 @@
+module Data.Json.EncodingSpec(encodingSpec) {
+
+  import MicroTest(Test, TestResult, check_with_remark, suite)
+  import Data.Json.Encoding(encode)
+  import Data.Json.Value(JsonValue)
+  
+  let
+    encodingSpec : Test =
+      suite([
+        test_encode_null,
+        test_encode_bool_false,
+        test_encode_bool_true,
+        test_encode_number_zero,
+        test_encode_number_positive,
+        test_encode_number_negative,
+        test_encode_number_decimal,
+        test_encode_string_empty,
+        test_encode_string_simple,
+        test_encode_string_with_spaces,
+        test_encode_array_empty,
+        test_encode_array_single_element,
+        test_encode_array_multiple_elements,
+        test_encode_array_mixed_types,
+        test_encode_array_nested,
+        test_encode_object_empty,
+        test_encode_object_single_property,
+        test_encode_object_multiple_properties,
+        test_encode_object_mixed_values,
+        test_encode_object_nested,
+        test_encode_complex_nested_structure
+      ])
+
+    // Null tests
+    let test_encode_null : Test =
+      check_with_remark("encode JsonNull", encode(JsonNull) == "null")
+
+    // Boolean tests
+    let test_encode_bool_false : Test =
+      check_with_remark("encode JsonBool(false)", encode(JsonBool(false)) == "false")
+
+    let test_encode_bool_true : Test =
+      check_with_remark("encode JsonBool(true)", encode(JsonBool(true)) == "true")
+
+    // Number tests
+    let test_encode_number_zero : Test =
+      check_with_remark("encode JsonNumber(0.0)", encode(JsonNumber(0.0)) == "0.0")
+
+    let test_encode_number_positive : Test =
+      check_with_remark("encode JsonNumber(42.0)", encode(JsonNumber(42.0)) == "42.0")
+
+    let test_encode_number_negative : Test =
+      check_with_remark("encode JsonNumber(-17.5)", encode(JsonNumber(-17.5)) == "-17.5")
+
+    let test_encode_number_decimal : Test =
+      check_with_remark("encode JsonNumber(3.14159)", encode(JsonNumber(3.14159)) == "3.14159")
+
+    // String tests
+    let test_encode_string_empty : Test =
+      check_with_remark("encode JsonString(empty)", encode(JsonString("")) == "\"\"")
+
+    let test_encode_string_simple : Test =
+      check_with_remark("encode JsonString(simple)", encode(JsonString("hello")) == "\"hello\"")
+
+    let test_encode_string_with_spaces : Test =
+      check_with_remark("encode JsonString(with spaces)", encode(JsonString("hello world")) == "\"hello world\"")
+
+    // Array tests
+    let test_encode_array_empty : Test =
+      check_with_remark("encode JsonArray(empty)", encode(JsonArray([])) == "[]")
+
+    let test_encode_array_single_element : Test =
+      check_with_remark("encode JsonArray(single)", encode(JsonArray([JsonNumber(1.0)])) == "[1.0]")
+
+    let test_encode_array_multiple_elements : Test =
+      check_with_remark("encode JsonArray(multiple)", 
+        encode(JsonArray([JsonNumber(1.0), JsonNumber(2.0), JsonNumber(3.0)])) == "[1.0,2.0,3.0]")
+
+    let test_encode_array_mixed_types : Test =
+      check_with_remark("encode JsonArray(mixed types)",
+        encode(JsonArray([JsonNull, JsonBool(true), JsonNumber(42.0), JsonString("test")])) == 
+        "[null,true,42.0,\"test\"]")
+
+    let test_encode_array_nested : Test =
+      check_with_remark("encode JsonArray(nested)",
+        encode(JsonArray([JsonArray([JsonNumber(1.0), JsonNumber(2.0)]), JsonArray([JsonNumber(3.0)])])) == 
+        "[[1.0,2.0],[3.0]]")
+
+    // Object tests
+    let test_encode_object_empty : Test =
+      check_with_remark("encode JsonObject(empty)", encode(JsonObject([])) == "{}")
+
+    let test_encode_object_single_property : Test =
+      check_with_remark("encode JsonObject(single property)",
+        encode(JsonObject([("key", JsonString("value"))])) == "{\"key\":\"value\"}")
+
+    let test_encode_object_multiple_properties : Test =
+      check_with_remark("encode JsonObject(multiple properties)",
+        encode(JsonObject([("name", JsonString("Alice")), ("age", JsonNumber(30.0))])) == 
+        "{\"name\":\"Alice\",\"age\":30.0}")
+
+    let test_encode_object_mixed_values : Test =
+      check_with_remark("encode JsonObject(mixed values)",
+        encode(JsonObject([
+          ("null_val", JsonNull),
+          ("bool_val", JsonBool(false)),
+          ("num_val", JsonNumber(123.0)),
+          ("str_val", JsonString("text"))
+        ])) == "{\"null_val\":null,\"bool_val\":false,\"num_val\":123.0,\"str_val\":\"text\"}")
+
+    let test_encode_object_nested : Test =
+      check_with_remark("encode JsonObject(nested)",
+        encode(JsonObject([
+          ("outer", JsonObject([("inner", JsonString("value"))]))
+        ])) == "{\"outer\":{\"inner\":\"value\"}}")
+
+    // Complex nested structure test
+    let test_encode_complex_nested_structure : Test =
+      check_with_remark("encode complex nested structure",
+        encode(JsonObject([
+          ("name", JsonString("John")),
+          ("age", JsonNumber(25.0)),
+          ("active", JsonBool(true)),
+          ("scores", JsonArray([JsonNumber(95.5), JsonNumber(87.3), JsonNumber(92.1)])),
+          ("address", JsonObject([
+            ("street", JsonString("123 Main St")),
+            ("city", JsonString("Boston"))
+          ])),
+          ("tags", JsonArray([JsonString("developer"), JsonString("remote")]))
+        ])) == 
+        "{\"name\":\"John\",\"age\":25.0,\"active\":true,\"scores\":[95.5,87.3,92.1],\"address\":{\"street\":\"123 Main St\",\"city\":\"Boston\"},\"tags\":[\"developer\",\"remote\"]}")
+
+}
