@@ -15,14 +15,6 @@ module Main {
       ])
 
   fun main() = 
-//    let x = decode("null")
-//    in
-//    match(x) {
-//      | Ok(jv) =>
-//          IO.println_string("A")
-//      | Err(s) =>
-//          IO.println_string(s)
-//    }
     run(spec)
 
 }
