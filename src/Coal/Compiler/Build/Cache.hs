@@ -35,7 +35,11 @@ buildFileExt :: String
 buildFileExt = "coal.b"
 
 cachedData :: (MonadIO m) => Name -> CompilerT Metadata m (Either SomeException ByteString)
-cachedData name = liftIO $ try $ ByteString.readFile (buildCacheDir </> Text.unpack name <.> buildFileExt)
+cachedData name =
+  liftIO $ try (ByteString.readFile (buildCacheDir </> file))
+ where
+  file :: FilePath
+  file = Text.unpack name <.> buildFileExt
 
 cachedBuild :: (MonadIO m, Binary a) => Name -> Text -> CompilerT Metadata m (Maybe (Build a))
 cachedBuild name src = do
@@ -55,7 +59,7 @@ cachedBuild name src = do
         Just build
 
 writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> Build a -> CompilerT Metadata m ()
-writeBuildFile buildDir name build = do
+writeBuildFile buildDir name build =
   liftIO $ do
     createDirectoryIfMissing True buildDir
     ByteString.writeFile (buildDir </> file) (toStrict (encode build))
