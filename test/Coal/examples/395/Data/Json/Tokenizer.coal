@@ -108,7 +108,7 @@ module Data.Json.Tokenizer(tokenize) {
 
   fun tokenize(input : string) : Result<List<Token>, string> =
     let chars = String.to_list(input) in
-    let final_state = List.reduce_left(step_tokenizer, TsReady([]), chars) in
+    let final_state = List.reduce(fn(c, s) => step_tokenizer(s, c), TsReady([]), chars) in
       match(finalize_tokenizer(final_state)) {
         | Some(tokens_rev) => Ok(List.reverse(tokens_rev))
         | None =>

@@ -1,9 +1,11 @@
 module Main {
 
   import namespace IO
+
   import MicroTest(Test, suite, run)
   import Data.Json.EncodingSpec(encodingSpec)
   import Data.Json.DecodingSpec(decodingSpec)
+  import Data.Json.Decoding(decode)
 
   let
     spec : Test =
@@ -13,6 +15,14 @@ module Main {
       ])
 
   fun main() = 
+//    let x = decode("null")
+//    in
+//    match(x) {
+//      | Ok(jv) =>
+//          IO.println_string("A")
+//      | Err(s) =>
+//          IO.println_string(s)
+//    }
     run(spec)
 
 }
