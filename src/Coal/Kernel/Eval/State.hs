@@ -29,7 +29,7 @@ module Coal.Kernel.Eval.State (
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO)
 import qualified Control.Monad.IO.Class as IO
-import Control.Monad.Reader (MonadReader, ReaderT, ask, local, runReaderT)
+import Control.Monad.Reader (MonadReader, ReaderT, ask, asks, local, runReaderT)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 
@@ -122,4 +122,4 @@ extendEnvMany :: [(Name, Value)] -> EvalM a -> EvalM a
 extendEnvMany pairs = local (\e -> e{envBindings = Map.fromList pairs `Map.union` envBindings e})
 
 getExterns :: EvalM (Map Name ([Value] -> IO (Either EvalError Value)))
-getExterns = fmap envExterns ask
+getExterns = asks envExterns
