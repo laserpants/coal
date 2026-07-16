@@ -128,8 +128,7 @@ assembleOne writeDebug tmpDir (name, ir) = do
   Text.writeFile llFile llText
   when writeDebug $
     writeDebugFile ("./.debug/" <> nameToPath name <.> "ll") llText
-  result <- fmap (name,) <$> runLLVMAs llFile
-  pure result
+  fmap (name,) <$> runLLVMAs llFile
 
 runLLVMAs :: FilePath -> IO (Either SomeException ByteString)
 runLLVMAs src =
