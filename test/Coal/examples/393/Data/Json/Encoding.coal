@@ -1,4 +1,4 @@
-module Data.Json.Encoding(encode) {
+module Data.Json.Encoding(encode, encode_json_value) {
 
   import Data.Json.Value(JsonValue)
   import String(double_to_string, intercalate)

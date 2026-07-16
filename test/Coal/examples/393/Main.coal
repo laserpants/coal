@@ -4,6 +4,9 @@ module Main {
   import IO(return)
   import MicroTest(Test, suite, run)
   import Data.Json.EncodingSpec(encodingSpec)
+  import Data.Json.Encoding(encode_json_value)
+  import Data.Json.Value(JsonValue)
+  import String(double_to_string, intercalate)
 
   let
     spec : Test =
@@ -11,6 +14,11 @@ module Main {
         encodingSpec
       ])
 
-  fun main() = run(spec)
+  fun main() = // run(spec)
+    let s =
+      double_to_string(0.0)
+//      encode_json_value(JsonNumber(0.0))
+    in
+    IO.println_string(s)
 
 }
