@@ -209,23 +209,20 @@ prepareDefinitions defs = do
     -- import of the module that defines them.
     -- `importedBuild` returns emptyBuild for modules not yet compiled (safe for
     -- stdlib modules compiling themselves).
+    -- Only insertInstance is called here (not insertNameEntry or insertNameC): those
+    -- would contaminate buildNames/compilerNameStore with names from other stdlib
+    -- modules. replacePlaceholders (in passTypeInference) propagates compilerNameStore
+    -- into buildNames, so any insertNameC here would cause stdlibInstanceQNames to
+    -- emit wrong qualifications (e.g. List.id__$impl_Monoid instead of
+    -- Coal.Monoid.id__$impl_Monoid). Instance member type schemes come from
+    -- instanceEntryTypeSchemes directly and do not require compilerNameStore.
     forM_ (map (Path . pure) builtinModulesPaths) $ \path -> do
-      Build{buildInstances, buildNames} <- lift $ lift $ importedBuild path
+      Build{buildInstances} <- lift $ lift $ importedBuild path
       forM_ (Environment.toList buildInstances) $
         \(traitName, instanceMap) ->
           forM_ (Map.toList instanceMap) $
-            \(t, InstanceEntry{..}) -> do
+            \(t, InstanceEntry{..}) ->
               insertInstance traitName t InstanceEntry{..}
-              forM_ (Map.keys instanceEntryTypeSchemes) $ \member -> do
-                let instanceName = instanceLabel (Trait traitName instanceEntryType) member
-                forM_ (Environment.lookupWithDefault mempty instanceName buildNames) $
-                  \case
-                    info@(NName n s) -> do
-                      insertNameEntry info
-                      _ <- lift $ lift $ insertNameC n s
-                      pure ()
-                    _ ->
-                      pure ()
 
     -- Step 8: Collect imports from other modules
     -- Depends on all prior phases completing in the imported modules
@@ -244,7 +241,7 @@ prepareDefinitions defs = do
   stdlibInstanceQNames <- concatForM (map (Path . pure) builtinModulesPaths) $ \path -> do
     Build{buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
     generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
-  modify (setQualifiedNames (Environment.fromList (concat qualifiedNames <> stdlibInstanceQNames)))
+  modify (setQualifiedNames (Environment.fromList (stdlibInstanceQNames <> concat qualifiedNames)))
 
 {- |
 Generate qualified names for trait instance members.
