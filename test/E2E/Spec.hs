@@ -2073,6 +2073,25 @@ e2eSpec = do
       "test/Coal/examples/397"
       ["Main.coal"]
 
+  describe "398" $ do
+    expectOutput
+      "{\n  \"id\": 12456.0,\n  \"username\": \"coder_pants\",\n  \"active\": true,\n  \"roles\": [\n    \"User\",\n    \"Moderator\"\n  ],\n  \"profile\": {\n    \"age\": 28.0,\n    \"location\": \"Valencia, Spain\",\n    \"verified_member\": true\n  },\n  \"subscription\": null\n}"
+      "test/Coal/examples/398"
+      [ "Main.coal"
+      , "MicroTest.coal"
+      , "Data/Json/Value.coal"
+      , "Data/Json/Token.coal"
+      , "Data/Json/Tokenizer.coal"
+      , "Data/Json/Decoding.coal"
+      , "Data/Json/Decoder.coal"
+      , "Data/Json/FromJson.coal"
+      , "Data/Json/Encoding.coal"
+      , "Data/Json/EncodingSpec.coal"
+      , "Data/Json/ToJson.coal"
+      , "Data/Json/DecodingSpec.coal"
+      , "Data/Json/Pretty.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

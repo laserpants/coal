@@ -1,0 +1,30 @@
+module Main {
+
+  import namespace IO
+
+  import MicroTest(Test, suite, run)
+  import Data.Json.EncodingSpec(encodingSpec)
+  import Data.Json.DecodingSpec(decodingSpec)
+  import Data.Json.Decoding(decode)
+  import Data.Json.Encoding(encode)
+  import Data.Json.Pretty(pretty_print)
+
+  let
+    spec : Test =
+      suite([
+        encodingSpec,
+        decodingSpec
+      ])
+
+  fun main() = 
+    let v = decode("{ \"id\": 12456, \"username\": \"coder_pants\", \"active\": true, \"roles\": [\"User\", \"Moderator\"], \"profile\": { \"age\": 28, \"location\": \"Valencia, Spain\", \"verified_member\": true }, \"subscription\": null }") in
+    match(v) {
+      | Ok(json) =>
+          let s = pretty_print(json) in
+          IO.println_string(s)
+      | Err(_) =>
+          IO.println_string("--")
+    }
+
+}
+

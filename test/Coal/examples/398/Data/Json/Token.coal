@@ -1,0 +1,16 @@
+module Data.Json.Token {
+
+  type Token
+    = TNull
+    | TTrue
+    | TFalse
+    | TNumber(string)
+    | TString(string)
+    | TLBracket
+    | TRBracket
+    | TLBrace
+    | TRBrace
+    | TColon
+    | TComma
+
+}
