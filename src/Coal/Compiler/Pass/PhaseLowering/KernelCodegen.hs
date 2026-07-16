@@ -19,7 +19,7 @@ import Coal.Compiler.Error (CompilerFailureMode (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, getBuildC, setBitcodeC)
-import Coal.Compiler.State
+import Coal.Compiler.State (CompilerState (compilerConfig))
 import Coal.Debug (writeDebugFile)
 import qualified Coal.Kernel.Builtin.Objects as Builtin
 import qualified Coal.Kernel.Compiler as NK
