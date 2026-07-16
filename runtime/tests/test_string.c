@@ -189,11 +189,13 @@ test_to_string_conversions(void)
 
     // Test float_to_string
     rt_string_t *float_str = rt_float_to_string(3.14159f);
-    assert(rt_string_data(float_str) != NULL);
+    assert(strcmp(rt_string_data(float_str), "3.14159") == 0);
+    assert(rt_string_length(float_str) == 7);
 
     // Test double_to_string
     rt_string_t *double_str = rt_double_to_string(2.718281828459045);
-    assert(rt_string_data(double_str) != NULL);
+    assert(strcmp(rt_string_data(double_str), "2.71828182845905") == 0);
+    assert(rt_string_length(double_str) == 16);
 
     // Test bignum_to_string
     rt_bignum_t *bn = rt_bignum_new("123456789012345678901234567890");
