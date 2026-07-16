@@ -4,9 +4,9 @@
 module Package.Dependency (PackageDependency (..)) where
 
 import CLI.Git.Repo (GitRepo (..))
-import Package.Version (PackageConstraint (..))
 import Data.Aeson
 import GHC.Generics (Generic)
+import Package.Version (PackageConstraint (..))
 
 data PackageDependency = PackageDependency
   { version :: Maybe PackageConstraint

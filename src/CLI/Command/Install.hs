@@ -7,12 +7,6 @@ import CLI.Error (CLIError (..))
 import CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
-import Package.Dependency (PackageDependency (..))
-import Package.Error (PackageError (..))
-import Package.Lock (PackageLock (..))
-import Package.Lock.Spec
-import Package.Manifest
-import Package.Version (AvailableVersion (..), PackageConstraint (..), PackageVersion (..))
 import Control.Monad.Except
 import Control.Monad.State
 import Data.Aeson.Encode.Pretty
@@ -28,6 +22,12 @@ import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
 import Extras (Name, Over)
+import Package.Dependency (PackageDependency (..))
+import Package.Error (PackageError (..))
+import Package.Lock (PackageLock (..))
+import Package.Lock.Spec
+import Package.Manifest
+import Package.Version (AvailableVersion (..), PackageConstraint (..), PackageVersion (..))
 import System.Directory
 
 data InstallState = InstallState

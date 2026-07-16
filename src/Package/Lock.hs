@@ -8,8 +8,6 @@ module Package.Lock (
   loadLockFile,
 ) where
 
-import Package.Error (PackageError (..))
-import Package.Lock.Spec (LockSpec (..))
 import Control.Monad.Except
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
@@ -17,6 +15,8 @@ import Data.Map.Strict (Map)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import GHC.Generics (Generic)
+import Package.Error (PackageError (..))
+import Package.Lock.Spec (LockSpec (..))
 import System.Directory
 
 newtype PackageLock = PackageLock

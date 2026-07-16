@@ -16,7 +16,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Compiler.State (CompilerState (compilerConfig))
 import Control.Exception (SomeException (..), try)
-import Control.Monad (guard, unless)
+import Control.Monad (guard)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Crypto.Hash (hash)
@@ -29,7 +29,6 @@ import qualified Data.Text.Encoding as Text
 import Extras (Name)
 import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((<.>), (</>))
-import System.IO (hFlush, hPutStr, stderr)
 
 -- Build cache constants
 buildCacheDir :: FilePath

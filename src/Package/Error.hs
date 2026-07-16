@@ -4,12 +4,12 @@
 
 module Package.Error (PackageError (..), prettyPackageError) where
 
+import Data.Text (Text)
+import Extras (Name)
 import Package.Version (
   PackageConstraint (..),
   PackageVersion (..),
  )
-import Data.Text (Text)
-import Extras (Name)
 
 data PackageError
   = EProjectManifestMissing

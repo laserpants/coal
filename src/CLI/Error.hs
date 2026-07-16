@@ -4,8 +4,8 @@
 
 module CLI.Error (CLIError (..), prettyCLIError) where
 
-import Package.Error (PackageError (..), prettyPackageError)
 import Data.Text (Text)
+import Package.Error (PackageError (..), prettyPackageError)
 
 data CLIError
   = EPackageError PackageError

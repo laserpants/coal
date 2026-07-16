@@ -5,10 +5,6 @@
 
 module Package (packageIncludes, toModuleNamespace) where
 
-import Package.Entry (PackageEntry (..))
-import Package.Error (PackageError (..))
-import Package.Lock (LockSpec (..), PackageLock (..), loadLockFile)
-import Package.Manifest (PackageManifest (..), basePath, filePaths, loadPackageLockManifests)
 import Control.Monad.Except
 import Data.Char (toUpper)
 import Data.Map.Strict (Map)
@@ -17,6 +13,10 @@ import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name)
+import Package.Entry (PackageEntry (..))
+import Package.Error (PackageError (..))
+import Package.Lock (LockSpec (..), PackageLock (..), loadLockFile)
+import Package.Manifest (PackageManifest (..), basePath, filePaths, loadPackageLockManifests)
 import System.Directory (doesFileExist, makeAbsolute)
 import System.FilePath
 

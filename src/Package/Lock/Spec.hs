@@ -5,9 +5,9 @@ module Package.Lock.Spec (LockSpec (..)) where
 
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
-import Package.Version (PackageVersion (..))
 import Data.Aeson
 import GHC.Generics (Generic)
+import Package.Version (PackageVersion (..))
 
 data LockSpec = LockSpec
   { version :: PackageVersion

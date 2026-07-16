@@ -15,10 +15,6 @@ module Package.Manifest (
 
 import CLI.Git.Commit (GitCommit (..))
 import Coal.Language.Module.Path (parsePath, toFilePath)
-import Package.Dependency (PackageDependency)
-import Package.Error (PackageError (..))
-import Package.Lock (LockSpec (..), PackageLock (..))
-import Package.Version (PackageVersion (..))
 import Control.Monad.Except
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
@@ -29,6 +25,10 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name)
 import GHC.Generics (Generic)
+import Package.Dependency (PackageDependency)
+import Package.Error (PackageError (..))
+import Package.Lock (LockSpec (..), PackageLock (..))
+import Package.Version (PackageVersion (..))
 import System.Directory
 import System.FilePath
 

@@ -12,7 +12,6 @@ module CLI.Git (
 import CLI.Error (CLIError (..))
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
-import Package.Version (AvailableVersion (..), PackageVersion (..))
 import Control.Monad.Except
 import Data.Char (isSpace)
 import Data.Either.Extra (eitherToMaybe)
@@ -25,6 +24,7 @@ import Data.SemVer (fromText)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Package.Version (AvailableVersion (..), PackageVersion (..))
 import System.Exit (ExitCode (..))
 import System.Process
 

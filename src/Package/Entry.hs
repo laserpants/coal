@@ -2,9 +2,9 @@
 
 module Package.Entry (PackageEntry (..)) where
 
+import Data.Text (Text)
 import Package.Lock (LockSpec (..))
 import Package.Manifest (PackageManifest (..))
-import Data.Text (Text)
 
 data PackageEntry = PackageEntry
   { packageName :: Text
