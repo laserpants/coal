@@ -46,7 +46,7 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
     , ..
     }
 
-data CompilerEnvironment a = CompilerEnvironment
+newtype CompilerEnvironment a = CompilerEnvironment
   { compilerKernelEnvironment :: KernelEnvironment
   }
 
