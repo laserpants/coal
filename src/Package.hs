@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -18,7 +19,7 @@ import Package.Error (PackageError (..))
 import Package.Lock (LockSpec (..), PackageLock (..), loadLockFile)
 import Package.Manifest (PackageManifest (..), basePath, filePaths, loadPackageLockManifests)
 import System.Directory (doesFileExist, makeAbsolute)
-import System.FilePath
+import System.FilePath ((</>))
 
 {- | Convert a package name to a Coal module namespace prefix.
 Capitalizes the first letter of each hyphen-separated segment.
@@ -82,7 +83,7 @@ resolveInSourceDirs (d : ds) rel = do
 collectEntries :: PackageLock -> Map Text PackageManifest -> ExceptT PackageError IO [PackageEntry]
 collectEntries (PackageLock packages) manifests =
   forM (Map.toList packages) $
-    \(pkgName, LockSpec{..}) ->
+    \(pkgName, LockSpec{version, source, commit}) ->
       case Map.lookup pkgName manifests of
         Nothing ->
           throwError (EDependencyManifestMissing pkgName Nothing)
@@ -90,6 +91,6 @@ collectEntries (PackageLock packages) manifests =
           pure $
             PackageEntry
               { packageName = pkgName
-              , packageSpec = LockSpec{..}
+              , packageSpec = LockSpec{version, source, commit}
               , packageManifest = manifest
               }
