@@ -2,9 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Package.Error (PackageError (..), prettyPackageError) where
+module Package.Error (PackageError (..), prettyPackageError) where
 
-import Coal.Package.Version (
+import Package.Version (
   PackageConstraint (..),
   PackageVersion (..),
  )

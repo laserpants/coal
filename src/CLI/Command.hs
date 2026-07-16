@@ -1,6 +1,6 @@
-module Coal.CLI.Command (Command (..)) where
+module CLI.Command (Command (..)) where
 
-import Coal.CLI.Options.CompileCmd (CompileCmdOptions (..))
+import CLI.Options.CompileCmd (CompileCmdOptions (..))
 
 data Command
   = CmdCompile CompileCmdOptions

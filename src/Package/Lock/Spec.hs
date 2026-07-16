@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Package.Lock.Spec (LockSpec (..)) where
+module Package.Lock.Spec (LockSpec (..)) where
 
-import Coal.CLI.Git.Commit (GitCommit (..))
-import Coal.CLI.Git.Repo (GitRepo (..))
-import Coal.Package.Version (PackageVersion (..))
+import CLI.Git.Commit (GitCommit (..))
+import CLI.Git.Repo (GitRepo (..))
+import Package.Version (PackageVersion (..))
 import Data.Aeson
 import GHC.Generics (Generic)
 

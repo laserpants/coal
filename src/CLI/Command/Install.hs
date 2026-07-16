@@ -1,18 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.CLI.Command.Install (installCommand, installProject) where
+module CLI.Command.Install (installCommand, installProject) where
 
-import Coal.CLI.Error (CLIError (..))
-import Coal.CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
-import Coal.CLI.Git.Commit (GitCommit (..))
-import Coal.CLI.Git.Repo (GitRepo (..))
-import Coal.Package.Dependency (PackageDependency (..))
-import Coal.Package.Error (PackageError (..))
-import Coal.Package.Lock (PackageLock (..))
-import Coal.Package.Lock.Spec
-import Coal.Package.Manifest
-import Coal.Package.Version (AvailableVersion (..), PackageConstraint (..), PackageVersion (..))
+import CLI.Error (CLIError (..))
+import CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
+import CLI.Git.Commit (GitCommit (..))
+import CLI.Git.Repo (GitRepo (..))
+import Package.Dependency (PackageDependency (..))
+import Package.Error (PackageError (..))
+import Package.Lock (PackageLock (..))
+import Package.Lock.Spec
+import Package.Manifest
+import Package.Version (AvailableVersion (..), PackageConstraint (..), PackageVersion (..))
 import Control.Monad.Except
 import Control.Monad.State
 import Data.Aeson.Encode.Pretty

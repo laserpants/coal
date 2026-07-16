@@ -1,9 +1,9 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.CLI.Parser.CompileCmd (compileCmdParser) where
+module CLI.Parser.CompileCmd (compileCmdParser) where
 
-import Coal.CLI.Options.CompileCmd (CompileCmdOptions (..))
+import CLI.Options.CompileCmd (CompileCmdOptions (..))
 import Options.Applicative
 
 compileCmdParser :: Parser CompileCmdOptions

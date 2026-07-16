@@ -2,9 +2,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.CLI.Error (CLIError (..), prettyCLIError) where
+module CLI.Error (CLIError (..), prettyCLIError) where
 
-import Coal.Package.Error (PackageError (..), prettyPackageError)
+import Package.Error (PackageError (..), prettyPackageError)
 import Data.Text (Text)
 
 data CLIError

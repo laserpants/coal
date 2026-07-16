@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module Coal.CLI.Git.Commit (GitCommit (..)) where
+module CLI.Git.Commit (GitCommit (..)) where
 
 import Data.Aeson
 import Data.Text (Text)

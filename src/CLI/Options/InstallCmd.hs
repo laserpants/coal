@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Coal.CLI.Options.InstallCmd (InstallCmdOptions (..)) where
+module CLI.Options.InstallCmd (InstallCmdOptions (..)) where
 
 data InstallCmdOptions = InstallCmdOptions
   { installTarget :: String

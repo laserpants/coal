@@ -68,6 +68,12 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+    - aeson
+    - aeson-pretty
+    - optparse-applicative
+    - template-haskell
+    - semver
 
 executables:
   coal:

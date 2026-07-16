@@ -1,7 +1,7 @@
-module Coal.CLI.Parser.Command (commandParser) where
+module CLI.Parser.Command (commandParser) where
 
-import Coal.CLI.Command (Command (..))
-import Coal.CLI.Parser.CompileCmd (compileCmdParser)
+import CLI.Command (Command (..))
+import CLI.Parser.CompileCmd (compileCmdParser)
 import Options.Applicative
 
 commandParser :: Parser Command

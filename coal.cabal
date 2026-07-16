@@ -21,6 +21,20 @@ extra-source-files:
 
 library
   exposed-modules:
+      CLI.Command
+      CLI.Command.Build
+      CLI.Command.Clean
+      CLI.Command.Compile
+      CLI.Command.Install
+      CLI.Command.Version
+      CLI.Error
+      CLI.Git
+      CLI.Git.Commit
+      CLI.Git.Repo
+      CLI.Options.CompileCmd
+      CLI.Options.InstallCmd
+      CLI.Parser.Command
+      CLI.Parser.CompileCmd
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
@@ -277,13 +291,23 @@ library
       Extras.Operators
       Extras.Prettyprinter
       Extras.Text.Megaparsec.Char
+      Package
+      Package.Dependency
+      Package.Entry
+      Package.Error
+      Package.Lock
+      Package.Lock.Spec
+      Package.Manifest
+      Package.Version
   other-modules:
       Paths_coal
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path
   build-depends:
-      ansi-terminal
+      aeson
+    , aeson-pretty
+    , ansi-terminal
     , base >=4.7 && <5
     , binary
     , bytestring
@@ -302,6 +326,7 @@ library
     , megaparsec
     , memory
     , mtl
+    , optparse-applicative
     , parser-combinators
     , pretty-simple
     , prettyprinter
@@ -309,6 +334,8 @@ library
     , process-extras
     , raw-strings-qq
     , recursion-schemes
+    , semver
+    , template-haskell
     , temporary
     , text
     , text-show
@@ -320,28 +347,6 @@ library
 executable coal
   main-is: Main.hs
   other-modules:
-      Coal.CLI.Command
-      Coal.CLI.Command.Build
-      Coal.CLI.Command.Clean
-      Coal.CLI.Command.Compile
-      Coal.CLI.Command.Install
-      Coal.CLI.Command.Version
-      Coal.CLI.Error
-      Coal.CLI.Git
-      Coal.CLI.Git.Commit
-      Coal.CLI.Git.Repo
-      Coal.CLI.Options.CompileCmd
-      Coal.CLI.Options.InstallCmd
-      Coal.CLI.Parser.Command
-      Coal.CLI.Parser.CompileCmd
-      Coal.Package
-      Coal.Package.Dependency
-      Coal.Package.Entry
-      Coal.Package.Error
-      Coal.Package.Lock
-      Coal.Package.Lock.Spec
-      Coal.Package.Manifest
-      Coal.Package.Version
       Paths_coal
   hs-source-dirs:
       app

@@ -13,7 +13,7 @@ the beginning of a module, before any other definitions.
 For example, this is valid:
 
 @
-module MyModule
+module Coal.MyModule
 
 import List(concat, head, tail)
 import String(is_empty)
@@ -24,7 +24,7 @@ fun my_function() = ...
 But this would be flagged as an error:
 
 @
-module MyModule
+module Coal.MyModule
 
 fun my_function() = ...
 

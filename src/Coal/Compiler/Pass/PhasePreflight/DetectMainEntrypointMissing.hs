@@ -17,7 +17,7 @@ in their Main module to specify where program execution begins.
 For example, a valid Main module must include:
 
 @
-module Main {
+module Coal.Main {
 
   fun main() =
     ...

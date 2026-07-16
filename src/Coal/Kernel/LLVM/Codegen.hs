@@ -323,7 +323,7 @@ irImportedDataConstructor name fieldCount = do
 {- | Declare the $apply trampoline for a function defined in another module.
 The importing module needs this declaration when the function is used through
 partial application; the actual trampoline will be supplied by the defining
-module at link time.
+module Coal.at link time.
 -}
 irImportedFunctionTrampoline :: Name -> Int -> IRCodegen ()
 irImportedFunctionTrampoline name arity_ =

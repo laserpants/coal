@@ -17,7 +17,7 @@ that is not defined in the module is an error.
 For example, this module would be rejected:
 
 @
-module Foo(baz) {
+module Coal.Foo(baz) {
   fun hello() = "A"
 }
 @

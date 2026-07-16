@@ -2,14 +2,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Package.Lock (
+module Package.Lock (
   LockSpec (..),
   PackageLock (..),
   loadLockFile,
 ) where
 
-import Coal.Package.Error (PackageError (..))
-import Coal.Package.Lock.Spec (LockSpec (..))
+import Package.Error (PackageError (..))
+import Package.Lock.Spec (LockSpec (..))
 import Control.Monad.Except
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString

@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Coal.CLI.Command.Version (coalVersion) where
+module CLI.Command.Version (coalVersion) where
 
 import Control.Exception (SomeException, catch)
 import Data.List.Extra (trim)

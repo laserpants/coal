@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Coal.CLI.Command.Compile (compileCommand) where
+module CLI.Command.Compile (compileCommand) where
 
-import Coal.CLI.Options.CompileCmd (CompileCmdOptions (..))
+import CLI.Options.CompileCmd (CompileCmdOptions (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Data.List (nub)

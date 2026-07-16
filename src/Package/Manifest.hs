@@ -3,7 +3,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Package.Manifest (
+module Package.Manifest (
   PackageManifest (..),
   basePath,
   loadManifest,
@@ -13,12 +13,12 @@ module Coal.Package.Manifest (
   filePaths,
 ) where
 
-import Coal.CLI.Git.Commit (GitCommit (..))
+import CLI.Git.Commit (GitCommit (..))
 import Coal.Language.Module.Path (parsePath, toFilePath)
-import Coal.Package.Dependency (PackageDependency)
-import Coal.Package.Error (PackageError (..))
-import Coal.Package.Lock (LockSpec (..), PackageLock (..))
-import Coal.Package.Version (PackageVersion (..))
+import Package.Dependency (PackageDependency)
+import Package.Error (PackageError (..))
+import Package.Lock (LockSpec (..), PackageLock (..))
+import Package.Version (PackageVersion (..))
 import Control.Monad.Except
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString

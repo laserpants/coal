@@ -1,6 +1,6 @@
 {-# LANGUAGE StrictData #-}
 
-module Coal.CLI.Options.CompileCmd (CompileCmdOptions (..)) where
+module CLI.Options.CompileCmd (CompileCmdOptions (..)) where
 
 import Data.Text (Text)
 

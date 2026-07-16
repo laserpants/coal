@@ -1,10 +1,10 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Package.Dependency (PackageDependency (..)) where
+module Package.Dependency (PackageDependency (..)) where
 
-import Coal.CLI.Git.Repo (GitRepo (..))
-import Coal.Package.Version (PackageConstraint (..))
+import CLI.Git.Repo (GitRepo (..))
+import Package.Version (PackageConstraint (..))
 import Data.Aeson
 import GHC.Generics (Generic)
 

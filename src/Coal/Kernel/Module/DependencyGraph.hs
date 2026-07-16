@@ -22,7 +22,7 @@ preferred over @"Utils"@ when both are present and both are prefixes.
 
 Handles both function imports (@"Data.List.head"@) and data constructor
 imports (@"Ordering.LessThan"@) correctly, because it consults the actual
-module set rather than relying on naming conventions.
+module Coal.set rather than relying on naming conventions.
 
 Returns 'Nothing' if no known module is a prefix of the import.
 -}

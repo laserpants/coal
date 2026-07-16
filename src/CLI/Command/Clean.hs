@@ -1,4 +1,4 @@
-module Coal.CLI.Command.Clean (cleanCommand) where
+module CLI.Command.Clean (cleanCommand) where
 
 import Control.Exception (catch)
 import System.Directory

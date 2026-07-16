@@ -1,12 +1,12 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module Coal.Package.Version (
+module Package.Version (
   PackageVersion (..),
   PackageConstraint (..),
   AvailableVersion (..),
 ) where
 
-import Coal.CLI.Git.Commit (GitCommit (..))
+import CLI.Git.Commit (GitCommit (..))
 import Data.Aeson
 import Data.SemVer
 import qualified Data.SemVer as SemVerVersion

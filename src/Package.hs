@@ -3,12 +3,12 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Package (packageIncludes, toModuleNamespace) where
+module Package (packageIncludes, toModuleNamespace) where
 
-import Coal.Package.Entry (PackageEntry (..))
-import Coal.Package.Error (PackageError (..))
-import Coal.Package.Lock (LockSpec (..), PackageLock (..), loadLockFile)
-import Coal.Package.Manifest (PackageManifest (..), basePath, filePaths, loadPackageLockManifests)
+import Package.Entry (PackageEntry (..))
+import Package.Error (PackageError (..))
+import Package.Lock (LockSpec (..), PackageLock (..), loadLockFile)
+import Package.Manifest (PackageManifest (..), basePath, filePaths, loadPackageLockManifests)
 import Control.Monad.Except
 import Data.Char (toUpper)
 import Data.Map.Strict (Map)

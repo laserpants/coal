@@ -2,17 +2,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.CLI.Git (
+module CLI.Git (
   gitLsRemoteHash,
   gitCloneRepo,
   gitCheckoutCommit,
   gitLsRemoteVersions,
 ) where
 
-import Coal.CLI.Error (CLIError (..))
-import Coal.CLI.Git.Commit (GitCommit (..))
-import Coal.CLI.Git.Repo (GitRepo (..))
-import Coal.Package.Version (AvailableVersion (..), PackageVersion (..))
+import CLI.Error (CLIError (..))
+import CLI.Git.Commit (GitCommit (..))
+import CLI.Git.Repo (GitRepo (..))
+import Package.Version (AvailableVersion (..), PackageVersion (..))
 import Control.Monad.Except
 import Data.Char (isSpace)
 import Data.Either.Extra (eitherToMaybe)
