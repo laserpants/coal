@@ -2037,6 +2037,12 @@ e2eSpec = do
       "test/Coal/examples/392"
       ["Main.coal"]
 
+  describe "393" $ do
+    expectOutput
+      "✓ All 21 tests passed"
+      "test/Coal/examples/393"
+      ["Main.coal", "Data/Json/Encoding.coal", "Data/Json/EncodingSpec.coal", "Data/Json/ToJson.coal", "Data/Json/Value.coal", "MicroTest.coal"]
+
   describe "394" $ do
     expectOutput
       "0.0"
