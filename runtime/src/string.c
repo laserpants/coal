@@ -296,6 +296,17 @@ rt_float_to_string(float f)
 {
     char buffer[64];
     snprintf(buffer, sizeof(buffer), "%g", f);
+    /* If the output has no decimal point, exponent marker, or special-value
+     * letter (n=nan, i=inf), append ".0" so that whole-valued floats like
+     * 0.0f are represented as "0.0" rather than "0". */
+    if (strchr(buffer, '.') == NULL && strchr(buffer, 'e') == NULL &&
+        strchr(buffer, 'E') == NULL && strchr(buffer, 'n') == NULL &&
+        strchr(buffer, 'i') == NULL) {
+        size_t len = strlen(buffer);
+        buffer[len] = '.';
+        buffer[len + 1] = '0';
+        buffer[len + 2] = '\0';
+    }
     return rt_string_new(buffer);
 }
 
@@ -304,6 +315,17 @@ rt_double_to_string(double d)
 {
     char buffer[64];
     snprintf(buffer, sizeof(buffer), "%.15g", d);
+    /* If the output has no decimal point, exponent marker, or special-value
+     * letter (n=nan, i=inf), append ".0" so that whole-valued doubles like
+     * 0.0 are represented as "0.0" rather than "0". */
+    if (strchr(buffer, '.') == NULL && strchr(buffer, 'e') == NULL &&
+        strchr(buffer, 'E') == NULL && strchr(buffer, 'n') == NULL &&
+        strchr(buffer, 'i') == NULL) {
+        size_t len = strlen(buffer);
+        buffer[len] = '.';
+        buffer[len + 1] = '0';
+        buffer[len + 2] = '\0';
+    }
     return rt_string_new(buffer);
 }
 

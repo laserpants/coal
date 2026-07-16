@@ -192,10 +192,21 @@ test_to_string_conversions(void)
     assert(strcmp(rt_string_data(float_str), "3.14159") == 0);
     assert(rt_string_length(float_str) == 7);
 
+    // Whole-valued float must preserve the decimal point
+    rt_string_t *float_zero = rt_float_to_string(0.0f);
+    assert(strcmp(rt_string_data(float_zero), "0.0") == 0);
+
     // Test double_to_string
     rt_string_t *double_str = rt_double_to_string(2.718281828459045);
     assert(strcmp(rt_string_data(double_str), "2.71828182845905") == 0);
     assert(rt_string_length(double_str) == 16);
+
+    // Whole-valued double must preserve the decimal point
+    rt_string_t *double_zero = rt_double_to_string(0.0);
+    assert(strcmp(rt_string_data(double_zero), "0.0") == 0);
+
+    rt_string_t *double_one = rt_double_to_string(1.0);
+    assert(strcmp(rt_string_data(double_one), "1.0") == 0);
 
     // Test bignum_to_string
     rt_bignum_t *bn = rt_bignum_new("123456789012345678901234567890");
