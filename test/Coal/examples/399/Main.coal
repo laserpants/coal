@@ -3,6 +3,7 @@ module Main {
   import namespace IO
   import namespace Containers.Set
   import namespace List
+  import namespace Nat
 
   import Containers.Set (Set)
   import List(reduce)
@@ -454,12 +455,40 @@ module Main {
       else
         state
 
+  // ---------------------------------------------------------------------------
+  // Structural recursion helpers
+  // ---------------------------------------------------------------------------
+
+  // Return the list [start, start + 1, ..., start + count - 1].
+  fun range(start : int32, count : nat) : List<int32> =
+    fold(count, start) {
+      | Zero      => fn(_) => []
+      | Succ(@go) => fn(s) => s :: go(s + 1)
+    }
+
+  // Apply the function `f` to the value `x`, `n` times.
+  fun iterate_n(n : nat, f : a -> a, x : a) : a =
+    fold(n, x) {
+      | Zero      => fn(y) => y
+      | Succ(@go) => fn(y) => go(f(y))
+    }
+
+  // Drop the current block as far as it will go. The board is 20 cells tall,
+  // so the block can never move down more than 20 times; 30 iterations is a
+  // safe upper bound. Once the block cannot move down, further steps are
+  // no-ops, so the extra iterations have no effect.
+  fun drop_to_bottom(state : GameState) : GameState =
+    iterate_n(
+      Nat.pack(30),
+      fn(s) =>
+        if (can_move_down(s))
+          then move_current_block(0, 1, s)
+          else s,
+      state
+    )
+
   fun hard_drop(state : GameState) =
-    if (can_move_down(state))
-      then
-        hard_drop(move_current_block(0, 1, state))
-      else
-        on_piece_landed(state)
+    on_piece_landed(drop_to_bottom(state))
 
   // ---------------------------------------------------------------------------
   // Board API  
@@ -477,67 +506,67 @@ module Main {
   fun board_cell_is_set(cell : (int32, int32), game_state : GameState) : bool =
     is_board_member(cell, game_state.board)
 
-  fun board_count_x(y : int32, x : int32, board : Board) =
-    if (x >= 10)
-      then 0
-      else
-        let rest = board_count_x(y, x + 1, board) in
-        if (is_board_member((x, y), board))
-          then 1 + rest
-          else rest
-
   fun board_count_in_row(y : int32, board : Board) =
-    board_count_x(y, 0, board)
-  
-  fun board_remove_row_x(y : int32, x : int32, board : Board) =
-    if (x >= 10)
-      then board
-      else
-        board_remove_row_x(y, x + 1, Containers.Set.delete((x, y), board))
-
-  fun board_remove_row(y : int32, board : Board) =
-    board_remove_row_x(y, 0, board)
-  
-  fun board_shift_row_x(y : int32, x : int32, board : Board) =
-    if (x >= 10)
-      then board
-      else
+    List.reduce_left(
+      fn(count, x) =>
         if (is_board_member((x, y), board))
-          then
-            let
-              board_del = Containers.Set.delete((x, y), board)
-            in
-            board_shift_row_x(y, x + 1, Containers.Set.insert((x, y + 1), board_del))
-          else
-            board_shift_row_x(y, x + 1, board)
+          then count + 1
+          else count,
+      0,
+      range(0, Nat.pack(10))
+    )
   
-  fun board_shift_rows_above_from(start_y : int32, board : Board) =
-    if (start_y < 0)
-      then board
-      else
-        board_shift_rows_above_from(start_y - 1, board_shift_row_x(start_y, 0, board))
+  fun board_remove_row(y : int32, board : Board) =
+    List.reduce_left(
+      fn(acc, x) => Containers.Set.delete((x, y), acc),
+      board,
+      range(0, Nat.pack(10))
+    )
+  
+  // Shift the cells in row `y` down by one. Membership is checked against the
+  // original `board`; since each column `x` only affects its own cell, this is
+  // equivalent to folding over the accumulating board.
+  fun board_shift_row(y : int32, board : Board) : Board =
+    List.reduce_left(
+      fn(acc, x) =>
+        if (is_board_member((x, y), board))
+          then Containers.Set.insert((x, y + 1), Containers.Set.delete((x, y), acc))
+          else acc,
+      board,
+      range(0, Nat.pack(10))
+    )
 
-  fun board_shift_rows_above(cleared_y : int32, board : Board) =
-    board_shift_rows_above_from(cleared_y - 1, board)
+  // Shift rows `cleared_y - 1` down to row 0, in descending order. Reversing
+  // the ascending range yields [cleared_y - 1, ..., 0], preserving the
+  // original top-down order of operations.
+  fun board_shift_rows_above(cleared_y : int32, board : Board) : Board =
+    List.reduce_left(
+      fn(acc, y) => board_shift_row(y, acc),
+      board,
+      List.reverse(range(0, Nat.pack(cleared_y)))
+    )
   
-  fun board_clear_full_rows_from(y : int32, board : Board) =
+  // One step of the row-clearing loop, operating on a (row, board) pair. If
+  // the current row is full it is removed, the rows above are shifted down,
+  // and the same row is examined again; otherwise the next row up is examined.
+  fun board_clear_step((y, board) : (int32, Board)) : (int32, Board) =
     if (y < 0)
-      then board
+      then (y, board)
       else
         if (board_count_in_row(y, board) == 10)
-          then
-            let
-              removed = board_remove_row(y, board)
-            in
-            let
-              shifted = board_shift_rows_above(y, removed)
-            in
-            board_clear_full_rows_from(y, shifted)
-          else
-            board_clear_full_rows_from(y - 1, board)
-  
+          then (y, board_shift_rows_above(y, board_remove_row(y, board)))
+          else (y - 1, board)
+
   fun board_clear_full_rows(board : Board) =
-    board_clear_full_rows_from(19, board)
+    match(
+      // There are at most 20 row-clearing steps (one per row) plus 20 steps
+      // moving up past each row, so 50 iterations is a safe upper bound. Once
+      // the row index drops below 0 the step is a no-op, so the extra
+      // iterations have no effect.
+      iterate_n(Nat.pack(50), board_clear_step, (19, board))
+    ) {
+      | (_, result_board) => result_board
+    }
 
   fun board_to_list(board : Board) : List<(int32, int32)> =
     Containers.Set.to_list(board)
