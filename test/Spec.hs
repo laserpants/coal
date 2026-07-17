@@ -4,19 +4,14 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
 import Coal.Language.Type
-import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (..), applyTypeArgs)
-import Coal.Language.Type.Kind
-import Coal.Language.Type.Operations (tupleType)
-import Coal.Language.Type.Scheme
-import Coal.Language.TypeSpec
-import Coal.TypeSystem.Constraint.Solver
-import Coal.TypeSystem.Parameterized
+import Coal.Language.Type.Kind (Kind (KArrow, KType))
+import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
+import Coal.TypeSystem.Parameterized (ToIndexed (toIndexed))
 import Coal.TypeSystemSpec (typeSystemSpec)
-import Control.Monad.Reader
-import Control.Monad.State
-import qualified Data.Set as Set
-import E2E.Spec
-import Test.Hspec
+import Control.Monad.Reader (ReaderT (runReaderT))
+import Control.Monad.State (State, runState)
+import E2E.Spec (e2eSpec)
+import Test.Hspec (SpecWith, describe, hspec)
 
 spec :: SpecWith ()
 spec =
