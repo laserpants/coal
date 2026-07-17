@@ -2280,7 +2280,151 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  0 : int32
+                  @<Machine(*,*)>
+                    ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                    , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                        ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                        , { state = f : Machine(*,*)/Machine(*,*)
+                          | step =
+                              fn(input : *, $unused_state : *) =>
+                                let
+                                  $unfolded : Machine(*,*) =
+                                    @<Machine(*,*)>
+                                      ( f : Machine(*,*)/Machine(*,*)
+                                      , @<Machine(*,*)>
+                                          ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
+                                          , f : Machine(*,*)/Machine(*,*)
+                                          )
+                                      )
+                                  in
+                                    case<Machine(*,*)>($unfolded : Machine(*,*)) {
+                                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                        , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                        ) =>
+                                            case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                                , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                                ) =>
+                                                    let
+                                                      $inner_state : * =
+                                                        get?_state<*>($row : { state : * | * })
+                                                      in
+                                                        let
+                                                          $inner_step : */*/Machine(*,*) =
+                                                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                                          in
+                                                            @<Machine(*,*)>
+                                                              ( $inner_step : */*/Machine(*,*)
+                                                              , input : *
+                                                              , $inner_state : *
+                                                              )
+                                            }
+                                    }
+                          | view =
+                              fn($unused_state2 : *) =>
+                                let
+                                  $unfolded2 : Machine(*,*) =
+                                    @<Machine(*,*)>
+                                      ( f : Machine(*,*)/Machine(*,*)
+                                      , @<Machine(*,*)>
+                                          ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
+                                          , f : Machine(*,*)/Machine(*,*)
+                                          )
+                                      )
+                                  in
+                                    case<Machine(*,*)>($unfolded2 : Machine(*,*)) {
+                                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                        , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                        ) =>
+                                            case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                                , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                                ) =>
+                                                    let
+                                                      $inner_state2 : * =
+                                                        get?_state<*>($row2 : { state : * | * })
+                                                      in
+                                                        let
+                                                          $inner_view : */* =
+                                                            get?_view<*/*>($row2 : { view : */* | * })
+                                                          in
+                                                            @<*>
+                                                              ( $inner_view : */*
+                                                              , $inner_state2 : *
+                                                              )
+                                            }
+                                    }
+                          | {}
+                          }
+                        )
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.machine$_run_while"
+      [ NK.Label (NKC.unit `NKC.arrow` NKC.bool) "pred"
+      , NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "m"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  if
+                    ( @<bool>
+                        ( pred : unit/bool
+                        , ()
+                        )
+                    )
+                  then
+                    case<Machine(*,*)>(m : Machine(*,*)) {
+                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                        , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                        ) =>
+                            case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                ) =>
+                                    let
+                                      $cur_state : * =
+                                        get?_state<*>($row : { state : * | * })
+                                      in
+                                        let
+                                          $cur_step : */*/Machine(*,*) =
+                                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                          in
+                                            @<*>
+                                              ( `Builtin$.machine$_run_while` : (unit/bool)/Machine(*,*)/*
+                                              , pred : unit/bool
+                                              , @<Machine(*,*)>
+                                                  ( $cur_step : */*/Machine(*,*)
+                                                  , ()
+                                                  , $cur_state : *
+                                                  )
+                                              )
+                            }
+                    }
+                  else
+                    case<Machine(*,*)>(m : Machine(*,*)) {
+                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                        , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                        ) =>
+                            case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                ) =>
+                                    let
+                                      $fin_state : * =
+                                        get?_state<*>($row2 : { state : * | * })
+                                      in
+                                        let
+                                          $fin_view : */* =
+                                            get?_view<*/*>($row2 : { view : */* | * })
+                                          in
+                                            @<*>
+                                              ( $fin_view : */*
+                                              , $fin_state : *
+                                              )
+                            }
+                    }
         |]
       )
   ]

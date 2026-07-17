@@ -6,6 +6,7 @@ module Main {
 
   import Containers.Set (Set)
   import List(reduce)
+  import Codata.Machine (machine, run_while)
 
   type Shape
     = ShapeI
@@ -657,27 +658,24 @@ module Main {
         current_block_cells(new_state)
       )(fn(_) => new_state)
 
-  fun loop(game_state : GameState) =
-    #{event_loop_has_next : unit -> bool}(())(
-      fn(has_next) =>
-        if (has_next)
-          then
-            #{event_loop_next : unit -> int32}(())(
-              fn(ev_code : int32) =>
-                let
-                  next_state = 
-                    handle(ev_code, game_state)
-                  in
-                    loop(next_state)
-            )
-          else
-            game_state
+  let game_machine : Machine<unit, GameState> =
+    machine(
+      initial_game_state,
+      fn(_, state) =>
+        #{event_loop_next : unit -> int32}(())(
+          fn(ev_code : int32) => handle(ev_code, state)
+        ),
+      fn(state) => state
     )
 
   fun main() = 
     IO.__return_io(
       #{event_loop_init : int32 -> unit}(300 : int32)(
-        fn(_) => loop(initial_game_state)
+        fn(_) =>
+          run_while(
+            fn(_) => #{event_loop_has_next : unit -> bool}(())(fn(b : bool) => b),
+            game_machine
+          )
       )
     )
 
