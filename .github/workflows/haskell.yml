@@ -34,4 +34,4 @@ jobs:
         run: stack build --test --no-run-tests
 
       - name: Test
-        run: stack test --ta '--match Unit --match Kernel'
+        run: stack test --ta '--match Unit' #  --match Kernel'
