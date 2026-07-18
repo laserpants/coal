@@ -40,7 +40,7 @@ module Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (
   administrativeNormalForm,
 ) where
 
-import Control.Monad.State.Strict (State, evalState, get, put)
+import Control.Monad.State.Strict (State, evalState, get, put, state)
 import qualified Data.List.NonEmpty as NonEmpty
 
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
@@ -353,7 +353,7 @@ rebuildOp :: (Traversable f) => [a] -> f b -> f a
 rebuildOp xs op = evalState (traverse (const pop) op) xs
  where
   pop :: State [a] a
-  pop = do
-    x : xs <- get
-    put xs
-    pure x
+  pop = state $
+    \case
+      (x : xs) -> (x, xs)
+      [] -> error "rebuildOp: empty list"
