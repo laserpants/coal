@@ -38,6 +38,7 @@ module Coal.Kernel.Pipeline.Pass.LambdaLifting (
 ) where
 
 import Control.Monad.State.Strict (State, evalState, get, put)
+import Data.Functor (unzip)
 import Data.List (sortBy)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -46,6 +47,7 @@ import qualified Data.Map.Strict as Map
 import Data.Ord (comparing)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Prelude hiding (unzip)
 
 import Coal.Common.Name (Name)
 import Coal.Kernel.FreeVars (freeVars)
@@ -256,7 +258,7 @@ liftBindings ::
   PipelineT m (NonEmpty (Binding Type), [Object Type])
 liftBindings globals scope bindings = do
   pairs <- mapM (liftBinding globals scope) bindings
-  let (bs, news) = NonEmpty.unzip pairs
+  let (bs, news) = unzip pairs
   pure (bs, concat (NonEmpty.toList news))
 
 {- | Lift a single let binding.  When the RHS is an 'ELam' whose body
@@ -333,7 +335,7 @@ liftClauses globals scope clauses = do
           pure (Clause params body', new)
       )
       clauses
-  let (cs, news) = NonEmpty.unzip pairs
+  let (cs, news) = unzip pairs
   pure (cs, concat (NonEmpty.toList news))
 
 {- | Rebuild an 'Op' by popping from a list of replacement operands in order.

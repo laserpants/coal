@@ -46,14 +46,16 @@ prettyTypePrec prec (TCon "/" [t1, t2]) =
   let inner = prettyTypePrec 2 t1 <> "/" <> prettyTypePrec 1 t2
    in if prec >= 2 then parens inner else inner
 prettyTypePrec _ (TCon name args)
-  | name == "list" && length args == 1 =
-      "list" <> parens (prettyType (head args))
+  | name == "list"
+  , [arg] <- args =
+      "list" <> parens (prettyType arg)
   | T.isPrefixOf "tuple" name && not (null args) =
       -- tuple2, tuple3, etc. - NO SPACES
       pretty name <> parens (prettyCommaSep args)
-  | name == "record" && length args == 1 =
+  | name == "record"
+  , [arg] <- args =
       -- record types: the argument is already a row (with braces)
-      "record" <> parens (prettyType (head args))
+      "record" <> parens (prettyType arg)
   | null args =
       pretty name
   | otherwise =

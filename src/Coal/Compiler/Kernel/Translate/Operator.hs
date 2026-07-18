@@ -72,8 +72,8 @@ stringConcatenationOperator translate es = do
       t1
       (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__string_concatenation"))
       args
-  where 
-    t1 = translateType (TIntrinsic IString)
+ where
+  t1 = translateType (TIntrinsic IString)
 
 listConcatenationOperator ::
   (Monad m) =>
@@ -88,8 +88,8 @@ listConcatenationOperator translate t es = do
       t1
       (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__list_concatenation"))
       args
-  where 
-    t1 = translateType t
+ where
+  t1 = translateType t
 
 reverseCompositionOperator ::
   (Monad m) =>
@@ -104,8 +104,8 @@ reverseCompositionOperator translate t es = do
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
       args
-  where
-    t1 = translateType t
+ where
+  t1 = translateType t
 
 forwardCompositionOperator ::
   (Monad m) =>
@@ -120,8 +120,8 @@ forwardCompositionOperator translate t es = do
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
       args
-  where
-    t1 = translateType t
+ where
+  t1 = translateType t
 
 reverseApplicationOperator ::
   (Monad m) =>
@@ -136,8 +136,8 @@ reverseApplicationOperator translate t es = do
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
       args
-  where
-    t1 = translateType t
+ where
+  t1 = translateType t
 
 forwardApplicationOperator ::
   (Monad m) =>
@@ -152,8 +152,8 @@ forwardApplicationOperator translate t es = do
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_application"))
       args
-  where
-    t1 = translateType t
+ where
+  t1 = translateType t
 
 binop ::
   (Monad m, Data a) =>
