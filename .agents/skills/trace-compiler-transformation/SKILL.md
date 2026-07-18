@@ -1,6 +1,6 @@
 ---
 name: trace-compiler-transformation
-description: Use when tracing a source construct, expression, type, value, generated LLVM instruction, or runtime behaviour through multiple compiler stages to identify where semantics diverge. Particularly useful when investigating regressions between the legacy and new compiler pipelines.
+description: Use when tracing a source construct, expression, type, value, generated LLVM instruction, or runtime behaviour through multiple compiler stages to identify where semantics diverge.
 ---
 
 # Trace Compiler Transformation
@@ -22,7 +22,6 @@ The goal is to identify the **first compiler stage where the behaviour diverges 
 - Gather evidence before making edits.
 - Prefer understanding over speculation.
 - Stop when the first incorrect transformation has been identified.
-- The legacy compiler is the behavioural reference unless instructed otherwise.
 
 ---
 
@@ -32,7 +31,6 @@ Use this skill when:
 
 - a compiled program crashes
 - generated LLVM IR appears incorrect
-- the new compiler behaves differently from the legacy compiler
 - a value appears to change unexpectedly during compilation
 - a generated instruction appears suspicious
 - a type or expression is transformed incorrectly
@@ -106,20 +104,7 @@ Do not skip stages without explanation.
 
 ---
 
-### Step 4 — Compare With the Legacy Pipeline
-
-If the legacy compiler can produce the same program:
-
-- compare representations
-- ignore formatting
-- ignore generated identifiers
-- ignore cosmetic differences
-
-Focus only on semantic differences.
-
----
-
-### Step 5 — Identify the First Divergence
+### Step 4 — Identify the First Divergence
 
 Locate the earliest point where:
 
@@ -132,7 +117,7 @@ This is usually far more useful than analysing the final LLVM IR in isolation.
 
 ---
 
-### Step 6 — Explain the Root Cause
+### Step 5 — Explain the Root Cause
 
 Summarize:
 
@@ -147,7 +132,7 @@ Avoid speculation.
 
 ---
 
-### Step 7 — Recommend a Fix
+### Step 6 — Recommend a Fix
 
 Only after the divergence has been identified:
 
