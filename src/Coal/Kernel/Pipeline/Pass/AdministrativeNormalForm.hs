@@ -354,6 +354,6 @@ rebuildOp xs op = evalState (traverse (const pop) op) xs
  where
   pop :: State [a] a
   pop = do
-    xs' <- get
-    put (tail xs')
-    pure (head xs')
+    x : xs <- get
+    put xs
+    pure x
