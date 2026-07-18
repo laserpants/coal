@@ -67,7 +67,7 @@ import Coal.Language
 import Coal.Language.Module.Path (Path (Path), principalPath)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
-import Control.Monad.Except (MonadError (throwError), forM)
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (execStateT, get, gets, modify, put)
 import Data.Data (Data)
@@ -80,7 +80,7 @@ import Data.Maybe (catMaybes)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
-import Extras (Dictionary, Name, forM_, traverse_, twice)
+import Extras (Dictionary, Name, forM, forM_, traverse_, twice)
 
 passInsertDictionaries :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passInsertDictionaries = Pass{runPass = pass}

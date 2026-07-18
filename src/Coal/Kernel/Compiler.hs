@@ -40,33 +40,23 @@ module Coal.Kernel.Compiler (
   compileFiles,
 ) where
 
-import Control.Monad.Except (ExceptT, MonadError, MonadTrans (..), runExceptT, throwError)
+import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Identity (Identity, runIdentity)
 import Control.Monad.State (runStateT)
+import Control.Monad.Trans (MonadTrans (..))
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
 import LLVM.IR
 
 import Coal.Compiler.Config (CompilerConfig (configEntryPoint))
-import Coal.Kernel.LLVM.Codegen (
-  irMainModule,
-  irModule,
- )
-import Coal.Kernel.LLVM.Monad (
-  IRCodegen,
-  IRCodegenError,
-  runIRCodegen,
- )
+import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
+import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenError, runIRCodegen)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Type (Type)
 import qualified Coal.Kernel.Parser.Module as Parser
-import Coal.Kernel.Pipeline (
-  PipelineError,
-  evalPipeline,
-  initialPipelineState,
- )
+import Coal.Kernel.Pipeline (PipelineError, evalPipeline, initialPipelineState)
 import Coal.Kernel.Pipeline.Passes (pipeline)
 import Text.Megaparsec (errorBundlePretty, parse)
 

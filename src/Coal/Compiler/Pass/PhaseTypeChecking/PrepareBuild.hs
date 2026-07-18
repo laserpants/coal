@@ -66,9 +66,10 @@ import Coal.TypeSystem.Parameterized (Parameterized (instantiateTypeIndexes), To
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless)
-import Control.Monad.Except (MonadError (throwError), MonadIO)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
-import Control.Monad.State (StateT, execStateT, foldM, get, gets, modify)
+import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.List (intersect)
 import qualified Data.Map.Strict as Map
@@ -76,7 +77,7 @@ import Data.Set (Set, (\\))
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import Data.Tuple.Extra (uncurry3)
-import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
+import Extras (Name, foldM, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
 passPrepareBuild :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())

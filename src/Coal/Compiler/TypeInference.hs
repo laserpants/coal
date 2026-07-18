@@ -69,7 +69,7 @@ import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replac
 import Coal.TypeSystem.Substitution
 import Control.Arrow ((>>>))
 import Control.Monad (unless)
-import Control.Monad.Except (forM_, throwError)
+import Control.Monad.Except (throwError)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (get, gets)
 import Control.Monad.Writer (MonadWriter, execWriter, tell)
@@ -78,7 +78,7 @@ import Data.Either.Extra (partitionEithers)
 import Data.List.Extra (groupSortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Extras (Dictionary, Name, concatMapM)
+import Extras (Dictionary, Name, concatMapM, forM_)
 
 generateKindConstraints :: (Monad m) => Module a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do

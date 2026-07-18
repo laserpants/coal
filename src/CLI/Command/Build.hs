@@ -6,14 +6,17 @@ module CLI.Command.Build (buildCommand) where
 import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config
+import Control.Monad (join)
 import Control.Monad.Except
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Class (lift)
 import Data.List (nub)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, maybeToList)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extras (Name)
+import Extras (Name, forM)
 import Package (packageIncludes)
 import Package.Error (PackageError (..))
 import Package.Manifest (PackageManifest (..), filePaths, loadProjectManifest)

@@ -7,13 +7,14 @@
 module Package (packageIncludes, toModuleNamespace) where
 
 import Control.Monad.Except
+import Control.Monad.IO.Class (liftIO)
 import Data.Char (toUpper)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extras (Name)
+import Extras (Name, forM)
 import Package.Entry (PackageEntry (..))
 import Package.Error (PackageError (..))
 import Package.Lock (LockSpec (..), PackageLock (..), loadLockFile)

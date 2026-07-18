@@ -48,7 +48,6 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
-import Control.Monad.Except (forM_)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.IORef (modifyIORef', newIORef)
 import Data.List (nub)
@@ -56,6 +55,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
+import Extras (forM_)
 import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
 import System.IO (hPutStr, stderr)

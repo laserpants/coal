@@ -15,7 +15,9 @@ module Package.Manifest (
 
 import CLI.Git.Commit (GitCommit (..))
 import Coal.Language.Module.Path (parsePath, toFilePath)
+import Control.Monad (unless)
 import Control.Monad.Except
+import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
 import Data.Either.Extra (eitherToMaybe)
@@ -23,7 +25,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extras (Name)
+import Extras (Name, forM)
 import GHC.Generics (Generic)
 import Package.Dependency (PackageDependency)
 import Package.Error (PackageError (..))

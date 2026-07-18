@@ -13,6 +13,7 @@ import CLI.Error (CLIError (..))
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
 import Control.Monad.Except
+import Control.Monad.IO.Class (liftIO)
 import Data.Char (isSpace)
 import Data.Either.Extra (eitherToMaybe)
 import Data.List (sortOn)

@@ -40,7 +40,8 @@ import Coal.Compiler.State (CompilerState (..))
 import Coal.Language.Definition
 import Coal.Language.Module
 import Coal.Language.Module.Path
-import Control.Monad.Except (MonadError (throwError), unless)
+import Control.Monad (unless)
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (get)
 import Extras (Name)

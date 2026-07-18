@@ -17,14 +17,13 @@ import Coal.Compiler.Journal (RecordEntry, listenRecordEntry, tellRecordEntry)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Control.Monad.RWS (forM, replicateM)
 import Data.Data (Data)
 import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (transformBiM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
-import Extras (Name)
+import Extras (Name, forM, replicateM)
 
 passExpandRecordPatterns :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind IndexedType) (Module a Kind IndexedType)
 passExpandRecordPatterns = Pass{runPass = transformBiM passImpl}

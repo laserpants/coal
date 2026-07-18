@@ -42,15 +42,12 @@ module Coal.Kernel.Pipeline (
 ) where
 
 import Coal.Common.Name (Name)
-import Control.Monad.Except (
-  ExceptT,
-  MonadError,
-  MonadIO,
-  MonadTrans (..),
-  runExceptT,
- )
+import Control.Monad.Except (ExceptT, MonadError, runExceptT)
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Identity (Identity, runIdentity)
 import Control.Monad.State (MonadState, StateT, gets, modify, runStateT)
+import Control.Monad.Trans (lift)
+import Control.Monad.Trans.Class (MonadTrans)
 import qualified Data.Text as Text
 
 newtype PipelineState = PipelineState

@@ -7,6 +7,7 @@ import CLI.Error (CLIError (..))
 import CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
+import Control.Monad (unless)
 import Control.Monad.Except
 import Control.Monad.State
 import Data.Aeson.Encode.Pretty
@@ -21,7 +22,7 @@ import qualified Data.SemVer.Constraint as SemVerConstraint
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
-import Extras (Name, Over)
+import Extras (Name, Over, forM_)
 import Package.Dependency (PackageDependency (..))
 import Package.Error (PackageError (..))
 import Package.Lock (PackageLock (..))

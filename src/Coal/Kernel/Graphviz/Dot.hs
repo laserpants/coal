@@ -26,7 +26,7 @@ module Coal.Kernel.Graphviz.Dot (
   emitShape,
 ) where
 
-import Control.Monad.State (State, forM, forM_, get, modify, put, runState)
+import Control.Monad.State (State, get, modify, put, runState)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -44,6 +44,7 @@ import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Prettyprinter.Type as KernelType
+import Extras (forM, forM_)
 
 -- | Shapes available for DOT nodes
 data DotShape

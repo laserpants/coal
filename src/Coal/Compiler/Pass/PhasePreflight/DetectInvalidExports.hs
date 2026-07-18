@@ -41,7 +41,8 @@ import Coal.Language.Definition
 import Coal.Language.Module
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Path (principalPath)
-import Control.Monad.Except (MonadError (throwError), unless)
+import Control.Monad (unless)
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
 import Data.List.NonEmpty (NonEmpty (..))

@@ -9,6 +9,7 @@ module Package.Lock (
 ) where
 
 import Control.Monad.Except
+import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
 import Data.Map.Strict (Map)
