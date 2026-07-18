@@ -95,7 +95,8 @@ pass envelopes = do
 
   -- Assemble each module's LLVM IR to bitcode via llvm-as.
   -- irs[0] is Builtin$'s IR; irs[1..n] correspond to augmented[0..n-1].
-  let named = ("Builtin$", head irs) : zip (fst <$> sources) (tail irs)
+  let (builtinIR : sourceIRs) = irs
+      named = ("Builtin$", builtinIR) : zip (fst <$> sources) sourceIRs
   results <- liftIO $
     withSystemTempDirectory "coal-build-nk" $ \tmpDir ->
       traverse (assembleOne configGenerateLLVMOutput tmpDir) named
