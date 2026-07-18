@@ -185,4 +185,3 @@ The [documentation](https://coal-lang.org/) is built with MkDocs and the Materia
 ## License 
 
 This project is licensed under the terms of the MIT license. See the `LICENSE` file in this repository for details.
-
