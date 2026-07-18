@@ -18,7 +18,7 @@ jobs:
     steps: 
       - uses: https://code.forgejo.org/actions/checkout@v6 
 
-      - run: bash scripts/coal-install.sh
+      - run: bash scripts/coal-install
 
       - run: stack test --ta '--match Unit --match Kernel'
 
