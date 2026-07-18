@@ -27,6 +27,9 @@ jobs:
           restore-keys: |
             stack-${{ runner.os }}-
 
+      - name: Prepare
+        run: bash runtime/scripts/combine.sh
+
       - name: Build
         run: stack build --test --no-run-tests
 
