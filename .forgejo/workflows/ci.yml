@@ -8,7 +8,7 @@ on:
       - "**"
 jobs:
   build:
-    runs-on: docker
+    runs-on: codeberg-small
 
     container:
       image: ghcr.io/laserpants/coal-dev:latest
