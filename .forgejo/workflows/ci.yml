@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "**"
+jobs:
+  build:
+    runs-on: docker
+
+    container:
+      image: ghcr.io/laserpants/coal-dev:latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: bash scripts/coal-install.sh
+
+      - run: stack test --ta '--match Unit --match Kernel'
