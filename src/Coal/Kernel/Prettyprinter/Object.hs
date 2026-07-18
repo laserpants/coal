@@ -34,18 +34,18 @@ prettyObject pt obj =
         [] -> error "DData with empty constructor list"
         (firstCtor : restCtors) ->
           let retType = returnTypeOf (snd firstCtor)
-          prettyConstructor (ctorName, ctorType) =
-            let typeList = NonEmpty.toList (unfoldType ctorType)
-                fieldTypes = init typeList -- drop the return type
-             in if null fieldTypes
-                  then pretty ctorName
-                  else
-                    pretty ctorName
-                      <> parens
-                        (mconcat $ punctuate ", " (map pt fieldTypes))
-          firstCtorLine = "  = " <> prettyConstructor firstCtor
-          restCtorLines = map (("  | " <>) . prettyConstructor) restCtors
-       in vsep $ ("data " <> pt retType) : firstCtorLine : restCtorLines
+              prettyConstructor (ctorName, ctorType) =
+                let typeList = NonEmpty.toList (unfoldType ctorType)
+                    fieldTypes = init typeList -- drop the return type
+                 in if null fieldTypes
+                      then pretty ctorName
+                      else
+                        pretty ctorName
+                          <> parens
+                            (mconcat $ punctuate ", " (map pt fieldTypes))
+              firstCtorLine = "  = " <> prettyConstructor firstCtor
+              restCtorLines = map (("  | " <>) . prettyConstructor) restCtors
+           in vsep $ ("data " <> pt retType) : firstCtorLine : restCtorLines
     DFunction _ name params body ->
       case params of
         [param] ->
