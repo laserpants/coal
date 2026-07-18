@@ -58,7 +58,7 @@ checkCaseExpressionsCanonical expr = case expr of
     foldMap checkCaseExpressionsCanonical op
   ECase _ scrutinee clauses ->
     let names = map clauseConName (NonEmpty.toList clauses)
-        orderErrors = concat (zipWith checkPair names (tail names))
+        orderErrors = concat (zipWith checkPair names (drop 1 names))
         scrutineeErrors = checkCaseExpressionsCanonical scrutinee
         clauseErrors = foldMap checkClauseBody (NonEmpty.toList clauses)
      in orderErrors ++ scrutineeErrors ++ clauseErrors

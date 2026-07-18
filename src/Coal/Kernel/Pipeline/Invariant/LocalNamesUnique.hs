@@ -27,6 +27,7 @@ module Coal.Kernel.Pipeline.Invariant.LocalNamesUnique (
 ) where
 
 import Data.List (nub, sort)
+import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
 import Coal.Common.Name (Name)
@@ -106,8 +107,8 @@ the first, which is the constructor) and recurse into the clause body.
 -}
 clauseBinders :: Clause Type -> [Name]
 clauseBinders (Clause labels body) =
-  map labelName (NonEmpty.tail labels)
-    ++ collectLocalBinders body
+  case labels of
+    _ :| rest -> map labelName rest ++ collectLocalBinders body
 
 -- | Extract the 'Name' from a 'Label'.
 labelName :: Label t -> Name
@@ -117,6 +118,6 @@ labelName (Label _ name) = name
 list.
 -}
 findDuplicates :: [Name] -> [Name]
-findDuplicates names = nub [a | (a, b) <- zip sorted (tail sorted), a == b]
+findDuplicates names = nub [a | (a, b) <- zip sorted (drop 1 sorted), a == b]
  where
   sorted = sort names

@@ -30,9 +30,10 @@ prettyObject pt obj =
       -- data ReturnType
       --   = CtorName(field1, field2)
       --   | CtorName2
-      let retType = case ctors of
-            [] -> error "DData with empty constructor list"
-            ((_, t) : _) -> returnTypeOf t
+      case ctors of
+        [] -> error "DData with empty constructor list"
+        (firstCtor : restCtors) ->
+          let retType = returnTypeOf (snd firstCtor)
           prettyConstructor (ctorName, ctorType) =
             let typeList = NonEmpty.toList (unfoldType ctorType)
                 fieldTypes = init typeList -- drop the return type
@@ -42,19 +43,19 @@ prettyObject pt obj =
                     pretty ctorName
                       <> parens
                         (mconcat $ punctuate ", " (map pt fieldTypes))
-          firstCtor = "  = " <> prettyConstructor (head ctors)
-          restCtors = map (("  | " <>) . prettyConstructor) (tail ctors)
-       in vsep $ ("data " <> pt retType) : firstCtor : restCtors
+          firstCtorLine = "  = " <> prettyConstructor firstCtor
+          restCtorLines = map (("  | " <>) . prettyConstructor) restCtors
+       in vsep $ ("data " <> pt retType) : firstCtorLine : restCtorLines
     DFunction _ name params body ->
-      if length params == 1
-        then -- Single param: Name(param) = body
-
+      case params of
+        [param] ->
+          -- Single param: Name(param) = body
           pretty name
-            <> parens (prettyLabel pt (head params))
+            <> parens (prettyLabel pt param)
             <+> "="
               <> nest 2 (line <> prettyExpr pt body)
-        else -- Multi param: Name\n  ( param1\n  , param2\n  ) =\n    body
-
+        _ ->
+          -- Multi param: Name\n  ( param1\n  , param2\n  ) =\n    body
           pretty name
             <> nest
               2
