@@ -10,12 +10,17 @@ jobs:
   build:
     runs-on: codeberg-small
 
-    container:
-      image: ghcr.io/laserpants/coal-dev:latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - run: bash scripts/coal-install.sh
+      - run: |
+          docker run \
+            --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            ghcr.io/laserpants/coal-dev:latest \
+            bash scripts/coal-install.sh
 
       - run: stack test --ta '--match Unit --match Kernel'
+
+      - run: coal --version
