@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
@@ -37,7 +38,7 @@ module Coal.Kernel.Pipeline.Pass.LambdaLifting (
   lambdaLifting,
 ) where
 
-import Control.Monad.State.Strict (State, evalState, get, put)
+import Control.Monad.State.Strict (State, evalState, get, put, state)
 import Data.Functor (unzip)
 import Data.List (sortBy)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -182,7 +183,9 @@ liftExpr globals scope expr =
           resolveFv n =
             case Map.lookup n scope of
               Just lbl -> lbl
-              Nothing -> head [l | l@(Label _ n') <- fvAll, n' == n]
+              Nothing -> case [l | l@(Label _ n') <- fvAll, n' == n] of
+                (lbl : _) -> lbl
+                [] -> error "resolveFv: free variable not found in fvAll"
           fvLabels = sortBy (comparing labelName) (map resolveFv (Set.toList fvNameSet))
       -- 3. Mint a fresh top-level name.
       liftedName <- freshName "lam"
@@ -298,7 +301,9 @@ liftBinding globals scope (Binding lbl e) = case e of
         resolveFv n =
           case Map.lookup n scope of
             Just l -> l
-            Nothing -> head [l | l@(Label _ n') <- fvAll, n' == n]
+            Nothing -> case [l | l@(Label _ n') <- fvAll, n' == n] of
+              (lbl : _) -> lbl
+              [] -> error "resolveFv: free variable not found in fvAll"
         fvLabels = sortBy (comparing labelName) (map resolveFv (Set.toList fvNameSet))
     liftedName <- freshName "lam"
     let allParams = fvLabels ++ NonEmpty.toList params
@@ -329,7 +334,8 @@ liftClauses globals scope clauses = do
     mapM
       ( \(Clause params body) -> do
           let clauseScope =
-                Map.fromList [(n, lbl) | lbl@(Label _ n) <- NonEmpty.tail params]
+                case params of
+                  _ :| rest -> Map.fromList [(n, lbl) | lbl@(Label _ n) <- rest]
                   `Map.union` scope
           (body', new) <- liftExpr globals clauseScope body
           pure (Clause params body', new)
@@ -345,10 +351,10 @@ rebuildOp :: (Traversable f) => [a] -> f b -> f a
 rebuildOp xs op = evalState (traverse (const pop) op) xs
  where
   pop :: State [a] a
-  pop = do
-    xs' <- get
-    put (tail xs')
-    pure (head xs')
+  pop = state $
+    \case
+      (x : xs) -> (x, xs)
+      [] -> error "rebuildOp: empty list"
 
 -- --------------------------------------------------------------------------
 -- Substitution
@@ -395,9 +401,9 @@ substituteVar n replacement = go
     EExt name e1 e2 -> EExt name (go e1) (go e2)
     EGet l e -> EGet l (go e)
     ECall label args k -> ECall label (map go args) (go k)
-  goClause (Clause labels body)
-    | any (\(Label _ pn) -> pn == n) (NonEmpty.tail labels) =
-        -- n is a pattern variable; do not substitute in the clause body.
-        Clause labels body
-    | otherwise =
-        Clause labels (go body)
+  goClause (Clause labels body) =
+    let (_ :| sndLabels) = labels
+     in if any (\(Label _ pn) -> pn == n) sndLabels
+          then -- n is a pattern variable; do not substitute in the clause body.
+            Clause labels body
+          else Clause labels (go body)

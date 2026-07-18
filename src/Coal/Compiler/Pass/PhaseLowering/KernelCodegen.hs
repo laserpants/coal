@@ -95,8 +95,11 @@ pass envelopes = do
 
   -- Assemble each module's LLVM IR to bitcode via llvm-as.
   -- irs[0] is Builtin$'s IR; irs[1..n] correspond to augmented[0..n-1].
-  let (builtinIR : sourceIRs) = irs
-      named = ("Builtin$", builtinIR) : zip (fst <$> sources) sourceIRs
+  named <- case irs of
+    (builtinIR : sourceIRs) ->
+      pure (("Builtin$", builtinIR) : zip (fst <$> sources) sourceIRs)
+    [] ->
+      error "KernelCodegen: compileModules returned empty IR list"
   results <- liftIO $
     withSystemTempDirectory "coal-build-nk" $ \tmpDir ->
       traverse (assembleOne configGenerateLLVMOutput tmpDir) named

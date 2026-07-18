@@ -40,7 +40,8 @@ module Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (
   administrativeNormalForm,
 ) where
 
-import Control.Monad.State.Strict (State, evalState, get, put, state)
+import Control.Monad.State.Strict (State, evalState, state)
+import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
@@ -204,7 +205,7 @@ anfValue expr cont
             -- The continuation changes the branch type; derive the new case
             -- result type from the transformed first branch rather than reusing
             -- the now-stale pre-continuation type.
-            let newT = let Clause _ body = NonEmpty.head clauses' in typeOf body
+            let newT = case clauses' of Clause _ body :| _ -> typeOf body
             pure (ECase newT scrutAtom clauses')
         ELet bs body ->
           anfLetSeq (NonEmpty.toList bs) (anfValue body cont)
@@ -245,7 +246,7 @@ anfLetRhs expr cont
       ECase _t scrutinee clauses ->
         anfValue scrutinee $ \scrutAtom -> do
           clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfLetRhs b cont) clauses
-          let newT = let Clause _ body = NonEmpty.head clauses' in typeOf body
+          let newT = case clauses' of Clause _ body :| _ -> typeOf body
           pure (ECase newT scrutAtom clauses')
       ELet bs body ->
         anfLetSeq (NonEmpty.toList bs) (anfLetRhs body cont)
@@ -350,7 +351,7 @@ opOperands = foldr (:) []
 
 -- | Rebuild a 'Traversable' functor by popping from a replacement list.
 rebuildOp :: (Traversable f) => [a] -> f b -> f a
-rebuildOp xs op = evalState (traverse (const pop) op) xs
+rebuildOp ts op = evalState (traverse (const pop) op) ts
  where
   pop :: State [a] a
   pop = state $
