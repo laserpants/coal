@@ -17,8 +17,6 @@ git checkout "$REF"
 
 bash runtime/scripts/combine.sh
 
-export PATH="$HOME/.local/bin:$PATH"
-
-stack install
+stack install --local-bin-path /usr/local/bin --copy-bins
 
 coal --version
