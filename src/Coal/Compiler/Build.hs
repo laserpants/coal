@@ -76,7 +76,6 @@ import Coal.Compiler.Build.NameEntry
 import Coal.Language (IndexedScheme, IndexedType)
 import Coal.Language.Module.Path (Path (..))
 import Control.Monad.State (execState, modify)
-import Control.Monad.Trans.Class (lift)
 import Crypto.Hash (hash)
 import Data.Binary (Binary)
 import Data.ByteString (ByteString)

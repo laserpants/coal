@@ -67,12 +67,13 @@ stringConcatenationOperator ::
   CompilerT a m NKExpr
 stringConcatenationOperator translate es = do
   args <- traverse translate es
-  let t1 = translateType (TIntrinsic IString)
   pure $
     EApp
       t1
       (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__string_concatenation"))
       args
+  where 
+    t1 = translateType (TIntrinsic IString)
 
 listConcatenationOperator ::
   (Monad m) =>
@@ -82,12 +83,13 @@ listConcatenationOperator ::
   CompilerT a m NKExpr
 listConcatenationOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
     EApp
       t1
       (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__list_concatenation"))
       args
+  where 
+    t1 = translateType t
 
 reverseCompositionOperator ::
   (Monad m) =>
@@ -97,12 +99,13 @@ reverseCompositionOperator ::
   CompilerT a m NKExpr
 reverseCompositionOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
     EApp
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
       args
+  where
+    t1 = translateType t
 
 forwardCompositionOperator ::
   (Monad m) =>
@@ -112,12 +115,13 @@ forwardCompositionOperator ::
   CompilerT a m NKExpr
 forwardCompositionOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
     EApp
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
       args
+  where
+    t1 = translateType t
 
 reverseApplicationOperator ::
   (Monad m) =>
@@ -127,12 +131,13 @@ reverseApplicationOperator ::
   CompilerT a m NKExpr
 reverseApplicationOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
     EApp
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
       args
+  where
+    t1 = translateType t
 
 forwardApplicationOperator ::
   (Monad m) =>
@@ -142,12 +147,13 @@ forwardApplicationOperator ::
   CompilerT a m NKExpr
 forwardApplicationOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
     EApp
       t1
       (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_application"))
       args
+  where
+    t1 = translateType t
 
 binop ::
   (Monad m, Data a) =>
