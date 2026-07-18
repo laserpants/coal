@@ -3,7 +3,9 @@ name: Mirror to GitHub
 on:
   push:
     branches:
-      - "**"
+      - main
+      - develop
+      - next
     tags:
       - "**"
 
