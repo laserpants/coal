@@ -38,7 +38,7 @@ module Coal.Kernel.Pipeline.Pass.LambdaLifting (
   lambdaLifting,
 ) where
 
-import Control.Monad.State.Strict (State, evalState, get, put, state)
+import Control.Monad.State.Strict (State, evalState, state)
 import Data.Functor (unzip)
 import Data.List (sortBy)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -302,7 +302,7 @@ liftBinding globals scope (Binding lbl e) = case e of
           case Map.lookup n scope of
             Just l -> l
             Nothing -> case [l | l@(Label _ n') <- fvAll, n' == n] of
-              (lbl : _) -> lbl
+              (lbl_ : _) -> lbl_
               [] -> error "resolveFv: free variable not found in fvAll"
         fvLabels = sortBy (comparing labelName) (map resolveFv (Set.toList fvNameSet))
     liftedName <- freshName "lam"
@@ -348,7 +348,7 @@ liftClauses globals scope clauses = do
 Uses the 'Traversable' instance to walk the op structure.
 -}
 rebuildOp :: (Traversable f) => [a] -> f b -> f a
-rebuildOp xs op = evalState (traverse (const pop) op) xs
+rebuildOp ts op = evalState (traverse (const pop) op) ts
  where
   pop :: State [a] a
   pop = state $
