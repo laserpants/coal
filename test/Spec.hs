@@ -25,9 +25,9 @@ main :: IO ()
 main =
   hspec $ do
     spec
-    kernelSpec
+    describe "Kernel tests" kernelSpec
     --    buildSpec
-    e2eSpec
+    describe "E2E tests" e2eSpec
 
 --    e2eKernelSpec
 
