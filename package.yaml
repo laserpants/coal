@@ -100,4 +100,4 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - coal
-      - hspec >= 2.10.10 && < 2.11
+      - hspec >= 2.10.10 && < 2.12

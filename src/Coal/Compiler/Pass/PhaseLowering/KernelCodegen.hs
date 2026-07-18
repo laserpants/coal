@@ -38,7 +38,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
-import Extras (Name, foldM)
+import Extras (Name)
 import LLVM.IRModule (IRModule)
 import LLVM.IRRenderer (renderModule)
 import System.Exit (ExitCode (..))
