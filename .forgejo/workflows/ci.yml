@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
 
     steps: 
       - uses: https://code.forgejo.org/actions/checkout@v6
