@@ -71,4 +71,13 @@ module Coal.Combinators {
   fun flip(f : a -> b -> c, y : b, x : a) : c =
     f(x, y)
 
+  /**
+   * Apply the function `f` to the value `x`, `n` times.
+   */
+  fun iterate(n : nat, f : a -> a, x : a) : a =
+    fold(n, x) {
+      | Zero      => fn(y) => y
+      | Succ(@go) => fn(y) => go(f(y))
+    }
+
 }

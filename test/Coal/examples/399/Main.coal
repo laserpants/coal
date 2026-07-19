@@ -8,6 +8,7 @@ module Main {
   import Containers.Set (Set)
   import List(reduce, range)
   import Codata.Machine (machine, run_while)
+  import Coal.Combinators (iterate)
 
   type Shape
     = ShapeI
@@ -456,22 +457,15 @@ module Main {
         state
 
   // ---------------------------------------------------------------------------
-  // Structural recursion helpers
+  // Recursion helpers
   // ---------------------------------------------------------------------------
-
-  // Apply the function `f` to the value `x`, `n` times.
-  fun iterate_n(n : nat, f : a -> a, x : a) : a =
-    fold(n, x) {
-      | Zero      => fn(y) => y
-      | Succ(@go) => fn(y) => go(f(y))
-    }
 
   // Drop the current block as far as it will go. The board is 20 cells tall,
   // so the block can never move down more than 20 times; 30 iterations is a
   // safe upper bound. Once the block cannot move down, further steps are
   // no-ops, so the extra iterations have no effect.
   fun drop_to_bottom(state : GameState) : GameState =
-    iterate_n(
+    iterate(
       Nat.pack(30),
       fn(s) =>
         if (can_move_down(s))
@@ -556,7 +550,7 @@ module Main {
       // moving up past each row, so 50 iterations is a safe upper bound. Once
       // the row index drops below 0 the step is a no-op, so the extra
       // iterations have no effect.
-      iterate_n(Nat.pack(50), board_clear_step, (19, board))
+      iterate(Nat.pack(50), board_clear_step, (19, board))
     ) {
       | (_, result_board) => result_board
     }
