@@ -25,6 +25,7 @@ library
       CLI.Command.Build
       CLI.Command.Clean
       CLI.Command.Compile
+      CLI.Command.Init
       CLI.Command.Install
       CLI.Command.Version
       CLI.Error
@@ -32,9 +33,11 @@ library
       CLI.Git.Commit
       CLI.Git.Repo
       CLI.Options.CompileCmd
+      CLI.Options.InitCmd
       CLI.Options.InstallCmd
       CLI.Parser.Command
       CLI.Parser.CompileCmd
+      CLI.Parser.InitCmd
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label

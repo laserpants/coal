@@ -2,6 +2,7 @@ module CLI.Parser.Command (commandParser) where
 
 import CLI.Command (Command (..))
 import CLI.Parser.CompileCmd (compileCmdParser)
+import CLI.Parser.InitCmd (initCmdParser)
 import Options.Applicative
 
 commandParser :: Parser Command
@@ -31,8 +32,13 @@ commandParser =
               (pure CmdInstall)
               (progDesc "Install packages from project manifest")
           )
+        <> command
+          "init"
+          ( info
+              (CmdInit <$> initCmdParser)
+              (progDesc "Initialise a new project")
+          )
           -- TODO:
           -- run
           -- update
-          -- init
     )
