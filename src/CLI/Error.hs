@@ -11,6 +11,7 @@ data CLIError
   = EPackageError PackageError
   | EGitError Text
   | EIOError
+  | EProjectAlreadyExists
   deriving (Show)
 
 prettyCLIError :: CLIError -> Text
@@ -22,3 +23,5 @@ prettyCLIError =
       "• Git error:\n\n" <> err
     EIOError ->
       "IO Error"
+    EProjectAlreadyExists ->
+      "• A coal.json file already exists in the current directory.\n\nUse --force to overwrite it."

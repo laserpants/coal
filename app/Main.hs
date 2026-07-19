@@ -5,9 +5,12 @@
 module Main (main) where
 
 import CLI.Command (Command (..))
+
 import CLI.Command.Build (buildCommand)
 import CLI.Command.Clean (cleanCommand)
 import CLI.Command.Compile (compileCommand)
+
+import CLI.Command.Init (initCommand)
 import CLI.Command.Install (installCommand)
 import CLI.Command.Version (coalVersion)
 import CLI.Error (prettyCLIError)
@@ -30,6 +33,13 @@ runCommand =
           pure ()
     CmdClean ->
       cleanCommand
+    CmdInit opts -> do
+      r <- runExceptT (initCommand opts)
+      case r of
+        Left err ->
+          Text.putStrLn (prettyCLIError err)
+        Right{} ->
+          pure ()
     CmdInstall -> do
       r <- runExceptT installCommand
       case r of
