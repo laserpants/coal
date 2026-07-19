@@ -520,14 +520,14 @@ module Main {
       range(0, Nat.pack(10))
     )
 
-  // Shift rows `cleared_y - 1` down to row 0, in descending order. Reversing
-  // the ascending range yields [cleared_y - 1, ..., 0], preserving the
-  // original top-down order of operations.
+  // Shift rows `cleared_y - 1` down to row 0. reduce_left processes the list
+  // right-to-left (last element first), so range [0 .. cleared_y-1] is
+  // consumed from cleared_y-1 down to 0 — the correct order for falling cells.
   fun board_shift_rows_above(cleared_y : int32, board : Board) : Board =
     List.reduce_left(
       fn(acc, y) => board_shift_row(y, acc),
       board,
-      List.reverse(range(0, Nat.pack(cleared_y)))
+      range(0, Nat.pack(cleared_y))
     )
   
   // One step of the row-clearing loop, operating on a (row, board) pair. If
