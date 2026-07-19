@@ -38,7 +38,6 @@ module Coal.Kernel.Pipeline.Pass.LambdaLifting (
   lambdaLifting,
 ) where
 
-import Control.Monad.State.Strict (State, evalState, state)
 import Data.Functor (unzip)
 import Data.List (sortBy)
 import Data.List.NonEmpty (NonEmpty (..))
@@ -58,6 +57,7 @@ import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.HasType (foldType, typeOf)
 import Coal.Kernel.Pipeline (Pass, PipelineT, freshName)
+import Coal.Kernel.Pipeline.Pass.Utils (opOperands, rebuildOp)
 
 {- | Lift all lambda expressions to top-level functions, parameterizing over
 free variables.
@@ -213,7 +213,7 @@ liftExpr globals scope expr =
       (el', new3) <- liftExpr globals scope el
       pure (EIf cond' th' el', new1 ++ new2 ++ new3)
     EOp op -> do
-      let operands = foldr (:) [] op
+      let operands = opOperands op
       pairs <- mapM (liftExpr globals scope) operands
       let (lifted, news) = unzip pairs
           op' = rebuildOp lifted op
@@ -343,18 +343,6 @@ liftClauses globals scope clauses = do
       clauses
   let (cs, news) = unzip pairs
   pure (cs, concat (NonEmpty.toList news))
-
-{- | Rebuild an 'Op' by popping from a list of replacement operands in order.
-Uses the 'Traversable' instance to walk the op structure.
--}
-rebuildOp :: (Traversable f) => [a] -> f b -> f a
-rebuildOp ts op = evalState (traverse (const pop) op) ts
- where
-  pop :: State [a] a
-  pop = state $
-    \case
-      (x : xs) -> (x, xs)
-      [] -> error "rebuildOp: empty list"
 
 -- --------------------------------------------------------------------------
 -- Substitution

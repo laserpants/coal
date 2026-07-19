@@ -192,6 +192,7 @@ library
       Coal.Kernel.Pipeline.Pass.LocalNameCanonicalization
       Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation
       Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization
+      Coal.Kernel.Pipeline.Pass.Utils
       Coal.Kernel.Pipeline.Passes
       Coal.Kernel.Prettyprinter
       Coal.Kernel.Prettyprinter.Expr

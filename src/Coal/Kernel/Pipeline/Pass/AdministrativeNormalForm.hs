@@ -40,7 +40,6 @@ module Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (
   administrativeNormalForm,
 ) where
 
-import Control.Monad.State.Strict (State, evalState, state)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 
@@ -50,6 +49,7 @@ import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Language.Type.HasType (typeOf)
 import Coal.Kernel.Pipeline (Pass, PipelineT, freshName)
+import Coal.Kernel.Pipeline.Pass.Utils (opOperands, rebuildOp)
 
 {- | Transform every expression in the module into administrative normal form
 (ANF).
@@ -344,17 +344,3 @@ bindFresh expr cont
 -- | Wrap an expression in a single-binding @let@.
 wrapOne :: Binding Type -> Expr Type -> Expr Type
 wrapOne b = ELet (NonEmpty.singleton b)
-
--- | Extract the operands of an 'Op' as a list.
-opOperands :: (Foldable f) => f a -> [a]
-opOperands = foldr (:) []
-
--- | Rebuild a 'Traversable' functor by popping from a replacement list.
-rebuildOp :: (Traversable f) => [a] -> f b -> f a
-rebuildOp ts op = evalState (traverse (const pop) op) ts
- where
-  pop :: State [a] a
-  pop = state $
-    \case
-      (x : xs) -> (x, xs)
-      [] -> error "rebuildOp: empty list"
