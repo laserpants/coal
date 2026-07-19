@@ -284,4 +284,13 @@ module List {
               true
         }
 
+  /**
+   * Return the list [start, start + 1, ..., start + count - 1].
+   */
+  fun range(start : n, count : nat) : List<n> with (Numeric<n>) =
+    fold(count, start) {
+      | Zero      => fn(_) => []
+      | Succ(@go) => fn(s) => s :: go(s + 1)
+    }
+
 }

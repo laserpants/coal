@@ -6,7 +6,7 @@ module Main {
   import namespace Nat
 
   import Containers.Set (Set)
-  import List(reduce)
+  import List(reduce, range)
   import Codata.Machine (machine, run_while)
 
   type Shape
@@ -458,13 +458,6 @@ module Main {
   // ---------------------------------------------------------------------------
   // Structural recursion helpers
   // ---------------------------------------------------------------------------
-
-  // Return the list [start, start + 1, ..., start + count - 1].
-  fun range(start : int32, count : nat) : List<int32> =
-    fold(count, start) {
-      | Zero      => fn(_) => []
-      | Succ(@go) => fn(s) => s :: go(s + 1)
-    }
 
   // Apply the function `f` to the value `x`, `n` times.
   fun iterate_n(n : nat, f : a -> a, x : a) : a =
