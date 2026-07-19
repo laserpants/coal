@@ -46,7 +46,7 @@ data PackageManifest = PackageManifest
   deriving (Generic, Show, Eq)
 
 instance ToJSON PackageManifest where
-  toJSON = genericToJSON defaultOptions
+  toJSON = genericToJSON defaultOptions{omitNothingFields = True}
 
 instance FromJSON PackageManifest where
   parseJSON = genericParseJSON defaultOptions
