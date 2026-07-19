@@ -27,20 +27,20 @@ prettyPackageError :: PackageError -> Text
 prettyPackageError =
   \case
     EProjectManifestMissing ->
-      "• Project manifest (coal.json) file is missing."
+      "Project manifest (coal.json) file is missing."
     EProjectLockFileInvalid text ->
-      "• The project lock-file format is invalid:\n\n" <> text
+      "The project lock-file format is invalid:\n\n" <> text
     EProjectInvalidManifestFormat text ->
-      "• Project manifest (coal.json) file format is invalid:\n\n" <> text
+      "Project manifest (coal.json) file format is invalid:\n\n" <> text
     EProjectInvalidModuleFormat name ->
-      "• '" <> name <> "' is not a valid module name."
+      "'" <> name <> "' is not a valid module name."
     ENoLockFile ->
-      "• No project lock-file found.\n\nTry running `coal install`."
+      "No project lock-file found.\n\nTry running `coal install`."
     EDependencyManifestMissing name text ->
-      "• The package '" <> name <> "' is missinig a manifest file." <> maybe "" ("\n\nLocation: " <>) text
+      "The package '" <> name <> "' is missinig a manifest file." <> maybe "" ("\n\nLocation: " <>) text
     EDependencyInvalidManifestFormat name text ->
-      "• Package '" <> name <> "' manifest file format is invalid:\n\n" <> text
+      "Package '" <> name <> "' manifest file format is invalid:\n\n" <> text
     EDependencyInvalidModuleFormat name moduleName ->
-      "• Module '" <> moduleName <> "' in the package '" <> name <> "' is not a valid module name."
+      "Module '" <> moduleName <> "' in the package '" <> name <> "' is not a valid module name."
     ENoPackageVersionMatch name _ _ ->
-      "• No install candidate found for package '" <> name <> "'"
+      "No install candidate found for package '" <> name <> "'"

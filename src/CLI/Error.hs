@@ -20,8 +20,8 @@ prettyCLIError =
     EPackageError pkgError ->
       prettyPackageError pkgError
     EGitError err ->
-      "• Git error:\n\n" <> err
+      "Git error:\n\n" <> err
     EIOError ->
       "IO Error"
     EProjectAlreadyExists ->
-      "• A coal.json file already exists in the current directory.\n\nUse --force to overwrite it."
+      "A coal.json file already exists in the current directory.\n\nUse --force to overwrite it."

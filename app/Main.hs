@@ -28,7 +28,7 @@ runCommand =
       r <- runExceptT buildCommand
       case r of
         Left err ->
-          Text.putStrLn (prettyCLIError err)
+          Text.putStrLn ("• " <> prettyCLIError err)
         Right{} ->
           pure ()
     CmdClean ->
@@ -37,14 +37,14 @@ runCommand =
       r <- runExceptT (initCommand opts)
       case r of
         Left err ->
-          Text.putStrLn (prettyCLIError err)
+          Text.putStrLn ("• " <> prettyCLIError err)
         Right{} ->
           pure ()
     CmdInstall -> do
       r <- runExceptT installCommand
       case r of
         Left err ->
-          Text.putStrLn (prettyCLIError err)
+          Text.putStrLn ("• " <> prettyCLIError err)
         Right{} ->
           pure ()
 
