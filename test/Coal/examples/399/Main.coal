@@ -463,7 +463,7 @@ module Main {
   // no-ops, so the extra iterations have no effect.
   fun drop_to_bottom(state : GameState) : GameState =
     iterate(
-      Nat.pack(30),
+      30,
       fn(s) =>
         if (can_move_down(s))
           then move_current_block(0, 1, s)
