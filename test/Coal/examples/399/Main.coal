@@ -402,14 +402,11 @@ module Main {
       { shape, rotation, pos_x, pos_y } = state.current_block
     in
     let
-      next_rot = spin(rotation)
-    in
-    let
       rotated_cells =
         translate_cells(
           pos_x,
           pos_y,
-          shape_cells(shape, next_rot) |. Containers.Set.to_list
+          shape_cells(shape, spin(rotation)) |. Containers.Set.to_list
         )
     in
     ! cells_collide(rotated_cells, state)
