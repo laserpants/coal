@@ -41,7 +41,7 @@ jobs:
         run: bash runtime/scripts/combine.sh
 
       - name: Build
-        run: stack build --test --no-run-tests
+        run: stack --allow-different-user build --test --no-run-tests
 
       - name: Test
-        run: stack test --ta '--match Unit' #  --match Kernel'
+        run: stack --allow-different-user test --ta '--match Unit' #  --match Kernel'
