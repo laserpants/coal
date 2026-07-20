@@ -8,7 +8,10 @@ on:
 
 jobs:
   test:
-    runs-on: ghcr.io/laserpants/coal-dev:latest
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/laserpants/coal-dev:latest
 
     steps:
       - uses: actions/checkout@v4
