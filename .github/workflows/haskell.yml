@@ -13,6 +13,13 @@ jobs:
     container:
       image: ghcr.io/laserpants/coal-dev:latest
 
+    env:
+      STACK_ROOT: /root/.stack
+
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - uses: actions/checkout@v4
 
