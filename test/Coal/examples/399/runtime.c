@@ -123,9 +123,6 @@ void *event_loop_init(int32_t tick_ms)
     g_tick_ms = tick_ms;
     srand((unsigned)time(NULL));
 
-    printf("event_loop_init");
-    fflush(stdout);
-
     // Switch stdin to raw mode: no line buffering, no echo.
     tcgetattr(STDIN_FILENO, &g_orig_termios);
     atexit(restore_terminal);
@@ -165,9 +162,6 @@ _Bool event_loop_has_next(void *_unit)
 // event_loop_next() -- dequeue and return the next event
 int32_t event_loop_next(void *_unit)
 {
-    printf("event_loop_next");
-    fflush(stdout);
-
     return dequeue();
 }
 
