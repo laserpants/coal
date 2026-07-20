@@ -137,11 +137,17 @@ done
 echo "Successfully combined runtime into $OUTPUT_FILE"
 echo "Lines: $(wc -l < "$OUTPUT_FILE")"
 
-# Test compilation
 echo "Testing compilation..."
-if clang -std=c11 -Wall -Wextra -Wpedantic -c "$OUTPUT_FILE" \
+
+OUTPUT=$(clang -std=c11 -Wall -Wextra -Wpedantic -c "$OUTPUT_FILE" \
     -o "$ROOT_DIR/dist/runtime-combined.o" \
-    $(pkg-config --cflags bdw-gc gmp 2>/dev/null || echo "-I/opt/homebrew/include") 2>&1 | head -20; then
+    $(pkg-config --cflags bdw-gc gmp 2>/dev/null || echo "-I/opt/homebrew/include") \
+    2>&1)
+STATUS=$?
+
+echo "$OUTPUT" | head -20
+
+if [ $STATUS -eq 0 ]; then
     echo "✓ Combined runtime compiles successfully"
     rm -f "$ROOT_DIR/dist/runtime-combined.o"
 else
