@@ -24,6 +24,8 @@ cat > "$OUTPUT_FILE" << 'EOF'
  * To regenerate: cd runtime && ./scripts/combine.sh
  */
 
+#define _GNU_SOURCE
+
 /* ============================================================================
  * External library includes
  * ============================================================================
