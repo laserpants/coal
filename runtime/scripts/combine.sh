@@ -139,18 +139,28 @@ echo "Lines: $(wc -l < "$OUTPUT_FILE")"
 
 echo "Testing compilation..."
 
-OUTPUT=$(clang -std=c11 -Wall -Wextra -Wpedantic -c "$OUTPUT_FILE" \
+CFLAGS=$(pkg-config --cflags bdw-gc gmp)
+
+TMP=$(mktemp)
+
+set +e
+clang -std=c11 -Wall -Wextra -Wpedantic \
+    -c "$OUTPUT_FILE" \
     -o "$ROOT_DIR/dist/runtime-combined.o" \
-    $(pkg-config --cflags bdw-gc gmp 2>/dev/null || echo "-I/opt/homebrew/include") \
-    2>&1)
+    $CFLAGS \
+    >"$TMP" 2>&1
 STATUS=$?
+set -e
 
-echo "$OUTPUT" | head -20
+head -20 "$TMP"
 
-if [ $STATUS -eq 0 ]; then
+if [ "$STATUS" -eq 0 ]; then
     echo "✓ Combined runtime compiles successfully"
     rm -f "$ROOT_DIR/dist/runtime-combined.o"
 else
     echo "✗ Combined runtime has compilation errors"
+    rm -f "$TMP"
     exit 1
 fi
+
+rm -f "$TMP"
