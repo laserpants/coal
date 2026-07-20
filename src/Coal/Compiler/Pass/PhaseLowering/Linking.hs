@@ -53,7 +53,7 @@ compileBitcode CompilerConfig{..} files =
           forM_ cFiles $
             \file ->
               copyFile file (tmpDir </> takeBaseName file)
-          gccRes <- runGCC tmpDir objFiles cFiles
+          gccRes <- runGCC CompilerConfig{..} tmpDir objFiles cFiles
           case gccRes of
             Left e -> do
               putStrLn ("gcc failed: " ++ show e)
@@ -72,20 +72,21 @@ runLLC dir name bcode = do
   file = dir </> Text.unpack name <.> "bc"
   target = takeBaseName file <.> "o"
 
-runGCC :: FilePath -> [FilePath] -> [FilePath] -> IO (Either SomeException ())
-runGCC dir objFiles cFiles = do
+runGCC :: CompilerConfig -> FilePath -> [FilePath] -> [FilePath] -> IO (Either SomeException ())
+runGCC CompilerConfig{..} dir objFiles cFiles = do
   isClang <- ("clang" `isInfixOf`) <$> readProcess "cc" ["--version"] ""
   let args =
         (if isClang then flags else "-no-pie" : flags) <> commonArgs
   try $ execProcess $ (proc "gcc" args){cwd = Just dir}
  where
-  flags = ["-g", "-I.", "-fsanitize=address"]
+  sanitizeFlags = if configSanitize then ["-fsanitize=address"] else []
+  flags = ["-g", "-I."] <> sanitizeFlags
   commonArgs =
     ["runtime.c"]
       <> cFiles
       <> objFiles
       <> ["-o", "dist"]
-      <> ["-fsanitize=address"]
+      <> sanitizeFlags
       <> ["-lgc", "-lgmp"]
 
 execProcess :: CreateProcess -> IO ()

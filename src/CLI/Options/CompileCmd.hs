@@ -14,5 +14,6 @@ data CompileCmdOptions = CompileCmdOptions
   , silent :: Bool
   , noCache :: Bool
   , entryPoint :: Maybe Text
+  , sanitize :: Bool
   }
   deriving (Show)

@@ -71,4 +71,10 @@ compileCmdParser = do
           )
       )
 
+  sanitize <-
+    switch
+      ( long "sanitize"
+          <> help "Enable AddressSanitizer for debugging"
+      )
+
   pure CompileCmdOptions{..}
