@@ -453,10 +453,6 @@ module Main {
       else
         state
 
-  // ---------------------------------------------------------------------------
-  // Recursion helpers
-  // ---------------------------------------------------------------------------
-
   // Drop the current block as far as it will go. The board is 20 cells tall,
   // so the block can never move down more than 20 times; 30 iterations is a
   // safe upper bound. Once the block cannot move down, further steps are
