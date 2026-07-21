@@ -105,7 +105,7 @@ git clone ssh://git@codeberg.org/laserpants/coal.git
 ```
 
 ```
-cd coal && stack install
+cd coal && chmod +x project && ./project install
 ```
 
 Restart or refresh your shell, using e.g., `exec $SHELL -l`. To verify that the executable is installed, run:
