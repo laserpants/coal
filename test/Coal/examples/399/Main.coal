@@ -493,14 +493,14 @@ module Main {
           then count + 1
           else count,
       0,
-      range(0, Nat.pack(10))
+      range(0, 10)
     )
   
   fun board_remove_row(y : int32, board : Board) =
     List.reduce_left(
       fn(acc, x) => Containers.Set.delete((x, y), acc),
       board,
-      range(0, Nat.pack(10))
+      range(0, 10)
     )
   
   // Shift the cells in row `y` down by one. Membership is checked against the
@@ -513,7 +513,7 @@ module Main {
           then Containers.Set.insert((x, y + 1), Containers.Set.delete((x, y), acc))
           else acc,
       board,
-      range(0, Nat.pack(10))
+      range(0, 10)
     )
 
   // Shift rows `cleared_y - 1` down to row 0. reduce_left processes the list
@@ -543,7 +543,7 @@ module Main {
       // moving up past each row, so 50 iterations is a safe upper bound. Once
       // the row index drops below 0 the step is a no-op, so the extra
       // iterations have no effect.
-      iterate(Nat.pack(50), board_clear_step, (19, board))
+      iterate(50, board_clear_step, (19, board))
     ) {
       | (_, result_board) => result_board
     }
