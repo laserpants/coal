@@ -1,0 +1,117 @@
+module Main {
+
+// Test case: process same list multiple times with different predicates
+// Mimics the Tree.from_list pattern where the same tail is processed by both subtrees
+Main.test_multi_process =
+  let
+    __fold__ : list(int32)/bool/list(int32) =
+      fn(xs : list(int32)) =>
+        case<list(int32)>(xs : list(int32)) {
+          | ($Cons : int32/list(int32)/list(int32), head : int32, tail : list(int32)) =>
+              fn(keep_evens : bool) =>
+                if (keep_evens : bool)
+                  then
+                    // Keep even numbers
+                    let
+                      tail_filtered : list(int32) =
+                        @<list(int32)>
+                          ( __fold__ : list(int32)/bool/list(int32)
+                          , tail : list(int32)
+                          , keep_evens : bool
+                          )
+                    in
+                      if ([<= int32](head : int32, 2))
+                        then
+                          @<list(int32)>
+                            ( $Cons : int32/list(int32)/list(int32)
+                            , head : int32
+                            , tail_filtered : list(int32)
+                            )
+                        else
+                          tail_filtered : list(int32)
+                  else
+                    // Keep odd numbers (> 2)
+                    let
+                      tail_filtered : list(int32) =
+                        @<list(int32)>
+                          ( __fold__ : list(int32)/bool/list(int32)
+                          , tail : list(int32)
+                          , keep_evens : bool
+                          )
+                    in
+                      if ([> int32](head : int32, 2))
+                        then
+                          @<list(int32)>
+                            ( $Cons : int32/list(int32)/list(int32)
+                            , head : int32
+                            , tail_filtered : list(int32)
+                            )
+                        else
+                          tail_filtered : list(int32)
+          | ($Nil : list(int32)) =>
+              fn(_ : bool) => $Nil : list(int32)
+        }
+  ; input_list : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 1
+        , @<list(int32)>
+            ( $Cons : int32/list(int32)/list(int32)
+            , 2
+            , @<list(int32)>
+                ( $Cons : int32/list(int32)/list(int32)
+                , 3
+                , @<list(int32)>
+                    ( $Cons : int32/list(int32)/list(int32)
+                    , 4
+                    , $Nil : list(int32)
+                    )
+                )
+            )
+        )
+  ; evens : list(int32) =
+      @<list(int32)>
+        ( __fold__ : list(int32)/bool/list(int32)
+        , input_list : list(int32)
+        , true
+        )
+  ; odds : list(int32) =
+      @<list(int32)>
+        ( __fold__ : list(int32)/bool/list(int32)
+        , input_list : list(int32)
+        , false
+        )
+  ; evens_head : int32 =
+      case<int32>(evens : list(int32)) {
+        | ($Cons : int32/list(int32)/list(int32), h : int32, _ : list(int32)) => h : int32
+        | ($Nil : list(int32)) => -1
+      }
+  ; odds_head : int32 =
+      case<int32>(odds : list(int32)) {
+        | ($Cons : int32/list(int32)/list(int32), h : int32, _ : list(int32)) => h : int32
+        | ($Nil : list(int32)) => -1
+      }
+  ; result : int32 =
+      [+ int32](evens_head : int32, odds_head : int32)
+  in
+    result : int32
+
+Main.cont(r : int32, a : *) =
+  0
+
+Main.main(_ : *) =
+  let
+    r : int32 = Main.test_multi_process : int32
+  ; call_tmp : * =
+      @<*>
+        ( coal_print_int32 : int32/*
+        , r : int32
+        )
+  in
+    @<int32>
+      ( Main.cont : int32/*/int32
+      , r : int32
+      , call_tmp : *
+      )
+
+}

@@ -76,23 +76,23 @@ module IO {
   fun read_file(path : string) : IO<Result<string, FileIOError>> =
     let
       decode_file_result(r : FileIOResult) =
-        #{result_status : FileIOResult -> int32}(r)(
+        #{coal_result_status : FileIOResult -> int32}(r)(
           fn(status) => 
             match(status) {
-              | 0 => #{result_value : FileIOResult -> string}(r)(Ok)
+              | 0 => #{coal_result_value : FileIOResult -> string}(r)(Ok)
               | 1 => Err(FileNotFound)
               | 2 => Err(IOError)
               | 3 => Err(OutOfMemory)
               | _ => Err(UnknownError)
             })
     in
-    #{read_file : string -> FileIOResult}(path)(
+    #{coal_read_file : string -> FileIOResult}(path)(
       fn(res) => __return_io(decode_file_result(res)))
 
   fun write_file(path : string, data : string) : IO<Option<FileIOError>> =
     let
       decode_write_result(r : FileIOResult) =
-        #{result_status : FileIOResult -> int32}(r)(
+        #{coal_result_status : FileIOResult -> int32}(r)(
           fn(status) => 
             match(status) {
               | 0 => None
@@ -101,13 +101,13 @@ module IO {
               | _ => Some(UnknownError)
             })
     in
-    #{write_file : string -> string -> FileIOResult}(path, data)(
+    #{coal_write_file : string -> string -> FileIOResult}(path, data)(
       fn(res) => __return_io(decode_write_result(res)))
 
   fun readln(_ : unit) : IO<string> =
-    #{readln : unit -> string}(())(fn(str) => __return_io(str))
+    #{coal_readln : unit -> string}(())(fn(str) => __return_io(str))
 
   fun random(_ : unit) : IO<double> =
-    #{double_random : unit -> double}(())(fn(d) => __return_io(d))
+    #{coal_double_random : unit -> double}(())(fn(d) => __return_io(d))
 
 }

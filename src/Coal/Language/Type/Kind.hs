@@ -77,8 +77,8 @@ class KindProxy t k where
 
 instance (Data t) => KindProxy t Kind where
   tailKind t =
-    case head (universeBi t) of
-      KArrow _ k ->
+    case universeBi t of
+      KArrow _ k : _ ->
         k
       _ ->
         error "Invalid kind"

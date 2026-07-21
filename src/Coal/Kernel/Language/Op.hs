@@ -1,21 +1,30 @@
-{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StrictData #-}
-{-# LANGUAGE TemplateHaskell #-}
 
+{- |
+Primitive operators.
+
+Defines the full set of built-in binary operators for arithmetic, comparison,
+and logical operations. Each operator is specialized to a concrete primitive
+type.
+
+= Operator categories
+
+  * __Arithmetic__: @+@, @-@, @*@, @/@, @%@ for numeric types
+  * __Comparison__: @==@, @!=@, @<@, @>@, @<=@, @>=@ for comparable types
+  * __Logical__: @!@ for boolean negation
+
+All operators are represented as constructors in the 'Op' type, parameterized
+over their operand type @a@.
+-}
 module Coal.Kernel.Language.Op (Op (..)) where
 
-import Coal.Common.FreeVars (FreeVars (..))
-import Data.Data (Data, Typeable)
-import Data.Eq.Deriving (deriveEq1)
-import Data.Generics.Uniplate.Data (childrenBi)
-import Text.Show.Deriving (deriveShow1)
+{- | Primitive operators.
 
--- | Operators
+Each constructor represents a type-specific binary operation. Operands are
+stored directly in the constructor, allowing 'Op' to be embedded in the
+expression AST.
+-}
 data Op a
   = -- | Equality
     OEqInt32 a a
@@ -78,12 +87,16 @@ data Op a
   | -- | Logical NOT
     ONot a
   | -- | Negation
-    ONegFloat a
+    ONegInt32 a
+  | ONegInt64 a
+  | ONegFloat a
   | ONegDouble a
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Data, Typeable)
-
-deriveShow1 ''Op
-deriveEq1 ''Op
-
-instance forall a t. (Data a, Ord t, FreeVars a t) => FreeVars (Op a) t where
-  freeIn = freeIn . (childrenBi :: Op a -> [a])
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    )

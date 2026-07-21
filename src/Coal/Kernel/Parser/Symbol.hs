@@ -1,76 +1,97 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Symbol and delimiter parsers.
+
+Provides lexeme-level parsers for punctuation, operators, and delimiters used
+throughout the kernel language grammar.
+
+All parsers consume trailing whitespace automatically.
+-}
 module Coal.Kernel.Parser.Symbol (
-  symbol,
-  parens,
-  brackets,
-  braces,
-  angleBrackets,
-  commaSep,
-  commaSep1,
-  commaSep2,
-  commaSepN,
-  semicolonSep1,
-  pair,
-  pipe,
   colon,
+  equals,
+  semicolon,
+  pipe,
+  arrow,
+  at,
+  hash,
   slash,
-  equalSign,
+  star,
+  emptyBraces,
+  angleBrackets,
+  braces,
+  semicolonSep1,
+  commaSep1,
 ) where
 
-import Coal.Kernel.Parser (Parser, Text, between, cons, sepBy, sepBy1, spaces)
-import qualified Text.Megaparsec.Char.Lexer as Lexer
+import Control.Monad (void)
 
-{-# INLINE symbol #-}
-symbol :: Text -> Parser Text
-symbol = Lexer.symbol spaces
+import qualified Text.Megaparsec as P
+import qualified Text.Megaparsec.Char as C
 
-parens :: Parser a -> Parser a
-parens = symbol "(" `between` symbol ")"
+import Coal.Kernel.Parser (Parser, lexeme)
 
-brackets :: Parser a -> Parser a
-brackets = symbol "[" `between` symbol "]"
+-- | Parse colon: :
+colon :: Parser ()
+colon = void $ lexeme (C.char ':')
 
-braces :: Parser a -> Parser a
-braces = symbol "{" `between` symbol "}"
+-- | Parse equals: =
+equals :: Parser ()
+equals = void $ lexeme (C.char '=')
 
+-- | Parse semicolon: ;
+semicolon :: Parser ()
+semicolon = void $ lexeme (C.char ';')
+
+-- | Parse pipe: |
+pipe :: Parser ()
+pipe = void $ lexeme (C.char '|')
+
+-- | Parse arrow: =>
+arrow :: Parser ()
+arrow = void $ lexeme (C.string "=>")
+
+-- | Parse at symbol: @
+at :: Parser ()
+at = void $ lexeme (C.char '@')
+
+-- | Parse hash symbol: #
+hash :: Parser ()
+hash = void $ lexeme (C.char '#')
+
+-- | Parse slash: /
+slash :: Parser ()
+slash = void $ lexeme (C.char '/')
+
+-- | Parse star: *
+star :: Parser ()
+star = void $ lexeme (C.char '*')
+
+-- | Parse empty braces: {}
+emptyBraces :: Parser ()
+emptyBraces = void $ lexeme (C.string "{}")
+
+-- | Parse angle brackets: < ... >
 angleBrackets :: Parser a -> Parser a
-angleBrackets = symbol "<" `between` symbol ">"
+angleBrackets p = do
+  void $ lexeme (C.char '<')
+  result <- p
+  void $ lexeme (C.char '>')
+  return result
 
-commaSep :: Parser a -> Parser [a]
-commaSep parser = parser `sepBy` symbol ","
+-- | Parse braces: { ... }
+braces :: Parser a -> Parser a
+braces p = do
+  void $ lexeme (C.char '{')
+  result <- p
+  void $ lexeme (C.char '}')
+  return result
 
-commaSep1 :: Parser a -> Parser [a]
-commaSep1 parser = parser `sepBy1` symbol ","
-
-commaSep2 :: Parser a -> Parser [a]
-commaSep2 parser = cons (parser <* symbol ",") (commaSep1 parser)
-
-commaSepN :: Int -> Parser a -> Parser [a]
-commaSepN n parser = do
-  as <- commaSep parser
-  if length as == n
-    then pure as
-    else fail "Wrong count"
-
+-- | Parse semicolon-separated list (at least one)
 semicolonSep1 :: Parser a -> Parser [a]
-semicolonSep1 parser = parser `sepBy1` symbol ";"
+semicolonSep1 p = P.sepBy1 p semicolon
 
-pair :: Parser a -> Parser b -> Parser (a, b)
-pair a b = parens ((,) <$> a <* symbol "," <*> b)
-
-{-# INLINE pipe #-}
-pipe :: Parser Text
-pipe = symbol "|"
-
-{-# INLINE colon #-}
-colon :: Parser Text
-colon = symbol ":"
-
-{-# INLINE slash #-}
-slash :: Parser Text
-slash = symbol "/"
-
-{-# INLINE equalSign #-}
-equalSign :: Parser Text
-equalSign = symbol "="
+-- | Parse comma-separated list (at least one)
+commaSep1 :: Parser a -> Parser [a]
+commaSep1 p = P.sepBy1 p (lexeme (C.char ','))

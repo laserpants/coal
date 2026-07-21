@@ -1,0 +1,60 @@
+module Main {
+
+// Test case: letrec with lambda inside case branch (closer to Tree.from_list pattern)
+// The inner lambda should capture __fold__ from the outer scope
+Main.test_nested_lambda =
+  let
+    __fold__ : list(int32)/int32/int32 =
+      fn(xs : list(int32)) =>
+        case<int32>(xs : list(int32)) {
+          | ($Cons : int32/list(int32)/list(int32), head : int32, tail : list(int32)) =>
+              fn(acc : int32) =>
+                [+ int32]
+                  ( head : int32
+                  , @<int32>
+                      ( __fold__ : list(int32)/int32/int32
+                      , tail : list(int32)
+                      , acc : int32
+                      )
+                  )
+          | ($Nil : list(int32)) =>
+              fn(acc : int32) => acc : int32
+        }
+  in
+    @<int32>
+      ( __fold__ : list(int32)/int32/int32
+      , @<list(int32)>
+          ( $Cons : int32/list(int32)/list(int32)
+          , 10
+          , @<list(int32)>
+              ( $Cons : int32/list(int32)/list(int32)
+              , 20
+              , @<list(int32)>
+                  ( $Cons : int32/list(int32)/list(int32)
+                  , 30
+                  , $Nil : list(int32)
+                  )
+              )
+          )
+      , 0
+      )
+
+Main.cont(r : int32, a : *) =
+  0
+
+Main.main(_ : *) =
+  let
+    r : int32 = Main.test_nested_lambda : int32
+  ; call_tmp : * =
+      @<*>
+        ( coal_print_int32 : int32/*
+        , r : int32
+        )
+  in
+    @<int32>
+      ( Main.cont : int32/*/int32
+      , r : int32
+      , call_tmp : *
+      )
+
+}

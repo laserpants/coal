@@ -1,0 +1,41 @@
+module Containers.Tree {
+
+  import Number(max)
+
+  type alias TreeFields<a> =
+    { value    : a
+    , children : List<Tree<a>>
+    }
+
+  type Tree<a> = Node(TreeFields<a>)
+
+  fun leaf(value) =
+    Node({ value = value, children = [] })
+
+  fun node(value, children) =
+    Node({ value = value, children = children })
+
+  fold tree_list_size 
+    | size(@tree) :: tree_list_size(@trees) => tree + trees
+    | [] => 0
+
+  fold size 
+    | Node({ children = tree_list_size(@children) | _ }) => 1 + children
+
+  fold tree_list_height 
+    | [] => 0
+    | height(@h) :: tree_list_height(@g) => max(h, g)
+
+  fold height 
+    | Node({ children = tree_list_height(@h) | _ }) => 1 + h
+
+  fold tree_list_map 
+    | [] =>
+        fn(_) => []
+    | Node({ value, children = tree_list_map(@children) }) :: tree_list_map(@trees) =>
+        fn(f) => Node({ value = f(value), children = children(f) }) :: trees(f)
+
+  fun tree_map(f : a -> b, Node({ value, children }) : Tree<a>) : Tree<b> =
+    Node({ value = f(value), children = tree_list_map(children, f) })
+
+}

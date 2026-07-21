@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 {-# LANGUAGE TupleSections #-}
@@ -29,16 +30,19 @@ module Coal.Compiler.Pass.PhasePreflight.SortModules (
 import Coal.Compiler.Build (Build (buildDependencies))
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..), envelopePathName)
 import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
+import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
+import Coal.Compiler.State (CompilerState (..))
 import Coal.Language.Definition (Definition (DImport, DNamespaceImport))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (Path (Path), principalPath)
 import Control.Monad (unless)
 import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.State (get)
 import Data.Graph (SCC (..), stronglyConnComp)
 import Data.List.Extra (notNull)
 import Data.Maybe (mapMaybe)
@@ -59,8 +63,12 @@ passSortModules = Pass{runPass = passImpl}
 
 passImpl :: (Monad m) => [BuildEnvelope (Module Metadata () ())] -> CompilerT Metadata m [BuildEnvelope (Module Metadata () ())]
 passImpl units = do
-  unless ("Main" `elem` names) $ do
-    tellErrors [NoModuleMain]
+  CompilerState{compilerConfig} <- get
+  let requiredModule = case configEntryPoint compilerConfig of
+        Just (moduleName, _) -> moduleName
+        Nothing -> "Main"
+  unless (requiredModule `elem` names) $ do
+    tellErrors [NoModuleMain requiredModule]
     throwError PreflightFailure
 
   -- Collect edges and listen for any ModuleNotFound errors
@@ -110,10 +118,7 @@ dependencies (Module p _ defs)
   | otherwise = imported <> extra
  where
   imported = mapMaybe importPath defs
-  extra =
-    [ (mempty, Path ["Coal", "Applicative"])
-    , (mempty, Path ["Coal", "Monad"])
-    ]
+  extra = for builtinModulesPaths (\name -> (mempty, Path [name]))
 
 importPath :: Definition a k t -> Maybe (a, Path)
 importPath =

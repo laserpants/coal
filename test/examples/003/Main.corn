@@ -1,0 +1,93 @@
+module Main {
+
+data Tree(*) 
+  = Main.Leaf
+  | Main.Node(*, Tree(*), Tree(*))
+
+//
+//     2
+//    / \
+//   1   4
+//      / \
+//     3   5
+//
+Main.sample_tree =
+  @<Tree(int32)>
+    ( Main.Node : int32/Tree(int32)/Tree(int32)/Tree(int32)
+    , 2
+    , @<Tree(int32)>
+        ( Main.Node : int32/Tree(int32)/Tree(int32)/Tree(int32)
+        , 1
+        , Main.Leaf : Tree(int32)
+        , Main.Leaf : Tree(int32)
+        )
+    , @<Tree(int32)>
+        ( Main.Node : int32/Tree(int32)/Tree(int32)/Tree(int32)
+        , 4
+        , @<Tree(int32)>
+            ( Main.Node : int32/Tree(int32)/Tree(int32)/Tree(int32)
+            , 3
+            , Main.Leaf : Tree(int32)
+            , Main.Leaf : Tree(int32)
+            )
+        , @<Tree(int32)>
+            ( Main.Node : int32/Tree(int32)/Tree(int32)/Tree(int32)
+            , 5
+            , Main.Leaf : Tree(int32)
+            , Main.Leaf : Tree(int32)
+            )
+        )
+    )
+
+Main.max(a : int32, b : int32) =
+  if ([> int32](a : int32, b : int32))
+    then a : int32
+    else b : int32
+
+Main.height(tree : Tree(*)) =
+  case<int32>(tree : Tree(*)) {
+    | ( Main.Leaf : Tree(*)
+      ) =>
+      0
+    | ( Main.Node : */Tree(*)/Tree(*)/Tree(*)
+      , y : *
+      , lhs : Tree(*)
+      , rhs : Tree(*)
+      ) =>
+        [+ int32]
+          ( 1
+          , @<int32>
+              ( Main.max : int32/int32/int32
+              , @<int32>
+                  ( Main.height : Tree(*)/int32
+                  , lhs : Tree(*)
+                  )
+              , @<int32>
+                  ( Main.height : Tree(*)/int32
+                  , rhs : Tree(*)
+                  )
+              )
+          )
+  }
+
+Main.main(_ : *) =
+  let
+    r : int32 =
+      @<int32>
+        ( Main.height : Tree(*)/int32
+        , Main.sample_tree : Tree(*)
+        )
+    in
+      let
+        __call_tmp : * =
+          @<*>
+            ( coal_print_int32 : int32/*
+            , r : int32
+            )
+        in
+          @<int32>
+            ( fn(a : *) => r : int32
+            , __call_tmp : *
+            )
+
+}

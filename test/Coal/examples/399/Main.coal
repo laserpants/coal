@@ -1,0 +1,691 @@
+module Main {
+
+  import namespace IO
+  import namespace Containers.Set
+  import namespace List
+  import namespace Nat
+
+  import Containers.Set (Set)
+  import List(reduce, range)
+  import Codata.Machine (machine, run_while)
+  import Coal.Combinators (iterate)
+
+  type Shape
+    = ShapeI
+    | ShapeO
+    | ShapeT
+    | ShapeS
+    | ShapeZ
+    | ShapeJ
+    | ShapeL
+
+  type Rotation
+    = R0
+    | R90
+    | R180
+    | R270
+
+  fun spin
+    | R0   => R90  
+    | R90  => R180 
+    | R180 => R270 
+    | R270 => R0   
+
+  fun shape_from_int(n : int32) : Shape =
+    match(n % 6) {
+      | 0 => ShapeI
+      | 1 => ShapeO
+      | 2 => ShapeT
+      | 3 => ShapeS
+      | 4 => ShapeZ
+      | 5 => ShapeJ
+      | _ => ShapeL
+    }
+
+  fun rotation_from_int(n : int32) : Rotation =
+    match(n % 4) {
+      | 0 => R0
+      | 1 => R90
+      | 2 => R180
+      | _ => R270
+    }
+
+  type Event
+    = KeyLeft
+    | KeyRight
+    | KeyDown
+    | KeyUp
+    | KeySpace
+    | KeyEsc
+    | Tick
+    | NoOp
+
+  type alias Block =
+    { shape : Shape
+    , rotation : Rotation
+    , pos_x : int32
+    , pos_y : int32
+    }
+
+  let initial_block : Block = 
+    { shape = ShapeI
+    , rotation = R0
+    , pos_x = 0
+    , pos_y = 0
+    }
+
+  fun random_block() =
+    #{random_shape : unit -> int32}(())(
+      fn(shape_n : int32) =>
+        #{random_rotation : unit -> int32}(())(
+          fn(rotation_n : int32) =>
+            { shape = shape_from_int(shape_n)
+            , rotation = rotation_from_int(rotation_n)
+            , pos_x = 0
+            , pos_y = 0
+            }
+        )
+    )
+
+  type alias Board = Set<(int32, int32)>
+
+  let empty_board : Board =
+    Containers.Set.empty
+
+  type alias GameState =
+    { board : Board
+    , current_block : Block
+    }
+
+  let initial_game_state : GameState =
+    { board = empty_board
+    , current_block = initial_block
+    }
+
+  fun shape_cells(shape : Shape, rotation : Rotation) : Set<(int32, int32)> =
+    Containers.Set.from_list 
+      .| match(shape) {
+           | ShapeO =>
+               //          
+               //   - - - -
+               //   - # # -
+               //   - # # -
+               //   - - - -
+               [ (1, 1)
+               , (2, 1)
+               , (1, 2)
+               , (2, 2)
+               ]
+           | ShapeI =>
+               match(rotation) {
+                 | R0 =>
+                     //   - # - -
+                     //   - # - -
+                     //   - # - -
+                     //   - # - -
+                     [ (1, 0)
+                     , (1, 1)
+                     , (1, 2)
+                     , (1, 3)
+                     ]
+                 | R90 =>
+                     //   - - - -
+                     //   # # # #
+                     //   - - - -
+                     //   - - - -
+                     [ (0, 1)
+                     , (1, 1)
+                     , (2, 1)
+                     , (3, 1)
+                     ]
+                 | R180 =>
+                     //   - - # -
+                     //   - - # -
+                     //   - - # -
+                     //   - - # -
+                     [ (2, 0)
+                     , (2, 1)
+                     , (2, 2)
+                     , (2, 3)
+                     ]
+                 | R270 =>
+                     //   - - - -
+                     //   - - - -
+                     //   # # # #
+                     //   - - - -
+                     [ (0, 2)
+                     , (1, 2)
+                     , (2, 2)
+                     , (3, 2)
+                     ]
+               }
+           | ShapeT =>
+               match(rotation) {
+                 | R0 =>
+                     //   - # - -
+                     //   # # # -
+                     //   - - - -
+                     //   - - - -
+                     [ (1, 0)
+                     , (0, 1)
+                     , (1, 1)
+                     , (2, 1)
+                     ]
+                 | R90 =>
+                     //   - - # -
+                     //   - - # #
+                     //   - - # -
+                     //   - - - -
+                     [ (2, 0)
+                     , (2, 1)
+                     , (3, 1)
+                     , (2, 2)
+                     ]
+                 | R180 =>
+                     //   - - - -
+                     //   - - - -
+                     //   - # # #
+                     //   - - # -
+                     [ (1, 2)
+                     , (2, 2)
+                     , (3, 2)
+                     , (2, 3)
+                     ]
+                 | R270 =>
+                     //   - - - -
+                     //   - # - -
+                     //   # # - -
+                     //   - # - -
+                     [ (1, 1)
+                     , (0, 2)
+                     , (1, 2)
+                     , (1, 3)
+                     ]
+               }
+           | ShapeS =>
+               match(rotation) {
+                 | R0 =>
+                     //   # - - -
+                     //   # # - -
+                     //   - # - -
+                     //   - - - -
+                     [ (0, 0)
+                     , (0, 1)
+                     , (1, 1)
+                     , (1, 2)
+                     ]
+                 | R90 =>
+                     //   - - # #
+                     //   - # # -
+                     //   - - - -
+                     //   - - - -
+                     [ (2, 0)
+                     , (3, 0)
+                     , (1, 1)
+                     , (2, 1)
+                     ]
+                 | R180 =>
+                     //   - - - -
+                     //   - - # -
+                     //   - - # #
+                     //   - - - #
+                     [ (2, 1)
+                     , (2, 2)
+                     , (3, 2)
+                     , (3, 3)
+                     ]
+                 | R270 =>
+                     //   - - - -
+                     //   - - - -
+                     //   - # # -
+                     //   # # - -
+                     [ (1, 2)
+                     , (2, 2)
+                     , (0, 3)
+                     , (1, 3)
+                     ]
+               }
+           | ShapeZ =>
+               match(rotation) {
+                 | R0 =>
+                     //   - # - -
+                     //   # # - -
+                     //   # - - -
+                     //   - - - -
+                     [ (1, 0)
+                     , (0, 1)
+                     , (1, 1)
+                     , (0, 2)
+                     ]
+                 | R90 =>
+                     //   - # # -
+                     //   - - # #
+                     //   - - - -
+                     //   - - - -
+                     [ (1, 0)
+                     , (2, 0)
+                     , (2, 1)
+                     , (3, 1)
+                     ]
+                 | R180 =>
+                     //   - - - -
+                     //   - - - #
+                     //   - - # #
+                     //   - - # -
+                     [ (3, 1)
+                     , (2, 2)
+                     , (3, 2)
+                     , (2, 3)
+                     ]
+                 | R270 =>
+                     //   - - - -
+                     //   - - - -
+                     //   # # - -
+                     //   - # # -
+                     [ (0, 2)
+                     , (1, 2)
+                     , (1, 3)
+                     , (2, 3)
+                     ]
+               }
+           | ShapeJ =>
+               match(rotation) {
+                 | R0 =>
+                     //   - # # -
+                     //   - # - -
+                     //   - # - -
+                     //   - - - -
+                     [ (1, 0)
+                     , (2, 0)
+                     , (1, 1)
+                     , (1, 2)
+                     ]
+                 | R90 =>
+                     //   - - - -
+                     //   - # # #
+                     //   - - - #
+                     //   - - - -
+                     [ (1, 1)
+                     , (2, 1)
+                     , (3, 1)
+                     , (3, 2)
+                     ]
+                 | R180 =>
+                     //   - - - -
+                     //   - - # -
+                     //   - - # -
+                     //   - # # -
+                     [ (2, 1)
+                     , (2, 2)
+                     , (1, 3)
+                     , (2, 3)
+                     ]
+                 | R270 =>
+                     //   - - - -
+                     //   # - - -
+                     //   # # # -
+                     //   - - - -
+                     [ (0, 1)
+                     , (0, 2)
+                     , (1, 2)
+                     , (2, 2)
+                     ]
+               }
+           | ShapeL =>
+               match(rotation) {
+                 | R0 =>
+                     //   # # - -
+                     //   - # - -
+                     //   - # - -
+                     //   - - - -
+                     [ (0, 0)
+                     , (1, 0)
+                     , (1, 1)
+                     , (1, 2)
+                     ]
+                 | R90 =>
+                     //   - - - #
+                     //   - # # #
+                     //   - - - -
+                     //   - - - -
+                     [ (3, 0)
+                     , (1, 1)
+                     , (2, 1)
+                     , (3, 1)
+                     ]
+                 | R180 =>
+                     //   - - - -
+                     //   - - # -
+                     //   - - # -
+                     //   - - # #
+                     [ (2, 1)
+                     , (2, 2)
+                     , (2, 3)
+                     , (3, 3)
+                     ]
+                 | R270 =>
+                     //   - - - -
+                     //   - - - -
+                     //   # # # -
+                     //   # - - -
+                     [ (0, 2)
+                     , (1, 2)
+                     , (2, 2)
+                     , (0, 3)
+                     ]
+               }
+      }
+
+  fun can_move_left(state : GameState) = 
+    let 
+      translated_block_cells =
+        translate_cells(-1, 0, current_block_cells(state))
+    in
+    ! cells_collide(translated_block_cells, state)
+
+  fun can_move_right(state : GameState) = 
+    let 
+      translated_block_cells =
+        translate_cells(1, 0, current_block_cells(state))
+    in
+    ! cells_collide(translated_block_cells, state)
+
+  fun can_move_down(state : GameState) = 
+    let 
+      translated_block_cells =
+        translate_cells(0, 1, current_block_cells(state))
+    in
+    ! cells_collide(translated_block_cells, state)
+
+  fun can_rotate(state : GameState) =
+    let
+      { shape, rotation, pos_x, pos_y } = state.current_block
+    in
+    let
+      rotated_cells =
+        translate_cells(
+          pos_x,
+          pos_y,
+          shape_cells(shape, spin(rotation)) |. Containers.Set.to_list
+        )
+    in
+    ! cells_collide(rotated_cells, state)
+
+  fun move_current_block(d_x : int32, d_y : int32, state : GameState) : GameState =
+    { board = state.board
+    , current_block = 
+        { shape = state.current_block.shape
+        , rotation = state.current_block.rotation
+        , pos_x = state.current_block.pos_x + d_x
+        , pos_y = state.current_block.pos_y + d_y
+        }
+    }
+
+  fun rotate_current_block(state : GameState) : GameState =
+    { board = state.board
+    , current_block = 
+        { shape = state.current_block.shape
+        , rotation = spin(state.current_block.rotation)
+        , pos_x = state.current_block.pos_x 
+        , pos_y = state.current_block.pos_y 
+        }
+    }
+
+  fun move_left(state : GameState) =
+    if (can_move_left(state))
+      then move_current_block(-1, 0, state)
+      else state
+
+  fun move_right(state : GameState) =
+    if (can_move_right(state))
+      then move_current_block(1, 0, state)
+      else state
+
+  fun move_down(state : GameState) =
+    if (can_move_down(state))
+      then move_current_block(0, 1, state)
+      else state
+
+  fun rotate(state : GameState) =
+    if (can_rotate(state))
+      then
+        rotate_current_block(state)
+      else
+        state
+
+  // Drop the current block as far as it will go. The board is 20 cells tall,
+  // so the block can never move down more than 20 times; 30 iterations is a
+  // safe upper bound. Once the block cannot move down, further steps are
+  // no-ops, so the extra iterations have no effect.
+  fun drop_to_bottom(state : GameState) : GameState =
+    iterate(
+      30,
+      fn(s) =>
+        if (can_move_down(s))
+          then move_current_block(0, 1, s)
+          else s,
+      state
+    )
+
+  fun hard_drop(state : GameState) =
+    on_piece_landed(drop_to_bottom(state))
+
+  // ---------------------------------------------------------------------------
+  // Board API  
+  // ---------------------------------------------------------------------------
+
+  fun is_board_member(cell : (int32, int32), board : Board) : bool =
+    Containers.Set.is_member(cell, board)
+
+  fun board_insert(cell : (int32, int32), board : Board) : Board =
+    Containers.Set.insert(cell, board)
+
+  fun board_insert_cells(cells : List<(int32, int32)>, board : Board) : Board =
+    reduce(board_insert, board, cells)
+
+  fun board_cell_is_set(cell : (int32, int32), game_state : GameState) : bool =
+    is_board_member(cell, game_state.board)
+
+  fun board_count_in_row(y : int32, board : Board) =
+    List.reduce_left(
+      fn(count, x) =>
+        if (is_board_member((x, y), board))
+          then count + 1
+          else count,
+      0,
+      range(0, 10)
+    )
+  
+  fun board_remove_row(y : int32, board : Board) =
+    List.reduce_left(
+      fn(acc, x) => Containers.Set.delete((x, y), acc),
+      board,
+      range(0, 10)
+    )
+  
+  // Shift the cells in row `y` down by one. Membership is checked against the
+  // original `board`; since each column `x` only affects its own cell, this is
+  // equivalent to folding over the accumulating board.
+  fun board_shift_row(y : int32, board : Board) : Board =
+    List.reduce_left(
+      fn(acc, x) =>
+        if (is_board_member((x, y), board))
+          then Containers.Set.insert((x, y + 1), Containers.Set.delete((x, y), acc))
+          else acc,
+      board,
+      range(0, 10)
+    )
+
+  // Shift rows `cleared_y - 1` down to row 0. reduce_left processes the list
+  // right-to-left (last element first), so range [0 .. cleared_y-1] is
+  // consumed from cleared_y-1 down to 0 — the correct order for falling cells.
+  fun board_shift_rows_above(cleared_y : int32, board : Board) : Board =
+    List.reduce_left(
+      fn(acc, y) => board_shift_row(y, acc),
+      board,
+      range(0, Nat.pack(cleared_y))
+    )
+  
+  // One step of the row-clearing loop, operating on a (row, board) pair. If
+  // the current row is full it is removed, the rows above are shifted down,
+  // and the same row is examined again; otherwise the next row up is examined.
+  fun board_clear_step((y, board) : (int32, Board)) : (int32, Board) =
+    if (y < 0)
+      then (y, board)
+      else
+        if (board_count_in_row(y, board) == 10)
+          then (y, board_shift_rows_above(y, board_remove_row(y, board)))
+          else (y - 1, board)
+
+  fun board_clear_full_rows(board : Board) =
+    match(
+      // There are at most 20 row-clearing steps (one per row) plus 20 steps
+      // moving up past each row, so 50 iterations is a safe upper bound. Once
+      // the row index drops below 0 the step is a no-op, so the extra
+      // iterations have no effect.
+      iterate(50, board_clear_step, (19, board))
+    ) {
+      | (_, result_board) => result_board
+    }
+
+  fun board_to_list(board : Board) : List<(int32, int32)> =
+    Containers.Set.to_list(board)
+
+  // ---------------------------------------------------------------------------
+  // Cells
+  // ---------------------------------------------------------------------------
+
+  fun translate_cell(d_x : int32, d_y : int32, (cell_x, cell_y) : (int32, int32)) : (int32, int32) =
+    (cell_x + d_x, cell_y + d_y)
+
+  fun translate_cells(d_x : int32, d_y : int32, cells : List<(int32, int32)>) =
+    List.map(translate_cell(d_x, d_y), cells)
+
+  fun current_block_cells(game_state : GameState) : List<(int32, int32)> =
+    let 
+      { shape, rotation, pos_x, pos_y } = game_state.current_block
+    in
+    shape_cells(shape, rotation)
+      |. Containers.Set.to_list
+      |. translate_cells(pos_x, pos_y)
+
+  // ---------------------------------------------------------------------------
+  // Collision detection
+  // ---------------------------------------------------------------------------
+
+  fun cell_collides((x, y) : (int32, int32), game_state : GameState) : bool =
+    x < 0 || x >= 10 || y >= 20 || board_cell_is_set((x, y), game_state)
+
+  fun cells_collide(cells : List<(int32, int32)>, game_state : GameState) : bool =
+    List.any(fn(cell) => cell_collides(cell, game_state), cells)
+
+  // ---------------------------------------------------------------------------
+  // Piece locking
+  // ---------------------------------------------------------------------------
+
+  fun lock_current_block(state : GameState) : GameState =
+    { board = board_insert_cells(current_block_cells(state), state.board)
+    , current_block = state.current_block
+    }
+
+  // ---------------------------------------------------------------------------
+
+  fun parse_event(ev_code : int32) =
+    match(ev_code) {
+      | 0  => Tick
+      | 68 => KeyLeft 
+      | 67 => KeyRight
+      | 66 => KeyDown
+      | 65 => KeyUp
+      | 32 => KeySpace
+      | 27 => KeyEsc
+      | _  => NoOp
+    }
+
+  fun spawn_next_block(state : GameState) =
+    let 
+      next_block =
+        random_block()
+    in
+    { board = state.board
+    , current_block = next_block
+    }
+
+  fun on_piece_landed(state : GameState) =
+    let
+      locked =
+        lock_current_block(state)
+    in
+    let
+      cleared =
+        { board = board_clear_full_rows(locked.board)
+        , current_block = locked.current_block
+        }
+    in
+    let
+      spawned =
+        spawn_next_block(cleared)
+    in
+    if (cells_collide(current_block_cells(spawned), spawned))
+      then cleared
+      else spawned
+
+  fun tick(state : GameState) =
+    if (can_move_down(state))
+      then 
+        move_current_block(0, 1, state)
+      else 
+        on_piece_landed(state)
+
+  fun handle_event(event : Event, state : GameState) =
+    match(event) {
+      | KeyLeft =>
+          move_left(state)
+      | KeyRight =>
+          move_right(state)
+      | KeyDown =>
+          tick(state)
+      | KeyUp =>
+          rotate(state)
+      | KeySpace =>
+          hard_drop(state)
+      | KeyEsc =>
+          // TODO
+          state
+      | Tick =>
+          tick(state)
+      | NoOp =>
+          state
+    }
+
+  fun handle(ev_code : int32, state : GameState) =
+    let event = parse_event(ev_code) in
+    let new_state = handle_event(event, state) 
+    in
+    #{coal_render_board : List<(int32, int32)> -> List<(int32, int32)> -> unit}(
+        board_to_list(new_state.board),
+        current_block_cells(new_state)
+      )(fn(_) => new_state)
+
+  let game_machine : Machine<unit, GameState> =
+    machine(
+      initial_game_state,
+      fn(_, state) =>
+        #{event_loop_next : unit -> int32}(())(
+          fn(ev_code : int32) => handle(ev_code, state)
+        ),
+      fn(state) => state
+    )
+
+  fun main() = 
+    IO.__return_io(
+      #{event_loop_init : int32 -> unit}(300 : int32)(
+        fn(_) =>
+          run_while(
+            fn(_) => #{event_loop_has_next : unit -> bool}(())(fn(b : bool) => b),
+            game_machine
+          )
+      )
+    )
+
+}

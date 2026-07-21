@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking) where
 
@@ -15,7 +16,7 @@ import Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild (passPrepareBuild)
 import Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors (passReportTypeErrors)
 import Coal.Compiler.Pass.PhaseTypeChecking.TypeInference (passTypeInference)
 import Coal.Language (IndexedType, Kind)
-import Coal.Language.Module (Module)
+import Coal.Language.Module (Module (..))
 import Control.Monad.IO.Class (MonadIO)
 
 phaseTypeChecking :: (MonadIO m) => Pass Metadata m (Module Metadata () ()) (Module Metadata Kind IndexedType)

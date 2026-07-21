@@ -1,0 +1,38 @@
+module Main {
+
+  Main.main(_ : *) =
+    let
+      f : float/float/float =
+        fn(a : float, b : float) =>
+          let
+            _ : * =
+              @<*>
+                ( rt_println_float : float/*
+                , a : float
+                )
+          in
+          [+ float]
+            ( a : float
+            , b : float
+            )
+    in
+      let
+        g : float/float =
+          @<float/float>
+            ( f : float/float/float
+            , 7.0f 
+            )
+        in
+          let
+            q : * =
+              @<*>
+                ( rt_println_float : float/*
+                , @<float>
+                    ( g : float/float
+                    , 9.0f
+                    )
+                )
+            in
+              0
+
+}

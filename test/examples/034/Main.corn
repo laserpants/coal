@@ -1,0 +1,96 @@
+module Main {
+
+  import List.fold_list
+  import List.Cons
+  import List.Nil
+
+  import Tree.Leaf
+  import Tree.Node
+  import Tree.flatten_tree
+  import Tree.list_to_tree
+
+  import Ord.Eq
+  import Ord.Gt
+  import Ord.Lt
+
+  import Function.compose
+
+  Main.sample_int32_list =
+    @<List(int32)>
+      ( List.Cons : int32/List(int32)/List(int32)
+      , 7
+      , @<List(int32)>
+          ( List.Cons : int32/List(int32)/List(int32)
+          , 4
+          , @<List(int32)>
+              ( List.Cons : int32/List(int32)/List(int32)
+              , 2
+              , @<List(int32)>
+                  ( List.Cons : int32/List(int32)/List(int32)
+                  , 6
+                  , @<List(int32)>
+                      ( List.Cons : int32/List(int32)/List(int32)
+                      , 5
+                      , List.Nil : List(int32)
+                      )
+                  )
+              )
+          )
+      )
+
+  Main.sort(xs : List(int32)) =
+    let
+      h : List(int32)/List(int32) =
+        @<List(int32)/List(int32)>
+          ( Function.compose : (Tree(int32)/List(int32))/(List(int32)/Tree(int32))/List(int32)/List(int32)
+          , Tree.flatten_tree : Tree(int32)/List(int32)
+          , @<List(int32)/Tree(int32)>
+              ( Tree.list_to_tree : { compare : */*/Ord | * }/List(int32)/Tree(int32)
+              , { compare = 
+                    fn(a : int32, b : int32) =>
+                      if ([< int32](a : int32, b : int32))
+                        then Ord.Lt : Ord
+                        else 
+                          if ([> int32](a : int32, b : int32))
+                            then Ord.Gt : Ord
+                            else Ord.Eq : Ord
+                | {}
+                }
+              )
+          )
+    in
+      @<List(int32)>
+        ( h : List(int32)/List(int32)
+        , xs : List(int32)
+        )
+  
+  Main.main(_ : *) = 
+    let
+      xs : List(int32) =
+        @<List(int32)>
+          ( Main.sort : List(int32)/List(int32)
+          , Main.sample_int32_list : List(int32)
+          )
+      in
+        let
+          res : * =
+            case<*>(xs : List(int32)) {
+              | ( List.Cons : int32/List(int32)/List(int32)
+                , hd : int32        
+                , tl : List(int32)   
+                ) => 
+                @<*>
+                  ( coal_print_int32 : int32/*
+                  , hd : int32
+                  )
+              | ( List.Nil : List(*)
+                ) => 
+                @<*>
+                  ( coal_print_int32 : int32/*
+                  , 0
+                  )
+            }
+          in
+            0
+
+}

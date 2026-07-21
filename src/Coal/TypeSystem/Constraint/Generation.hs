@@ -107,7 +107,7 @@ emitPListLiteralConstraints loc t ps =
         , Equality (RuleAssumption loc t t1) [t, t1]
         ]
     _ ->
-      pure ()
+      tellRight [Explicit (RuleListConstructor loc t listEmptyScheme) t listEmptyScheme]
  where
   ts = listType . typeOf <$> ps
 
@@ -335,7 +335,7 @@ emitEListLiteralConstraints loc t es = do
         , Equality (RuleAssumption loc t t1) [t, t1]
         ]
     _ ->
-      pure ()
+      tellRight [Explicit (RuleListConstructor loc t listEmptyScheme) t listEmptyScheme]
   concatMapM emitConstraints es
  where
   ts = listType . typeOf <$> es

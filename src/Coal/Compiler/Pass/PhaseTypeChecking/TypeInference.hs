@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
 {- |
@@ -41,8 +40,10 @@ import Coal.TypeSystem.Kind.Constraint.Solver (solveKindConstraints)
 import Coal.TypeSystem.Kind.Substitution (KindSubstitutable (applyKinds, replaceVariables))
 import Coal.TypeSystem.Kind.Unification (KindUnifier (kindUnifierMonad))
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
-import Control.Monad.Except (MonadError (throwError), MonadIO (..), forM_)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (execStateT, get, gets, modify, runState)
+import Extras (forM_)
 
 {- | Type inference compiler pass
 

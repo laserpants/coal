@@ -1,0 +1,111 @@
+module Data.Set {
+  
+  import Data.Map.Empty
+  import Data.Map.Map
+  import Data.Map.size
+  import Data.Map.lookup
+  import Data.Map.insert
+  import Data.Map.delete
+
+  import Data.Option.Some
+  import Data.Option.None
+
+  data Set(*) = Data.Set.Set(Map(*, unit))
+
+  Data.Set.insert(compare : */*/Ord, element : *, set : Set(*)) =
+    case<Set(*)>(set : Set(*)) {
+      | ( Data.Set.Set : Map(*, unit)/Set(*)
+        , map : Map(*, unit)
+        ) =>
+          @<Set(*)>
+            ( Data.Set.Set : Map(*, unit)/Set(*)
+            , @<Map(*, unit)>
+                ( Data.Map.insert : (*/*/Ord)/*/unit/Map(*, unit)/Map(*, unit)
+                , compare : */*/Ord
+                , element : *
+                , ()
+                , map : Map(*, unit)
+                )
+            )
+    }
+
+  Data.Set.delete(compare : */*/Ord, element : *, set : Set(*)) =
+    case<Set(*)>(set : Set(*)) {
+      | ( Data.Set.Set : Map(*, unit)/Set(*)
+        , map : Map(*, unit)
+        ) =>
+          @<Set(*)>
+            ( Data.Set.Set : Map(*, unit)/Set(*)
+            , @<Map(*, unit)>
+                ( Data.Map.delete : (*/*/Ord)/*/Map(*, unit)/Map(*, unit)
+                , compare : */*/Ord
+                , element : *
+                , map : Map(*, unit)
+                )
+            )
+    }
+
+  Data.Set.singleton(element : *) =
+    @<Set(*)>
+      ( Data.Set.Set : Map(*, unit)/Set(*)
+      , @<Map(*, unit)>
+          ( Data.Map.singleton : */unit/Map(*, unit)
+          , element : *
+          , ()
+          )
+      )
+
+  Data.Set.empty(_ : unit) =
+    @<Set(*)>
+      ( Data.Set.Set : Map(*, unit)/Set(*)
+      , Data.Map.Empty : Map(*, unit)
+      )
+
+  Data.Set.is_empty(set : Set(*)) =
+    case<bool>(set : Set(*)) {
+      | ( Data.Set.Set : Map(*, unit)/Set(*)
+        , map : Map(*, unit)
+        ) =>
+          @<bool>
+            ( Data.Map.is_empty : Map(*, unit)/bool
+            , map : Map(*, unit)
+            )
+    }
+
+  Data.Set.is_member(compare : */*/Ord, element : *, set : Set(*)) =
+    case<bool>(set : Set(*)) {
+      | ( Data.Set.Set : Map(*, unit)/Set(*)
+        , map : Map(*, unit)
+        ) =>
+          let 
+            res : Option(unit) =
+              @<Option(unit)>
+                ( Data.Map.lookup : (*/*/Ord)/*/Map(*, unit)/Option(unit)
+                , compare : */*/Ord
+                , element : *
+                , map : Map(*, unit)
+                )
+              in
+                case<bool>(res : Option(unit)) {
+                  | ( Data.Option.Some : unit/Option(unit)
+                    , _ : unit
+                    ) =>
+                      true
+                  | ( Data.Option.None : Option(unit)
+                    ) =>
+                      false
+                }
+    }
+
+  Data.Set.size(set : Set(*)) =
+    case<int32>(set : Set(*)) {
+      | ( Data.Set.Set : Map(*, unit)/Set(*)
+        , map : Map(*, unit)
+        ) =>
+          @<int32>
+            ( Data.Map.size : Map(*, unit)/int32
+            , map : Map(*, unit)
+            )
+    }
+
+}

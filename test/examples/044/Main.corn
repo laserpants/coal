@@ -1,0 +1,20 @@
+module Main {
+
+  Main.main(_ : *) =
+    let
+      r : float =
+        [+ float]
+          ( 5.0f
+          , 3.0f
+          )
+      in
+        let
+          q : * =
+            @<*>
+              ( rt_println_float : float/*
+              , r : float
+              )
+          in
+            0
+
+}

@@ -1,0 +1,214 @@
+module Data.Json.DecodingSpec(decodingSpec) {
+
+  import MicroTest(Test, check_with_remark, suite)
+  import Data.Json.Value(JsonValue)
+  import Data.Json.Decoding(decode)
+  import Data.Json.Encoding(encode)
+
+  // Structural matchers — avoid needing Comparable<JsonValue>
+
+  fun is_ok_null(r : Result<JsonValue, string>) : bool =
+    match(r) {
+      | Ok(JsonNull) => true
+      | _            => false
+    }
+
+  fun is_ok_bool(expected : bool, r : Result<JsonValue, string>) : bool =
+    match(r) {
+      | Ok(JsonBool(v)) => v == expected
+      | _               => false
+    }
+
+  fun is_ok_number(expected : double, r : Result<JsonValue, string>) : bool =
+    match(r) {
+      | Ok(JsonNumber(v)) => v == expected
+      | _                 => false
+    }
+
+  fun is_ok_string(expected : string, r : Result<JsonValue, string>) : bool =
+    match(r) {
+      | Ok(JsonString(v)) => v == expected
+      | _                 => false
+    }
+
+  fun is_err(r : Result<JsonValue, string>) : bool =
+    match(r) {
+      | Err(_) => true
+      | Ok(_)  => false
+    }
+
+  // Round-trip helper: decode an encoded value and re-encode it,
+  // then compare the two encoded strings.
+  fun round_trips(v : JsonValue) : bool =
+    match(decode(encode(v))) {
+      | Ok(v2) => encode(v2) == encode(v)
+      | Err(_) => false
+    }
+
+  let
+    decodingSpec : Test =
+      suite([
+        decode_null_tests,
+        decode_bool_tests,
+        decode_number_tests,
+        decode_string_tests,
+        decode_array_tests,
+        decode_object_tests,
+        decode_nested_tests,
+        decode_error_tests,
+        decode_round_trip_tests
+      ])
+
+    // --- Null ---
+    let decode_null_tests : Test =
+      suite([
+        check_with_remark("decode null",
+          is_ok_null(decode("null")))
+      ])
+
+    // --- Bool ---
+    let decode_bool_tests : Test =
+      suite([
+        check_with_remark("decode false",
+          is_ok_bool(false, decode("false"))),
+        check_with_remark("decode true",
+          is_ok_bool(true, decode("true")))
+      ])
+
+    // --- Number ---
+    let decode_number_tests : Test =
+      suite([
+        check_with_remark("decode 0.0",
+          is_ok_number(0.0, decode("0.0"))),
+        check_with_remark("decode 42.0",
+          is_ok_number(42.0, decode("42.0"))),
+        check_with_remark("decode -17.5",
+          is_ok_number(-17.5, decode("-17.5"))),
+        check_with_remark("decode integer 1",
+          is_ok_number(1.0, decode("1")))
+      ])
+
+    // --- String ---
+    let decode_string_tests : Test =
+      suite([
+        check_with_remark("decode empty string",
+          is_ok_string("", decode("\"\""))),
+        check_with_remark("decode simple string",
+          is_ok_string("hello", decode("\"hello\""))),
+        check_with_remark("decode string with spaces",
+          is_ok_string("hello world", decode("\"hello world\"")))
+      ])
+
+    // --- Array ---
+    let decode_array_tests : Test =
+      suite([
+        check_with_remark("decode empty array",
+          match(decode("[]")) {
+            | Ok(JsonArray([])) => true
+            | _                 => false
+          }),
+        check_with_remark("decode array with one element",
+          match(decode("[42.0]")) {
+            | Ok(JsonArray([JsonNumber(n)])) => n == 42.0
+            | _                             => false
+          }),
+        check_with_remark("decode array with multiple elements",
+          match(decode("[1.0,2.0,3.0]")) {
+            | Ok(JsonArray([JsonNumber(a), JsonNumber(b), JsonNumber(c)])) =>
+                a == 1.0 && b == 2.0 && c == 3.0
+            | _ => false
+          }),
+        check_with_remark("decode array with whitespace",
+          match(decode("[ 1.0 , 2.0 ]")) {
+            | Ok(JsonArray([JsonNumber(a), JsonNumber(b)])) =>
+                a == 1.0 && b == 2.0
+            | _ => false
+          })
+      ])
+
+    // --- Object ---
+    let decode_object_tests : Test =
+      suite([
+        check_with_remark("decode empty object",
+          match(decode("{}")) {
+            | Ok(JsonObject([])) => true
+            | _                  => false
+          }),
+        check_with_remark("decode object with one field",
+          match(decode("{\"k\":1.0}")) {
+            | Ok(JsonObject([(key, JsonNumber(v))])) =>
+                key == "k" && v == 1.0
+            | _ => false
+          }),
+        check_with_remark("decode object with multiple fields",
+          match(decode("{\"a\":true,\"b\":false}")) {
+            | Ok(JsonObject([(k1, JsonBool(v1)), (k2, JsonBool(v2))])) =>
+                k1 == "a" && v1 == true && k2 == "b" && v2 == false
+            | _ => false
+          })
+      ])
+
+    // --- Nested structures ---
+    let decode_nested_tests : Test =
+      suite([
+        check_with_remark("decode nested array",
+          match(decode("[[1.0,2.0],[3.0]]")) {
+            | Ok(JsonArray([JsonArray([JsonNumber(a), JsonNumber(b)]), JsonArray([JsonNumber(c)])])) =>
+                a == 1.0 && b == 2.0 && c == 3.0
+            | _ => false
+          }),
+        check_with_remark("decode nested object",
+          match(decode("{\"x\":{\"y\":99.0}}")) {
+            | Ok(JsonObject([(k1, JsonObject([(k2, JsonNumber(v))]))])) =>
+                k1 == "x" && k2 == "y" && v == 99.0
+            | _ => false
+          }),
+        check_with_remark("decode array of objects",
+          match(decode("[{\"n\":1.0},{\"n\":2.0}]")) {
+            | Ok(JsonArray([JsonObject([(k1, JsonNumber(v1))]), JsonObject([(k2, JsonNumber(v2))])])) =>
+                k1 == "n" && v1 == 1.0 && k2 == "n" && v2 == 2.0
+            | _ => false
+          })
+      ])
+
+    // --- Error cases ---
+    let decode_error_tests : Test =
+      suite([
+        check_with_remark("decode empty string is error",
+          is_err(decode(""))),
+        check_with_remark("decode unclosed array is error",
+          is_err(decode("["))),
+        check_with_remark("decode unclosed object is error",
+          is_err(decode("{"))),
+        check_with_remark("decode object missing value is error",
+          is_err(decode("{\"k\"}"))),
+        check_with_remark("decode unknown keyword is error",
+          is_err(decode("nul")))
+      ])
+
+    // --- Round-trip ---
+    let decode_round_trip_tests : Test =
+      suite([
+        check_with_remark("round-trip null",
+          round_trips(JsonNull)),
+        check_with_remark("round-trip false",
+          round_trips(JsonBool(false))),
+        check_with_remark("round-trip true",
+          round_trips(JsonBool(true))),
+        check_with_remark("round-trip number 0.0",
+          round_trips(JsonNumber(0.0))),
+        check_with_remark("round-trip number 42.0",
+          round_trips(JsonNumber(42.0))),
+        check_with_remark("round-trip string",
+          round_trips(JsonString("hello"))),
+        check_with_remark("round-trip empty array",
+          round_trips(JsonArray([]))),
+        check_with_remark("round-trip array",
+          round_trips(JsonArray([JsonNumber(1.0), JsonNull, JsonBool(true)]))),
+        check_with_remark("round-trip empty object",
+          round_trips(JsonObject([]))),
+        check_with_remark("round-trip object",
+          round_trips(JsonObject([("x", JsonNumber(1.0)), ("y", JsonBool(false))])))
+      ])
+
+}

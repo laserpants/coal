@@ -57,6 +57,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
+import Coal.Compiler.Config (configEntryPoint)
 import Coal.Compiler.Journal (censorDictionaryTraits, listenDictionaryTraits, tellDictionaryTraits, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
@@ -66,7 +67,7 @@ import Coal.Language
 import Coal.Language.Module.Path (Path (Path), principalPath)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
-import Control.Monad.Except (MonadError (throwError), forM)
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (execStateT, get, gets, modify, put)
 import Data.Data (Data)
@@ -79,7 +80,7 @@ import Data.Maybe (catMaybes)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
-import Extras (Dictionary, Name, forM_, traverse_, twice)
+import Extras (Dictionary, Name, forM, forM_, traverse_, twice)
 
 passInsertDictionaries :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passInsertDictionaries = Pass{runPass = pass}
@@ -151,7 +152,7 @@ insertName _ _ = pure () -- Other definitions do not need name insertion
 {- | Collect all trait constraints required by a name at the given type.
 Unifies the name's type scheme with the given type and returns required traits.
 -}
-collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m (Set (Trait IndexedType))
+collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
 collectTraits u name = do
   env <- gets compilerNameStore
   case Environment.lookup name env of
@@ -166,10 +167,14 @@ collectTraits u name = do
       case r of
         Left{} -> do
           -- Type mismatch during trait collection - this shouldn't happen in well-typed code
-          -- Return empty set and let type checker catch the error
+          -- Return empty list and let type checker catch the error
           pure mempty
         Right sub2 ->
-          pure (apply (sub2 <> sub1) (Set.fromList ts))
+          -- Return a list (not Set) to preserve multiplicity from the scheme's trait list.
+          -- Two distinct type variables that both resolve to the same concrete type must
+          -- still produce two separate dictionary arguments to match the two lambda params
+          -- created at the definition site (where the variables were distinct).
+          pure (apply (sub2 <> sub1) ts)
  where
   instantiate (TypeIndex k index) acc = do
     var <- supplied (TVariable . TypeIndex k)
@@ -291,11 +296,11 @@ instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (Expressio
       var@(EVariable _ (Label t name))
         | "$fold" `isPrefixOf` name -> do
             traits <- collectTraits t name
-            tellDictionaryTraits traits
+            tellDictionaryTraits (Set.fromList traits)
             pure var
       EVariable loc (Label t name) -> do
         traits <- collectTraits t name
-        applyTraits loc (Label t name) (Set.toList traits)
+        applyTraits loc (Label t name) traits
       ECompiledMatch a t e cs ->
         ECompiledMatch a t <$> expandTraits e <*> traverse expandTraits cs
       -- Transform a binding to collect trait dependencies and wrap the body in dictionary lambdas
@@ -311,7 +316,7 @@ transformBindingWithTraits =
           (body, traits) <- listenDictionaryTraits (expandTraits e)
           pure (BPattern a var body, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
     BPattern _ (PVariable a (Label t name)) e -> do
-      (e1, traits) <- transformScopeWithTraits e
+      (e1, traits) <- transformScopeWithTraits t e
       let ll = Label (foldTypeOf t (Set.toList traits)) name
       pure (BPattern mempty (PVariable a ll) e1, [(name, Forall (typeIndexesIn t) (Set.toList traits) t)])
     BPattern a (PAnnotation _ _ p) e ->
@@ -319,13 +324,78 @@ transformBindingWithTraits =
     binding ->
       error $ "transformBindingWithTraits: unsupported binding pattern: " ++ show binding
 
--- | Transform an expression scope to collect trait constraints and create dictionary lambdas
-transformScopeWithTraits :: (Monoid a, Data a, Data k, Monad m, Show a, Show k) => Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType, Set (Trait IndexedType))
-transformScopeWithTraits e = do
+{- | Transform an expression scope to collect trait constraints and create dictionary lambdas
+Only truly polymorphic (unresolvable) traits become dictionary lambda parameters;
+concrete traits that already have instances are kept as inlined ERecord dictionaries.
+-}
+transformScopeWithTraits :: (Monoid a, Data a, Data k, Monad m, Show a, Show k) => IndexedType -> Expression a k IndexedType -> CompilerT a m (Expression a k IndexedType, Set (Trait IndexedType))
+transformScopeWithTraits bindingType e = do
   (expr, traits) <- listenDictionaryTraits (expandTraits e)
-  case Set.toList traits of
-    [] -> pure (expr, traits)
-    tr : trs -> pure (dictionaryLambda tr trs expr, traits)
+  -- Partition traits into concretely resolvable (fully instantiated) vs. truly
+  -- polymorphic (still type-variable-parameterized). Concrete traits are inlined
+  -- as ERecord dictionaries inside the body; polymorphic traits become dictionary
+  -- lambda parameters. isConcrete returns True for TIntrinsic, TRecord, etc. and
+  -- False for TVariable.
+  let resolved = Set.toList (Set.filter isConcrete traits)
+  let concreteTraits = Set.fromList resolved
+  let polymorphicTraits = traits `Set.difference` concreteTraits
+  -- Replace ETraitInstance nodes with concrete ERecord dictionaries for traits
+  -- that have been resolved, so they aren't wrapped in dictionaryLambda.
+  expr' <-
+    if null resolved
+      then pure expr
+      else replaceConcreteTraitInstances expr concreteTraits
+  case Set.toList polymorphicTraits of
+    [] -> pure (expr', mempty)
+    tr : trs ->
+      -- If all remaining traits are type-variable traits (unresolved by inference)
+      -- AND the expression's type is fully concrete (no free type variables),
+      -- resolve them to int32 inline rather than deferring to the caller. This
+      -- handles let-bound expressions whose type is concrete but whose body
+      -- references a polymorphic helper.
+      let exprIsConcrete = Set.null (typeIndexesIn bindingType :: Set (TypeIndex Kind))
+          allVar = all isVariable (tr : trs)
+       in if exprIsConcrete && allVar
+            then do
+              recs <- forM (tr :| trs) $ \(Trait trait ty) -> do
+                let concreteType = case ty of
+                      TVariable{} -> TIntrinsic IInt32
+                      other -> other
+                mFields <- lookupTraitInstance mempty (Trait trait concreteType)
+                case mFields of
+                  Nothing -> do
+                    -- Can't resolve — fall back to dictionary lambda
+                    pure (ETraitInstance mempty concreteType (Trait trait concreteType))
+                  Just fields ->
+                    pure $
+                      ERecord
+                        mempty
+                        (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (concreteType :| []))
+                        fields
+                        Nothing
+              pure
+                ( EApplication
+                    mempty
+                    bindingType
+                    (dictionaryLambda tr trs expr')
+                    recs
+                , mempty
+                )
+            else pure (dictionaryLambda tr trs expr', polymorphicTraits)
+
+{- | Replace ETraitInstance occurrences for traits in the given set with
+concrete ERecord dictionaries obtained from lookupTraitInstance.
+-}
+replaceConcreteTraitInstances :: (Monad m, Monoid a, Data a, Data k, Show a, Show k) => Expression a k IndexedType -> Set (Trait IndexedType) -> CompilerT a m (Expression a k IndexedType)
+replaceConcreteTraitInstances expr traits = descendM go expr
+ where
+  go (ETraitInstance a ty trait)
+    | Set.member trait traits = do
+        mFields <- lookupTraitInstance a trait
+        case mFields of
+          Just fields -> pure (ERecord a ty fields Nothing)
+          Nothing -> pure (ETraitInstance a ty trait)
+  go e = pure e
 
 instance (Monoid a, Data a, Data k, Show a, Show k) => TraitContext a (CompiledClause a k IndexedType) where
   expandTraits =
@@ -361,8 +431,12 @@ expandLetDefinitionTraits name =
           pure $ LetDefinition{letDefinitionType = With [] t, letDefinitionExpression = expr, ..}
         tr : trs -> do
           path <- gets compilerCurrentPath
+          cfg <- gets compilerConfig
+          let isEntryPoint = case configEntryPoint cfg of
+                Nothing -> "main" == name && Path ["Main"] == path
+                Just (entryMod, entryFunc) -> entryFunc == name && Path [entryMod] == path
           -- Insert default int32 instance for Numeric and Ordered traits for main function
-          if "main" == name && Path ["Main"] == path
+          if isEntryPoint
             then do
               recs <- forM (tr :| trs) $
                 \(Trait trait _) -> do
@@ -442,11 +516,11 @@ passiveExpandTraitsInExpr =
     var@(EVariable _ (Label t name))
       | "$fold" `isPrefixOf` name -> do
           traits <- collectTraits t name
-          tellDictionaryTraits traits
+          tellDictionaryTraits (Set.fromList traits)
           pure var
     EVariable loc (Label t name) -> do
       traits <- collectTraits t name
-      passiveApplyTraits loc traits
+      passiveApplyTraits loc (Set.fromList traits)
       pure (EVariable loc (Label t name))
     ECompiledMatch a t e cs ->
       ECompiledMatch a t <$> passiveExpandTraitsInExpr e <*> traverse passiveExpandTraitsInClause cs

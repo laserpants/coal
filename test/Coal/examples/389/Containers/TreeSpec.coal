@@ -1,0 +1,98 @@
+module Containers.TreeSpec(treeSpec) {
+
+  import MicroTest(Test, suite, check)
+  import Containers.Tree(Tree, leaf, node, size, height, tree_map)
+
+  //        1
+  //      /   \
+  //     2     3
+  //    / \     \
+  //   4   5     6
+
+  let example_tree =
+    Node({
+      value = 1,
+      children =
+        [ Node({
+            value = 2,
+            children =
+              [ Node({ value = 4, children = [] })
+              , Node({ value = 5, children = [] })
+              ]
+          })
+        , Node({
+            value = 3,
+            children =
+              [ Node({ value = 6, children = [] }) ]
+          })
+        ]
+    })
+
+  fun treeSpec() : Test =
+    suite([
+      check(size(example_tree) == 6),
+
+      // Test leaf
+      check(size(leaf(42)) == 1),
+      check(height(leaf(42)) == 1),
+      
+      // Test node with children
+      check(
+        let t = node(1, [leaf(2), leaf(3)]) in
+        size(t) == 3 && height(t) == 2
+      ),
+      
+      // Test size with deeper tree
+      check(
+        let t = Node({
+          value = 1,
+          children = [
+            Node({ value = 2, children = [leaf(4), leaf(5)] }),
+            Node({ value = 3, children = [leaf(6)] })
+          ]
+        }) in
+        size(t) == 6
+      ),
+      
+      // Test height with deeper tree
+      check(
+        let t = Node({
+          value = 1,
+          children = [
+            Node({ value = 2, children = [leaf(4), leaf(5)] }),
+            leaf(3)
+          ]
+        }) in
+        height(t) == 3
+      ),
+      
+      // Test tree_map
+      check(
+        let t = node(1, [leaf(2), leaf(3)]) in
+        let t2 = tree_map(fn(x) => x * 10, t) in
+        match(t2) {
+          | Node({ value = v, children = _ }) => v == 10
+        }
+      ),
+      
+      // Test tree_map preserves structure
+      check(
+        let t = node(1, [leaf(2), leaf(3)]) in
+        let t2 = tree_map(fn(x) => x + 1, t) in
+        size(t2) == size(t) && height(t2) == height(t)
+      ),
+      
+      // Test single-child node
+      check(
+        let t = node(10, [leaf(20)]) in
+        size(t) == 2 && height(t) == 2
+      ),
+      
+      // Test empty children list
+      check(
+        let t = Node({ value = 5, children = [] }) in
+        size(t) == 1 && height(t) == 1
+      )
+    ])
+
+}

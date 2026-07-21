@@ -1,0 +1,211 @@
+module BinarySearch {
+
+import Core$.operator__reverse_application
+import Core$.operator__reverse_composition
+import Core$.operator__list_concatenation
+import Core$.always
+import Ordered.greater_than
+import Ordered.less_than_or_equal_to
+
+data BinarySearch.Tree(*)
+  = BinarySearch.Leaf
+  | BinarySearch.Node(*, BinarySearch.Tree(*), BinarySearch.Tree(*))
+
+BinarySearch.from_int32($a : BinarySearch.Numeric(*)) =
+  case<int32/*>($a : BinarySearch.Numeric(*)) {
+    | ( $Record : { from_int32 : int32/* | * }/BinarySearch.Numeric(*)
+      , $r : { from_int32 : int32/* | * }
+      ) =>
+        get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
+  }
+
+BinarySearch.in_range
+  ( $dict.be194a5d16952b76 : BinarySearch.Numeric(*)
+  , $dict.ffef54c635ab7d00 : Ordered.Ordered(*)
+  , $v.0 : record({ max : * | min : * | {} })
+  , n : *
+  ) =
+ case<bool>($v.0 : record({ max : * | min : * | {} })) {
+   | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+     , $match.8.$row.1 : { max : * | min : * | {} }
+     ) =>
+       let
+         $row.1.field.max : * =
+           get?_max<*>($match.8.$row.1 : { max : * | min : * | {} })
+       ; $row.2.field.min : * =
+           get?_min<*>($match.8.$row.1 : { max : * | min : * | {} })
+       in
+                                   [&&]
+                                   ( @<bool>
+                                       ( Ordered.greater_than : Ordered(*)/*/*/bool
+                                       , $dict.ffef54c635ab7d00 : Ordered(*)
+                                       , n : *
+                                       , $row.2.field.min : *
+                                       )
+                                   , [|| ]
+                                     ( @<bool>
+                                         ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
+                                         , $dict.ffef54c635ab7d00 : Ordered(*)
+                                         , n : *
+                                         , $row.1.field.max : *
+                                         )
+                                     , @<bool>
+                                         ( Ordered.less_than_or_equal_to : Ordered(*)/*/*/bool
+                                         , $dict.ffef54c635ab7d00 : Ordered(*)
+                                         , $row.1.field.max : *
+                                         , @<*>
+                                             ( BinarySearch.from_int32 : Numeric(*)/int32/*
+                                             , $dict.be194a5d16952b76 : Numeric(*)
+                                             , -1
+                                             )
+                                         )
+                                     )
+                                   )
+   }
+
+BinarySearch.from_list
+  ( $dict.be194a5d16952b77 : Numeric(*)
+  , $dict.ffef54c635ab7d01 : Ordered(*)
+  , list : list(*)
+  ) =
+    let
+      $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*) =
+        fn($fold.1.expr : list(*)) =>
+          case<record({ max : * | min : * | {} })/BinarySearch.Tree(*)>($fold.1.expr : list(*)) {
+            | ( $Cons : */list(*)/list(*)
+              , $match.10.p : *
+              , $match.11.g : list(*)
+              ) =>
+                fn(range : record({ max : * | min : * | {} })) =>
+                  if
+                    ( @<bool>
+                        ( Core$.operator__reverse_application : */(*/bool)/bool
+                        , $match.10.p : *
+                        , @<*/bool>
+                            ( BinarySearch.in_range : BinarySearch.Numeric(*)/Ordered.Ordered(*)/record({ max : * | min : * | {} })/*/bool
+                            , $dict.be194a5d16952b77 : BinarySearch.Numeric(*)
+                            , $dict.ffef54c635ab7d01 : Ordered.Ordered(*)
+                            , range : record({ max : * | min : * | {} })
+                            )
+                        )
+                    )
+                    then
+                      @<BinarySearch.Tree(*)>
+                        ( BinarySearch.Node : */BinarySearch.Tree(*)/BinarySearch.Tree(*)/BinarySearch.Tree(*)
+                        , $match.10.p : *
+                        , @<BinarySearch.Tree(*)>
+                            ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                            , $match.11.g : list(*)
+                            , @<record({ max : * | min : * | {} })>
+                                ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                , { max = $match.10.p : *
+                                  | min =
+                                      case<*>(range : record({ max : * | min : * | {} })) {
+                                        | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                          , $row : { max : * | min : * | {} }
+                                          ) =>
+                                            get?_min<*>($row : { max : * | min : * | {} })
+                                      }
+                                  | {}
+                                  }
+                                )
+                            )
+                        , @<BinarySearch.Tree(*)>
+                          ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                          , $match.11.g : list(*)
+                          , @<record({ max : * | min : * | {} })>
+                              ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                              , { max =
+                                    case<*>(range : record({ max : * | min : * | {} })) {
+                                      | ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+                                        , $row : { max : * | min : * | {} }
+                                        ) =>
+                                          get?_max<*>($row : { max : * | min : * | {} })
+                                    }
+                                | min = $match.10.p : *
+                                | {}
+                                }
+                              )
+                          )
+                        )
+                    else
+                      @<BinarySearch.Tree(*)>
+                        ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                        , $match.11.g : list(*)
+                        , range : record({ max : * | min : * | {} })
+                        )
+            | ($Nil : list(*)) =>
+                @<record({ max : * | min : * | {} })/BinarySearch.Tree(*)>
+                  ( Core$.always : BinarySearch.Tree(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+                  , BinarySearch.Leaf : BinarySearch.Tree(*)
+                  )
+          }
+      in
+        @<BinarySearch.Tree(*)>
+          ( $fold.1 : list(*)/record({ max : * | min : * | {} })/BinarySearch.Tree(*)
+          , list : list(*)
+          , @<record({ max : * | min : * | {} })>
+              ( $Record : { max : * | min : * | {} }/record({ max : * | min : * | {} })
+              , { max =
+                    @<*>
+                      ( BinarySearch.from_int32 : Numeric(*)/int32/*
+                      , $dict.be194a5d16952b77 : Numeric(*)
+                      , -1 )
+                | min =
+                    @<*>
+                      ( BinarySearch.from_int32 : Numeric(*)/int32/*
+                      , $dict.be194a5d16952b77 : Numeric(*)
+                      , 0 )
+                | {}
+                }
+              )
+          )
+
+BinarySearch.flatten(tree : BinarySearch.Tree(*)) =
+  let
+    $fold.2 : BinarySearch.Tree(*)/list(*) =
+      fn($fold.2.expr : BinarySearch.Tree(*)) =>
+        case<list(*)>($fold.2.expr : BinarySearch.Tree(*)) {
+          | ( BinarySearch.Leaf : BinarySearch.Tree(*)
+            ) =>
+              $Nil : list(*)
+          | ( BinarySearch.Node : */BinarySearch.Tree(*)/BinarySearch.Tree(*)/BinarySearch.Tree(*)
+            , $match.13.y : *
+            , $match.14.lhs : BinarySearch.Tree(*)
+            , $match.15.rhs : BinarySearch.Tree(*)
+            ) =>
+              @<list(*)>
+                ( Core$.operator__list_concatenation : list(*)/list(*)/list(*)
+                , @<list(*)>
+                    ( $fold.2 : BinarySearch.Tree(*)/list(*)
+                    , $match.14.lhs : BinarySearch.Tree(*))
+                , @<list(*)>
+                    ( $Cons : */list(*)/list(*)
+                    , $match.13.y : *
+                    , @<list(*)>
+                        ( $fold.2 : BinarySearch.Tree(*)/list(*)
+                        , $match.15.rhs : BinarySearch.Tree(*))
+                    )
+                )
+        }
+    in
+      @<list(*)>
+        ( $fold.2 : BinarySearch.Tree(*)/list(*)
+        , tree : BinarySearch.Tree(*)
+        )
+
+BinarySearch.sort
+  ( $dict.be194a5d16952b77 : Numeric(*)
+  , $dict.ffef54c635ab7d01 : Ordered(*)
+  ) =
+    @<list(*)/list(*)>
+      ( Core$.operator__reverse_composition : (BinarySearch.Tree(*)/list(*))/(list(*)/BinarySearch.Tree(*))/list(*)/list(*)
+      , BinarySearch.flatten : BinarySearch.Tree(*)/list(*)
+      , @<list(*)/BinarySearch.Tree(*)>
+          ( BinarySearch.from_list : Numeric(*)/Ordered(*)/list(*)/BinarySearch.Tree(*)
+          , $dict.be194a5d16952b77 : Numeric(*)
+          , $dict.ffef54c635ab7d01 : Ordered(*)
+          )
+      )
+
+}

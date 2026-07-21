@@ -55,5 +55,8 @@ module Codata.Machine {
 
   fun cofix(f : Machine<i, o> -> Machine<i, o>) : Machine<i, o> =
     machine$_cofix(f)
-    
+
+  fun run_while(pred : unit -> bool, m : Machine<unit, a>) : a =
+    machine$_run_while(pred, m)
+
 }

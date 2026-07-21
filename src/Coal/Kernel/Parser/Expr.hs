@@ -1,153 +1,257 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Kernel.Parser.Expr (expr, label) where
+{- |
+Expression parser.
 
-import Coal.Common.Label (Label (..))
-import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr, Focus (..))
-import qualified Coal.Kernel.Language.Expr.Syntax as Syntax
-import Coal.Kernel.Language.Type (Type (..))
-import Coal.Kernel.Parser (Parser, backtickString, lexeme, some, try, ($>), (<|>))
-import Coal.Kernel.Parser.Identifier (constructor, name)
-import Coal.Kernel.Parser.Op (op)
-import Coal.Kernel.Parser.Prim (prim)
-import Coal.Kernel.Parser.Symbol
-import Coal.Kernel.Parser.Type (type_)
+Parses Coal kernel language expressions using a precedence-climbing expression parser.
+
+Handles:
+
+  * Variables and constructors
+  * Literals and primitives
+  * Lambda abstractions (@fn@)
+  * Let-bindings
+  * Conditionals (@if@)
+  * Pattern matching (@case@)
+  * Operators (via operator table)
+  * Record construction and extension
+  * Function application
+-}
+module Coal.Kernel.Parser.Expr (
+  expr,
+  label,
+) where
+
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
-import Data.List.NonEmpty (NonEmpty (..))
-import Extras (Name)
+import qualified Data.List.NonEmpty as NonEmpty
 
-label :: Parser t -> Parser (Label t)
-label p = do
-  l <- backtickString <|> name <|> constructor
-  t <- colon *> p
-  pure (Label t l)
+import Text.Megaparsec ((<|>))
 
-binding :: Parser e -> Parser (Binding Type e)
-binding p = Binding <$> (label type_ <* equalSign) <*> p
+import Coal.Common.Name (Name)
+import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
+import Coal.Kernel.Language.Type (Type)
+import Coal.Kernel.Parser (
+  Parser,
+  backtickString,
+  field,
+  lexeme,
+  parens,
+  qualifiedConstructor,
+  qualifiedName,
+  reserved,
+  spaces,
+ )
+import Coal.Kernel.Parser.Op (op)
+import Coal.Kernel.Parser.Prim (prim)
+import Coal.Kernel.Parser.Symbol (
+  angleBrackets,
+  arrow,
+  at,
+  braces,
+  colon,
+  commaSep1,
+  emptyBraces,
+  equals,
+  pipe,
+  semicolonSep1,
+ )
+import Coal.Kernel.Parser.Type (type_)
+import qualified Text.Megaparsec as P
+import qualified Text.Megaparsec.Char as C
 
-let_ :: Parser (Expr Type) -> Parser (Expr Type)
-let_ p = do
-  void (lexeme "let")
-  semicolonSep1 (binding p)
-    >>= \case
-      b : bs -> do
-        void (lexeme "in")
-        Syntax.let_ (b :| bs) <$> p
-      _ ->
-        fail "Empty list"
-
-nil :: Parser (Expr Type)
-nil = symbol "{}" $> Syntax.nil
-
-if_ :: Parser (Expr Type) -> Parser (Expr Type)
-if_ p =
-  Syntax.if_
-    <$> (lexeme "if" *> parens p)
-    <*> (lexeme "then" *> p)
-    <*> (lexeme "else" *> p)
-
-{-# INLINE var #-}
-var :: Parser (Expr Type)
-var = Syntax.var <$> label type_
-
-lam :: Parser (Expr Type) -> Parser (Expr Type)
-lam p = do
-  void (lexeme "fn")
-  args <- parens (commaSep1 (label type_))
-  void (symbol "=>")
-  case args of
-    a : as ->
-      Syntax.lam (a :| as) <$> p
-    _ ->
-      fail "Empty list"
-
-app :: Parser (Expr Type) -> Parser (Expr Type)
-app p = do
-  void (symbol "@")
-  t <- angleBrackets type_
-  parens (commaSep1 p)
-    >>= \case
-      e1 : e2 : es ->
-        pure (Syntax.app t e1 (e2 :| es))
-      _ ->
-        fail "Too few expressions"
-
-clause :: Parser (Expr Type) -> Parser (Clause Type (Expr Type))
-clause p = do
-  void (symbol "|")
-  lls <- parens (commaSep1 (label type_))
-  void (symbol "=>")
-  case lls of
-    l : ls ->
-      Clause (l :| ls) <$> p
-    _ ->
-      fail "Empty list"
-
-match :: Parser (Expr Type) -> Parser (Expr Type)
-match p = do
-  void (lexeme "match")
-  t <- angleBrackets type_
-  e <- parens p
-  braces (some (clause p))
-    >>= \case
-      c : cs ->
-        pure (Syntax.match t e (c :| cs))
-      _ ->
-        fail "Empty list"
-
-focus :: Parser (Focus Type)
-focus =
-  Focus
-    <$> field
-    <*> (equalSign *> label type_)
-    <*> (pipe *> label type_)
-
-select :: Parser (Expr Type) -> Parser (Expr Type)
-select p =
-  Syntax.sel
-    <$> (lexeme "select" *> braces focus)
-    <*> (equalSign *> p)
-    <*> (lexeme "in" *> p)
-
-record :: Parser (Expr Type) -> Parser (Expr Type)
-record p = inner braces
- where
-  inner f =
-    nil
-      <|> try var
-      <|> f ext
-
-  ext =
-    Syntax.ext
-      <$> (field <* equalSign)
-      <*> (p <* pipe)
-      <*> inner id
-
-field :: Parser Name
-field = backtickString <|> name
-
-call :: Parser (Expr Type) -> Parser (Expr Type)
-call p = do
-  void (symbol "#")
-  uncurry Syntax.call
-    <$> pair (label type_) (commaSep1 p)
-    <*> parens p
-
-atom :: Parser (Expr Type) -> Parser (Expr Type)
-atom p =
-  (Syntax.lit <$> prim)
-    <|> let_ p
-    <|> if_ p
-    <|> lam p
-    <|> app p
-    <|> match p
-    <|> select p
-    <|> (Syntax.op <$> op p)
-    <|> record p
-    <|> var
-    <|> call p
-
+-- | Parse an expression
 expr :: Parser (Expr Type)
-expr = makeExprParser (try (parens expr) <|> atom expr) [[]]
+expr = spaces *> pExpr
+
+-- | Internal expression parser
+pExpr :: Parser (Expr Type)
+pExpr = makeExprParser pAtomExpr [[]]
+
+-- | Parse an atomic expression
+pAtomExpr :: Parser (Expr Type)
+pAtomExpr =
+  P.choice
+    [ P.try pParenExpr
+    , P.try pLit
+    , P.try pLet
+    , P.try pIf
+    , P.try pLam
+    , P.try pMatch
+    , P.try pProj
+    , P.try pCon
+    , pApp
+    , pRecord
+    , pOp
+    , pVar
+    ]
+
+-- | Parse a parenthesized expression
+pParenExpr :: Parser (Expr Type)
+pParenExpr = parens pExpr
+
+-- | Parse a literal primitive value
+pLit :: Parser (Expr Type)
+pLit = ELit <$> prim
+
+-- | Parse a label: name : type or `field-name` : type or Constructor : type
+label :: Parser (Label Type)
+label = do
+  name <- pLabelName
+  colon
+  t <- type_
+  return $ Label t name
+
+{- | Parse a label name (identifier, constructor, or backtick string)
+Supports qualified names like My.Utilities.find_min and $Cons
+-}
+pLabelName :: Parser Name
+pLabelName =
+  P.choice
+    [ P.try backtickString
+    , P.try qualifiedConstructor
+    , qualifiedName C.letterChar <|> qualifiedName (C.char '_')
+    ]
+
+-- | Parse a variable: name : type
+pVar :: Parser (Expr Type)
+pVar = EVar <$> label
+
+-- | Parse a constructor: Constructor : type
+pCon :: Parser (Expr Type)
+pCon = do
+  name <- qualifiedConstructor
+  colon
+  t <- type_
+  return $ ECon (Label t name)
+
+-- | Parse a binding: label = expr
+pBinding :: Parser (Binding Type)
+pBinding = do
+  lbl <- label
+  equals
+  e <- pExpr
+  return $ Binding lbl e
+
+-- | Parse let expression: let binding1; binding2; ... in body
+pLet :: Parser (Expr Type)
+pLet = do
+  reserved "let"
+  bindings <- semicolonSep1 pBinding
+  reserved "in"
+  body <- pExpr
+  case NonEmpty.nonEmpty bindings of
+    Just bs ->
+      return $ ELet bs body
+    Nothing ->
+      fail "Let expression requires at least one binding"
+
+-- | Parse if expression: if (cond) then trueExpr else falseExpr
+pIf :: Parser (Expr Type)
+pIf = do
+  reserved "if"
+  cond <- parens pExpr
+  reserved "then"
+  thenExpr <- pExpr
+  reserved "else"
+  elseExpr <- pExpr
+  return $ EIf cond thenExpr elseExpr
+
+-- | Parse lambda: fn(arg1 : type1, arg2 : type2, ...) => body
+pLam :: Parser (Expr Type)
+pLam = do
+  reserved "fn"
+  args <- parens (commaSep1 label)
+  arrow
+  body <- pExpr
+  case NonEmpty.nonEmpty args of
+    Just as ->
+      return $ ELam as body
+    Nothing ->
+      fail "Lambda requires at least one argument"
+
+-- | Parse function application: @<type>(expr1, expr2, ...)
+pApp :: Parser (Expr Type)
+pApp = do
+  at
+  t <- angleBrackets type_
+  exprs <- parens (commaSep1 pExpr)
+  case exprs of
+    (e1 : e2 : es) -> case NonEmpty.nonEmpty (e2 : es) of
+      Just args ->
+        return $ EApp t e1 args
+      Nothing ->
+        fail "Application requires at least two expressions"
+    _ ->
+      fail "Application requires at least two expressions"
+
+-- | Parse a clause: | (pattern1 : type1, pattern2 : type2, ...) => expr
+pClause :: Parser (Clause Type)
+pClause = do
+  pipe
+  patterns <- parens (commaSep1 label)
+  arrow
+  e <- pExpr
+  case NonEmpty.nonEmpty patterns of
+    Just ps ->
+      return $ Clause ps e
+    Nothing ->
+      fail "Clause requires at least one pattern"
+
+-- | Parse case expression: case<type>(scrutinee) { clause1 clause2 ... }
+pMatch :: Parser (Expr Type)
+pMatch = do
+  reserved "case"
+  t <- angleBrackets type_
+  scrutinee <- parens pExpr
+  clauses <- braces (P.some pClause)
+  case NonEmpty.nonEmpty clauses of
+    Just cs ->
+      return $ ECase t scrutinee cs
+    Nothing ->
+      fail "Case requires at least one clause"
+
+-- | Parse field projection: get?_fieldName<type>(expr)
+pProj :: Parser (Expr Type)
+pProj = do
+  reserved "get"
+  void $ lexeme (C.string "?_")
+  fieldName <- field
+  t <- angleBrackets type_
+  rowExpr <- parens pExpr
+  return $ EGet (Label t fieldName) rowExpr
+
+-- | Parse record expression: {} or { field = value | rest }
+pRecord :: Parser (Expr Type)
+pRecord =
+  P.choice
+    [ P.try pEmptyRecord
+    , pRecordExtension
+    ]
+
+-- | Parse empty record: {}
+pEmptyRecord :: Parser (Expr Type)
+pEmptyRecord = emptyBraces >> return ENil
+
+-- | Parse record extension: { field = value | rest }
+pRecordExtension :: Parser (Expr Type)
+pRecordExtension = braces pRecordExt
+ where
+  pRecordExt = do
+    fieldName <- field
+    equals
+    value <- pExpr
+    pipe
+    rest <- pRestRecord
+    return $ EExt fieldName value rest
+
+  pRestRecord =
+    P.choice
+      [ P.try pRecordExt -- Another field without braces
+      , P.try pEmptyRecord -- Empty record {}
+      , EVar <$> label -- Variable
+      ]
+
+-- | Parse operator expression
+pOp :: Parser (Expr Type)
+pOp = EOp <$> op pExpr

@@ -1,0 +1,168 @@
+module Main {
+
+import BinarySearch.from_int32
+import BinarySearch.sort
+import Ordered.compare__$instance.f377c7c1cf28bc72
+import Ordered.LessThan
+import Ordered.GreaterThan
+
+data $Cons<0, */List(*)/List(*)>
+
+data $Nil<1, List(*)>
+
+Main.anon_fun(x : int32) = 
+  x : int32
+
+Main.d =
+  let
+    rec_d : { from_int32 : int32/int32 | * } =
+      { from_int32 = Main.anon_fun : int32/int32
+      | {}
+      }
+    in
+      @<BinarySearch.Numeric(int32)>
+        ( $Record : { from_int32 : int32/int32 | * }/BinarySearch.Numeric(int32)
+        , rec_d : { from_int32 : int32/int32 | * }
+        )
+
+Main.d2 =
+  let
+    rec_d2 : { compare : int32/int32/Ordered.Ordering | * } =
+      { compare = Ordered.compare__$instance.f377c7c1cf28bc72 : int32/int32/Ordered.Ordering
+      | {}
+      }
+    in
+      @<Ordered.Ordered(int32)>
+        ( $Record : { compare : int32/int32/Ordered.Ordering | * }/Ordered.Ordered(int32)
+        , rec_d2 : { compare : int32/int32/Ordered.Ordering | * }
+        )
+
+Main.cont1(a : *) = 0
+
+Main.main(_ : *) =
+  let
+    i1 : int32 =
+      @<int32>
+        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
+        , Main.d : BinarySearch.Numeric(int32)
+        , 5
+        )
+  ; i2 : int32 =
+      @<int32>
+        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
+        , Main.d : BinarySearch.Numeric(int32)
+        , 3
+        )
+  ; i3 : int32 =
+      @<int32>
+        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
+        , Main.d : BinarySearch.Numeric(int32)
+        , 7
+        )
+  ; i4 : int32 =
+      @<int32>
+        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
+        , Main.d : BinarySearch.Numeric(int32)
+        , 2
+        )
+  ; i5 : int32 =
+      @<int32>
+        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
+        , Main.d : BinarySearch.Numeric(int32)
+        , 1
+        )
+  ; i6 : int32 =
+      @<int32>
+        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
+        , Main.d : BinarySearch.Numeric(int32)
+        , 6
+        )
+  ; i7 : int32 =
+      @<int32>
+        ( BinarySearch.from_int32 : BinarySearch.Numeric(int32)/int32/int32
+        , Main.d : BinarySearch.Numeric(int32)
+        , 4
+        )
+  ; l6 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , i7 : int32
+        , $Nil : list(int32)
+        )
+  ; l5 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , i6 : int32
+        , l6 : list(int32)
+        )
+  ; l4 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , i5 : int32
+        , l5 : list(int32)
+        )
+  ; l3 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , i4 : int32
+        , l4 : list(int32)
+        )
+  ; l2 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , i3 : int32
+        , l3 : list(int32)
+        )
+  ; l1 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , i2 : int32
+        , l2 : list(int32)
+        )
+  ; xs : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , i1 : int32
+        , l1 : list(int32)
+        )
+  ; ys : list(int32) =
+      @<list(int32)>
+        ( BinarySearch.sort : BinarySearch.Numeric(int32)/Ordered.Ordered(int32)/list(int32)/list(int32)
+        , Main.d : BinarySearch.Numeric(int32)
+        , Main.d2 : Ordered.Ordered(int32)
+        , xs : list(int32)
+        )
+  in
+    case<int32>(ys : list(int32)) {
+      | ( $Cons : int32/list(int32)/list(int32)
+        , x : int32
+        , _ : list(int32)
+        ) =>
+            let
+              __call_tmp : * =
+                @<*>
+                  ( coal_print_int32 : int32/*
+                  , x : int32
+                  )
+              in
+                @<int32>
+                  ( Main.cont1 : */int32
+                  , __call_tmp : *
+                  )
+      | ( $Nil : list(int32)
+        ) =>
+            let
+              __call_tmp : * =
+                @<*>
+                  ( coal_print_int32 : int32/*
+                  , 7
+                  )
+              in
+                @<int32>
+                  ( Main.cont1 : */int32
+                  , __call_tmp : *
+                  )
+    }
+
+}
+

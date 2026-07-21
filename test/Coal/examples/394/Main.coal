@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+  import String(double_to_string)
+
+  fun main() = 
+    let s =
+      double_to_string(0.0)
+    in
+    IO.println_string(s)
+
+}

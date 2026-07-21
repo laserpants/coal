@@ -49,15 +49,15 @@ import Coal.Language.Definition
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
-import Control.Monad (unless)
-import Control.Monad.Except (MonadError (throwError), forM_, when)
+import Control.Monad (unless, when)
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extras (Name, traverse_)
+import Extras (Name, forM_, traverse_)
 
 {- | Variable shadowing detection pass.
 

@@ -1,0 +1,180 @@
+module Main {
+
+import Ordering.LessThan
+import Ordering.GreaterThan
+import Ordering.EqualTo
+import Tree.flatten
+import Tree.from_list
+import Utils.Function.compose
+
+Main.sort(d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * }), $extra : list(*)) =
+  let
+    from_list_partial : list(*)/Tree(*) =
+      @<list(*)/Tree(*)>
+        ( Tree.from_list : record({ compare : */*/Ordering | from_int32 : int32/* | * })/list(*)/Tree(*)
+        , d_1 : record({ compare : */*/Ordering | from_int32 : int32/* | * })
+        )
+  in
+    @<list(*)>
+      ( Utils.Function.compose : (Tree(*)/list(*))/(list(*)/Tree(*))/list(*)/list(*)
+      , Tree.flatten : Tree(*)/list(*)
+      , from_list_partial : list(*)/Tree(*)
+      , $extra : list(*)
+      )
+
+Main.sample_list =
+  let
+    e6 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 106
+        , $Nil : list(int32)
+        )
+  ; e5 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 2
+        , e6 : list(int32)
+        )
+  ; e4 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 104
+        , e5 : list(int32)
+        )
+  ; e3 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 103
+        , e4 : list(int32)
+        )
+  ; e2 : list(int32) =
+      @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 105
+        , e3 : list(int32)
+        )
+  in
+    @<list(int32)>
+      ( $Cons : int32/list(int32)/list(int32)
+      , 2
+      , e2 : list(int32)
+      )
+
+Main.from_int32__int32(n : int32) =
+  n : int32
+
+Main.compare__int32(x : int32, y : int32) =
+  if ([< int32](x : int32, y : int32))
+    then
+      Ordering.LessThan : Ordering
+    else
+      if ([> int32](x : int32, y : int32))
+        then
+          Ordering.GreaterThan : Ordering
+        else
+          Ordering.EqualTo : Ordering
+
+Main.sorted_list =
+  let
+    dict : record({ compare : int32/int32/Ordering | from_int32 : int32/int32 | {} }) =
+      @<record({ compare : int32/int32/Ordering | from_int32 : int32/int32 | {} })>
+        ( $Record : { compare : int32/int32/Ordering | from_int32 : int32/int32 | {} }/record({ compare : int32/int32/Ordering | from_int32 : int32/int32 | {} })
+        , { compare = Main.compare__int32 : int32/int32/Ordering
+          | from_int32 = Main.from_int32__int32 : int32/int32
+          | {}
+          }
+        )
+  in
+    @<list(int32)>
+      ( Main.sort : record({ compare : int32/int32/Ordering | from_int32 : int32/int32 | {} })/list(int32)/list(int32)
+      , dict : record({ compare : int32/int32/Ordering | from_int32 : int32/int32 | {} })
+      , Main.sample_list : list(int32)
+      )
+
+Main.cont1(r_val : int32, a : *) =
+  r_val : int32
+
+Main.main(_ : *) =
+  case<int32>(Main.sorted_list : list(int32)) {
+    | ($Cons : int32/list(int32)/list(int32), a : int32, b : list(int32)) =>
+        case<int32>(b : list(int32)) {
+          | ($Cons : int32/list(int32)/list(int32), c : int32, d : list(int32)) =>
+              case<int32>(d : list(int32)) {
+                | ($Cons : int32/list(int32)/list(int32), e : int32, f : list(int32)) =>
+                    let
+                      r : int32 = e : int32
+                    ; cont : */int32 =
+                        @<*/int32>
+                          ( Main.cont1 : int32/*/int32
+                          , r : int32
+                          )
+                    ; __call_tmp : * =
+                        @<*>
+                          ( coal_print_int32 : int32/*
+                          , r : int32
+                          )
+                    in
+                      @<int32>
+                        ( cont : */int32
+                        , __call_tmp : *
+                        )
+                | ($Nil : list(int32)) =>
+                    let
+                      r : int32 = 0
+                    ; cont : */int32 =
+                        @<*/int32>
+                          ( Main.cont1 : int32/*/int32
+                          , r : int32
+                          )
+                    ; __call_tmp : * =
+                        @<*>
+                          ( coal_print_int32 : int32/*
+                          , r : int32
+                          )
+                    in
+                      @<int32>
+                        ( cont : */int32
+                        , __call_tmp : *
+                        )
+              }
+          | ($Nil : list(int32)) =>
+              let
+                r : int32 = 0
+              ; cont : */int32 =
+                  @<*/int32>
+                    ( Main.cont1 : int32/*/int32
+                    , r : int32
+                    )
+              ; __call_tmp : * =
+                  @<*>
+                    ( coal_print_int32 : int32/*
+                    , r : int32
+                    )
+              in
+                @<int32>
+                  ( cont : */int32
+                  , __call_tmp : *
+                  )
+        }
+    | ($Nil : list(int32)) =>
+        let
+          r : int32 = 0
+        ; cont : */int32 =
+            @<*/int32>
+              ( Main.cont1 : int32/*/int32
+              , r : int32
+              )
+        ; __call_tmp : * =
+            @<*>
+              ( coal_print_int32 : int32/*
+              , r : int32
+              )
+        in
+          @<int32>
+            ( cont : */int32
+            , __call_tmp : *
+            )
+  }
+
+}

@@ -1,0 +1,25 @@
+module List {
+
+import Utils.Function.compose
+
+List.concat(a : list(*), b : list(*)) =
+  case<list(*)>(a : list(*)) {
+    | ($Nil : list(*)) =>
+        b : list(*)
+    | ($Cons : */list(*)/list(*), x : *, xs : list(*)) =>
+        let
+          t : list(*) =
+            @<list(*)>
+              ( List.concat : list(*)/list(*)/list(*)
+              , xs : list(*)
+              , b : list(*)
+              )
+        in
+          @<list(*)>
+            ( $Cons : */list(*)/list(*)
+            , x : *
+            , t : list(*)
+            )
+  }
+
+}

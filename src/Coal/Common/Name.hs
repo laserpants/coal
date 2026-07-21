@@ -21,13 +21,14 @@ type Dictionary = Map Name
 isConstructor :: Name -> Bool
 isConstructor qualified =
   case reverse (Text.splitOn "." qualified) of
-    p : _ -> nameIsCtor p
-    [] -> False
-
-nameIsCtor :: Name -> Bool
-nameIsCtor name
-  | Text.null name = error "Empty name"
-  | Text.null s = False
-  | otherwise = isUpper (Text.head s)
+    p : _ ->
+      isFirstAlphaUpper p
+    [] ->
+      False
  where
-  s = dropWhileNot (isAlpha ||. isUnderscore) name
+  isFirstAlphaUpper name
+    | Text.null name = error "Empty name"
+    | Text.null s = False
+    | otherwise = isUpper (Text.head s)
+   where
+    s = dropWhileNot (isAlpha ||. isUnderscore) name

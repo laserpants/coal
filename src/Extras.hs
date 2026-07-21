@@ -28,7 +28,7 @@ module Extras (
 
 import Coal.Common.Name
 import Control.Applicative (Alternative (..))
-import Control.Monad (forM, forM_, mapM, void)
+import Control.Monad (foldM, forM, forM_, mapM, replicateM, void)
 import Data.Foldable (foldrM, traverse_)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)

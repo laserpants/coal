@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
@@ -16,7 +17,7 @@ in their Main module to specify where program execution begins.
 For example, a valid Main module must include:
 
 @
-module Main {
+module Coal.Main {
 
   fun main() =
     ...
@@ -31,16 +32,19 @@ module Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing (
 ) where
 
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.Config (configEntryPoint)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
+import Coal.Compiler.State (CompilerState (..))
 import Coal.Language.Definition
 import Coal.Language.Module
 import Coal.Language.Module.Path
-import Control.Monad.Except (MonadError (throwError), unless)
+import Control.Monad (unless)
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
-import Data.List.NonEmpty (NonEmpty (..))
-import Extras (Name, traverse_)
+import Control.Monad.State (get)
+import Extras (Name)
 
 {- | Main entry point detection pass.
 
@@ -53,26 +57,17 @@ passDetectMainEntrypointMissing = mapPass $ Pass{runPass = traverse passImpl}
 passImpl :: (MonadIO m) => Module Metadata () () -> CompilerT Metadata m (Module Metadata () ())
 passImpl m = do
   setCurrentModuleC m
-  detectMainEntrypointMissing m
+  CompilerState{compilerConfig} <- get
+  let (requiredMod, requiredFunc) = case configEntryPoint compilerConfig of
+        Nothing -> (Path ["Main"], "main")
+        Just (modName, funcName) -> (Path [modName], funcName)
+  case m of
+    Module path _ defs
+      | path == requiredMod ->
+          unless (requiredFunc `elem` concatMap functionDefinitions defs) $
+            throwError MissingMainEntryPoint
+    _ -> pure ()
   return m
-
-class RuleContext e where
-  detectMainEntrypointMissing :: (Monad m) => e -> CompilerT Metadata m ()
-
-instance (RuleContext e) => RuleContext [e] where
-  detectMainEntrypointMissing = traverse_ detectMainEntrypointMissing
-
-instance (RuleContext e) => RuleContext (NonEmpty e) where
-  detectMainEntrypointMissing = traverse_ detectMainEntrypointMissing
-
-instance RuleContext (Module Metadata () ()) where
-  detectMainEntrypointMissing =
-    \case
-      Module (Path ["Main"]) _ o -> do
-        unless ("main" `elem` concatMap functionDefinitions o) $
-          throwError MissingMainEntryPoint
-      _ ->
-        pure ()
 
 functionDefinitions :: Definition Metadata () () -> [Name]
 functionDefinitions =

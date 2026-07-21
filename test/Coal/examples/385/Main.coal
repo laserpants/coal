@@ -1,0 +1,13 @@
+module Main {
+
+  import namespace IO
+  import Codata.Stream(Stream, enum_from, tail, head)
+
+  let foo = enum_from(0)
+
+  let baz = filter(fn(x) => x % 2 == 0, foo)
+
+  fun main() = 
+    IO.println_int32(foo |. tail |. tail |. tail |. tail |. head)
+
+}

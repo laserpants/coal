@@ -1,0 +1,16 @@
+module Main {
+
+  Main.foo =
+    12334
+
+  Main.main(_ : *) =
+    let
+      r : * =
+        @<*>
+          ( coal_println_int32 : int32/*
+          , Main.foo : int32
+          )
+      in
+        0
+
+}

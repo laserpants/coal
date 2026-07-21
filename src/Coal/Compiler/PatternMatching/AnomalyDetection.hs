@@ -80,12 +80,12 @@ headCons = concatMap go
  where
   go [] = error "Implementation error"
   go ps =
-    case head ps of
-      Lit p ->
+    case ps of
+      Lit p : _ ->
         [(prim p, 0)]
-      Con name rs ->
+      Con name rs : _ ->
         [(name, length rs)]
-      Or r1 r2 ->
+      Or r1 r2 : _ ->
         go [r1] <> go [r2]
       _ ->
         []
@@ -134,7 +134,10 @@ isUseful px@(ps : _) qs =
         else isUseful (defaultMatrix px) qs1
  where
   cs = headCons px
-  go name n = isUseful (specialized name n px) (head (specialized name n [qs]))
+  go name n =
+    case specialized name n [qs] of
+      (qs' : _) -> isUseful (specialized name n px) qs'
+      [] -> error "isUseful: specialized returned empty matrix"
 
 isComplete :: (Monad m) => [Name] -> CompilerT a m Bool
 isComplete [] = pure False

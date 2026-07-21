@@ -1,0 +1,50 @@
+module Monad.Reader {
+
+  import Coal.Monad(Monad, and_then)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+
+  type Reader<r, a> = Reader(r -> a)
+
+  fun run_reader(Reader(f), env) =
+    f(env)
+
+  fun ask() = 
+    Reader(fn(env) => env)
+
+  instance Functor<Reader<r>> {
+    fun map(f, Reader(g)) =
+      Reader(fn(r) => f(g(r)))
+  }
+
+  instance Applicative<Reader<r>> {
+    fun pure(r) = 
+      Reader(fn(_) => r)
+
+    fun ap(Reader(f), Reader(g)) =
+      Reader(fn(r) =>
+        let func = f(r) in
+        let a    = g(r) in
+        func(a)
+      )
+  }
+
+  instance Monad<Reader<r>> {
+    fun bind(reader : Reader<r, a>, next : a -> Reader<r, b>) : Reader<r, b> = 
+      match(reader) {
+        | Reader(f) =>
+            Reader(fn(env) =>
+              let a = 
+                f(env) 
+              in
+              match(next(a)) {
+                | Reader(g) => g(env)
+              }
+            )
+      }
+  }
+
+  fun local(transform, Reader(f)) = 
+    Reader(fn(env) => f(transform(env)))
+
+}

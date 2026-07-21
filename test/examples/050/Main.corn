@@ -1,0 +1,9 @@
+module Main {
+
+  Main.foo(_ : unit) =
+    ()
+
+  Main.main(_ : *) =
+    0
+
+}

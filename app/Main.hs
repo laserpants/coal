@@ -4,14 +4,17 @@
 
 module Main (main) where
 
-import Coal.CLI.Command (Command (..))
-import Coal.CLI.Command.Build (buildCommand)
-import Coal.CLI.Command.Clean (cleanCommand)
-import Coal.CLI.Command.Compile (compileCommand)
-import Coal.CLI.Command.Install (installCommand)
-import Coal.CLI.Command.Version (coalVersion)
-import Coal.CLI.Error (prettyCLIError)
-import Coal.CLI.Parser.Command (commandParser)
+import CLI.Command (Command (..))
+
+import CLI.Command.Build (buildCommand)
+import CLI.Command.Clean (cleanCommand)
+import CLI.Command.Compile (compileCommand)
+
+import CLI.Command.Init (initCommand)
+import CLI.Command.Install (installCommand)
+import CLI.Command.Version (coalVersion)
+import CLI.Error (prettyCLIError)
+import CLI.Parser.Command (commandParser)
 import Control.Monad.Except
 import qualified Data.Text.IO as Text
 import Options.Applicative
@@ -25,16 +28,23 @@ runCommand =
       r <- runExceptT buildCommand
       case r of
         Left err ->
-          Text.putStrLn (prettyCLIError err)
+          Text.putStrLn ("• " <> prettyCLIError err)
         Right{} ->
           pure ()
     CmdClean ->
       cleanCommand
+    CmdInit opts -> do
+      r <- runExceptT (initCommand opts)
+      case r of
+        Left err ->
+          Text.putStrLn ("• " <> prettyCLIError err)
+        Right{} ->
+          pure ()
     CmdInstall -> do
       r <- runExceptT installCommand
       case r of
         Left err ->
-          Text.putStrLn (prettyCLIError err)
+          Text.putStrLn ("• " <> prettyCLIError err)
         Right{} ->
           pure ()
 

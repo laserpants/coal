@@ -84,7 +84,8 @@ builtinNames =
       ]
       ++
       -- Number operations
-      [("number$_unsafe_parse_bignum", Number)]
+      [ ("number$_unsafe_parse_bignum", Number)
+      ]
       ++
       -- Char operations
       [ ("char$_ord", Char)
@@ -96,6 +97,7 @@ builtinNames =
       , ("machine$_map_machine", Codata)
       , ("machine$_contramap_input", Codata)
       , ("machine$_cofix", Codata)
+      , ("machine$_run_while", Codata)
       ]
 
 -- | All built-in names as a set (for faster lookup)

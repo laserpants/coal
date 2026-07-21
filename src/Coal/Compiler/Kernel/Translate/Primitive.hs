@@ -1,29 +1,28 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
 module Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive) where
 
-import qualified Coal.Kernel.Language as Kernel
+import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Language (Primitive (..))
 
-translatePrimitive :: Primitive -> Kernel.Prim
+translatePrimitive :: Primitive -> Prim
 translatePrimitive =
   \case
     LUnit ->
-      Kernel.PUnit
-    LBool bool ->
-      Kernel.PBool bool
-    LInt32 int32 ->
-      Kernel.PInt32 int32
-    LInt64 int64 ->
-      Kernel.PInt64 int64
-    LBignum int ->
-      Kernel.PBignum int
-    LFloat float ->
-      Kernel.PFloat float
-    LDouble double ->
-      Kernel.PDouble double
-    LChar chr ->
-      Kernel.PChar chr
-    LString str ->
-      Kernel.PString str
+      PUnit
+    LBool b ->
+      PBool b
+    LInt32 n ->
+      PInt32 n
+    LInt64 n ->
+      PInt64 n
+    LBignum n ->
+      PBignum n
+    LFloat f ->
+      PFloat f
+    LDouble d ->
+      PDouble d
+    LChar c ->
+      PChar c
+    LString s ->
+      PString s

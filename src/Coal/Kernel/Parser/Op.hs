@@ -1,21 +1,159 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StrictData #-}
 
-module Coal.Kernel.Parser.Op (op) where
+{- |
+Operator parser.
+
+Parses operator expressions in explicit syntax: @[op type?] (expr1, expr2)@
+for binary operators and @[!] (expr)@ for unary operators.
+
+Operators are parsed as constructors from the 'Op' type, each specialized to a
+specific primitive type.
+-}
+module Coal.Kernel.Parser.Op (
+  op,
+) where
+
+import Control.Monad (void)
+import qualified Data.Text as T
+
+import qualified Text.Megaparsec as P
+import qualified Text.Megaparsec.Char as C
 
 import Coal.Kernel.Language.Op (Op (..))
-import Coal.Kernel.Language.Type (Type (..))
-import Coal.Kernel.Parser (Parser, lexeme, optional, try, ($>), (<|>))
-import Coal.Kernel.Parser.Symbol (brackets, pair, parens, symbol)
-import Coal.Kernel.Parser.Type (type_)
+import Coal.Kernel.Parser (Parser, brackets, lexeme, pair, parens, word)
 
+-- | Parse an operator expression
+op :: Parser a -> Parser (Op a)
+op p =
+  P.choice
+    [ P.try (pUnaryOp p)
+    , pBinaryOp p
+    ]
+
+-- | Parse a binary operator: [op type?] (expr1, expr2)
+pBinaryOp :: Parser a -> Parser (Op a)
+pBinaryOp p = do
+  ctor <- brackets pBinaryOpConstructor
+  args <- parens (pair p p)
+  return $ uncurry ctor args
+
+-- | Parse a unary operator: [op type?] (expr)
+pUnaryOp :: Parser a -> Parser (Op a)
+pUnaryOp p = do
+  ctor <- brackets pUnaryOpConstructor
+  arg <- parens p
+  return $ ctor arg
+
+-- | Parse a binary operator constructor inside brackets
+pBinaryOpConstructor :: Parser (a -> a -> Op a)
+pBinaryOpConstructor = do
+  sym <- pOp2Symbol
+  mType <- P.optional word
+  case mType of
+    Just "int32" ->
+      case sym of
+        SymEq -> return OEqInt32
+        SymNe -> return ONeInt32
+        SymLt -> return OLtInt32
+        SymGt -> return OGtInt32
+        SymLte -> return OLteInt32
+        SymGte -> return OGteInt32
+        SymAdd -> return OAddInt32
+        SymSub -> return OSubInt32
+        SymMul -> return OMulInt32
+        SymDiv -> return ODivInt32
+        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type int32"
+    Just "int64" ->
+      case sym of
+        SymEq -> return OEqInt64
+        SymNe -> return ONeInt64
+        SymLt -> return OLtInt64
+        SymGt -> return OGtInt64
+        SymLte -> return OLteInt64
+        SymGte -> return OGteInt64
+        SymAdd -> return OAddInt64
+        SymSub -> return OSubInt64
+        SymMul -> return OMulInt64
+        SymDiv -> return ODivInt64
+        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type int64"
+    Just "float" ->
+      case sym of
+        SymEq -> return OEqFloat
+        SymNe -> return ONeFloat
+        SymLt -> return OLtFloat
+        SymGt -> return OGtFloat
+        SymLte -> return OLteFloat
+        SymGte -> return OGteFloat
+        SymAdd -> return OAddFloat
+        SymSub -> return OSubFloat
+        SymMul -> return OMulFloat
+        SymDiv -> return ODivFloat
+        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type float"
+    Just "double" ->
+      case sym of
+        SymEq -> return OEqDouble
+        SymNe -> return ONeDouble
+        SymLt -> return OLtDouble
+        SymGt -> return OGtDouble
+        SymLte -> return OLteDouble
+        SymGte -> return OGteDouble
+        SymAdd -> return OAddDouble
+        SymSub -> return OSubDouble
+        SymMul -> return OMulDouble
+        SymDiv -> return ODivDouble
+        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type double"
+    Just "bool" ->
+      case sym of
+        SymEq -> return OEqBool
+        SymNe -> return ONeBool
+        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type bool"
+    Just "char" ->
+      case sym of
+        SymEq -> return OEqChar
+        SymNe -> return ONeChar
+        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type char"
+    Nothing ->
+      case sym of
+        SymOr -> return OOr
+        SymAnd -> return OAnd
+        _ -> fail $ "Operator '" ++ show sym ++ "' requires a type annotation"
+    Just t ->
+      fail $ "Unknown type: " ++ T.unpack t
+
+-- | Parse a unary operator constructor inside brackets
+pUnaryOpConstructor :: Parser (a -> Op a)
+pUnaryOpConstructor =
+  P.choice
+    [ P.try pNegOp
+    , pNotOp
+    ]
+
+-- | Parse logical NOT: !
+pNotOp :: Parser (a -> Op a)
+pNotOp = do
+  void $ lexeme (C.char '!')
+  return ONot
+
+-- | Parse negation: neg <type>
+pNegOp :: Parser (a -> Op a)
+pNegOp = do
+  void $ lexeme (C.string "neg")
+  t <- word
+  case t of
+    "int32" -> return ONegInt32
+    "int64" -> return ONegInt64
+    "float" -> return ONegFloat
+    "double" -> return ONegDouble
+    _ -> fail $ "Invalid type for negation: " ++ T.unpack t
+
+-- | Binary operator symbols
 data Op2Symbol
   = SymEq
   | SymNe
-  | SymLte
-  | SymGte
   | SymLt
   | SymGt
+  | SymLte
+  | SymGte
   | SymAdd
   | SymSub
   | SymMul
@@ -24,110 +162,20 @@ data Op2Symbol
   | SymAnd
   deriving (Show, Eq, Ord, Read)
 
-op2Symbol :: Parser Op2Symbol
-op2Symbol =
-  (symbol "==" $> SymEq)
-    <|> (symbol "!=" $> SymNe)
-    <|> (symbol "<=" $> SymLte)
-    <|> (symbol ">=" $> SymGte)
-    <|> (symbol "<" $> SymLt)
-    <|> (symbol ">" $> SymGt)
-    <|> (symbol "+" $> SymAdd)
-    <|> (symbol "-" $> SymSub)
-    <|> (symbol "*" $> SymMul)
-    <|> (symbol "/" $> SymDiv)
-    <|> (symbol "||" $> SymOr)
-    <|> (symbol "&&" $> SymAnd)
-
-op2 :: Parser (a -> a -> Op a)
-op2 = do
-  s <- op2Symbol
-  t <- optional type_
-  case t of
-    Just (TCon "int32" []) ->
-      case s of
-        SymEq -> pure OEqInt32
-        SymNe -> pure ONeInt32
-        SymLte -> pure OLteInt32
-        SymGte -> pure OGteInt32
-        SymLt -> pure OLtInt32
-        SymGt -> pure OGtInt32
-        SymAdd -> pure OAddInt32
-        SymSub -> pure OSubInt32
-        SymMul -> pure OMulInt32
-        SymDiv -> pure ODivInt32
-        _ -> fail "Invalid operator"
-    Just (TCon "int64" []) ->
-      case s of
-        SymEq -> pure OEqInt64
-        SymNe -> pure ONeInt64
-        SymLte -> pure OLteInt64
-        SymGte -> pure OGteInt64
-        SymLt -> pure OLtInt64
-        SymGt -> pure OGtInt64
-        SymAdd -> pure OAddInt64
-        SymSub -> pure OSubInt64
-        SymMul -> pure OMulInt64
-        SymDiv -> pure ODivInt64
-        _ -> fail "Invalid operator"
-    Just (TCon "float" []) ->
-      case s of
-        SymEq -> pure OEqFloat
-        SymNe -> pure ONeFloat
-        SymLte -> pure OLteFloat
-        SymGte -> pure OGteFloat
-        SymLt -> pure OLtFloat
-        SymGt -> pure OGtFloat
-        SymAdd -> pure OAddFloat
-        SymSub -> pure OSubFloat
-        SymMul -> pure OMulFloat
-        SymDiv -> pure ODivFloat
-        _ -> fail "Invalid operator"
-    Just (TCon "double" []) ->
-      case s of
-        SymEq -> pure OEqDouble
-        SymNe -> pure ONeDouble
-        SymLte -> pure OLteDouble
-        SymGte -> pure OGteDouble
-        SymLt -> pure OLtDouble
-        SymGt -> pure OGtDouble
-        SymAdd -> pure OAddDouble
-        SymSub -> pure OSubDouble
-        SymMul -> pure OMulDouble
-        SymDiv -> pure ODivDouble
-        _ -> fail "Invalid operator"
-    Just (TCon "bool" []) ->
-      case s of
-        SymEq -> pure OEqBool
-        _ -> fail "Invalid operator"
-    Just (TCon "char" []) ->
-      case s of
-        SymEq -> pure OEqInt32
-        _ -> fail "Invalid operator"
-    Nothing ->
-      case s of
-        SymOr -> pure OOr
-        SymAnd -> pure OAnd
-        _ -> fail "Invalid operator"
-    _ ->
-      fail "Invalid operator"
-
-op1 :: Parser (a -> Op a)
-op1 = symbol "!" $> ONot <|> op1Neg
-
-op1Neg :: Parser (a -> Op a)
-op1Neg = do
-  _ <- lexeme "neg"
-  t <- type_
-  case t of
-    TCon "float" [] ->
-      pure ONegFloat
-    TCon "double" [] ->
-      pure ONegDouble
-    _ ->
-      fail "Invalid operator"
-
-op :: Parser a -> Parser (Op a)
-op p =
-  try (brackets op1 <*> parens p)
-    <|> (uncurry <$> brackets op2 <*> pair p p)
+-- | Parse a binary operator symbol
+pOp2Symbol :: Parser Op2Symbol
+pOp2Symbol =
+  P.choice
+    [ P.try (lexeme (C.string "==") >> return SymEq)
+    , P.try (lexeme (C.string "!=") >> return SymNe)
+    , P.try (lexeme (C.string "<=") >> return SymLte)
+    , P.try (lexeme (C.string ">=") >> return SymGte)
+    , lexeme (C.string "<") >> return SymLt
+    , lexeme (C.string ">") >> return SymGt
+    , lexeme (C.string "+") >> return SymAdd
+    , lexeme (C.string "-") >> return SymSub
+    , lexeme (C.string "*") >> return SymMul
+    , lexeme (C.string "/") >> return SymDiv
+    , P.try (lexeme (C.string "||") >> return SymOr)
+    , lexeme (C.string "&&") >> return SymAnd
+    ]

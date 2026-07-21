@@ -22,7 +22,7 @@ module Coal.TypeSystem.Constraint.Generation.Stack (
 import Coal.Language (TypeIndex (..))
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..), overMonomorphicSet)
 import Coal.TypeSystem.Constraint.Generation.Annotation.Error (TypeAnnotationError (..))
-import Coal.TypeSystem.Constraint.Generation.Context
+import Coal.TypeSystem.Constraint.Generation.Context (ConstraintsGenContext (..), emptyConstraintsGenContext, overConstraintsGenMonomorphicSet)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Constraint.Generation.State (ConstraintsGenState (..), overConstraintsGenStateSupply)

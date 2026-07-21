@@ -1,0 +1,44 @@
+module Main {
+
+Main.add(dict : record({ add : */*/* | * }), a : *, b : *) =
+  case<*>(dict : record({ add : */*/* | * })) {
+    | ( $Record : { add : */*/* | * }/record({ add : */*/* | * })
+      , r : { add : */*/* | * }
+      ) =>
+        @<*>
+          ( get?_add<*/*/*>(r : { add : */*/* | * })
+          , a : *
+          , b : *
+          )
+  }
+
+Main.add_int32 =
+  @<record({ add : int32/int32/int32 | * })>
+    ( $Record : { add : int32/int32/int32 | * }/record({ add : int32/int32/int32 | * })
+    , { add = fn(x : int32, y : int32) => [+ int32](x : int32, y : int32)
+      | {}
+      }
+    )
+
+Main.main(_ : *) =
+  let
+    r : int32 =
+      @<int32>
+        ( Main.add : record({ add : int32/int32/int32 | * })/int32/int32/int32
+        , Main.add_int32 : record({ add : int32/int32/int32 | * })
+        , 5
+        , 5
+        )
+    in
+      let
+        __call_tmp : * =
+          @<*>
+            ( coal_print_int32 : int32/*
+            , r : int32
+            )
+        in
+          @<int32>
+            ( fn(a : *) => 0
+            , __call_tmp : *
+            )
+}

@@ -21,6 +21,7 @@ The pass operates in several strictly ordered steps:
 5. **Trait interface collection**: Register trait member signatures
 6. **Instance collection**: Register trait implementations
 7. **Builtin instance insertion**: Add compiler-provided instances
+7b. **Stdlib instance import**: Import instances from all stdlib modules (always globally available)
 8. **Import collection**: Process imports from other modules
 9. **Placeholder collection**: Register function/let names for type inference
 10. **Qualified name resolution**: Build mapping of local to qualified names
@@ -47,12 +48,13 @@ import Coal.Compiler.Build
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
+import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Builtin.Names (builtinNames)
 import Coal.Compiler.Error
-import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeVarNames)
+import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeConstructorNames, collectTypeVarNames)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
@@ -64,16 +66,18 @@ import Coal.TypeSystem.Parameterized (Parameterized (instantiateTypeIndexes), To
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
 import Control.Monad (unless)
-import Control.Monad.Except (MonadError (..), MonadIO)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
-import Control.Monad.State (StateT, execStateT, foldM, get, gets, modify)
+import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.List (intersect)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, (\\))
 import qualified Data.Set as Set
+import Data.Text (isPrefixOf)
 import Data.Tuple.Extra (uncurry3)
-import Extras (Name, for, forM, forM_, second, traverse_, (<.>))
+import Extras (Name, foldM, for, forM, forM_, second, traverse_, (<.>))
 import Extras.Control.Monad (concatForM)
 
 passPrepareBuild :: (MonadIO m) => Pass Metadata m (Module Metadata Kind ()) (Module Metadata Kind ())
@@ -81,7 +85,8 @@ passPrepareBuild = Pass{runPass = passImpl}
 
 passImpl :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind ())
 passImpl m = do
-  prepareBuild m
+  (_, errors) <- listenErrors (prepareBuild m)
+  unless (null errors) (throwError PreflightFailure)
   return m
 
 insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ExportList a) (StateT (Build a) m) ()
@@ -200,6 +205,27 @@ prepareDefinitions defs = do
     -- Standard instances provided by the compiler (e.g., Show for primitives)
     forM_ builtinInstances (modify . uncurry3 insertBuildInstance)
 
+    -- Step 7b: Import all instances from stdlib modules (always globally available).
+    -- This mirrors how builtinInstances are always in scope: stdlib module instances
+    -- (e.g. Comparable<List<a>>, Comparable<Option<a>>) do not require an explicit
+    -- import of the module that defines them.
+    -- `importedBuild` returns emptyBuild for modules not yet compiled (safe for
+    -- stdlib modules compiling themselves).
+    -- Only insertInstance is called here (not insertNameEntry or insertNameC): those
+    -- would contaminate buildNames/compilerNameStore with names from other stdlib
+    -- modules. replacePlaceholders (in passTypeInference) propagates compilerNameStore
+    -- into buildNames, so any insertNameC here would cause stdlibInstanceQNames to
+    -- emit wrong qualifications (e.g. List.id__$impl_Monoid instead of
+    -- Coal.Monoid.id__$impl_Monoid). Instance member type schemes come from
+    -- instanceEntryTypeSchemes directly and do not require compilerNameStore.
+    forM_ (map (Path . pure) builtinModulesPaths) $ \path -> do
+      Build{buildInstances} <- lift $ lift $ importedBuild path
+      forM_ (Environment.toList buildInstances) $
+        \(traitName, instanceMap) ->
+          forM_ (Map.toList instanceMap) $
+            \(t, InstanceEntry{..}) ->
+              insertInstance traitName t InstanceEntry{..}
+
     -- Step 8: Collect imports from other modules
     -- Depends on all prior phases completing in the imported modules
     traverse_ collectImports defs
@@ -210,7 +236,14 @@ prepareDefinitions defs = do
 
   build <- get
   qualifiedNames <- traverse (qualifiedImports build) defs
-  modify (setQualifiedNames (Environment.fromList (concat qualifiedNames)))
+  -- Generate qualified name mappings for all stdlib module instances (complement
+  -- to step 7b). Without this, the code generator resolves instance member names
+  -- against the current module (e.g. Main.Comparable$List<a>$(==)) instead of
+  -- the source module (e.g. List.Comparable$List<a>$(==)), causing linker errors.
+  stdlibInstanceQNames <- concatForM (map (Path . pure) builtinModulesPaths) $ \path -> do
+    Build{buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+    generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+  modify (setQualifiedNames (Environment.fromList (stdlibInstanceQNames <> concat qualifiedNames)))
 
 {- |
 Generate qualified names for trait instance members.
@@ -240,6 +273,8 @@ generateQualifiedInstanceNames path nameEnv instances =
               concatForM (Environment.lookupWithDefault mempty instanceName nameEnv) $
                 \case
                   NName n _ -> do
+                    pure [(n, principalPath path <.> n)]
+                  NPlaceholder n -> do
                     pure [(n, principalPath path <.> n)]
                   _ ->
                     pure mempty
@@ -337,9 +372,11 @@ qualifiedImports Build{..} =
                   _ ->
                     pure mempty
     DNamespaceImport _ path -> do
-      Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
-      concatForM (Set.toList exportedNames) $
+      Build{buildExportedNames = exportedNames, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+      n1 <- concatForM (Set.toList exportedNames) $
         \name -> pure [(qualified name path, qualified name path)]
+      n2 <- generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+      pure (n1 <> n2)
     _ ->
       pure mempty
 
@@ -349,7 +386,7 @@ qualified name path = principalPath path <> "." <> name
 expandExports :: (Monad m) => ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
 expandExports = do
   exportList <- ask
-  Build{buildDataConstructors} <- get
+  Build{buildTypeConstructors} <- get
   case exportList of
     ExportAll ->
       return ExportAll
@@ -358,14 +395,14 @@ expandExports = do
         forM exports $
           \case
             TypeExport loc name [] ->
-              case Environment.lookup name buildDataConstructors of
+              case Environment.lookup name buildTypeConstructors of
                 Nothing -> do
                   lift $ lift $ do
                     path <- gets compilerCurrentPath
                     tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
                   return (TypeExport loc name mempty)
-                Just DataConstructorEntry{..} ->
-                  return (TypeExport loc name (Set.toList dataConstructorEntryConstructorSet))
+                Just TypeConstructorEntry{..} ->
+                  return (TypeExport loc name typeConstructorEntryDataConstructors)
             e ->
               return e
       return
@@ -433,8 +470,7 @@ collectTypeConstructors importSources = \case
     return importSources
   DImport _ path imports -> do
     Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
-    newSources <- foldM (checkAndImportType path exportedNames) importSources imports
-    return newSources
+    foldM (checkAndImportType path exportedNames) importSources imports
   DNamespaceImport _ _ ->
     return importSources
   _ ->
@@ -723,10 +759,29 @@ traitDefinitionInterfaceEntryToPair TraitDefinitionInterfaceEntry{..} = (traitDe
 collectTraitsInterface :: (Monad m) => Definition a Kind t -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectTraitsInterface =
   \case
-    DTrait _ name TraitDefinition{..} ->
+    DTrait loc name TraitDefinition{..} ->
       forM_ traitDefinitionInterface $
         \TraitDefinitionInterfaceEntry{..} -> do
+          -- Check for undefined type constructors in the interface entry scheme
+          -- Type constructors (uppercase names) must be defined in the module or imported
           let Forall{..} = traitDefinitionInterfaceEntryScheme
+          let usedConstructors = collectTypeConstructorNames schemeTypeBody
+          build <- get
+          forM_ (Set.toList usedConstructors) $ \ctor -> do
+            unless
+              ( Environment.contains ctor (buildTypeConstructors build)
+                  || Environment.contains ctor (buildTraits build)
+                  || Environment.contains ctor (buildAliases build)
+              )
+              $ do
+                lift $ lift $ do
+                  currentPath <- gets compilerCurrentPath
+                  tellErrors
+                    [ NameNotInScope
+                        ctor
+                        (ErrorLocation (principalPath currentPath) loc)
+                    ]
+                  throwError PreflightFailure
           (s, _) <-
             instantiateScheme
               ( Forall
@@ -835,7 +890,10 @@ collectInstances =
 
           forM_ (constructors t) $
             \constructor ->
-              unless (Environment.contains constructor buildTypeConstructors) $
+              -- #Tuple constructors are builtins with a known kind formula;
+              -- they are handled specially in kind inference and are never
+              -- registered in buildTypeConstructors.
+              unless (Environment.contains constructor buildTypeConstructors || "#Tuple" `isPrefixOf` constructor) $
                 lift $
                   lift $ do
                     currentPath <- gets compilerCurrentPath

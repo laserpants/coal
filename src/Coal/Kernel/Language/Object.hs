@@ -1,109 +1,49 @@
 {-# LANGUAGE DeriveTraversable #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Kernel.Language.Object (
-  Object (..),
-  ObjectList,
-  KernelObject,
-  objectName,
-  fromBinding,
-  objectIsFunction,
-  objectIsConstant,
-  objectConstructorInfo,
-) where
+{- |
+Top-level object declarations.
 
-import Coal.Common.FreeVars (FreeVars (..), boundIn, exceptNames)
-import Coal.Common.Label (Label (..))
-import Coal.Kernel.Language.Expr (Binding (..), Expr, ExprF (..))
-import Coal.Kernel.Language.Type (Type (..))
-import Coal.Kernel.Language.Type.Arrow (functionTypeOf)
-import Coal.Kernel.Language.Typed (Typed (..))
-import Control.Arrow ((>>>))
-import Data.Functor.Foldable (embed, project)
-import Data.List.NonEmpty (toList)
-import Extras (Name)
+A Coal kernel language module consists of a sequence of top-level objects:
 
-data Object t e
-  = OFunction Name [Label t] e
-  | OConstant Name e
-  | OExternal Name t
-  | OData Name Int t
-  deriving (Show, Eq, Ord, Functor, Foldable, Traversable)
+  * __Functions__: Named functions with parameters and a body expression
+  * __Constants__: Named expressions evaluated at module initialization
+  * __Externals__: Foreign function declarations with type signatures
+  * __Data types__: Type declarations with a list of constructor names and types
 
-type KernelObject = Object Type (Expr Type)
+The 'Object' type is parameterized over type annotations @t@, allowing it to
+be used both before and after type checking.
 
-instance (Ord t, FreeVars e t) => FreeVars (Object t e) t where
-  freeIn =
-    \case
-      OFunction _ lls e ->
-        freeIn e `exceptNames` boundIn lls
-      OConstant _ e ->
-        freeIn e
-      OExternal{} ->
-        mempty
-      OData{} ->
-        mempty
+For 'DData', the first 'Name' is the type name; the list contains constructor
+names and their types, sorted lexicographically by constructor name.
+-}
+module Coal.Kernel.Language.Object (Object (..), FunctionScope (..)) where
 
-instance (Typed t) => Typed (Object t (Expr t)) where
-  typeOf =
-    \case
-      OFunction _ lls e ->
-        functionTypeOf e lls
-      OConstant _ e ->
-        typeOf e
-      OExternal _ t ->
-        typeOf t
-      OData _ _ t ->
-        typeOf t
+import Coal.Common.Name (Name)
+import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 
-objectName :: Object t e -> Name
-objectName =
-  \case
-    OFunction name _ _ ->
-      name
-    OConstant name _ ->
-      name
-    OExternal name _ ->
-      name
-    OData name _ _ ->
-      name
+{- | Visibility scope of a top-level function.
 
-type ObjectList = [Object Type (Expr Type)]
+'Exported' functions are visible to other modules and are emitted with
+external linkage by the code generator. 'Local' functions are private to
+their translation unit (e.g. lambda-lifted closures) and are emitted with
+internal linkage.
+-}
+data FunctionScope
+  = Exported
+  | Local
+  deriving (Show, Eq, Ord, Read)
 
-fromBinding :: Binding Type (Expr Type) -> Object Type (Expr Type)
-fromBinding (Binding (Label _ name) expr) = go expr
- where
-  go =
-    project
-      >>> \case
-        ELam vs e ->
-          OFunction name (toList vs) e
-        e ->
-          OConstant name (embed e)
-
-objectIsFunction :: Object t e -> Bool
-objectIsFunction =
-  \case
-    OFunction{} ->
-      True
-    _ ->
-      False
-
-objectIsConstant :: Object t e -> Bool
-objectIsConstant =
-  \case
-    OConstant{} ->
-      True
-    _ ->
-      False
-
-objectConstructorInfo :: Object t e -> [(Name, Int)]
-objectConstructorInfo =
-  \case
-    OData name i _ ->
-      [(name, i)]
-    _ ->
-      []
+data Object t
+  = DFunction FunctionScope Name [Label t] (Expr t)
+  | DConstant Name (Expr t)
+  | DExternal Name t
+  | DData Name [(Name, t)]
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Functor
+    , Foldable
+    , Traversable
+    )

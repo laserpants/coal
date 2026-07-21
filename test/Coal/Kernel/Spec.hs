@@ -1,0 +1,58 @@
+module Coal.Kernel.Spec (kernelSpec) where
+
+import qualified Coal.Kernel.Eval.EvalSpec
+import qualified Coal.Kernel.FreeVarsSpec
+import qualified Coal.Kernel.LLVM.CodegenSpec
+import qualified Coal.Kernel.Module.DependencyGraphSpec
+import qualified Coal.Kernel.Parser.ExprSpec
+import qualified Coal.Kernel.Parser.ModuleSpec
+import qualified Coal.Kernel.Parser.OpSpec
+import qualified Coal.Kernel.Parser.PrimSpec
+import qualified Coal.Kernel.Parser.TypeSpec
+import qualified Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonicalSpec
+import qualified Coal.Kernel.Pipeline.Invariant.LambdasFlattenedSpec
+import qualified Coal.Kernel.Pipeline.Invariant.LambdasLiftedSpec
+import qualified Coal.Kernel.Pipeline.Invariant.LocalNamesUniqueSpec
+import qualified Coal.Kernel.Pipeline.Invariant.LogicalOperatorsTranslatedSpec
+import qualified Coal.Kernel.Pipeline.Invariant.TopLevelFunctionsNormalizedSpec
+import qualified Coal.Kernel.Pipeline.Pass.AdministrativeNormalFormSpec
+import qualified Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalizationSpec
+import qualified Coal.Kernel.Pipeline.Pass.ConstructorSaturationSpec
+import qualified Coal.Kernel.Pipeline.Pass.FunctionResultsSaturationSpec
+import qualified Coal.Kernel.Pipeline.Pass.LambdaFlatteningSpec
+import qualified Coal.Kernel.Pipeline.Pass.LambdaLiftingSpec
+import qualified Coal.Kernel.Pipeline.Pass.LetBindingSimplificationSpec
+import qualified Coal.Kernel.Pipeline.Pass.LocalNameCanonicalizationSpec
+import qualified Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslationSpec
+import qualified Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec
+import qualified Coal.Kernel.Prettyprinter.RoundtripSpec
+import Test.Hspec (Spec, describe)
+
+kernelSpec :: Spec
+kernelSpec = do
+  describe "Coal.Kernel.Parser.Prim" Coal.Kernel.Parser.PrimSpec.spec
+  describe "Coal.Kernel.Eval" Coal.Kernel.Eval.EvalSpec.spec
+  describe "Coal.Kernel.FreeVars" Coal.Kernel.FreeVarsSpec.spec
+  describe "Coal.Kernel.LLVM.Codegen" Coal.Kernel.LLVM.CodegenSpec.spec
+  describe "Coal.Kernel.Module.DependencyGraph" Coal.Kernel.Module.DependencyGraphSpec.spec
+  describe "Coal.Kernel.Parser.Op" Coal.Kernel.Parser.OpSpec.spec
+  describe "Coal.Kernel.Parser.Type" Coal.Kernel.Parser.TypeSpec.spec
+  describe "Coal.Kernel.Parser.Expr" Coal.Kernel.Parser.ExprSpec.spec
+  describe "Coal.Kernel.Parser.Module" Coal.Kernel.Parser.ModuleSpec.spec
+  describe "Coal.Kernel.Prettyprinter" Coal.Kernel.Prettyprinter.RoundtripSpec.spec
+  describe "Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonical" Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonicalSpec.spec
+  describe "Coal.Kernel.Pipeline.Invariant.LocalNamesUnique" Coal.Kernel.Pipeline.Invariant.LocalNamesUniqueSpec.spec
+  describe "Coal.Kernel.Pipeline.Invariant.LambdasFlattened" Coal.Kernel.Pipeline.Invariant.LambdasFlattenedSpec.spec
+  describe "Coal.Kernel.Pipeline.Invariant.LambdasLifted" Coal.Kernel.Pipeline.Invariant.LambdasLiftedSpec.spec
+  describe "Coal.Kernel.Pipeline.Invariant.TopLevelFunctionsNormalized" Coal.Kernel.Pipeline.Invariant.TopLevelFunctionsNormalizedSpec.spec
+  describe "Coal.Kernel.Pipeline.Invariant.LogicalOperatorsTranslated" Coal.Kernel.Pipeline.Invariant.LogicalOperatorsTranslatedSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalization" Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalizationSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.LambdaFlattening" Coal.Kernel.Pipeline.Pass.LambdaFlatteningSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation" Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslationSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.LetBindingSimplification" Coal.Kernel.Pipeline.Pass.LetBindingSimplificationSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.LocalNameCanonicalization" Coal.Kernel.Pipeline.Pass.LocalNameCanonicalizationSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.ConstructorSaturation" Coal.Kernel.Pipeline.Pass.ConstructorSaturationSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization" Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.LambdaLifting" Coal.Kernel.Pipeline.Pass.LambdaLiftingSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation" Coal.Kernel.Pipeline.Pass.FunctionResultsSaturationSpec.spec
+  describe "Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm" Coal.Kernel.Pipeline.Pass.AdministrativeNormalFormSpec.spec

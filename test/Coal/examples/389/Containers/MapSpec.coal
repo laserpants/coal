@@ -1,0 +1,48 @@
+module Containers.MapSpec(mapSpec) {
+
+  import MicroTest(Test, suite, check)
+  import Containers.Map(Map, empty, singleton, insert, delete, lookup, is_empty, size)
+  import namespace Option
+
+  fun mapSpec() : Test =
+    suite([
+      // Test empty map
+      check(is_empty(empty)),
+      check(size(empty) == 0),
+      
+      // Test singleton
+      check(size(singleton(1, "one")) == 1),
+      check(lookup(1, singleton(1, "one")) == Some("one")),
+      
+      // Test insert and lookup
+      check(lookup(2, insert(2, "two", empty)) == Some("two")),
+      check(lookup(99, insert(2, "two", empty)) == None),
+      
+      // Test multiple insertions
+      check(
+        let m = insert(1, "one", insert(2, "two", insert(3, "three", empty))) in
+        lookup(1, m) == Some("one") &&
+        lookup(2, m) == Some("two") &&
+        lookup(3, m) == Some("three") &&
+        size(m) == 3
+      ),
+      
+      // Test delete
+      check(
+        let m = insert(1, "one", insert(2, "two", empty)) in
+        let m2 = delete(1, m) in
+        lookup(1, m2) == None && lookup(2, m2) == Some("two") && size(m2) == 1
+      ),
+      
+      // Test overwrite (insert same key)
+      check(
+        let m = insert(1, "one", empty) in
+        let m2 = insert(1, "ONE", m) in
+        lookup(1, m2) == Some("ONE") && size(m2) == 1
+      ),
+      
+      // Test delete non-existent key
+      check(size(delete(99, singleton(1, "one"))) == 1)
+    ])
+
+}

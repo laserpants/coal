@@ -239,4 +239,8 @@ builtinFunctions =
     ( "machine$_cofix"
     , forall2 $ \t1 t2 -> (machineType t1 t2 ~> machineType t1 t2) ~> machineType t1 t2
     )
+  ,
+    ( "machine$_run_while"
+    , forall1 $ \t -> (TIntrinsic IUnit ~> TIntrinsic IBool) ~> machineType (TIntrinsic IUnit) t ~> t
+    )
   ]

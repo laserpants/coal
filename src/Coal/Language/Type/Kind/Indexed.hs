@@ -24,12 +24,12 @@ import Coal.Language.Type (Parameter (..), Type (..), TypeIndex (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
-import Control.Monad.Except (forM)
 import Control.Monad.State (MonadState)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
 import qualified Data.Set as Set
+import Extras (forM)
 
 class ToKindIndexed t u where
   toKindIndexed :: (MonadState s m, Supply s) => t -> m u

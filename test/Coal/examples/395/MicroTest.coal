@@ -1,0 +1,106 @@
+module MicroTest {
+
+  import List(concat, length, reduce)
+  import IO(return)
+  import String(int32_to_string)
+  import namespace IO
+  import namespace Nat
+
+  type TestResult
+    = Pass
+    | Fail(string)
+
+  fun assert_with_remark(rem : string, condition : bool) : TestResult =
+    if (condition)
+      then Pass
+      else Fail(rem)
+
+  fun assert(condition : bool) : TestResult =
+    assert_with_remark("Assertion failed", condition)
+
+  fun assert_eq(x : a, y : a) : TestResult with (Comparable<a>) =
+    if (x == y) 
+      then Pass
+      else Fail("Equality assertion failed")
+
+  type alias Test = List<TestResult>
+
+  fun check(b : bool) : Test =
+    [assert(b)]
+
+  fun check_with_remark(rem : string, b : bool) : Test =
+    [assert_with_remark(rem, b)]
+
+  let suite : List<Test> -> Test = 
+    concat
+
+  type ExitCode = Success | Failure
+
+  type alias Summary =
+    { passed : int32
+    , failed : List<string>
+    }
+
+  let initial_summary = { passed = 0, failed = [] }
+
+  fun increase_passed({ passed, failed }) =
+    { passed = passed + 1
+    , failed = failed
+    }
+
+  fun insert_failed(msg : string, { failed, passed }) =
+    { passed = passed
+    , failed = msg :: failed 
+    }
+
+  fun step(result : TestResult, summary : Summary) : Summary =
+    match(result) {
+      | Pass =>
+          summary |. increase_passed
+
+      | Fail(msg) =>
+          summary |. insert_failed(msg)
+    }
+
+  fun print_failures(failed : List<string>) : IO<unit> =
+    fold(failed) {
+      | [] => return()
+      | msg :: @rest => do {
+          IO.println_string("\027[31m✗\027[0m " <> msg);
+          rest;
+        }
+    }
+
+  fun print_summary(summary : Summary) : IO<unit> =
+    let
+      failed_count = length(summary.failed)
+    in
+    if (failed_count == 0)
+      then
+        IO.println_string("✓ All " <> int32_to_string(summary.passed) <> " tests passed")
+      else
+        IO.println_string(
+          "✗ "
+          <> int32_to_string(Nat.unpack(failed_count))
+          <> " test(s) failed, "
+          <> int32_to_string(summary.passed)
+          <> " passed"
+        )
+
+  fun exit_code(summary : Summary) : ExitCode =
+    match(summary.failed) {
+      | [] => Success
+      | _  => Failure
+    }
+
+  fun run(test : Test) : IO<ExitCode> =
+    let summary =
+      reduce(step, initial_summary, test)
+    in
+      do {
+        print_failures(summary.failed);
+        print_summary(summary);
+        return(exit_code(summary));
+      }
+    
+}

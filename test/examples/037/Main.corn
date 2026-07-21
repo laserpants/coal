@@ -1,0 +1,846 @@
+module Main {
+
+  data Option(*)
+    = Main.None
+    | Main.Some(*)
+
+  data Ord
+    = Main.Eq
+    | Main.Gt
+    | Main.Lt
+
+  // Map
+
+  data Map(*, *) 
+    = Main.Empty
+    | Main.Map(
+      { key : *
+      | value : *
+      | height : int32
+      | left : Map(*, *)
+      | right : Map(*, *) 
+      | {}
+      })
+
+  // Helpers
+
+  Main.height(map : Map(*, *)) =
+    case<int32>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          0
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          get?_height<int32>(fields : { height : int32 | * })
+    }
+
+  Main.size(map : Map(*, *)) =
+    case<int32>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          0
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            lhs_size : int32 = 
+              @<int32>
+                ( Main.size : Map(*, *)/int32
+                , get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+                )
+            ;
+            rhs_size : int32 =
+              @<int32>
+                ( Main.size : Map(*, *)/int32
+                , get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+                )
+          in
+            let 
+              tot_size : int32 =
+                [+ int32]
+                  ( lhs_size : int32
+                  , rhs_size : int32
+                  )
+              in
+                [+ int32]
+                  ( tot_size : int32
+                  , 1
+                  )
+    }
+
+  Main.max(a : int32, b : int32) =
+    if ([> int32](a : int32, b : int32))
+      then a : int32 
+      else b : int32 
+    
+  Main.make_node
+    ( key : *
+    , val : *
+    , left : Map(*, *)
+    , right : Map(*, *)
+    ) =
+      let 
+        fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} } =
+          { key = key : *
+          | value = val : *
+          | height = 
+              let
+                lhs_height : int32 = 
+                  @<int32>
+                    ( Main.height : Map(*, *)/int32
+                    , left : Map(*, *)
+                    )
+                ;
+                rhs_height : int32 =
+                  @<int32>
+                    ( Main.height : Map(*, *)/int32
+                    , right : Map(*, *)
+                    )
+              in
+                let
+                  max_h : int32 =
+                    @<int32>
+                      ( Main.max : int32/int32/int32
+                      , lhs_height : int32
+                      , rhs_height : int32
+                      )
+                in
+                  [+ int32]
+                    ( 1
+                    , max_h : int32
+                    )
+          | left = left : Map(*, *)
+          | right = right : Map(*, *) 
+          | {}
+          }
+        in
+          @<Map(*, *)>
+            ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *) 
+            , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+            )
+
+  Main.balance_factor(map : Map(*, *)) =
+    case<int32>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          0
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            lhs : Map(*, *) = get?_left<Map(*, *)>(fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} })
+            ;
+            rhs : Map(*, *) = get?_right<Map(*, *)>(fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} })
+          in
+          let 
+            lhs_height : int32 =
+              @<int32>
+                ( Main.height : Map(*, *)/int32
+                , lhs : Map(*, *)
+                )
+            ;
+            rhs_height : int32 =
+              @<int32>
+                ( Main.height : Map(*, *)/int32
+                , rhs : Map(*, *)
+                )
+            in
+            [- int32]
+              ( lhs_height : int32
+              , rhs_height : int32
+              )
+    }
+  
+  // Constructors 
+
+  Main.singleton(key : *, val : *) =
+    @<Map(*, *)>
+      ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+      , key : *
+      , val : *
+      , Main.Empty : Map(*, *)
+      , Main.Empty : Map(*, *)
+      )
+
+  // Rotations
+
+  //
+  //       y              x
+  //      / \            / \
+  //     x   t3   ==>   t1  y
+  //    / \                / \
+  //   t1 t2              t2 t3
+  // 
+
+  Main.rotate_right(map : Map(*, *)) =
+    case<Map(*, *)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          map : Map(*, *)
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            yk : * = get?_key<*>(fields : { key : * | * })
+            ;
+            yv : * = get?_value<*>(fields : { value : * | * })
+            ; 
+            x : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+            ;
+            t3 : Map(*, *) = get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+          in
+            case<Map(*, *)>(x : Map(*, *)) {
+              | ( Main.Empty : Map(*, *) 
+                ) =>
+                  map : Map(*, *)
+              | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+                , x_fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+                ) =>
+                  let
+                    x_key : * = get?_key<*>(x_fields : { key : * | * })
+                    ;
+                    x_value : * = get?_value<*>(x_fields : { value : * | * })
+                    ;
+                    t1 : Map(*, *) = get?_left<Map(*, *)>(x_fields : { left : Map(*, *) | * })
+                    ;
+                    t2 : Map(*, *) = get?_right<Map(*, *)>(x_fields : { right : Map(*, *) | * })
+                  in
+                  @<Map(*, *)>
+                    ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                    , x_key : * 
+                    , x_value : *
+                    , t1 : Map(*, *) 
+                    , @<Map(*, *)>
+                        ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                        , yk : *
+                        , yv : *
+                        , t2 : Map(*, *)
+                        , t3 : Map(*, *)
+                        ) 
+                    )
+            }
+    }
+
+  //
+  //     x                 y
+  //    / \               / \
+  //   t1  y     ==>     x  t3
+  //      / \           / \
+  //     t2 t3         t1 t2
+  //
+  
+  Main.rotate_left(map : Map(*, *)) =
+    case<Map(*, *)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          map : Map(*, *)
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            xk : * = get?_key<*>(fields : { key : * | * })
+            ;
+            xv : * = get?_value<*>(fields : { value : * | * })
+            ; 
+            y : Map(*, *) = get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+            ;
+            t1 : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+          in
+            case<Map(*, *)>(y : Map(*, *)) {
+              | ( Main.Empty : Map(*, *) 
+                ) =>
+                  map : Map(*, *)
+              | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+                , y_fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+                ) =>
+                  let
+                    y_key : * = get?_key<*>(y_fields : { key : * | * })
+                    ;
+                    y_value : * = get?_value<*>(y_fields : { value : * | * })
+                    ;
+                    t2 : Map(*, *) = get?_left<Map(*, *)>(y_fields : { left : Map(*, *) | * })
+                    ;
+                    t3 : Map(*, *) = get?_right<Map(*, *)>(y_fields : { right : Map(*, *) | * })
+                  in
+                  @<Map(*, *)>
+                    ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                    , y_key : * 
+                    , y_value : *
+                    , @<Map(*, *)>
+                        ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                        , xk : *
+                        , xv : *
+                        , t1 : Map(*, *)
+                        , t2 : Map(*, *)
+                        ) 
+                    , t3 : Map(*, *) 
+                    )
+            }
+    }
+
+  // Rebalancing
+
+  Main.rebalance(map : Map(*, *)) =
+    case<Map(*, *)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          Main.Empty : Map(*, *)
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            m_key : * = get?_key<*>(fields : { key : * | * })
+            ;
+            m_value : * = get?_value<*>(fields : { value : * | * })
+            ;
+            bf : int32 =
+              @<int32>
+                ( Main.balance_factor : Map(*, *)/int32
+                , map : Map(*, *)
+                )
+            ;
+            left : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+            ;
+            right : Map(*, *) = get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+            in
+              if ([> int32](bf : int32, 1)) then
+                let
+                  bf_left : int32 = 
+                    @<int32>
+                      ( Main.balance_factor : Map(*, *)/int32
+                      , left : Map(*, *)
+                      )
+                in
+                if ([< int32](bf_left : int32, 0))
+                  then
+                    @<Map(*, *)>
+                      ( Main.rotate_right : Map(*, *)/Map(*, *)
+                      , @<Map(*, *)>
+                          ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                          , m_key : * 
+                          , m_value : *
+                          , @<Map(*, *)>
+                              ( Main.rotate_left : Map(*, *)/Map(*, *)
+                              , left : Map(*, *)
+                              )
+                          , right : Map(*, *)
+                          )
+                      )
+                  else
+                    @<Map(*, *)>
+                      ( Main.rotate_right : Map(*, *)/Map(*, *)
+                      , map : Map(*, *) 
+                      )
+                else
+                  if ([< int32](bf : int32, -1)) then
+                    let
+                      bf_right : int32 = 
+                        @<int32>
+                          ( Main.balance_factor : Map(*, *)/int32
+                          , right : Map(*, *)
+                          )
+                    in
+                    if ([> int32](bf_right : int32, 0))
+                      then
+                        @<Map(*, *)>
+                          ( Main.rotate_left : Map(*, *)/Map(*, *)
+                          , @<Map(*, *)>
+                              ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                              , m_key : *
+                              , m_value : *
+                              , left : Map(*, *)
+                              , @<Map(*, *)>
+                                  ( Main.rotate_right : Map(*, *)/Map(*, *)
+                                  , right : Map(*, *)
+                                  )
+                              )
+                          )
+                      else
+                        @<Map(*, *)>
+                          ( Main.rotate_left : Map(*, *)/Map(*, *)
+                          , map : Map(*, *) 
+                          )
+                    else
+                      map : Map(*, *)
+    }
+
+  // Lookup
+
+  Main.is_empty(map : Map(*, *)) =
+    case<bool>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          true
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , _ : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          false
+    }
+
+  Main.lookup(compare : */*/Ord, key : *, map : Map(*, *)) =
+    case<Option(*)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          Main.None : Option(*)
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            key_1 : * = get?_key<*>(fields : { key : * | * })
+            ;
+            value : * = get?_value<*>(fields : { value : * | * })
+            ;
+            lhs : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+            ;
+            rhs : Map(*, *) = get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+            in
+              let
+                ord : Ord =
+                  @<Ord>
+                    ( compare : */*/Ord
+                    , key : *
+                    , key_1 : *
+                    )
+                in
+                  case<Option(*)>(ord : Ord) {
+                    | ( Main.Eq : Ord 
+                      ) =>
+                        @<Option(*)>
+                          ( Main.Some : */Option(*)
+                          , value : *
+                          )
+                    | ( Main.Gt : Ord
+                      ) =>
+                        @<Option(*)>
+                          ( Main.lookup : (*/*/Ord)/*/Map(*, *)/Option(*)
+                          , compare : */*/Ord
+                          , key : *
+                          , rhs : Map(*, *)
+                          )
+                    | ( Main.Lt : Ord
+                      ) =>
+                        @<Option(*)>
+                          ( Main.lookup : (*/*/Ord)/*/Map(*, *)/Option(*)
+                          , compare : */*/Ord
+                          , key : *
+                          , lhs : Map(*, *)
+                          )
+                  }
+    }
+
+  // Insertion
+
+  Main.insert(compare : */*/Ord, key : *, val : *, map : Map(*, *)) =
+    case<Map(*, *)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          @<Map(*, *)>
+            ( Main.singleton : */*/Map(*, *)
+            , key : *
+            , val : *
+            )
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            key_1 : * = get?_key<*>(fields : { key : * | * })
+            ; 
+            value_1 : * = get?_value<*>(fields : { value : * | * })
+            ;
+            lhs : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+            ;
+            rhs : Map(*, *) = get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+          in
+            let
+              ord : Ord =
+                @<Ord>
+                  ( compare : */*/Ord
+                  , key : *
+                  , key_1 : *
+                  )
+              in
+                case<Map(*, *)>(ord : Ord) {
+                  | ( Main.Eq : Ord 
+                    ) =>
+                      @<Map(*, *)>
+                        ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                        , key : *
+                        , val : *
+                        , lhs : Map(*, *)
+                        , rhs : Map(*, *)
+                        )
+                  | ( Main.Lt : Ord
+                    ) =>
+                      @<Map(*, *)>
+                        ( Main.rebalance : Map(*, *)/Map(*, *)
+                        , @<Map(*, *)>
+                            ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                            , key_1 : *
+                            , value_1 : *
+                            , @<Map(*, *)>
+                                ( Main.insert : (*/*/Ord)/*/*/Map(*, *)/Map(*, *)
+                                , compare : */*/Ord
+                                , key : *
+                                , val : *
+                                , lhs : Map(*, *)
+                                )
+                            , rhs : Map(*, *)
+                            )
+                        )
+                  | ( Main.Gt : Ord
+                    ) =>
+                      @<Map(*, *)>
+                        ( Main.rebalance : Map(*, *)/Map(*, *)
+                        , @<Map(*, *)>
+                            ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                            , key_1 : *
+                            , value_1 : *
+                            , lhs : Map(*, *)
+                            , @<Map(*, *)>
+                                ( Main.insert : (*/*/Ord)/*/*/Map(*, *)/Map(*, *)
+                                , compare : */*/Ord
+                                , key : *
+                                , val : *
+                                , rhs : Map(*, *)
+                                )
+                            )
+                        )
+                }
+    }
+
+  // Deletion
+
+  Main.find_min(map : Map(*, *)) =
+    case<Map(*, *)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          Main.Empty : Map(*, *)
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            lhs : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+          in
+            case<Map(*, *)>(lhs : Map(*, *)) {
+              | ( Main.Empty : Map(*, *) 
+                ) =>
+                  map : Map(*, *)
+              | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+                , _ : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+                ) =>
+                  @<Map(*, *)>
+                    ( Main.find_min : Map(*, *)/Map(*, *)
+                    , lhs : Map(*, *)
+                    )
+            }
+    }
+
+  Main.delete_min(map : Map(*, *)) =
+    case<Map(*, *)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          Main.Empty : Map(*, *)
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            k   : * = get?_key<*>(fields : { key : * | * })
+            ;
+            v   : * = get?_value<*>(fields : { value : * | * })
+            ;
+            lhs : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+            ;
+            rhs : Map(*, *) = get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+          in
+            case<Map(*, *)>(lhs : Map(*, *)) {
+              | ( Main.Empty : Map(*, *) 
+                ) =>
+                  rhs : Map(*, *)
+              | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+                , _ : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+                ) =>
+                  @<Map(*, *)>
+                    ( Main.rebalance : Map(*, *)/Map(*, *)
+                    , @<Map(*, *)>
+                        ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                        , k : *
+                        , v : *
+                        , @<Map(*, *)>
+                            ( Main.delete_min : Map(*, *)/Map(*, *)
+                            , lhs : Map(*, *)
+                            )
+                        , rhs : Map(*, *)
+                        )
+                    )
+            }
+    }
+
+  Main.delete(compare : */*/Ord, key : *, map : Map(*, *)) =
+    case<Map(*, *)>(map : Map(*, *)) {
+      | ( Main.Empty : Map(*, *) 
+        ) =>
+          Main.Empty : Map(*, *)
+      | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+        , fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+        ) =>
+          let
+            key_1   : * = get?_key<*>(fields : { key : * | * })
+            ;
+            value_1 : * = get?_value<*>(fields : { value : * | * })
+            ;
+            lhs : Map(*, *) = get?_left<Map(*, *)>(fields : { left : Map(*, *) | * })
+            ;
+            rhs : Map(*, *) = get?_right<Map(*, *)>(fields : { right : Map(*, *) | * })
+          in
+          let
+            ord : Ord =
+              @<Ord>
+                ( compare : */*/Ord
+                , key : *
+                , key_1 : *
+                )
+          in
+            case<Map(*, *)>(ord : Ord) {
+              | ( Main.Eq : Ord 
+                ) =>
+                  // Remove this node.
+                  // If one child is empty, promote the other.
+                  // Otherwise replace with the in-order successor (min of rhs).
+                  case<Map(*, *)>(lhs : Map(*, *)) {
+                    | ( Main.Empty : Map(*, *) 
+                      ) =>
+                        rhs : Map(*, *)
+                    | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+                      , _ : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+                      ) =>
+                        case<Map(*, *)>(rhs : Map(*, *)) {
+                          | ( Main.Empty : Map(*, *) 
+                            ) =>
+                              lhs : Map(*, *)
+                          | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+                            , _ : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+                            ) =>
+                              let
+                                successor : Map(*, *) =
+                                  @<Map(*, *)>
+                                    ( Main.find_min : Map(*, *)/Map(*, *)
+                                    , rhs : Map(*, *)
+                                    )
+                              in
+                                case<Map(*, *)>(successor : Map(*, *)) {
+                                  | ( Main.Empty : Map(*, *) 
+                                    ) =>
+                                        lhs : Map(*, *)
+                                  | ( Main.Map : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }/Map(*, *)
+                                    , succ_fields : { key : * | value : * | height : int32 | left : Map(*, *) | right : Map(*, *) | {} }
+                                    ) =>
+                                        let
+                                          succ_key   : * = get?_key<*>  (succ_fields : { key   : * | * })
+                                          ;
+                                          succ_value : * = get?_value<*>(succ_fields : { value : * | * })
+                                        in
+                                          @<Map(*, *)>
+                                            ( Main.rebalance : Map(*, *)/Map(*, *)
+                                            , @<Map(*, *)>
+                                                ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                                                , succ_key : *
+                                                , succ_value : *
+                                                , lhs : Map(*, *)
+                                                , @<Map(*, *)>
+                                                    ( Main.delete_min : Map(*, *)/Map(*, *)
+                                                    , rhs : Map(*, *)
+                                                    )
+                                                )
+                                            )
+                                }
+                        }
+                  }
+              | ( Main.Lt : Ord 
+                ) =>
+                  @<Map(*, *)>
+                    ( Main.rebalance : Map(*, *)/Map(*, *)
+                    , @<Map(*, *)>
+                        ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                        , key_1 : *
+                        , value_1 : *
+                        , @<Map(*, *)>
+                            ( Main.delete : (*/*/Ord)/*/Map(*, *)/Map(*, *)
+                            , compare : */*/Ord
+                            , key : *
+                            , lhs : Map(*, *)
+                            )
+                        , rhs : Map(*, *)
+                        )
+                    )
+              | ( Main.Gt : Ord 
+                ) =>
+                  @<Map(*, *)>
+                    ( Main.rebalance : Map(*, *)/Map(*, *)
+                    , @<Map(*, *)>
+                        ( Main.make_node : */*/Map(*, *)/Map(*, *)/Map(*, *)
+                        , key_1 : *
+                        , value_1 : *
+                        , lhs : Map(*, *)
+                        , @<Map(*, *)>
+                            ( Main.delete : (*/*/Ord)/*/Map(*, *)/Map(*, *)
+                            , compare : */*/Ord
+                            , key : *
+                            , rhs : Map(*, *)
+                            )
+                        )
+                    )
+            }
+    }
+
+  Main.main(_ : *) =
+    let
+      compare : int32/int32/Ord =
+        fn(a : int32, b : int32) =>
+          if ([== int32](a : int32, b : int32)) then Main.Eq : Ord
+          else if ([< int32](a : int32, b : int32)) then Main.Lt : Ord
+          else Main.Gt : Ord
+    in
+    // Build map {1->10, 2->20, 3->30, 4->40, 5->50} by inserting in
+    // non-sorted order so the AVL rotations are exercised.
+    let
+      m0 : Map(int32, int32) = Main.Empty : Map(int32, int32)
+    in
+    let
+      m1 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Main.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 3
+          , 30
+          , m0 : Map(int32, int32)
+          )
+      ;
+      m2 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Main.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 1
+          , 10
+          , m1 : Map(int32, int32)
+          )
+      ;
+      m3 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Main.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 5
+          , 50
+          , m2 : Map(int32, int32)
+          )
+      ;
+      m4 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Main.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 2
+          , 20
+          , m3 : Map(int32, int32)
+          )
+      ;
+      m5 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Main.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 4
+          , 40
+          , m4 : Map(int32, int32)
+          )
+    in
+    let
+      // Expected: 5
+      size_before : int32 =
+        @<int32>
+          ( Main.size : Map(int32, int32)/int32
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Expected: Some(30) -> print 30
+      r3 : Option(int32) =
+        @<Option(int32)>
+          ( Main.lookup : (int32/int32/Ord)/int32/Map(int32, int32)/Option(int32)
+          , compare : int32/int32/Ord
+          , 3
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Expected: Some(10) -> print 10
+      r1 : Option(int32) =
+        @<Option(int32)>
+          ( Main.lookup : (int32/int32/Ord)/int32/Map(int32, int32)/Option(int32)
+          , compare : int32/int32/Ord
+          , 1
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Delete key 3
+      m6 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Main.delete : (int32/int32/Ord)/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 3
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Expected: 4
+      size_after : int32 =
+        @<int32>
+          ( Main.size : Map(int32, int32)/int32
+          , m6 : Map(int32, int32)
+          )
+      ;
+      // Expected: None -> print -1
+      r3_del : Option(int32) =
+        @<Option(int32)>
+          ( Main.lookup : (int32/int32/Ord)/int32/Map(int32, int32)/Option(int32)
+          , compare : int32/int32/Ord
+          , 3
+          , m6 : Map(int32, int32)
+          )
+    in
+    let
+      _ : * = @<*>(coal_println_int32 : int32/*, size_before : int32)      // 5
+      ;
+      _ : * =
+        case<*>(r3 : Option(int32)) {
+          | ( Main.None : Option(int32)
+            ) =>
+              @<*>(coal_println_int32 : int32/*, -1)
+          | ( Main.Some : int32/Option(int32)
+            , v : int32
+            ) =>
+              @<*>(coal_println_int32 : int32/*, v : int32)
+        }                                                                   // 30
+      ;
+      _ : * =
+        case<*>(r1 : Option(int32)) {
+          | ( Main.None : Option(int32)
+            ) =>
+              @<*>(coal_println_int32 : int32/*, -1)
+          | ( Main.Some : int32/Option(int32)
+            , v : int32
+            ) =>
+              @<*>(coal_println_int32 : int32/*, v : int32)
+        }                                                                   // 10
+      ;
+      _ : * = @<*>(coal_println_int32 : int32/*, size_after : int32)       // 4
+      ;
+      _ : * =
+        case<*>(r3_del : Option(int32)) {
+          | ( Main.None : Option(int32)
+            ) =>
+              @<*>(coal_println_int32 : int32/*, -1)
+          | ( Main.Some : int32/Option(int32)
+            , v : int32
+            ) =>
+              @<*>(coal_println_int32 : int32/*, v : int32)
+        }                                                                   // -1
+    in
+      0
+
+}

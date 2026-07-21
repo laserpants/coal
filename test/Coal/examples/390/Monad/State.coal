@@ -1,0 +1,55 @@
+module Monad.State {
+
+  import Coal.Functor(Functor)
+  import Coal.Monad(Monad, and_then)
+  import Coal.Applicative(Applicative)
+  import Coal.Combinators(fst)
+
+  type State<s, a> = State(s -> (a, s))
+
+  fun run_state(State(f), s) = 
+    f(s)
+
+  fun eval_state(st, s0) =
+    fst(run_state(st, s0))
+
+  instance Functor<State<s>> {
+    fun map(f, State(g)) =
+      State(fn(s) =>
+        let (a, s1) = g(s) 
+        in
+        (f(a), s1)
+      )
+  }
+
+  instance Applicative<State<s>> {
+    fun pure(x) =
+      State(fn(s) => (x, s))
+
+    fun ap(State(sf), State(sa)) =
+      State(fn(s0) =>
+        let (f, s1) = sf(s0) in
+        let (a, s2) = sa(s1) in
+        (f(a), s2)
+      )
+  }
+
+  instance Monad<State<s>> {
+    fun bind(m, k) =
+      State(fn(s0) =>
+        let (a, s1) = run_state(m, s0) 
+        in
+        run_state(k(a), s1)
+      )
+  }
+
+  fun get() = 
+    State(fn(s) => (s, s))
+
+  fun put(s) = 
+    State(fn(_) => ((), s))
+
+  fun modify(f) = 
+    State(fn(s) => ((), f(s)))
+
+}

@@ -1,11 +1,32 @@
 {-# LANGUAGE StrictData #-}
 
+{- |
+Primitive literal values.
+
+Defines the set of primitive values supported by the language:
+
+  * Unit (@()@)
+  * Booleans (@bool@)
+  * Fixed-width integers (@int32@, @int64@)
+  * Arbitrary-precision integers (@bignum@)
+  * Floating-point numbers (@float@, @double@)
+  * Characters (Unicode code points, @char@)
+  * Strings (UTF-8 encoded, @string@)
+
+Primitives are always fully evaluated—they cannot contain unevaluated
+subexpressions.
+-}
 module Coal.Kernel.Language.Prim (Prim (..)) where
 
 import Data.ByteString (ByteString)
 import Data.Int (Int32, Int64)
 
--- | Core language primitives
+{- | Core language primitive literals.
+
+Each constructor represents a fully evaluated primitive value. Strings are
+stored as raw 'ByteString' (UTF-8 encoded) for efficient manipulation and
+interoperability with C runtime functions.
+-}
 data Prim
   = -- | Unit value
     PUnit
@@ -21,7 +42,7 @@ data Prim
     PFloat Float
   | -- | Double-precision floating-point numbers
     PDouble Double
-  | -- | Single characters
+  | -- | Single character (Unicode code point)
     PChar Int32
   | -- | UTF-8 encoded strings
     PString ByteString

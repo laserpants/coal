@@ -38,7 +38,7 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Extras (Dictionary, Name, concatForM, second, (<$$>), (<>^))
+import Extras (Dictionary, Name, concatForM, forM_, second, (<$$>), (<>^))
 import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
 type KindConstraintsGenOutput = Either KindError KindConstraint

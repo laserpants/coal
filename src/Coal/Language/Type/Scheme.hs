@@ -29,6 +29,7 @@ module Coal.Language.Type.Scheme (
   forallN',
   IndexedScheme,
   listConstructorScheme,
+  listEmptyScheme,
   tupleScheme,
 )
 where
@@ -143,6 +144,10 @@ forallN' n f = Forall (Set.fromList ixs) traits t
 
 listConstructorScheme :: IndexedScheme
 listConstructorScheme = forall1 (\a -> a ~> listType a ~> listType a)
+
+-- | The type scheme of an empty list literal @[]@: @forall a. List a@
+listEmptyScheme :: IndexedScheme
+listEmptyScheme = forall1 listType
 
 tupleScheme :: Int -> IndexedScheme
 tupleScheme n | n < 2 = error "Invalid tuple size"

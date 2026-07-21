@@ -1,0 +1,31 @@
+module Data.Json.FromJson {
+
+  import Data.Json.Value(JsonValue)
+  import Data.Json.Decoder(
+    bool_decoder,
+    number_decoder,
+    string_decoder,
+    array_decoder
+  )
+
+  trait FromJson<a> {
+    from_json : JsonValue -> Result<a, string>
+  }
+
+  instance FromJson<bool> {
+    let from_json = bool_decoder
+  }
+
+  instance FromJson<double> {
+    let from_json = number_decoder
+  }
+
+  instance FromJson<string> {
+    let from_json = string_decoder
+  }
+
+  instance FromJson<List<a>> with (FromJson<a>) {
+    fun from_json(json) = array_decoder(from_json, json)
+  }
+
+}

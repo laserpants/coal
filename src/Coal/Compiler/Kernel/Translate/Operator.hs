@@ -4,27 +4,41 @@
 
 module Coal.Compiler.Kernel.Translate.Operator (translateOperator) where
 
-import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Kernel.Compiler (KernelExpr)
-import qualified Coal.Kernel.Language as Kernel
+import Coal.Kernel.Language.Expr (Expr (..), Label (..))
+import Coal.Kernel.Language.Op (Op (..))
+import qualified Coal.Kernel.Language.Type as NK
+import qualified Coal.Kernel.Language.Type.Constructors as NKT
+import qualified Coal.Kernel.Language.Type.HasType as NKHT
 import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 
-logicalNotOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+type NKExpr = Expr NK.Type
+
+logicalNotOperator ::
+  (Monad m) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 logicalNotOperator translate es = do
   args <- traverse translate es
   pure $
-    Kernel.app
+    EApp
       t1
-      (Kernel.var (Label (t1 `Kernel.arrow` t1) "Builtin$.operator$__not"))
+      (EVar (Label (NKT.arrow t1 t1) "Builtin$.operator$__not"))
       args
  where
   t1 = translateType (TIntrinsic IBool)
 
-translateOperator :: (Monad m, Data a) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> Operator -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+translateOperator ::
+  (Monad m, Data a) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  IndexedType ->
+  Operator ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 translateOperator translate t =
   \case
     OLogicalNot ->
@@ -40,78 +54,119 @@ translateOperator translate t =
     OListConcatenation ->
       listConcatenationOperator translate t
     OLogicalAnd ->
-      binop translate Kernel.OAnd (TIntrinsic IBool, TIntrinsic IBool)
+      binop translate OAnd (TIntrinsic IBool, TIntrinsic IBool)
     OLogicalOr ->
-      binop translate Kernel.OOr (TIntrinsic IBool, TIntrinsic IBool)
+      binop translate OOr (TIntrinsic IBool, TIntrinsic IBool)
     OStringConcatenation ->
       stringConcatenationOperator translate
 
-stringConcatenationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+stringConcatenationOperator ::
+  (Monad m) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 stringConcatenationOperator translate es = do
   args <- traverse translate es
-  let t1 = translateType (TIntrinsic IString)
   pure $
-    Kernel.app
+    EApp
       t1
-      (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator$__string_concatenation"))
+      (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__string_concatenation"))
       args
+ where
+  t1 = translateType (TIntrinsic IString)
 
-listConcatenationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+listConcatenationOperator ::
+  (Monad m) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  IndexedType ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 listConcatenationOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
-    Kernel.app
+    EApp
       t1
-      (Kernel.var (Label (t1 `Kernel.arrow` t1 `Kernel.arrow` t1) "Builtin$.operator$__list_concatenation"))
+      (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__list_concatenation"))
       args
+ where
+  t1 = translateType t
 
-reverseCompositionOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+reverseCompositionOperator ::
+  (Monad m) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  IndexedType ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 reverseCompositionOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
-    Kernel.app
+    EApp
       t1
-      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
+      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
       args
+ where
+  t1 = translateType t
 
-forwardCompositionOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+forwardCompositionOperator ::
+  (Monad m) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  IndexedType ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 forwardCompositionOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
-    Kernel.app
+    EApp
       t1
-      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
+      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
       args
+ where
+  t1 = translateType t
 
-reverseApplicationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+reverseApplicationOperator ::
+  (Monad m) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  IndexedType ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 reverseApplicationOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
-    Kernel.app
+    EApp
       t1
-      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
+      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
       args
+ where
+  t1 = translateType t
 
-forwardApplicationOperator :: (Monad m) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> IndexedType -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+forwardApplicationOperator ::
+  (Monad m) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  IndexedType ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 forwardApplicationOperator translate t es = do
   args <- traverse translate es
-  let t1 = translateType t
   pure $
-    Kernel.app
+    EApp
       t1
-      (Kernel.var (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_application"))
+      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_application"))
       args
+ where
+  t1 = translateType t
 
-binop :: (Monad m, Data a) => (Expression a Kind IndexedType -> CompilerT a m KernelExpr) -> (KernelExpr -> KernelExpr -> Kernel.Op KernelExpr) -> (IndexedType, IndexedType) -> NonEmpty (Expression a Kind IndexedType) -> CompilerT a m KernelExpr
+binop ::
+  (Monad m, Data a) =>
+  (Expression a Kind IndexedType -> CompilerT a m NKExpr) ->
+  (NKExpr -> NKExpr -> Op NKExpr) ->
+  (IndexedType, IndexedType) ->
+  NonEmpty (Expression a Kind IndexedType) ->
+  CompilerT a m NKExpr
 binop translate op (t1, t2) (e1 :| [e2])
   | e1 `hasType` t1 && e2 `hasType` t2 = do
       o1 <- translate e1
       o2 <- translate e2
-      pure (Kernel.op (op o1 o2))
+      pure (EOp (op o1 o2))
 binop _ _ _ _ = error "Implementation error"
 
 {-# INLINE hasType #-}

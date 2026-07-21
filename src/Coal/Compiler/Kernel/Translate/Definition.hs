@@ -5,36 +5,48 @@
 
 module Coal.Compiler.Kernel.Translate.Definition (translateDefinition) where
 
-import Coal.Common.Label (Label (..))
 import Coal.Compiler.Kernel.Environment (KernelEnvironment (..), withLocalNames)
 import Coal.Compiler.Kernel.Translate.Expression (translateExpression, translatePattern)
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack
-import qualified Coal.Kernel.Language as Kernel
-import Coal.Kernel.Language.Object (KernelObject)
+import qualified Coal.Kernel.Language.Expr as NK
+import qualified Coal.Kernel.Language.Object as NKObj
+import qualified Coal.Kernel.Language.Type as NKT
+import qualified Coal.Kernel.Language.Type.Constructors as T
 import Coal.Language
 import Control.Monad (forM)
 import Control.Monad.Extra (concatForM)
 import Control.Monad.Reader (asks)
 import Data.Data (Data)
 import Data.List.Extra (sortOn)
-import Data.List.NonEmpty (NonEmpty ((:|)), toList, (<|))
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Name, (<.>))
 
-translateDefinition :: (Monad m, Data a) => Definition a Kind IndexedType -> CompilerT a m [KernelObject]
+type NKObject = NKObj.Object NKT.Type
+
+translateDefinition ::
+  (Monad m, Data a) =>
+  Definition a Kind IndexedType ->
+  CompilerT a m [NKObject]
 translateDefinition =
   \case
-    DType _ _ TypeDefinition{..} ->
-      traverse translateConstructor (zip [0 ..] (sortOn constructorName typeDefinitionConstructors))
+    DType _ typeName TypeDefinition{..} -> do
+      moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
+      let ctors = sortOn constructorName typeDefinitionConstructors
+          ctorPairs =
+            [ (moduleName <.> cName, translateType cType)
+            | DataConstructor cName _ (Forall _ _ cType) <- ctors
+            ]
+      pure ([NKObj.DData (moduleName <.> typeName) ctorPairs | not (null ctorPairs)])
     DFunction _ name FunctionDefinition{..} -> do
       qs <- traverse translatePattern (toList functionDefinitionPatterns)
-      f <- withLocalNames (labelName <$> qs) (translateExpression functionDefinitionExpression)
+      f <- withLocalNames (nkLabelName <$> qs) (translateExpression functionDefinitionExpression)
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [Kernel.OFunction (moduleName <.> name) qs f]
+      pure [NKObj.DFunction NKObj.Exported (moduleName <.> name) qs f]
     DLet _ name LetDefinition{letDefinitionType = With{}, ..} -> do
       c <- translateExpression letDefinitionExpression
       moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-      pure [Kernel.OConstant (moduleName <.> name) c]
+      pure [NKObj.DConstant (moduleName <.> name) c]
     DTrait _ name TraitDefinition{..} ->
       forM traitDefinitionInterface $
         \(TraitDefinitionInterfaceEntry n (Forall _ _ t)) ->
@@ -61,32 +73,31 @@ translateDefinition =
     _ ->
       pure []
 
-traitAccessor :: (Monad m) => Name -> Name -> Kernel.Type -> CompilerT a m KernelObject
+{- | Generate a trait accessor function.
+
+The accessor projects field @fn@ from a dictionary value of type @trait@.
+-}
+traitAccessor :: (Monad m) => Name -> Name -> NKT.Type -> CompilerT a m NKObject
 traitAccessor trait fn t = do
   moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
+  let dict = NK.Label (NKT.TCon trait [NKT.TOpq]) "$a"
+      rt = NKT.RExt fn t NKT.TOpq
+      row = NK.Label rt "$r"
   pure $
-    Kernel.OFunction
+    NKObj.DFunction
+      NKObj.Exported
       (moduleName <.> fn)
       [dict]
-      ( Kernel.match
+      ( NK.ECase
           t
-          (Kernel.var dict)
-          ( Kernel.Clause
-              (Label (Kernel.functionTypeOf dict [row]) "$Record" <| row :| [])
-              ( Kernel.sel
-                  (Kernel.Focus fn var (Label Kernel.opaque "_"))
-                  (Kernel.var row)
-                  (Kernel.var var)
-              )
+          (NK.EVar dict)
+          ( NK.Clause
+              (NK.Label (rt `T.arrow` NKT.TCon "record" [rt]) "$Record" :| [row])
+              (NK.EGet (NK.Label t fn) (NK.EVar row))
               :| []
           )
       )
- where
-  var = Label t "$f"
-  row = Label (Kernel.RExt fn t Kernel.opaque) "$r"
-  dict = Label (Kernel.TCon trait [Kernel.opaque]) "$a"
 
-translateConstructor :: (Monad m) => (Int, DataConstructor Parameter Kind (Type Parameter Kind)) -> CompilerT a m KernelObject
-translateConstructor (index, DataConstructor name _ (Forall _ _ t)) = do
-  moduleName <- asks (kernelEnvironmentModule . compilerKernelEnvironment)
-  pure (Kernel.OData (moduleName <.> name) index (translateType t))
+{-# INLINE nkLabelName #-}
+nkLabelName :: NK.Label t -> Name
+nkLabelName (NK.Label _ name) = name
