@@ -2092,6 +2092,12 @@ e2eSpec = do
       , "Data/Json/Pretty.coal"
       ]
 
+  describe "400" $ do
+    expectOutput
+      "5456"
+      "test/Coal/examples/400"
+      ["Main.coal"]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

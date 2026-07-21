@@ -68,6 +68,8 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Patter
         typeOf t
       PInteger _ t _ ->
         t
+      PAnnotation _ _ p ->
+        typeOf p
       p ->
         safeHeadType (universeBi p)
 

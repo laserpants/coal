@@ -39,6 +39,7 @@ parseAtom =
     <|> try parseWildcardPattern
     <|> try parseAtFunction
     <|> parseVariablePattern
+    <|> try parseUnitLiteral
     <|> try (parens parsePattern)
     <|> parseTuplePattern
 
@@ -163,6 +164,13 @@ parseRecordPattern =
       pure (\loc -> PRecord loc () (Map.fromList fields) tail_)
  where
   rest = pipe >> parsePattern
+
+parseUnitLiteral :: Parser (Pattern Metadata () ())
+parseUnitLiteral =
+  withMetadata $ do
+    _ <- symbol "("
+    _ <- symbol ")"
+    pure (`PLiteral` LUnit)
 
 parseTuplePattern :: Parser (Pattern Metadata () ())
 parseTuplePattern = do
