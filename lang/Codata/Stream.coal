@@ -1,6 +1,6 @@
 module Codata.Stream {
 
-  import Codata.Machine(receive, observe, process, map_machine)
+  import Codata.Machine(receive, compose, observe, process, map_machine)
 
   type alias Stream<a> = Machine<unit, a>
 
@@ -17,5 +17,9 @@ module Codata.Stream {
 
   fun map_stream(f : a -> b, stream : Stream<a>) : Stream<b> =
     map_machine(f, stream)
+
+  fun scan(transition : i -> o -> o, seed : o, stream : Stream<i>) : Stream<o> =
+    compose(stream, process(seed, transition))
+
 
 }
