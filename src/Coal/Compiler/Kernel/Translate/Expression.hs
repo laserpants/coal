@@ -12,7 +12,7 @@ import Coal.Compiler.Kernel.Environment (qualifyName, withLocalName, withLocalNa
 import Coal.Compiler.Kernel.Translate.Operator (translateOperator)
 import Coal.Compiler.Kernel.Translate.Pattern (translatePattern)
 import Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive)
-import Coal.Compiler.Kernel.Translate.Record (translateRecord)
+import Coal.Compiler.Kernel.Translate.Record (makeRecord, translateRecord)
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import qualified Coal.Kernel.Language.Expr as NK
@@ -96,46 +96,28 @@ translateExpression =
               (NK.EGet (NK.Label (translateType t) field) (NK.EVar (NK.Label t1 "$row")))
               :| []
           )
-    -- TODO: This is convoluted
+    -- Focus on a field of a record, binding both the extracted field value
+    -- and the record tail (the original record re-boxed) for use in the body.
     EFocus _ name0 (Label ft1 n1) (Label ft2 n2) e1 e2 -> do
-      d1 <- translateExpression e1
-      d2 <- withLocalNames [n1, n2] (translateExpression e2)
-      let kft1 = translateType ft1
-          kft2 = translateType ft2
+      recordExpr <- translateExpression e1
+      bodyExpr <- withLocalNames [n1, n2] (translateExpression e2)
 
-          fieldBinding = NK.Binding (NK.Label kft1 n1) (NK.EGet (NK.Label kft1 name0) d1)
+      let fieldType = translateType ft1
+          tailType = translateType ft2
 
-          t4 = case kft2 of
-            NKT.TCon _ [r] -> r
-            _ -> error "Implementation error"
+          -- Bind n1 to the value of the focused field projected from the record
+          fieldBinding =
+            NK.Binding
+              (NK.Label fieldType n1)
+              (NK.EGet (NK.Label fieldType name0) recordExpr)
 
-          d3 =
-            NK.EApp
-              kft2
-              (NK.ECon (NK.Label (t4 `NKC.arrow` kft2) "$Record"))
-              (d1 :| [])
+          -- Bind n2 to the record tail (re-box the original record via $Record)
+          tailBinding =
+            NK.Binding
+              (NK.Label tailType n2)
+              (makeRecord tailType recordExpr)
 
-          tailBinding = NK.Binding (NK.Label kft2 n2) d3 -- d1
-
-      --          t1 =
-      --            case NKHT.typeOf d1 of
-      --              NKT.TCon _ [r] ->
-      --                r
-      --              q ->
-      --                -- TODO: should throw error
-      --                q -- error (show q) -- "Implementation error"
-      --          unwrapped =
-      --            NK.ECase
-      --              t1
-      --              d1
-      --              ( NK.Clause
-      --                  (NK.Label (NKT.TCon "record" [t1]) "$Record" :| [NK.Label t1 "$row"])
-      --                  (NK.EVar (NK.Label t1 "$row"))
-      --                  :| []
-      --              )
-      --          fieldBinding = NK.Binding (NK.Label kft1 n1) (NK.EGet (NK.Label kft1 name0) unwrapped)
-      --          tailBinding = NK.Binding (NK.Label kft2 n2) unwrapped
-      pure (NK.ELet (fieldBinding :| [tailBinding]) d2)
+      pure (NK.ELet (fieldBinding :| [tailBinding]) bodyExpr)
     ETraitInstance _ t trait ->
       pure (NK.EVar (NK.Label (translateType t) (dictionaryLabel trait)))
     EFFICall _ _ (Label t name) es e -> do
