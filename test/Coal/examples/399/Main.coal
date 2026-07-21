@@ -8,6 +8,7 @@ module Main {
   import Containers.Set (Set)
   import List(reduce, range)
   import Codata.Machine (machine, run_while)
+  import Codata.Stream (Stream)
   import Coal.Combinators (iterate)
 
   type Shape
@@ -630,7 +631,7 @@ module Main {
       then cleared
       else spawned
 
-  fun tick(state : GameState) =
+  fun tick(state : GameState) : GameState =
     if (can_move_down(state))
       then 
         move_current_block(0, 1, state)
@@ -658,7 +659,7 @@ module Main {
           state
     }
 
-  fun handle(ev_code : int32, state : GameState) =
+  fun handle(ev_code : int32, state : GameState) : GameState =
     let event = parse_event(ev_code) in
     let new_state = handle_event(event, state) 
     in
@@ -667,7 +668,7 @@ module Main {
         current_block_cells(new_state)
       )(fn(_) => new_state)
 
-  let game_machine : Machine<unit, GameState> =
+  let game_machine : Stream<GameState> =
     machine(
       initial_game_state,
       fn(_, state) =>
