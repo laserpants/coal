@@ -153,26 +153,7 @@ coal compile -I. Main.coal -o dist
 
 ## How to contribute
 
-This is an open and evolving project &mdash; contributions are welcome.
-
-### Bug reports 
-
-If you want to report a bug 🐞, [open an issue](https://codeberg.org/laserpants/coal/issues) with:
-
-- A description of the problem
-- Steps to reproduce it
-- What you expected to happen
-- What actually happened (including error messages)
-
-If possible, include a small code example that demonstrates the issue — this makes debugging much easier.
-
-### Contributing code
-
-If you want to work on a feature or bug fix, fork the repository and create a new branch for your work. Then submit a pull request with a description of:
-
-- What you changed
-- Why the change was made
-- Relevant issue number (if any)
+This is an open and evolving project &mdash; contributions are welcome. Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
 
 ### Contributing coffee
 

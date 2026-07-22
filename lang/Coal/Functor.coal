@@ -1,9 +1,18 @@
+/**
+ * A functor abstracts the idea of mapping a function over a container-like structure.
+ */
 module Coal.Functor {
 
   import namespace List
   import Coal.Combinators(always)
   import IO(return, __eval_io)
 
+  /**
+   * Trait that supports mapping a function over a value in a structured 
+   * context via the `map` operation.
+   *
+   * - `map : (a -> b) -> f<a> -> f<b> with (Functor<f>)`
+   */
   trait Functor<f> {
     map : (a -> b) -> f<a> -> f<b>
   }
@@ -26,6 +35,12 @@ module Coal.Functor {
       }
   }
 
+  /**
+   * `void` discards the value inside a functor, replacing it with the 
+   * unit value.
+   *
+   * **Type**: `void : f<a> -> f<unit> with (Functor<f>)`
+   */
   let void = map(always(())) 
 
 }

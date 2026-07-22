@@ -1,3 +1,6 @@
+/**
+ * Common operations for working with lists.
+ */
 module List {
 
   import Coal.Combinators(always, identity)
@@ -14,6 +17,8 @@ module List {
   /**
    * Return the first element of the list wrapped in `Some`, or `None` if the
    * list is empty.
+   *
+   * **Type**: `head : List<a> -> Option<a>`
    */
   fun head : List<a> -> Option<a> 
     | []     => None
@@ -21,6 +26,8 @@ module List {
 
   /**
    * Return the list without its first element, or `None` if the list is empty.
+   *
+   * **Type**: `tail : List<a> -> Option<List<a>>`
    */
   fun tail : List<a> -> Option<List<a>>
     | []      => None
@@ -29,6 +36,8 @@ module List {
   /**
    * Return a pair (head, tail) wrapped in `Some`, or `None` if the list is 
    * empty.
+   *
+   * **Type**: `uncons : List<a> -> Option<(a, List<a>)>`
    */
   fun uncons(list : List<a>) : Option<(a, List<a>)> =
     match(list) {
@@ -38,6 +47,8 @@ module List {
 
   /**
    * Return the length of the list as a natural number.
+   *
+   * **Type**: `length : List<a> -> nat`
    */
   fun length(list : List<a>) : nat =
     fold(list) {
@@ -50,6 +61,8 @@ module List {
    * 
    * Apply the function to each element and an accumulator, starting from the
    * end of the list.
+   *
+   * **Type**: `reduce : (a -> b -> b) -> b -> List<a> -> b`
    */
   fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
@@ -59,6 +72,8 @@ module List {
 
   /**
    * Left-associative fold.
+   *
+   * **Type**: `reduce_left : (b -> a -> b) -> b -> List<a> -> b`
    */
   fun reduce_left(f : b -> a -> b, init : b, list : List<a>) : b =
     let
@@ -68,12 +83,16 @@ module List {
 
   /**
    * Return a list containing exactly one element.
+   *
+   * **Type**: `singleton : a -> List<a>`
    */
   fun singleton(elem : a) : List<a> = 
     [elem]
 
   /**
    * Return `true` if the list is empty, or `false` otherwise.
+   *
+   * **Type**: `is_empty : List<a> -> bool`
    */
   fun is_empty(list : List<a>) : bool =
     match(list) {
@@ -83,6 +102,8 @@ module List {
 
   /**
    * Return `true` if the list contains any elements, or `false` otherwise.
+   *
+   * **Type**: `is_nonempty : List<a> -> bool`
    */
   fun is_nonempty(list : List<a>) : bool =
     ! is_empty(list)
@@ -90,6 +111,8 @@ module List {
   /**
    * Return `true` if the list contains precisely one element, or `false` 
    * otherwise.
+   *
+   * **Type**: `is_singleton : List<a> -> bool`
    */
   fun is_singleton(list : List<a>) : bool =
     match(list) {
@@ -99,6 +122,8 @@ module List {
 
   /**
    * Flatten a list of lists into a single list.
+   *
+   * **Type**: `concat : List<List<a>> -> List<a>`
    */
   fun concat(list : List<List<a>>) : List<a> =
     fold(list) {
@@ -110,6 +135,8 @@ module List {
    * Return the first `n` elements of the list.
    * 
    * If the list is shorter than `n`, return the whole list.
+   *
+   * **Type**: `take : nat -> List<a> -> List<a>`
    */
   fun take(n : nat, list : List<a>) : List<a> =
     fold(n, list) {
@@ -127,6 +154,8 @@ module List {
    * Remove the first `n` elements from the list.
    *
    * If the list is shorter than `n`, return an empty list.
+   *
+   * **Type**: `drop : nat -> List<a> -> List<a>`
    */
   fun drop(n : nat, list : List<a>) : List<a> =
     fold(n, list) {
@@ -144,18 +173,24 @@ module List {
    * Extract a range of elements from the list.
    *
    * slice(m, n, xs) = xs |. drop(m) |. take(n - m)
+   *
+   * **Type**: `slice : nat -> nat -> List<a> -> List<a>`
    */
   fun slice(m : nat, n : nat, list : List<a>) : List<a> =
     list |. drop(m) |. take(n - m)
 
   /**
    * Return the element at index `n`, or `None` if out of bounds.
+   *
+   * **Type**: `element_at : nat -> List<a> -> Option<a>`
    */
   fun element_at(n : nat, list : List<a>) : Option<a> =
     head(drop(n, list)) 
 
   /**
    * Transform each element of a list using the given function.
+   *
+   * **Type**: `map : (a -> b) -> List<a> -> List<b>`
    */
   fun map(f : a -> b, list : List<a>) : List<b> =
     fold(list) {
@@ -167,12 +202,16 @@ module List {
    * Apply a function to every element of a list, where that function must 
    * return a list, and then concatenate the resulting lists into a single, 
    * flattened list. 
+   *
+   * **Type**: `concat_map : (a -> List<b>) -> List<a> -> List<b>`
    */
   fun concat_map(f : a -> List<b>) : List<a> -> List<b> =
     concat << map(f)
 
   /**
    * Keep only the elements for which the predicate returns `true`.
+   *
+   * **Type**: `filter : (a -> bool) -> List<a> -> List<a>`
    */
   fun filter(p : a -> bool, list : List<a>) : List<a> =
     fold(list) {
@@ -182,6 +221,8 @@ module List {
 
   /**
    * Return a new list with the elements in reverse order.
+   *
+   * **Type**: `reverse : List<a> -> List<a>`
    */
   fun reverse(list : List<a>) : List<a> =
     match(list) {
@@ -194,6 +235,8 @@ module List {
    *
    * E.g., unzip([(1, "one"), (2, "two")]) returns:
    * ([1, 2], ["one", "two"])
+   *
+   * **Type**: `unzip : List<(a, b)> -> (List<a>, List<b>)`
    */
   fun unzip(list : List<(a, b)>) : (List<a>, List<b>) =
     fold(list, ([], [])) {
@@ -209,6 +252,8 @@ module List {
    *
    * E.g., zip([1, 2], ["one", "two"]) returns:
    * [(1, "one"), (2, "two")]
+   *
+   * **Type**: `zip : List<a> -> List<b> -> List<(a, b)>`
    */
   fun zip(xs : List<a>, ys : List<b>) : List<(a, b)> =
     let step(f, x) =
@@ -222,6 +267,8 @@ module List {
   /**
    * Return `true` if and only if any element of the list satisfies the given 
    * predicate.
+   *
+   * **Type**: `any : (a -> bool) -> List<a> -> bool`
    */
   fun any(p : a -> bool, list : List<a>) : bool =
     fold(list) {
@@ -232,6 +279,8 @@ module List {
   /**
    * Return `true` if and only if all element of the list satisfy the given 
    * predicate.
+   *
+   * **Type**: `all : (a -> bool) -> List<a> -> bool`
    */
   fun all(p : a -> bool, list : List<a>) : bool =
     fold(list) {
@@ -240,7 +289,9 @@ module List {
     }
 
   /** 
-   * Return the conjunction of a list of bools.
+   * Return the conjunction of a list of booleans.
+   *
+   * **Type**: `all_true : List<bool> -> bool`
    */
   fun all_true(list : List<bool>) : bool =
     fold(list) {
@@ -249,7 +300,9 @@ module List {
     }
 
   /** 
-   * Return the disjunction of a list of bools.
+   * Return the disjunction of a list of booleans.
+   *
+   * **Type**: `any_true : List<bool> -> bool`
    */
   fun any_true(list : List<bool>) : bool =
     fold(list) {
@@ -260,6 +313,8 @@ module List {
   /**
    * Return the first element of the list that satisfies the given predicate, 
    * or `None`, if there is no such element.
+   *
+   * **Type**: `find : (a -> bool) -> List<a> -> Option<a>`
    */
   fun find(p : a -> bool, list : List<a>) : Option<a> =
     fold(list) {
@@ -270,6 +325,8 @@ module List {
   /**
    * Return a boolean indicating whether the first list is a prefix of the 
    * second.
+   *
+   * **Type**: `is_prefix_of : List<a> -> List<a> -> bool`
    */
   fun is_prefix_of(part : List<a>, whole : List<a>) : bool with (Comparable<a>) =
     if (length(part) > length(whole)) 
@@ -286,6 +343,8 @@ module List {
 
   /**
    * Return the list [start, start + 1, ..., start + count - 1].
+   *
+   * **Type**: `range : n -> nat -> List<n>`
    */
   fun range(start : n, count : nat) : List<n> with (Numeric<n>) =
     fold(count, start) {

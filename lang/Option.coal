@@ -1,3 +1,7 @@
+/**
+ * Utilities for working with the built-in `Option` type, which represents 
+ * optional values — values that may or may not be present.
+ */
 module Option {
 
   instance Comparable<Option<a>> {
@@ -12,6 +16,8 @@ module Option {
   /**
    * Extract a value of type `a` from an `Option<a>` by providing a default 
    * value for the case when the input is `None`.
+   *
+   * **Type**: `with_default : a -> Option<a> -> a`
    */ 
   fun with_default
     | _, Some(value) => value
@@ -20,6 +26,8 @@ module Option {
   /**
    * Return `true` if the given value is constructed with `Some`, and `false` 
    * otherwise.
+   *
+   * **Type**: `is_some : Option<a> -> bool`
    */
   fun is_some 
     | Some(_) => true
@@ -27,6 +35,8 @@ module Option {
 
   /**
    * Return `true` if the given value is `None`, and `false` otherwise.
+   *
+   * **Type**: `is_none : Option<a> -> bool`
    */
   fun is_none
     | None    => true
@@ -37,6 +47,8 @@ module Option {
    * `Option<a>` value, apply the function to the value inside the `Some` 
    * constructor and return the result, or if the value is `None`, return
    * the default value.
+   *
+   * **Type**: `option : b -> (a -> b) -> Option<a> -> b`
    */
   fun option(default : b, f : a -> b, value : Option<a>) : b =
     match(value) {
@@ -47,6 +59,8 @@ module Option {
   /**
    * Collect all values contained in `Some` constructors from a list of
    * `Option<a>` values, discarding occurrences of `None`.
+   *
+   * **Type**: `cat_options : List<Option<a>> -> List<a>`
    */
   fun cat_options(options : List<Option<a>>) : List<a> =
     fold(options) {
@@ -58,6 +72,8 @@ module Option {
   /**
    * Convert a list to an `Option<a>` by returning `Some` applied to the first
    * element of the list, or `None` if the list is empty.
+   *
+   * **Type**: `list_to_option : List<a> -> Option<a>`
    */
   fun list_to_option(list : List<a>) : Option<a> =
     match(list) {
@@ -68,6 +84,8 @@ module Option {
   /**
    * Convert an `Option<a>` value to a list by returning a singleton list
    * containing the value if it is `Some`, or the empty list if it is `None`.
+   *
+   * **Type**: `option_to_list : Option<a> -> List<a>`
    */
   fun option_to_list(option: Option<a>) : List<a> =
     match(option) {
