@@ -22,4 +22,8 @@ jobs:
         run: |
           git remote add github https://oauth2:${{ secrets.GH_TOKEN }}@github.com/laserpants/coal.git
           git push github --all
-          git push github --tags
+
+          # Only push tags when this workflow was triggered by a tag push
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            git push github --tags
+          fi
