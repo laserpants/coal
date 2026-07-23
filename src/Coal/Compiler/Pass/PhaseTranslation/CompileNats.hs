@@ -45,13 +45,12 @@ import qualified Coal.Compiler.Builtin.Traits as Trait
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Kernel.Builtin.Objects (builtinInstance)
 import Coal.Language
 import Control.Monad ((<=<))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Extras (Dictionary)
+import Extras (Dictionary, Name)
 
 {- | Natural number compilation pass.
 
@@ -65,6 +64,9 @@ passCompileNats = Pass{runPass = passImpl}
 
 passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT a m (Module Metadata Kind IndexedType)
 passImpl = compileNats
+
+builtinInstance :: (Serializable t) => Trait t -> Name -> Name
+builtinInstance trait name = instanceLabel trait ("Builtin$." <> name)
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a m e

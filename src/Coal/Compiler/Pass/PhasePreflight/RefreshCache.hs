@@ -71,7 +71,7 @@ refreshCache =
 compileFromSource :: (MonadIO m) => Name -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 compileFromSource name = do
   src <- getSourceC name
-  setTouched name
+  setTouchedC name
   case runParser parseSourceFile "" src of
     Left parserError -> do
       -- Parser failed on previously cached source - this indicates source corruption or parser bug

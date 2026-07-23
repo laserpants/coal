@@ -1,6 +1,7 @@
 module Codata.Stream {
 
-  import Codata.Machine(receive, observe, process)
+  import Codata.Machine(receive, compose, observe, process, machine, map_machine, map2_machine, map3_machine, map4_machine)
+  import Coal.Combinators(identity)
 
   type alias Stream<a> = Machine<unit, a>
 
@@ -14,5 +15,36 @@ module Codata.Stream {
 
   let tail = receive()
   let head = observe
+
+  fun map_stream(f : a -> b, stream : Stream<a>) : Stream<b> =
+    map_machine(f, stream)
+
+  fun map2_stream(f : a -> b -> c, s1 : Stream<a>, s2 : Stream<b>) : Stream<c> =
+    map2_machine(f, s1, s2)
+
+  fun map3_stream(f : a -> b -> c -> d, s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>) : Stream<d> =
+    map3_machine(f, s1, s2, s3)
+
+  fun map4_stream(f : a -> b -> c -> d -> e, s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>, s4 : Stream<d>) : Stream<e> =
+    map4_machine(f, s1, s2, s3, s4)
+
+  fun merge_with(fa : a -> c, fb : b -> c, s1 : Stream<a>, s2 : Stream<b>) : Stream<c> =
+    machine(
+      (s1, s2, false),
+      fn((), (sa, sb, last_stepped)) =>
+        if (last_stepped)
+          then (sa, receive((), sb), false)
+          else (receive((), sa), sb, true),
+      fn((sa, sb, last_stepped)) =>
+        if (last_stepped)
+          then fa(observe(sa))
+          else fb(observe(sb))
+    )
+
+  fun merge(s1 : Stream<a>, s2 : Stream<a>) : Stream<a> =
+    merge_with(identity, identity, s1, s2)
+
+  fun scan(transition : i -> o -> o, seed : o, stream : Stream<i>) : Stream<o> =
+    compose(stream, process(seed, transition))
 
 }

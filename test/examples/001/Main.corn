@@ -1,0 +1,44 @@
+module Main {
+
+import My.Utilities.find_min
+
+Main.sample_data =
+  @<list(int32)>
+    ( $Cons : int32/list(int32)/list(int32)
+    , 2
+    , @<list(int32)>
+      ( $Cons : int32/list(int32)/list(int32)
+      , 4
+      , @<list(int32)>
+        ( $Cons : int32/list(int32)/list(int32)
+        , 1
+        , @<list(int32)>
+          ( $Cons : int32/list(int32)/list(int32)
+          , 3
+          , $Nil : list(int32)
+          )
+        )
+      )
+    )
+
+Main.main(_ : *) =
+  let
+    r : int32 =
+      @<int32>
+        ( My.Utilities.find_min : list(int32)/int32
+        , Main.sample_data : list(int32)
+        )
+    in
+      let
+        __call_tmp : * =
+          @<*>
+            ( coal_print_int32 : int32/*
+            , r : int32
+            )
+        in
+          @<int32>
+            ( fn(a : *) => r : int32
+            , __call_tmp : *
+            )
+
+}

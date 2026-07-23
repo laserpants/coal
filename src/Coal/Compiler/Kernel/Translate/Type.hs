@@ -3,7 +3,8 @@
 
 module Coal.Compiler.Kernel.Translate.Type (translateType) where
 
-import qualified Coal.Kernel.Language as Kernel
+import qualified Coal.Kernel.Language.Type as NK
+import qualified Coal.Kernel.Language.Type.Constructors as NKT
 import Coal.Language.Type (Type (..))
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Operations (typeArgs)
@@ -11,83 +12,83 @@ import Coal.Language.Type.Row (Row (..))
 import qualified Data.Text as Text
 
 {-# INLINE tupleTCon #-}
-tupleTCon :: Kernel.Type
-tupleTCon = Kernel.TCon "tuple" []
+tupleTCon :: NK.Type
+tupleTCon = NK.TCon "tuple" []
 
 {-# INLINE listTCon #-}
-listTCon :: Kernel.Type
-listTCon = Kernel.TCon "list" []
+listTCon :: NK.Type
+listTCon = NK.TCon "list" []
 
 {-# INLINE natTCon #-}
-natTCon :: Kernel.Type
-natTCon = Kernel.TCon "nat" []
+natTCon :: NK.Type
+natTCon = NK.TCon "nat" []
 
 {-# INLINE voidTCon #-}
-voidTCon :: Kernel.Type
-voidTCon = Kernel.TCon "void" []
+voidTCon :: NK.Type
+voidTCon = NK.TCon "void" []
 
-translateIntrinsicType :: Intrinsic -> Kernel.Type
+translateIntrinsicType :: Intrinsic -> NK.Type
 translateIntrinsicType =
   \case
     IBool ->
-      Kernel.bool
+      NKT.bool
     IChar ->
-      Kernel.char
+      NKT.char
     IDouble ->
-      Kernel.double
+      NKT.double
     IFloat ->
-      Kernel.float
+      NKT.float
     IInt32 ->
-      Kernel.int32
+      NKT.int32
     IInt64 ->
-      Kernel.int64
+      NKT.int64
     IBignum ->
-      Kernel.bignum
+      NKT.bignum
     IString ->
-      Kernel.string
+      NKT.string
     IUnit ->
-      Kernel.unit
+      NKT.unit
     INat ->
       natTCon
     IVoid ->
       voidTCon
 
-translateRow :: Row o k (Type o k) -> Kernel.Type
+translateRow :: Row o k (Type o k) -> NK.Type
 translateRow =
   \case
     RExtend name t r ->
-      Kernel.RExt name (translateType t) (translateRow r)
+      NK.RExt name (translateType t) (translateRow r)
     RVariable{} ->
-      Kernel.TOpq
+      NK.TOpq
     RNil ->
-      Kernel.RNil
+      NK.RNil
 
-translateApplication :: Kernel.Type -> Kernel.Type -> Kernel.Type
-translateApplication t (Kernel.TCon name ts) = Kernel.TCon name (t : ts)
-translateApplication _ _ = Kernel.TOpq
+translateApplication :: NK.Type -> NK.Type -> NK.Type
+translateApplication t (NK.TCon name ts) = NK.TCon name (t : ts)
+translateApplication _ _ = NK.TOpq
 
-translateType :: Type o k -> Kernel.Type
+translateType :: Type o k -> NK.Type
 translateType =
   \case
     t@TApplication{} ->
       let (t1, ts) = typeArgs t
        in foldr (translateApplication . translateType) (translateType t1) ts
     TArrow t1 t2 ->
-      Kernel.arrow (translateType t1) (translateType t2)
+      NKT.arrow (translateType t1) (translateType t2)
     TConstructor _ con
       | "#Tuple" `Text.isPrefixOf` con ->
           tupleTCon
     TConstructor _ "List" ->
       listTCon
     TConstructor _ name ->
-      Kernel.TCon name []
+      NK.TCon name []
     TIntrinsic t ->
       translateIntrinsicType t
     TRecord t ->
-      Kernel.record (translateType t)
+      NK.TCon "record" [translateType t]
     TRow r ->
       translateRow r
     TVariable{} ->
-      Kernel.TOpq
+      NK.TOpq
     TAlias _ _ t ->
       translateType t

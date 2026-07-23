@@ -1,0 +1,133 @@
+module Main {
+
+  data List
+    = Main.Nil
+    | Main.Cons(*, List(*))
+
+  Main.fold_list
+    ( f : */*/*         // a/b/b
+    , acc : *           // b
+    , xs : List(*)      // [a]
+                        // b
+    ) =
+      case<*>(xs : List(*)) {
+        | ( Main.Cons : */List(*)/List(*)
+          , hd : *                 // a
+          , tl : List(*)           // [a]
+          ) => 
+          @<*>                     // b
+            ( Main.fold_list : (*/*/*)/*/List(*)/*
+            , f : */*/*
+            , @<*>                 // b
+                ( f : */*/*        // a/b/b
+                , hd : *           // a
+                , acc : *          // b
+                )
+            , tl : List(*)
+            )
+        | ( Main.Nil : List(*)
+          ) => 
+          acc : *
+      }
+
+  Main.product(nums : List(int64)) =
+    case<int64>(nums : List(int64)) {
+      | ( Main.Cons : int64/List(int64)/List(int64)
+        , hd : int64
+        , tl : List(int64)
+        ) => 
+        @<int64>
+          ( Main.fold_list : (int64/int64/int64)/int64/List(int64)/int64
+          , fn(a : int64, b : int64) => [* int64](a : int64, b : int64)
+          , hd : int64
+          , tl : List(int64)
+          )
+      | ( Main.Nil : List(int64)
+        ) => 
+        %1
+    }
+
+  Main.reverse(xs : List(*)) =
+    let 
+      aux : List(*)/List(*)/List(*) =
+        fn(acc : List(*), xs : List(*)) =>
+          case<List(*)>(xs : List(*)) {
+            | ( Main.Cons : */List(*)/List(*)
+              , hd : *
+              , tl : List(*)
+              ) => 
+              @<List(*)>
+                ( aux : List(*)/List(*)/List(*)
+                , @<List(*)>
+                    ( Main.Cons : */List(*)/List(*)
+                    , hd  : *
+                    , acc : List(*)
+                    )
+                , tl : List(*)
+                )
+            | ( Main.Nil : List(*)
+              ) => 
+              acc : List(*)
+          }
+    in
+    @<List(*)>
+      ( aux : List(*)/List(*)/List(*)
+      , Main.Nil : List(*)
+      , xs  : List(*)
+      )
+
+  Main.enum_to(n : int64) =
+    let
+      Main.build_list : int64/List(int64)/List(int64) =
+        fn
+          ( m : int64
+          , xs : List(int64)
+          ) =>
+            let
+              ys : List(int64) =
+                @<List(int64)>
+                  ( Main.Cons : int64/List(int64)/List(int64)
+                  , m  : int64
+                  , xs : List(int64)
+                  )
+            in
+            if ([== int64](n : int64, m : int64))
+              then 
+                ys : List(int64)
+              else
+                @<List(int64)>
+                  ( Main.build_list : int64/List(int64)/List(int64)
+                  , [+ int64](m : int64, %1) 
+                  , ys : List(int64)
+                  )
+    in
+    @<List(int64)>
+      ( Main.reverse : List(int64)/List(int64)
+      , @<List(int64)>
+          ( Main.build_list : int64/List(int64)/List(int64)
+          , %1
+          , Main.Nil : List(int64)
+          )
+      )
+
+  Main.main(_ : *) = 
+    let
+      r : * = 
+        let
+          n : int64 =
+            @<int64>
+              ( Main.product : List(int64)/int64
+              , @<List(int64)>
+                  ( Main.enum_to : int64/List(int64)
+                  , %5
+                  )
+              )
+        in
+        @<*>
+          ( coal_print_int64 : int64/*
+          , n : int64
+          )
+    in
+    0
+
+}

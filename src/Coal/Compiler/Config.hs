@@ -17,7 +17,11 @@ module Coal.Compiler.Config (
   setConfigExecutableName,
   setConfigGenerateDebugArtifacts,
   setConfigGenerateLLVMOutput,
+  setConfigSanitize,
 ) where
+
+import Data.Text (Text)
+import Extras (Name)
 
 data CompilerConfig = CompilerConfig
   { configExecutableName :: FilePath
@@ -27,6 +31,11 @@ data CompilerConfig = CompilerConfig
   , configCFiles :: [FilePath]
   , configSilent :: Bool
   , configNoCache :: Bool
+  , configEntryPoint :: Maybe (Name, Name)
+  , configPackageNamespaces :: [(FilePath, Text, [Name])]
+  -- ^ Each triple: (canonical source dir, namespace prefix, unqualified module names).
+  --   Package modules from a given source dir are renamed as @namespace.ModuleName@.
+  , configSanitize :: Bool
   }
   deriving (Show, Eq, Ord, Read)
 
@@ -41,11 +50,14 @@ defaultConfig =
     , configCFiles = []
     , configSilent = False
     , configNoCache = False
+    , configEntryPoint = Nothing
+    , configPackageNamespaces = []
+    , configSanitize = False
     }
 
 {-# INLINE silentConfig #-}
 silentConfig :: CompilerConfig
-silentConfig = defaultConfig{configSilent = True}
+silentConfig = defaultConfig{configSilent = True, configEntryPoint = Nothing}
 
 {-# INLINE debugConfig #-}
 debugConfig :: CompilerConfig
@@ -54,6 +66,7 @@ debugConfig =
     { configNoCache = True
     , configGenerateDebugArtifacts = True
     , configGenerateLLVMOutput = True
+    , configEntryPoint = Nothing
     }
 
 {-# INLINE setConfigExecutableName #-}
@@ -79,6 +92,15 @@ setConfigGenerateLLVMOutput :: Bool -> CompilerConfig -> CompilerConfig
 setConfigGenerateLLVMOutput flag CompilerConfig{..} =
   CompilerConfig
     { configGenerateLLVMOutput =
+        flag
+    , ..
+    }
+
+{-# INLINE setConfigSanitize #-}
+setConfigSanitize :: Bool -> CompilerConfig -> CompilerConfig
+setConfigSanitize flag CompilerConfig{..} =
+  CompilerConfig
+    { configSanitize =
         flag
     , ..
     }

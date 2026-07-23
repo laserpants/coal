@@ -141,4 +141,4 @@ parensIf False = id
 Used for generic type application in Coal's syntax
 -}
 typeBrackets :: [Doc ann] -> Doc ann
-typeBrackets = encloseSep (pretty '<') (pretty '>') (pretty ", ")
+typeBrackets = encloseSep (pretty '<') (pretty '>') (pretty (", " :: String))

@@ -1,0 +1,34 @@
+module Main {
+
+  // head_or_99: $Nil clause comes FIRST, returning a sentinel 99.
+  // Applied to an empty list, the $Nil branch must be taken.
+  Main.head_or_99(xs : list(int32)) =
+    case<int32>(xs : list(int32)) {
+      | ($Nil : list(int32)) =>
+          99
+      | ($Cons : int32/list(int32)/list(int32), x : int32, _ : list(int32)) =>
+          x : int32
+    }
+
+  Main.cont(a : *) =
+    0
+
+  Main.main(_ : *) =
+    let
+      r : int32 =
+        @<int32>
+          ( Main.head_or_99 : list(int32)/int32
+          , $Nil : list(int32)
+          )
+    ; __call : * =
+        @<*>
+          ( coal_print_int32 : int32/*
+          , r : int32
+          )
+    in
+      @<int32>
+        ( Main.cont : */int32
+        , __call : *
+        )
+
+}

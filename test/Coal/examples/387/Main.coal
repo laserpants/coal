@@ -1,0 +1,173 @@
+module Main {
+
+  import Containers.Set(Set)
+  import List(length)
+  import Nat(unpack)
+
+  import namespace Containers.Set
+  import namespace List
+  import namespace IO
+
+  type alias Board = Set<(int32, int32)>
+
+  fun is_board_member(cell : (int32, int32), board : Board) : bool =
+    Containers.Set.is_member(cell, board)
+
+  fun board_insert(cell : (int32, int32), board : Board) : Board =
+    Containers.Set.insert(cell, board)
+
+  fun board_insert_cells(cells : List<(int32, int32)>, board : Board) : Board =
+    List.reduce(board_insert, board, cells)
+
+  fun board_count_x(y : int32, x : int32, board : Board) =
+    if (x >= 10)
+      then 0
+      else
+        let rest = board_count_x(y, x + 1, board) in
+        if (is_board_member((x, y), board))
+          then 1 + rest
+          else rest
+
+  fun board_count_in_row(y : int32, board : Board) =
+    board_count_x(y, 0, board)
+  
+  fun board_remove_row_x(y : int32, x : int32, board : Board) =
+    if (x >= 10)
+      then board
+      else
+        board_remove_row_x(y, x + 1, Containers.Set.delete((x, y), board))
+
+  fun board_remove_row(y : int32, board : Board) =
+    board_remove_row_x(y, 0, board)
+  
+  fun board_shift_row_x(y : int32, x : int32, board : Board) =
+    if (x >= 10)
+      then board
+      else
+        if (is_board_member((x, y), board))
+          then
+            let
+              board_del = Containers.Set.delete((x, y), board)
+            in
+            board_shift_row_x(y, x + 1, Containers.Set.insert((x, y + 1), board_del))
+          else
+            board_shift_row_x(y, x + 1, board)
+  
+  fun board_shift_rows_above_from(start_y : int32, board : Board) =
+    if (start_y < 0)
+      then board
+      else
+        board_shift_rows_above_from(start_y - 1, board_shift_row_x(start_y, 0, board))
+
+  fun board_shift_rows_above(cleared_y : int32, board : Board) =
+    board_shift_rows_above_from(cleared_y - 1, board)
+  
+  fun board_clear_full_rows_from(y : int32, board : Board) =
+    if (y < 0)
+      then board
+      else
+        if (board_count_in_row(y, board) == 10)
+          then
+            let
+              removed = board_remove_row(y, board)
+            in
+            let
+              shifted = board_shift_rows_above(y, removed)
+            in
+            board_clear_full_rows_from(y, shifted)
+          else
+            board_clear_full_rows_from(y - 1, board)
+  
+  fun board_clear_full_rows(board : Board) =
+    board_clear_full_rows_from(19, board)
+
+  fun board_to_list(board : Board) : List<(int32, int32)> =
+    Containers.Set.to_list(board)
+
+  fun make_row(y : int32) : List<(int32, int32)> =
+    [ (0, y), (1, y), (2, y), (3, y), (4, y), (5, y), (6, y), (7, y), (8, y), (9, y) ]
+
+  fun board_size(board : Board) =
+    Containers.Set.size(board)
+
+  fun foo() = 
+    let
+      row16 = make_row(16)
+    in
+    let
+      row17 = make_row(17)
+    in
+    let
+      row18 = make_row(18)
+    in
+    let
+      row19 = make_row(19)
+    in
+    let
+      all_cells = row16 <> row17 <> row18 <> row19
+    in
+    let
+      board = board_insert_cells(all_cells, Containers.Set.empty)
+    in
+    let
+      cleared = board_clear_full_rows(board)
+    in
+    let
+      a = IO.println_int32(board_size(board))
+    in
+    let
+      b = IO.println_string(" cells before clear\n")
+    in
+    let 
+      c = IO.println_int32(board_size(cleared))
+    in
+    let
+      _ = IO.print_string(" cells after clear\n")
+    in
+    IO.__return_io(())
+
+  fun main() =
+    foo()
+
+//    let
+//    in
+//    let
+//      cells = board_to_list(cleared)
+//    in
+//    match(cells) {
+//      | [] => IO.print_string("PASS: Board is empty after clearing 4 full rows\n")
+//      | _  =>
+//          let
+//            _ = IO.print_string("FAIL: Board has remaining cells:\n")
+//          in
+//          let
+//            _ = IO.println_int32(unpack(length(cells) + 1))
+////            _ = IO.print_int32(8899)
+//          in
+//          let
+//            _ = IO.println_string("wat")
+//          in
+//          let
+//            _ = List.map(fn((x, y)) => 
+//              let
+//                _ = IO.print_string("  (")
+//              in
+//              let
+//                _ = IO.print_int32(x)
+//              in
+//              let
+//                _ = IO.print_string(", ")
+//              in
+//              let
+//                _ = IO.print_int32(y)
+//              in
+//              let
+//                _ = IO.print_string(")\n")
+//              in
+//                ()
+//            , cells)
+//          in
+//            IO.__return_io(())
+//    }
+
+}

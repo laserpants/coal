@@ -7,18 +7,15 @@ Build artifact caching for incremental compilation.
 
 Manages reading and writing serialized build data to the `.build/` directory.
 -}
-module Coal.Compiler.Build.Cache (cachedData, cachedBuild, writeBuildFile) where
+module Coal.Compiler.Build.Cache (buildCacheDir, cachedData, cachedBuild, writeBuildFile) where
 
 import Coal.Compiler.Build (Build (buildHash))
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
-import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Compiler.State (CompilerState (compilerConfig))
 import Control.Exception (SomeException (..), try)
-import Control.Monad (guard, unless)
+import Control.Monad (guard)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.State (gets)
 import Crypto.Hash (hash)
 import Data.Binary (Binary (..), decodeOrFail, encode)
 import Data.ByteString (ByteString, fromStrict, toStrict)
@@ -27,6 +24,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
 import Extras (Name)
+import System.Directory (createDirectoryIfMissing)
 import System.FilePath ((<.>), (</>))
 
 -- Build cache constants
@@ -37,7 +35,11 @@ buildFileExt :: String
 buildFileExt = "coal.b"
 
 cachedData :: (MonadIO m) => Name -> CompilerT Metadata m (Either SomeException ByteString)
-cachedData name = liftIO $ try $ ByteString.readFile (buildCacheDir </> Text.unpack name <.> buildFileExt)
+cachedData name =
+  liftIO $ try (ByteString.readFile (buildCacheDir </> file))
+ where
+  file :: FilePath
+  file = Text.unpack name <.> buildFileExt
 
 cachedBuild :: (MonadIO m, Binary a) => Name -> Text -> CompilerT Metadata m (Maybe (Build a))
 cachedBuild name src = do
@@ -57,11 +59,9 @@ cachedBuild name src = do
         Just build
 
 writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> Build a -> CompilerT Metadata m ()
-writeBuildFile buildDir name build = do
-  CompilerConfig{..} <- gets compilerConfig
+writeBuildFile buildDir name build =
   liftIO $ do
-    unless configSilent $
-      putStrLn file
+    createDirectoryIfMissing True buildDir
     ByteString.writeFile (buildDir </> file) (toStrict (encode build))
  where
   file :: FilePath

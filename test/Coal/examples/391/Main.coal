@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+  import Option(with_default)
+
+  fun baz(a, b) =
+    Some(a) == Some(b)
+
+  fun main() =
+    IO.println_string("...")
+
+}

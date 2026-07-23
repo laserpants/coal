@@ -1,0 +1,30 @@
+module Data.Json.ToJson {
+
+  import Data.Json.Value(JsonValue)
+  import namespace List
+
+  trait ToJson<j> {
+    to_json : j -> JsonValue
+  }
+
+  instance ToJson<bool> {
+    let to_json = JsonBool
+  }
+
+  instance ToJson<double> {
+    let to_json = JsonNumber
+  }
+
+  instance ToJson<string> {
+    let to_json = JsonString
+  }
+
+  instance ToJson<List<j>> with (ToJson<j>) {
+    fun to_json(values) = JsonArray(List.map(to_json, values))
+  }
+
+  instance ToJson<List<(string, j)>> with (ToJson<j>) {
+    fun to_json(values) = JsonObject(List.map(fn((k, v)) => (k, to_json(v)), values))
+  }
+
+}

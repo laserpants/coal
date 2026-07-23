@@ -1,0 +1,167 @@
+module Main {
+
+  import Data.Option.Some
+  import Data.Option.None
+
+  import Data.Ord.Eq
+  import Data.Ord.Gt
+  import Data.Ord.Lt
+
+  import Data.Map.Empty
+  import Data.Map.Map
+  import Data.Map.size
+  import Data.Map.lookup
+  import Data.Map.insert
+  import Data.Map.delete
+
+  Main.main(_ : *) =
+    let
+      compare : int32/int32/Ord =
+        fn(a : int32, b : int32) =>
+          if ([== int32](a : int32, b : int32)) then Data.Ord.Eq : Ord
+          else if ([< int32](a : int32, b : int32)) then Data.Ord.Lt : Ord
+          else Data.Ord.Gt : Ord
+    in
+    // Build map {1->10, 2->20, 3->30, 4->40, 5->50} by inserting in
+    // non-sorted order so the AVL rotations are exercised.
+    let
+      m0 : Map(int32, int32) = Data.Map.Empty : Map(int32, int32)
+    in
+    let
+      m1 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Data.Map.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 3
+          , 30
+          , m0 : Map(int32, int32)
+          )
+      ;
+      m2 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Data.Map.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 1
+          , 10
+          , m1 : Map(int32, int32)
+          )
+      ;
+      m3 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Data.Map.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 5
+          , 50
+          , m2 : Map(int32, int32)
+          )
+      ;
+      m4 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Data.Map.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 2
+          , 20
+          , m3 : Map(int32, int32)
+          )
+      ;
+      m5 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Data.Map.insert : (int32/int32/Ord)/int32/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 4
+          , 40
+          , m4 : Map(int32, int32)
+          )
+    in
+    let
+      // Expected: 5
+      size_before : int32 =
+        @<int32>
+          ( Data.Map.size : Map(int32, int32)/int32
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Expected: Some(30) -> print 30
+      r3 : Option(int32) =
+        @<Option(int32)>
+          ( Data.Map.lookup : (int32/int32/Ord)/int32/Map(int32, int32)/Option(int32)
+          , compare : int32/int32/Ord
+          , 3
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Expected: Some(10) -> print 10
+      r1 : Option(int32) =
+        @<Option(int32)>
+          ( Data.Map.lookup : (int32/int32/Ord)/int32/Map(int32, int32)/Option(int32)
+          , compare : int32/int32/Ord
+          , 1
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Delete key 3
+      m6 : Map(int32, int32) =
+        @<Map(int32, int32)>
+          ( Data.Map.delete : (int32/int32/Ord)/int32/Map(int32, int32)/Map(int32, int32)
+          , compare : int32/int32/Ord
+          , 3
+          , m5 : Map(int32, int32)
+          )
+      ;
+      // Expected: 4
+      size_after : int32 =
+        @<int32>
+          ( Data.Map.size : Map(int32, int32)/int32
+          , m6 : Map(int32, int32)
+          )
+      ;
+      // Expected: None -> print -1
+      r3_del : Option(int32) =
+        @<Option(int32)>
+          ( Data.Map.lookup : (int32/int32/Ord)/int32/Map(int32, int32)/Option(int32)
+          , compare : int32/int32/Ord
+          , 3
+          , m6 : Map(int32, int32)
+          )
+    in
+    let
+      _ : * = @<*>(coal_println_int32 : int32/*, size_before : int32)      // 5
+      ;
+      _ : * =
+        case<*>(r3 : Option(int32)) {
+          | ( Data.Option.None : Option(int32)
+            ) =>
+              @<*>(coal_println_int32 : int32/*, -1)
+          | ( Data.Option.Some : int32/Option(int32)
+            , v : int32
+            ) =>
+              @<*>(coal_println_int32 : int32/*, v : int32)
+        }                                                                   // 30
+      ;
+      _ : * =
+        case<*>(r1 : Option(int32)) {
+          | ( Data.Option.None : Option(int32)
+            ) =>
+              @<*>(coal_println_int32 : int32/*, -1)
+          | ( Data.Option.Some : int32/Option(int32)
+            , v : int32
+            ) =>
+              @<*>(coal_println_int32 : int32/*, v : int32)
+        }                                                                   // 10
+      ;
+      _ : * = @<*>(coal_println_int32 : int32/*, size_after : int32)       // 4
+      ;
+      _ : * =
+        case<*>(r3_del : Option(int32)) {
+          | ( Data.Option.None : Option(int32)
+            ) =>
+              @<*>(coal_println_int32 : int32/*, -1)
+          | ( Data.Option.Some : int32/Option(int32)
+            , v : int32
+            ) =>
+              @<*>(coal_println_int32 : int32/*, v : int32)
+        }                                                                   // -1
+    in
+      0
+
+}

@@ -1,0 +1,7 @@
+module Data.Tree {
+
+  data Data.Tree(*)
+    = Data.Tree.Node(*, Data.Tree(*), Data.Tree(*))
+    | Data.Tree.Leaf
+
+}

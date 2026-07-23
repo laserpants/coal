@@ -1,0 +1,26 @@
+module Main {
+
+  import IO(return, println_string, println_int32)
+  import Containers.Map(Map)
+  import MicroTest(Test, suite, run, check, assert)
+  import namespace List
+
+  import Containers.Tree(Tree, height, size)
+  import Containers.MapSpec(mapSpec)
+  import Containers.SetSpec(setSpec)
+  import Containers.TreeSpec(treeSpec)
+  import Containers.NonEmpty.ListSpec(nonEmptyListSpec)
+
+  let 
+    spec : Test =
+      suite([
+        mapSpec(),
+        setSpec(),
+        treeSpec(),
+        nonEmptyListSpec()
+      ])
+
+  fun main() = 
+    run(spec)
+
+}

@@ -1,0 +1,87 @@
+module Main {
+
+  data List
+    = Main.Nil
+    | Main.Cons(*, List(*))
+
+  Main.fold_list
+    ( f : */*/*         // a/b/b
+    , acc : *           // b
+    , xs : List(*)      // [a]
+                        // b
+    ) =
+      case<*>(xs : List(*)) {
+        | ( Main.Cons : */List(*)/List(*)
+          , hd : *                 // a
+          , tl : List(*)           // [a]
+          ) => 
+          @<*>                     // b
+            ( Main.fold_list : (*/*/*)/*/List(*)/*
+            , f : */*/*
+            , @<*>                 // b
+                ( f : */*/*        // a/b/b
+                , hd : *           // a
+                , acc : *          // b
+                )
+            , tl : List(*)
+            )
+        | ( Main.Nil : List(*)
+          ) => 
+          acc : *
+      }
+
+  Main.product(nums : List(int64)) =
+    case<int64>(nums : List(int64)) {
+      | ( Main.Cons : int64/List(int64)/List(int64)
+        , hd : int64
+        , tl : List(int64)
+        ) => 
+        @<int64>
+          ( Main.fold_list : (int64/int64/int64)/int64/List(int64)/int64
+          , fn(a : int64, b : int64) => [* int64](a : int64, b : int64)
+          , hd : int64
+          , tl : List(int64)
+          )
+      | ( Main.Nil : List(int64)
+        ) => 
+        %1
+    }
+
+  Main.main(_ : *) = 
+    let
+      r : * = 
+        let
+          n : int64 =
+            @<int64>
+              ( Main.product : List(int64)/int64
+              , @<List(int64)>
+                  ( Main.Cons : int64/List(int64)/List(int64)
+                  , %1
+                  , @<List(int64)>
+                      ( Main.Cons : int64/List(int64)/List(int64)
+                      , %2
+                      , @<List(int64)>
+                          ( Main.Cons : int64/List(int64)/List(int64)
+                          , %3
+                          , @<List(int64)>
+                              ( Main.Cons : int64/List(int64)/List(int64)
+                              , %4
+                              , @<List(int64)>
+                                  ( Main.Cons : int64/List(int64)/List(int64)
+                                  , %5
+                                  , Main.Nil : List(int64)
+                                  )
+                              )
+                          )
+                      )
+                  )
+              )
+        in
+        @<*>
+          ( coal_print_int64 : int64/*
+          , n : int64
+          )
+    in
+    0
+
+}

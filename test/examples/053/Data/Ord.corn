@@ -1,0 +1,8 @@
+module Data.Ord {
+
+  data Ord
+    = Data.Ord.Eq
+    | Data.Ord.Gt
+    | Data.Ord.Lt
+
+}

@@ -1,0 +1,46 @@
+module Data.Json.Pretty(pretty_print) {
+
+  import Data.Json.Value(JsonValue)
+  import String(double_to_string, bool_to_string, intercalate)
+  import List(map)
+  import namespace Nat
+
+  fun in_quotes(input : string) : string = 
+    "\"" <> input <> "\""
+
+  fun indent(n : nat) : string =
+    fold(n) {
+      | Zero => ""
+      | Succ(@m) => "  " <> m
+    }
+
+  fold pretty_json_value : JsonValue -> (nat -> string) 
+    | JsonNull => fn(level) => "null"
+    | JsonBool(false) => fn(level) => "false"
+    | JsonBool(true) => fn(level) => "true"
+    | JsonNumber(d) => fn(level) => double_to_string(d)
+    | JsonString(str) => fn(level) => in_quotes(str)
+    | JsonArray(pretty_json_array(@values)) => 
+        fn(level) =>
+          let inner_level = Succ(level) in
+          let formatted = map(fn(s) => indent(inner_level) <> s, values(inner_level)) in
+          "[\n" <> intercalate(",\n", formatted) <> "\n" <> indent(level) <> "]"
+    | JsonObject(pretty_json_object(@pairs)) => 
+        fn(level) =>
+          let inner_level = Succ(level) in
+          let formatted = map(fn(s) => indent(inner_level) <> s, pairs(inner_level)) in
+          "{\n" <> intercalate(",\n", formatted) <> "\n" <> indent(level) <> "}"
+
+  fold pretty_json_array : List<JsonValue> -> (nat -> List<string>) 
+    | [] => fn(level) => []
+    | pretty_json_value(@value) :: pretty_json_array(@values) => 
+        fn(level) => value(level) :: values(level)
+
+  fold pretty_json_object : List<(string, JsonValue)> -> (nat -> List<string>) 
+    | [] => fn(level) => []
+    | ((key, pretty_json_value(@value)) :: pretty_json_object(@pairs)) => 
+        fn(level) => (in_quotes(key) <> ": " <> value(level)) :: pairs(level)
+
+  fun pretty_print(value : JsonValue) : string =
+    pretty_json_value(value, Zero)
+}

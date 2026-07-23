@@ -1,5 +1,16 @@
+/**
+ * A monoid is a semigroup with an identity element (`id`), providing a
+ * neutral value for the associative binary operation.
+ */
 module Coal.Monoid {
   
+  /**
+   * Trait for types that have an associative binary operation (inherited 
+   * from `Semigroup`) and an identity element `id` that is neutral with 
+   * respect to that operation.
+   *
+   * - `id : m`
+   */
   trait Monoid<m> with (Semigroup<m>) {
     id : m
   }

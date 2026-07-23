@@ -168,7 +168,7 @@ module Containers.Map {
     | Map({ left = delete_min_node(@left) | _ } as m) =>
         let (k, v, new_left) = left 
         in
-        (Some(k), Some(v), rebalance(make_node(m.key, m.value, new_left, m.right)))
+        (k, v, rebalance(make_node(m.key, m.value, new_left, m.right)))
 
   fun delete(key, map) =
     fold(map) {

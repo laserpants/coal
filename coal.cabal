@@ -21,6 +21,23 @@ extra-source-files:
 
 library
   exposed-modules:
+      CLI.Command
+      CLI.Command.Build
+      CLI.Command.Clean
+      CLI.Command.Compile
+      CLI.Command.Init
+      CLI.Command.Install
+      CLI.Command.Version
+      CLI.Error
+      CLI.Git
+      CLI.Git.Commit
+      CLI.Git.Repo
+      CLI.Options.CompileCmd
+      CLI.Options.InitCmd
+      CLI.Options.InstallCmd
+      CLI.Parser.Command
+      CLI.Parser.CompileCmd
+      CLI.Parser.InitCmd
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
@@ -57,10 +74,9 @@ library
       Coal.Compiler.Pass.Counts
       Coal.Compiler.Pass.DebugOutput
       Coal.Compiler.Pass.PhaseLowering
-      Coal.Compiler.Pass.PhaseLowering.KernelCode
+      Coal.Compiler.Pass.PhaseLowering.KernelCodegen
       Coal.Compiler.Pass.PhaseLowering.KernelTranslate
       Coal.Compiler.Pass.PhaseLowering.Linking
-      Coal.Compiler.Pass.PhaseLowering.LLVMOutput
       Coal.Compiler.Pass.PhaseParsing
       Coal.Compiler.Pass.PhaseParsing.Parsing
       Coal.Compiler.Pass.PhasePreflight
@@ -68,6 +84,7 @@ library
       Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses
       Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles
       Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams
+      Coal.Compiler.Pass.PhasePreflight.DetectInvalidExports
       Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing
       Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements
       Coal.Compiler.Pass.PhasePreflight.DetectShadowing
@@ -107,78 +124,93 @@ library
       Coal.Compiler.PatternMatching.Equation
       Coal.Compiler.PatternMatching.Rule
       Coal.Compiler.Pipeline
+      Coal.Compiler.Progress
       Coal.Compiler.Stack
       Coal.Compiler.State
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
       Coal.Debug
       Coal.Graphviz.Dot
-      Coal.Kernel.Builtin.Constructors
       Coal.Kernel.Builtin.Objects
       Coal.Kernel.Compiler
-      Coal.Kernel.Compiler.AST
-      Coal.Kernel.Compiler.EntryPoint
-      Coal.Kernel.Compiler.Pass
-      Coal.Kernel.Compiler.Pass.ClosureConversion
-      Coal.Kernel.Compiler.Pass.ExtraArgs
-      Coal.Kernel.Compiler.Pass.LambdaLifting
-      Coal.Kernel.Compiler.Pass.LetLifting
-      Coal.Kernel.Compiler.Pass.Memoize
-      Coal.Kernel.Compiler.Pass.PartialConstructors
-      Coal.Kernel.Compiler.Pass.Suffix
-      Coal.Kernel.Compiler.Pipeline
-      Coal.Kernel.Compiler.Pipeline.State
-      Coal.Kernel.Language
+      Coal.Kernel.Eval
+      Coal.Kernel.Eval.Expr
+      Coal.Kernel.Eval.External
+      Coal.Kernel.Eval.Link
+      Coal.Kernel.Eval.Load
+      Coal.Kernel.Eval.Pattern
+      Coal.Kernel.Eval.Prim
+      Coal.Kernel.Eval.State
+      Coal.Kernel.Eval.Value
+      Coal.Kernel.FreeVars
+      Coal.Kernel.Graphviz.Dot
       Coal.Kernel.Language.Expr
-      Coal.Kernel.Language.Expr.Composite
-      Coal.Kernel.Language.Expr.Replace
-      Coal.Kernel.Language.Expr.Syntax
       Coal.Kernel.Language.Module
       Coal.Kernel.Language.Object
       Coal.Kernel.Language.Op
       Coal.Kernel.Language.Prim
       Coal.Kernel.Language.Type
-      Coal.Kernel.Language.Type.Arrow
+      Coal.Kernel.Language.Type.Constructors
+      Coal.Kernel.Language.Type.Function
+      Coal.Kernel.Language.Type.HasType
       Coal.Kernel.Language.Type.Row
-      Coal.Kernel.Language.Type.Syntax
-      Coal.Kernel.Language.Typed
-      Coal.Kernel.LLVM
-      Coal.Kernel.LLVM.IR
-      Coal.Kernel.LLVM.IRConstruct
-      Coal.Kernel.LLVM.IREncodable
-      Coal.Kernel.LLVM.IRError
-      Coal.Kernel.LLVM.IREval
-      Coal.Kernel.LLVM.IREval.Closure
-      Coal.Kernel.LLVM.IREval.Closure.Apply
-      Coal.Kernel.LLVM.IREval.Closure.Call
-      Coal.Kernel.LLVM.IREval.Closure.Extend
-      Coal.Kernel.LLVM.IREval.Closure.Finalize
-      Coal.Kernel.LLVM.IREval.Comment
-      Coal.Kernel.LLVM.IREval.Conceal
-      Coal.Kernel.LLVM.IREval.Expr
-      Coal.Kernel.LLVM.IREval.Expr.Match
-      Coal.Kernel.LLVM.IREval.Expr.Op
-      Coal.Kernel.LLVM.IREval.Expr.Var
-      Coal.Kernel.LLVM.IREval.Malloc
-      Coal.Kernel.LLVM.IRInstruction
-      Coal.Kernel.LLVM.IRInstruction.Builders
-      Coal.Kernel.LLVM.IRInterpreter
-      Coal.Kernel.LLVM.IRInterpreter.Artifact
-      Coal.Kernel.LLVM.IRInterpreter.Environment
-      Coal.Kernel.LLVM.IRInterpreter.Instruction
-      Coal.Kernel.LLVM.IRInterpreter.Monad
-      Coal.Kernel.LLVM.IRInterpreter.State
-      Coal.Kernel.LLVM.IRType
-      Coal.Kernel.LLVM.IRType.Syntax
-      Coal.Kernel.LLVM.IRValue
+      Coal.Kernel.LLVM.Boxing
+      Coal.Kernel.LLVM.Codegen
+      Coal.Kernel.LLVM.Constructor
+      Coal.Kernel.LLVM.Function
+      Coal.Kernel.LLVM.Module
+      Coal.Kernel.LLVM.Monad
+      Coal.Kernel.LLVM.Prim
+      Coal.Kernel.LLVM.Runtime
+      Coal.Kernel.LLVM.RuntimeDefs
+      Coal.Kernel.Module.DependencyGraph
       Coal.Kernel.Parser
       Coal.Kernel.Parser.Expr
-      Coal.Kernel.Parser.Identifier
       Coal.Kernel.Parser.Module
       Coal.Kernel.Parser.Op
       Coal.Kernel.Parser.Prim
       Coal.Kernel.Parser.Symbol
       Coal.Kernel.Parser.Type
+      Coal.Kernel.Parser.Unsafe
+      Coal.Kernel.Pipeline
+      Coal.Kernel.Pipeline.Invariant
+      Coal.Kernel.Pipeline.Invariant.AdministrativeNormalForm
+      Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonical
+      Coal.Kernel.Pipeline.Invariant.ConstructorsSaturated
+      Coal.Kernel.Pipeline.Invariant.Error
+      Coal.Kernel.Pipeline.Invariant.FunctionResultsSaturated
+      Coal.Kernel.Pipeline.Invariant.LambdasFlattened
+      Coal.Kernel.Pipeline.Invariant.LambdasLifted
+      Coal.Kernel.Pipeline.Invariant.LetBindingsSimplified
+      Coal.Kernel.Pipeline.Invariant.LocalNamesUnique
+      Coal.Kernel.Pipeline.Invariant.LogicalOperatorsTranslated
+      Coal.Kernel.Pipeline.Invariant.TopLevelFunctionsNormalized
+      Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm
+      Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalization
+      Coal.Kernel.Pipeline.Pass.ConstructorSaturation
+      Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation
+      Coal.Kernel.Pipeline.Pass.LambdaFlattening
+      Coal.Kernel.Pipeline.Pass.LambdaLifting
+      Coal.Kernel.Pipeline.Pass.LetBindingSimplification
+      Coal.Kernel.Pipeline.Pass.LocalNameCanonicalization
+      Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation
+      Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization
+      Coal.Kernel.Pipeline.Pass.Utils
+      Coal.Kernel.Pipeline.Passes
+      Coal.Kernel.Prettyprinter
+      Coal.Kernel.Prettyprinter.Expr
+      Coal.Kernel.Prettyprinter.Module
+      Coal.Kernel.Prettyprinter.Object
+      Coal.Kernel.Prettyprinter.Op
+      Coal.Kernel.Prettyprinter.Prim
+      Coal.Kernel.Prettyprinter.Type
+      Coal.Kernel.TypeCheck
+      Coal.Kernel.TypeCheck.Compat
+      Coal.Kernel.TypeCheck.Env
+      Coal.Kernel.TypeCheck.Error
+      Coal.Kernel.TypeCheck.Expr
+      Coal.Kernel.TypeCheck.Module
+      Coal.Kernel.TypeCheck.Object
       Coal.Language
       Coal.Language.AST.Builders
       Coal.Language.AST.Flattening
@@ -256,75 +288,69 @@ library
       Extras.Data.Functor
       Extras.Data.Functor.Foldable
       Extras.Data.List
+      Extras.Data.List.NonEmpty
       Extras.Data.Set
       Extras.Data.Text
       Extras.Data.Traversable
       Extras.Operators
       Extras.Prettyprinter
       Extras.Text.Megaparsec.Char
+      Package
+      Package.Dependency
+      Package.Entry
+      Package.Error
+      Package.Lock
+      Package.Lock.Spec
+      Package.Manifest
+      Package.Version
   other-modules:
       Paths_coal
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path
   build-depends:
-      ascii-progress
-    , base >=4.7 && <5
-    , binary
-    , bytestring
-    , containers
-    , cryptonite
-    , data-default
-    , data-fix
-    , deriving-compat
-    , directory
-    , exceptions >=0.10.5
-    , extra
-    , file-embed
-    , filepath
-    , free
-    , megaparsec
-    , memory
-    , mtl
-    , parser-combinators
-    , pretty-simple
-    , prettyprinter
-    , process
-    , process-extras
-    , raw-strings-qq
-    , recursion-schemes
-    , temporary
-    , text
-    , text-show
-    , transformers
-    , uniplate
+      aeson
+    , aeson-pretty
+    , ansi-terminal >=0.11 && <2
+    , base >=4.17 && <5
+    , binary >=0.8.9.1 && <0.9
+    , bytestring >=0.11.5.3 && <0.13
+    , containers >=0.6.7 && <0.8
+    , cryptonite ==0.30.*
+    , data-default >=0.7.1.1 && <0.9
+    , data-fix >=0.3.2 && <0.4
+    , deriving-compat >=0.6.5 && <0.7
+    , directory >=1.3.7.1 && <1.4
+    , exceptions >=0.10.5 && <0.11
+    , extra >=1.7.14 && <1.9
+    , file-embed >=0.0.15.0 && <0.1
+    , filepath >=1.4.2.2 && <1.6
+    , free >=5.1 && <6
+    , ir-builder >=0.1.0.0 && <0.2
+    , megaparsec >=9.3.1 && <10
+    , memory >=0.18.0 && <0.19
+    , mtl >=2.2 && <3
+    , optparse-applicative
+    , parser-combinators >=1.3.0 && <1.4
+    , pretty-simple >=4.1.2.0 && <4.2
+    , prettyprinter >=1.7.1 && <1.8
+    , process >=1.6.18.0 && <1.7
+    , process-extras >=0.7.4 && <0.8
+    , raw-strings-qq ==1.1.*
+    , recursion-schemes >=5.2.2.5 && <5.3
+    , semver
+    , template-haskell
+    , temporary ==1.3.*
+    , text >=2.0.2 && <2.2
+    , text-show >=3.10.4 && <3.12
+    , time >=1.12.2 && <1.13
+    , transformers >=0.5 && <0.7
+    , uniplate >=1.6.13 && <1.7
   default-language: Haskell2010
 
 executable coal
   main-is: Main.hs
   other-modules:
-      Coal.CLI.Command
-      Coal.CLI.Command.Build
-      Coal.CLI.Command.Clean
-      Coal.CLI.Command.Compile
-      Coal.CLI.Command.Install
-      Coal.CLI.Command.Version
-      Coal.CLI.Error
-      Coal.CLI.Git
-      Coal.CLI.Git.Commit
-      Coal.CLI.Git.Repo
-      Coal.CLI.Options.CompileCmd
-      Coal.CLI.Options.InstallCmd
-      Coal.CLI.Parser.Command
-      Coal.CLI.Parser.CompileCmd
-      Coal.Package
-      Coal.Package.Dependency
-      Coal.Package.Entry
-      Coal.Package.Error
-      Coal.Package.Lock
-      Coal.Package.Lock.Spec
-      Coal.Package.Manifest
-      Coal.Package.Version
       Paths_coal
   hs-source-dirs:
       app
@@ -332,40 +358,42 @@ executable coal
   build-depends:
       aeson
     , aeson-pretty
-    , ascii-progress
-    , base >=4.7 && <5
-    , binary
-    , bytestring
+    , ansi-terminal >=0.11 && <2
+    , base >=4.17 && <5
+    , binary >=0.8.9.1 && <0.9
+    , bytestring >=0.11.5.3 && <0.13
     , coal
-    , containers
-    , cryptonite
-    , data-default
-    , data-fix
-    , deriving-compat
-    , directory
-    , exceptions >=0.10.5
-    , extra
-    , file-embed
-    , filepath
-    , free
-    , megaparsec
-    , memory
-    , mtl
+    , containers >=0.6.7 && <0.8
+    , cryptonite ==0.30.*
+    , data-default >=0.7.1.1 && <0.9
+    , data-fix >=0.3.2 && <0.4
+    , deriving-compat >=0.6.5 && <0.7
+    , directory >=1.3.7.1 && <1.4
+    , exceptions >=0.10.5 && <0.11
+    , extra >=1.7.14 && <1.9
+    , file-embed >=0.0.15.0 && <0.1
+    , filepath >=1.4.2.2 && <1.6
+    , free >=5.1 && <6
+    , ir-builder >=0.1.0.0 && <0.2
+    , megaparsec >=9.3.1 && <10
+    , memory >=0.18.0 && <0.19
+    , mtl >=2.2 && <3
     , optparse-applicative
-    , parser-combinators
-    , pretty-simple
-    , prettyprinter
-    , process
-    , process-extras
-    , raw-strings-qq
-    , recursion-schemes
+    , parser-combinators >=1.3.0 && <1.4
+    , pretty-simple >=4.1.2.0 && <4.2
+    , prettyprinter >=1.7.1 && <1.8
+    , process >=1.6.18.0 && <1.7
+    , process-extras >=0.7.4 && <0.8
+    , raw-strings-qq ==1.1.*
+    , recursion-schemes >=5.2.2.5 && <5.3
     , semver
     , template-haskell
-    , temporary
-    , text
-    , text-show
-    , transformers
-    , uniplate
+    , temporary ==1.3.*
+    , text >=2.0.2 && <2.2
+    , text-show >=3.10.4 && <3.12
+    , time >=1.12.2 && <1.13
+    , transformers >=0.5 && <0.7
+    , uniplate >=1.6.13 && <1.7
   default-language: Haskell2010
 
 test-suite coal-test
@@ -374,6 +402,36 @@ test-suite coal-test
   other-modules:
       Coal.Compiler.BuildSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
+      Coal.Kernel.Eval.EvalSpec
+      Coal.Kernel.FreeVarsSpec
+      Coal.Kernel.LLVM.CodegenSpec
+      Coal.Kernel.LLVM.IntegrationTestUtils
+      Coal.Kernel.LLVM.TestUtils
+      Coal.Kernel.Module.DependencyGraphSpec
+      Coal.Kernel.Parser.ExprSpec
+      Coal.Kernel.Parser.ModuleSpec
+      Coal.Kernel.Parser.OpSpec
+      Coal.Kernel.Parser.PrimSpec
+      Coal.Kernel.Parser.TypeSpec
+      Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonicalSpec
+      Coal.Kernel.Pipeline.Invariant.LambdasFlattenedSpec
+      Coal.Kernel.Pipeline.Invariant.LambdasLiftedSpec
+      Coal.Kernel.Pipeline.Invariant.LocalNamesUniqueSpec
+      Coal.Kernel.Pipeline.Invariant.LogicalOperatorsTranslatedSpec
+      Coal.Kernel.Pipeline.Invariant.TopLevelFunctionsNormalizedSpec
+      Coal.Kernel.Pipeline.Pass.AdministrativeNormalFormSpec
+      Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalizationSpec
+      Coal.Kernel.Pipeline.Pass.ConstructorSaturationSpec
+      Coal.Kernel.Pipeline.Pass.FunctionResultsSaturationSpec
+      Coal.Kernel.Pipeline.Pass.LambdaFlatteningSpec
+      Coal.Kernel.Pipeline.Pass.LambdaLiftingSpec
+      Coal.Kernel.Pipeline.Pass.LetBindingSimplificationSpec
+      Coal.Kernel.Pipeline.Pass.LocalNameCanonicalizationSpec
+      Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslationSpec
+      Coal.Kernel.Pipeline.Pass.TestHelpers
+      Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec
+      Coal.Kernel.Prettyprinter.RoundtripSpec
+      Coal.Kernel.Spec
       Coal.Language.TypeSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
@@ -384,43 +442,44 @@ test-suite coal-test
       Coal.TypeSystem.TypeIndexedSpec
       Coal.TypeSystem.UnificationSpec
       Coal.TypeSystemSpec
-      E2E.Kernel.Spec
       E2E.Spec
       Paths_coal
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -optP-Wno-nonportable-include-path -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      ascii-progress
-    , base >=4.7 && <5
-    , binary
-    , bytestring
+      ansi-terminal >=0.11 && <2
+    , base >=4.17 && <5
+    , binary >=0.8.9.1 && <0.9
+    , bytestring >=0.11.5.3 && <0.13
     , coal
-    , containers
-    , cryptonite
-    , data-default
-    , data-fix
-    , deriving-compat
-    , directory
-    , exceptions >=0.10.5
-    , extra
-    , file-embed
-    , filepath
-    , free
-    , hspec
-    , megaparsec
-    , memory
-    , mtl
-    , parser-combinators
-    , pretty-simple
-    , prettyprinter
-    , process
-    , process-extras
-    , raw-strings-qq
-    , recursion-schemes
-    , temporary
-    , text
-    , text-show
-    , transformers
-    , uniplate
+    , containers >=0.6.7 && <0.8
+    , cryptonite ==0.30.*
+    , data-default >=0.7.1.1 && <0.9
+    , data-fix >=0.3.2 && <0.4
+    , deriving-compat >=0.6.5 && <0.7
+    , directory >=1.3.7.1 && <1.4
+    , exceptions >=0.10.5 && <0.11
+    , extra >=1.7.14 && <1.9
+    , file-embed >=0.0.15.0 && <0.1
+    , filepath >=1.4.2.2 && <1.6
+    , free >=5.1 && <6
+    , hspec >=2.10.10 && <2.12
+    , ir-builder >=0.1.0.0 && <0.2
+    , megaparsec >=9.3.1 && <10
+    , memory >=0.18.0 && <0.19
+    , mtl >=2.2 && <3
+    , parser-combinators >=1.3.0 && <1.4
+    , pretty-simple >=4.1.2.0 && <4.2
+    , prettyprinter >=1.7.1 && <1.8
+    , process >=1.6.18.0 && <1.7
+    , process-extras >=0.7.4 && <0.8
+    , raw-strings-qq ==1.1.*
+    , recursion-schemes >=5.2.2.5 && <5.3
+    , temporary ==1.3.*
+    , text >=2.0.2 && <2.2
+    , text-show >=3.10.4 && <3.12
+    , time >=1.12.2 && <1.13
+    , transformers >=0.5 && <0.7
+    , uniplate >=1.6.13 && <1.7
   default-language: Haskell2010

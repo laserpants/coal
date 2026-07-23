@@ -8,7 +8,6 @@ module Main {
     user.shoe_size
 
   fun main() =
-
     println_float(get_shoe_size(
       { username = "bob"
       , email = "bob@home.com"

@@ -1,3 +1,8 @@
+/**
+ * Monads extend applicative functors with sequential composition, allowing 
+ * effectful computations to be chained where each step depends on the result 
+ * of the previous one.
+ */
 module Coal.Monad {
 
   import Coal.Combinators(flip, always)
@@ -5,6 +10,12 @@ module Coal.Monad {
   import IO(__eval_io)
   import namespace List
 
+  /**
+   * Trait that extends `Applicative` with `bind` (also known as flat-map), 
+   * enabling sequential composition of effectful computations.
+   *
+   * - `bind : m<a> -> (a -> m<b>) -> m<b>`
+   */
   trait Monad<m> with (Applicative<m>) {
     bind : m<a> -> (a -> m<b>) -> m<b>
   }
@@ -25,12 +36,30 @@ module Coal.Monad {
     fun bind(v, f) = f(__eval_io(v))
   }
 
+  /**
+   * `then_do` sequences two monadic actions, discarding the result of the
+   * first and returning the second.
+   *
+   * **Type**: `then_do : m<a> -> m<b> -> m<b> with (Monad<m>)`
+   */
   fun then_do(a : m<a>, b : m<b>) : m<b> with (Monad<m>) =
     bind(a, always(b))
 
+  /**
+   * `and_then` is `bind` with its arguments flipped: the continuation comes
+   * first, making it read like "and then do this with the result".
+   *
+   * **Type**: `and_then : (a -> m<b>) -> m<a> -> m<b> with (Monad<m>)`
+   */
   let and_then : (a -> m<b>) -> m<a> -> m<b> with (Monad<m>) =
     flip(bind)
 
+  /**
+   * `and_eval` is `then_do` with its arguments flipped: the second action is
+   * evaluated first, and the first is returned.
+   *
+   * **Type**: `and_eval : m<b> -> m<a> -> m<a> with (Monad<m>)`
+   */
   let and_eval = flip(then_do)
 
 }

@@ -1,0 +1,61 @@
+module Main {
+
+  import List(reduce)
+  import IO(return)
+
+  import namespace IO
+
+  type Tree<a>
+    = Leaf
+    | Node(a, Tree<a>, Tree<a>)
+
+  fun insert(n : a, tree : Tree<a>) : Tree<a> with (Ordered<a>) =
+    fold(tree) {
+      | Leaf => 
+          Node(n, Leaf, Leaf)
+      | Node(v, @left as left_tree, @right as right_tree) 
+          when (n < v) => 
+            Node(v, left, right_tree)
+          when (n > v) => 
+            Node(v, left_tree, right)
+          otherwise => 
+            Node(v, left_tree, right_tree)
+    }
+
+  fun from_list(xs : List<a>) with (Ordered<a>) =
+    reduce(insert, Leaf, xs)
+
+  fun flatten(tree : Tree<a>) : List<a> =
+    fold(tree, []) {
+      | Leaf => 
+          fn(acc) => acc
+      | Node(v, @left, @right) =>
+          fn(acc) =>
+            left(v :: right(acc))
+    }
+
+  let sort =
+    flatten << from_list
+
+  fun print_1st(xs) =
+    match(xs) {
+      | x :: _ => IO.println_int32(x)
+      | _ => IO.println_int32(-1)
+    }
+
+  fun print_2nd(xs) =
+    match(xs) {
+      | _ :: x :: _ => IO.println_int32(x)
+      | _ => IO.println_int32(-1)
+    }
+
+  fun main() = 
+    let sorted = sort([4, 8, 5, 7, 2, 1, 3, 6]) 
+    in 
+      do {
+        print_1st(sorted) ;
+        print_2nd(sorted) ;
+        return() ;
+      }
+
+}

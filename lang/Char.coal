@@ -1,3 +1,6 @@
+/**
+ * Functions for working with the built-in `char` type.
+ */
 module Char {
 
   /**
@@ -8,6 +11,8 @@ module Char {
    * `'3'` produces `Some(3)`.
    *
    * If the character is not a digit, the function returns `None`.
+   *
+   * **Type**: `digit_to_int32 : char -> Option<int32>`
    */
   fun digit_to_int32(ch : char) : Option<int32> =
     match(ch) {
@@ -29,6 +34,8 @@ module Char {
    *
    * Convert the given character into its numeric Unicode scalar value
    * and return it as an `int32`. This is the inverse of `chr`.
+   *
+   * **Type**: `ord : char -> int32`
    */
   fun ord(c : char) : int32 =
     char$_ord(c)
@@ -38,12 +45,16 @@ module Char {
    *
    * Convert the given numeric Unicode scalar value into the corresponding
    * character. This is the inverse of `ord`.
+   *
+   * **Type**: `chr : int32 -> char`
    */
   fun chr(n : int32) : char =
     char$_chr(n)
 
   /**
    * Check if character is a digit (0-9)
+   *
+   * **Type**: `is_digit : char -> bool`
    */
   fun is_digit(c : char) : bool =
     match(c) {      
@@ -53,6 +64,8 @@ module Char {
 
   /**
    * Check if character is whitespace
+   *
+   * **Type**: `is_whitespace : char -> bool`
    */
   fun is_whitespace(c : char) : bool =
     match(c) {
@@ -62,6 +75,8 @@ module Char {
 
   /**
    * Check if character is a letter (a-z, A-Z)
+   *
+   * **Type**: `is_alpha : char -> bool`
    */
   fun is_alpha(c : char) : bool =
     let 

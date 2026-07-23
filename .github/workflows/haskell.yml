@@ -1,0 +1,47 @@
+name: Haskell CI
+
+on:
+  push:
+    branches: [ main, develop, next ]
+
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/laserpants/coal-dev:latest
+
+    env:
+      STACK_ROOT: /root/.stack
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: haskell-actions/setup@v2
+        with:
+          enable-stack: true
+
+      - name: Cache Stack
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: stack-${{ runner.os }}-${{ hashFiles('stack.yaml', 'package.yaml', '*.cabal') }}
+          restore-keys: |
+            stack-${{ runner.os }}-
+
+      - name: Prepare
+        run: bash runtime/scripts/combine.sh
+
+      - name: Build
+        run: stack --allow-different-user build --test --no-run-tests
+
+      - name: Test
+        run: stack --allow-different-user test --ta '--match Unit' #  --match Kernel'

@@ -25,14 +25,14 @@ module Coal.Compiler.Pipeline (
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
-import Coal.Compiler.Builtin.Modules (builtinModules)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Error (errorLocation)
 import Coal.Compiler.Metadata (Metadata (..))
-import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, tickBar, (>->))
+import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import qualified Coal.Compiler.Pass.Counts as Counts
-import Coal.Compiler.Pass.PhaseLowering (phaseLowering)
+import Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen)
+import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)
 import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
 import Coal.Compiler.Pass.PhasePreflight (phasePreflight)
@@ -48,55 +48,117 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
-import Control.Monad (replicateM_)
-import Control.Monad.Catch (MonadMask)
-import Control.Monad.Except (MonadIO, forM_)
+import Control.Monad.IO.Class (MonadIO, liftIO)
+import Data.IORef (modifyIORef', newIORef)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Data.Time.Clock (diffUTCTime, getCurrentTime)
+import Extras (forM_)
 import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
-import System.Console.AsciiProgress (Default (def), Options (..), displayConsoleRegions, newProgressBar)
+import System.IO (hPutStr, stderr)
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
-pipeline :: (MonadIO m, MonadMask m) => Pass Metadata m [FilePath] ()
+import Coal.Compiler.Progress (ProgressRef, writeStatus, writeStatusSimple)
+
+pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
-  phaseParsing
-    >-> phasePreflight
+  timed "Parsing" phaseParsing
+    >-> timed "Preflight" phasePreflight
     >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
-    >-> Pass{runPass = extraTicks}
-    >-> phaseLowering
-    >-> passLinking
+    >-> timed "Kernel translate" (mapPass passKernelTranslate)
+    >-> timed "Kernel codegen" passKernelCodegen
+    >-> timed "Linking" passLinking
+
+timed :: (MonadIO m) => String -> Pass a m i o -> Pass a m i o
+timed label p =
+  Pass
+    { runPass = \i -> do
+        t0 <- liftIO getCurrentTime
+        result <- runPass p i
+        t1 <- liftIO getCurrentTime
+        let secs = realToFrac (diffUTCTime t1 t0) :: Double
+        liftIO $ writeStatusSimple (label ++ "... " ++ show secs ++ "s")
+        pure result
+    }
+
+pipelineWithProgress :: (MonadIO m) => ProgressRef -> Pass Metadata m [FilePath] ()
+pipelineWithProgress ref =
+  timedWeighted ref "Parsing" Counts.weightParsing phaseParsing
+    >-> Pass{runPass = updateTotal ref}
+    >-> timedWeighted ref "Preflight" Counts.weightPreflight phasePreflight
+    >-> perModulePasses ref phaseTypeChecking phaseTranslation
+    >-> timedWeighted ref "Kernel translate" Counts.weightKernelTranslate (mapPass passKernelTranslate)
+    >-> timedWeighted ref "Kernel codegen" Counts.weightKernelCodegen passKernelCodegen
+    >-> timedWeighted ref "Linking" Counts.weightLinking passLinking
+
+timedWeighted :: (MonadIO m) => ProgressRef -> String -> Int -> Pass a m i o -> Pass a m i o
+timedWeighted ref label weight p =
+  Pass
+    { runPass = \i -> do
+        t0 <- liftIO getCurrentTime
+        result <- runPass p i
+        t1 <- liftIO getCurrentTime
+        let secs = realToFrac (diffUTCTime t1 t0) :: Double
+        liftIO $ do
+          modifyIORef' ref (\(done, total) -> (done + weight, total))
+          writeStatus ref (label ++ "... " ++ show secs ++ "s")
+        pure result
+    }
+
+perModulePasses :: (MonadIO m) => ProgressRef -> Pass Metadata m i o -> Pass Metadata m o p -> Pass Metadata m [BuildEnvelope i] [BuildEnvelope p]
+perModulePasses ref p1 p2 =
+  Pass
+    { runPass = traverse runOne
+    }
+ where
+  sourceStage =
+    liftPass
+      ( timedWeightedPerModule ref "Type checking" Counts.weightTypeChecking p1
+          >-> timedWeightedPerModule ref "Translation" Counts.weightTranslation p2
+      )
+  cachedStage = liftPass (p1 >-> p2)
+  runOne env = case env of
+    BSource _ -> runPass sourceStage env
+    BCached _ -> runPass cachedStage env
+
+timedWeightedPerModule :: (MonadIO m) => ProgressRef -> String -> Int -> Pass Metadata m i o -> Pass Metadata m i o
+timedWeightedPerModule ref label weight p =
+  Pass
+    { runPass = \i -> do
+        t0 <- liftIO getCurrentTime
+        result <- runPass p i
+        t1 <- liftIO getCurrentTime
+        let secs = realToFrac (diffUTCTime t1 t0) :: Double
+        liftIO $ do
+          modifyIORef' ref (\(done, total) -> (done + weight, total))
+          writeStatus ref (label ++ "... " ++ show secs ++ "s")
+        pure result
+    }
+
+updateTotal :: (MonadIO m) => ProgressRef -> [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
+updateTotal ref envelopes = do
+  let numSource = length [() | BSource _ <- envelopes]
+      moduleWeight = Counts.weightTypeChecking + Counts.weightTranslation
+      globalWeight = Counts.weightParsing + Counts.weightPreflight + Counts.weightKernelTranslate + Counts.weightKernelCodegen + Counts.weightLinking
+      total = globalWeight + numSource * moduleWeight
+  -- Reset both counters: parsing is already done, so done = parsing weight.
+  liftIO $ modifyIORef' ref (\(_, _) -> (Counts.weightParsing, total))
+  pure envelopes
 
 phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
 phaseMainPasses = mapPass . liftPass
 
-extraTicks :: (MonadIO m) => [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
-extraTicks units = do
-  forM_ units $
-    \case
-      BCached{} -> replicateM_ Counts.cachedModuleTicks tickBar
-      _ -> pure ()
-  pure units
-
 compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
 compileWithCFiles config files cFiles = do
-  res <-
-    if configSilent config
-      then do
-        go Nothing
-      else do
-        displayConsoleRegions $ do
-          pb <-
-            newProgressBar
-              def
-                { pgTotal = fromIntegral $ Counts.calculateProgressBarTotal (length builtinModules) (length files)
-                , pgWidth = 100
-                , pgFormat = "Compiling [:bar] :percent"
-                }
-          go (Just pb)
+  ref <- newIORef (0, 0)
+  let go = runCompilerT emptyCompilerEnvironment $ do
+        setConfigC config{configCFiles = configCFiles config <> cFiles}
+        runPass (pipelineWithProgress ref) files
+  res <- go
   case res of
     (e, CompilerState{compilerSources}, es) -> do
       forM_ (nub es) $
@@ -111,12 +173,8 @@ compileWithCFiles config files cFiles = do
         Left e1 ->
           print e1
         Right{} -> do
-          pure ()
- where
-  go progressBar = do
-    runCompilerT (emptyCompilerEnvironment progressBar) $ do
-      setConfigC config{configCFiles = configCFiles config <> cFiles}
-      runPass pipeline files
+          liftIO $ writeStatus ref ("Executable written to: " ++ configExecutableName config)
+          hPutStr stderr "\n"
 
 compile :: CompilerConfig -> [FilePath] -> IO ()
 compile config files = compileWithCFiles config files []
@@ -244,8 +302,8 @@ prettyError env =
       "The module name '" <> path <> "' doesn't match the file name '" <> Text.pack file <> "'."
     BadFilename _ err ->
       Text.pack err
-    NoModuleMain ->
-      "No 'Main' module"
+    NoModuleMain missing ->
+      "No entry point module '" <> missing <> "'"
     ModuleCycle names ->
       "Module imports form a cycle: " <> showt names
     MisplacedImportStatement erl -> do

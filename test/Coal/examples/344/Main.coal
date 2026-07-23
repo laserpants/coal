@@ -3,7 +3,14 @@ module Main {
   import namespace IO
   import Coal.Combinators(identity, always)
   import Coal.Functor(Functor)
-  import Codata.Machine(machine, map_machine, observe, receive)
+  import Codata.Machine(machine, map_machine, observe, receive, cofix)
+  import String(from_list, to_list, cons)
+  import Char(is_digit, is_whitespace, digit_to_int32)
+  import Number(int32_to_double)
+
+  ///////////////////////////
+  // Parsing library
+  ///////////////////////////
 
   type ParseError
     = ExpectedToken
@@ -27,22 +34,43 @@ module Main {
 
   type alias Parser<tok, a> = Machine<tok, ParseResult<a>>
 
-  fun run_parser(parser : Parser<tok, a>, input : tok) : ParseResult<a> =
-    parser |.receive(input) |.observe
+  fun step_parser(parser : Parser<tok, a>, input : tok) : ParseResult<a> =
+    parser 
+      |. receive(input) 
+      |. observe
 
-  fun pure_parser(value : s) : Parser<tok, s> =
+  fun run_parser(parser : Parser<tok, a>, tokens : List<tok>) : ParseResult<a> =
+    fold(tokens, parser) {
+      | [] =>
+          fn(p) =>
+            match(observe(p)) {
+              | NeedMoreInput => Error(UnexpectedEOF)
+              | result => result
+            }
+      | tok :: @rest => 
+          fn(p) =>
+            let next = receive(tok, p) in
+            match(observe(next)) {
+              | Error(e) => Error(e)
+              | _ => rest(next)
+            }
+    }
+
+  fun const_parser(result : ParseResult<s>) : Parser<tok, s> =
     machine(
-      ResultOk(value),
+      result,
       fn(_, state) => state,
       identity
     )
 
+  fun pure_parser(value : s) : Parser<tok, s> =
+    const_parser(ResultOk(value))
+
   fun fail_parser() : Parser<tok, s> =
-    machine(
-      Error(ExpectedToken),
-      fn(_, state) => state,
-      identity 
-    )
+    const_parser(Error(ExpectedToken))
+
+  fun fail_with(msg : string) : Parser<tok, s> =
+    const_parser(Error(CustomError(msg)))
 
   fun satisfy(pred : tok -> bool) : Parser<tok, tok> =
     machine(
@@ -177,13 +205,14 @@ module Main {
           // Neither parser succeeded yet
           | BothRunning(q1, q2) =>
               match(observe(q1)) {
-                | ResultOk(_) => observe(q1)
-                | Error(_) => observe(q2)
+                | ResultOk(_) => 
+                    observe(q1)
+                | Error(_) => 
+                    observe(q2)
                 | NeedMoreInput =>
                     match(observe(q2)) {
                       | ResultOk(_) => observe(q2)
-                      | Error(_) => observe(q2)
-                      | NeedMoreInput => NeedMoreInput
+                      | _ => NeedMoreInput
                     }
               }
           // Return result from whichever parser succeeded
@@ -202,7 +231,8 @@ module Main {
 
   fun at_most(bound : nat, p : Parser<tok, a>) : Parser<tok, List<a>> =
     fold(bound) {
-      | Zero => pure_parser([])
+      | Zero => 
+          pure_parser([])
       | Succ(@rest) =>
           or_else(
             and_then(p, fn(x) =>
@@ -213,7 +243,14 @@ module Main {
     }
 
   fun many(p : Parser<tok, a>) : Parser<tok, List<a>> =
-    at_most(1000, p) 
+    cofix(fn(self) =>
+      or_else(
+        and_then(p, fn(x) =>
+          map_parser(fn(xs) => x :: xs, self)
+        ),
+        pure_parser([])
+      )
+    )
 
   fun some(p : Parser<tok, a>) : Parser<tok, List<a>> =
     and_then(p, fn(x) =>
@@ -224,9 +261,9 @@ module Main {
     )
 
   fun between(
-    open  : Parser<tok, a>,
+    open : Parser<tok, a>,
     close : Parser<tok, b>,
-    p     : Parser<tok, c>
+    p : Parser<tok, c>
   ) : Parser<tok, c> =
     and_then(open, fn(_) =>
       and_then(p, fn(result) =>
@@ -264,7 +301,8 @@ module Main {
 
   fun until_at_most(bound : nat, p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
     fold(bound) {
-      | Zero => pure_parser([])
+      | Zero => 
+          pure_parser([])
       | Succ(@rest) =>
           or_else(
             map_parser(fn(_) => [], stop),
@@ -277,10 +315,150 @@ module Main {
           )
     }
 
+  fun until(p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
+    cofix(fn(self) =>
+      or_else(
+        map_parser(fn(_) => [], stop),
+        and_then(p, fn(x) =>
+          map_parser(fn(xs) => x :: xs, self)
+        )
+      )
+    )
+
   fun many_until(p : Parser<tok, a>, stop : Parser<tok, b>) : Parser<tok, List<a>> =
-    until_at_most(1000, p, stop)
+    until(p, stop)
+
+  // Match a literal string of characters
+  fun string_p(s : string) : Parser<char, string> =
+    fold(to_list(s)) {
+      | [] => 
+          pure_parser("")
+      | c :: @rest =>
+          and_then(parse_token(c), fn(_) =>
+            map_parser(fn(suffix) => cons(c, suffix), rest)
+          )
+    }
+
+  ///////////////////////////
+  // Example: JSON parser
+  ///////////////////////////
+
+  type JsonValue
+    = JsonNull
+    | JsonBool(bool)
+    | JsonNumber(double)
+    | JsonString(string)
+    | JsonArray(List<JsonValue>)
+    | JsonObject(List<(string, JsonValue)>)
+
+  // Skip leading whitespace, then run p
+  fun lexeme(p : Parser<char, a>) : Parser<char, a> =
+    cofix(fn(go) =>
+      or_else(
+        and_then(satisfy(is_whitespace), fn(_) => go),
+        p
+      )
+    )
+
+  // Parse a single digit char as int32
+  fun digit_p() : Parser<char, int32> =
+    and_then(satisfy(is_digit), fn(c) =>
+      match(digit_to_int32(c)) {
+        | Some(n) => pure_parser(n)
+        | None => fail_parser()
+      }
+    )
+
+  // Parse one or more digits as a positive int32
+  fun pos_int_p() : Parser<char, int32> =
+    map_parser(
+      fn(digits) =>
+        fold(digits, 0) {
+          | [] => identity
+          | d :: @rest => fn(acc) => rest(acc * 10 + d)
+        },
+      some(digit_p())
+    )
+
+  fun json_null() : Parser<char, JsonValue> =
+    map_parser(fn(_) => JsonNull, string_p("null"))
+
+  fun json_bool() : Parser<char, JsonValue> =
+    or_else(
+      map_parser(fn(_) => JsonBool(true), string_p("true")),
+      map_parser(fn(_) => JsonBool(false), string_p("false"))
+    )
+
+  fun json_number() : Parser<char, JsonValue> =
+    map_parser(fn(n) => JsonNumber(int32_to_double(n)), pos_int_p())
+
+  // Quoted string contents (simplified: no escape sequences)
+  fun json_string_inner() : Parser<char, string> =
+    between(
+      parse_token('"'),
+      parse_token('"'),
+      map_parser(from_list, many(satisfy(fn(c) => c != '"')))
+    )
+
+  fun json_string() : Parser<char, JsonValue> =
+    map_parser(JsonString, json_string_inner())
+
+  // JSON array: [ value, value, ... ]
+  fun json_array(elem : Parser<char, JsonValue>) : Parser<char, JsonValue> =
+    map_parser(
+      JsonArray,
+      between(
+        lexeme(parse_token('[')),
+        lexeme(parse_token(']')),
+        sep_by(lexeme(elem), lexeme(parse_token(',')))
+      )
+    )
+
+  // Key-value pair: "key" : value
+  fun json_pair(elem : Parser<char, JsonValue>) : Parser<char, (string, JsonValue)> =
+    and_then(lexeme(json_string_inner()), fn(key) =>
+      and_then(lexeme(parse_token(':')), fn(_) =>
+        map_parser(fn(value) => (key, value), lexeme(elem))
+      )
+    )
+
+  // JSON object: { "key": value, ... }
+  fun json_object(elem : Parser<char, JsonValue>) : Parser<char, JsonValue> =
+    map_parser(
+      JsonObject,
+      between(
+        lexeme(parse_token('{')),
+        lexeme(parse_token('}')),
+        sep_by(json_pair(elem), lexeme(parse_token(',')))
+      )
+    )
+
+  // Full JSON value parser (recursive via cofix)
+  let json_value : Parser<char, JsonValue> =
+    cofix(fn(go) =>
+      choice([
+        lexeme(json_null()),
+        lexeme(json_bool()),
+        lexeme(json_number()),
+        lexeme(json_string()),
+        json_array(go),
+        json_object(go)
+      ])
+    )
+
+  ///////////////////////////
+  // Misc
+  ///////////////////////////
 
   fun main() =
-    IO.println_string("@")
+    let
+      r = run_parser(json_value, to_list("true"))
+    in
+    match(r) {
+      | ResultOk(JsonBool(true)) =>
+          IO.println_string("1")
+      | _ =>
+          IO.println_string("fail")
+    }
 
 }

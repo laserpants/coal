@@ -1,0 +1,7 @@
+module Data.Option {
+
+  data Option(*)
+    = Data.Option.None
+    | Data.Option.Some(*)
+
+}

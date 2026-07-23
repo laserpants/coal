@@ -1,20 +1,39 @@
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+{- |
+Core type language.
+
+Defines the type system for Coal kernel language, including:
+
+  * Type constructors for built-in and user-defined types
+  * Row polymorphism for extensible records
+  * The opaque type; this type typically maps to an opaque pointer in IR
+
+= Row types
+
+Rows represent field collections in record types. They are built from:
+
+  * 'RNil': the empty row
+  * 'RExt': row extension with a labeled field
+
+The type checker normalizes rows by sorting fields lexicographically, enabling
+structural comparison of record types.
+-}
 module Coal.Kernel.Language.Type (Type (..)) where
 
-import Coal.Pretty (CoalPretty (..))
-import Data.Binary (Binary)
-import Data.Data (Data, Typeable)
-import Extras (Name)
-import Extras.Prettyprinter (parensIf)
-import GHC.Generics (Generic)
-import Prettyprinter
+import Coal.Common.Name (Name)
 
--- | Core language types
+{- | Core language types.
+
+The type system distinguishes:
+
+  * __Nominal types__: type constructors applied to arguments (@TCon "int32"
+    []@, @TCon "list" [a]@)
+  * __Opaque type__: @TOpq@ provides structural type safety as a bridge between
+    the surface language type system and IR types, retaining essential typing
+    information.
+  * __Row types__: 'RExt' and 'RNil' for extensible records
+-}
 data Type
   = -- | Type constructor
     TCon Name [Type]
@@ -24,67 +43,4 @@ data Type
     RExt Name Type Type
   | -- | Empty row
     RNil
-  deriving (Show, Eq, Ord, Read, Data, Typeable, Generic)
-
-instance Binary Type
-
-precArrow, precApp :: Int
-precArrow = 1
-precApp = 2
-
-tupledCompact :: [Doc ann] -> Doc ann
-tupledCompact = encloseSep "(" ")" ", "
-
-prettyTypePrec :: Int -> Type -> Doc ann
-prettyTypePrec prec =
-  \case
-    TCon "/" [t1, t2] ->
-      parensIf (prec > precArrow) $
-        group (prettyTypePrec (precArrow + 1) t1 <> "/" <> prettyTypePrec precArrow t2)
-    TCon "bool" [] ->
-      "bool"
-    TCon "int32" [] ->
-      "int32"
-    TCon "int64" [] ->
-      "int64"
-    TCon "float" [] ->
-      "float"
-    TCon "double" [] ->
-      "double"
-    TCon "char" [] ->
-      "char"
-    TCon "string" [] ->
-      "string"
-    TCon "bignum" [] ->
-      "bignum"
-    TCon "unit" [] ->
-      "unit"
-    TCon con ts ->
-      parensIf (prec > precApp) $
-        group (pretty con <> tupledCompact (map pretty ts))
-    TOpq ->
-      "*"
-    r@RExt{} ->
-      prettyRow r
-    RNil ->
-      "{}"
-
-prettyRow :: Type -> Doc ann
-prettyRow = braces . fields
- where
-  fields =
-    \case
-      RExt f t1 r ->
-        pretty f <+> ":" <+> pretty t1 <+> "|" <+> fields r
-      RNil ->
-        "{}"
-      TOpq ->
-        "*"
-      _ ->
-        error "Implementation error"
-
-instance Pretty Type where
-  pretty = prettyTypePrec 0
-
-instance CoalPretty Type where
-  prettyCoalPrec = prettyTypePrec
+  deriving (Show, Eq, Ord, Read)

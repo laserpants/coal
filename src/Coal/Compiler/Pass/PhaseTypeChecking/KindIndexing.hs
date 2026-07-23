@@ -49,13 +49,14 @@ import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
 import Control.Monad (unless, when)
-import Control.Monad.Except (MonadError (throwError), MonadIO)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
-import Control.Monad.State (StateT, execStateT, foldM, get, gets, modify)
+import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import Extras (Name, forM, forM_)
+import Extras (Name, foldM, forM, forM_)
 
 {- | The kind indexing compiler pass.
 

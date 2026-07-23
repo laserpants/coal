@@ -1,0 +1,17 @@
+module Main {
+
+  import namespace IO
+
+  fun baz2(() : unit) =
+    5456 : int32
+
+//  fun baz((), x : int32) =
+//    5456 : int32
+
+  fun main() =
+    let
+      x = baz2(())
+    in
+    IO.println_int32(x)
+
+}

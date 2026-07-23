@@ -26,8 +26,8 @@ import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty ((:|)))
 
-{- | Safe helper to extract the first type, with invariant checking
-This should never fail for well-formed type-indexed AST nodes
+{- | Safe helper to extract the first type, with invariant checking.
+This should never fail for well-formed type-indexed AST nodes.
 -}
 safeHeadType :: [Type o k] -> Type o k
 safeHeadType [] = error "Internal compiler error: typeOf called on AST node with no type annotation"
@@ -68,6 +68,8 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o) => HasType o k (Patter
         typeOf t
       PInteger _ t _ ->
         t
+      PAnnotation _ _ p ->
+        typeOf p
       p ->
         safeHeadType (universeBi p)
 

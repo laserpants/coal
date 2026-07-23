@@ -1,0 +1,8 @@
+module Ord {
+
+  data Ord
+    = Ord.Eq
+    | Ord.Gt
+    | Ord.Lt
+
+}

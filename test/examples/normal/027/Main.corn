@@ -1,0 +1,59 @@
+module Main {
+
+  // list_sum: $Nil clause comes FIRST, recursive $Cons case uses self-reference.
+  // This directly exercises that non-empty lists do not spuriously match $Nil,
+  // and that the recursive case is actually reached.
+  Main.list_sum(xs : list(int32)) =
+    case<int32>(xs : list(int32)) {
+      | ($Nil : list(int32)) =>
+          0
+      | ($Cons : int32/list(int32)/list(int32), x : int32, rest : list(int32)) =>
+          [+ int32]
+            ( x : int32
+            , @<int32>
+                ( Main.list_sum : list(int32)/int32
+                , rest : list(int32)
+                )
+            )
+    }
+
+  Main.cont(a : *) =
+    0
+
+  Main.main(_ : *) =
+    let
+      l3 : list(int32) =
+        @<list(int32)>
+          ( $Cons : int32/list(int32)/list(int32)
+          , 3
+          , $Nil : list(int32)
+          )
+    ; l2 : list(int32) =
+        @<list(int32)>
+          ( $Cons : int32/list(int32)/list(int32)
+          , 2
+          , l3 : list(int32)
+          )
+    ; l1 : list(int32) =
+        @<list(int32)>
+          ( $Cons : int32/list(int32)/list(int32)
+          , 1
+          , l2 : list(int32)
+          )
+    ; r : int32 =
+        @<int32>
+          ( Main.list_sum : list(int32)/int32
+          , l1 : list(int32)
+          )
+    ; __call : * =
+        @<*>
+          ( coal_print_int32 : int32/*
+          , r : int32
+          )
+    in
+      @<int32>
+        ( Main.cont : */int32
+        , __call : *
+        )
+
+}

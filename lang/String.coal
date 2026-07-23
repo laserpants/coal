@@ -1,3 +1,6 @@
+/**
+ * Functions for working with the built-in `string` type.
+ */
 module String {
 
   import List(reduce)
@@ -6,60 +9,80 @@ module String {
 
   /**
    * Convert a character to a one-character string.
+   *
+   * **Type**: `char_to_string : char -> string`
    */
   fun char_to_string(c : char) : string =
     string$_char_to_string(c)
 
   /**
    * Convert a boolean to a string, i.e., either "true" or "false".
+   *
+   * **Type**: `bool_to_string : bool -> string`
    */
   fun bool_to_string(b : bool) : string =
     string$_bool_to_string(b)
 
   /**
    * Convert an int32 value to its string representation.
+   *
+   * **Type**: `int32_to_string : int32 -> string`
    */
   fun int32_to_string(n : int32) : string =
     string$_int32_to_string(n)
 
   /**
    * Convert a floating-point value to its string representation.
+   *
+   * **Type**: `float_to_string : float -> string`
    */
   fun float_to_string(f : float) : string =
     string$_float_to_string(f)
 
   /**
    * Convert a double-precision value to its string representation.
+   *
+   * **Type**: `double_to_string : double -> string`
    */
   fun double_to_string(d : double) : string =
     string$_double_to_string(d)
 
   /**
    * Convert a string into a list of its characters.
+   *
+   * **Type**: `to_list : string -> List<char>`
    */
   fun to_list(s : string) : List<char> =
     string$_to_list(s)
 
   /**
    * Build a string from a list of characters.
+   *
+   * **Type**: `from_list : List<char> -> string`
    */
   fun from_list(chars : List<char>) : string =
     string$_from_list(chars)
 
   /**
    * Return the number of characters in the string.
+   *
+   * **Type**: `length : string -> nat`
    */
   fun length(s : string) : nat =
     pack(string$_length(s))
 
   /**
    * Determine whether the string is empty.
+   *
+   * **Type**: `is_empty : string -> bool`
    */
   fun is_empty(s : string) : bool =
     0 == length(s)
 
   /**
    * Return the first character of the string, or `None` if empty.
+   *
+   * **Type**: `head : string -> Option<char>`
    */
   fun head(s : string) : Option<char> =  
     if (is_empty(s)) 
@@ -68,36 +91,48 @@ module String {
 
   /**
    * Return the string without its first character.
+   *
+   * **Type**: `tail : string -> string`
    */
   fun tail(s : string) : string =
     string$_tail(s)
 
   /**
    * Prepend a character to the front of a string.
+   *
+   * **Type**: `cons : char -> string -> string`
    */
   fun cons(c : char, str : string) : string =
     char_to_string(c) <> str
 
   /**
    * Return the head and tail of a string, as a pair.
+   *
+   * **Type**: `uncons : string -> (Option<char>, string)`
    */
   fun uncons(str : string) : (Option<char>, string) =
     (head(str), tail(str))
 
   /**
    * Reverse the characters in the string.
+   *
+   * **Type**: `reverse : string -> string`
    */
   fun reverse(s : string) : string =
     string$_reverse(s)
 
   /**
    * Remove all whitespace characters from the string.
+   *
+   * **Type**: `remove_whitespace : string -> string`
    */
   fun remove_whitespace(s : string) : string =
     string$_remove_whitespace(s)
 
   /**
    * Insert a separator between the strings in a list and concatenate them.
+   *
+   * **Type**: `intercalate : string -> List<string> -> string`
    */
   fun intercalate(sep : string, strs : List<string>) : string =
     match(strs) {
@@ -107,6 +142,8 @@ module String {
 
   /**
    * Take a list of strings and concatenate them into a single string. 
+   *
+   * **Type**: `concat : List<string> -> string`
    */ 
   fun concat(strs : List<string>) : string =
     intercalate("", strs)
@@ -114,6 +151,8 @@ module String {
   /**
    * Return a boolean indicating whether the first string is a prefix of the 
    * second.
+   *
+   * **Type**: `is_prefix_of : string -> string -> bool`
    */
   fun is_prefix_of(part : string, whole : string) : bool =
     List.is_prefix_of(to_list(part), to_list(whole))
@@ -122,6 +161,8 @@ module String {
    * Remove the first `n` characters from the string.
    *
    * If the string is shorter than `n`, return an empty string.
+   *
+   * **Type**: `drop : nat -> string -> string`
    */
   fun drop(n : nat, str : string) : string =
     from_list(List.drop(n, to_list(str)))

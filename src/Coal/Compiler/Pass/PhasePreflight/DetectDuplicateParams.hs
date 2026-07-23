@@ -42,8 +42,11 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State (CompilerState (compilerCurrentPath))
 import Coal.Language
 import Coal.Language.Module.Path (principalPath)
+import Control.Monad (unless, when)
 import Control.Monad.Except
+import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (StateT, evalStateT, get, gets, modify, put)
+import Control.Monad.Trans.Class (lift)
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty

@@ -1,0 +1,50 @@
+module Main {
+
+// Test case: letrec with nested lambda that captures the recursive binding
+// This should output 3 (the result of summing 1+2)
+Main.test_letrec =
+  let
+    __fold__ : list(int32)/int32 =
+      fn(xs : list(int32)) =>
+        case<int32>(xs : list(int32)) {
+          | ($Cons : int32/list(int32)/list(int32), head : int32, tail : list(int32)) =>
+              [+ int32]
+                ( head : int32
+                , @<int32>(__fold__ : list(int32)/int32, tail : list(int32))
+                )
+          | ($Nil : list(int32)) =>
+              0
+        }
+  in
+    @<int32>
+      ( __fold__ : list(int32)/int32
+      , @<list(int32)>
+          ( $Cons : int32/list(int32)/list(int32)
+          , 1
+          , @<list(int32)>
+              ( $Cons : int32/list(int32)/list(int32)
+              , 2
+              , $Nil : list(int32)
+              )
+          )
+      )
+
+Main.cont(r : int32, a : *) =
+  0
+
+Main.main(_ : *) =
+  let
+    r : int32 = Main.test_letrec : int32
+  ; call_tmp : * =
+      @<*>
+        ( coal_print_int32 : int32/*
+        , r : int32
+        )
+  in
+    @<int32>
+      ( Main.cont : int32/*/int32
+      , r : int32
+      , call_tmp : *
+      )
+
+}

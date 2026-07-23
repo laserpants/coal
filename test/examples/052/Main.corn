@@ -1,0 +1,348 @@
+module Main {
+
+data Ordering
+  = Main.EqualTo
+  | Main.GreaterThan
+  | Main.LessThan
+
+data Option(*)
+  = Main.None
+  | Main.Some(*)
+
+data Result(*, *)
+  = Main.Err(*)
+  | Main.Ok(*)
+
+data Machine(*, *)
+  = Main.Machine(record({ state : * | step : */*/Machine(*, *) | view : */* | {} }))
+
+Main.from_int32($a : Numeric(*)) =
+  case<int32/*>($a : Numeric(*)) {
+    | ( $Record : { from_int32 : int32/* | * }/record({ from_int32 : int32/* | * })
+      , $r : { from_int32 : int32/* | * }
+      ) =>
+        get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
+  }
+
+Main.from_int64($a : Numeric(*)) =
+  case<int64/*>($a : Numeric(*)) {
+    | ( $Record : { from_int64 : int64/* | * }/record({ from_int64 : int64/* | * })
+      , $r : { from_int64 : int64/* | * }
+      ) =>
+        get?_from_int64<int64/*>($r : { from_int64 : int64/* | * })
+  }
+
+Main.from_bignum($a : Numeric(*)) =
+  case<bignum/*>($a : Numeric(*)) {
+    | ( $Record : { from_bignum : bignum/* | * }/record({ from_bignum : bignum/* | * })
+      , $r : { from_bignum : bignum/* | * }
+      ) =>
+        get?_from_bignum<bignum/*>($r : { from_bignum : bignum/* | * })
+  }
+
+Main.negate($a : Numeric(*)) =
+  case<*/*>($a : Numeric(*)) {
+    | ( $Record : { negate : */* | * }/record({ negate : */* | * })
+      , $r : { negate : */* | * }
+      ) =>
+        get?_negate<*/*>($r : { negate : */* | * })
+  }
+
+Main.(+)($a : Numeric(*)) =
+  case<*/*/*>($a : Numeric(*)) {
+    | ( $Record : { (+) : */*/* | * }/record({ (+) : */*/* | * })
+      , $r : { (+) : */*/* | * }
+      ) =>
+        get?_(+)<*/*/*>($r : { (+) : */*/* | * })
+  }
+
+Main.(-)($a : Numeric(*)) =
+  case<*/*/*>($a : Numeric(*)) {
+    | ( $Record : { (-) : */*/* | * }/record({ (-) : */*/* | * })
+      , $r : { (-) : */*/* | * }
+      ) =>
+        get?_(-)<*/*/*>($r : { (-) : */*/* | * })
+  }
+
+Main.(*)($a : Numeric(*)) =
+  case<*/*/*>($a : Numeric(*)) {
+    | ( $Record : { (*) : */*/* | * }/record({ (*) : */*/* | * })
+      , $r : { (*) : */*/* | * }
+      ) =>
+        get?_(*)<*/*/*>($r : { (*) : */*/* | * })
+  }
+
+Main.compare($a : Ordered(*)) =
+  case<*/*/Ordering>($a : Ordered(*)) {
+    | ( $Record : { compare : */*/Ordering | * }/record({ compare : */*/Ordering | * })
+      , $r : { compare : */*/Ordering | * }
+      ) =>
+        get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+  }
+
+Main.(==)($a : Comparable(*)) =
+  case<*/*/bool>($a : Comparable(*)) {
+    | ( $Record : { (==) : */*/bool | * }/record({ (==) : */*/bool | * })
+      , $r : { (==) : */*/bool | * }
+      ) =>
+        get?_(==)<*/*/bool>($r : { (==) : */*/bool | * })
+  }
+
+Main.(/)($a : Divisible(*)) =
+  case<*/*/*>($a : Divisible(*)) {
+    | ( $Record : { (/) : */*/* | * }/record({ (/) : */*/* | * })
+      , $r : { (/) : */*/* | * }
+      ) =>
+        get?_(/)<*/*/*>($r : { (/) : */*/* | * })
+  }
+
+Main.(%)($a : Modulo(*)) =
+  case<*/*/*>($a : Modulo(*)) {
+    | ( $Record : { (%) : */*/* | * }/record({ (%) : */*/* | * })
+      , $r : { (%) : */*/* | * }
+      ) =>
+        get?_(%)<*/*/*>($r : { (%) : */*/* | * })
+  }
+
+Main.(<>)($a : Semigroup(*)) =
+  case<*/*/*>($a : Semigroup(*)) {
+    | ( $Record : { (<>) : */*/* | * }/record({ (<>) : */*/* | * })
+      , $r : { (<>) : */*/* | * }
+      ) =>
+        get?_(<>)<*/*/*>($r : { (<>) : */*/* | * })
+  }
+
+Main.fib(p : $Nat) =
+  let
+    $v.6311 : tuple($Nat, $Nat) =
+      let
+        $fold.6256 : $Nat/tuple($Nat, $Nat) =
+          fn($fold.6256.expr : $Nat) =>
+            case<tuple($Nat, $Nat)>($fold.6256.expr : $Nat) {
+              | ( $Succ : $Nat/$Nat
+                , $nats.6398 : int32
+                ) =>
+                  let
+                    $match.6318.x : $Nat =
+                      if
+                        (@<bool>
+                          ( Builtin$.(==)__$impl_Comparable(TIntrinsic(IInt32)) : int32/int32/bool
+                          , $nats.6398 : int32
+                          , 0
+                          ))
+                        then
+                          $Zero : $Nat
+                        else
+                          @<$Nat>
+                            ( $Succ : int32/$Nat
+                            , @<int32>
+                                ( Builtin$.(-)__$impl_Numeric(TIntrinsic(IInt32)) : int32/int32/int32
+                                , $nats.6398 : int32
+                                , 1
+                                )
+                            )
+                    in
+                      let
+                        $v.6312 : tuple($Nat, $Nat) =
+                          @<tuple($Nat, $Nat)>
+                            ( $fold.6256 : $Nat/tuple($Nat, $Nat)
+                            , $match.6318.x : $Nat
+                            )
+                        in
+                          case<tuple($Nat, $Nat)>($v.6312 : tuple($Nat, $Nat)) {
+                            | ( $Tuple2 : $Nat/$Nat/tuple($Nat, $Nat)
+                              , $match.6315.m : $Nat
+                              , $match.6316.n : $Nat
+                              ) =>
+                                @<tuple($Nat, $Nat)>
+                                  ( $Tuple2 : $Nat/$Nat/tuple($Nat, $Nat)
+                                  , $match.6316.n : $Nat
+                                  , @<$Nat>
+                                      ( @<$Nat/$Nat/$Nat>
+                                          ( Main.(+) : Numeric($Nat)/$Nat/$Nat/$Nat
+                                          , @<Numeric($Nat)>
+                                              ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                                              , { (*) =
+                                                  Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                                | (+) =
+                                                  Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                                | (-) =
+                                                  Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                                | from_bignum =
+                                                  Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                                                | from_int32 =
+                                                  Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
+                                                | from_int64 =
+                                                  Builtin$.from_int64__$impl_Numeric(TIntrinsic(INat)) : int64/$Nat
+                                                | negate =
+                                                  Builtin$.negate__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat
+                                                | {}
+                                                }
+                                              )
+                                          )
+                                      , $match.6315.m : $Nat
+                                      , $match.6316.n : $Nat
+                                      )
+                                  )
+                          }
+              | ( $Zero : $Nat
+                ) =>
+                  @<tuple($Nat, $Nat)>
+                    ( $Tuple2 : $Nat/$Nat/tuple($Nat, $Nat)
+                    , @<$Nat>
+                        ( @<int32/$Nat>
+                            ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
+                            , @<Numeric($Nat)>
+                                ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                                , { (*) =
+                                    Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                  | (+) =
+                                    Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                  | (-) =
+                                    Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                  | from_bignum =
+                                    Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                                  | from_int32 =
+                                    Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
+                                  | from_int64 =
+                                    Builtin$.from_int64__$impl_Numeric(TIntrinsic(INat)) : int64/$Nat
+                                  | negate =
+                                    Builtin$.negate__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat
+                                  | {}
+                                  }
+                                )
+                            )
+                        , 1
+                        )
+                    , @<$Nat>
+                        ( @<int32/$Nat>
+                            ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
+                            , @<Numeric($Nat)>
+                                ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                                , { (*) =
+                                    Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                  | (+) =
+                                    Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                  | (-) =
+                                    Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                                  | from_bignum =
+                                    Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                                  | from_int32 =
+                                    Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
+                                  | from_int64 =
+                                    Builtin$.from_int64__$impl_Numeric(TIntrinsic(INat)) : int64/$Nat
+                                  | negate =
+                                    Builtin$.negate__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat
+                                  | {}
+                                  }
+                                )
+                            )
+                        , 1
+                        )
+                    )
+            }
+        in
+          @<tuple($Nat, $Nat)>
+            ( $fold.6256 : $Nat/tuple($Nat, $Nat)
+            , @<$Nat>
+                ( @<$Nat/$Nat/$Nat>
+                    ( Main.(-) : Numeric($Nat)/$Nat/$Nat/$Nat
+                    , @<Numeric($Nat)>
+                        ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                        , { (*) =
+                            Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                          | (+) =
+                            Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                          | (-) =
+                            Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                          | from_bignum =
+                            Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                          | from_int32 =
+                            Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
+                          | from_int64 =
+                            Builtin$.from_int64__$impl_Numeric(TIntrinsic(INat)) : int64/$Nat
+                          | negate =
+                            Builtin$.negate__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat
+                          | {}
+                          }
+                        )
+                    )
+                , p : $Nat
+                , @<$Nat>
+                    ( @<int32/$Nat>
+                        ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
+                        , @<Numeric($Nat)>
+                            ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                            , { (*) =
+                                Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                              | (+) =
+                                Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                              | (-) =
+                                Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                              | from_bignum =
+                                Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                              | from_int32 =
+                                Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
+                              | from_int64 =
+                                Builtin$.from_int64__$impl_Numeric(TIntrinsic(INat)) : int64/$Nat
+                              | negate =
+                                Builtin$.negate__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat
+                              | {}
+                              }
+                            )
+                        )
+                    , 1
+                    )
+                )
+            )
+    in
+      case<$Nat>($v.6311 : tuple($Nat, $Nat)) {
+        | ( $Tuple2 : $Nat/$Nat/tuple($Nat, $Nat)
+          , $match.6323.res : $Nat
+          , $match.6324._ : $Nat
+          ) =>
+            case<$Nat>($v.6312 : tuple($Nat, $Nat)) {
+              | ( $Tuple2 : $Nat/$Nat/tuple($Nat, $Nat)
+                , $match.6320.m : $Nat
+                , $match.6321.n : $Nat
+                ) =>
+                  $match.6323.res : $Nat
+            }
+      }
+
+Main.main($v.6313 : unit) =
+  @<IO(unit)>
+    ( IO.println_int32 : int32/IO(unit)
+    , @<int32>
+        ( Nat.unpack : $Nat/int32
+        , @<$Nat>
+            ( Main.fib : $Nat/$Nat
+            , @<$Nat>
+                ( @<int32/$Nat>
+                    ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
+                    , @<Numeric($Nat)>
+                        ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                        , { (*) =
+                            Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                          | (+) =
+                            Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                          | (-) =
+                            Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
+                          | from_bignum =
+                            Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                          | from_int32 =
+                            Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
+                          | from_int64 =
+                            Builtin$.from_int64__$impl_Numeric(TIntrinsic(INat)) : int64/$Nat
+                          | negate =
+                            Builtin$.negate__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat
+                          | {}
+                          }
+                        )
+                    )
+                , 6
+                )
+            )
+        )
+    )
+}

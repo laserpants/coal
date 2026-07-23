@@ -1,0 +1,20 @@
+module Core$ {
+
+data $Nat
+  = Core$.$Zero
+  | Core$.$Succ($Nat)
+
+Core$.trace_int32(n : int32) =
+  let
+    __call_tmp : * =
+      @<*>
+        ( coal_print_int32 : int32/*
+        , n : int32
+        )
+    in
+      @<*>
+        ( fn(a : *) => a : *
+        , __call_tmp : *
+        )
+
+}

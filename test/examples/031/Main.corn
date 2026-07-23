@@ -1,0 +1,271 @@
+module Main {
+
+  data List
+    = Main.Nil
+    | Main.Cons(*, List(*))
+
+  data Tree
+    = Main.Leaf
+    | Main.Node(*, Tree(*), Tree(*))
+
+  data Ord
+    = Main.Eq
+    | Main.Gt
+    | Main.Lt
+
+  Main.fold_list
+    ( f : */*/*         // a/b/b
+    , acc : *           // b
+    , xs : List(*)      // [a]
+                        // b
+    ) =
+      case<*>(xs : List(*)) {
+        | ( Main.Cons : */List(*)/List(*)
+          , hd : *                 // a
+          , tl : List(*)           // [a]
+          ) => 
+          @<*>                     // b
+            ( Main.fold_list : (*/*/*)/*/List(*)/*
+            , f : */*/*
+            , @<*>                 // b
+                ( f : */*/*        // a/b/b
+                , hd : *           // a
+                , acc : *          // b
+                )
+            , tl : List(*)
+            )
+        | ( Main.Nil : List(*)
+          ) => 
+          acc : *
+      }
+
+  Main.insert
+    ( comp : */*/Ord
+    , e : *
+    , tree : Tree(*)
+    ) =
+    case<Tree(*)>(tree : Tree(*)) {
+      | ( Main.Leaf : Tree(*)
+        ) =>
+        @<Tree(*)>
+          ( Main.Node : */Tree(*)/Tree(*)/Tree(*)
+          , e : *
+          , Main.Leaf : Tree(*)
+          , Main.Leaf : Tree(*)
+          )
+      | ( Main.Node : */Tree(*)/Tree(*)/Tree(*)
+        , v : *
+        , lhs : Tree(*)
+        , rhs : Tree(*)
+        ) =>
+        let
+          res : Ord =
+            @<Ord>
+              ( comp : */*/Ord
+              , v : *
+              , e : *
+              )
+        in
+        case<Tree(*)>(res : Ord) {
+          | ( Main.Lt : Ord ) =>
+            @<Tree(*)>
+              ( Main.Node : */Tree(*)/Tree(*)/Tree(*)
+              , v : *
+              , lhs : Tree(*)
+              , @<Tree(*)>
+                  ( Main.insert : (*/*/Ord)/*/Tree(*)/Tree(*)
+                  , comp : */*/Ord
+                  , e : *
+                  , rhs : Tree(*)
+                  )
+              )
+          | ( Main.Gt : Ord ) =>
+            @<Tree(*)>
+              ( Main.Node : */Tree(*)/Tree(*)/Tree(*)
+              , v : *
+              , @<Tree(*)>
+                  ( Main.insert : (*/*/Ord)/*/Tree(*)/Tree(*)
+                  , comp : */*/Ord
+                  , e : *
+                  , lhs : Tree(*)
+                  )
+              , rhs : Tree(*)
+              )
+          | ( Main.Eq : Ord ) =>
+            @<Tree(*)>
+              ( Main.Node : */Tree(*)/Tree(*)/Tree(*)
+              , v : *
+              , lhs : Tree(*)
+              , rhs : Tree(*)
+              )
+        }
+    }
+
+  Main.compare_int32(a : int32, b : int32) =
+    if ([< int32](a : int32, b : int32))
+      then
+        Main.Lt : Ord
+      else 
+        if ([> int32](a : int32, b : int32))
+          then
+            Main.Gt : Ord
+          else 
+            Main.Eq : Ord
+
+  Main.compare_int64(a : int64, b : int64) =
+    if ([< int64](a : int64, b : int64))
+      then
+        Main.Lt : Ord
+      else 
+        if ([> int64](a : int64, b : int64))
+          then
+            Main.Gt : Ord
+          else 
+            Main.Eq : Ord
+
+  Main.int32_list_to_tree(xs : List(int32)) =
+    let
+      insert_int32 : int32/Tree(int32)/Tree(int32) =
+        @<int32/Tree(int32)/Tree(int32)>
+          ( Main.insert : (int32/int32/Ord)/int32/Tree(int32)/Tree(int32)
+          , Main.compare_int32 : int32/int32/Ord
+          )
+      in
+        @<Tree(int32)>
+          ( Main.fold_list : (int32/Tree(int32)/Tree(int32))/Tree(int32)/List(int32)/Tree(int32)
+          , insert_int32 : int32/Tree(int32)/Tree(int32)
+          , Main.Leaf : Tree(int32)
+          , xs : List(int32)
+          )
+
+  Main.int64_list_to_tree(xs : List(int64)) =
+    let
+      insert_int64 : int64/Tree(int64)/Tree(int64) =
+        @<int64/Tree(int64)/Tree(int64)>
+          ( Main.insert : (int64/int64/Ord)/int64/Tree(int64)/Tree(int64)
+          , Main.compare_int64 : int64/int64/Ord
+          )
+      in
+        @<Tree(int64)>
+          ( Main.fold_list : (int64/Tree(int64)/Tree(int64))/Tree(int64)/List(int64)/Tree(int64)
+          , insert_int64 : int64/Tree(int64)/Tree(int64)
+          , Main.Leaf : Tree(int64)
+          , xs : List(int64)
+          )
+
+  Main.list_concat(xs : List(*), ys : List(*)) =
+    case<List(*)>(xs : List(*)) {
+      | ( Main.Nil : List(*)
+        ) =>
+        ys : List(*)
+      | ( Main.Cons : */List(*)/List(*)
+        , hd : *
+        , tl : List(*)
+        ) =>
+        @<List(*)>
+          ( Main.Cons : */List(*)/List(*)
+          , hd : *
+          , @<List(*)>
+              ( Main.list_concat : List(*)/List(*)/List(*)
+              , tl : List(*) 
+              , ys : List(*)
+              )
+          )
+    }
+
+  Main.flatten_tree(tree : Tree(*)) =
+    case<List(*)>(tree : Tree(*)) {
+      | ( Main.Leaf : Tree(*)
+        ) =>
+        Main.Nil : List(*)
+      | ( Main.Node : */Tree(*)/Tree(*)/Tree(*)
+        , v : *
+        , lhs : Tree(*)
+        , rhs : Tree(*)
+        ) =>
+        let
+          ls : List(*) =
+            @<List(*)>
+              ( Main.flatten_tree : Tree(*)/List(*)
+              , lhs : Tree(*)
+              ) 
+          ;
+          rs : List(*) =
+            @<List(*)>
+              ( Main.Cons : */List(*)/List(*)
+              , v : *
+              , @<List(*)>
+                  ( Main.flatten_tree : Tree(*)/List(*)
+                  , rhs : Tree(*)
+                  )
+              )
+        in
+          @<List(*)>
+            ( Main.list_concat : List(*)/List(*)/List(*)
+            , ls : List(*)
+            , rs : List(*)
+            )
+    }
+
+  Main.sample_int32_list =
+    @<List(int32)>
+      ( Main.Cons : int32/List(int32)/List(int32)
+      , 5
+      , @<List(int32)>
+          ( Main.Cons : int32/List(int32)/List(int32)
+          , 2
+          , @<List(int32)>
+              ( Main.Cons : int32/List(int32)/List(int32)
+              , 1
+              , @<List(int32)>
+                  ( Main.Cons : int32/List(int32)/List(int32)
+                  , 4
+                  , @<List(int32)>
+                      ( Main.Cons : int32/List(int32)/List(int32)
+                      , 3
+                      , Main.Nil : List(int32)
+                      )
+                  )
+              )
+          )
+      )
+
+  Main.sort(xs : List(int32)) =
+    @<List(int32)>
+      ( Main.flatten_tree : Tree(int32)/List(int32)
+      , @<Tree(int32)>
+          ( Main.int32_list_to_tree : List(int32)/Tree(int32)
+          , xs : List(int32)
+          )
+      )
+  
+  Main.main(_ : *) = 
+    let
+      xs : List(int32) =
+        @<List(int32)>
+          ( Main.sort : List(int32)/List(int32)
+          , Main.sample_int32_list : List(int32)
+          )
+      in
+        let
+          res : * =
+            case<*>(xs : List(int32)) {
+              | ( Main.Cons : int32/List(int32)/List(int32)
+                , hd : int32        
+                , tl : List(int32)   
+                ) => 
+                @<*>
+                  ( coal_print_int32 : int32/*
+                  , hd : int32
+                  )
+              | ( Main.Nil : List(*)
+                ) => 
+                @<*>
+                  ( coal_print_int32 : int32/*
+                  , 0
+                  )
+            }
+          in
+            0
+
+}

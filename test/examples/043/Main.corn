@@ -1,0 +1,24 @@
+module Main {
+
+  Main.main(_ : *) =
+    let 
+      _ : * =
+        let
+          r : { foo : int32 | `(*)` : int32/int32/int32 | {}} =
+            { foo = 5
+            | `(*)` = fn(x : int32, y : int32) => x : int32
+            | {}
+            }
+          in
+            @<*>
+              ( coal_print_int32 : int32/*
+              , @<int32>
+                  ( get?_`(*)`<int32/int32/int32>(r : { `(*)` : int32/int32/int32 | * })
+                  , 8
+                  , 2
+                  )
+              )
+      in
+        0
+
+}

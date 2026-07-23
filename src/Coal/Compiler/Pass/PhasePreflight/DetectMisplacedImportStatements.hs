@@ -13,7 +13,7 @@ the beginning of a module, before any other definitions.
 For example, this is valid:
 
 @
-module MyModule
+module Coal.MyModule
 
 import List(concat, head, tail)
 import String(is_empty)
@@ -24,7 +24,7 @@ fun my_function() = ...
 But this would be flagged as an error:
 
 @
-module MyModule
+module Coal.MyModule
 
 fun my_function() = ...
 
@@ -52,7 +52,10 @@ import Coal.Compiler.Stack (
 import Coal.Language.Definition (Definition (DImport, DNamespaceImport))
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
-import Control.Monad.Except (MonadError (throwError), MonadIO, forM_, unless)
+import Control.Monad (unless)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.IO.Class (MonadIO)
+import Extras (forM_)
 
 {- | Misplaced import detection pass.
 

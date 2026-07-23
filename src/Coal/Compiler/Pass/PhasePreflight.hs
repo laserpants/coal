@@ -7,6 +7,7 @@ import Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation (passDesugarDoNotatio
 import Coal.Compiler.Pass.PhasePreflight.DesugarWhereClauses (passDesugarWhereClauses)
 import Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles (passDetectAliasCycles)
 import Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams (passDetectDuplicateParams)
+import Coal.Compiler.Pass.PhasePreflight.DetectInvalidExports (passDetectInvalidExports)
 import Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing (passDetectMainEntrypointMissing)
 import Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements (passDetectMisplacedImportStatements)
 import Coal.Compiler.Pass.PhasePreflight.DetectShadowing (passDetectShadowing)
@@ -26,5 +27,6 @@ phasePreflight =
     >-> passDesugarDoNotation
     >-> passDetectAliasCycles
     >-> passDetectShadowing
-    >-> passDetectMainEntrypointMissing
     >-> passDetectDuplicateParams
+    >-> passDetectInvalidExports
+    >-> passDetectMainEntrypointMissing

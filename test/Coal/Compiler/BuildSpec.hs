@@ -241,7 +241,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_add"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                        :| mempty
+                                      :| mempty
                                   )
                             }
                         )
@@ -265,7 +265,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_sub"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                        :| mempty
+                                      :| mempty
                                   )
                             }
                         )
@@ -289,7 +289,7 @@ testModuleBuiltinsPreKinds =
                                   (EVariable mempty (Label () "bultin$_int32_mul"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                        :| mempty
+                                      :| mempty
                                   )
                             }
                         )
@@ -496,7 +496,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_add"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                        :| mempty
+                                      :| mempty
                                   )
                             }
                         )
@@ -520,7 +520,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_sub"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                        :| mempty
+                                      :| mempty
                                   )
                             }
                         )
@@ -544,7 +544,7 @@ testModuleBuiltins =
                                   (EVariable mempty (Label () "bultin$_int32_mul"))
                                   ( EVariable mempty (Label () "m")
                                       <| EVariable mempty (Label () "n")
-                                        :| mempty
+                                      :| mempty
                                   )
                             }
                         )
@@ -844,12 +844,12 @@ testModule2PreKinds =
                                                     :| mempty
                                                 )
                                                 <| EVariable mempty (Label () "f")
-                                                  :| mempty
+                                                :| mempty
                                             )
                                         )
                                         :| mempty
                                     )
-                                    :| mempty
+                                  :| mempty
                               )
                           )
                       )

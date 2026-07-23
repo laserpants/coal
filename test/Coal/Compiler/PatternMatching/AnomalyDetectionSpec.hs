@@ -2,23 +2,22 @@
 
 module Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec) where
 
-import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Environment
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.PatternMatching.AnomalyDetection
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module.Path (Path (..))
 import Control.Monad.Identity (runIdentity)
-import Control.Monad.State (lift, modify, put)
+import Control.Monad.State (put)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
-import Extras (Name)
 import Test.Hspec
 
 example1 :: [Pat]
@@ -174,7 +173,7 @@ testEnv =
 runTest :: [Pat] -> Bool
 runTest px = r2
  where
-  Right r2 = runIdentity (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive px))
+  Right r2 = runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive px))
   setupEnv = do
     -- lift $ updateCurrentBuildC (pure . overBuildDataConstructors (const testEnv))
     put
@@ -235,7 +234,7 @@ example11 =
 runTest2 :: [Pattern a () t] -> Bool
 runTest2 px = r2
  where
-  Right r2 = runIdentity (evalCompilerT (emptyCompilerEnvironment Nothing) (setupEnv >> exhaustive (translatePattern <$> px)))
+  Right r2 = runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive (translatePattern <$> px)))
   setupEnv = do
     put
       initialCompilerState

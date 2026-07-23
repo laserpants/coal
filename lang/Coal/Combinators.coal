@@ -1,74 +1,114 @@
+/**
+ * Combinators and tuple operations for functional programming.
+ */
 module Coal.Combinators {
 
   /**
    * The identity function.
    *
    * Returns the value unchanged.
+   *
+   * **Type**: `identity : a -> a`
    */
   fun identity(x) = x
 
   /**
    * When applied to one argument, return a function that always returns this 
    * value.
+   *
+   * **Type**: `always : a -> b -> a`
    */
   fun always(x : a, _) : a = x
 
   /**
    * Extract the first element of a pair.
+   *
+   * **Type**: `fst : (a, b) -> a`
    */
   fun fst((a, _)) = a
 
   /**
    * Extract the second element of a pair.
+   *
+   * **Type**: `snd : (a, b) -> b`
    */
   fun snd((_, b)) = b
 
   /**
    * Apply a function to the first element of a pair.
+   *
+   * **Type**: `apply_fst : (a -> b) -> (a, c) -> (b, c)`
    */
   fun apply_fst(f, (a, b)) = (f(a), b)
 
   /**
    * Apply a function to the second element of a pair.
+   *
+   * **Type**: `apply_snd : (b -> c) -> (a, b) -> (a, c)`
    */
   fun apply_snd(f, (a, b)) = (a, f(b))
 
   /**
    * Swap the components of a pair.
+   *
+   * **Type**: `swap : (a, b) -> (b, a)`
    */
   fun swap((a, b)) = (b, a)
 
   /**
    * Extract the first element of a triple.
+   *
+   * **Type**: `fst3 : (a, b, c) -> a`
    */
   fun fst3((a, _, _)) = a
 
   /**
    * Extract the second element of a triple.
+   *
+   * **Type**: `snd3 : (a, b, c) -> b`
    */
   fun snd3((_, b, _)) = b
 
   /**
    * Extract the third element of a triple.
+   *
+   * **Type**: `thd3 : (a, b, c) -> c`
    */
   fun thd3((_, _, c)) = c
 
   /**
    * Convert a function that takes a pair into one that takes two arguments.
+   *
+   * **Type**: `curry : ((a, b) -> c) -> a -> b -> c`
    */
   fun curry(f : (a, b) -> c, x : a, y : b) : c = 
     f((x, y))
 
   /**
    * Convert a function of two arguments into one that takes a pair.
+   *
+   * **Type**: `uncurry : (a -> b -> c) -> (a, b) -> c`
    */
   fun uncurry(f : a -> b -> c, (x, y) : (a, b)) : c = 
     f(x, y)
 
   /**
    * Reverse the order of the arguments to a two-argument function.
+   *
+   * **Type**: `flip : (a -> b -> c) -> b -> a -> c`
    */
   fun flip(f : a -> b -> c, y : b, x : a) : c =
     f(x, y)
+
+  /**
+   * Apply the function `f` to the value `x`, `n` times.
+   *
+   * **Type**: `iterate : nat -> (a -> a) -> a -> a`
+   */
+  fun iterate(n : nat, f : a -> a, x : a) : a =
+    fold(n, x) {
+      | Zero      => fn(y) => y
+      | Succ(@go) => fn(y) => go(f(y))
+    }
 
 }

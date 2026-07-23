@@ -20,7 +20,8 @@ import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
 import Control.Monad (forM_, unless)
-import Control.Monad.Except (MonadError (throwError), MonadIO)
+import Control.Monad.Except (MonadError (throwError))
+import Control.Monad.IO.Class (MonadIO)
 
 {- | Type error pass.
 

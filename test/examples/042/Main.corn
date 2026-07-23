@@ -1,0 +1,22 @@
+module Main {
+
+  Main.baz(_ : unit) =
+    1239
+
+  Main.foo =
+    @<int32>
+      ( Main.baz : unit/int32
+      , ()
+      )
+
+  Main.main(_ : *) =
+    let
+      r : * =
+        @<*>
+          ( coal_println_int32 : int32/*
+          , Main.foo : int32
+          )
+      in
+        0
+
+}

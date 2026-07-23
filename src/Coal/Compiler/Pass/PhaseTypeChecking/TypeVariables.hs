@@ -13,6 +13,7 @@ parameter list.
 module Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (
   collectTypeVarNames,
   collectTypeVarNamesInRow,
+  collectTypeConstructorNames,
 ) where
 
 import Coal.Language.Type (Parameter (..), Type (..))
@@ -42,4 +43,27 @@ collectTypeVarNamesInRow =
   \case
     RExtend _ t row -> collectTypeVarNames t <> collectTypeVarNamesInRow row
     RVariable Parameter{..} -> Set.singleton parameterName
+    RNil -> Set.empty
+
+{- | Collect all type constructor names from a type
+Used to check for undefined type constructors in trait interface schemes
+-}
+collectTypeConstructorNames :: Type Parameter k -> Set Name
+collectTypeConstructorNames =
+  \case
+    TConstructor _ name -> Set.singleton name
+    TArrow t1 t2 -> collectTypeConstructorNames t1 <> collectTypeConstructorNames t2
+    TApplication _ t1 t2 -> collectTypeConstructorNames t1 <> collectTypeConstructorNames t2
+    TRecord t -> collectTypeConstructorNames t
+    TRow row -> collectTypeConstructorNamesInRow row
+    TAlias _ ts t -> foldMap collectTypeConstructorNames ts <> collectTypeConstructorNames t
+    TVariable{} -> Set.empty
+    TIntrinsic{} -> Set.empty
+
+-- | Collect all type constructor names from a row type
+collectTypeConstructorNamesInRow :: Row Parameter k (Type Parameter k) -> Set Name
+collectTypeConstructorNamesInRow =
+  \case
+    RExtend _ t row -> collectTypeConstructorNames t <> collectTypeConstructorNamesInRow row
+    RVariable{} -> Set.empty
     RNil -> Set.empty

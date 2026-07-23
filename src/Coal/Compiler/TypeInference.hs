@@ -69,7 +69,7 @@ import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replac
 import Coal.TypeSystem.Substitution
 import Control.Arrow ((>>>))
 import Control.Monad (unless)
-import Control.Monad.Except (forM_, throwError)
+import Control.Monad.Except (throwError)
 import Control.Monad.Reader (runReaderT)
 import Control.Monad.State (get, gets)
 import Control.Monad.Writer (MonadWriter, execWriter, tell)
@@ -78,7 +78,7 @@ import Data.Either.Extra (partitionEithers)
 import Data.List.Extra (groupSortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Extras (Dictionary, Name, concatMapM)
+import Extras (Dictionary, Name, concatMapM, forM_)
 
 generateKindConstraints :: (Monad m) => Module a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do
@@ -86,7 +86,7 @@ generateKindConstraints modul = do
   (_, result) <- runKindConstraintsGen env (emitKindConstraints modul)
   let (errors, constraints) = partitionEithers result
   insertKindConstraintsC constraints
-  compilerReportKindConstraintsGenErrors errors
+  compilerReportKindConstraintsGenErrorsC errors
 
 class GenerateConstraints a c where
   generateConstraints :: (Monad m) => c -> CompilerT a m ()
@@ -210,7 +210,7 @@ generateExpressionConstraints :: (Monad m, Data a, Show a) => Expression a Kind 
 generateExpressionConstraints expr = do
   (assumptions, params, result) <- runConstraintsGen (emitConstraints expr)
   let (errors, constraints) = partitionEithers result
-  compilerReportConstraintsGenErrors errors
+  compilerReportConstraintsGenErrorsC errors
   setTypeAnnotationParamsC params
   return (assumptions, constraints)
 
@@ -260,8 +260,8 @@ solveConstraintsT constraints = do
   let (sub, m, rs) = solveConstraints n constraints
   updateSupplyC m
   let errors = execWriter (checkTypeAnnotationParameters (Map.toList dict) sub)
-  compilerReportSolverRuleViolations (apply sub rs)
-  compilerReportConstraintsGenErrors (EIllFormedTypeAnnotation <$> errors)
+  compilerReportSolverRuleViolationsC (apply sub rs)
+  compilerReportConstraintsGenErrorsC (EIllFormedTypeAnnotation <$> errors)
   return sub
 
 solveT :: (Monad m, Data a, Eq a) => CompilerT a m Substitution

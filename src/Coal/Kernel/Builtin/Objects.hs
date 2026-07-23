@@ -3,118 +3,196 @@
 
 module Coal.Kernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
-import Coal.Common.Label (Label (..))
 import qualified Coal.Compiler.Builtin.Traits as Trait
-import Coal.Kernel.Language (Module (..), Object (..), char, opaque)
-import qualified Coal.Kernel.Language as Kernel
-import Coal.Kernel.Parser.Expr (expr)
-import Coal.Language
-import Data.Text (Text)
+import qualified Coal.Kernel.Language.Expr as NK
+import Coal.Kernel.Language.Module (Module (..))
+import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
+import qualified Coal.Kernel.Language.Type as NKT
+import qualified Coal.Kernel.Language.Type.Constructors as NKC
+import Coal.Kernel.Parser.Unsafe (unsafeParseExpr)
+import Coal.Language (
+  Intrinsic (..),
+  Parameter (..),
+  Serializable,
+  Trait (..),
+  Type (TApplication, TConstructor, TIntrinsic, TVariable),
+  instanceLabel,
+ )
 import qualified Data.Text as Text
 import Extras (Name)
-import Text.Megaparsec (errorBundlePretty, runParser)
 import Text.RawString.QQ (r)
 
-builtinObjects :: Kernel.Module Kernel.Type Name (Kernel.Expr Kernel.Type)
-builtinObjects = unsafeParseKernelExpr <$> objects
+builtinObjects :: Module NKT.Type
+builtinObjects = objects
 
 builtinInstance :: (Serializable t) => Trait t -> Name -> Name
 builtinInstance trait name = instanceLabel trait ("Builtin$." <> name)
 
-objects :: Kernel.Module Kernel.Type Name Text
+objects :: Module NKT.Type
 objects =
-  Kernel.Module
+  Module
     { moduleName = "Builtin$"
-    , moduleImports =
-        []
-    , moduleObjects =
-        [ OData "EqualTo" 0 (Kernel.TCon "Ordering" [])
-        , OData "GreaterThan" 1 (Kernel.TCon "Ordering" [])
-        , OData "LessThan" 2 (Kernel.TCon "Ordering" [])
-        , OFunction
-            "Builtin$.operator$__not"
-            [ Label Kernel.bool "a"
-            ]
-            [r| 
+    , moduleImports = []
+    , moduleObjects = objectList
+    }
+
+objectList :: [Object NKT.Type]
+objectList =
+  [ DData
+      "Ordering"
+      [ ("EqualTo", NKT.TCon "Ordering" [])
+      , ("GreaterThan", NKT.TCon "Ordering" [])
+      , ("LessThan", NKT.TCon "Ordering" [])
+      ]
+  , -- Machine: single constructor taking one opaque argument (the state record).
+    -- Declared here so Builtin$ bodies can use the unqualified name.
+    DData
+      "Machine"
+      [ ("Machine", NKC.arrow NKT.TOpq (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]))
+      ]
+  , DFunction
+      Exported
+      "Builtin$.operator$__not"
+      [ NK.Label NKC.bool "a"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if (a : bool) then false else true
-              |]
-        , OFunction
-            "Builtin$.not"
-            [ Label Kernel.bool "a"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.not"
+      [ NK.Label NKC.bool "a"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if (a : bool) then false else true
-              |]
-        , OFunction
-            "Builtin$.char$_ord"
-            [ Label Kernel.char "c"
-            ]
-            [r| 
-                  c : int32
-              |]
-        , OFunction
-            "Builtin$.char$_chr"
-            [ Label Kernel.int32 "n"
-            ]
-            [r| 
-                  n : char
-              |]
-        , OFunction
-            "Builtin$.number$_unsafe_parse_bignum"
-            [ Label Kernel.string "input"
-            ]
-            [r| 
-                  #(bignum_init : string/*, input : string) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.operator$__reverse_composition"
-            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "g"
-            , Label Kernel.opaque "x"
-            ]
-            [r| 
-                  @<*>(f : */*, @<*>(g : */*, x : *))
-              |]
-        , OFunction
-            "Builtin$.operator$__forward_composition"
-            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "g"
-            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            , Label Kernel.opaque "x"
-            ]
-            [r| 
-                  @<*>(f : */*, @<*>(g : */*, x : *))
-              |]
-        , OFunction
-            "Builtin$.operator$__reverse_application"
-            [ Label Kernel.opaque "x"
-            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            ]
-            [r| 
-                  @<*>(f : */*, x : *)
-              |]
-        , OFunction
-            "Builtin$.operator$__forward_application"
-            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            , Label Kernel.opaque "x"
-            ]
-            [r| 
-                  @<*>(f : */*, x : *)
-              |]
-        , OFunction
-            "Builtin$.always"
-            [ Label Kernel.opaque "a"
-            , Label Kernel.opaque "_"
-            ]
-            [r|   
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.char$_ord"
+      [ NK.Label NKC.char "c"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<char>
+                    ( rt_char_unbox : char/int32
+                    , c : char
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.char$_chr"
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<char>
+                    ( rt_char_box : int32/char
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.number$_unsafe_parse_bignum"
+      [ NK.Label NKC.string "input"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_bignum_init : string/bignum
+                    , input : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.operator$__reverse_composition"
+      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
+      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "g"
+      , NK.Label NKT.TOpq "x"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( f : */*
+                    , @<*>
+                        ( g : */*
+                        , x : *
+                        )
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.operator$__forward_composition"
+      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "g"
+      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
+      , NK.Label NKT.TOpq "x"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( f : */*
+                    , @<*>
+                        ( g : */*
+                        , x : *
+                        )
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.operator$__reverse_application"
+      [ NK.Label NKT.TOpq "x"
+      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( f : */*
+                    , x : *
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.operator$__forward_application"
+      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
+      , NK.Label NKT.TOpq "x"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( f : */*
+                    , x : *
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.always"
+      [ NK.Label NKT.TOpq "a"
+      , NK.Label NKT.TOpq "_"
+      ]
+      ( unsafeParseExpr
+          [r|
                   a : *
-              |]
-        , OFunction
-            "Builtin$.operator$__list_concatenation"
-            [ Label (Kernel.TCon "list" [Kernel.opaque]) "xs"
-            , Label (Kernel.TCon "list" [Kernel.opaque]) "ys"
-            ]
-            [r| 
-                  match<list(*)>(xs : list(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.operator$__list_concatenation"
+      [ NK.Label (NKT.TCon "list" [NKT.TOpq]) "xs"
+      , NK.Label (NKT.TCon "list" [NKT.TOpq]) "ys"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<list(*)>(xs : list(*)) {
                     | ( $Cons : */list(*)/list(*)
                       , z : *
                       , zs : list(*)
@@ -132,168 +210,304 @@ objects =
                       ) =>
                         ys : list(*)
                   }
-              |]
-        , OFunction
-            "Builtin$.io$_print_int32"
-            [ Label Kernel.int32 "n"
-            ]
-            [r|
-                  #(print_int32 : int32/*, n : int32) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_print_int64"
-            [ Label Kernel.int64 "n"
-            ]
-            [r|
-                  #(print_int64 : int64/*, n : int64) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_print_bignum"
-            [ Label Kernel.bignum "n"
-            ]
-            [r|
-                  #(print_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_print_string"
-            [ Label Kernel.string "s"
-            ]
-            [r|
-                  #(print_string : string/*, s : string) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_print_bool"
-            [ Label Kernel.bool "b"
-            ]
-            [r|
-                  #(print_bool : bool/*, b : bool) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_print_char"
-            [ Label Kernel.char "c"
-            ]
-            [r|
-                  #(print_char : char/*, c : char) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_print_float"
-            [ Label Kernel.float "f"
-            ]
-            [r|
-                  #(print_float : float/*, f : float) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_print_double"
-            [ Label Kernel.double "d"
-            ]
-            [r|
-                  #(print_double : double/*, d : double) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_int32"
-            [ Label Kernel.int32 "n"
-            ]
-            [r|
-                  #(println_int32 : int32/*, n : int32) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_int64"
-            [ Label Kernel.int64 "n"
-            ]
-            [r|
-                  #(println_int64 : int64/*, n : int64) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_bignum"
-            [ Label Kernel.bignum "n"
-            ]
-            [r|
-                  #(println_bignum : bignum/*, n : bignum) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_string"
-            [ Label Kernel.string "s"
-            ]
-            [r|
-                  #(println_string : string/*, s : string) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_bool"
-            [ Label Kernel.bool "b"
-            ]
-            [r|
-                  #(println_bool : bool/*, b : bool) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_char"
-            [ Label Kernel.char "c"
-            ]
-            [r|
-                  #(println_char : char/*, c : char) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_float"
-            [ Label Kernel.float "f"
-            ]
-            [r|
-                  #(println_float : float/*, f : float) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.io$_println_double"
-            [ Label Kernel.double "d"
-            ]
-            [r|
-                  #(println_double : double/*, d : double) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            "Builtin$.operator$__string_concatenation"
-            [ Label Kernel.string "s"
-            , Label Kernel.string "t"
-            ]
-            [r|
-                  #(string_concat : string/string/string, s : string, t : string) (fn(r : string) => r : string)
-              |]
-        , OFunction
-            "Builtin$.string$_int32_to_string"
-            [ Label Kernel.int32 "n"
-            ]
-            [r| 
-                  #(int32_to_string : int32/string, n : int32) (fn(r : string) => r : string)
-              |]
-        , OFunction
-            "Builtin$.string$_float_to_string"
-            [ Label Kernel.float "f"
-            ]
-            [r| 
-                  #(float_to_string : float/string, f : float) (fn(r : string) => r : string)
-              |]
-        , OFunction
-            "Builtin$.string$_double_to_string"
-            [ Label Kernel.double "d"
-            ]
-            [r| 
-                  #(double_to_string : double/string, d : double) (fn(r : string) => r : string)
-              |]
-        , OFunction
-            "Builtin$.string$_char_to_string"
-            [ Label Kernel.char "c"
-            ]
-            [r| 
-                  #(char_to_string : char/string, c : char) (fn(r : string) => r : string)
-              |]
-        , OFunction
-            "Builtin$.string$_bool_to_string"
-            [ Label Kernel.bool "b"
-            ]
-            [r| 
-                  #(bool_to_string : bool/string, b : bool) (fn(r : string) => r : string)
-              |]
-        , OFunction
-            "Builtin$.nat$_unpack"
-            [ Label (Kernel.TCon "$Nat" []) "nat"
-            ]
-            [r| 
-                  match<int32>(nat: $Nat) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_int32"
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_int32 : int32/*
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_int64"
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_int64 : int64/*
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_bignum"
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_bignum : bignum/*
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_string"
+      [ NK.Label NKC.string "s"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_string : string/*
+                    , s : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_bool"
+      [ NK.Label NKC.bool "b"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_bool : bool/*
+                    , b : bool
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_char"
+      [ NK.Label NKC.char "c"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_char : char/*
+                    , c : char
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_float"
+      [ NK.Label NKC.float "f"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_float : float/*
+                    , f : float
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_print_double"
+      [ NK.Label NKC.double "d"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_print_double : double/*
+                    , d : double
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_int32"
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_println_int32 : int32/*
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_int64"
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_println_int64 : int64/*
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_bignum"
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_println_bignum : bignum/*
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_string"
+      [ NK.Label NKC.string "s"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_println_string : string/*
+                    , s : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_bool"
+      [ NK.Label NKC.bool "b"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_println_bool : bool/*
+                    , b : bool
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_char"
+      [ NK.Label NKC.char "c"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( coal_println_char : char/*
+                    , c : char
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_float"
+      [ NK.Label NKC.float "f"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( rt_println_float : float/*
+                    , f : float
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_println_double"
+      [ NK.Label NKC.double "d"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<*>
+                    ( rt_println_double : double/*
+                    , d : double
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.operator$__string_concatenation"
+      [ NK.Label NKC.string "s"
+      , NK.Label NKC.string "t"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_string_concat : string/string/string
+                    , s : string
+                    , t : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_int32_to_string"
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_int32_to_string : int32/string
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_float_to_string"
+      [ NK.Label NKC.float "f"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( rt_float_to_string : float/string
+                    , f : float
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_double_to_string"
+      [ NK.Label NKC.double "d"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( rt_double_to_string : double/string
+                    , d : double
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_char_to_string"
+      [ NK.Label NKC.char "c"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_char_to_string : char/string
+                    , c : char
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_bool_to_string"
+      [ NK.Label NKC.bool "b"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_bool_to_string : bool/string
+                    , b : bool
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.nat$_unpack"
+      [ NK.Label (NKT.TCon "nat" []) "nat"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<int32>(nat: $Nat) {
                     | ( $Succ : int32/$Nat
                       , succ : int32
                       ) =>
@@ -302,12 +516,15 @@ objects =
                       ) =>
                         0
                   }
-              |]
-        , OFunction
-            "Builtin$.nat$_pack"
-            [ Label Kernel.int32 "n"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.nat$_pack"
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([<= int32](n : int32, 0))
                     then
                       $Zero : $Nat
@@ -316,370 +533,480 @@ objects =
                         ( $Succ : int32/$Nat
                         , [- int32](n : int32, 1)
                         )
-              |]
-        , OFunction
-            "Builtin$.from_int32"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            ]
-            [r|
-                  match<int32/*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.from_int32"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<int32/*>($a : Numeric(*)) {
                     | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
                       , $r : { from_int32 : int32/* | * }
                       ) =>
-                        select
-                          { from_int32 = $f : int32/* | _ : * } =
-                            $r : { from_int32 : int32/* | * }
-                          in
-                            $f : int32/*
+                        get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
                   }
-              |]
-        , OFunction
-            "Builtin$.from_int64"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            ]
-            [r|
-                  match<int64/*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.from_int64"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<int64/*>($a : Numeric(*)) {
                     | ( $Record : { from_int64 : int64/* | * }/Numeric(*)
                       , $r : { from_int64 : int64/* | * }
                       ) =>
-                        select
-                          { from_int64 = $f : int64/* | _ : * } =
-                            $r : { from_int64 : int64/* | * }
-                          in
-                            $f : int64/*
+                        get?_from_int64<int64/*>($r : { from_int64 : int64/* | * })
                   }
-              |]
-        , OFunction
-            "Builtin$.from_bignum"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            ]
-            [r| 
-                  match<bignum/*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.from_bignum"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bignum/*>($a : Numeric(*)) {
                     | ( $Record : { from_bignum : bignum/* | * }/Numeric(*)
                       , $r : { from_bignum : bignum/* | * }
                       ) =>
-                        select
-                          { from_bignum = $f : bignum/* | _ : * } =
-                            $r : { from_bignum : bignum/* | * }
-                          in
-                            $f : bignum/*
+                        get?_from_bignum<bignum/*>($r : { from_bignum : bignum/* | * })
                   }
-              |]
-        , OFunction
-            "Builtin$.negate"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            ]
-            [r| 
-                  match<*/*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.negate"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*/*>($a : Numeric(*)) {
                     | ( $Record : { negate : */* | * }/Numeric(*)
                       , $r : { negate : */* | * }
                       ) =>
-                        select
-                          { negate = $f : */* | _ : * } =
-                            $r : { negate : */* | * }
-                          in
-                            $f : */*
+                        get?_negate<*/*>($r : { negate : */* | * })
                   }
-              |]
-        , OFunction
-            "Builtin$.(+)"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            ]
-            [r| 
-                  match<*/*/*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(+)"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*/*/*>($a : Numeric(*)) {
                     | ( $Record : { `(+)` : */*/* | * }/Numeric(*)
                       , $r : { `(+)` : */*/* | * }
                       ) =>
-                        select
-                          { `(+)` = $f : */*/* | _ : * } =
-                            $r : { `(+)` : */*/* | * }
-                          in
-                            $f : */*/*
+                        get?_`(+)`<*/*/*>($r : { `(+)` : */*/* | * })
                   }
-              |]
-        , OFunction
-            "Builtin$.(-)"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            ]
-            [r| 
-                  match<*/*/*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(-)"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*/*/*>($a : Numeric(*)) {
                     | ( $Record : { `(-)` : */*/* | * }/Numeric(*)
                       , $r : { `(-)` : */*/* | * }
                       ) =>
-                        select
-                          { `(-)` = $f : */*/* | _ : * } =
-                            $r : { `(-)` : */*/* | * }
-                          in
-                            $f : */*/*
+                        get?_`(-)`<*/*/*>($r : { `(-)` : */*/* | * })
                   }
-              |]
-        , OFunction
-            "Builtin$.(*)"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            ]
-            [r| 
-                  match<*/*/*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(*)"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*/*/*>($a : Numeric(*)) {
                     | ( $Record : { `(*)` : */*/* | * }/Numeric(*)
                       , $r : { `(*)` : */*/* | * }
                       ) =>
-                        select
-                          { `(*)` = $f : */*/* | _ : * } =
-                            $r : { `(*)` : */*/* | * }
-                          in
-                            $f : */*/*
+                        get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
                   }
-              |]
-        , -- Numeric(int32)
-          OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int32")
-            [ Label Kernel.int32 "n"
-            ]
-            [r|
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int32")
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   n : int32
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int64")
-            [ Label Kernel.int64 "n"
-            ]
-            [r|
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int64")
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   n : int64
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_bignum")
-            [ Label Kernel.bignum "n"
-            ]
-            [r| 
-                  #(bignum_to_int32 : bignum/int32, n : bignum)(fn(m : int32) => m : int32)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(+)")
-            [ Label Kernel.int32 "lhs"
-            , Label Kernel.int32 "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_bignum")
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<int32>
+                    ( coal_bignum_to_int32 : bignum/int32
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(+)")
+      [ NK.Label NKC.int32 "lhs"
+      , NK.Label NKC.int32 "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [+ int32](lhs : int32, rhs : int32)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")
-            [ Label Kernel.int32 "lhs"
-            , Label Kernel.int32 "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")
+      [ NK.Label NKC.int32 "lhs"
+      , NK.Label NKC.int32 "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [- int32](lhs : int32, rhs : int32)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(*)")
-            [ Label Kernel.int32 "lhs"
-            , Label Kernel.int32 "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(*)")
+      [ NK.Label NKC.int32 "lhs"
+      , NK.Label NKC.int32 "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [* int32](lhs : int32, rhs : int32)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "negate")
-            [ Label Kernel.int32 "n"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "negate")
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [- int32](0, n : int32)
-              |]
-        , -- Numeric(int64)
-          OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int32")
-            [ Label Kernel.int32 "n"
-            ]
-            [r|
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int32")
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   n : int32
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int64")
-            [ Label Kernel.int64 "n"
-            ]
-            [r|
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int64")
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   n : int64
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_bignum")
-            [ Label Kernel.bignum "n"
-            ]
-            [r| 
-                  #(bignum_to_int64 : bignum/int64, n : bignum)(fn(m : int64) => m : int64)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(+)")
-            [ Label Kernel.int64 "lhs"
-            , Label Kernel.int64 "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_bignum")
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<int64>
+                    ( coal_bignum_to_int64 : bignum/int64
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(+)")
+      [ NK.Label NKC.int64 "lhs"
+      , NK.Label NKC.int64 "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [+ int64](lhs : int64, rhs : int64)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(-)")
-            [ Label Kernel.int64 "lhs"
-            , Label Kernel.int64 "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(-)")
+      [ NK.Label NKC.int64 "lhs"
+      , NK.Label NKC.int64 "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [- int64](lhs : int64, rhs : int64)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(*)")
-            [ Label Kernel.int64 "lhs"
-            , Label Kernel.int64 "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(*)")
+      [ NK.Label NKC.int64 "lhs"
+      , NK.Label NKC.int64 "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [* int64](lhs : int64, rhs : int64)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "negate")
-            [ Label Kernel.int64 "n"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "negate")
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [- int64](0, n : int64)
-              |]
-        , -- Numeric(float)
-          OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int32")
-            [ Label Kernel.int32 "n"
-            ]
-            [r|
-                  #(int32_to_float : int32/float, n : int32) (fn(f : float) => f : float)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int64")
-            [ Label Kernel.int64 "n"
-            ]
-            [r|
-                  #(int64_to_float : int64/float, n : int64) (fn(f : float) => f : float)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_bignum")
-            [ Label Kernel.bignum "n"
-            ]
-            [r| 
-                  #(bignum_to_float : bignum/float, n : bignum) (fn(m : float) => m : float)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(+)")
-            [ Label Kernel.float "lhs"
-            , Label Kernel.float "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int32")
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<float>
+                    ( coal_int32_to_float : int32/float
+                    , n : int32 
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int64")
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<float>
+                    ( coal_int64_to_float : int64/float
+                    , n : int64 
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_bignum")
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<float>
+                    ( coal_bignum_to_float : bignum/float
+                    , n : bignum 
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(+)")
+      [ NK.Label NKC.float "lhs"
+      , NK.Label NKC.float "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [+ float](lhs : float, rhs : float)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(-)")
-            [ Label Kernel.float "lhs"
-            , Label Kernel.float "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(-)")
+      [ NK.Label NKC.float "lhs"
+      , NK.Label NKC.float "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [- float](lhs : float, rhs : float)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(*)")
-            [ Label Kernel.float "lhs"
-            , Label Kernel.float "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(*)")
+      [ NK.Label NKC.float "lhs"
+      , NK.Label NKC.float "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [* float](lhs : float, rhs : float)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "negate")
-            [ Label Kernel.float "f"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "negate")
+      [ NK.Label NKC.float "f"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [neg float](f : float)
-              |]
-        , -- Numeric(double)
-          OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int32")
-            [ Label Kernel.int32 "n"
-            ]
-            [r|
-                  #(int32_to_double : int32/double, n : int32) (fn(d : double) => d : double)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int64")
-            [ Label Kernel.int64 "n"
-            ]
-            [r|
-                  #(int64_to_double : int64/double, n : int64) (fn(d : double) => d : double)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_bignum")
-            [ Label Kernel.bignum "n"
-            ]
-            [r| 
-                  #(bignum_to_double : bignum/double, n : bignum)(fn(m : double) => m : double)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(+)")
-            [ Label Kernel.double "lhs"
-            , Label Kernel.double "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int32")
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<double>
+                    ( coal_int32_to_double : int32/double
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int64")
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<double>
+                    ( coal_int64_to_double : int64/double
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_bignum")
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<double>
+                    ( coal_bignum_to_double : bignum/double
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(+)")
+      [ NK.Label NKC.double "lhs"
+      , NK.Label NKC.double "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [+ double](lhs : double, rhs : double)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(-)")
-            [ Label Kernel.double "lhs"
-            , Label Kernel.double "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(-)")
+      [ NK.Label NKC.double "lhs"
+      , NK.Label NKC.double "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [- double](lhs : double, rhs : double)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(*)")
-            [ Label Kernel.double "lhs"
-            , Label Kernel.double "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(*)")
+      [ NK.Label NKC.double "lhs"
+      , NK.Label NKC.double "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [* double](lhs : double, rhs : double)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "negate")
-            [ Label Kernel.double "d"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "negate")
+      [ NK.Label NKC.double "d"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [neg double](d : double)
-              |]
-        , -- Numeric(nat)
-          OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int32")
-            [ Label Kernel.int32 "m"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int32")
+      [ NK.Label NKC.int32 "m"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int32/$Nat
                     , m : int32
                     )
-              |]
-        , OFunction
-            -- NOTE: Numbers larger than INT32_MAX are truncated
-            (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int64")
-            [ Label Kernel.int64 "m"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      -- TODO: fix
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int64")
+      [ NK.Label NKC.int64 "m"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int32/$Nat
                     , m : int64
                     )
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_bignum")
-            [ Label Kernel.bignum "n"
-            ]
-            [r| 
-                  #(bignum_to_int32 : bignum/int32, n : bignum) (fn(m : int32) => 
-                    @<$Nat>
-                      ( `Builtin$.nat$_pack` : int32/$Nat
-                      , m : int32
-                      ))
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic INat)) "(+)")
-            [ Label (Kernel.TCon "$Nat" []) "lhs"
-            , Label (Kernel.TCon "$Nat" []) "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_bignum")
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<$Nat>
+                    ( `Builtin$.nat$_pack` : int32/$Nat
+                    , @<int32>
+                        ( coal_bignum_to_int32 : bignum/int32
+                        , n : bignum
+                        )
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic INat)) "(+)")
+      [ NK.Label (NKT.TCon "nat" []) "lhs"
+      , NK.Label (NKT.TCon "nat" []) "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int32/$Nat
                     , [+ int32]
@@ -693,13 +1020,16 @@ objects =
                             )
                         )
                     )
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic INat)) "(-)")
-            [ Label (Kernel.TCon "$Nat" []) "lhs"
-            , Label (Kernel.TCon "$Nat" []) "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic INat)) "(-)")
+      [ NK.Label (NKT.TCon "nat" []) "lhs"
+      , NK.Label (NKT.TCon "nat" []) "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int32/$Nat
                     , let
@@ -719,13 +1049,16 @@ objects =
                             then 0
                             else n : int32
                     )
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic INat)) "(*)")
-            [ Label (Kernel.TCon "$Nat" []) "lhs"
-            , Label (Kernel.TCon "$Nat" []) "rhs"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic INat)) "(*)")
+      [ NK.Label (NKT.TCon "nat" []) "lhs"
+      , NK.Label (NKT.TCon "nat" []) "rhs"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int32/$Nat
                     , [* int32]
@@ -739,235 +1072,295 @@ objects =
                             )
                         )
                     )
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic INat)) "negate")
-            [ Label (Kernel.TCon "$Nat" []) "_"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic INat)) "negate")
+      [ NK.Label (NKT.TCon "nat" []) "_"
+      ]
+      ( unsafeParseExpr
+          [r|
                   $Zero : $Nat
-              |]
-        , -- Numeric(bignum)
-          OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int32")
-            [ Label Kernel.int32 "n"
-            ]
-            [r|
-                  #(int32_to_bignum : int32/bignum, n : int32) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int64")
-            [ Label Kernel.int64 "n"
-            ]
-            [r|
-                  #(int64_to_bignum : int64/bignum, n : int64) (fn(a : *) => a : *)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_bignum")
-            [ Label Kernel.bignum "n"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int32")
+      [ NK.Label NKC.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_int32_to_bignum : int32/bignum
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int64")
+      [ NK.Label NKC.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_int64_to_bignum : int64/bignum
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_bignum")
+      [ NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
                   n : bignum
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(+)")
-            [ Label Kernel.bignum "p"
-            , Label Kernel.bignum "q"
-            ]
-            [r| 
-                  #(bignum_add : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(-)")
-            [ Label Kernel.bignum "p"
-            , Label Kernel.bignum "q"
-            ]
-            [r| 
-                  #(bignum_sub : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(*)")
-            [ Label Kernel.bignum "p"
-            , Label Kernel.bignum "q"
-            ]
-            [r| 
-                  #(bignum_mul : bignum/bignum/bignum, p : bignum, q : bignum) (fn(r : bignum) => r : bignum)
-              |]
-        , OFunction
-            (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "negate")
-            [ Label Kernel.bignum "p"
-            ]
-            [r| 
-                  #(bignum_neg : bignum/bignum, p : bignum) (fn(r : bignum) => r : bignum)
-              |]
-        , -- /
-          OFunction
-            "Builtin$.compare"
-            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
-            ]
-            [r| 
-                  match<*/*/Ordering>($a : Ordered(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(+)")
+      [ NK.Label NKC.bignum "p"
+      , NK.Label NKC.bignum "q"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_bignum_add : bignum/bignum/bignum
+                    , p : bignum
+                    , q : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(-)")
+      [ NK.Label NKC.bignum "p"
+      , NK.Label NKC.bignum "q"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_bignum_sub : bignum/bignum/bignum
+                    , p : bignum
+                    , q : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(*)")
+      [ NK.Label NKC.bignum "p"
+      , NK.Label NKC.bignum "q"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_bignum_mul : bignum/bignum/bignum
+                    , p : bignum
+                    , q : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "negate")
+      [ NK.Label NKC.bignum "p"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_bignum_neg : bignum/bignum
+                    , p : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.compare"
+      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*/*/Ordering>($a : Ordered(*)) {
                     | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
                       , $r : { compare : */*/Ordering | * }
                       ) =>
-                        select
-                          { compare = $f : */*/Ordering | _ : * } =
-                            $r : { compare : */*/Ordering | * }
-                          in
-                            $f : */*/Ordering
+                        get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                   }
-              |]
-        , OFunction
-            "Builtin$.(^)"
-            [ Label (Kernel.TCon "Numeric" [opaque]) "$a"
-            , Label opaque "m"
-            , Label (Kernel.TCon "$Nat" []) "n"
-            ]
-            [r| 
-                  match<*>($a : Numeric(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(^)"
+      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      , NK.Label NKT.TOpq "m"
+      , NK.Label (NKT.TCon "nat" []) "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*>($a : Numeric(*)) {
                     | ( $Record : { `(*)` : */*/* | from_int32 : int32/* | * }/Numeric(*)
                       , $r : { `(*)` : */*/* | from_int32 : int32/* | * }
                       ) =>
-                        select
-                          { `(*)` = $f : */*/* | q : { from_int32 : int32/* | * } } =
-                            $r : { `(*)` : */*/* | from_int32 : int32/* | * }
+                        let
+                          $f : */*/* =
+                            get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
                           in
-                            select
-                              { from_int32 = $g : int32/* | _ : * } =
-                                q : { from_int32 : int32/* | * }
-                              in
-                                let 
-                                  one : * =
-                                    @<*>
-                                      ( $g : int32/*
-                                      , 1 
-                                      )
-                                  in
-                                    let
-                                      z : int32 =
-                                        @<int32>
-                                          ( `Builtin$.nat$_unpack` : $Nat/int32
-                                          , n : $Nat 
-                                          )
-                                      in
-                                        let
-                                          h : int32/*/* =
-                                            fn(q : int32, r : *) =>
-                                              if ([== int32](q : int32, 0))
-                                                then
-                                                  r : *
-                                                else
-                                                  @<*>
-                                                    ( h : int32/*/*
-                                                    , [- int32](q : int32, 1)
-                                                    , @<*>
-                                                        ( $f : */*/*
-                                                        , m : *
-                                                        , r : *
-                                                        )
-                                                    )
-                                          in
-                                            @<*>
-                                              ( h : int32/*/*
-                                              , z : int32
-                                              , one : *
-                                              )
-                  }
-              |]
-        , OFunction
-            "Builtin$.(<)"
-            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
-            , Label opaque "x"
-            , Label opaque "y"
-            ]
-            [r| 
-                  match<bool>($a : Ordered(*)) {
+                            let
+                              $g : int32/* =
+                                get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
+                            in
+                              let 
+                                one : * =
+                                  @<*>
+                                    ( $g : int32/*
+                                    , 1 
+                                    )
+                                in
+                                  let
+                                    z : int32 =
+                                      @<int32>
+                                        ( `Builtin$.nat$_unpack` : $Nat/int32
+                                        , n : $Nat 
+                                        )
+                                    in
+                                      let
+                                        h : int32/*/* =
+                                          fn(q : int32, r : *) =>
+                                            if ([== int32](q : int32, 0))
+                                              then
+                                                r : *
+                                              else
+                                                @<*>
+                                                  ( h : int32/*/*
+                                                  , [- int32](q : int32, 1)
+                                                  , @<*>
+                                                      ( $f : */*/*
+                                                      , m : *
+                                                      , r : *
+                                                      )
+                                                  )
+                                        in
+                                          @<*>
+                                            ( h : int32/*/*
+                                            , z : int32
+                                            , one : *
+                                            )
+                }
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(<)"
+      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
+      , NK.Label NKT.TOpq "x"
+      , NK.Label NKT.TOpq "y"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bool>($a : Ordered(*)) {
                     | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
                       , $r : { compare : */*/Ordering | * }
                       ) =>
-                        select
-                          { compare = $f : */*/Ordering | _ : * } =
-                            $r : { compare : */*/Ordering | * }
+                        let
+                          $f : */*/Ordering =
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
-                            match<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => false
                               | ( GreaterThan : Ordering ) => false
                               | ( LessThan : Ordering ) => true
                             }
                   }
-              |]
-        , OFunction
-            "Builtin$.(<=)"
-            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
-            , Label opaque "x"
-            , Label opaque "y"
-            ]
-            [r| 
-                  match<bool>($a : Ordered(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(<=)"
+      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
+      , NK.Label NKT.TOpq "x"
+      , NK.Label NKT.TOpq "y"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bool>($a : Ordered(*)) {
                     | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
                       , $r : { compare : */*/Ordering | * }
                       ) =>
-                        select
-                          { compare = $f : */*/Ordering | _ : * } =
-                            $r : { compare : */*/Ordering | * }
+                        let
+                          $f : */*/Ordering =
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
-                            match<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => true
                               | ( GreaterThan : Ordering ) => false
                               | ( LessThan : Ordering ) => true
                             }
                   }
-              |]
-        , OFunction
-            "Builtin$.(>)"
-            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
-            , Label opaque "x"
-            , Label opaque "y"
-            ]
-            [r| 
-                  match<bool>($a : Ordered(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(>)"
+      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
+      , NK.Label NKT.TOpq "x"
+      , NK.Label NKT.TOpq "y"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bool>($a : Ordered(*)) {
                     | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
                       , $r : { compare : */*/Ordering | * }
                       ) =>
-                        select
-                          { compare = $f : */*/Ordering | _ : * } =
-                            $r : { compare : */*/Ordering | * }
+                        let
+                          $f : */*/Ordering =
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
-                            match<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => false
                               | ( GreaterThan : Ordering ) => true
                               | ( LessThan : Ordering ) => false
                             }
                   }
-              |]
-        , OFunction
-            "Builtin$.(>=)"
-            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
-            , Label opaque "x"
-            , Label opaque "y"
-            ]
-            [r| 
-                  match<bool>($a : Ordered(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(>=)"
+      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
+      , NK.Label NKT.TOpq "x"
+      , NK.Label NKT.TOpq "y"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bool>($a : Ordered(*)) {
                     | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
                       , $r : { compare : */*/Ordering | * }
                       ) =>
-                        select
-                          { compare = $f : */*/Ordering | _ : * } =
-                            $r : { compare : */*/Ordering | * }
+                        let
+                          $f : */*/Ordering =
+                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
                           in
-                            match<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
                               | ( EqualTo : Ordering ) => true
                               | ( GreaterThan : Ordering ) => true
                               | ( LessThan : Ordering ) => false
                             }
                   }
-              |]
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
-            [ Label Kernel.int32 "x"
-            , Label Kernel.int32 "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
+      [ NK.Label NKC.int32 "x"
+      , NK.Label NKC.int32 "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([< int32](x : int32, y : int32))
                     then
                       LessThan : Ordering
@@ -977,13 +1370,16 @@ objects =
                           GreaterThan : Ordering
                         else
                           EqualTo : Ordering
-              |]
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
-            [ Label Kernel.int64 "x"
-            , Label Kernel.int64 "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
+      [ NK.Label NKC.int64 "x"
+      , NK.Label NKC.int64 "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([< int64](x : int64, y : int64))
                     then
                       LessThan : Ordering
@@ -993,13 +1389,16 @@ objects =
                           GreaterThan : Ordering
                         else
                           EqualTo : Ordering
-              |]
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IFloat)) "compare")
-            [ Label Kernel.float "x"
-            , Label Kernel.float "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IFloat)) "compare")
+      [ NK.Label NKC.float "x"
+      , NK.Label NKC.float "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([< float](x : float, y : float))
                     then
                       LessThan : Ordering
@@ -1009,13 +1408,16 @@ objects =
                           GreaterThan : Ordering
                         else
                           EqualTo : Ordering
-              |]
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IDouble)) "compare")
-            [ Label Kernel.double "x"
-            , Label Kernel.double "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IDouble)) "compare")
+      [ NK.Label NKC.double "x"
+      , NK.Label NKC.double "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([< double](x : double, y : double))
                     then
                       LessThan : Ordering
@@ -1025,13 +1427,16 @@ objects =
                           GreaterThan : Ordering
                         else
                           EqualTo : Ordering
-              |]
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic INat)) "compare")
-            [ Label (Kernel.TCon "$Nat" []) "x"
-            , Label (Kernel.TCon "$Nat" []) "y"
-            ]
-            ( [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic INat)) "compare")
+      [ NK.Label (NKT.TCon "nat" []) "x"
+      , NK.Label (NKT.TCon "nat" []) "y"
+      ]
+      ( unsafeParseExpr
+          ( [r|
                   let 
                     a : int32 = 
                       @<int32>
@@ -1046,18 +1451,22 @@ objects =
                           in
                             @<Ordering>
                               ( `|]
-                <> builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare"
-                <> [r|` : int32/int32/Ordering
+              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
+              <> [r|` : int32/int32/Ordering
                               , a : int32
-                              , b : int32 )
-              |]
-            )
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IBool)) "compare")
-            [ Label Kernel.bool "x"
-            , Label Kernel.bool "y"
-            ]
-            [r| 
+                              , b : int32 
+                              )
+        |]
+          )
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IBool)) "compare")
+      [ NK.Label NKC.bool "x"
+      , NK.Label NKC.bool "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if 
                     ([&&]
                       ( @<bool>(`Builtin$.not` : bool/bool, x : bool )
@@ -1073,28 +1482,34 @@ objects =
                        )
                        then GreaterThan : Ordering
                        else EqualTo : Ordering
-              |]
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
-            [ Label Kernel.char "x"
-            , Label Kernel.char "y"
-            ]
-            ( [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
+      [ NK.Label NKC.char "x"
+      , NK.Label NKC.char "y"
+      ]
+      ( unsafeParseExpr
+          ( [r|
                   @<Ordering>
                     ( `|]
-                <> builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare"
-                <> [r|` : int32/int32/Ordering
+              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
+              <> [r|` : int32/int32/Ordering
                     , @<int32>(`Builtin$.char$_ord` : char/int32, x : char) 
                     , @<int32>(`Builtin$.char$_ord` : char/int32, y : char)
                     )
-              |]
-            )
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IString)) "compare")
-            [ Label Kernel.string "s1"
-            , Label Kernel.string "s2"
-            ]
-            ( [r| 
+        |]
+          )
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IString)) "compare")
+      [ NK.Label NKC.string "s1"
+      , NK.Label NKC.string "s2"
+      ]
+      ( unsafeParseExpr
+          ( [r|
                   let
                     fst : list(char) = 
                       @<list(char)>
@@ -1108,10 +1523,10 @@ objects =
                   in let
                     f : list(char)/list(char)/Ordering =
                       fn(xs : list(char), ys : list(char)) =>
-                        match<Ordering>(xs : list(char)) {
+                        case<Ordering>(xs : list(char)) {
                           | ( $Nil : list(char)
                             ) =>
-                              match<Ordering>(ys : list(char)) {
+                              case<Ordering>(ys : list(char)) {
                                 | ( $Nil : list(char)
                                   ) =>
                                     EqualTo : Ordering
@@ -1125,7 +1540,7 @@ objects =
                             , x : char
                             , xs1 : list(char)
                             ) =>
-                              match<Ordering>(ys : list(char)) {
+                              case<Ordering>(ys : list(char)) {
                                 | ( $Nil : list(char)
                                   ) =>
                                     GreaterThan : Ordering
@@ -1133,11 +1548,11 @@ objects =
                                   , y : char
                                   , ys1 : list(char)
                                   ) =>
-                                    match<Ordering>(
+                                    case<Ordering>(
                                       @<Ordering>
                                         ( `|]
-                <> builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare"
-                <> [r|` : char/char/Ordering
+              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
+              <> [r|` : char/char/Ordering
                                         , x : char
                                         , y : char
                                         )
@@ -1161,67 +1576,117 @@ objects =
                       , fst : list(char)
                       , snd : list(char)
                       )
-              |]
-            )
-        , OFunction
-            (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
-            [ Label Kernel.bignum "x"
-            , Label Kernel.bignum "y"
-            ]
-            [r| 
-                  #(bignum_lt : bignum/bignum/bool, x : bignum, y : bignum) (fn(is_lt : bool) => 
-                    if (is_lt : bool)
-                      then LessThan : Ordering
-                      else 
-                        #(bignum_gt : bignum/bignum/bool, x : bignum, y : bignum) (fn(is_gt : bool) =>
-                          if (is_gt : bool)
-                            then GreaterThan : Ordering
-                            else EqualTo : Ordering))
-              |]
-        , OFunction
-            "Builtin$.string$_length"
-            [ Label Kernel.string "str"
-            ]
-            [r| 
-                  #(string_length : string/int32, str : string) (fn(a : int32) => a : int32)
-              |]
-        , OFunction
-            "Builtin$.string$_head_unsafe"
-            [ Label Kernel.string "str"
-            ]
-            [r| 
-                  #(string_head : string/char, str : string) (fn(a : char) => a : char)
-              |]
-        , OFunction
-            "Builtin$.string$_tail"
-            [ Label Kernel.string "str"
-            ]
-            [r| 
-                  #(string_tail : string/string, str : string) (fn(a : string) => a : string)
-              |]
-        , OFunction
-            "Builtin$.string$_reverse"
-            [ Label Kernel.string "str"
-            ]
-            [r| 
-                  #(string_reverse : string/string, str : string) (fn(a : string) => a : string)
-              |]
-        , OFunction
-            "Builtin$.string$_remove_whitespace"
-            [ Label Kernel.string "str"
-            ]
-            [r| 
-                  #(string_remove_whitespace : string/string, str : string) (fn(a : string) => a : string)
-              |]
-        , OFunction
-            "Builtin$.string$_from_list"
-            [ Label (Kernel.TCon "List" [char]) "chars"
-            ]
-            [r| 
+        |]
+          )
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
+      [ NK.Label NKC.bignum "x"
+      , NK.Label NKC.bignum "y"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  let
+                    is_lt : bool =
+                      @<bool>
+                        ( coal_bignum_lt : bignum/bignum/bool
+                        , x : bignum
+                        , y : bignum
+                        )
+                    in
+                      if (is_lt : bool)
+                        then LessThan : Ordering
+                        else 
+                          let
+                            is_gt : bool =
+                              @<bool>
+                                ( coal_bignum_gt : bignum/bignum/bool
+                                , x : bignum
+                                , y : bignum
+                                )
+                            in
+                              if (is_gt : bool)
+                                then GreaterThan : Ordering
+                                else EqualTo : Ordering
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_length"
+      [ NK.Label NKC.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<int32>
+                    ( coal_string_length : string/int32
+                    , str : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_head_unsafe"
+      [ NK.Label NKC.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<char>
+                    ( coal_string_head : string/char
+                    , str : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_tail"
+      [ NK.Label NKC.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_string_tail : string/string
+                    , str : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_reverse"
+      [ NK.Label NKC.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_string_reverse : string/string
+                    , str : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_remove_whitespace"
+      [ NK.Label NKC.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_string_remove_whitespace : string/string
+                    , str : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_from_list"
+      [ NK.Label (NKT.TCon "list" [NKC.char]) "chars"
+      ]
+      ( unsafeParseExpr
+          [r|
                   let
                     f : list(char)/string/string =
                       fn(chars : list(char), result : string) =>
-                        match<string>(chars : list(char)) {
+                        case<string>(chars : list(char)) {
                           | ( $Nil : list(char)
                             ) =>  
                               result : string
@@ -1248,12 +1713,15 @@ objects =
                       , chars : list(char)
                       , "" 
                       )
-              |]
-        , OFunction
-            "Builtin$.string$_to_list"
-            [ Label Kernel.string "str"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_to_list"
+      [ NK.Label NKC.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
                   let
                     f : string/list(char)/list(char) =
                       fn(input : string, result : list(char)) => 
@@ -1291,192 +1759,272 @@ objects =
                             )
                         , $Nil : list(char)
                         )
-              |]
-        , OFunction
-            "Builtin$.(==)"
-            [ Label (Kernel.TCon "Comparable" [opaque]) "$a"
-            ]
-            [r| 
-                  match<*/*/bool>($a : Comparable(*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(==)"
+      [ NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*/*/bool>($a : Comparable(*)) {
                     | ( $Record : { `(==)` : */*/bool | * }/Comparable(*)
                       , $r : { `(==)` : */*/bool | * }
                       ) =>
-                        select
-                          { `(==)` = $f : */*/bool | _ : * } =
-                            $r : { `(==)` : */*/bool | * }
-                          in
-                            $f : */*/bool
+                        get?_`(==)`<*/*/bool>($r : { `(==)` : */*/bool | * })
                   }
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")
-            [ Label Kernel.int32 "x"
-            , Label Kernel.int32 "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")
+      [ NK.Label NKC.int32 "x"
+      , NK.Label NKC.int32 "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([== int32](x : int32, y : int32)) then true else false 
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IInt64)) "(==)")
-            [ Label Kernel.int64 "x"
-            , Label Kernel.int64 "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IInt64)) "(==)")
+      [ NK.Label NKC.int64 "x"
+      , NK.Label NKC.int64 "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([== int64](x : int64, y : int64)) then true else false 
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IFloat)) "(==)")
-            [ Label Kernel.float "x"
-            , Label Kernel.float "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IFloat)) "(==)")
+      [ NK.Label NKC.float "x"
+      , NK.Label NKC.float "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([== float](x : float, y : float)) then true else false 
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IDouble)) "(==)")
-            [ Label Kernel.double "x"
-            , Label Kernel.double "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IDouble)) "(==)")
+      [ NK.Label NKC.double "x"
+      , NK.Label NKC.double "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([== double](x : double, y : double)) then true else false 
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IBool)) "(==)")
-            [ Label Kernel.bool "x"
-            , Label Kernel.bool "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IBool)) "(==)")
+      [ NK.Label NKC.bool "x"
+      , NK.Label NKC.bool "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([== bool](x : bool, y : bool)) then true else false 
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IChar)) "(==)")
-            [ Label Kernel.char "x"
-            , Label Kernel.char "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IChar)) "(==)")
+      [ NK.Label NKC.char "x"
+      , NK.Label NKC.char "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   if ([== char](x : char, y : char)) then true else false 
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic INat)) "(==)")
-            [ Label (Kernel.TCon "$Nat" []) "x"
-            , Label (Kernel.TCon "$Nat" []) "y"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic INat)) "(==)")
+      [ NK.Label (NKT.TCon "nat" []) "x"
+      , NK.Label (NKT.TCon "nat" []) "y"
+      ]
+      ( unsafeParseExpr
+          [r|
                   let 
                     a : int32 = 
                       @<int32>
                         ( `Builtin$.nat$_unpack` : $Nat/int32
-                        , x : $Nat )
+                        , x : $Nat 
+                        )
                       in
                         let
                           b : int32 =
                             @<int32>
                               ( `Builtin$.nat$_unpack` : $Nat/int32
-                              , y : $Nat )
+                              , y : $Nat 
+                              )
                           in
-                            if ([== int32](a : int32, b : int32)) then true else false 
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IString)) "(==)")
-            [ Label Kernel.string "str1"
-            , Label Kernel.string "str2"
-            ]
-            [r| 
-                  #(string_compare : string/string/bool, str1 : string, str2 : string) (fn(r : bool) => r : bool)
-              |]
-        , OFunction
-            (builtinInstance (Trait.comparable (TIntrinsic IBignum)) "(==)")
-            [ Label Kernel.bignum "m"
-            , Label Kernel.bignum "n"
-            ]
-            [r| 
-                  #(bignum_eq : bignum/bignum/bool, m : bignum, n : bignum) (fn(r : bool) => r : bool)
-              |]
-        , OFunction
-            (builtinInstance (Trait.divisible (TIntrinsic IFloat)) "(/)")
-            [ Label Kernel.float "q"
-            , Label Kernel.float "r"
-            ]
-            [r| 
+                            if ([== int32](a : int32, b : int32)) 
+                              then true 
+                              else false 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IString)) "(==)")
+      [ NK.Label NKC.string "str1"
+      , NK.Label NKC.string "str2"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bool>
+                    ( coal_string_compare : string/string/bool
+                    , str1 : string
+                    , str2 : string
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IBignum)) "(==)")
+      [ NK.Label NKC.bignum "m"
+      , NK.Label NKC.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bool>
+                    ( coal_bignum_eq : bignum/bignum/bool
+                    , m : bignum
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.divisible (TIntrinsic IFloat)) "(/)")
+      [ NK.Label NKC.float "q"
+      , NK.Label NKC.float "r"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [/ float](q : float, r : float)
-              |]
-        , OFunction
-            (builtinInstance (Trait.divisible (TIntrinsic IDouble)) "(/)")
-            [ Label Kernel.double "q"
-            , Label Kernel.double "r"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.divisible (TIntrinsic IDouble)) "(/)")
+      [ NK.Label NKC.double "q"
+      , NK.Label NKC.double "r"
+      ]
+      ( unsafeParseExpr
+          [r|
                   [/ double](q : double, r : double)
-              |]
-        , OFunction
-            (builtinInstance (Trait.modulo (TIntrinsic IInt32)) "(%)")
-            [ Label Kernel.int32 "q"
-            , Label Kernel.int32 "r"
-            ]
-            [r| 
-                  #(int32_mod : int32/int32/int32, q : int32, r : int32) (fn(s : int32) => s : int32)
-              |]
-        , OFunction
-            (builtinInstance (Trait.modulo (TIntrinsic IInt64)) "(%)")
-            [ Label Kernel.int64 "q"
-            , Label Kernel.int64 "r"
-            ]
-            [r| 
-                  #(int64_mod : int64/int64/int64, q : int64, r : int64) (fn(s : int64) => s : int64)
-              |]
-        , OFunction
-            (builtinInstance (Trait.modulo (TIntrinsic IBignum)) "(%)")
-            [ Label Kernel.bignum "q"
-            , Label Kernel.bignum "r"
-            ]
-            [r| 
-                  #(bignum_mod : bignum/bignum/bignum, q : bignum, r : bignum) (fn(s : bignum) => s : bignum)
-              |]
-        , OFunction
-            (builtinInstance (Trait.semigroup (TIntrinsic IString)) "(<>)")
-            [ Label Kernel.string "s"
-            , Label Kernel.string "t"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.modulo (TIntrinsic IInt32)) "(%)")
+      [ NK.Label NKC.int32 "q"
+      , NK.Label NKC.int32 "r"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<int32>
+                    ( coal_int32_mod : int32/int32/int32
+                    , q : int32
+                    , r : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.modulo (TIntrinsic IInt64)) "(%)")
+      [ NK.Label NKC.int64 "q"
+      , NK.Label NKC.int64 "r"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<int64>
+                    ( coal_int64_mod : int64/int64/int64
+                    , q : int64
+                    , r : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.modulo (TIntrinsic IBignum)) "(%)")
+      [ NK.Label NKC.bignum "q"
+      , NK.Label NKC.bignum "r"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_bignum_mod : bignum/bignum/bignum
+                    , q : bignum
+                    , r : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.semigroup (TIntrinsic IString)) "(<>)")
+      [ NK.Label NKC.string "s"
+      , NK.Label NKC.string "t"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<string>
                     ( `Builtin$.operator$__string_concatenation` : string/string/string
                     , s : string
                     , t : string
                     )
-              |]
-        , OFunction
-            (builtinInstance (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)")
-            [ Label (Kernel.TCon "List" [Kernel.TOpq]) "xs"
-            , Label (Kernel.TCon "List" [Kernel.TOpq]) "ys"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)")
+      [ NK.Label (NKT.TCon "list" [NKT.TOpq]) "xs"
+      , NK.Label (NKT.TCon "list" [NKT.TOpq]) "ys"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<list(*)>
                     ( `Builtin$.operator$__list_concatenation` : list(*)/list(*)/list(*)
                     , xs : list(*)
                     , ys : list(*)
                     )
-              |]
-        , OFunction
-            "Builtin$.io$_eval"
-            [ Label Kernel.TOpq "v"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_eval"
+      [ NK.Label NKT.TOpq "v"
+      ]
+      ( unsafeParseExpr
+          [r|
                   v : *
-              |]
-        , OFunction
-            "Builtin$.io$_return"
-            [ Label Kernel.TOpq "v"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_return"
+      [ NK.Label NKT.TOpq "v"
+      ]
+      ( unsafeParseExpr
+          [r|
                   v : IO(*)
-              |]
-        , OFunction
-            "Builtin$.(!=)"
-            [ Label (Kernel.TCon "Comparable" [opaque]) "$c"
-            , Label Kernel.TOpq "a"
-            , Label Kernel.TOpq "b"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.(!=)"
+      [ NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$c"
+      , NK.Label NKT.TOpq "a"
+      , NK.Label NKT.TOpq "b"
+      ]
+      ( unsafeParseExpr
+          [r|
                   @<bool>
                     ( `Builtin$.operator$__not` : bool/bool
                     , @<bool>
@@ -1486,22 +2034,25 @@ objects =
                         , b : *
                         )
                     )
-              |]
-        , OFunction
-            ( builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
-            )
-            [ Label (Kernel.TCon "Comparable" [opaque]) "$a"
-            , Label (Kernel.TCon "Comparable" [opaque]) "$b"
-            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t1"
-            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t2"
-            ]
-            [r| 
-                  match<bool>(t1 : tuple2(*,*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      ( builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
+      )
+      [ NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$a"
+      , NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$b"
+      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t1"
+      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t2"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bool>(t1 : tuple2(*,*)) {
                     | ( $Tuple2 : */*/tuple2(*,*)
                       , a1 : *
                       , b1 : *
                       ) =>
-                        match<bool>(t2 : tuple2(*,*)) {
+                        case<bool>(t2 : tuple2(*,*)) {
                           | ( $Tuple2 : */*/tuple2(*,*)
                             , a2 : *
                             , b2 : *
@@ -1523,26 +2074,29 @@ objects =
                               )
                         }
                   }
-              |]
-        , OFunction
-            (builtinInstance (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare")
-            [ Label (Kernel.TCon "Ordered" [opaque]) "$a"
-            , Label (Kernel.TCon "Ordered" [opaque]) "$b"
-            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t1"
-            , Label (Kernel.TCon "tuple2" [Kernel.TOpq, Kernel.TOpq]) "t2"
-            ]
-            [r| 
-                  match<Ordering>(t1 : tuple2(*,*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare")
+      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
+      , NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$b"
+      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t1"
+      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t2"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<Ordering>(t1 : tuple2(*,*)) {
                     | ( $Tuple2 : */*/tuple2(*,*)
                       , a1 : *
                       , b1 : *
                       ) =>
-                        match<Ordering>(t2 : tuple2(*,*)) {
+                        case<Ordering>(t2 : tuple2(*,*)) {
                           | ( $Tuple2 : */*/tuple2(*,*)
                             , a2 : *
                             , b2 : *
                             ) =>
-                              match<Ordering>(
+                              case<Ordering>(
                                 @<Ordering>
                                   ( Builtin$.compare : Ordered(*)/*/*/Ordering
                                   , $a : Ordered(*)
@@ -1562,14 +2116,17 @@ objects =
                               }
                         }
                   }
-              |]
-        , OFunction
-            "Builtin$.machine$_machine"
-            [ Label Kernel.opaque "seed"
-            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque `Kernel.arrow` Kernel.opaque) "transition"
-            , Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "view"
-            ]
-            [r| 
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.machine$_machine"
+      [ NK.Label NKT.TOpq "seed"
+      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq `NKC.arrow` NKT.TOpq) "transition"
+      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "view"
+      ]
+      ( unsafeParseExpr
+          [r|
                   let
                     step : */*/Machine(*,*) =
                       fn(input : *, current_state : *) =>
@@ -1601,31 +2158,35 @@ objects =
                           }
                         )
                     )
-              |]
-        , OFunction
-            "Builtin$.machine$_map_machine"
-            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            , Label (Kernel.TCon "Machine" [opaque, opaque]) "m"
-            ]
-            [r| 
-                  match<Machine(*,*)>(m : Machine(*,*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.machine$_map_machine"
+      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
+      , NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "m"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<Machine(*,*)>(m : Machine(*,*)) {
                     | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
                       , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
                       ) =>
-                        match<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                        case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
                           | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
                             , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
                             ) =>
-                              select
-                                { state = $state : * | q : { step : */*/Machine(*,*) | view : */* | {} } } =
-                                  $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                              let 
+                                $state : * =
+                                  get?_state<*>($row : { state : * | * })
                                 in
-                                  select
-                                    { step = $step : */*/Machine(*,*) | r : { view : */* | {} } } = 
-                                      q : { step : */*/Machine(*,*) | view : */* | {} }
+                                  let
+                                    $step : */*/Machine(*,*) =
+                                      get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
                                     in
-                                      select
-                                        { view = $view : */* | _ : {} } = r : { view : */* | {} }
+                                      let
+                                        $view : */* =
+                                          get?_view<*/*>($row : { view : */* | * })
                                         in
                                           @<Machine(*,*)>
                                             ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
@@ -1658,31 +2219,35 @@ objects =
                                             )
                         }
                   }
-              |]
-        , OFunction
-            "Builtin$.machine$_contramap_input"
-            [ Label (Kernel.opaque `Kernel.arrow` Kernel.opaque) "f"
-            , Label (Kernel.TCon "Machine" [opaque, opaque]) "m"
-            ]
-            [r| 
-                  match<Machine(*,*)>(m : Machine(*,*)) {
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.machine$_contramap_input"
+      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
+      , NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "m"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<Machine(*,*)>(m : Machine(*,*)) {
                     | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
                       , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
                       ) =>
-                        match<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                        case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
                           | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
                             , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
                             ) =>
-                              select
-                                { state = $state : * | q : { step : */*/Machine(*,*) | view : */* | {} } } =
-                                  $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                              let 
+                                $state : * =
+                                  get?_state<*>($row : { state : * | * })
                                 in
-                                  select
-                                    { step = $step : */*/Machine(*,*) | r : { view : */* | {} } } = 
-                                      q : { step : */*/Machine(*,*) | view : */* | {} }
+                                  let
+                                    $step : */*/Machine(*,*) =
+                                      get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
                                     in
-                                      select
-                                        { view = $view : */* | _ : {} } = r : { view : */* | {} }
+                                      let
+                                        $view : */* =
+                                          get?_view<*/*>($row : { view : */* | * })
                                         in
                                           @<Machine(*,*)>
                                             ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
@@ -1706,14 +2271,160 @@ objects =
                                             )
                         }
                   }
-              |]
-        ]
-    }
-
-unsafeParseKernelExpr :: Text -> Kernel.Expr Kernel.Type
-unsafeParseKernelExpr t =
-  case runParser expr "" (Text.stripStart t) of
-    Left e ->
-      error (errorBundlePretty e)
-    Right a ->
-      a
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.machine$_cofix"
+      [ NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq] `NKC.arrow` NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "f"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<Machine(*,*)>
+                    ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                    , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                        ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                        , { state = f : Machine(*,*)/Machine(*,*)
+                          | step =
+                              fn(input : *, $unused_state : *) =>
+                                let
+                                  $unfolded : Machine(*,*) =
+                                    @<Machine(*,*)>
+                                      ( f : Machine(*,*)/Machine(*,*)
+                                      , @<Machine(*,*)>
+                                          ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
+                                          , f : Machine(*,*)/Machine(*,*)
+                                          )
+                                      )
+                                  in
+                                    case<Machine(*,*)>($unfolded : Machine(*,*)) {
+                                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                        , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                        ) =>
+                                            case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                                , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                                ) =>
+                                                    let
+                                                      $inner_state : * =
+                                                        get?_state<*>($row : { state : * | * })
+                                                      in
+                                                        let
+                                                          $inner_step : */*/Machine(*,*) =
+                                                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                                          in
+                                                            @<Machine(*,*)>
+                                                              ( $inner_step : */*/Machine(*,*)
+                                                              , input : *
+                                                              , $inner_state : *
+                                                              )
+                                            }
+                                    }
+                          | view =
+                              fn($unused_state2 : *) =>
+                                let
+                                  $unfolded2 : Machine(*,*) =
+                                    @<Machine(*,*)>
+                                      ( f : Machine(*,*)/Machine(*,*)
+                                      , @<Machine(*,*)>
+                                          ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
+                                          , f : Machine(*,*)/Machine(*,*)
+                                          )
+                                      )
+                                  in
+                                    case<Machine(*,*)>($unfolded2 : Machine(*,*)) {
+                                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                        , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                        ) =>
+                                            case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                                , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                                ) =>
+                                                    let
+                                                      $inner_state2 : * =
+                                                        get?_state<*>($row2 : { state : * | * })
+                                                      in
+                                                        let
+                                                          $inner_view : */* =
+                                                            get?_view<*/*>($row2 : { view : */* | * })
+                                                          in
+                                                            @<*>
+                                                              ( $inner_view : */*
+                                                              , $inner_state2 : *
+                                                              )
+                                            }
+                                    }
+                          | {}
+                          }
+                        )
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.machine$_run_while"
+      [ NK.Label (NKC.unit `NKC.arrow` NKC.bool) "pred"
+      , NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "m"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  if
+                    ( @<bool>
+                        ( pred : unit/bool
+                        , ()
+                        )
+                    )
+                  then
+                    case<Machine(*,*)>(m : Machine(*,*)) {
+                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                        , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                        ) =>
+                            case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                ) =>
+                                    let
+                                      $cur_state : * =
+                                        get?_state<*>($row : { state : * | * })
+                                      in
+                                        let
+                                          $cur_step : */*/Machine(*,*) =
+                                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                          in
+                                            @<*>
+                                              ( `Builtin$.machine$_run_while` : (unit/bool)/Machine(*,*)/*
+                                              , pred : unit/bool
+                                              , @<Machine(*,*)>
+                                                  ( $cur_step : */*/Machine(*,*)
+                                                  , ()
+                                                  , $cur_state : *
+                                                  )
+                                              )
+                            }
+                    }
+                  else
+                    case<Machine(*,*)>(m : Machine(*,*)) {
+                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                        , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                        ) =>
+                            case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                ) =>
+                                    let
+                                      $fin_state : * =
+                                        get?_state<*>($row2 : { state : * | * })
+                                      in
+                                        let
+                                          $fin_view : */* =
+                                            get?_view<*/*>($row2 : { view : */* | * })
+                                          in
+                                            @<*>
+                                              ( $fin_view : */*
+                                              , $fin_state : *
+                                              )
+                            }
+                    }
+        |]
+      )
+  ]

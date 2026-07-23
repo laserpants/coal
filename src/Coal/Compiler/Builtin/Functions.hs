@@ -235,4 +235,12 @@ builtinFunctions =
     ( "machine$_contramap_input"
     , forall3 $ \t1 t2 t3 -> (t3 ~> t1) ~> machineType t1 t2 ~> machineType t3 t2
     )
+  ,
+    ( "machine$_cofix"
+    , forall2 $ \t1 t2 -> (machineType t1 t2 ~> machineType t1 t2) ~> machineType t1 t2
+    )
+  ,
+    ( "machine$_run_while"
+    , forall1 $ \t -> (TIntrinsic IUnit ~> TIntrinsic IBool) ~> machineType (TIntrinsic IUnit) t ~> t
+    )
   ]

@@ -1,0 +1,20 @@
+module Main {
+
+  Main.main(_ : *) =
+    let
+      x : bignum =
+        %%9999999999999999999999999999999999999998
+      in
+        let
+          __call_tmp : * =
+            @<*>
+              ( coal_print_bignum : bignum/*
+              , x : bignum
+              )
+          in
+            @<int32>
+              ( fn(_ : *) => 123
+              , __call_tmp : *
+              )
+
+}

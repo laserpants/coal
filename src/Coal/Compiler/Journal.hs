@@ -23,7 +23,7 @@ import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Trait)
 import Coal.Language.Type (IndexedType)
 import Coal.Language.Type.Kind (Kind)
-import Control.Monad.Writer (MonadWriter, censor, listen, tell)
+import Control.Monad.Writer (MonadWriter, censor, listen, pass, tell)
 import Data.Set (Set)
 import Data.Tuple.Extra (second)
 
@@ -71,7 +71,9 @@ tellErrors :: (MonadWriter (CompilerJournal a) m) => [CompilerError a] -> m ()
 tellErrors w = tell $ CompilerJournal mempty mempty mempty w
 
 listenPatterns :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [(Name, Pattern a Kind IndexedType)])
-listenPatterns w = second compilerJournalPatterns <$> listen w
+listenPatterns w = pass $ do
+  (result, journal) <- listen w
+  pure ((result, compilerJournalPatterns journal), \j -> j{compilerJournalPatterns = mempty})
 
 listenRecordEntry :: (MonadWriter (CompilerJournal a) m) => m e -> m (e, [RecordEntry a])
 listenRecordEntry w = second compilerJournalRecordEntries <$> listen w

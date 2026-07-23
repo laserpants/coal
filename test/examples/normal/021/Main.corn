@@ -1,0 +1,26 @@
+module Main {
+
+  Main.cont1(a : *) =
+    0
+
+  Main.main(_ : *) =
+    let
+      r : int32 =
+        @<int32>
+          ( Foo.foo : unit/int32
+          , () 
+          )
+    in
+      let
+        __call_tmp : * =
+          @<*>
+            ( coal_print_int32 : int32/*
+            , r : int32
+            )
+        in
+          @<int32>
+            ( Main.cont1 : */int32
+            , __call_tmp : *
+            )
+
+}

@@ -1,0 +1,22 @@
+module Main {
+
+  import IO(return)
+  import MicroTest(Test, suite, run)
+  import Monad.StateSpec(stateSpec)
+  import Monad.WriterSpec(writerSpec)
+  import Monad.ReaderSpec(readerSpec)
+
+  let
+    spec : Test =
+      suite([
+        stateSpec,
+        writerSpec,
+        readerSpec
+      ])
+
+  fun main() = do {
+    _ <- run(spec);
+    return();
+  }
+
+}

@@ -1,9 +1,20 @@
+/**
+ * Applicative generalizes function application to effectful or structured contexts.
+ */
 module Coal.Applicative {
   
   import Coal.Functor(Functor)
   import IO(return, __eval_io)
   import namespace List
 
+  /**
+   * Applicative generalizes function application to effectful or structured contexts.
+   * 
+   * An Applicative functor must support:
+   * 
+   * - `pure`, which lifts a value into the context, and
+   * - `ap`, which applies a context-wrapped function to a context-wrapped value.
+   */
   trait Applicative<f> with (Functor<f>) {
     ap : f<a -> b> -> f<a> -> f<b>
     pure : a -> f<a>
@@ -32,6 +43,12 @@ module Coal.Applicative {
     let pure = return
   }
 
+  /**
+   * `map2` lifts a binary function into an applicative context, applying it to two 
+   * wrapped values.
+   *
+   * **Type**: `map2 : (p -> q -> r) -> f<p> -> f<q> -> f<r> with (Applicative<f>, Functor<f>)`
+   */
   fun map2(f : p -> q -> r, a1 : f<p>, a2 : f<q>) : f<r> with (Applicative<f>, Functor<f>) =                 
     ap(map(f, a1), a2)
 

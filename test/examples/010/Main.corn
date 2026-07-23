@@ -1,0 +1,41 @@
+module Main {
+
+Main.main(_ : *) =
+  if ([== float](5.3f, 0.5f))
+    then
+      1
+    else
+      let
+        a : float =
+          [- float](5.0f, 3.5f)
+          ;
+        x : float =
+          [/ float](9.0f, 2.0f)
+        in
+          let
+            __call_tmp : * =
+              @<*>
+                ( rt_println_float : float/*
+                , x : float
+                )
+            in
+              @<int32>
+                ( fn(a : *) =>
+                    let
+                      y : int32 =
+                        [/ int32](8, 2)
+                      in
+                        let
+                          __call_tmp2 : * =
+                            @<*>
+                              ( coal_print_int32 : int32/*
+                              , y : int32
+                              )
+                          in
+                            @<int32>
+                              ( fn(a : *) => 0
+                              , __call_tmp2 : *
+                              )
+                , __call_tmp : *
+                )
+}

@@ -33,7 +33,6 @@ builtinNames =
     , "Ordering"
     , "Semigroup"
     , "Some"
-    , "Process"
     , "Machine"
     , "compare"
     , "from_int32"

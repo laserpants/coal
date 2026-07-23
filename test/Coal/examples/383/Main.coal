@@ -1,0 +1,43 @@
+module Main {
+
+  import namespace IO
+
+  type Tree<a> 
+    = Leaf 
+    | Node(a, Tree<a>, Tree<a>)
+
+  let sample_tree =
+    Node
+      ( 2 : int32
+      , Node
+          ( 1 : int32
+          , Leaf, Leaf
+          )
+      , Node
+          ( 4 : int32
+          , Node
+              ( 3 : int32
+              , Leaf
+              , Leaf
+              )
+      , Node
+          ( 5 : int32
+          , Leaf, Leaf
+          ))
+      )
+
+  fun max(a : int32, b : int32) = if (a > b) then a else b
+
+  fun height(tree) : int32 =
+    match(tree) {
+      | Leaf => 0
+      | Node(y, lhs, rhs) => 1 + max(height(lhs), height(rhs))
+    }
+
+  fun main() =
+    let r : int32 =
+      height(sample_tree)
+    in
+    IO.println_int32(r)
+
+}

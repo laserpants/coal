@@ -21,7 +21,7 @@ module Coal.Language.Type.Indexed (
 
 import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (supply)
-import Coal.Language.Definition
+import Coal.Language.Definition (Definition)
 import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))

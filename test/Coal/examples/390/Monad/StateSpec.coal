@@ -1,0 +1,33 @@
+module Monad.StateSpec(stateSpec) {
+
+  import Coal.Monad(and_then)
+  import Monad.State(State, get, put, eval_state)
+  import MicroTest(Test, check, suite)
+  import namespace List
+
+  fun authenticate
+    | "password123" => put(true)
+    | _             => put(false)
+
+   fun msg(success : bool) =
+     if (success) then "Logged in" else "Authentication failed"
+
+  fun state_example(pw : string) =
+    get()
+      |. and_then(fn(logged_in) => 
+           if (logged_in) 
+             then pure("Already logged in")
+             else 
+               authenticate(pw) 
+                 |. and_then(get) 
+                 |. and_then(pure << msg)
+      )
+
+  let
+    stateSpec : Test =
+      suite([
+        check(eval_state(state_example("abc123"), false) == "Authentication failed"),
+        check(eval_state(state_example("password123"), false) == "Logged in")
+      ])
+
+}

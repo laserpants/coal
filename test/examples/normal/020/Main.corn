@@ -1,0 +1,26 @@
+module Main {
+
+Main.cont1(a : *) = 
+  0
+
+Main.main(_ : *) =
+  let
+    r : { foo : int32 | baz : int32 | {} } =
+      { foo = 123
+      | baz = 456
+      | {}
+      } 
+    in
+      let
+        __call_tmp : * =
+          @<*>
+            ( coal_print_int32 : int32/*
+            , get?_baz<int32>(r : { foo : int32 | baz : int32 | {} })
+            )
+            in
+              @<int32>
+                ( Main.cont1 : */int32
+                , __call_tmp : *
+                )
+
+}

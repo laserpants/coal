@@ -14,6 +14,27 @@ module Codata.Machine {
   fun map_machine(f : o -> p, machine : Machine<i, o>) : Machine<i, p> =
     machine$_map_machine(f, machine)
 
+  fun map2_machine(f : o -> p -> q, m1 : Machine<i, o>, m2 : Machine<i, p>) : Machine<i, q> =
+    machine(
+      (m1, m2),
+      fn(input, (p, q)) => (receive(input, p), receive(input, q)),
+      fn((p, q)) => f(observe(p), observe(q))
+    )
+
+  fun map3_machine(f : o -> p -> q -> r, m1 : Machine<i, o>, m2 : Machine<i, p>, m3 : Machine<i, q>) : Machine<i, r> =
+    machine(
+      (m1, m2, m3),
+      fn(input, (p, q, r)) => (receive(input, p), receive(input, q), receive(input, r)),
+      fn((p, q, r)) => f(observe(p), observe(q), observe(r))
+    )
+
+  fun map4_machine(f : o -> p -> q -> r -> s, m1 : Machine<i, o>, m2 : Machine<i, p>, m3 : Machine<i, q>, m4 : Machine<i, r>) : Machine<i, s> =
+    machine(
+      (m1, m2, m3, m4),
+      fn(input, (p, q, r, s)) => (receive(input, p), receive(input, q), receive(input, r), receive(input, s)),
+      fn((p, q, r, s)) => f(observe(p), observe(q), observe(r), observe(s))
+    )
+
   fun contramap_input(f : j -> i, machine : Machine<i, o>) : Machine<j, o> =
     machine$_contramap_input(f, machine)
 
@@ -37,10 +58,27 @@ module Codata.Machine {
     )
 
   fun zip(m1 : Machine<i, o1>, m2 : Machine<i, o2>) : Machine<i, (o1, o2)> =
+    zip2(m1, m2)
+
+  fun zip2(m1 : Machine<i, o1>, m2 : Machine<i, o2>) : Machine<i, (o1, o2)> =
     machine(
       (m1, m2),
       fn(input, (p,q)) => (receive(input, p), receive(input, q)),
       fn((p,q)) => (observe(p), observe(q))
+    )
+
+  fun zip3(m1 : Machine<i, o1>, m2 : Machine<i, o2>, m3 : Machine<i, o3>) : Machine<i, (o1, o2, o3)> =
+    machine(
+      (m1, m2, m3),
+      fn(input, (p,q,r)) => (receive(input, p), receive(input, q), receive(input, r)),
+      fn((p,q,r)) => (observe(p), observe(q), observe(r))
+    )
+
+  fun zip4(m1 : Machine<i, o1>, m2 : Machine<i, o2>, m3 : Machine<i, o3>, m4 : Machine<i, o4>) : Machine<i, (o1, o2, o3, o4)> =
+    machine(
+      (m1, m2, m3, m4),
+      fn(input, (p,q,r,s)) => (receive(input, p), receive(input, q), receive(input, r), receive(input, s)),
+      fn((p,q,r,s)) => (observe(p), observe(q), observe(r), observe(s))
     )
 
   fun cons(state, Machine(m)) =
@@ -52,5 +90,11 @@ module Codata.Machine {
 
   fun process(seed, f) =
     machine(seed, f, identity)
+
+  fun cofix(f : Machine<i, o> -> Machine<i, o>) : Machine<i, o> =
+    machine$_cofix(f)
+
+  fun run_while(pred : unit -> bool, m : Machine<unit, a>) : a =
+    machine$_run_while(pred, m)
 
 }

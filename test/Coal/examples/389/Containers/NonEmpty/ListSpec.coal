@@ -1,0 +1,105 @@
+module Containers.NonEmpty.ListSpec(nonEmptyListSpec) {
+
+  import MicroTest(Test, suite, check)
+  import Containers.NonEmpty.List(
+    NonEmptyList, 
+    singleton, 
+    from_list, 
+    first, 
+    rest, 
+    uncons, 
+    append, 
+    reverse, 
+    map, 
+    filter, 
+    length, 
+    take, 
+    drop, 
+    to_list
+  )
+  import namespace Option
+  import namespace List
+
+  fun nonEmptyListSpec() : Test =
+    suite([
+      // Test singleton
+      check(first(singleton(42)) == 42),
+      check(rest(singleton(42)) == []),
+
+      // Test from_list with non-empty list
+      check(
+        match(from_list([1, 2, 3])) {
+          | Some(nel) => first(nel) == 1
+          | None => false
+        }
+      ),
+      
+      // Test from_list with empty list
+      check(from_list([]) == None),
+      
+      // Test first and rest
+      check(
+        let nel = Cons(1, [2, 3, 4]) in
+        first(nel) == 1 && rest(nel) == [2, 3, 4]
+      ),
+      
+      // Test uncons
+      check(
+        let nel = Cons(5, [6, 7]) in
+        let (h, t) = uncons(nel) in
+        h == 5 && t == [6, 7]
+      ),
+      
+      // Test append
+      check(
+        let nel1 = Cons(1, [2]) in
+        let nel2 = Cons(3, [4]) in
+        let result = append(nel1, nel2) in
+        first(result) == 1 && to_list(result) == [1, 2, 3, 4]
+      ),
+      
+      // Test reverse
+      check(
+        let nel = Cons(1, [2, 3]) in
+        let rev = reverse(nel) in
+        to_list(rev) == [3, 2, 1]
+      ),
+      
+      // Test map
+      check(
+        let nel = Cons(1, [2, 3]) in
+        let doubled = map(fn(x) => x * 2, nel) in
+        to_list(doubled) == [2, 4, 6]
+      ),
+      
+      check(
+        let nel = Cons(1, [2, 3, 4]) in
+        filter(fn(x) => x > 2, nel) == [3, 4]
+      ),
+      
+      // Test filter returns an empty list when all filtered out
+      check(
+        let nel = Cons(1, [2, 3]) in
+        filter(fn(x) => x > 10, nel) == []
+      ),
+      
+      // Test to_list
+      check(
+        let nel = Cons(10, [20, 30]) in
+        to_list(nel) == [10, 20, 30]
+      ),
+      
+      // Test take
+      check(
+        let nel = Cons(1, [2, 3, 4, 5]) in
+        take(3, nel) == [1, 2, 3]
+      ),
+      
+      // Test drop
+      check(
+        let nel = Cons(1, [2, 3, 4]) in
+        drop(2, nel) == [3, 4]
+      )
+    ])
+
+}

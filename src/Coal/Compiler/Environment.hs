@@ -14,7 +14,6 @@ module Coal.Compiler.Environment (
 
 import Coal.Common.Environment (Environment (..))
 import Extras (Name, Over, Set)
-import System.Console.AsciiProgress
 
 data KernelEnvironment = KernelEnvironment
   { kernelEnvironmentModule :: Name
@@ -47,16 +46,14 @@ overKernelEnvironmentQualifiedNames fn KernelEnvironment{..} =
     , ..
     }
 
-data CompilerEnvironment a = CompilerEnvironment
+newtype CompilerEnvironment a = CompilerEnvironment
   { compilerKernelEnvironment :: KernelEnvironment
-  , compilerProgressBar :: Maybe ProgressBar
   }
 
-emptyCompilerEnvironment :: Maybe ProgressBar -> CompilerEnvironment a
-emptyCompilerEnvironment progressBar =
+emptyCompilerEnvironment :: CompilerEnvironment a
+emptyCompilerEnvironment =
   CompilerEnvironment
     { compilerKernelEnvironment = KernelEnvironment mempty mempty mempty
-    , compilerProgressBar = progressBar
     }
 
 overCompilerKernelEnvironment ::
