@@ -1,0 +1,9 @@
+module Foo {
+
+  import Pretty(Pretty)
+  import namespace IO
+
+  fun foo() =
+    IO.println_string(pretty(55))
+
+}

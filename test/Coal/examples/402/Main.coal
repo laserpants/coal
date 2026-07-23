@@ -1,0 +1,9 @@
+module Main {
+
+//  import Pretty(Pretty)
+  import Foo(foo)
+
+  fun main() =
+    foo()
+
+}
