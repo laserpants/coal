@@ -92,7 +92,7 @@ RUN clang --version
 # Install helper scripts
 # -----------------------------------------------------------------------------
 
-COPY scripts/coal-install.sh /usr/local/bin/coal-install
+COPY docker/scripts/coal-install.sh /usr/local/bin/coal-install
 
 RUN chmod +x /usr/local/bin/coal-install
 
