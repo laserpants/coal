@@ -241,8 +241,8 @@ prepareDefinitions defs = do
   -- against the current module (e.g. Main.Comparable$List<a>$(==)) instead of
   -- the source module (e.g. List.Comparable$List<a>$(==)), causing linker errors.
   stdlibInstanceQNames <- concatForM (map (Path . pure) builtinModulesPaths) $ \path -> do
-    Build{buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
-    generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+    Build{buildNames = importNames, buildInstances = importInstances, buildExportedNames = buildExportedNames'} <- lift $ lift $ importedBuild path
+    generateQualifiedInstanceNames path importNames buildExportedNames' (Environment.toList importInstances)
   modify (setQualifiedNames (Environment.fromList (stdlibInstanceQNames <> concat qualifiedNames)))
 
 {- |
@@ -260,9 +260,10 @@ generateQualifiedInstanceNames ::
   (Monad m) =>
   Path ->
   Environment [NameEntry] ->
+  Set Name ->
   [(Name, InstanceMap (InstanceEntry a))] ->
   ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) [(Name, Name)]
-generateQualifiedInstanceNames path nameEnv instances =
+generateQualifiedInstanceNames path nameEnv exportedNames instances =
   concatForM instances $
     \(traitName, instanceMap) ->
       concatForM (Map.toList instanceMap) $
@@ -270,14 +271,19 @@ generateQualifiedInstanceNames path nameEnv instances =
           concatForM (Map.keys instanceEntryTypeSchemes) $
             \member -> do
               let instanceName = instanceLabel (Trait traitName instanceEntryType) member
-              concatForM (Environment.lookupWithDefault mempty instanceName nameEnv) $
-                \case
-                  NName n _ -> do
-                    pure [(n, principalPath path <.> n)]
-                  NPlaceholder n -> do
-                    pure [(n, principalPath path <.> n)]
-                  _ ->
-                    pure mempty
+              -- Only qualify instance members that are actually exported by this
+              -- module. Instances imported from other modules are not exported
+              -- (they remain accessible via the defining module's namespace).
+              if instanceName `Set.member` exportedNames
+                then concatForM (Environment.lookupWithDefault mempty instanceName nameEnv) $
+                  \case
+                    NName n _ -> do
+                      pure [(n, principalPath path <.> n)]
+                    NPlaceholder n -> do
+                      pure [(n, principalPath path <.> n)]
+                    _ ->
+                      pure mempty
+                else pure mempty
 
 {- |
 Generate qualified name mappings for imported definitions.
@@ -318,13 +324,13 @@ qualifiedImports Build{..} =
                       if Path ["Builtin$"] == path
                         then pure []
                         else do
-                          Build{buildTraits = importTraits, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+                          Build{buildTraits = importTraits, buildNames = importNames, buildInstances = importInstances, buildExportedNames = importExportedNames} <- lift $ lift $ importedBuild path
                           case Environment.lookup traitName importTraits of
                             Just TraitEntry{..} -> do
                               let entries = Environment.names traitEntryInterface
                                   ns1 = [(n, principalPath path <.> n) | n <- entries]
 
-                              ns2 <- generateQualifiedInstanceNames path importNames (traitInstances traitName importInstances)
+                              ns2 <- generateQualifiedInstanceNames path importNames importExportedNames (traitInstances traitName importInstances)
 
                               pure (ns1 <> ns2)
                             _ ->
@@ -335,13 +341,25 @@ qualifiedImports Build{..} =
             -- Importing any value from a module should also qualify its
             -- instance implementation names. Otherwise unconstrained imports
             -- (e.g. head) can miss required instance symbols at lowering time.
+            -- Use the imported module's buildQualifiedNames to get the correct
+            -- qualified names for instance members. This handles the case where
+            -- the imported module re-exports instances from other modules: the
+            -- re-exported instance members will already have the correct (defining
+            -- module's) prefix in buildQualifiedNames.
             nsi <-
               if Path ["Builtin$"] == path
                 then pure []
                 else do
-                  Build{buildNames = importNames, buildInstances = importInstances} <-
+                  Build{buildNames = importNames, buildInstances = importInstances, buildQualifiedNames = importQualifiedNames} <-
                     lift $ lift $ importedBuild path
-                  generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+                  let instanceMemberNames = [instanceLabel (Trait traitName instanceEntryType) member | (traitName, instanceMap) <- Environment.toList importInstances, (_, InstanceEntry{..}) <- Map.toList instanceMap, member <- Map.keys instanceEntryTypeSchemes]
+                  pure $
+                    concatMap
+                      ( \iname -> case Environment.lookup iname importQualifiedNames of
+                          Just qname -> [(iname, qname)]
+                          Nothing -> [(iname, principalPath path <.> iname)]
+                      )
+                      instanceMemberNames
 
             return $
               [(name, principalPath path <.> name)]
@@ -355,8 +373,8 @@ qualifiedImports Build{..} =
                         then typeConstructorEntryDataConstructors
                         else names `intersect` typeConstructorEntryDataConstructors
                     ns1 = [(n, principalPath path <.> n) | n <- dataConstructors]
-                Build{buildInstances = importInstances} <- lift $ lift $ importedBuild path
-                ns2 <- generateQualifiedInstanceNames path buildNames (typeInstances name importInstances)
+                Build{buildInstances = importInstances, buildExportedNames = buildExportedNames'} <- lift $ lift $ importedBuild path
+                ns2 <- generateQualifiedInstanceNames path buildNames buildExportedNames' (typeInstances name importInstances)
                 pure (ns1 <> ns2)
               _ ->
                 case Environment.lookup name buildTraits of
@@ -366,8 +384,8 @@ qualifiedImports Build{..} =
                           [ (n, principalPath path <.> n)
                           | n <- if ["*"] == names then entries else names `intersect` entries
                           ]
-                    Build{buildInstances = importInstances} <- lift $ lift $ importedBuild path
-                    ns2 <- generateQualifiedInstanceNames path buildNames (traitInstances name importInstances)
+                    Build{buildInstances = importInstances, buildExportedNames = buildExportedNames'} <- lift $ lift $ importedBuild path
+                    ns2 <- generateQualifiedInstanceNames path buildNames buildExportedNames' (traitInstances name importInstances)
                     pure (ns1 <> ns2)
                   _ ->
                     pure mempty
@@ -375,7 +393,7 @@ qualifiedImports Build{..} =
       Build{buildExportedNames = exportedNames, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
       n1 <- concatForM (Set.toList exportedNames) $
         \name -> pure [(qualified name path, qualified name path)]
-      n2 <- generateQualifiedInstanceNames path importNames (Environment.toList importInstances)
+      n2 <- generateQualifiedInstanceNames path importNames buildExportedNames (Environment.toList importInstances)
       pure (n1 <> n2)
     _ ->
       pure mempty
@@ -524,8 +542,8 @@ insertTypeName Build{..} loc name =
               } <-
               get
             if ( Environment.contains name curTCs
-                  || Environment.contains name curTraits
-                  || Environment.contains name curAliases
+                   || Environment.contains name curTraits
+                   || Environment.contains name curAliases
                )
               && Set.member name curExported
               then lift $ lift $ do
@@ -551,8 +569,8 @@ insertTypeName Build{..} loc name =
               } <-
               get
             if ( Environment.contains name curTraits
-                  || Environment.contains name curTCs
-                  || Environment.contains name curAliases
+                   || Environment.contains name curTCs
+                   || Environment.contains name curAliases
                )
               && Set.member name curExported
               then lift $ lift $ do
