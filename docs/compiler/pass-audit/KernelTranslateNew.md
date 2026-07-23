@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Translate surface language modules (`Module Metadata Kind IndexedType`) to kernel IR modules (`Module NK.Type`).
+Translate surface language modules (`Module Metadata Kind IndexedType`) to kernel IR modules (`Module Kernel.Type`).
 
 ---
 
@@ -31,7 +31,7 @@ This pass runs per-module via `mapPass` in the lowering phase.
 
 ## Output
 
-- **Resulting AST**: `BuildEnvelope (Module NK.Type)` — kernel IR modules with:
+- **Resulting AST**: `BuildEnvelope (Module Kernel.Type)` — kernel IR modules with:
   - Module name (principal path)
   - Module imports (qualified names from build)
   - Module objects (translated definitions)
@@ -48,7 +48,7 @@ For each surface module:
 3. Inserts qualified names into the environment (`insertQualifiedNames`)
 4. Runs `withModuleName` to set the current module name context
 5. Translates each surface definition via `translateDefinition` (using `concatForM`)
-6. Assembles a `NKModule.Module` with the module name, imports, and objects
+6. Assembles a `Kernel.odule.Module` with the module name, imports, and objects
 
 ### `translateDefinition`
 

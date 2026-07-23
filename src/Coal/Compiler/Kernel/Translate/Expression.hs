@@ -15,10 +15,10 @@ import Coal.Compiler.Kernel.Translate.Primitive (translatePrimitive)
 import Coal.Compiler.Kernel.Translate.Record (makeRecord, translateRecord)
 import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
-import qualified Coal.Kernel.Language.Expr as NK
-import qualified Coal.Kernel.Language.Type as NKT
-import qualified Coal.Kernel.Language.Type.Constructors as NKC
-import qualified Coal.Kernel.Language.Type.HasType as NKHT
+import qualified Coal.Kernel.Language.Expr as Kernel
+import qualified Coal.Kernel.Language.Type as Kernel
+import qualified Coal.Kernel.Language.Type.Constructors as Kernel
+import qualified Coal.Kernel.Language.Type.HasType as Kernel
 import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..), toList)
@@ -26,7 +26,7 @@ import qualified Data.Text as Text
 import Extras (Name)
 import TextShow (showt)
 
-type NKExpr = NK.Expr NKT.Type
+type NKExpr = Kernel.Expr Kernel.Type
 
 translateExpression ::
   (Monad m, Data a) =>
@@ -39,31 +39,31 @@ translateExpression =
     EApplication _ t (EOperator _ _ op) es ->
       translateOperator translateExpression t op es
     EApplication _ t e es ->
-      NK.EApp (translateType t)
+      Kernel.EApp (translateType t)
         <$> translateExpression e
         <*> traverse translateExpression es
     ELambda _ ps e -> do
       qs <- traverse translatePattern ps
       e1 <- withLocalNames (nkLabelName <$> toList qs) (translateExpression e)
-      pure (NK.ELam qs e1)
+      pure (Kernel.ELam qs e1)
     ELet _ vs e -> do
       ws <- traverse translateBinding vs
-      let localNames = [nkLabelName lbl | NK.Binding lbl _ <- toList ws]
+      let localNames = [nkLabelName lbl | Kernel.Binding lbl _ <- toList ws]
       d1 <- withLocalNames localNames (translateExpression e)
-      pure (NK.ELet ws d1)
+      pure (Kernel.ELet ws d1)
     ERecursiveLet _ (PVariable _ (Label t name)) e1 e2 -> do
-      let kLabel = NK.Label (translateType t) name
+      let kLabel = Kernel.Label (translateType t) name
       d1 <- withLocalName name (translateExpression e1)
       d2 <- withLocalName name (translateExpression e2)
-      pure (NK.ELet (NK.Binding kLabel d1 :| []) d2)
+      pure (Kernel.ELet (Kernel.Binding kLabel d1 :| []) d2)
     EVariable _ (Label t name) ->
-      NK.EVar . NK.Label (translateType t) <$> qualifyName name
+      Kernel.EVar . Kernel.Label (translateType t) <$> qualifyName name
     EConstructor _ (Label t name) ->
-      NK.ECon . NK.Label (translateType t) <$> qualifyName name
+      Kernel.ECon . Kernel.Label (translateType t) <$> qualifyName name
     ELiteral _ p ->
-      pure (NK.ELit (translatePrimitive p))
+      pure (Kernel.ELit (translatePrimitive p))
     EIf _ _ e1 e2 e3 ->
-      NK.EIf
+      Kernel.EIf
         <$> translateExpression e1
         <*> translateExpression e2
         <*> translateExpression e3
@@ -72,28 +72,28 @@ translateExpression =
     EListCons _ _ e1 e2 ->
       consNK <$> translateExpression e1 <*> translateExpression e2
     EListLiteral _ t [] ->
-      pure (NK.ECon (NK.Label (translateType t) "$Nil"))
+      pure (Kernel.ECon (Kernel.Label (translateType t) "$Nil"))
     EListLiteral a t (e : es) ->
       translateExpression (foldr (EListCons a t) (EListLiteral a t []) (e : es))
     ETuple _ _ es ->
       tupleExprNK <$> traverse translateExpression es
     ECompiledMatch _ t e cs ->
-      NK.ECase (translateType t)
+      Kernel.ECase (translateType t)
         <$> translateExpression e
         <*> traverse translateClause cs
     ESelect _ (Label t field) e -> do
       d1 <- translateExpression e
       let t1 =
-            case NKHT.typeOf d1 of
-              NKT.TCon _ [r] -> r
+            case Kernel.typeOf d1 of
+              Kernel.TCon _ [r] -> r
               _ -> error "Implementation error"
       pure $
-        NK.ECase
+        Kernel.ECase
           (translateType t)
           d1
-          ( NK.Clause
-              (NK.Label (NKT.TCon "record" [t1]) "$Record" :| [NK.Label t1 "$row"])
-              (NK.EGet (NK.Label (translateType t) field) (NK.EVar (NK.Label t1 "$row")))
+          ( Kernel.Clause
+              (Kernel.Label (Kernel.TCon "record" [t1]) "$Record" :| [Kernel.Label t1 "$row"])
+              (Kernel.EGet (Kernel.Label (translateType t) field) (Kernel.EVar (Kernel.Label t1 "$row")))
               :| []
           )
     -- Focus on a field of a record, binding both the extracted field value
@@ -107,23 +107,23 @@ translateExpression =
 
           -- Bind n1 to the value of the focused field projected from the record
           fieldBinding =
-            NK.Binding
-              (NK.Label fieldType n1)
-              (NK.EGet (NK.Label fieldType name0) recordExpr)
+            Kernel.Binding
+              (Kernel.Label fieldType n1)
+              (Kernel.EGet (Kernel.Label fieldType name0) recordExpr)
 
           -- Bind n2 to the record tail (re-box the original record via $Record)
           tailBinding =
-            NK.Binding
-              (NK.Label tailType n2)
+            Kernel.Binding
+              (Kernel.Label tailType n2)
               (makeRecord tailType recordExpr)
 
-      pure (NK.ELet (fieldBinding :| [tailBinding]) bodyExpr)
+      pure (Kernel.ELet (fieldBinding :| [tailBinding]) bodyExpr)
     ETraitInstance _ t trait ->
-      pure (NK.EVar (NK.Label (translateType t) (dictionaryLabel trait)))
+      pure (Kernel.EVar (Kernel.Label (translateType t) (dictionaryLabel trait)))
     EFFICall _ _ (Label t name) es e -> do
       translatedEs <- traverse translateExpression es
       body <- translateExpression e
-      pure (NK.ECall (NK.Label (translateType t) name) translatedEs body)
+      pure (Kernel.ECall (Kernel.Label (translateType t) name) translatedEs body)
     EMatch{} ->
       error "Implementation error"
     ELambdaMatch{} ->
@@ -134,7 +134,7 @@ translateExpression =
 translateBinding ::
   (Monad m, Data a) =>
   Binding Expression a Kind IndexedType ->
-  CompilerT a m (NK.Binding NKT.Type)
+  CompilerT a m (Kernel.Binding Kernel.Type)
 translateBinding =
   \case
     BPattern _ (PVariable _ (Label t name)) e -> do
@@ -142,20 +142,20 @@ translateBinding =
         withLocalNames
           [n | n <- [name], Text.isPrefixOf "$fold" n]
           (translateExpression e)
-      pure (NK.Binding (NK.Label (translateType t) name) e1)
+      pure (Kernel.Binding (Kernel.Label (translateType t) name) e1)
     _ ->
       error "Not implemented"
 
 translateClause ::
   (Monad m, Data a) =>
   CompiledClause a Kind IndexedType ->
-  CompilerT a m (NK.Clause NKT.Type)
+  CompilerT a m (Kernel.Clause Kernel.Type)
 translateClause =
   \case
     ECompiledClause _ (ll :| lls) e -> do
       e1 <- withLocalNames (labelName <$> lls) (translateExpression e)
       ll0 <- qualifyLabel ll
-      pure (NK.Clause (translateLabel <$> (ll0 :| lls)) e1)
+      pure (Kernel.Clause (translateLabel <$> (ll0 :| lls)) e1)
 
 {-# INLINE qualifyLabel #-}
 qualifyLabel ::
@@ -165,28 +165,28 @@ qualifyLabel ::
 qualifyLabel (Label t name) = Label t <$> qualifyName name
 
 {-# INLINE translateLabel #-}
-translateLabel :: Label IndexedType -> NK.Label NKT.Type
-translateLabel (Label t name) = NK.Label (translateType t) name
+translateLabel :: Label IndexedType -> Kernel.Label Kernel.Type
+translateLabel (Label t name) = Kernel.Label (translateType t) name
 
 {-# INLINE nkLabelName #-}
-nkLabelName :: NK.Label t -> Name
-nkLabelName (NK.Label _ name) = name
+nkLabelName :: Kernel.Label t -> Name
+nkLabelName (Kernel.Label _ name) = name
 
 -- | Build a list cons cell in the new kernel.
 consNK :: NKExpr -> NKExpr -> NKExpr
 consNK x xs =
-  NK.EApp
-    (NKT.TCon "list" [t])
-    (NK.ECon (NK.Label (NKC.arrow t (NKC.arrow (NKT.TCon "list" [t]) (NKT.TCon "list" [t]))) "$Cons"))
+  Kernel.EApp
+    (Kernel.TCon "list" [t])
+    (Kernel.ECon (Kernel.Label (Kernel.arrow t (Kernel.arrow (Kernel.TCon "list" [t]) (Kernel.TCon "list" [t]))) "$Cons"))
     (x :| [xs])
  where
-  t = NKHT.typeOf x
+  t = Kernel.typeOf x
 
 -- | Build a tuple expression in the new kernel.
 tupleExprNK :: NonEmpty NKExpr -> NKExpr
 tupleExprNK es =
-  NK.EApp t (NK.ECon (NK.Label (NKHT.foldType t ts) ("$Tuple" <> showt n))) es
+  Kernel.EApp t (Kernel.ECon (Kernel.Label (Kernel.foldType t ts) ("$Tuple" <> showt n))) es
  where
   n = length es
-  t = NKT.TCon "tuple" (foldr (:) [] ts)
-  ts = NKHT.typeOf <$> es
+  t = Kernel.TCon "tuple" (foldr (:) [] ts)
+  ts = Kernel.typeOf <$> es

@@ -21,7 +21,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, setCurrentPathC)
 import qualified Coal.Kernel.Language.Module as NKModule (Module (..))
-import qualified Coal.Kernel.Language.Type as NK
+import qualified Coal.Kernel.Language.Type as Kernel
 import Coal.Language (IndexedType, Kind (..))
 import qualified Coal.Language.Module as SurfModule (Module (..))
 import Coal.Language.Module.Path (principalPath)
@@ -34,19 +34,19 @@ passKernelTranslate ::
     Metadata
     m
     (BuildEnvelope (SurfModule.Module Metadata Kind IndexedType))
-    (BuildEnvelope (NKModule.Module NK.Type))
+    (BuildEnvelope (NKModule.Module Kernel.Type))
 passKernelTranslate = Pass{runPass = passImpl}
 
 passImpl ::
   (MonadIO m, Traversable t) =>
   t (SurfModule.Module Metadata Kind IndexedType) ->
-  CompilerT Metadata m (t (NKModule.Module NK.Type))
+  CompilerT Metadata m (t (NKModule.Module Kernel.Type))
 passImpl = traverse pass
 
 pass ::
   (MonadIO m) =>
   SurfModule.Module Metadata Kind IndexedType ->
-  CompilerT Metadata m (NKModule.Module NK.Type)
+  CompilerT Metadata m (NKModule.Module Kernel.Type)
 pass =
   \case
     SurfModule.Module path _ defs -> do

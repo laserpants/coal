@@ -20,6 +20,8 @@ extra-source-files:
 description: Please see the README at <https://codeberg.org/laserpants/coal/src/branch/main/README.md>
 
 dependencies:
+  - aeson >= 2.2 && < 2.3
+  - aeson-pretty >= 0.8 && < 0.9
   - ansi-terminal >= 0.11 && < 2
   - base >= 4.17 && < 5
   - binary >= 0.8.9.1 && < 0.9
@@ -39,6 +41,7 @@ dependencies:
   - megaparsec >= 9.3.1 && < 10
   - memory >= 0.18.0 && < 0.19
   - mtl >= 2.2 && < 3
+  - optparse-applicative >= 0.18 && < 0.19
   - parser-combinators >= 1.3.0 && < 1.4
   - pretty-simple >= 4.1.2.0 && < 4.2
   - prettyprinter >= 1.7.1 && < 1.8
@@ -46,11 +49,13 @@ dependencies:
   - process-extras >= 0.7.4 && < 0.8
   - raw-strings-qq >= 1.1 && < 1.2
   - recursion-schemes >= 5.2.2.5 && < 5.3
+  - semver >= 0.4 && < 1.1
+  - template-haskell >= 2.19 && < 2.24
   - temporary >= 1.3 && < 1.4
   - text >= 2.0.2 && < 2.2
   - text-show >= 3.10.4 && < 3.12
   - time >= 1.12.2 && < 1.13
-  - transformers >=0.5 && <0.7
+  - transformers >= 0.5 && < 0.7
   - uniplate >= 1.6.13 && < 1.7
 
 ghc-options:
@@ -67,12 +72,6 @@ ghc-options:
 
 library:
   source-dirs: src
-  dependencies:
-    - aeson
-    - aeson-pretty
-    - optparse-applicative
-    - template-haskell
-    - semver
 
 executables:
   coal:
@@ -84,11 +83,6 @@ executables:
       - -with-rtsopts=-N
     dependencies:
       - coal
-      - optparse-applicative
-      - template-haskell
-      - aeson
-      - aeson-pretty
-      - semver
 
 tests:
   coal-test:

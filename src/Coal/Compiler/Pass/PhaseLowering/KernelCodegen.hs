@@ -22,11 +22,11 @@ import Coal.Compiler.Stack (CompilerT, getBuildC, setBitcodeC)
 import Coal.Compiler.State (CompilerState (compilerConfig))
 import Coal.Debug (writeDebugFile)
 import qualified Coal.Kernel.Builtin.Objects as Builtin
-import qualified Coal.Kernel.Compiler as NK
+import qualified Coal.Kernel.Compiler as Kernel
 import Coal.Kernel.Language.Module (Module (..))
-import qualified Coal.Kernel.Language.Object as NKObj
-import qualified Coal.Kernel.Language.Type as NKT
-import qualified Coal.Kernel.Language.Type.Constructors as NKC
+import qualified Coal.Kernel.Language.Object as Kernel
+import qualified Coal.Kernel.Language.Type as Kernel
+import qualified Coal.Kernel.Language.Type.Constructors as Kernel
 import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Coal.Language.Module.Path (principalPath)
 import Control.Exception (SomeException, try)
@@ -50,12 +50,12 @@ import TextShow (showt)
 
 passKernelCodegen ::
   (MonadIO m) =>
-  Pass Metadata m [BuildEnvelope (Module NKT.Type)] [(Name, ByteString)]
+  Pass Metadata m [BuildEnvelope (Module Kernel.Type)] [(Name, ByteString)]
 passKernelCodegen = Pass{runPass = pass}
 
 pass ::
   (MonadIO m) =>
-  [BuildEnvelope (Module NKT.Type)] ->
+  [BuildEnvelope (Module Kernel.Type)] ->
   CompilerT Metadata m [(Name, ByteString)]
 pass envelopes = do
   config <- gets compilerConfig
@@ -86,7 +86,7 @@ pass envelopes = do
 
   -- Run the new-kernel compiler purely on all source modules together
   -- (cross-module context is required for LLVM codegen).
-  irs <- case NK.runCompiler (NK.compileModules config (builtinMod : augmented)) of
+  irs <- case Kernel.runCompiler (Kernel.compileModules config (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError
@@ -166,30 +166,30 @@ Constructors are listed in lexicographic order because
 'CaseExpressionCanonicalization' sorts 'ECase' clauses lexicographically
 and the LLVM codegen assigns switch tags by clause position.
 -}
-builtinDData :: [NKObj.Object NKT.Type]
+builtinDData :: [Kernel.Object Kernel.Type]
 builtinDData =
   -- List: $Cons (tag 0) < $Nil (tag 1) lexicographically
-  NKObj.DData
+  Kernel.DData
     "list"
-    [ ("$Cons", NKC.arrow NKT.TOpq (NKC.arrow (NKT.TCon "list" [NKT.TOpq]) (NKT.TCon "list" [NKT.TOpq])))
-    , ("$Nil", NKT.TCon "list" [NKT.TOpq])
+    [ ("$Cons", Kernel.arrow Kernel.TOpq (Kernel.arrow (Kernel.TCon "list" [Kernel.TOpq]) (Kernel.TCon "list" [Kernel.TOpq])))
+    , ("$Nil", Kernel.TCon "list" [Kernel.TOpq])
     ]
     :
     -- Record
-    NKObj.DData
+    Kernel.DData
       "record"
-      [("$Record", NKC.arrow NKT.TOpq (NKT.TCon "record" [NKT.TOpq]))]
+      [("$Record", Kernel.arrow Kernel.TOpq (Kernel.TCon "record" [Kernel.TOpq]))]
     :
     -- Nat: $Succ (tag 0) < $Zero (tag 1) lexicographically
-    NKObj.DData
+    Kernel.DData
       "nat"
-      [ ("$Succ", NKC.arrow (NKT.TCon "int32" []) (NKT.TCon "nat" []))
-      , ("$Zero", NKT.TCon "nat" [])
+      [ ("$Succ", Kernel.arrow (Kernel.TCon "int32" []) (Kernel.TCon "nat" []))
+      , ("$Zero", Kernel.TCon "nat" [])
       ]
     :
     -- Tuples $Tuple2 .. $Tuple8 (each type has one constructor at tag 0)
-    [ NKObj.DData
+    [ Kernel.DData
       ("tuple" <> showt n)
-      [("$Tuple" <> showt n, foldr NKC.arrow (NKT.TCon "tuple" (replicate n NKT.TOpq)) (replicate n NKT.TOpq))]
+      [("$Tuple" <> showt n, foldr Kernel.arrow (Kernel.TCon "tuple" (replicate n Kernel.TOpq)) (replicate n Kernel.TOpq))]
     | n <- [2 .. 8 :: Int]
     ]

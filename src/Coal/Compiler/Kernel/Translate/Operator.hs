@@ -8,14 +8,14 @@ import Coal.Compiler.Kernel.Translate.Type (translateType)
 import Coal.Compiler.Stack (CompilerT)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Op (Op (..))
-import qualified Coal.Kernel.Language.Type as NK
-import qualified Coal.Kernel.Language.Type.Constructors as NKT
-import qualified Coal.Kernel.Language.Type.HasType as NKHT
+import qualified Coal.Kernel.Language.Type as Kernel
+import qualified Coal.Kernel.Language.Type.Constructors as Kernel
+import qualified Coal.Kernel.Language.Type.HasType as Kernel
 import Coal.Language
 import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 
-type NKExpr = Expr NK.Type
+type NKExpr = Expr Kernel.Type
 
 logicalNotOperator ::
   (Monad m) =>
@@ -27,7 +27,7 @@ logicalNotOperator translate es = do
   pure $
     EApp
       t1
-      (EVar (Label (NKT.arrow t1 t1) "Builtin$.operator$__not"))
+      (EVar (Label (Kernel.arrow t1 t1) "Builtin$.operator$__not"))
       args
  where
   t1 = translateType (TIntrinsic IBool)
@@ -70,7 +70,7 @@ stringConcatenationOperator translate es = do
   pure $
     EApp
       t1
-      (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__string_concatenation"))
+      (EVar (Label (Kernel.arrow t1 (Kernel.arrow t1 t1)) "Builtin$.operator$__string_concatenation"))
       args
  where
   t1 = translateType (TIntrinsic IString)
@@ -86,7 +86,7 @@ listConcatenationOperator translate t es = do
   pure $
     EApp
       t1
-      (EVar (Label (NKT.arrow t1 (NKT.arrow t1 t1)) "Builtin$.operator$__list_concatenation"))
+      (EVar (Label (Kernel.arrow t1 (Kernel.arrow t1 t1)) "Builtin$.operator$__list_concatenation"))
       args
  where
   t1 = translateType t
@@ -102,7 +102,7 @@ reverseCompositionOperator translate t es = do
   pure $
     EApp
       t1
-      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
+      (EVar (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_composition"))
       args
  where
   t1 = translateType t
@@ -118,7 +118,7 @@ forwardCompositionOperator translate t es = do
   pure $
     EApp
       t1
-      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
+      (EVar (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_composition"))
       args
  where
   t1 = translateType t
@@ -134,7 +134,7 @@ reverseApplicationOperator translate t es = do
   pure $
     EApp
       t1
-      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
+      (EVar (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__reverse_application"))
       args
  where
   t1 = translateType t
@@ -150,7 +150,7 @@ forwardApplicationOperator translate t es = do
   pure $
     EApp
       t1
-      (EVar (Label (NKHT.foldType t1 (NKHT.typeOf <$> args)) "Builtin$.operator$__forward_application"))
+      (EVar (Label (Kernel.foldType t1 (Kernel.typeOf <$> args)) "Builtin$.operator$__forward_application"))
       args
  where
   t1 = translateType t

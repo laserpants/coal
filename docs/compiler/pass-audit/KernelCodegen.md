@@ -27,7 +27,7 @@ Cached modules bypass this process and contribute their stored bitcode directly.
 
 ## Input
 
-- **AST representation**: `[BuildEnvelope (Module NK.Type)]` — kernel IR modules
+- **AST representation**: `[BuildEnvelope (Module Kernel.Type)]` — kernel IR modules
 - **Required invariants**: All modules translated to kernel IR
 
 ---
@@ -48,7 +48,7 @@ Cached modules bypass this process and contribute their stored bitcode directly.
    is enabled
 3. Injects `builtinDData` constructors into every source module AND the builtin
    module (`Builtin.builtinObjects`)
-4. Runs `NK.runCompiler (NK.compileModules (builtinMod : augmented))` to compile
+4. Runs `Kernel.runCompiler (Kernel.compileModules (builtinMod : augmented))` to compile
    all modules together through the kernel pipeline
 5. For each resulting `IRModule`, calls `assembleOne` to produce bitcode
 6. Returns assembled bitcode merged with cached module bitcode

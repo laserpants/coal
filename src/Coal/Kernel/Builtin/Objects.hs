@@ -4,11 +4,11 @@
 module Coal.Kernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
 import qualified Coal.Compiler.Builtin.Traits as Trait
-import qualified Coal.Kernel.Language.Expr as NK
+import qualified Coal.Kernel.Language.Expr as Kernel
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
-import qualified Coal.Kernel.Language.Type as NKT
-import qualified Coal.Kernel.Language.Type.Constructors as NKC
+import qualified Coal.Kernel.Language.Type as Kernel
+import qualified Coal.Kernel.Language.Type.Constructors as Kernel
 import Coal.Kernel.Parser.Unsafe (unsafeParseExpr)
 import Coal.Language (
   Intrinsic (..),
@@ -22,13 +22,13 @@ import qualified Data.Text as Text
 import Extras (Name)
 import Text.RawString.QQ (r)
 
-builtinObjects :: Module NKT.Type
+builtinObjects :: Module Kernel.Type
 builtinObjects = objects
 
 builtinInstance :: (Serializable t) => Trait t -> Name -> Name
 builtinInstance trait name = instanceLabel trait ("Builtin$." <> name)
 
-objects :: Module NKT.Type
+objects :: Module Kernel.Type
 objects =
   Module
     { moduleName = "Builtin$"
@@ -36,24 +36,24 @@ objects =
     , moduleObjects = objectList
     }
 
-objectList :: [Object NKT.Type]
+objectList :: [Object Kernel.Type]
 objectList =
   [ DData
       "Ordering"
-      [ ("EqualTo", NKT.TCon "Ordering" [])
-      , ("GreaterThan", NKT.TCon "Ordering" [])
-      , ("LessThan", NKT.TCon "Ordering" [])
+      [ ("EqualTo", Kernel.TCon "Ordering" [])
+      , ("GreaterThan", Kernel.TCon "Ordering" [])
+      , ("LessThan", Kernel.TCon "Ordering" [])
       ]
   , -- Machine: single constructor taking one opaque argument (the state record).
     -- Declared here so Builtin$ bodies can use the unqualified name.
     DData
       "Machine"
-      [ ("Machine", NKC.arrow NKT.TOpq (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]))
+      [ ("Machine", Kernel.arrow Kernel.TOpq (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]))
       ]
   , DFunction
       Exported
       "Builtin$.operator$__not"
-      [ NK.Label NKC.bool "a"
+      [ Kernel.Label Kernel.bool "a"
       ]
       ( unsafeParseExpr
           [r|
@@ -63,7 +63,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.not"
-      [ NK.Label NKC.bool "a"
+      [ Kernel.Label Kernel.bool "a"
       ]
       ( unsafeParseExpr
           [r|
@@ -73,7 +73,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.char$_ord"
-      [ NK.Label NKC.char "c"
+      [ Kernel.Label Kernel.char "c"
       ]
       ( unsafeParseExpr
           [r|
@@ -86,7 +86,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.char$_chr"
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -99,7 +99,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.number$_unsafe_parse_bignum"
-      [ NK.Label NKC.string "input"
+      [ Kernel.Label Kernel.string "input"
       ]
       ( unsafeParseExpr
           [r|
@@ -112,9 +112,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.operator$__reverse_composition"
-      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
-      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "g"
-      , NK.Label NKT.TOpq "x"
+      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "g"
+      , Kernel.Label Kernel.TOpq "x"
       ]
       ( unsafeParseExpr
           [r|
@@ -130,9 +130,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.operator$__forward_composition"
-      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "g"
-      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
-      , NK.Label NKT.TOpq "x"
+      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "g"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
+      , Kernel.Label Kernel.TOpq "x"
       ]
       ( unsafeParseExpr
           [r|
@@ -148,8 +148,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.operator$__reverse_application"
-      [ NK.Label NKT.TOpq "x"
-      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
+      [ Kernel.Label Kernel.TOpq "x"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
       ]
       ( unsafeParseExpr
           [r|
@@ -162,8 +162,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.operator$__forward_application"
-      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
-      , NK.Label NKT.TOpq "x"
+      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
+      , Kernel.Label Kernel.TOpq "x"
       ]
       ( unsafeParseExpr
           [r|
@@ -176,8 +176,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.always"
-      [ NK.Label NKT.TOpq "a"
-      , NK.Label NKT.TOpq "_"
+      [ Kernel.Label Kernel.TOpq "a"
+      , Kernel.Label Kernel.TOpq "_"
       ]
       ( unsafeParseExpr
           [r|
@@ -187,8 +187,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.operator$__list_concatenation"
-      [ NK.Label (NKT.TCon "list" [NKT.TOpq]) "xs"
-      , NK.Label (NKT.TCon "list" [NKT.TOpq]) "ys"
+      [ Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "xs"
+      , Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "ys"
       ]
       ( unsafeParseExpr
           [r|
@@ -215,7 +215,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_int32"
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -228,7 +228,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_int64"
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -241,7 +241,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_bignum"
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -254,7 +254,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_string"
-      [ NK.Label NKC.string "s"
+      [ Kernel.Label Kernel.string "s"
       ]
       ( unsafeParseExpr
           [r|
@@ -267,7 +267,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_bool"
-      [ NK.Label NKC.bool "b"
+      [ Kernel.Label Kernel.bool "b"
       ]
       ( unsafeParseExpr
           [r|
@@ -280,7 +280,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_char"
-      [ NK.Label NKC.char "c"
+      [ Kernel.Label Kernel.char "c"
       ]
       ( unsafeParseExpr
           [r|
@@ -293,7 +293,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_float"
-      [ NK.Label NKC.float "f"
+      [ Kernel.Label Kernel.float "f"
       ]
       ( unsafeParseExpr
           [r|
@@ -306,7 +306,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_print_double"
-      [ NK.Label NKC.double "d"
+      [ Kernel.Label Kernel.double "d"
       ]
       ( unsafeParseExpr
           [r|
@@ -319,7 +319,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_int32"
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -332,7 +332,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_int64"
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -345,7 +345,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_bignum"
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -358,7 +358,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_string"
-      [ NK.Label NKC.string "s"
+      [ Kernel.Label Kernel.string "s"
       ]
       ( unsafeParseExpr
           [r|
@@ -371,7 +371,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_bool"
-      [ NK.Label NKC.bool "b"
+      [ Kernel.Label Kernel.bool "b"
       ]
       ( unsafeParseExpr
           [r|
@@ -384,7 +384,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_char"
-      [ NK.Label NKC.char "c"
+      [ Kernel.Label Kernel.char "c"
       ]
       ( unsafeParseExpr
           [r|
@@ -397,7 +397,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_float"
-      [ NK.Label NKC.float "f"
+      [ Kernel.Label Kernel.float "f"
       ]
       ( unsafeParseExpr
           [r|
@@ -410,7 +410,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_println_double"
-      [ NK.Label NKC.double "d"
+      [ Kernel.Label Kernel.double "d"
       ]
       ( unsafeParseExpr
           [r|
@@ -423,8 +423,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.operator$__string_concatenation"
-      [ NK.Label NKC.string "s"
-      , NK.Label NKC.string "t"
+      [ Kernel.Label Kernel.string "s"
+      , Kernel.Label Kernel.string "t"
       ]
       ( unsafeParseExpr
           [r|
@@ -438,7 +438,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_int32_to_string"
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -451,7 +451,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_float_to_string"
-      [ NK.Label NKC.float "f"
+      [ Kernel.Label Kernel.float "f"
       ]
       ( unsafeParseExpr
           [r|
@@ -464,7 +464,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_double_to_string"
-      [ NK.Label NKC.double "d"
+      [ Kernel.Label Kernel.double "d"
       ]
       ( unsafeParseExpr
           [r|
@@ -477,7 +477,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_char_to_string"
-      [ NK.Label NKC.char "c"
+      [ Kernel.Label Kernel.char "c"
       ]
       ( unsafeParseExpr
           [r|
@@ -490,7 +490,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_bool_to_string"
-      [ NK.Label NKC.bool "b"
+      [ Kernel.Label Kernel.bool "b"
       ]
       ( unsafeParseExpr
           [r|
@@ -503,7 +503,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.nat$_unpack"
-      [ NK.Label (NKT.TCon "nat" []) "nat"
+      [ Kernel.Label (Kernel.TCon "nat" []) "nat"
       ]
       ( unsafeParseExpr
           [r|
@@ -521,7 +521,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.nat$_pack"
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -538,7 +538,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.from_int32"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -553,7 +553,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.from_int64"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -568,7 +568,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.from_bignum"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -583,7 +583,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.negate"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -598,7 +598,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(+)"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -613,7 +613,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(-)"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -628,7 +628,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(*)"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -643,7 +643,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int32")
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -653,7 +653,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int64")
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -663,7 +663,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_bignum")
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -676,8 +676,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(+)")
-      [ NK.Label NKC.int32 "lhs"
-      , NK.Label NKC.int32 "rhs"
+      [ Kernel.Label Kernel.int32 "lhs"
+      , Kernel.Label Kernel.int32 "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -687,8 +687,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")
-      [ NK.Label NKC.int32 "lhs"
-      , NK.Label NKC.int32 "rhs"
+      [ Kernel.Label Kernel.int32 "lhs"
+      , Kernel.Label Kernel.int32 "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -698,8 +698,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(*)")
-      [ NK.Label NKC.int32 "lhs"
-      , NK.Label NKC.int32 "rhs"
+      [ Kernel.Label Kernel.int32 "lhs"
+      , Kernel.Label Kernel.int32 "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -709,7 +709,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "negate")
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -719,7 +719,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int32")
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -729,7 +729,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int64")
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -739,7 +739,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_bignum")
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -752,8 +752,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(+)")
-      [ NK.Label NKC.int64 "lhs"
-      , NK.Label NKC.int64 "rhs"
+      [ Kernel.Label Kernel.int64 "lhs"
+      , Kernel.Label Kernel.int64 "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -763,8 +763,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(-)")
-      [ NK.Label NKC.int64 "lhs"
-      , NK.Label NKC.int64 "rhs"
+      [ Kernel.Label Kernel.int64 "lhs"
+      , Kernel.Label Kernel.int64 "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -774,8 +774,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(*)")
-      [ NK.Label NKC.int64 "lhs"
-      , NK.Label NKC.int64 "rhs"
+      [ Kernel.Label Kernel.int64 "lhs"
+      , Kernel.Label Kernel.int64 "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -785,7 +785,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "negate")
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -795,7 +795,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int32")
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -808,7 +808,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int64")
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -821,7 +821,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_bignum")
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -834,8 +834,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(+)")
-      [ NK.Label NKC.float "lhs"
-      , NK.Label NKC.float "rhs"
+      [ Kernel.Label Kernel.float "lhs"
+      , Kernel.Label Kernel.float "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -845,8 +845,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(-)")
-      [ NK.Label NKC.float "lhs"
-      , NK.Label NKC.float "rhs"
+      [ Kernel.Label Kernel.float "lhs"
+      , Kernel.Label Kernel.float "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -856,8 +856,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(*)")
-      [ NK.Label NKC.float "lhs"
-      , NK.Label NKC.float "rhs"
+      [ Kernel.Label Kernel.float "lhs"
+      , Kernel.Label Kernel.float "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -867,7 +867,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "negate")
-      [ NK.Label NKC.float "f"
+      [ Kernel.Label Kernel.float "f"
       ]
       ( unsafeParseExpr
           [r|
@@ -877,7 +877,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int32")
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -890,7 +890,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int64")
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -903,7 +903,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_bignum")
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -916,8 +916,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(+)")
-      [ NK.Label NKC.double "lhs"
-      , NK.Label NKC.double "rhs"
+      [ Kernel.Label Kernel.double "lhs"
+      , Kernel.Label Kernel.double "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -927,8 +927,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(-)")
-      [ NK.Label NKC.double "lhs"
-      , NK.Label NKC.double "rhs"
+      [ Kernel.Label Kernel.double "lhs"
+      , Kernel.Label Kernel.double "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -938,8 +938,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(*)")
-      [ NK.Label NKC.double "lhs"
-      , NK.Label NKC.double "rhs"
+      [ Kernel.Label Kernel.double "lhs"
+      , Kernel.Label Kernel.double "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -949,7 +949,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "negate")
-      [ NK.Label NKC.double "d"
+      [ Kernel.Label Kernel.double "d"
       ]
       ( unsafeParseExpr
           [r|
@@ -959,7 +959,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int32")
-      [ NK.Label NKC.int32 "m"
+      [ Kernel.Label Kernel.int32 "m"
       ]
       ( unsafeParseExpr
           [r|
@@ -973,7 +973,7 @@ objectList =
       -- TODO: fix
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int64")
-      [ NK.Label NKC.int64 "m"
+      [ Kernel.Label Kernel.int64 "m"
       ]
       ( unsafeParseExpr
           [r|
@@ -986,7 +986,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_bignum")
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -1002,8 +1002,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "(+)")
-      [ NK.Label (NKT.TCon "nat" []) "lhs"
-      , NK.Label (NKT.TCon "nat" []) "rhs"
+      [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
+      , Kernel.Label (Kernel.TCon "nat" []) "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -1025,8 +1025,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "(-)")
-      [ NK.Label (NKT.TCon "nat" []) "lhs"
-      , NK.Label (NKT.TCon "nat" []) "rhs"
+      [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
+      , Kernel.Label (Kernel.TCon "nat" []) "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -1054,8 +1054,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "(*)")
-      [ NK.Label (NKT.TCon "nat" []) "lhs"
-      , NK.Label (NKT.TCon "nat" []) "rhs"
+      [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
+      , Kernel.Label (Kernel.TCon "nat" []) "rhs"
       ]
       ( unsafeParseExpr
           [r|
@@ -1077,7 +1077,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "negate")
-      [ NK.Label (NKT.TCon "nat" []) "_"
+      [ Kernel.Label (Kernel.TCon "nat" []) "_"
       ]
       ( unsafeParseExpr
           [r|
@@ -1087,7 +1087,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int32")
-      [ NK.Label NKC.int32 "n"
+      [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -1100,7 +1100,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int64")
-      [ NK.Label NKC.int64 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -1113,7 +1113,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_bignum")
-      [ NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -1123,8 +1123,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(+)")
-      [ NK.Label NKC.bignum "p"
-      , NK.Label NKC.bignum "q"
+      [ Kernel.Label Kernel.bignum "p"
+      , Kernel.Label Kernel.bignum "q"
       ]
       ( unsafeParseExpr
           [r|
@@ -1138,8 +1138,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(-)")
-      [ NK.Label NKC.bignum "p"
-      , NK.Label NKC.bignum "q"
+      [ Kernel.Label Kernel.bignum "p"
+      , Kernel.Label Kernel.bignum "q"
       ]
       ( unsafeParseExpr
           [r|
@@ -1153,8 +1153,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(*)")
-      [ NK.Label NKC.bignum "p"
-      , NK.Label NKC.bignum "q"
+      [ Kernel.Label Kernel.bignum "p"
+      , Kernel.Label Kernel.bignum "q"
       ]
       ( unsafeParseExpr
           [r|
@@ -1168,7 +1168,7 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "negate")
-      [ NK.Label NKC.bignum "p"
+      [ Kernel.Label Kernel.bignum "p"
       ]
       ( unsafeParseExpr
           [r|
@@ -1181,7 +1181,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.compare"
-      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -1196,9 +1196,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(^)"
-      [ NK.Label (NKT.TCon "Numeric" [NKT.TOpq]) "$a"
-      , NK.Label NKT.TOpq "m"
-      , NK.Label (NKT.TCon "nat" []) "n"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      , Kernel.Label Kernel.TOpq "m"
+      , Kernel.Label (Kernel.TCon "nat" []) "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -1256,9 +1256,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(<)"
-      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
-      , NK.Label NKT.TOpq "x"
-      , NK.Label NKT.TOpq "y"
+      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
+      , Kernel.Label Kernel.TOpq "x"
+      , Kernel.Label Kernel.TOpq "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1281,9 +1281,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(<=)"
-      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
-      , NK.Label NKT.TOpq "x"
-      , NK.Label NKT.TOpq "y"
+      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
+      , Kernel.Label Kernel.TOpq "x"
+      , Kernel.Label Kernel.TOpq "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1306,9 +1306,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(>)"
-      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
-      , NK.Label NKT.TOpq "x"
-      , NK.Label NKT.TOpq "y"
+      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
+      , Kernel.Label Kernel.TOpq "x"
+      , Kernel.Label Kernel.TOpq "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1331,9 +1331,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(>=)"
-      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
-      , NK.Label NKT.TOpq "x"
-      , NK.Label NKT.TOpq "y"
+      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
+      , Kernel.Label Kernel.TOpq "x"
+      , Kernel.Label Kernel.TOpq "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1356,8 +1356,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
-      [ NK.Label NKC.int32 "x"
-      , NK.Label NKC.int32 "y"
+      [ Kernel.Label Kernel.int32 "x"
+      , Kernel.Label Kernel.int32 "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1375,8 +1375,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
-      [ NK.Label NKC.int64 "x"
-      , NK.Label NKC.int64 "y"
+      [ Kernel.Label Kernel.int64 "x"
+      , Kernel.Label Kernel.int64 "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1394,8 +1394,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IFloat)) "compare")
-      [ NK.Label NKC.float "x"
-      , NK.Label NKC.float "y"
+      [ Kernel.Label Kernel.float "x"
+      , Kernel.Label Kernel.float "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1413,8 +1413,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IDouble)) "compare")
-      [ NK.Label NKC.double "x"
-      , NK.Label NKC.double "y"
+      [ Kernel.Label Kernel.double "x"
+      , Kernel.Label Kernel.double "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1432,8 +1432,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic INat)) "compare")
-      [ NK.Label (NKT.TCon "nat" []) "x"
-      , NK.Label (NKT.TCon "nat" []) "y"
+      [ Kernel.Label (Kernel.TCon "nat" []) "x"
+      , Kernel.Label (Kernel.TCon "nat" []) "y"
       ]
       ( unsafeParseExpr
           ( [r|
@@ -1462,8 +1462,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IBool)) "compare")
-      [ NK.Label NKC.bool "x"
-      , NK.Label NKC.bool "y"
+      [ Kernel.Label Kernel.bool "x"
+      , Kernel.Label Kernel.bool "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1487,8 +1487,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
-      [ NK.Label NKC.char "x"
-      , NK.Label NKC.char "y"
+      [ Kernel.Label Kernel.char "x"
+      , Kernel.Label Kernel.char "y"
       ]
       ( unsafeParseExpr
           ( [r|
@@ -1505,8 +1505,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IString)) "compare")
-      [ NK.Label NKC.string "s1"
-      , NK.Label NKC.string "s2"
+      [ Kernel.Label Kernel.string "s1"
+      , Kernel.Label Kernel.string "s2"
       ]
       ( unsafeParseExpr
           ( [r|
@@ -1582,8 +1582,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
-      [ NK.Label NKC.bignum "x"
-      , NK.Label NKC.bignum "y"
+      [ Kernel.Label Kernel.bignum "x"
+      , Kernel.Label Kernel.bignum "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1614,7 +1614,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_length"
-      [ NK.Label NKC.string "str"
+      [ Kernel.Label Kernel.string "str"
       ]
       ( unsafeParseExpr
           [r|
@@ -1627,7 +1627,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_head_unsafe"
-      [ NK.Label NKC.string "str"
+      [ Kernel.Label Kernel.string "str"
       ]
       ( unsafeParseExpr
           [r|
@@ -1640,7 +1640,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_tail"
-      [ NK.Label NKC.string "str"
+      [ Kernel.Label Kernel.string "str"
       ]
       ( unsafeParseExpr
           [r|
@@ -1653,7 +1653,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_reverse"
-      [ NK.Label NKC.string "str"
+      [ Kernel.Label Kernel.string "str"
       ]
       ( unsafeParseExpr
           [r|
@@ -1666,7 +1666,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_remove_whitespace"
-      [ NK.Label NKC.string "str"
+      [ Kernel.Label Kernel.string "str"
       ]
       ( unsafeParseExpr
           [r|
@@ -1679,7 +1679,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_from_list"
-      [ NK.Label (NKT.TCon "list" [NKC.char]) "chars"
+      [ Kernel.Label (Kernel.TCon "list" [Kernel.char]) "chars"
       ]
       ( unsafeParseExpr
           [r|
@@ -1718,7 +1718,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.string$_to_list"
-      [ NK.Label NKC.string "str"
+      [ Kernel.Label Kernel.string "str"
       ]
       ( unsafeParseExpr
           [r|
@@ -1764,7 +1764,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(==)"
-      [ NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
@@ -1779,8 +1779,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")
-      [ NK.Label NKC.int32 "x"
-      , NK.Label NKC.int32 "y"
+      [ Kernel.Label Kernel.int32 "x"
+      , Kernel.Label Kernel.int32 "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1790,8 +1790,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IInt64)) "(==)")
-      [ NK.Label NKC.int64 "x"
-      , NK.Label NKC.int64 "y"
+      [ Kernel.Label Kernel.int64 "x"
+      , Kernel.Label Kernel.int64 "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1801,8 +1801,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IFloat)) "(==)")
-      [ NK.Label NKC.float "x"
-      , NK.Label NKC.float "y"
+      [ Kernel.Label Kernel.float "x"
+      , Kernel.Label Kernel.float "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1812,8 +1812,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IDouble)) "(==)")
-      [ NK.Label NKC.double "x"
-      , NK.Label NKC.double "y"
+      [ Kernel.Label Kernel.double "x"
+      , Kernel.Label Kernel.double "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1823,8 +1823,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IBool)) "(==)")
-      [ NK.Label NKC.bool "x"
-      , NK.Label NKC.bool "y"
+      [ Kernel.Label Kernel.bool "x"
+      , Kernel.Label Kernel.bool "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1834,8 +1834,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IChar)) "(==)")
-      [ NK.Label NKC.char "x"
-      , NK.Label NKC.char "y"
+      [ Kernel.Label Kernel.char "x"
+      , Kernel.Label Kernel.char "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1845,8 +1845,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic INat)) "(==)")
-      [ NK.Label (NKT.TCon "nat" []) "x"
-      , NK.Label (NKT.TCon "nat" []) "y"
+      [ Kernel.Label (Kernel.TCon "nat" []) "x"
+      , Kernel.Label (Kernel.TCon "nat" []) "y"
       ]
       ( unsafeParseExpr
           [r|
@@ -1872,8 +1872,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IString)) "(==)")
-      [ NK.Label NKC.string "str1"
-      , NK.Label NKC.string "str2"
+      [ Kernel.Label Kernel.string "str1"
+      , Kernel.Label Kernel.string "str2"
       ]
       ( unsafeParseExpr
           [r|
@@ -1887,8 +1887,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.comparable (TIntrinsic IBignum)) "(==)")
-      [ NK.Label NKC.bignum "m"
-      , NK.Label NKC.bignum "n"
+      [ Kernel.Label Kernel.bignum "m"
+      , Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
@@ -1902,8 +1902,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.divisible (TIntrinsic IFloat)) "(/)")
-      [ NK.Label NKC.float "q"
-      , NK.Label NKC.float "r"
+      [ Kernel.Label Kernel.float "q"
+      , Kernel.Label Kernel.float "r"
       ]
       ( unsafeParseExpr
           [r|
@@ -1913,8 +1913,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.divisible (TIntrinsic IDouble)) "(/)")
-      [ NK.Label NKC.double "q"
-      , NK.Label NKC.double "r"
+      [ Kernel.Label Kernel.double "q"
+      , Kernel.Label Kernel.double "r"
       ]
       ( unsafeParseExpr
           [r|
@@ -1924,8 +1924,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.modulo (TIntrinsic IInt32)) "(%)")
-      [ NK.Label NKC.int32 "q"
-      , NK.Label NKC.int32 "r"
+      [ Kernel.Label Kernel.int32 "q"
+      , Kernel.Label Kernel.int32 "r"
       ]
       ( unsafeParseExpr
           [r|
@@ -1939,8 +1939,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.modulo (TIntrinsic IInt64)) "(%)")
-      [ NK.Label NKC.int64 "q"
-      , NK.Label NKC.int64 "r"
+      [ Kernel.Label Kernel.int64 "q"
+      , Kernel.Label Kernel.int64 "r"
       ]
       ( unsafeParseExpr
           [r|
@@ -1954,8 +1954,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.modulo (TIntrinsic IBignum)) "(%)")
-      [ NK.Label NKC.bignum "q"
-      , NK.Label NKC.bignum "r"
+      [ Kernel.Label Kernel.bignum "q"
+      , Kernel.Label Kernel.bignum "r"
       ]
       ( unsafeParseExpr
           [r|
@@ -1969,8 +1969,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.semigroup (TIntrinsic IString)) "(<>)")
-      [ NK.Label NKC.string "s"
-      , NK.Label NKC.string "t"
+      [ Kernel.Label Kernel.string "s"
+      , Kernel.Label Kernel.string "t"
       ]
       ( unsafeParseExpr
           [r|
@@ -1984,8 +1984,8 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)")
-      [ NK.Label (NKT.TCon "list" [NKT.TOpq]) "xs"
-      , NK.Label (NKT.TCon "list" [NKT.TOpq]) "ys"
+      [ Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "xs"
+      , Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "ys"
       ]
       ( unsafeParseExpr
           [r|
@@ -1999,7 +1999,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_eval"
-      [ NK.Label NKT.TOpq "v"
+      [ Kernel.Label Kernel.TOpq "v"
       ]
       ( unsafeParseExpr
           [r|
@@ -2009,7 +2009,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_return"
-      [ NK.Label NKT.TOpq "v"
+      [ Kernel.Label Kernel.TOpq "v"
       ]
       ( unsafeParseExpr
           [r|
@@ -2019,9 +2019,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(!=)"
-      [ NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$c"
-      , NK.Label NKT.TOpq "a"
-      , NK.Label NKT.TOpq "b"
+      [ Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$c"
+      , Kernel.Label Kernel.TOpq "a"
+      , Kernel.Label Kernel.TOpq "b"
       ]
       ( unsafeParseExpr
           [r|
@@ -2040,10 +2040,10 @@ objectList =
       Exported
       ( builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
       )
-      [ NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$a"
-      , NK.Label (NKT.TCon "Comparable" [NKT.TOpq]) "$b"
-      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t1"
-      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t2"
+      [ Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$a"
+      , Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$b"
+      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t1"
+      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t2"
       ]
       ( unsafeParseExpr
           [r|
@@ -2079,10 +2079,10 @@ objectList =
   , DFunction
       Exported
       (builtinInstance (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare")
-      [ NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$a"
-      , NK.Label (NKT.TCon "Ordered" [NKT.TOpq]) "$b"
-      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t1"
-      , NK.Label (NKT.TCon "tuple" [NKT.TOpq, NKT.TOpq]) "t2"
+      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
+      , Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$b"
+      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t1"
+      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t2"
       ]
       ( unsafeParseExpr
           [r|
@@ -2121,9 +2121,9 @@ objectList =
   , DFunction
       Exported
       "Builtin$.machine$_machine"
-      [ NK.Label NKT.TOpq "seed"
-      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq `NKC.arrow` NKT.TOpq) "transition"
-      , NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "view"
+      [ Kernel.Label Kernel.TOpq "seed"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "transition"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "view"
       ]
       ( unsafeParseExpr
           [r|
@@ -2163,8 +2163,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.machine$_map_machine"
-      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
-      , NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "m"
+      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
+      , Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "m"
       ]
       ( unsafeParseExpr
           [r|
@@ -2224,8 +2224,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.machine$_contramap_input"
-      [ NK.Label (NKT.TOpq `NKC.arrow` NKT.TOpq) "f"
-      , NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "m"
+      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
+      , Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "m"
       ]
       ( unsafeParseExpr
           [r|
@@ -2276,7 +2276,7 @@ objectList =
   , DFunction
       Exported
       "Builtin$.machine$_cofix"
-      [ NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq] `NKC.arrow` NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "f"
+      [ Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq] `Kernel.arrow` Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "f"
       ]
       ( unsafeParseExpr
           [r|
@@ -2363,8 +2363,8 @@ objectList =
   , DFunction
       Exported
       "Builtin$.machine$_run_while"
-      [ NK.Label (NKC.unit `NKC.arrow` NKC.bool) "pred"
-      , NK.Label (NKT.TCon "Machine" [NKT.TOpq, NKT.TOpq]) "m"
+      [ Kernel.Label (Kernel.unit `Kernel.arrow` Kernel.bool) "pred"
+      , Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "m"
       ]
       ( unsafeParseExpr
           [r|
