@@ -350,7 +350,7 @@ qualifiedImports Build{..} =
               if Path ["Builtin$"] == path
                 then pure []
                 else do
-                  Build{buildNames = importNames, buildInstances = importInstances, buildQualifiedNames = importQualifiedNames} <-
+                  Build{buildInstances = importInstances, buildQualifiedNames = importQualifiedNames} <-
                     lift $ lift $ importedBuild path
                   let instanceMemberNames = [instanceLabel (Trait traitName instanceEntryType) member | (traitName, instanceMap) <- Environment.toList importInstances, (_, InstanceEntry{..}) <- Map.toList instanceMap, member <- Map.keys instanceEntryTypeSchemes]
                   pure $
