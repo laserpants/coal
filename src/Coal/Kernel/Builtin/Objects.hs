@@ -450,6 +450,19 @@ objectList =
       )
   , DFunction
       Exported
+      "Builtin$.string$_int64_to_string"
+      [ Kernel.Label Kernel.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_int64_to_string : int64/string
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
       "Builtin$.string$_float_to_string"
       [ Kernel.Label Kernel.float "f"
       ]
@@ -497,6 +510,19 @@ objectList =
                   @<string>
                     ( coal_bool_to_string : bool/string
                     , b : bool
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.string$_bignum_to_string"
+      [ Kernel.Label Kernel.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<string>
+                    ( coal_bignum_to_string : bignum/string
+                    , n : bignum
                     )
         |]
       )

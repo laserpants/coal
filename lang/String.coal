@@ -32,6 +32,14 @@ module String {
     string$_int32_to_string(n)
 
   /**
+   * Convert an int64 value to its string representation.
+   *
+   * **Type**: `int64_to_string : int64 -> string`
+   */
+  fun int64_to_string(n : int64) : string =
+    string$_int64_to_string(n)
+
+  /**
    * Convert a floating-point value to its string representation.
    *
    * **Type**: `float_to_string : float -> string`

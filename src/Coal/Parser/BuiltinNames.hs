@@ -72,6 +72,7 @@ builtinNames =
       [ ("string$_char_to_string", String)
       , ("string$_bool_to_string", String)
       , ("string$_int32_to_string", String)
+      , ("string$_int64_to_string", String)
       , ("string$_float_to_string", String)
       , ("string$_double_to_string", String)
       , ("string$_to_list", String)

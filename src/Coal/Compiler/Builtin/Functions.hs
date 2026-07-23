@@ -124,6 +124,10 @@ builtinFunctions =
     , forall0 (TIntrinsic IInt32 ~> TIntrinsic IString)
     )
   ,
+    ( "string$_int64_to_string"
+    , forall0 (TIntrinsic IInt64 ~> TIntrinsic IString)
+    )
+  ,
     ( "string$_float_to_string"
     , forall0 (TIntrinsic IFloat ~> TIntrinsic IString)
     )

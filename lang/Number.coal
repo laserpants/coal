@@ -116,6 +116,14 @@ module Number {
     #{coal_bignum_to_double : bignum -> double}(n)(fn(d) => d)
 
   /**
+   * Convert a bignum to its string representation.
+   *
+   * **Type**: `bignum_to_string : bignum -> string`
+   */
+  fun bignum_to_string(n : bignum) : string =
+    #{coal_bignum_to_string : bignum -> string}(n)(fn(s) => s)
+
+  /**
    * Return the greater of two comparable values.
    *
    * **Type**: `max : a -> a -> a with (Ordered<a>)`
