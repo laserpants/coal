@@ -161,7 +161,7 @@ This is an open and evolving project &mdash; contributions are welcome. Please s
 
 ### Documentation
 
-The [documentation](https://coal-lang.org/) is built with MkDocs and the Material for MkDocs (mkdocs-material) theme. The source code is hosted at: [github.com/laserpants/coal-docs](https://github.com/laserpants/coal-docs).
+The [documentation](https://coal-lang.org/) is built with Zensical. The source code is hosted at: [github.com/laserpants/coal-docs](https://github.com/laserpants/coal-docs).
 
 ## License 
 
