@@ -166,4 +166,3 @@ The [documentation](https://coal-lang.org/) is built with Zensical. The source c
 ## License 
 
 This project is licensed under the terms of the MIT license. See the `LICENSE` file in this repository for details.
-
