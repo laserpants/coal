@@ -172,7 +172,9 @@ module List {
   /**
    * Extract a range of elements from the list.
    *
+   * ```
    * slice(m, n, xs) = xs |. drop(m) |. take(n - m)
+   * ```
    *
    * **Type**: `slice : nat -> nat -> List<a> -> List<a>`
    */
