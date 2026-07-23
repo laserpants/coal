@@ -1,0 +1,14 @@
+.git
+.stack-work
+dist
+dist-newstyle
+
+*.o
+*.hi
+
+.DS_Store
+.vscode
+.idea
+
+result
+tmp

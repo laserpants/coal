@@ -1,0 +1,10 @@
+FROM ghcr.io/laserpants/coal-dev
+
+WORKDIR /src
+
+COPY . .
+
+RUN runtime/scripts/combine.sh && \
+    stack install --local-bin-path /usr/local/bin --copy-bins
+
+ENTRYPOINT ["coal"]
