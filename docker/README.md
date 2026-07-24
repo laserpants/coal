@@ -50,6 +50,8 @@ docker run --rm \
   compile -I. Main.coal -o dist
 ```
 
+### Interactive use
+
 For an interactive development workflow:
 
 ```bash
@@ -71,7 +73,7 @@ docker run --rm \
 | `-w /src` | Set the working directory inside the container |
 | `--entrypoint bash` | Start a bash shell (instead of the default `coal` command) |
 
-**important:** the `-v "$pwd:/src"` flag makes your local files accessible inside the container. any changes you make inside `/src` are immediately reflected in your local directory.
+**Important:** the `-v "$pwd:/src"` flag makes your local files accessible inside the container. any changes you make inside `/src` are immediately reflected in your local directory.
 
 Once inside the container, the `coal` command is ready to use:
 
