@@ -18,6 +18,10 @@ Coal is a declarative, statically typed, purely functional programming language 
 
 The language documentation is available at: [coal-lang.org](https://coal-lang.org/)
 
+> **Docker** :whale: 
+> 
+> For instructions on how to use Coal in a Docker-based workflow, please see [this page](https://codeberg.org/laserpants/coal/src/branch/main/docker#readme).
+
 ## Installation and setup
 
 The compiler has been tested on Linux and Mac OS.
