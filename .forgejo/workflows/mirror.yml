@@ -25,5 +25,5 @@ jobs:
 
           # Only push tags when this workflow was triggered by a tag push
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            git push github --tags
+            git push github "${GITHUB_REF}"
           fi
