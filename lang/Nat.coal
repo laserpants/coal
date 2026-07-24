@@ -1,6 +1,6 @@
 /**
- * Functions for converting between `nat` values and ordinary 
- * integer representations of non-negative integers.
+ * Functions for converting between `nat` values and the ordinary integer 
+ * representation of the natural numbers.
  */
 module Nat {
 
