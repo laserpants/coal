@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+  import Coal.Combinators(always, identity)
+
+  let foo_works =
+    fn(_, x) => x
+
+  let foo_test =
+    always(identity)
+
+  fun main() =
+    IO.println_string(foo_test(5, "abc"))
+
+}

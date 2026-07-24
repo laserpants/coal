@@ -15,9 +15,10 @@
 //   Arrow keys encoded as: A=Up(65), B=Down(66), C=Right(67), D=Left(68)
 //
 // Interface:
-//   event_loop_init     : int32 -> unit   (tick interval in ms)
-//   event_loop_has_next : unit  -> bool
-//   event_loop_next     : unit  -> int32
+//   event_loop_init             : int32 -> unit   (tick interval in ms)
+//   event_loop_has_next         : unit  -> bool
+//   event_loop_next_kbd_event   : unit  -> int32  (0 = no kbd event)
+//   event_loop_next_tick_event  : unit  -> int32  (1 = tick, 0 = no tick)
 
 #define EVENT_TICK 0
 #define MAX_EVENTS 256
@@ -159,10 +160,37 @@ _Bool event_loop_has_next(void *_unit)
     return true;
 }
 
-// event_loop_next() -- dequeue and return the next event
-int32_t event_loop_next(void *_unit)
+// event_loop_next_kbd_event() -- consume and return the next keyboard event,
+// or 0 if the next event is a tick or the queue is empty.  Does not block.
+int32_t event_loop_next_kbd_event(void *_unit)
 {
-    return dequeue();
+    collect_events();
+    if (g_head >= g_tail)
+        return 0; // queue empty
+    int32_t ev = g_queue[g_head % MAX_EVENTS];
+    if (ev != EVENT_TICK)
+    {
+        dequeue();
+        return ev;
+    }
+    return 0; // next event is a tick, leave it in the queue
+}
+
+// event_loop_next_tick_event() -- consume and return 1 if the next event is
+// a tick, or 0 if it is a keyboard event or the queue is empty.  Does not
+// block.
+int32_t event_loop_next_tick_event(void *_unit)
+{
+    collect_events();
+    if (g_head >= g_tail)
+        return 0; // queue empty
+    int32_t ev = g_queue[g_head % MAX_EVENTS];
+    if (ev == EVENT_TICK)
+    {
+        dequeue();
+        return 1; // tick consumed
+    }
+    return 0; // next event is a keyboard event, leave it in the queue
 }
 
 // ---------------------------------------------------------------------------

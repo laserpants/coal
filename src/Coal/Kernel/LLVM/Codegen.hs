@@ -50,7 +50,7 @@ import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import Coal.Kernel.LLVM.Constructor (irCaseValue)
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
 import qualified Coal.Kernel.LLVM.Function as Function
-import qualified Coal.Kernel.LLVM.Module as MA (collectImportedConstants, collectImportedDData, collectImportedFunctions, objectExprVarRefs, objectGlobalBinding)
+import qualified Coal.Kernel.LLVM.Module as MA (collectImportedConstants, collectImportedDData, collectImportedFunctionBindings, collectImportedFunctions, objectExprVarRefs, objectGlobalBinding)
 import Coal.Kernel.LLVM.Monad
 import Coal.Kernel.LLVM.Prim (irPrim)
 import qualified Coal.Kernel.LLVM.Prim as Prim
@@ -141,7 +141,8 @@ irTail =
       r1 <- nameLookup t1 name
       r2 <- case r1 of
         OGlobal (TFun _ ts) _ | length ts == length es -> do
-          -- Fully saturated call
+          -- Fully saturated tail call. Use irTypeRep t so the call return
+          -- type matches the enclosing function's declared return type.
           rs <- traverse irValue es
           call Tail (irTypeRep t) r1 (NonEmpty.toList rs)
         _ -> do
@@ -201,8 +202,18 @@ irValue =
       case o1 of
         OGlobal (TFun _ ts) _
           | length ts == length es -> do
-              -- Fully saturated call
-              call NoTail (irTypeRep t) o1 (NonEmpty.toList vs)
+              -- Fully saturated call. Use irValueTypeRep t (not irTypeRep t)
+              -- so that function-typed application results map to TPtr rather
+              -- than TFun (which is not a valid LLVM value type), while still
+              -- preserving primitive return types such as i64.
+              call NoTail (Boxing.irValueTypeRep t) o1 (NonEmpty.toList vs)
+          | null ts -> do
+              -- Zero-arg thunk (DConstant): force it first, then apply args
+              -- to the resulting closure. The thunk has no $apply trampoline.
+              forced <- call NoTail TPtr o1 []
+              (argc, args) <- irPackArgs es
+              o3 <- callRuntime rtApply [forced, argc, args]
+              irUnbox t o3
           | otherwise -> do
               let fnPtr = OGlobal TPtr (name <> "$apply")
               o2 <- callRuntime rtClosureNew [fnPtr, O.i32 (length ts)]
@@ -347,7 +358,20 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
           declare thunkName rty []
         _ ->
           return ()
-    let bindings = mapMaybe objectGlobalBinding moduleObjects ++ importedConstantBindings
+    -- Bind imported functions with their exact IR types (derived from the
+    -- actual function definition) so that nameLookup uses the correct
+    -- parameter count rather than the arity derived from usage-site type
+    -- annotations, which can disagree when the return type is itself a
+    -- function (e.g. always : (a->a) -> b -> (a->a) has arity 3 in
+    -- unfoldType but only 2 actual parameters).
+    -- Also emit forward declarations so call instructions remain valid
+    -- (nameLookup would lazily declare these, but we bypass that path).
+    let importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports
+    forM_ importedFunctionBindings $ \(name, op) ->
+      case op of
+        OGlobal (TFun rty ts) _ -> declare name rty ts
+        _ -> return ()
+    let bindings = mapMaybe objectGlobalBinding moduleObjects ++ importedConstantBindings ++ importedFunctionBindings
         allTagBindings =
           Map.fromList
             [ (ctorName, idx)

@@ -1,0 +1,16 @@
+module Main {
+
+  import namespace IO
+  import Coal.Combinators(always, identity)
+
+
+  fun foo(f, g, str) =
+    f(g(5, str))
+
+  fun banan(str) =
+    foo(identity, always(identity), str)
+
+  fun main() =
+    IO.println_string(banan("hello"))
+
+}

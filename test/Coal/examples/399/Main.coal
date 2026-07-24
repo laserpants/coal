@@ -7,9 +7,9 @@ module Main {
 
   import Containers.Set (Set)
   import List(reduce, range)
-  import Codata.Machine (machine, run_while)
-  import Codata.Stream (Stream)
-  import Coal.Combinators (iterate)
+  import Codata.Machine (machine, process, run_while, compose)
+  import Codata.Stream (Stream, scan, nats, map2_stream, repeat, merge_with)
+  import Coal.Combinators (identity, iterate, always)
 
   type Shape
     = ShapeI
@@ -51,15 +51,15 @@ module Main {
       | _ => R270
     }
 
-  type Event
-    = KeyLeft
-    | KeyRight
-    | KeyDown
-    | KeyUp
-    | KeySpace
-    | KeyEsc
-    | Tick
-    | NoOp
+//  type Event
+//    = KeyLeft
+//    | KeyRight
+//    | KeyDown
+//    | KeyUp
+//    | KeySpace
+//    | KeyEsc
+//    | Tick
+//    | NoOp
 
   type alias Block =
     { shape : Shape
@@ -591,18 +591,6 @@ module Main {
 
   // ---------------------------------------------------------------------------
 
-  fun parse_event(ev_code : int32) =
-    match(ev_code) {
-      | 0  => Tick
-      | 68 => KeyLeft 
-      | 67 => KeyRight
-      | 66 => KeyDown
-      | 65 => KeyUp
-      | 32 => KeySpace
-      | 27 => KeyEsc
-      | _  => NoOp
-    }
-
   fun spawn_next_block(state : GameState) =
     let 
       next_block =
@@ -638,45 +626,88 @@ module Main {
       else 
         on_piece_landed(state)
 
-  fun handle_event(event : Event, state : GameState) =
-    match(event) {
-      | KeyLeft =>
+  fun handle_event(game_ev : Option<GameEvent>, state : GameState) =
+    match(game_ev) {
+      | Some(KeyLeft) =>
           move_left(state)
-      | KeyRight =>
+      | Some(KeyRight) =>
           move_right(state)
-      | KeyDown =>
+      | Some(KeyDown) =>
           tick(state)
-      | KeyUp =>
+      | Some(KeyUp) =>
           rotate(state)
-      | KeySpace =>
+      | Some(KeySpace) =>
           hard_drop(state)
-      | KeyEsc =>
+      | Some(KeyEsc) =>
           // TODO
           state
-      | Tick =>
+      | Some(TickEvent) =>
           tick(state)
-      | NoOp =>
+      | _ =>
           state
     }
 
-  fun handle(ev_code : int32, state : GameState) : GameState =
-    let event = parse_event(ev_code) in
-    let new_state = handle_event(event, state) 
+  type GameEvent
+    = KeyLeft
+    | KeyRight
+    | KeyDown
+    | KeyUp
+    | KeySpace
+    | KeyEsc
+    | TickEvent
+
+  fun handle(game_ev : Option<GameEvent>, state : GameState) : GameState =
+    let new_state = handle_event(game_ev, state) 
     in
     #{coal_render_board : List<(int32, int32)> -> List<(int32, int32)> -> unit}(
         board_to_list(new_state.board),
         current_block_cells(new_state)
       )(fn(_) => new_state)
 
-  let game_machine : Stream<GameState> =
+  let kbd_event_stream : Stream<Option<int32>> =
     machine(
-      initial_game_state,
-      fn(_, state) =>
-        #{event_loop_next : unit -> int32}(())(
-          fn(ev_code : int32) => handle(ev_code, state)
+      None,
+      fn(_, _) =>
+        #{event_loop_next_kbd_event : unit -> int32}(())(
+          fn(ev_code : int32) => 
+            if (ev_code != 0)
+              then Some(ev_code)
+              else None
         ),
-      fn(state) => state
+      identity
     )
+
+  let tick_event_stream : Stream<Option<unit>> =
+    machine(
+      None,
+      fn(_, _) =>
+        #{event_loop_next_tick_event : unit -> int32}(())(
+          fn(ev_code : int32) => 
+            if (ev_code != 0)
+              then Some(())
+              else None
+        ),
+      identity
+    )
+
+  fun parse_kbd_event : Option<int32> -> Option<GameEvent>
+    | Some(68) => Some(KeyLeft)
+    | Some(67) => Some(KeyRight)
+    | Some(66) => Some(KeyDown)
+    | Some(65) => Some(KeyUp)
+    | Some(32) => Some(KeySpace)
+    | Some(27) => Some(KeyEsc)
+    | _ => None
+
+  fun parse_tick_event : Option<unit> -> Option<GameEvent>
+    | Some(_) => Some(TickEvent)
+    | _ => None
+
+  let event_stream : Stream<Option<GameEvent>> =
+    merge_with(parse_kbd_event, parse_tick_event, kbd_event_stream, tick_event_stream)
+
+  let game_machine : Stream<GameState> =
+    scan(handle, initial_game_state, event_stream)
 
   fun main() = 
     IO.__return_io(

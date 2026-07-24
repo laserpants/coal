@@ -12,6 +12,7 @@ code generator to build the IR environment before compiling function bodies.
 module Coal.Kernel.LLVM.Module (
   collectImportedConstants,
   collectImportedDData,
+  collectImportedFunctionBindings,
   collectImportedFunctions,
   objectGlobalBinding,
   objectExprVarRefs,
@@ -80,6 +81,25 @@ collectImportedFunctions allModules importNames =
   , Module{moduleObjects} <- allModules
   , DFunction _ name params _ <- moduleObjects
   , name == importName
+  ]
+
+{- | Search all modules for 'DFunction' objects whose name appears in the given
+import list, returning @(name, operand)@ pairs with the exact IR type derived
+from the function's definition — the same way 'objectGlobalBinding' handles
+module-local functions.
+
+Used to pre-populate the codegen environment so that 'nameLookup' uses the
+declared parameter count rather than the (potentially wrong) arity derived
+from usage-site type annotations.
+-}
+collectImportedFunctionBindings :: [Module Type] -> [Name] -> [(Name, IROperand)]
+collectImportedFunctionBindings allModules importNames =
+  [ (name, op)
+  | importName <- importNames
+  , Module{moduleObjects} <- allModules
+  , obj@(DFunction _ name _ _) <- moduleObjects
+  , name == importName
+  , Just (_, op) <- [objectGlobalBinding obj]
   ]
 
 {- | Search all modules for 'DConstant' objects whose name appears in the given
