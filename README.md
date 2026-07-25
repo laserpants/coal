@@ -20,6 +20,10 @@ The language documentation is available at: [coal-lang.org](https://coal-lang.or
 
 ## Installation and setup
 
+> #### :whale: Docker
+> 
+> For instructions on how to use Coal in a Docker-based workflow, please see [this page](docker/).
+
 The compiler has been tested on Linux and Mac OS.
 
 ### Prerequisites
@@ -165,5 +169,5 @@ The [documentation](https://coal-lang.org/) is built with Zensical. The source c
 
 ## License 
 
-This project is licensed under the terms of the MIT license. See the `LICENSE` file in this repository for details.
+This project is licensed under the terms of the MIT license. See the [`LICENSE`](LICENSE) file in this repository for details.
 
