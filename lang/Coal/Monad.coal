@@ -69,6 +69,6 @@ module Coal.Monad {
    *
    * **Type**: `join : m<m<a>> -> m<a> with (Monad<m>)`
    */
-  let join = flip(bind(identity))
+  let join = flip(bind, identity)
 
 }
