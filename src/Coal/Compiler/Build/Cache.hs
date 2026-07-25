@@ -9,13 +9,16 @@ Manages reading and writing serialized build data to the `.build/` directory.
 -}
 module Coal.Compiler.Build.Cache (buildCacheDir, cachedData, cachedBuild, writeBuildFile) where
 
-import Coal.Compiler.Build (Build (buildHash))
+import Coal.Compiler.Build (Build (buildConfigHash, buildHash))
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
+import Coal.Compiler.Config (configHash)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.State (CompilerState (compilerConfig))
 import Control.Exception (SomeException (..), try)
 import Control.Monad (guard)
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.State (gets)
 import Crypto.Hash (hash)
 import Data.Binary (Binary (..), decodeOrFail, encode)
 import Data.ByteString (ByteString, fromStrict, toStrict)
@@ -44,6 +47,8 @@ cachedData name =
 cachedBuild :: (MonadIO m, Binary a) => Name -> Text -> CompilerT Metadata m (Maybe (Build a))
 cachedBuild name src = do
   res <- cachedData name
+  config <- gets compilerConfig
+  let expectedCfgHash = configHash config
   pure $ do
     bs <- case res of
       Left{} ->
@@ -56,6 +61,7 @@ cachedBuild name src = do
       Right (_, _, build) -> do
         let expectedHash = hash (Text.encodeUtf8 src)
         guard (buildHash build == Just (Hash256 expectedHash))
+        guard (buildConfigHash build == Just expectedCfgHash)
         Just build
 
 writeBuildFile :: (MonadIO m, Binary a) => FilePath -> Name -> Build a -> CompilerT Metadata m ()

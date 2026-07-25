@@ -29,12 +29,13 @@ module Coal.Compiler.Pass.PhaseTypeChecking.KindIndexing (passKindIndexing) wher
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Build (Build (..), emptyBuild, insertHash)
+import Coal.Compiler.Build (Build (..), emptyBuild, insertHash, setBuildConfigHash)
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Definitions (builtinFunctions)
 import Coal.Compiler.Builtin.Functions (machineType)
 import Coal.Compiler.Builtin.Names (builtinNames)
+import Coal.Compiler.Config (configHash)
 import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
@@ -123,8 +124,9 @@ insertBuildHash = do
   case Environment.lookup (principalPath compilerCurrentPath) compilerSources of
     Nothing ->
       pure ()
-    Just source ->
-      updateCurrentBuildPureC (insertHash source)
+    Just source -> do
+      let cfgHash = configHash compilerConfig
+      updateCurrentBuildPureC (insertHash source . setBuildConfigHash cfgHash)
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions defs = do

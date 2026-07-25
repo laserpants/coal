@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -18,9 +19,13 @@ module Coal.Compiler.Config (
   setConfigGenerateDebugArtifacts,
   setConfigGenerateLLVMOutput,
   setConfigSanitize,
+  configHash,
 ) where
 
-import Data.Text (Text)
+import Coal.Compiler.Build.Hash256 (Hash256 (..))
+import Crypto.Hash (hash)
+import Data.Text (Text, pack)
+import Data.Text.Encoding (encodeUtf8)
 import Extras (Name)
 
 data CompilerConfig = CompilerConfig
@@ -33,8 +38,9 @@ data CompilerConfig = CompilerConfig
   , configNoCache :: Bool
   , configEntryPoint :: Maybe (Name, Name)
   , configPackageNamespaces :: [(FilePath, Text, [Name])]
-  -- ^ Each triple: (canonical source dir, namespace prefix, unqualified module names).
-  --   Package modules from a given source dir are renamed as @namespace.ModuleName@.
+  {- ^ Each triple: (canonical source dir, namespace prefix, unqualified module names).
+  Package modules from a given source dir are renamed as @namespace.ModuleName@.
+  -}
   , configSanitize :: Bool
   }
   deriving (Show, Eq, Ord, Read)
@@ -104,3 +110,10 @@ setConfigSanitize flag CompilerConfig{..} =
         flag
     , ..
     }
+
+{- | Compute a hash of the configuration fields that affect compilation output.
+Used to invalidate cached builds when relevant config (e.g. package namespaces) changes.
+-}
+configHash :: CompilerConfig -> Hash256
+configHash CompilerConfig{configPackageNamespaces} =
+  Hash256 (hash (encodeUtf8 (pack (show configPackageNamespaces))))

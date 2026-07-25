@@ -32,6 +32,7 @@ module Coal.Compiler.Build (
   setBuildPath,
   setBuildBitcode,
   setBuildHash,
+  setBuildConfigHash,
   insertHash,
 
   -- * Name entry operations
@@ -112,6 +113,7 @@ information collected during compilation phases:
 - 'buildQualifiedNames': Mapping from unqualified to qualified names
 - 'buildBitcode': LLVM bitcode output (if generated)
 - 'buildHash': Source hash for incremental compilation
+- 'buildConfigHash': Configuration hash for cache invalidation on config changes
 - 'buildKernelNames': Kernel IR type environment
 - 'buildKernelIRTypes': LLVM IR type mappings
 - 'buildKernelConstructors': Constructor tag mappings
@@ -130,6 +132,7 @@ data Build a = Build
   , buildQualifiedNames :: Environment Name
   , buildBitcode :: Maybe ByteString
   , buildHash :: Maybe Hash256
+  , buildConfigHash :: Maybe Hash256
   }
   deriving (Show, Eq, Ord, Generic, Functor, Foldable, Traversable)
 
@@ -156,6 +159,7 @@ emptyBuild =
     , buildQualifiedNames = mempty
     , buildBitcode = Nothing
     , buildHash = Nothing
+    , buildConfigHash = Nothing
     }
 
 -- -----------------------------------------------------------------------------
@@ -189,6 +193,14 @@ setBuildHash newBuildHash Build{..} =
 -- | Compute and set the source hash from source text
 insertHash :: Text -> Build a -> Build a
 insertHash source = setBuildHash (Hash256 (hash (Text.encodeUtf8 source)))
+
+-- | Set the configuration hash for cache invalidation
+setBuildConfigHash :: Hash256 -> Build a -> Build a
+setBuildConfigHash newBuildConfigHash Build{..} =
+  Build
+    { buildConfigHash = Just newBuildConfigHash
+    , ..
+    }
 
 -- -----------------------------------------------------------------------------
 
