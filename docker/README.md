@@ -34,7 +34,7 @@ The **development image for contributors**. This image includes only the build t
 
 Use this image if you want to **contribute to the Coal project** or experiment with the compiler source code. You'll need to build the compiler yourself using the `coal-install` script from inside the container.
 
-## Quickstart
+## Quick start
 
 ### Using the pre-built compiler image
 
