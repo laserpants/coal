@@ -219,7 +219,7 @@ builtinDData =
     :
     -- Tuples $Tuple2 .. $Tuple8 (each type has one constructor at tag 0)
     [ Kernel.DData
-        ("tuple" <> showt n)
-        [("$Tuple" <> showt n, foldr Kernel.arrow (Kernel.TCon "tuple" (replicate n Kernel.TOpq)) (replicate n Kernel.TOpq))]
+      ("tuple" <> showt n)
+      [("$Tuple" <> showt n, foldr Kernel.arrow (Kernel.TCon "tuple" (replicate n Kernel.TOpq)) (replicate n Kernel.TOpq))]
     | n <- [2 .. 8 :: Int]
     ]

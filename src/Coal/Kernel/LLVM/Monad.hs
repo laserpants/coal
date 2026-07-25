@@ -52,10 +52,9 @@ data IRCodegenEnv = IRCodegenEnv
   { codegenVarEnv :: Environment IROperand
   , codegenTagEnv :: Map Name Int
   , codegenImportedDData :: Map Name Int
-  {- ^ Fully-qualified constructor name → field count for BCached modules.
-  Used by 'irModule' to emit sized struct type declarations for constructors
-  that are referenced by freshly compiled modules but live in cached builds.
-  -}
+  -- ^ Fully-qualified constructor name → field count for BCached modules.
+  --   Used by 'irModule' to emit sized struct type declarations for constructors
+  --   that are referenced by freshly compiled modules but live in cached builds.
   }
 
 instance Semigroup IRCodegenEnv where
