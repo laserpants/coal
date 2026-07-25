@@ -50,6 +50,7 @@ import Coal.Compiler.Build.NameEntry
 import Coal.Compiler.Builtin.Instances (builtinInstances)
 import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Builtin.Names (builtinNames)
+import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Error
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
@@ -391,8 +392,28 @@ qualifiedImports Build{..} =
                     pure mempty
     DNamespaceImport _ path -> do
       Build{buildExportedNames = exportedNames, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
-      n1 <- concatForM (Set.toList exportedNames) $
-        \name -> pure [(qualified name path, qualified name path)]
+      namespaces <- lift $ lift $ gets (configPackageNamespaces . compilerConfig)
+      let fullPathName = principalPath path
+          -- Reverse the package namespace map to recover the short (pre-prefix)
+          -- module name for installed packages.  E.g. given namespace prefix
+          -- "CoalContainers", "CoalContainers.Containers.Map" → "Containers.Map".
+          -- This allows intra-package code that still uses the short prefix
+          -- (e.g. Containers.Map.insert) to resolve correctly after the import
+          -- path has been rewritten to the fully-qualified form.
+          reverseNsMap =
+            Map.fromList
+              [ (ns <> "." <> m, m)
+              | (_, ns, mods) <- namespaces
+              , m <- mods
+              ]
+          shortPathMaybe = Map.lookup fullPathName reverseNsMap
+      n1 <- concatForM (Set.toList exportedNames) $ \name -> do
+        let fullEntry = qualified name path
+            shortEntries =
+              case shortPathMaybe of
+                Just sp -> [(sp <> "." <> name, fullEntry)]
+                Nothing -> []
+        pure ((fullEntry, fullEntry) : shortEntries)
       n2 <- generateQualifiedInstanceNames path importNames buildExportedNames (Environment.toList importInstances)
       pure (n1 <> n2)
     _ ->
@@ -542,8 +563,8 @@ insertTypeName Build{..} loc name =
               } <-
               get
             if ( Environment.contains name curTCs
-                  || Environment.contains name curTraits
-                  || Environment.contains name curAliases
+                   || Environment.contains name curTraits
+                   || Environment.contains name curAliases
                )
               && Set.member name curExported
               then lift $ lift $ do
@@ -569,8 +590,8 @@ insertTypeName Build{..} loc name =
               } <-
               get
             if ( Environment.contains name curTraits
-                  || Environment.contains name curTCs
-                  || Environment.contains name curAliases
+                   || Environment.contains name curTCs
+                   || Environment.contains name curAliases
                )
               && Set.member name curExported
               then lift $ lift $ do
@@ -1054,7 +1075,20 @@ collectImports =
                   tellErrors [ImportNotInModule name path (ErrorLocation (principalPath currentPath) loc)]
     DNamespaceImport _ path -> do
       Build{..} <- lift $ lift $ importedBuild path
+      namespaces <- lift $ lift $ gets (configPackageNamespaces . compilerConfig)
       let qualifiedName name = principalPath buildPath <.> name
+          fullPathName = principalPath buildPath
+          -- Reverse the package namespace map to find the short (pre-prefix) path.
+          -- E.g. "CoalContainers.Containers.Map" → "Containers.Map".
+          -- This allows intra-package code that still references the short prefix
+          -- (e.g. Containers.Map.insert) to resolve correctly in compilerNameStore.
+          reverseNsMap =
+            Map.fromList
+              [ (ns <> "." <> m, m)
+              | (_, ns, mods) <- namespaces
+              , m <- mods
+              ]
+          shortPrefix = Map.lookup fullPathName reverseNsMap
       forM_ buildExportedNames $
         \exportedName ->
           forM_ (Environment.lookupWithDefault mempty exportedName buildNames) $
@@ -1062,6 +1096,13 @@ collectImports =
               NName name s -> do
                 modify (insertBuildNameEntry (NName (qualifiedName name) s))
                 _ <- lift $ lift $ insertNameC (qualifiedName name) s
+                -- Also register the short-form name so that intra-package code
+                -- using the pre-prefix path (e.g. Containers.Map.insert) resolves.
+                forM_ shortPrefix $ \sp -> do
+                  let sn = sp <.> name
+                  modify (insertBuildNameEntry (NName sn s))
+                  _ <- lift $ lift $ insertNameC sn s
+                  pure ()
                 pure ()
               NType name k ->
                 modify (insertBuildNameEntry (NType (qualifiedName name) k))
