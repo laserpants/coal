@@ -51,13 +51,22 @@ data IRCodegenError
 data IRCodegenEnv = IRCodegenEnv
   { codegenVarEnv :: Environment IROperand
   , codegenTagEnv :: Map Name Int
+  , codegenImportedDData :: Map Name Int
+  {- ^ Fully-qualified constructor name → field count for BCached modules.
+  Used by 'irModule' to emit sized struct type declarations for constructors
+  that are referenced by freshly compiled modules but live in cached builds.
+  -}
   }
 
 instance Semigroup IRCodegenEnv where
-  e1 <> e2 = IRCodegenEnv (codegenVarEnv e1 <> codegenVarEnv e2) (codegenTagEnv e1 <> codegenTagEnv e2)
+  e1 <> e2 =
+    IRCodegenEnv
+      (codegenVarEnv e1 <> codegenVarEnv e2)
+      (codegenTagEnv e1 <> codegenTagEnv e2)
+      (codegenImportedDData e1 <> codegenImportedDData e2)
 
 instance Monoid IRCodegenEnv where
-  mempty = IRCodegenEnv mempty Map.empty
+  mempty = IRCodegenEnv mempty Map.empty Map.empty
 
 newtype IRCodegenT m a = IRCodegen
   { getIRCodegen :: StateT (Set Name, Int, Map ByteString Name) (ExceptT IRCodegenError (ReaderT IRCodegenEnv m)) a

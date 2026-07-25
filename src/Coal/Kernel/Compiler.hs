@@ -45,14 +45,17 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.Identity (Identity, runIdentity)
 import Control.Monad.State (runStateT)
 import Control.Monad.Trans (MonadTrans (..))
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
 import LLVM.IR
 
+import Coal.Common.Name (Name)
 import Coal.Compiler.Config (CompilerConfig (configEntryPoint))
 import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
-import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenError, runIRCodegen)
+import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..), IRCodegenError, runIRCodegen)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Type (Type)
 import qualified Coal.Kernel.Parser.Module as Parser
@@ -68,18 +71,22 @@ import Text.Megaparsec (errorBundlePretty, parse)
 through parsing, normalization passes, and LLVM IR code generation.
 -}
 data CompilerError
-  = -- | A source file failed to parse.  The string is the output of
-    --     'errorBundlePretty', suitable for direct display to the user.
+  = {- | A source file failed to parse.  The string is the output of
+    'errorBundlePretty', suitable for direct display to the user.
+    -}
     CompilerParseError String
-  | -- | A normalization pass signalled an error (e.g. over-saturated
-    --     constructor application).
+  | {- | A normalization pass signalled an error (e.g. over-saturated
+    constructor application).
+    -}
     CompilerPipelineError PipelineError
-  | -- | The IR code-generation phase encountered a semantic error
-    --     (e.g. unbound variable or non-function type in call position).
+  | {- | The IR code-generation phase encountered a semantic error
+    (e.g. unbound variable or non-function type in call position).
+    -}
     CompilerIRCodegenError IRCodegenError
-  | -- | The LLVM IR builder signalled an internal construction error
-    --     (e.g. block already terminated).  These indicate a compiler bug
-    --     rather than a user error.
+  | {- | The LLVM IR builder signalled an internal construction error
+    (e.g. block already terminated).  These indicate a compiler bug
+    rather than a user error.
+    -}
     CompilerIRBuilderError IRBuilderError
   deriving (Show, Eq)
 
@@ -136,15 +143,15 @@ normalizeModule m =
     either (throwError . CompilerPipelineError) return $
       evalPipeline initialPipelineState (pipeline m)
 
-{- | Run the LLVM IR builder and 'IRCodegen' action, producing an 'IRModule'
-or a 'CompilerError'.
+{- | Run the LLVM IR builder and 'IRCodegen' action with a given initial
+environment, producing an 'IRModule' or a 'CompilerError'.
 -}
-buildIR :: IRCodegen IRModule -> Either CompilerError IRModule
-buildIR action =
+buildIR :: IRCodegenEnv -> IRCodegen IRModule -> Either CompilerError IRModule
+buildIR initEnv action =
   case runIdentity $
     runExceptT $
       runStateT
-        (runIRBuilder (runIRCodegen mempty action))
+        (runIRBuilder (runIRCodegen initEnv action))
         (emptyIRBuilderEnv :: IRBuilderEnv) of
     Left builderErr ->
       Left (CompilerIRBuilderError builderErr)
@@ -159,8 +166,8 @@ list of all (normalized) modules for cross-module context.
 For the entry point module (default: "Main"), additionally emits the C main
 entry point via 'irMainModule'.
 -}
-codeGenModule :: (Monad m) => CompilerConfig -> [Module Type] -> Module Type -> CompilerT m IRModule
-codeGenModule config allModules m =
+codeGenModule :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> [Module Type] -> Module Type -> CompilerT m IRModule
+codeGenModule config extraTags cachedDData allModules m =
   let isEntryPoint = case configEntryPoint config of
         Nothing -> moduleName m == Text.pack "Main"
         Just (entryMod, _) -> moduleName m == entryMod
@@ -170,11 +177,12 @@ codeGenModule config allModules m =
       entryPointFunc = case configEntryPoint config of
         Nothing -> Text.pack "main"
         Just (_, entryFunc) -> entryFunc
+      initEnv = IRCodegenEnv{codegenVarEnv = mempty, codegenTagEnv = extraTags, codegenImportedDData = cachedDData}
    in CompilerT $
         either throwError return $
           if isEntryPoint
-            then buildIR (irModule allModules m (irMainModule entryPointModule entryPointFunc))
-            else buildIR (irModule allModules m (return ()))
+            then buildIR initEnv (irModule allModules m (irMainModule entryPointModule entryPointFunc))
+            else buildIR initEnv (irModule allModules m (return ()))
 
 -- ---------------------------------------------------------------------------
 -- Public entry points
@@ -193,10 +201,10 @@ Example:
     Right irs -> mapM_ (Text.putStrLn . runIRRenderer . renderModule) irs
 @
 -}
-compileModules :: (Monad m) => CompilerConfig -> [Module Type] -> CompilerT m [IRModule]
-compileModules config mods = do
+compileModules :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> [Module Type] -> CompilerT m [IRModule]
+compileModules config extraTags cachedDData mods = do
   normalized <- traverse normalizeModule mods
-  traverse (codeGenModule config normalized) normalized
+  traverse (codeGenModule config extraTags cachedDData normalized) normalized
 
 {- | Read and parse source files from the given paths, then call
 'compileModules'.
@@ -208,7 +216,7 @@ Parse errors for any file abort the compilation and are reported as
 compileFiles :: CompilerConfig -> [FilePath] -> CompilerT IO [IRModule]
 compileFiles config paths = do
   mods <- traverse parseOne paths
-  compileModules config mods
+  compileModules config Map.empty Map.empty mods
  where
   parseOne path = do
     src <- liftIO (Text.readFile path)

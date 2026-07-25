@@ -348,6 +348,11 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
     -- other modules so that 'irClause' can use sized getelementptr.
     forM_ (collectImportedDData allModules moduleImports) $
       uncurry irImportedDataConstructor
+    -- Also emit struct types for constructors from BCached modules (not in
+    -- allModules), identified via the codegenImportedDData environment entry.
+    cachedDData <- asks codegenImportedDData
+    forM_ [(n, fc) | n <- moduleImports, Just fc <- [Map.lookup n cachedDData]] $
+      uncurry irImportedDataConstructor
     -- Declare $apply trampolines for imported functions.
     forM_ (collectImportedFunctions allModules moduleImports) $
       uncurry irImportedFunctionTrampoline

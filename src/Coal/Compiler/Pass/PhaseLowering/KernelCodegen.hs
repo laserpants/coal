@@ -11,9 +11,11 @@ it to bitcode via @llvm-as@.
 -}
 module Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen) where
 
+import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Build.Cache (buildCacheDir, writeBuildFile)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
+import Coal.Compiler.Build.NameEntry (DataConstructorEntry (..), TypeConstructorEntry (..))
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Error (CompilerFailureMode (..))
 import Coal.Compiler.Metadata (Metadata (..))
@@ -28,6 +30,7 @@ import qualified Coal.Kernel.Language.Object as Kernel
 import qualified Coal.Kernel.Language.Type as Kernel
 import qualified Coal.Kernel.Language.Type.Constructors as Kernel
 import qualified Coal.Kernel.Prettyprinter as NKPretty
+import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Module.Path (principalPath)
 import Control.Exception (SomeException, try)
 import Control.Monad (forM_, when)
@@ -36,6 +39,8 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
+import Data.List (sort)
+import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Extras (Name)
@@ -84,9 +89,34 @@ pass envelopes = do
       builtinMod = injectDData Builtin.builtinObjects
       augmented = map injectDData (snd <$> sources)
 
+  -- Reconstruct data constructor tag bindings for BCached modules.
+  -- Cached builds store constructors in declaration order via buildTypeConstructors,
+  -- which matches the [0..] indexing used in kernel codegen's allTagBindings.
+  -- Seeding the initial IRCodegenEnv with these tags allows BSource modules to
+  -- pattern-match on constructors from BCached modules without UnboundVariable errors.
+  let cachedTagBindings =
+        Map.fromList
+          [ (principalPath (buildPath b) <> "." <> ctorName, idx)
+          | BCached b <- envelopes
+          , (_, TypeConstructorEntry{typeConstructorEntryDataConstructors = ctors}) <-
+              Environment.toList (buildTypeConstructors b)
+          , (idx, ctorName) <- zip [0 ..] (sort ctors)
+          ]
+
+  -- Reconstruct constructor field counts for BCached modules.
+  -- Needed so that irModule can emit sized LLVM struct type declarations
+  -- (via irImportedDataConstructor) for constructors that live in cached builds
+  -- and are referenced by freshly compiled BSource modules.
+  let cachedDDataInfo =
+        Map.fromList
+          [ (principalPath (buildPath b) <> "." <> dataConstructorEntryName entry, constructorArity (dataConstructorEntryConstructor entry))
+          | BCached b <- envelopes
+          , (_, entry) <- Environment.toList (buildDataConstructors b)
+          ]
+
   -- Run the new-kernel compiler purely on all source modules together
   -- (cross-module context is required for LLVM codegen).
-  irs <- case Kernel.runCompiler (Kernel.compileModules config (builtinMod : augmented)) of
+  irs <- case Kernel.runCompiler (Kernel.compileModules config cachedTagBindings cachedDDataInfo (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError
@@ -189,7 +219,7 @@ builtinDData =
     :
     -- Tuples $Tuple2 .. $Tuple8 (each type has one constructor at tag 0)
     [ Kernel.DData
-      ("tuple" <> showt n)
-      [("$Tuple" <> showt n, foldr Kernel.arrow (Kernel.TCon "tuple" (replicate n Kernel.TOpq)) (replicate n Kernel.TOpq))]
+        ("tuple" <> showt n)
+        [("$Tuple" <> showt n, foldr Kernel.arrow (Kernel.TCon "tuple" (replicate n Kernel.TOpq)) (replicate n Kernel.TOpq))]
     | n <- [2 .. 8 :: Int]
     ]
