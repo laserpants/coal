@@ -563,8 +563,8 @@ insertTypeName Build{..} loc name =
               } <-
               get
             if ( Environment.contains name curTCs
-                   || Environment.contains name curTraits
-                   || Environment.contains name curAliases
+                  || Environment.contains name curTraits
+                  || Environment.contains name curAliases
                )
               && Set.member name curExported
               then lift $ lift $ do
@@ -590,8 +590,8 @@ insertTypeName Build{..} loc name =
               } <-
               get
             if ( Environment.contains name curTraits
-                   || Environment.contains name curTCs
-                   || Environment.contains name curAliases
+                  || Environment.contains name curTCs
+                  || Environment.contains name curAliases
                )
               && Set.member name curExported
               then lift $ lift $ do
