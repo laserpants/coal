@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+  import Coal.Monad(join)
+
+  let 
+    val = join(Some(Some(123 : int32)))
+
+  fun main() =
+    match(val) {
+      | Some(i) => IO.println_int32(i)
+      | None => IO.println_int32(0)
+    }
+
+}

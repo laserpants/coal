@@ -5,7 +5,7 @@
  */
 module Coal.Monad {
 
-  import Coal.Combinators(flip, always)
+  import Coal.Combinators(flip, always, identity)
   import Coal.Applicative(Applicative)
   import IO(__eval_io)
   import namespace List
@@ -61,5 +61,14 @@ module Coal.Monad {
    * **Type**: `and_eval : m<b> -> m<a> -> m<a> with (Monad<m>)`
    */
   let and_eval = flip(then_do)
+
+  /**
+   * `join` flattens a nested monadic value by one level, transforming
+   * `m<m<a>>` into `m<a>`. It is equivalent to `bind` with the identity
+   * function.
+   *
+   * **Type**: `join : m<m<a>> -> m<a> with (Monad<m>)`
+   */
+  let join = flip(bind(identity))
 
 }
