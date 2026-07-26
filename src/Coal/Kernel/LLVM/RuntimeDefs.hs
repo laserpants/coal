@@ -40,6 +40,12 @@ module Coal.Kernel.LLVM.RuntimeDefs (
   -- * String
   rtStringNew,
 
+  -- * Parsing
+  rtParseInt32,
+  rtParseInt64,
+  rtParseFloat,
+  rtParseDouble,
+
   -- * Bignum
   rtBignumNew,
 
@@ -103,6 +109,20 @@ rtCharUnbox = rtFun "rt_char_unbox" i32 [TPtr]
 
 rtStringNew :: RuntimeFun
 rtStringNew = rtFun "rt_string_new" TPtr [TPtr]
+
+-- * Parsing
+
+rtParseInt32 :: RuntimeFun
+rtParseInt32 = rtFun "rt_parse_int32" TPtr [TPtr]
+
+rtParseInt64 :: RuntimeFun
+rtParseInt64 = rtFun "rt_parse_int64" TPtr [TPtr]
+
+rtParseFloat :: RuntimeFun
+rtParseFloat = rtFun "rt_parse_float" TPtr [TPtr]
+
+rtParseDouble :: RuntimeFun
+rtParseDouble = rtFun "rt_parse_double" TPtr [TPtr]
 
 -- * Bignum
 

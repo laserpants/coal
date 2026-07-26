@@ -91,6 +91,20 @@ extern void coal_println_bignum(rt_value_t v);
 extern rt_value_t coal_readln(void);
 
 /* ============================================================================
+ * Parsing operations
+ * ============================================================================
+ */
+
+/** Parse boxed string to int32, returns boxed int32 or NULL on failure */
+extern rt_value_t coal_parse_int32(rt_value_t v);
+/** Parse boxed string to int64, returns boxed int64 or NULL on failure */
+extern rt_value_t coal_parse_int64(rt_value_t v);
+/** Parse boxed string to float, returns boxed float or NULL on failure */
+extern rt_value_t coal_parse_float(rt_value_t v);
+/** Parse boxed string to double, returns boxed double or NULL on failure */
+extern rt_value_t coal_parse_double(rt_value_t v);
+
+/* ============================================================================
  * Bignum operations
  * ============================================================================
  */
