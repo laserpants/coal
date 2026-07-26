@@ -1,4 +1,6 @@
 #include "coal/value_api.h"
+#include <errno.h>
+#include <stdlib.h>
 
 /* ============================================================================
  * Type conversions
@@ -194,6 +196,83 @@ coal_bignum_init(rt_value_t v)
 {
     return rt_bignum_box(rt_bignum_new(rt_string_data(rt_string_unbox(v))));
 }
+
+rt_value_t
+coal_parse_int32(rt_value_t v)
+{
+    const char *str = rt_string_data(rt_string_unbox(v));
+    char *endptr;
+    errno = 0;
+    long val = strtol(str, &endptr, 10);
+
+    /* Check for conversion errors */
+    if (errno != 0 || *endptr != '\0' || val < INT32_MIN || val > INT32_MAX) {
+        return rt_ptr_box(NULL);
+    }
+
+    return rt_int32_box((int32_t) val);
+}
+
+rt_value_t
+coal_parse_int64(rt_value_t v)
+{
+    const char *str = rt_string_data(rt_string_unbox(v));
+    char *endptr;
+    errno = 0;
+    long long val = strtoll(str, &endptr, 10);
+
+    /* Check for conversion errors */
+    if (errno != 0 || *endptr != '\0') {
+        return rt_ptr_box(NULL);
+    }
+
+    return rt_int64_box((int64_t) val);
+}
+
+rt_value_t
+coal_parse_float(rt_value_t v)
+{
+    const char *str = rt_string_data(rt_string_unbox(v));
+    char *endptr;
+    errno = 0;
+    float val = strtof(str, &endptr);
+
+    /* Check for conversion errors */
+    if (errno != 0 || *endptr != '\0') {
+        return rt_ptr_box(NULL);
+    }
+
+    return rt_float_box(val);
+}
+
+rt_value_t
+coal_parse_double(rt_value_t v)
+{
+    const char *str = rt_string_data(rt_string_unbox(v));
+    char *endptr;
+    errno = 0;
+    double val = strtod(str, &endptr);
+
+    /* Check for conversion errors */
+    if (errno != 0 || *endptr != '\0') {
+        return rt_ptr_box(NULL);
+    }
+
+    return rt_double_box(val);
+}
+
+/* ============================================================================
+ * Parsing operations
+ * ============================================================================
+ */
+
+rt_value_t coal_parse_int32(rt_value_t v);
+
+rt_value_t coal_parse_int64(rt_value_t v);
+
+rt_value_t coal_parse_float(rt_value_t v);
+
+rt_value_t coal_parse_double(rt_value_t v);
 
 rt_value_t
 coal_bignum_from_i64(rt_value_t v)

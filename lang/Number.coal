@@ -88,6 +88,58 @@ module Number {
     #{coal_double_to_int64 : double -> int64}(d)(fn(n) => n)
 
   /**
+   * Parse a decimal string into a 32-bit integer.
+   *
+   * Returns `None` if parsing fails (invalid format or overflow), 
+   * otherwise `Some(int32)`.
+   *
+   * **Type**: `parse_int32 : string -> Option<int32>`
+   */
+  fun parse_int32(input : string) : Option<int32> =
+    #{coal_parse_int32 : string -> int32}(input)(fn(res) => 
+      #{rt_is_null : int32 -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(res)))
+
+  /**
+   * Parse a decimal string into a 64-bit integer.
+   *
+   * Returns `None` if parsing fails (invalid format or overflow), 
+   * otherwise `Some(int64)`.
+   *
+   * **Type**: `parse_int64 : string -> Option<int64>`
+   */
+  fun parse_int64(input : string) : Option<int64> =
+    #{coal_parse_int64 : string -> int64}(input)(fn(res) => 
+      #{rt_is_null : int64 -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(res)))
+
+  /**
+   * Parse a decimal string into a float.
+   *
+   * Returns `None` if parsing fails (invalid format), 
+   * otherwise `Some(float)`.
+   *
+   * **Type**: `parse_float : string -> Option<float>`
+   */
+  fun parse_float(input : string) : Option<float> =
+    #{coal_parse_float : string -> float}(input)(fn(res) => 
+      #{rt_is_null : float -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(res)))
+
+  /**
+   * Parse a decimal string into a double.
+   *
+   * Returns `None` if parsing fails (invalid format), 
+   * otherwise `Some(double)`.
+   *
+   * **Type**: `parse_double : string -> Option<double>`
+   */
+  fun parse_double(input : string) : Option<double> =
+    #{coal_parse_double : string -> double}(input)(fn(res) => 
+      #{rt_is_null : double -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(res)))
+
+  /**
    * Parse a decimal string into a bignum.
    *
    * Returns `None` if parsing fails, otherwise `Some(bignum)`.

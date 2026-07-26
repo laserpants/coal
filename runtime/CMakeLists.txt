@@ -30,6 +30,7 @@ set(RUNTIME_SOURCES
     src/io.c
     src/panic.c
     src/record.c
+    src/value_api.c
 )
 
 # Build static library
