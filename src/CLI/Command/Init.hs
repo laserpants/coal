@@ -6,7 +6,7 @@ module CLI.Command.Init (initCommand) where
 import CLI.Error (CLIError (..))
 import CLI.Options.InitCmd (InitCmdOptions (..))
 import Control.Monad (unless, when)
-import Control.Monad.Except
+import Control.Monad.Except (ExceptT, MonadError (throwError))
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString (toStrict)

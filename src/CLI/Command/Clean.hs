@@ -1,7 +1,7 @@
 module CLI.Command.Clean (cleanCommand) where
 
 import Control.Exception (catch)
-import System.Directory
+import System.Directory (removeDirectoryRecursive)
 import System.IO.Error (isDoesNotExistError)
 
 cleanCommand :: IO ()
