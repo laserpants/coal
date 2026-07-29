@@ -243,7 +243,7 @@ parseIfExpression =
 parseLambdaExpression :: Parser (Expression Metadata () ())
 parseLambdaExpression =
   withMetadata $ do
-    ps <- lexeme_ "fn" *> parens (nonEmpty (commaSep1 parsePattern))
+    ps <- lexeme_ "fn" *> parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
     e <- symbol_ "=>" *> parseExpression
     pure (\loc -> ELambda loc ps e)
 
