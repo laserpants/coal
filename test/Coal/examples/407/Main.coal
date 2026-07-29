@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+
+  let math = 
+    { add = fn(x : int32) => x + 1
+    }
+
+  fun main() =
+    IO.println_int32(math.add(5))
+
+}
