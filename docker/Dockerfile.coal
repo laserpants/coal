@@ -1,9 +1,6 @@
 FROM ghcr.io/laserpants/coal-dev
 
-ARG COAL_VERSION=unknown
-ENV COAL_VERSION=${COAL_VERSION}
-
-WORKDIR /src
+]WORKDIR /src
 
 COPY . .
 
