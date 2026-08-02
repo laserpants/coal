@@ -12,12 +12,20 @@ bug-reports: https://codeberg.org/laserpants/coal/issues
 
 extra-source-files:
   - README.md
+  - src/Coal/Version.hs
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
 # category:            Web
 
 description: Please see the README at <https://codeberg.org/laserpants/coal/src/branch/main/README.md>
+
+custom-setup:
+  dependencies:
+    - base
+    - Cabal
+    - directory
+    - process
 
 dependencies:
   - aeson >= 2.2 && < 2.3
