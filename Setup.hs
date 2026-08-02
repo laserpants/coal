@@ -19,7 +19,7 @@ generateVersion = do
   version <- readProcess "git" ["describe", "--tags", "--dirty", "--always"] ""
   writeFile "src/Coal/Version.hs" $
     unlines
-      [ "module Coal.Version where"
+      [ "module Coal.Version(version) where"
       , ""
       , "version :: String"
       , "version = " ++ show (trim version)
