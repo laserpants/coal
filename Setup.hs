@@ -1,3 +1,6 @@
+{-# LANGUAGE TypeApplications #-}
+
+import Control.Exception (SomeException, try)
 import Distribution.Simple
 import Distribution.Simple.LocalBuildInfo
 import Distribution.Simple.Setup
@@ -16,13 +19,14 @@ main =
 
 generateVersion :: IO ()
 generateVersion = do
-  version <- readProcess "git" ["describe", "--tags", "--dirty", "--always"] ""
+  e <- try @SomeException (readProcess "git" ["describe", "--tags", "--dirty", "--always"] "")
+  let version = either (const "unknown") trim e
   writeFile "src/Coal/Version.hs" $
     unlines
-      [ "module Coal.Version(version) where"
+      [ "module Coal.Version (version) where"
       , ""
       , "version :: String"
-      , "version = " ++ show (trim version)
+      , "version = " ++ show version
       ]
  where
   trim = reverse . dropWhile (`elem` "\n ") . reverse . dropWhile (`elem` "\n ")
