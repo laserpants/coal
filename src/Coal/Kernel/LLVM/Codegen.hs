@@ -411,7 +411,7 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
     -- actual function definition) so that nameLookup uses the correct
     -- parameter count rather than the arity derived from usage-site type
     -- annotations, which can disagree when the return type is itself a
-    -- function (e.g. always : (a->a) -> b -> (a->a) has arity 3 in
+    -- function (e.g. always : (a -> a) -> b -> (a -> a) has arity 3 in
     -- unfoldType but only 2 actual parameters).
     -- Also emit forward declarations so call instructions remain valid
     -- (nameLookup would lazily declare these, but we bypass that path).
@@ -453,12 +453,13 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
       $ forM_ moduleObjects
       $ \case
         DData _ ctors ->
-          forM_ (zip [0 ..] ctors) $ \(index, (ctorName, ctorType)) ->
-            irDataConstructor ctorName $
-              Constructor.ConstructorDefinition
-                { Constructor.constructorIndex = index
-                , Constructor.constructorFieldCount = arity ctorType
-                }
+          forM_ (zip [0 ..] ctors) $
+            \(index, (ctorName, ctorType)) ->
+              irDataConstructor ctorName $
+                Constructor.ConstructorDefinition
+                  { Constructor.constructorIndex = index
+                  , Constructor.constructorFieldCount = arity ctorType
+                  }
         DFunction scope name lls expr -> do
           let lnk = toIRLinkage scope
           irFunction lnk name lls expr
