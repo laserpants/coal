@@ -40,9 +40,10 @@ buildCommand = do
         throwError err
     -- Canonicalize package source dirs so they match the canonical bestRoot
     -- returned by resolveModule inside the parsing pass.
-    canonNsInfo <- forM nsInfo $ \(dir, ns, mods) -> do
-      canonDir <- liftIO $ canonicalizePath dir
-      pure (canonDir, ns, mods)
+    canonNsInfo <- forM nsInfo $
+      \(dir, ns, mods) -> do
+        canonDir <- liftIO $ canonicalizePath dir
+        pure (canonDir, ns, mods)
     let localSrcPaths = Text.unpack <$> fromMaybe ["src"] source_dirs
         pkgSrcPaths = [d | (d, _, _) <- canonNsInfo]
         entryPoint = parseEntryPoint entry_point

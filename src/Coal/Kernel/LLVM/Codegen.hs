@@ -54,7 +54,8 @@ import qualified Coal.Kernel.LLVM.Module as MA (collectImportedConstants, collec
 import Coal.Kernel.LLVM.Monad
 import Coal.Kernel.LLVM.Prim (irPrim)
 import qualified Coal.Kernel.LLVM.Prim as Prim
-import Coal.Kernel.LLVM.Runtime (callRuntime)
+import Coal.Kernel.LLVM.Runtime (callRuntime, callRuntimeTail)
+
 import Coal.Kernel.LLVM.RuntimeDefs
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
@@ -148,13 +149,56 @@ irTail =
         _ -> do
           irValue expr
       ret r2
-    ECall (Label t name) args k -> do
-      -- External C call in tail position: evaluate as value, return
-      r1 <- irValue (ECall (Label t name) args k)
-      ret r1
+    ECall (Label t name) args k ->
+      -- Tail-position #{ffi}(args)(k): run the foreign call, then tail-apply
+      -- the continuation via rt_apply so CPS loops (e.g. EventSource.select)
+      -- do not grow the C stack. Arg vector must be heap-allocated because
+      -- LLVM forbids tail calls that pass stack alloca pointers.
+      irTailECall t name args k
     expr -> do
       r1 <- irValue expr
       ret r1
+
+{- | Compile a tail-position external call with continuation.
+
+@#{name}(args)(k)@ becomes: call foreign, box result, heap-pack one arg,
+@tail call rt_apply(k, 1, arg)@, @ret@. When the continuation result needs a
+real unbox (primitive), fall back to the non-tail path.
+-}
+irTailECall :: Type -> Name -> [Expr Type] -> Expr Type -> IRCodegen ()
+irTailECall t name args k = do
+  boxedArgs <- traverse (Boxing.irBoxed irValue) args
+  let foreignResultType = returnTypeOf t
+      foreignResultIrType = irTypeRep foreignResultType
+      contResultType = returnTypeOf k
+  _ <- declare name foreignResultIrType (replicate (length args) TPtr)
+  rawResult <-
+    call
+      NoTail
+      foreignResultIrType
+      (OGlobal (TFun foreignResultIrType (replicate (length args) TPtr)) name)
+      boxedArgs
+  boxedResult <- Boxing.irBox foreignResultType rawResult
+  kv <- irValue k
+  if Boxing.isIdentityBox contResultType
+    then do
+      -- Heap-allocate the 1-element arg vector (not alloca) so it outlives
+      -- this frame under a true tail call into rt_apply.
+      sizeptr <- gep TPtr (O.nullPtr TPtr) [O.i32 @Int 1]
+      size <- ptrtoint sizeptr i32
+      argSlot <- callRuntime rtAlloc [size]
+      gepSlot <- gep TPtr argSlot [O.i32 @Int 0]
+      store boxedResult gepSlot
+      applied <- callRuntimeTail rtApply [kv, O.i32 @Int 1, argSlot]
+      ret applied
+    else do
+      -- Primitive continuation result: must unbox after apply, so cannot tail.
+      argSlot <- alloca TPtr (O.i32 @Int 1)
+      gepSlot <- gep TPtr argSlot [O.i32 @Int 0]
+      store boxedResult gepSlot
+      applied <- callRuntime rtApply [kv, O.i32 @Int 1, argSlot]
+      r <- irUnbox contResultType applied
+      ret r
 
 irApplyConstructor :: Label Type -> [Expr Type] -> IRCodegen IROperand
 irApplyConstructor = Constructor.irApplyConstructor irValue

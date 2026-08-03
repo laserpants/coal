@@ -68,9 +68,17 @@ irTrampoline linkage name lls retType =
         slot <- gep TPtr (OLocal TPtr "args") [O.i32 @Int i]
         boxed <- load TPtr slot
         Boxing.irUnbox t boxed
-    result <- call NoTail (Boxing.irTypeRep retType) (OGlobal realFunType name) unboxed
-    boxed <- Boxing.irBox retType result
-    ret boxed
+    -- When boxing is a no-op the real function already returns ptr, so we can
+    -- tail-call it and return directly. That keeps rt_apply → $apply → f flat
+    -- for pointer-returning continuations (e.g. EventSource.select CPS).
+    if Boxing.isIdentityBox retType
+      then do
+        result <- call Tail (Boxing.irTypeRep retType) (OGlobal realFunType name) unboxed
+        ret result
+      else do
+        result <- call NoTail (Boxing.irTypeRep retType) (OGlobal realFunType name) unboxed
+        boxed <- Boxing.irBox retType result
+        ret boxed
  where
   trampolineName = name <> "$apply"
   realFunType = TFun (Boxing.irTypeRep retType) [Boxing.irValueTypeRep t | Label t _ <- lls]
