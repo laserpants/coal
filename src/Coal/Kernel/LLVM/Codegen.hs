@@ -367,9 +367,14 @@ irInlineExternalTrampoline name t = do
     then return ()
     else do
       modify (\(s, i, m) -> (Set.insert trampolineName s, i, m))
-      let (argTypes, retType) = unsnoc (unfoldType t)
-          labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
-      irTrampoline LInternal name labels retType
+      irExternalTrampoline name t
+
+-- | Emit the @$apply@ trampoline for an external (inline C) function.
+irExternalTrampoline :: Name -> Type -> IRCodegen ()
+irExternalTrampoline name t = do
+  let (argTypes, retType) = unsnoc (unfoldType t)
+      labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
+  irTrampoline LInternal name labels retType
 
 irImportedDataConstructor :: Name -> Int -> IRCodegen ()
 irImportedDataConstructor name fieldCount = do
@@ -386,63 +391,16 @@ irImportedFunctionTrampoline name arity_ =
   declare (name <> "$apply") TPtr (replicate arity_ TPtr)
 
 irModule :: [Module Type] -> Module Type -> IRCodegen () -> IRCodegen IRModule
-irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
+irModule allModules Module{moduleName, moduleObjects, moduleImports} afterObjects =
   buildModuleM moduleName $ do
-    -- Emit struct types and external declarations for constructors defined in
-    -- other modules so that 'irClause' can use sized getelementptr.
-    forM_ (collectImportedDData allModules moduleImports) $
-      uncurry irImportedDataConstructor
-    -- Also emit struct types for constructors from BCached modules (not in
-    -- allModules), identified via the codegenImportedDData environment entry.
-    cachedDData <- asks codegenImportedDData
-    forM_ [(n, fc) | n <- moduleImports, Just fc <- [Map.lookup n cachedDData]] $
-      uncurry irImportedDataConstructor
-    -- Declare $apply trampolines for imported functions.
-    forM_ (collectImportedFunctions allModules moduleImports) $
-      uncurry irImportedFunctionTrampoline
+    emitImportedDataConstructors allModules moduleImports
     let importedConstantBindings = collectImportedConstants allModules moduleImports
-    forM_ importedConstantBindings $ \(_, op) ->
-      case op of
-        OGlobal (TFun rty []) thunkName ->
-          declare thunkName rty []
-        _ ->
-          return ()
-    -- Bind imported functions with their exact IR types (derived from the
-    -- actual function definition) so that nameLookup uses the correct
-    -- parameter count rather than the arity derived from usage-site type
-    -- annotations, which can disagree when the return type is itself a
-    -- function (e.g. always : (a -> a) -> b -> (a -> a) has arity 3 in
-    -- unfoldType but only 2 actual parameters).
-    -- Also emit forward declarations so call instructions remain valid
-    -- (nameLookup would lazily declare these, but we bypass that path).
-    let importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports
-    forM_ importedFunctionBindings $ \(name, op) ->
-      case op of
-        OGlobal (TFun rty ts) _ -> declare name rty ts
-        _ -> return ()
+        importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports
+    emitImportedDeclarations allModules moduleImports importedConstantBindings importedFunctionBindings
     let bindings = mapMaybe objectGlobalBinding moduleObjects ++ importedConstantBindings ++ importedFunctionBindings
-        allTagBindings =
-          Map.fromList
-            [ (ctorName, idx)
-            | Module{moduleObjects = objs} <- allModules
-            , DData _ ctors <- objs
-            , (idx, (ctorName, _)) <- zip [0 ..] ctors
-            ]
-        boundNames = Set.fromList (map fst bindings)
-        importedNames = Set.fromList [n | (n, _) <- collectImportedFunctions allModules moduleImports]
-        excludedNames = Set.union boundNames importedNames
-    -- Define $apply trampolines for inline C externals: names that appear in
-    -- expression bodies with function types but are neither module-local nor
-    -- imported Coal functions. Must be emitted here, at module level, before
-    -- any function body is generated (irTrampoline calls beginFunction).
-    forM_
-      [ (name, t)
-      | obj <- moduleObjects
-      , (name, t) <- objectExprVarRefs obj
-      , arity t > 0
-      , not (Set.member name excludedNames)
-      ]
-      (uncurry irInlineExternalTrampoline)
+        allTagBindings = buildTagBindings allModules
+        excludedNames = buildExcludedNames bindings allModules moduleImports
+    emitInlineExternalTrampolines moduleObjects excludedNames
     local
       ( \e ->
           e
@@ -450,35 +408,115 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
             , codegenTagEnv = allTagBindings <> codegenTagEnv e
             }
       )
-      $ forM_ moduleObjects
-      $ \case
-        DData _ ctors ->
-          forM_ (zip [0 ..] ctors) $
-            \(index, (ctorName, ctorType)) ->
-              irDataConstructor ctorName $
-                Constructor.ConstructorDefinition
-                  { Constructor.constructorIndex = index
-                  , Constructor.constructorFieldCount = arity ctorType
-                  }
-        DFunction scope name lls expr -> do
-          let lnk = toIRLinkage scope
-          irFunction lnk name lls expr
-          irTrampoline lnk name lls (typeOf expr)
-        DConstant name (ELit prim)
-          | Just (irt, irc) <- primToIRConstant prim ->
-              emitGlobal (IRConstant LExternal name irt irc)
-        DConstant name expr ->
-          irThunk name expr
-        DExternal name t ->
-          case irTypeRep t of
-            TFun rty ts -> do
-              declare name rty ts
-              let (argTypes, retType) = unsnoc (unfoldType t)
-                  labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
-              irTrampoline LInternal name labels retType
-            _ ->
-              return ()
-    k
+      $ emitModuleObjects moduleObjects
+    -- The continuation runs inside the extended environment, so it can
+    -- resolve module-level names (e.g. the entry point function).
+    afterObjects
+
+{- | Emit struct type declarations and external declarations for data
+constructors imported from other modules, so that 'irClause' can use sized
+getelementptr. Includes constructors from freshly compiled modules
+('allModules') and from BCached modules (via the 'codegenImportedDData'
+environment entry).
+-}
+emitImportedDataConstructors :: [Module Type] -> [Name] -> IRCodegen ()
+emitImportedDataConstructors allModules moduleImports = do
+  forM_ (collectImportedDData allModules moduleImports) $
+    uncurry irImportedDataConstructor
+  cachedDData <- asks codegenImportedDData
+  forM_ [(n, fc) | n <- moduleImports, Just fc <- [Map.lookup n cachedDData]] $
+    uncurry irImportedDataConstructor
+
+{- | Declare @$apply@ trampolines for imported functions, thunks for imported
+constants, and forward declarations for imported function bindings with
+their exact IR types (derived from the actual function definition) so that
+'nameLookup' uses the correct parameter count rather than the arity derived
+from usage-site type annotations, which can disagree when the return type is
+itself a function (e.g. @always : (a -> a) -> b -> (a -> a)@ has arity 3 in
+'unfoldType' but only 2 actual parameters).
+-}
+emitImportedDeclarations :: [Module Type] -> [Name] -> [(Name, IROperand)] -> [(Name, IROperand)] -> IRCodegen ()
+emitImportedDeclarations allModules moduleImports importedConstantBindings importedFunctionBindings = do
+  forM_ (collectImportedFunctions allModules moduleImports) $
+    uncurry irImportedFunctionTrampoline
+  forM_ importedConstantBindings $ \(_, op) ->
+    case op of
+      OGlobal (TFun rty []) thunkName ->
+        declare thunkName rty []
+      _ ->
+        return ()
+  forM_ importedFunctionBindings $ \(name, op) ->
+    case op of
+      OGlobal (TFun rty ts) _ -> declare name rty ts
+      _ -> return ()
+
+-- | Build the map from constructor name to its tag index across all modules.
+buildTagBindings :: [Module Type] -> Map.Map Name Int
+buildTagBindings allModules =
+  Map.fromList
+    [ (ctorName, idx)
+    | Module{moduleObjects = objs} <- allModules
+    , DData _ ctors <- objs
+    , (idx, (ctorName, _)) <- zip [0 ..] ctors
+    ]
+
+{- | Names that must not be treated as inline C externals: module-local
+bindings and imported Coal functions.
+-}
+buildExcludedNames :: [(Name, IROperand)] -> [Module Type] -> [Name] -> Set.Set Name
+buildExcludedNames bindings allModules moduleImports =
+  Set.union boundNames importedNames
+ where
+  boundNames = Set.fromList (map fst bindings)
+  importedNames = Set.fromList [n | (n, _) <- collectImportedFunctions allModules moduleImports]
+
+{- | Emit @$apply@ trampolines for inline C externals: names that appear in
+expression bodies with function types but are neither module-local nor
+imported Coal functions. Must be emitted at module level, before any
+function body is generated (irTrampoline calls beginFunction).
+-}
+emitInlineExternalTrampolines :: [Object Type] -> Set.Set Name -> IRCodegen ()
+emitInlineExternalTrampolines moduleObjects excludedNames =
+  forM_
+    [ (name, t)
+    | obj <- moduleObjects
+    , (name, t) <- objectExprVarRefs obj
+    , arity t > 0
+    , not (Set.member name excludedNames)
+    ]
+    (uncurry irInlineExternalTrampoline)
+
+{- | Emit all objects of a module: data constructors, functions (with their
+@$apply@ trampolines), constants/thunks, and externals.
+-}
+emitModuleObjects :: [Object Type] -> IRCodegen ()
+emitModuleObjects moduleObjects =
+  forM_ moduleObjects $ \case
+    DData _ ctors ->
+      forM_ (zip [0 ..] ctors) $
+        \(index, (ctorName, ctorType)) ->
+          irDataConstructor ctorName $
+            Constructor.ConstructorDefinition
+              { Constructor.constructorIndex = index
+              , Constructor.constructorFieldCount = arity ctorType
+              }
+    DFunction scope name lls expr -> do
+      let lnk = toIRLinkage scope
+      irFunction lnk name lls expr
+      irTrampoline lnk name lls (typeOf expr)
+    DConstant name (ELit prim)
+      | Just (irt, irc) <- primToIRConstant prim ->
+          emitGlobal (IRConstant LExternal name irt irc)
+    DConstant name expr ->
+      irThunk name expr
+    DExternal name t ->
+      case irTypeRep t of
+        TFun rty ts -> do
+          declare name rty ts
+          irExternalTrampoline name t
+        _ ->
+          return ()
+
 irFunction :: IRLinkage -> Name -> [Label Type] -> Expr Type -> IRCodegen ()
 irFunction lnk = Function.irFunction lnk irTail
 
