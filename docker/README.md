@@ -10,7 +10,7 @@ requires installing Haskell, LLVM, and other dependencies).
 
 ## Available Docker images
 
-Coal provides two official Docker images:
+This project provides two official Docker images:
 
 ### `ghcr.io/laserpants/coal:latest`
 
