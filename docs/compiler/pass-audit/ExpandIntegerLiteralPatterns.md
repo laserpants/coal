@@ -39,13 +39,27 @@ Integer literals are converted to expressions using the appropriate `from_int32`
 
 ## Detailed Behavior
 
+### Match scrutinee binding
+
+Before expanding clauses, every `EMatch` is rewritten to bind its scrutinee once:
+
+```
+let $scrut.N = <scrutinee> in
+match($scrut.N) { ... }
+```
+
+Fallthrough arms rebuild a nested match on that bound variable. Without this
+binding, an effectful scrutinee (e.g. `EventSource.select`) would be
+re-evaluated for every failed integer arm, dropping events and breaking event
+loops.
+
 ### `expandClause`
 
 1. Desugars the clause expression recursively
 2. Collects all integer literal patterns via `collectIntegerLiteralPatterns`
 3. If integer patterns were found:
    - Generates an if-expression: `if (var1 == from_literal(value1) && ...) then body else <fallback>`
-   - The fallback is a match on the remaining clauses
+   - The fallback is a match on the remaining clauses against the **bound** scrutinee variable
 4. If no remaining clauses exist, reports `NonExhaustivePatterns`
 
 ### `collectIntegerLiteralPatterns`
@@ -70,16 +84,28 @@ Chooses the integer constructor based on value bounds:
 ## Transformation Rules
 
 ```
-match(x) {
-  | 42 => "answer"
+match(effect()) {
+  | 0 => A
+  | 1 => B
+  | _ => C
 }
 ```
 becomes approximately:
 ```
-match(x) {
-  | int.[1] => if (int.[1] == from_int32(42)) then "answer" else ...
+let $scrut.N = effect() in
+match($scrut.N) {
+  | int.[1] =>
+      if (int.[1] == from_int32(0)) then A
+      else match($scrut.N) {
+             | int.[2] =>
+                 if (int.[2] == from_int32(1)) then B
+                 else match($scrut.N) { | _ => C }
+           }
 }
 ```
+
+The outer `let` ensures `effect()` runs once even though fallthrough rebuilds
+nested matches.
 
 ---
 
@@ -92,5 +118,5 @@ match(x) {
 
 ## Side Effects
 
-- **Creates fresh names**: `int.[N]` via supply monad
+- **Creates fresh names**: `$scrut.N` for the bound scrutinee; `int.[N]` for each integer pattern
 - **Generates diagnostics**: `NonExhaustivePatterns` if integer patterns lack fallthrough

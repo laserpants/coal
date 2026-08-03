@@ -10,7 +10,7 @@ import CLI.Git.Repo (GitRepo (..))
 import Control.Monad (unless)
 import Control.Monad.Except
 import Control.Monad.State
-import Data.Aeson.Encode.Pretty
+import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString (toStrict)
 import qualified Data.ByteString as ByteString
 import Data.List (find)
@@ -26,10 +26,10 @@ import Extras (Name, Over, forM_)
 import Package.Dependency (PackageDependency (..))
 import Package.Error (PackageError (..))
 import Package.Lock (PackageLock (..))
-import Package.Lock.Spec
+import Package.Lock.Spec (LockSpec (..))
 import Package.Manifest
 import Package.Version (AvailableVersion (..), PackageConstraint (..), PackageVersion (..))
-import System.Directory
+import System.Directory (doesDirectoryExist)
 
 data InstallState = InstallState
   { visited :: Set (Name, GitCommit)

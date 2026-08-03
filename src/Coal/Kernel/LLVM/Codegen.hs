@@ -54,7 +54,8 @@ import qualified Coal.Kernel.LLVM.Module as MA (collectImportedConstants, collec
 import Coal.Kernel.LLVM.Monad
 import Coal.Kernel.LLVM.Prim (irPrim)
 import qualified Coal.Kernel.LLVM.Prim as Prim
-import Coal.Kernel.LLVM.Runtime (callRuntime)
+import Coal.Kernel.LLVM.Runtime (callRuntime, callRuntimeTail)
+
 import Coal.Kernel.LLVM.RuntimeDefs
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
@@ -74,6 +75,9 @@ irOp = Prim.irOp irValue
 irCase :: Expr Type -> NonEmpty (Clause Type) -> IRCodegen ()
 irCase = Constructor.irCase irValue irTail
 
+{- | Resolve a variable name to its IR operand, declaring the global if the
+name is a top-level function that has not been bound in the environment yet.
+-}
 nameLookup :: Type -> Name -> IRCodegen IROperand
 nameLookup t name = do
   env <- asks codegenVarEnv
@@ -88,13 +92,12 @@ nameLookup t name = do
     Just op ->
       return op
 
-{- | Automatically force a thunk (nullary function) if needed, and load
-global constants.
+{- | Force a global thunk or load a global constant to obtain its value.
 
-When an operand refers to a global nullary function, it represents a lazy
-thunk that must be called to obtain the actual value. When an operand refers
-to a global constant (e.g. @i32@, @i64@), a 'load' is emitted because global
-references always have pointer type in LLVM IR.
+A global nullary function ('TFun t []') is a lazy thunk and must be called to
+produce its value. An operand with a non-pointer global type (e.g. @i32@,
+@i64@) refers to a global variable, which in LLVM IR always has pointer type,
+so a 'load' is emitted. Other operands are returned unchanged.
 -}
 forceThunk :: IROperand -> IRCodegen IROperand
 forceThunk op =
@@ -107,6 +110,9 @@ forceThunk op =
     _ ->
       return op
 
+{- | Evaluate a sequence of let-binding expressions, extending the variable
+environment with each bound value, and finally evaluate the body.
+-}
 irLet :: (Expr Type -> IRCodegen a) -> NonEmpty (Binding Type) -> Expr Type -> IRCodegen a
 irLet eval vs e = foldr step (eval e) vs
  where
@@ -121,6 +127,8 @@ irTail =
       r1 <- nameLookup t name
       r2 <- case r1 of
         OGlobal (TFun _ (_ : _)) fname -> do
+          -- A non-nullary global function is a closure; build a closure object
+          -- so it can be passed through the runtime's uniform application.
           let n = arity t
           callRuntime rtClosureNew [OGlobal TPtr (fname <> "$apply"), O.i32 n]
         _ ->
@@ -141,24 +149,75 @@ irTail =
       r1 <- nameLookup t1 name
       r2 <- case r1 of
         OGlobal (TFun _ ts) _ | length ts == length es -> do
-          -- Fully saturated tail call. Use irTypeRep t so the call return
-          -- type matches the enclosing function's declared return type.
+          -- Fully saturated call. Use 'irTypeRep t' so the call's return type
+          -- matches the enclosing function's declared return type, enabling a
+          -- true tail call.
           rs <- traverse irValue es
           call Tail (irTypeRep t) r1 (NonEmpty.toList rs)
         _ -> do
           irValue expr
       ret r2
     ECall (Label t name) args k -> do
-      -- External C call in tail position: evaluate as value, return
-      r1 <- irValue (ECall (Label t name) args k)
-      ret r1
+      -- Tail-position foreign call of the form #ᐸnameᐳ(args)(k): run the
+      -- foreign function, box its result, then apply the continuation in tail
+      -- position via 'rt_apply' (rather than an ordinary return) so that
+      -- continuation-passing loops do not grow the C call stack.
+      --
+      -- The one-element argument vector must be heap-allocated because LLVM
+      -- forbids passing stack-allocated (alloca) pointers to a tail call.
+      irTailECall t name args k
     expr -> do
       r1 <- irValue expr
       ret r1
 
+{- | Compile a tail-position foreign call with a continuation.
+
+@#name(args)(k)@ compiles to: call the foreign function, box the raw result,
+heap-pack it as the single argument, emit @tail call rt_apply(k, 1, arg)@
+followed by @ret@. If the continuation's result type requires a real unbox
+(primitive type), the unbox must happen after the apply, so the plain
+(non-tail) path is used instead.
+-}
+irTailECall :: Type -> Name -> [Expr Type] -> Expr Type -> IRCodegen ()
+irTailECall t name args k = do
+  boxedArgs <- traverse (Boxing.irBoxed irValue) args
+  let foreignResultType = returnTypeOf t
+      foreignResultIrType = irTypeRep foreignResultType
+      contResultType = returnTypeOf k
+  _ <- declare name foreignResultIrType (replicate (length args) TPtr)
+  rawResult <-
+    call
+      NoTail
+      foreignResultIrType
+      (OGlobal (TFun foreignResultIrType (replicate (length args) TPtr)) name)
+      boxedArgs
+  boxedResult <- Boxing.irBox foreignResultType rawResult
+  kv <- irValue k
+  if Boxing.isIdentityBox contResultType
+    then do
+      -- The argument vector is heap-allocated (rather than via alloca) so it
+      -- remains valid after the true tail call into 'rt_apply'.
+      sizeptr <- gep TPtr (O.nullPtr TPtr) [O.i32 @Int 1]
+      size <- ptrtoint sizeptr i32
+      argSlot <- callRuntime rtAlloc [size]
+      gepSlot <- gep TPtr argSlot [O.i32 @Int 0]
+      store boxedResult gepSlot
+      applied <- callRuntimeTail rtApply [kv, O.i32 @Int 1, argSlot]
+      ret applied
+    else do
+      -- Primitive continuation result: the value must be unboxed after the
+      -- apply, so a true tail call is not possible. Use a stack slot instead.
+      argSlot <- alloca TPtr (O.i32 @Int 1)
+      gepSlot <- gep TPtr argSlot [O.i32 @Int 0]
+      store boxedResult gepSlot
+      applied <- callRuntime rtApply [kv, O.i32 @Int 1, argSlot]
+      r <- irUnbox contResultType applied
+      ret r
+
 irApplyConstructor :: Label Type -> [Expr Type] -> IRCodegen IROperand
 irApplyConstructor = Constructor.irApplyConstructor irValue
 
+-- | Emit a null-terminated string label for record field names.
 irLabel :: Name -> IRCodegen IROperand
 irLabel name = do
   emitGlobal (IRString LPrivate label (Text.encodeUtf8 (name <> "\0")))
@@ -166,6 +225,9 @@ irLabel name = do
  where
   label = ".label_" <> name
 
+{- | Box a sequence of argument expressions and pack them into a freshly
+allocated array of @ptr@ values, returning the count and the array pointer.
+-}
 irPackArgs :: NonEmpty (Expr Type) -> IRCodegenT IRBuilder (IROperand, IROperand)
 irPackArgs es = do
   vals <- traverse (Boxing.irBoxed irValue) es
@@ -186,6 +248,8 @@ irValue =
       op <- nameLookup t name
       case op of
         OGlobal (TFun _ (_ : _)) fname -> do
+          -- A non-nullary global function is a closure; build a closure object
+          -- so it can be passed through the runtime's uniform application.
           let n = arity t
           callRuntime rtClosureNew [OGlobal TPtr (fname <> "$apply"), O.i32 n]
         _ ->
@@ -202,25 +266,29 @@ irValue =
       case o1 of
         OGlobal (TFun _ ts) _
           | length ts == length es -> do
-              -- Fully saturated call. Use irValueTypeRep t (not irTypeRep t)
-              -- so that function-typed application results map to TPtr rather
-              -- than TFun (which is not a valid LLVM value type), while still
-              -- preserving primitive return types such as i64.
+              -- Fully saturated call. Use 'irValueTypeRep t' (not 'irTypeRep t')
+              -- so that a function-typed result maps to @ptr@ rather than
+              -- @TFun@ (which is not a valid LLVM value type), while still
+              -- preserving primitive return types such as @i64@.
               call NoTail (Boxing.irValueTypeRep t) o1 (NonEmpty.toList vs)
           | null ts -> do
-              -- Zero-arg thunk (DConstant): force it first, then apply args
-              -- to the resulting closure. The thunk has no $apply trampoline.
+              -- Zero-argument thunk (a constant object): force it first, then
+              -- apply the remaining arguments to the resulting closure. Such a
+              -- thunk has no @$apply@ trampoline of its own.
               forced <- call NoTail TPtr o1 []
               (argc, args) <- irPackArgs es
               o3 <- callRuntime rtApply [forced, argc, args]
               irUnbox t o3
           | otherwise -> do
+              -- Partially applied global function: build a closure object for
+              -- it and apply that to the arguments via the runtime.
               let fnPtr = OGlobal TPtr (name <> "$apply")
               o2 <- callRuntime rtClosureNew [fnPtr, O.i32 (length ts)]
               (argc, args) <- irPackArgs es
               o3 <- callRuntime rtApply [o2, argc, args]
               irUnbox t o3
         op@(OLocal TPtr _) -> do
+          -- Local function value: apply it directly via the runtime.
           (argc, args) <- irPackArgs es
           o3 <- callRuntime rtApply [op, argc, args]
           irUnbox t o3
@@ -229,6 +297,8 @@ irValue =
     ELet vs e ->
       irLet irValue vs e
     EExt name e1 e2 -> do
+      -- Record extension: add the field @name@ (holding boxed value @e1@) to
+      -- the record produced by @e2@.
       val <- Boxing.irBoxed irValue e1
       row <- irValue e2
       field <- irLabel name
@@ -236,14 +306,15 @@ irValue =
     ENil ->
       callRuntime rtRecordEmpty []
     EGet (Label t fieldName) e1 -> do
+      -- Record field lookup, unboxing the result to the field's type.
       row <- irValue e1
       field <- irLabel fieldName
       r1 <- callRuntime rtRecordLookup [row, field]
       irUnbox t r1
     ECall (Label t name) args k -> do
-      -- External C call via #{…} syntax.
-      -- Arguments are boxed to TPtr. The function is declared with its
-      -- actual return type; we box the raw result ourselves.
+      -- Foreign call of the form #ᐸnameᐳ(args)(k): arguments are boxed to
+      -- @ptr@, the foreign function is declared with its actual return type,
+      -- and the raw result is boxed manually before applying the continuation.
       boxedArgs <- traverse (Boxing.irBoxed irValue) args
       let foreignResultType = returnTypeOf t
           foreignResultIrType = irTypeRep foreignResultType
@@ -260,6 +331,8 @@ irValue =
     ECase _ e1 cs ->
       irUnbox (typeOf e1) =<< irCaseValue irValue e1 cs
     EIf e1 e2 e3 -> mdo
+      -- Evaluate both branches, box the results into a shared stack slot, and
+      -- load the winner after the merge point.
       r1 <- irValue e1
       resultSlot <- alloca TPtr (O.i32 @Int 1)
       condbr r1 thenL elseL
@@ -281,7 +354,10 @@ primToIRConstant :: Prim -> Maybe (IRType, IRConstant)
 primToIRConstant = Prim.primToIRConstant
 
 {- | Compute the global environment binding for an object, if any.
-DData constructors are not bound here; they are referenced via make_% in irApplyConstructor.
+
+Data constructors are not bound here; they are referenced by their
+@make_%ᐸnameᐳ@ constructor function, lowering to an application of that
+function in 'irApplyConstructor'.
 -}
 objectGlobalBinding :: Object Type -> Maybe (Name, IROperand)
 objectGlobalBinding = MA.objectGlobalBinding
@@ -304,16 +380,20 @@ import list, returning (functionName, arity) pairs.
 collectImportedFunctions :: [Module Type] -> [Name] -> [(Name, Int)]
 collectImportedFunctions = MA.collectImportedFunctions
 
-{- | Collect free variable references from the body of an object as (name, type) pairs.
-Delegates to 'freeVars' from "Coal.Kernel.FreeVars"; parameters of a 'DFunction'
-are excluded from the result.
+{- | Collect free variable references from the body of an object as
+(name, type) pairs.
+
+Delegates to 'freeVars' from "Coal.Kernel.FreeVars". The parameters of a
+'DFunction' are excluded from the result.
 -}
 objectExprVarRefs :: Object Type -> [(Name, Type)]
 objectExprVarRefs = MA.objectExprVarRefs
 
 {- | Emit a @$apply@ trampoline for an inline C external, at most once per
-module.  Uses the trampoline-name set in 'IRCodegenT' state for deduplication.
-Must be called at module level (outside any active function definition).
+module.
+
+Uses the trampoline-name set in the 'IRCodegenT' state for deduplication.
+Must be called at module level, outside any active function definition.
 -}
 irInlineExternalTrampoline :: Name -> Type -> IRCodegen ()
 irInlineExternalTrampoline name t = do
@@ -323,82 +403,44 @@ irInlineExternalTrampoline name t = do
     then return ()
     else do
       modify (\(s, i, m) -> (Set.insert trampolineName s, i, m))
-      let (argTypes, retType) = unsnoc (unfoldType t)
-          labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
-      irTrampoline LInternal name labels retType
+      irExternalTrampoline name t
 
+-- | Emit the @$apply@ trampoline for an external (inline C) function.
+irExternalTrampoline :: Name -> Type -> IRCodegen ()
+irExternalTrampoline name t = do
+  let (argTypes, retType) = unsnoc (unfoldType t)
+      labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
+  irTrampoline LInternal name labels retType
+
+{- | Declare the struct type and @make_%ᐸnameᐳ@ constructor function for a
+data constructor imported from another module.
+-}
 irImportedDataConstructor :: Name -> Int -> IRCodegen ()
 irImportedDataConstructor name fieldCount = do
   emitTypeDecl name (TStruct $ [i32] <> replicate fieldCount TPtr)
   declare ("make_%" <> name) TPtr (replicate fieldCount TPtr)
 
-{- | Declare the $apply trampoline for a function defined in another module.
+{- | Declare the @$apply@ trampoline for a function defined in another module.
+
 The importing module needs this declaration when the function is used through
-partial application; the actual trampoline will be supplied by the defining
-module Coal.at link time.
+partial application; the actual trampoline is supplied by the defining module
+and resolved at link time.
 -}
 irImportedFunctionTrampoline :: Name -> Int -> IRCodegen ()
 irImportedFunctionTrampoline name arity_ =
   declare (name <> "$apply") TPtr (replicate arity_ TPtr)
 
 irModule :: [Module Type] -> Module Type -> IRCodegen () -> IRCodegen IRModule
-irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
+irModule allModules Module{moduleName, moduleObjects, moduleImports} afterObjects =
   buildModuleM moduleName $ do
-    -- Emit struct types and external declarations for constructors defined in
-    -- other modules so that 'irClause' can use sized getelementptr.
-    forM_ (collectImportedDData allModules moduleImports) $
-      uncurry irImportedDataConstructor
-    -- Also emit struct types for constructors from BCached modules (not in
-    -- allModules), identified via the codegenImportedDData environment entry.
-    cachedDData <- asks codegenImportedDData
-    forM_ [(n, fc) | n <- moduleImports, Just fc <- [Map.lookup n cachedDData]] $
-      uncurry irImportedDataConstructor
-    -- Declare $apply trampolines for imported functions.
-    forM_ (collectImportedFunctions allModules moduleImports) $
-      uncurry irImportedFunctionTrampoline
+    emitImportedDataConstructors allModules moduleImports
     let importedConstantBindings = collectImportedConstants allModules moduleImports
-    forM_ importedConstantBindings $ \(_, op) ->
-      case op of
-        OGlobal (TFun rty []) thunkName ->
-          declare thunkName rty []
-        _ ->
-          return ()
-    -- Bind imported functions with their exact IR types (derived from the
-    -- actual function definition) so that nameLookup uses the correct
-    -- parameter count rather than the arity derived from usage-site type
-    -- annotations, which can disagree when the return type is itself a
-    -- function (e.g. always : (a->a) -> b -> (a->a) has arity 3 in
-    -- unfoldType but only 2 actual parameters).
-    -- Also emit forward declarations so call instructions remain valid
-    -- (nameLookup would lazily declare these, but we bypass that path).
-    let importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports
-    forM_ importedFunctionBindings $ \(name, op) ->
-      case op of
-        OGlobal (TFun rty ts) _ -> declare name rty ts
-        _ -> return ()
+        importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports
+    emitImportedDeclarations allModules moduleImports importedConstantBindings importedFunctionBindings
     let bindings = mapMaybe objectGlobalBinding moduleObjects ++ importedConstantBindings ++ importedFunctionBindings
-        allTagBindings =
-          Map.fromList
-            [ (ctorName, idx)
-            | Module{moduleObjects = objs} <- allModules
-            , DData _ ctors <- objs
-            , (idx, (ctorName, _)) <- zip [0 ..] ctors
-            ]
-        boundNames = Set.fromList (map fst bindings)
-        importedNames = Set.fromList [n | (n, _) <- collectImportedFunctions allModules moduleImports]
-        excludedNames = Set.union boundNames importedNames
-    -- Define $apply trampolines for inline C externals: names that appear in
-    -- expression bodies with function types but are neither module-local nor
-    -- imported Coal functions. Must be emitted here, at module level, before
-    -- any function body is generated (irTrampoline calls beginFunction).
-    forM_
-      [ (name, t)
-      | obj <- moduleObjects
-      , (name, t) <- objectExprVarRefs obj
-      , arity t > 0
-      , not (Set.member name excludedNames)
-      ]
-      (uncurry irInlineExternalTrampoline)
+        allTagBindings = buildTagBindings allModules
+        excludedNames = buildExcludedNames bindings allModules moduleImports
+    emitInlineExternalTrampolines moduleObjects excludedNames
     local
       ( \e ->
           e
@@ -406,34 +448,127 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} k =
             , codegenTagEnv = allTagBindings <> codegenTagEnv e
             }
       )
-      $ forM_ moduleObjects
-      $ \case
-        DData _ ctors ->
-          forM_ (zip [0 ..] ctors) $ \(index, (ctorName, ctorType)) ->
-            irDataConstructor ctorName $
-              Constructor.ConstructorDefinition
-                { Constructor.constructorIndex = index
-                , Constructor.constructorFieldCount = arity ctorType
-                }
-        DFunction scope name lls expr -> do
-          let lnk = toIRLinkage scope
-          irFunction lnk name lls expr
-          irTrampoline lnk name lls (typeOf expr)
-        DConstant name (ELit prim)
-          | Just (irt, irc) <- primToIRConstant prim ->
-              emitGlobal (IRConstant LExternal name irt irc)
-        DConstant name expr ->
-          irThunk name expr
-        DExternal name t ->
-          case irTypeRep t of
-            TFun rty ts -> do
-              declare name rty ts
-              let (argTypes, retType) = unsnoc (unfoldType t)
-                  labels = zipWith (\i at -> Label at ("p" <> Text.pack (show (i :: Int)))) [1 ..] argTypes
-              irTrampoline LInternal name labels retType
-            _ ->
-              return ()
-    k
+      $ emitModuleObjects moduleObjects
+    -- The continuation runs inside the extended environment, so it can
+    -- resolve module-level names (e.g. the entry point function).
+    afterObjects
+
+{- | Emit struct type declarations and external declarations for data
+constructors imported from other modules.
+
+These declarations allow case expressions ('irClause') to use sized
+getelementptr on the constructor structs. Both constructors from freshly
+compiled modules ('allModules') and from BCached modules (via the
+'codegenImportedDData' environment entry) are covered.
+-}
+emitImportedDataConstructors :: [Module Type] -> [Name] -> IRCodegen ()
+emitImportedDataConstructors allModules moduleImports = do
+  forM_ (collectImportedDData allModules moduleImports) $
+    uncurry irImportedDataConstructor
+  cachedDData <- asks codegenImportedDData
+  forM_ [(n, fc) | n <- moduleImports, Just fc <- [Map.lookup n cachedDData]] $
+    uncurry irImportedDataConstructor
+
+{- | Declare imported functions, thunks, and constants in this module.
+
+This emits:
+
+  * The @$apply@ trampoline for each imported 'DFunction'.
+  * A zero-argument function declaration for each imported constant (thunk).
+  * A forward declaration of each imported function binding using the exact
+    IR types taken from its definition.
+
+Using the definition's exact IR types ensures 'nameLookup' sees the true
+parameter count. In particular, a function whose result type is itself a
+function type (e.g. @always : (a -> a) -> b -> (a -> a)@) has an arity of 3
+according to 'unfoldType' but only 2 actual parameters; deriving the
+declaration from the definition avoids this disagreement.
+-}
+emitImportedDeclarations :: [Module Type] -> [Name] -> [(Name, IROperand)] -> [(Name, IROperand)] -> IRCodegen ()
+emitImportedDeclarations allModules moduleImports importedConstantBindings importedFunctionBindings = do
+  forM_ (collectImportedFunctions allModules moduleImports) $
+    uncurry irImportedFunctionTrampoline
+  forM_ importedConstantBindings $ \(_, op) ->
+    case op of
+      OGlobal (TFun rty []) thunkName ->
+        declare thunkName rty []
+      _ ->
+        return ()
+  forM_ importedFunctionBindings $ \(name, op) ->
+    case op of
+      OGlobal (TFun rty ts) _ -> declare name rty ts
+      _ -> return ()
+
+-- | Build the map from constructor name to its tag index across all modules.
+buildTagBindings :: [Module Type] -> Map.Map Name Int
+buildTagBindings allModules =
+  Map.fromList
+    [ (ctorName, idx)
+    | Module{moduleObjects = objs} <- allModules
+    , DData _ ctors <- objs
+    , (idx, (ctorName, _)) <- zip [0 ..] ctors
+    ]
+
+{- | Names that must not be treated as inline C externals: module-local
+bindings and imported Coal functions.
+-}
+buildExcludedNames :: [(Name, IROperand)] -> [Module Type] -> [Name] -> Set.Set Name
+buildExcludedNames bindings allModules moduleImports =
+  Set.union boundNames importedNames
+ where
+  boundNames = Set.fromList (map fst bindings)
+  importedNames = Set.fromList [n | (n, _) <- collectImportedFunctions allModules moduleImports]
+
+{- | Emit @$apply@ trampolines for inline C externals.
+
+An inline C external is a name that appears in an expression body with a
+function type but is neither a module-local binding nor an imported Coal
+function. The trampolines are emitted at module level, before any function
+body is generated ('irTrampoline' calls 'beginFunction', which requires being
+outside of an active function definition).
+-}
+emitInlineExternalTrampolines :: [Object Type] -> Set.Set Name -> IRCodegen ()
+emitInlineExternalTrampolines moduleObjects excludedNames =
+  forM_
+    [ (name, t)
+    | obj <- moduleObjects
+    , (name, t) <- objectExprVarRefs obj
+    , arity t > 0
+    , not (Set.member name excludedNames)
+    ]
+    (uncurry irInlineExternalTrampoline)
+
+{- | Emit all objects of a module: data constructors, functions (with their
+@$apply@ trampolines), constants/thunks, and externals.
+-}
+emitModuleObjects :: [Object Type] -> IRCodegen ()
+emitModuleObjects moduleObjects =
+  forM_ moduleObjects $ \case
+    DData _ ctors ->
+      forM_ (zip [0 ..] ctors) $
+        \(index, (ctorName, ctorType)) ->
+          irDataConstructor ctorName $
+            Constructor.ConstructorDefinition
+              { Constructor.constructorIndex = index
+              , Constructor.constructorFieldCount = arity ctorType
+              }
+    DFunction scope name lls expr -> do
+      let lnk = toIRLinkage scope
+      irFunction lnk name lls expr
+      irTrampoline lnk name lls (typeOf expr)
+    DConstant name (ELit prim)
+      | Just (irt, irc) <- primToIRConstant prim ->
+          emitGlobal (IRConstant LExternal name irt irc)
+    DConstant name expr ->
+      irThunk name expr
+    DExternal name t ->
+      case irTypeRep t of
+        TFun rty ts -> do
+          declare name rty ts
+          irExternalTrampoline name t
+        _ ->
+          return ()
+
 irFunction :: IRLinkage -> Name -> [Label Type] -> Expr Type -> IRCodegen ()
 irFunction lnk = Function.irFunction lnk irTail
 
@@ -453,7 +588,7 @@ toIRLinkage Local = LInternal
 
 {- | Emit the C main entry point for the entry point module.
 
-This must be called after 'irModule' on the entry point module to add the
+This must be called after 'irModule' on the entry point module. It defines the
 program entry point that initializes the runtime and calls the entry function.
 
 The entry point is specified by module and function name, e.g., ("Main", "main").

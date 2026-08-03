@@ -27,7 +27,10 @@ Key transformations:
    single boolean expression using logical AND operations.
 
 4. **Fallthrough handling**: When integer patterns are present, subsequent clauses
-   become the else-branch to ensure proper pattern matching semantics.
+   become the else-branch to ensure proper pattern matching semantics. The match
+   scrutinee is bound once to a fresh variable before clause expansion, so
+   fallthrough re-matches that variable rather than re-evaluating an effectful
+   scrutinee expression.
 
 5. **Type-specific conversion**: Integers are converted using appropriate constructors
    (`from_int32`, `from_int64`, or `from_bignum`) based on their magnitude.
@@ -40,7 +43,7 @@ module Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns (
 ) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Common.Supply (supplied)
+import Coal.Common.Supply (freshName, supplied)
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
@@ -53,7 +56,7 @@ import Control.Monad.State (gets)
 import Control.Monad.Writer (MonadTrans (lift), MonadWriter (tell), WriterT (runWriterT))
 import qualified Data.ByteString.Char8 as ByteString
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (descendM, transformM)
+import Data.Generics.Uniplate.Data (descendM, transformM, universe)
 import Data.List (tails)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -79,12 +82,40 @@ instance (ExpandContext e) => ExpandContext (NonEmpty e) where
 instance (Data k) => ExpandContext (Expression Metadata k IndexedType) where
   expandIntegerLiteralPatterns =
     \case
-      EMatch a t e cs ->
-        EMatch a t e . NonEmpty.fromList <$> traverse (expandClause a e) pairs
-       where
-        pairs = [(p, ps) | (p : ps) <- tails (NonEmpty.toList cs)]
+      -- When a match contains integer literal patterns, fallthrough arms rebuild
+      -- a nested match on the scrutinee. Bind the scrutinee once first so an
+      -- effectful scrutinee (e.g. EventSource.select) is not re-evaluated on
+      -- every failed arm. Matches without integer patterns are left unchanged
+      -- aside from recursive expansion of sub-expressions.
+      EMatch a t e cs -> do
+        e' <- expandIntegerLiteralPatterns e
+        let clauseList = NonEmpty.toList cs
+            pairs = [(p, ps) | (p : ps) <- tails clauseList]
+        if any clauseHasIntegerLiteral cs
+          then do
+            scrutName <- supplied (freshName "scrut")
+            let scrutType = typeOf e'
+                scrutLabel = Label scrutType scrutName
+                scrutVar = EVariable mempty scrutLabel
+            cs' <- NonEmpty.fromList <$> traverse (expandClause a scrutVar) pairs
+            pure $
+              ELet
+                mempty
+                (BPattern mempty (PVariable mempty scrutLabel) e' :| [])
+                (EMatch a t scrutVar cs')
+          else do
+            cs' <- NonEmpty.fromList <$> traverse (expandClause a e') pairs
+            pure (EMatch a t e' cs')
       e ->
         descendM expandIntegerLiteralPatterns e
+
+-- | True if any pattern in the clause contains an integer literal sub-pattern.
+clauseHasIntegerLiteral :: (Data k) => Clause Metadata k IndexedType -> Bool
+clauseHasIntegerLiteral (EClause _ p _) = any isIntegerLiteral (universe p)
+ where
+  isIntegerLiteral = \case
+    PInteger{} -> True
+    _ -> False
 
 {- | Expand a single clause, converting integer patterns to guards.
 Takes the clause and remaining clauses (for fallthrough), and produces

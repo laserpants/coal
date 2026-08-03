@@ -1,0 +1,14 @@
+module Main {
+
+  import namespace IO
+  
+//  fun baz() = 123
+
+  let math = 
+    { onetwothree = fn() => 123
+    }
+
+  fun main() =
+    IO.println_int32(math.onetwothree())
+
+}

@@ -76,8 +76,15 @@ parseSelectorOp = do
   end <- getSourcePos
   pure (\expr -> selector expr (Metadata start end) field)
 
+parseApplicationOp :: Parser (Expression Metadata () () -> Expression Metadata () ())
+parseApplicationOp = do
+  start <- getSourcePos
+  xs <- parens (nonEmptyOr parseUnit (commaSep parseExpression))
+  end <- getSourcePos
+  pure (\expr -> EApplication (Metadata start end) () expr xs)
+
 selectorPostfix :: Combinators.Operator Parser (Expression Metadata () ())
-selectorPostfix = Combinators.Postfix (foldl (flip (.)) id <$> some parseSelectorOp)
+selectorPostfix = Combinators.Postfix (foldl (flip (.)) id <$> some (try parseSelectorOp <|> parseApplicationOp))
 
 parseExpression :: Parser (Expression Metadata () ())
 parseExpression = Combinators.makeExprParser parseAtom operator
@@ -236,7 +243,7 @@ parseIfExpression =
 parseLambdaExpression :: Parser (Expression Metadata () ())
 parseLambdaExpression =
   withMetadata $ do
-    ps <- lexeme_ "fn" *> parens (nonEmpty (commaSep1 parsePattern))
+    ps <- lexeme_ "fn" *> parens (nonEmptyOr parseUnitPattern (commaSep parsePattern))
     e <- symbol_ "=>" *> parseExpression
     pure (\loc -> ELambda loc ps e)
 

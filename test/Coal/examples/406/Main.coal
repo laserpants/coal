@@ -1,0 +1,19 @@
+module Main {
+
+  import namespace IO
+  import Char(digit_to_int32)
+  import Option(with_default)
+  import Coal.Combinators(identity)
+
+  fun to_int(digits : List<char>) : int32 =
+    fold(digits, 0) {
+      | [] => 
+          identity
+      | d :: @next =>
+          fn(acc) => next(10 * acc + with_default(0, digit_to_int32(d)))
+    }
+
+  fun main() =
+    IO.println_int32(to_int(['2', '3', '4']))
+
+}

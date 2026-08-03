@@ -26,6 +26,7 @@ module Coal.Kernel.LLVM.Boxing (
   irBox,
   irUnbox,
   irBoxed,
+  isIdentityBox,
 ) where
 
 import LLVM.IR (IROperand, IRType (TDouble, TFloat, TFun, TPtr), i1, i32, i64)
@@ -134,3 +135,19 @@ irUnbox t op =
       return op
     _ ->
       return op
+
+{- | True when 'irBox' / 'irUnbox' are no-ops for this type (value is already @ptr@).
+
+Used to decide whether a call result can be returned via a true LLVM tail call
+without a post-call boxing/unboxing step.
+-}
+isIdentityBox :: Type -> Bool
+isIdentityBox =
+  \case
+    TCon "int32" [] -> False
+    TCon "int64" [] -> False
+    TCon "bool" [] -> False
+    TCon "char" [] -> False
+    TCon "float" [] -> False
+    TCon "double" [] -> False
+    _ -> True
