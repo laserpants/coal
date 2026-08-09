@@ -120,10 +120,11 @@ checkAtomic expr =
       _ ->
         [NonAtomicOperand]
 
--- | Check a let-binding RHS. Control flow is permitted as the RHS of a
--- @let@-binding (the ANF pass binds control flow found in operand position to
--- a fresh variable); the condition/scrutinee must be atomic and the
--- branches/clause bodies checked recursively.
+{- | Check a let-binding RHS. Control flow is permitted as the RHS of a
+@let@-binding (the ANF pass binds control flow found in operand position to
+a fresh variable); the condition/scrutinee must be atomic and the
+branches/clause bodies checked recursively.
+-}
 checkBinding :: Binding Type -> [InvariantError]
 checkBinding (Binding _ expr) = case expr of
   EIf cond thenBranch elseBranch ->
