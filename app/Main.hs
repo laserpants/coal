@@ -5,11 +5,9 @@
 module Main (main) where
 
 import CLI.Command (Command (..))
-
 import CLI.Command.Build (buildCommand)
 import CLI.Command.Clean (cleanCommand)
 import CLI.Command.Compile (compileCommand)
-
 import CLI.Command.Init (initCommand)
 import CLI.Command.Install (installCommand)
 import CLI.Command.Version (coalVersion)
