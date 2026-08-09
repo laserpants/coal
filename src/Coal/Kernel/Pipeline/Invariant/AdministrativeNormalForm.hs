@@ -7,12 +7,13 @@ Verifies that all expressions are in administrative normal form (ANF).
 
 After pass 10, the program must satisfy:
 
-  1. All operands are atomic (@EVar@, @ECon@, @ELit@, @ENil@)
-  2. Control flow (@EIf@, @ECase@) appears only in tail position
-  3. Let-binding RHS cannot be control flow
-
-This is a __strong__ interpretation of ANF that completely separates
-value-producing expressions from control-flow expressions.
+  1. All operands (application function/arguments, operator inputs, record
+     fields, scrutinees, conditions) are atomic (@EVar@, @ECon@, @ELit@,
+     @ENil@)
+  2. Control flow (@EIf@, @ECase@) may appear in tail position or as a
+     @let@-binding RHS; every other position requires atomic operands.
+     @EIf@/@ECase@ are never used as a direct operand, because the ANF pass
+     binds them to a fresh variable first.
 
 = Error reporting
 
@@ -33,12 +34,11 @@ import Coal.Kernel.Pipeline.Invariant.Error (InvariantError (..))
 
 After pass 10, the program must satisfy:
 
-  1. All operands are atomic (@EVar@, @ECon@, @ELit@, @ENil@)
-  2. Control flow (@EIf@, @ECase@) appears only in tail position
-  3. Let-binding RHS cannot be control flow
-
-This is a __strong__ interpretation of ANF that completely separates
-value-producing expressions from control-flow expressions.
+  1. All operands (application function/arguments, operator inputs, record
+     fields, scrutinees, conditions) are atomic (@EVar@, @ECon@, @ELit@,
+     @ENil@)
+  2. Control flow (@EIf@, @ECase@) may appear in tail position or as a
+     @let@-binding RHS; every other position requires atomic operands.
 
 Returns an empty list when the invariant holds, or one error per violation.
 -}
@@ -120,14 +120,19 @@ checkAtomic expr =
       _ ->
         [NonAtomicOperand]
 
--- | Check a let-binding (RHS cannot be control flow and must be value-producing)
+-- | Check a let-binding RHS. Control flow is permitted as the RHS of a
+-- @let@-binding (the ANF pass binds control flow found in operand position to
+-- a fresh variable); the condition/scrutinee must be atomic and the
+-- branches/clause bodies checked recursively.
 checkBinding :: Binding Type -> [InvariantError]
 checkBinding (Binding _ expr) = case expr of
-  -- Control flow is forbidden in let-binding RHS
-  EIf{} ->
-    [ControlFlowInOperandPosition]
-  ECase{} ->
-    [ControlFlowInOperandPosition]
+  EIf cond thenBranch elseBranch ->
+    checkAtomic cond
+      ++ checkInTailPosition thenBranch
+      ++ checkInTailPosition elseBranch
+  ECase _ scrutinee clauses ->
+    checkAtomic scrutinee
+      ++ foldMap checkClauseBody (NonEmpty.toList clauses)
   -- For all other expressions, check them in operand context
   -- (they must not contain control flow in their subexpressions)
   _ ->
