@@ -39,6 +39,7 @@ data PackageManifest = PackageManifest
   , version :: Maybe PackageVersion
   , source_dirs :: Maybe [Text]
   , modules :: [Text]
+  , c_sources :: Maybe [FilePath]
   , dependencies :: Maybe (Map Text PackageDependency)
   , entry_point :: Maybe Text
   --  , compiler_version :: Text

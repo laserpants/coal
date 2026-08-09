@@ -1,6 +1,6 @@
 # Using the Coal compiler with Docker
 
-This guide explains how to use Docker to compile and run Coal programs without needing to install Haskell, LLVM, or other dependencies locally.
+This guide explains how to use Docker to compile and run Coal programs without having to build the compiler from source (which requires installing Haskell, LLVM, and other dependencies).
 
 ## Prerequisites
 
