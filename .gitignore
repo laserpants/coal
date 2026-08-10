@@ -7,4 +7,3 @@ dist
 coal.lock.json
 coal.json
 tmp
-src/Coal/Version.hs
