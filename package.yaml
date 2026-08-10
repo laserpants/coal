@@ -12,7 +12,6 @@ bug-reports: https://codeberg.org/laserpants/coal/issues
 
 extra-source-files:
   - README.md
-  - src/Coal/Version.hs
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
