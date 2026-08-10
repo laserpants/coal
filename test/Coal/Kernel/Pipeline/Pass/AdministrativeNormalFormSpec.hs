@@ -130,8 +130,8 @@ spec = do
                 )
          in runPass administrativeNormalForm input `shouldBe` Right expected
 
-    describe "floats control flow out of let-binding RHS" $ do
-      it "let x = if b then a else c in body  =>  if b then (let x = a in body) else (let x = c in body)" $
+    describe "binds control flow in let-binding RHS (no floating)" $ do
+      it "let x = if b then a else c in body  stays as  let x = if b then a else c in body" $
         let body = var "body"
             input =
               modWith
@@ -139,16 +139,9 @@ spec = do
                     (ne [Binding (lbl "x") (EIf (var "b") (var "a") (var "c"))])
                     body
                 )
-            expected =
-              modWith
-                ( EIf
-                    (var "b")
-                    (wrapOne "x" (var "a") body)
-                    (wrapOne "x" (var "c") body)
-                )
-         in runPass administrativeNormalForm input `shouldBe` Right expected
+         in runPass administrativeNormalForm input `shouldBe` Right input
 
-      it "let x = case e of Foo => a; Bar => b in body  =>  case e of Foo => let x = a in body; Bar => let x = b in body" $
+      it "let x = case e of Foo => a; Bar => b in body  stays as  let x = case e of Foo => a; Bar => b in body" $
         let body = var "body"
             scrutinee = var "e"
             clauseFoo = Clause (ne [lbl "Foo"]) (var "a")
@@ -159,46 +152,32 @@ spec = do
                     (ne [Binding (lbl "x") (ECase TOpq scrutinee (ne [clauseFoo, clauseBar]))])
                     body
                 )
+         in runPass administrativeNormalForm input `shouldBe` Right input
+
+    describe "binds control flow in function argument position (wr a fresh let)" $ do
+      it "f(if b then a else c): atomic branches  =>  let anf.0 = if b then a else c in f(anf.0)" $
+        -- Control flow is bound to a fresh variable; the continuation (f(...)) is
+        -- applied exactly once, not duplicated into each branch.
+        let a0 = Label TOpq "anf.0"
+            input = modWith (app (var "f") [EIf (var "b") (var "a") (var "c")])
             expected =
               modWith
-                ( ECase
-                    TOpq
-                    scrutinee
-                    ( ne
-                        [ Clause (ne [lbl "Foo"]) (wrapOne "x" (var "a") body)
-                        , Clause (ne [lbl "Bar"]) (wrapOne "x" (var "b") body)
-                        ]
-                    )
+                ( ELet
+                    (ne [Binding a0 (EIf (var "b") (var "a") (var "c"))])
+                    (EApp TOpq (var "f") (ne [EVar a0]))
                 )
          in runPass administrativeNormalForm input `shouldBe` Right expected
 
-    describe "floats control flow out of function argument position" $ do
-      it "f(if b then a else c): atomic branches pass directly (no extra let)" $
-        -- a and c are already atomic (EVar), so bindFresh is not needed:
-        -- f(if b then a else c) => if b then f(a) else f(c)
-        let input = modWith (app (var "f") [EIf (var "b") (var "a") (var "c")])
-            expected =
-              modWith
-                ( EIf
-                    (var "b")
-                    (EApp TOpq (var "f") (ne [var "a"]))
-                    (EApp TOpq (var "f") (ne [var "c"]))
-                )
-         in runPass administrativeNormalForm input `shouldBe` Right expected
-
-      it "f(if b then g(a) else h(c))  =>  if b then (let anf.0 = g(a) in f(anf.0)) else (let anf.1 = h(c) in f(anf.1))" $
-        -- Non-atomic branches are bound to fresh names within each branch.
+      it "f(if b then g(a) else h(c))  =>  let anf.0 = if b then g(a) else h(c) in f(anf.0)" $
         let ga = app (var "g") [var "a"]
             hc = app (var "h") [var "c"]
-            input = modWith (app (var "f") [EIf (var "b") ga hc])
             a0 = Label TOpq "anf.0"
-            a1 = Label TOpq "anf.1"
+            input = modWith (app (var "f") [EIf (var "b") ga hc])
             expected =
               modWith
-                ( EIf
-                    (var "b")
-                    (ELet (ne [Binding a0 ga]) (EApp TOpq (var "f") (ne [EVar a0])))
-                    (ELet (ne [Binding a1 hc]) (EApp TOpq (var "f") (ne [EVar a1])))
+                ( ELet
+                    (ne [Binding a0 (EIf (var "b") ga hc)])
+                    (EApp TOpq (var "f") (ne [EVar a0]))
                 )
          in runPass administrativeNormalForm input `shouldBe` Right expected
 

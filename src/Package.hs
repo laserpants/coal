@@ -34,7 +34,7 @@ toModuleNamespace t =
     Nothing -> ""
     Just (c, rest) -> Text.cons (toUpper c) rest
 
-packageIncludes :: ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath])
+packageIncludes :: ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath], [FilePath])
 packageIncludes = do
   res <- loadLockFile
   case res of
@@ -43,15 +43,15 @@ packageIncludes = do
     Nothing ->
       throwError ENoLockFile
 
-lockIncludes :: PackageLock -> ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath])
+lockIncludes :: PackageLock -> ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath], [FilePath])
 lockIncludes lock = do
   manifests <- loadPackageLockManifests lock
   entries <- collectEntries lock manifests
   includes <- traverse entryIncludes entries
-  let (nss, files) = unzip includes
-  pure (concat nss, concat files)
+  let (nss, files, cFiles) = unzip3 includes
+  pure (concat nss, concat files, concat cFiles)
 
-entryIncludes :: PackageEntry -> ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath])
+entryIncludes :: PackageEntry -> ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath], [FilePath])
 entryIncludes =
   \case
     PackageEntry{packageManifest = PackageManifest{..}, ..} -> do
@@ -60,12 +60,17 @@ entryIncludes =
       -- accidentally match them against same-named project source files.
       -- Search all source dirs to find where each file actually lives.
       absFiles <- liftIO $ mapM (resolveInSourceDirs sourcePaths) relFiles
+      -- Resolve package C sources relative to the package base path so the
+      -- linker can find them inside .coal/packages/<name>/<hash>/.
+      absCFiles <- liftIO $ mapM resolveInBase cFiles
       let ns = toModuleNamespace packageName
           nsEntries = [(srcDir, ns, modules) | srcDir <- sourcePaths]
-      pure (nsEntries, absFiles)
+      pure (nsEntries, absFiles, absCFiles)
      where
       sourcePaths = [base </> Text.unpack path | path <- fromMaybe ["src"] source_dirs]
       base = basePath packageName (commit packageSpec)
+      cFiles = fromMaybe [] c_sources
+      resolveInBase rel = makeAbsolute (base </> rel)
 
 {- | Find a relative file path inside a list of candidate source directories,
 returning its absolute path from the first directory that contains it.

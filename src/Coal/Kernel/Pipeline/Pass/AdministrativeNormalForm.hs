@@ -5,8 +5,8 @@
 Normalization pass 10: Administrative normal form (ANF).
 
 Transforms every expression in the module into administrative normal form,
-where all operands are atomic and control flow appears only in tail position.
-This simplifies code generation by eliminating nested complex expressions.
+where all operands are atomic. This simplifies code generation by eliminating
+nested complex expressions.
 
 = Invariants established
 
@@ -14,12 +14,10 @@ After this pass:
 
   1. Every operand (function, argument, operator input, record field/row,
      scrutinee, condition) is __atomic__ (@EVar@, @ECon@, @ELit@, @ENil@).
-  2. @EIf@ and @ECase@ appear only in __tail position__ — they are never the
-     RHS of a @let@-binding.
+  2. @EIf@ and @ECase@ in operand (value) position are bound to fresh
+     @let@-variables at their point of use, so the surrounding continuation is
+     applied exactly once. They may also appear in __tail position__.
   3. Non-atomic subexpressions are extracted into fresh @let@-bindings.
-  4. Control flow in a non-tail position is floated outward: the surrounding
-     continuation is pushed into every branch rather than wrapping the whole
-     @EIf@/@ECase@ in a @let@.
 
 = Example transformation
 
@@ -28,12 +26,12 @@ let x = if c then a else b
 in body
 @
 
-becomes:
+becomes (the control flow is bound to the let-variable, it is /not/ floated
+outward into the branches):
 
 @
-if c
-  then let x = a in body
-  else let x = b in body
+let x = if c then a else b
+in body
 @
 -}
 module Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (
@@ -60,12 +58,10 @@ After this pass:
 
   1. Every operand (function, argument, operator input, record field/row,
      scrutinee, condition) is __atomic__ (@EVar@, @ECon@, @ELit@, @ENil@).
-  2. @EIf@ and @ECase@ appear only in __tail position__ — they are never the
-     RHS of a @let@-binding.
+  2. @EIf@ and @ECase@ in operand (value) position are bound to fresh
+     @let@-variables at their point of use, so the surrounding continuation is
+     applied exactly once. They may also appear in __tail position__.
   3. Non-atomic subexpressions are extracted into fresh @let@-bindings.
-  4. Control flow in a non-tail position is floated outward: the surrounding
-     continuation is pushed into every branch rather than wrapping the whole
-     @EIf@/@ECase@ in a @let@.
 
 = Example
 
@@ -74,13 +70,15 @@ let x = if c then a else b
 in body
 @
 
-becomes:
+stays as:
 
 @
-if c
-  then let x = a in body
-  else let x = b in body
+let x = if c then a else b
+in body
 @
+
+(control flow is not floated outward into the branches; this keeps the
+transformation linear in the size of the input program).
 -}
 administrativeNormalForm :: (Monad m) => Pass m (Module Type) (Module Type)
 administrativeNormalForm m = do
@@ -121,9 +119,7 @@ isAtomic =
 {- | Normalize @expr@ in tail position.
 
 In tail position @EIf@ and @ECase@ are permitted. Their operands are
-atomized and their branches are normalized tail-recursively. Any @let@
-in the binding sequence whose RHS is control flow is floated outward via
-'anfLetSeq'.
+atomized and their branches are normalized tail-recursively.
 -}
 anfTail :: (Monad m) => Expr Type -> PipelineT m (Expr Type)
 anfTail expr =
@@ -173,16 +169,22 @@ anfTail expr =
 {- | Normalize @expr@ in value (operand) position and pass the /atomic/
 result to @cont@.
 
-When @expr@ is @EIf@ or @ECase@, the continuation is pushed into every
-branch so that no control-flow expression appears as a @let@-binding RHS:
+When @expr@ is @EIf@ or @ECase@, the control flow is bound to a fresh
+@let@-variable and the continuation is applied exactly once. This avoids
+floating a shared continuation into every branch, which would duplicate the
+surrounding code for each control-flow expression (quadratic blow-up):
 
 @
   anfValue (if c then a else b) cont
-    ≡  if c_atom then (anfValue a cont) else (anfValue b cont)
+    ≡  let anf.N = if c_atom then a' else b' in cont anf.N
 @
 
+Branches and clause bodies are normalized as value expressions (their
+operands atomized) with an identity continuation, so they are computed
+exactly once.
+
 For all other non-atomic expressions sub-expressions are atomized
-(possibly floating control flow from them outward) and the result is bound
+(possibly binding control flow from them) and the result is bound
 to a fresh name via 'bindFresh'.
 -}
 anfValue ::
@@ -196,17 +198,15 @@ anfValue expr cont
       case expr of
         EIf cond th el ->
           anfValue cond $ \condAtom -> do
-            th' <- anfValue th cont
-            el' <- anfValue el cont
-            pure (EIf condAtom th' el')
+            th' <- anfLetRhs th pure
+            el' <- anfLetRhs el pure
+            bindFresh (EIf condAtom th' el') cont
         ECase _t scrutinee clauses ->
           anfValue scrutinee $ \scrutAtom -> do
-            clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfValue b cont) clauses
-            -- The continuation changes the branch type; derive the new case
-            -- result type from the transformed first branch rather than reusing
-            -- the now-stale pre-continuation type.
+            clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfLetRhs b pure) clauses
+            -- Derive the case result type from the normalized first branch.
             let newT = case clauses' of Clause _ body :| _ -> typeOf body
-            pure (ECase newT scrutAtom clauses')
+            bindFresh (ECase newT scrutAtom clauses') cont
         ELet bs body ->
           anfLetSeq (NonEmpty.toList bs) (anfValue body cont)
         ELam params body -> do
@@ -226,9 +226,11 @@ anfValue expr cont
 
 {- | Normalize @expr@ for use as the RHS of a @let@-binding.
 
-The continuation @cont@ receives a non-control-flow, ANF'd value
-expression. If @expr@ is @EIf@ or @ECase@ the control flow is floated
-outward by pushing @cont@ into every branch.
+The continuation @cont@ receives a fully normalized value expression. If
+@expr@ is @EIf@ or @ECase@ the control flow is kept as the binding RHS (the
+surrounding computation is applied exactly once, not floated into every
+branch); branches and clause bodies are normalized as value expressions with
+an identity continuation.
 -}
 anfLetRhs ::
   (Monad m) =>
@@ -240,14 +242,14 @@ anfLetRhs expr cont
   | otherwise = case expr of
       EIf cond th el ->
         anfValue cond $ \condAtom -> do
-          th' <- anfLetRhs th cont
-          el' <- anfLetRhs el cont
-          pure (EIf condAtom th' el')
+          th' <- anfLetRhs th pure
+          el' <- anfLetRhs el pure
+          cont (EIf condAtom th' el')
       ECase _t scrutinee clauses ->
         anfValue scrutinee $ \scrutAtom -> do
-          clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfLetRhs b cont) clauses
+          clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfLetRhs b pure) clauses
           let newT = case clauses' of Clause _ body :| _ -> typeOf body
-          pure (ECase newT scrutAtom clauses')
+          cont (ECase newT scrutAtom clauses')
       ELet bs body ->
         anfLetSeq (NonEmpty.toList bs) (anfLetRhs body cont)
       ELam params body -> do
@@ -280,9 +282,8 @@ anfLetRhs expr cont
 
 {- | Process a sequence of @let@-bindings followed by a body.
 
-Each binding RHS is normalized via 'anfLetRhs'. If a RHS is control flow
-it is floated outward: the remaining bindings and the body computation are
-pushed into every branch.
+Each binding RHS is normalized via 'anfLetRhs'. Control flow in a RHS is kept
+as the binding RHS (wrapped in a @let@) rather than floated outward.
 -}
 anfLetSeq ::
   (Monad m) =>
@@ -300,8 +301,8 @@ anfLetSeq (Binding lbl rhs : rest) bodyM =
 -- ---------------------------------------------------------------------------
 
 {- | Atomize each expression in the list via 'anfValue', threading the atoms
-through to the continuation. Control flow inside any element is floated
-outward.
+through to the continuation. Control flow inside any element is let-bound
+rather than floated outward.
 -}
 anfAll ::
   (Monad m) =>

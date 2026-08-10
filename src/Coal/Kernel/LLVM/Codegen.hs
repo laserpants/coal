@@ -328,11 +328,14 @@ irValue =
       store boxedResult gepSlot
       applied <- callRuntime rtApply [kv, O.i32 @Int 1, argSlot]
       irUnbox (returnTypeOf k) applied
-    ECase _ e1 cs ->
-      irUnbox (typeOf e1) =<< irCaseValue irValue e1 cs
+    ECase t e1 cs ->
+      irUnbox t =<< irCaseValue irValue e1 cs
     EIf e1 e2 e3 -> mdo
       -- Evaluate both branches, box the results into a shared stack slot, and
-      -- load the winner after the merge point.
+      -- load the winner after the merge point. The loaded value is unboxed to
+      -- the if expression's result type ('typeOf e3') so that the value
+      -- matches the IR type expected at the use site (e.g. a let-binding
+      -- variable whose Label carries this type).
       r1 <- irValue e1
       resultSlot <- alloca TPtr (O.i32 @Int 1)
       condbr r1 thenL elseL
@@ -345,7 +348,8 @@ irValue =
       store elseVal resultSlot
       br mergeL
       mergeL <- block "merge.if"
-      load TPtr resultSlot
+      boxed <- load TPtr resultSlot
+      irUnbox (typeOf (e3 :: Expr Type)) boxed
     e ->
       throwError (UnsupportedExpression e)
 

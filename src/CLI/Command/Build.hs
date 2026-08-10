@@ -30,12 +30,12 @@ buildCommand = do
     -- If there is no lock file but the project declares no dependencies,
     -- treat it as zero packages rather than requiring `coal install`.
     pkgResult <- lift $ runExceptT packageIncludes
-    (nsInfo, inputFiles) <- case pkgResult of
+    (nsInfo, inputFiles, pkgCFiles) <- case pkgResult of
       Right result ->
         pure result
       Left ENoLockFile
         | noDependencies dependencies ->
-            pure ([], [])
+            pure ([], [], [])
       Left err ->
         throwError err
     -- Canonicalize package source dirs so they match the canonical bestRoot
@@ -53,6 +53,9 @@ buildCommand = do
               configSourcePaths = nub ("src" : localSrcPaths <> pkgSrcPaths)
             , configEntryPoint = entryPoint
             , configPackageNamespaces = canonNsInfo
+            , -- C sources contributed by installed packages (e.g. an EventSource
+              -- library shipping its native primitives).
+              configCFiles = pkgCFiles
             }
     localFiles <- filePaths modules EProjectInvalidModuleFormat
     -- If the entry-point module is not listed in `modules`, add its file
