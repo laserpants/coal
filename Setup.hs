@@ -6,6 +6,7 @@ import Distribution.Simple.LocalBuildInfo
 import Distribution.Simple.Setup
 import System.Directory
 import System.Process
+import System.Environment (lookupEnv)
 
 main :: IO ()
 main =
@@ -19,8 +20,16 @@ main =
 
 generateVersion :: IO ()
 generateVersion = do
-  e <- try @SomeException (readProcess "git" ["describe", "--tags", "--dirty", "--always"] "")
-  let version = either (const "unknown") trim e
+  envVersion <- lookupEnv "COAL_VERSION"
+
+  version <-
+    case envVersion of
+      Just v -> pure v
+      Nothing -> do
+        e <- try @SomeException
+          (readProcess "git" ["describe", "--tags", "--dirty", "--always"] "")
+        pure $ either (const "unknown") trim e
+
   writeFile "src/Coal/Version.hs" $
     unlines
       [ "module Coal.Version (version) where"
@@ -28,5 +37,5 @@ generateVersion = do
       , "version :: String"
       , "version = " ++ show version
       ]
- where
-  trim = reverse . dropWhile (`elem` "\n ") . reverse . dropWhile (`elem` "\n ")
+  where
+    trim = reverse . dropWhile (`elem` "\n ") . reverse . dropWhile (`elem` "\n ")

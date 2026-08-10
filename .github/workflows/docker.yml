@@ -30,6 +30,8 @@ jobs:
           file: ./docker/Dockerfile.coal
           platforms: linux/amd64
           push: true
+          build-args: |
+            COAL_VERSION=${{ github.ref_name }}
           tags: |
             ghcr.io/laserpants/coal:latest
             ghcr.io/laserpants/coal:${{ github.ref_name }}
