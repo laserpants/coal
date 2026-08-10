@@ -12,10 +12,10 @@ main :: IO ()
 main =
   defaultMainWithHooks
     simpleUserHooks
-      { preBuild =
+      { preConf =
           \args flags -> do
             generateVersion
-            preBuild simpleUserHooks args flags
+            preConf simpleUserHooks args flags
       }
 
 generateVersion :: IO ()
