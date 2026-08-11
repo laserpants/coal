@@ -43,6 +43,7 @@ packages:
 #
 extra-deps:
   - ir-builder-0.1.0.0
+  - criterion-1.6.5.0
 
 # Override default flag values for project packages and extra-deps
 # flags: {}

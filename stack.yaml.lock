@@ -11,6 +11,13 @@ packages:
       size: 3295
   original:
     hackage: ir-builder-0.1.0.0
+- completed:
+    hackage: criterion-1.6.5.0@sha256:3d4b74d802923dc17491980b32e27e70ad93405432f254997f877beda794a24d,5041
+    pantry-tree:
+      sha256: ba53743d11667c479d7e56b1810f41a710c565a40d11eac20b74ec6415d27842
+      size: 2507
+  original:
+    hackage: criterion-1.6.5.0
 snapshots:
 - completed:
     sha256: f9f775487e1678844b9f031919ed508a88097aa883002a970d3cd6fc6308b5d2
