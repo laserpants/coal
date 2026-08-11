@@ -18,10 +18,10 @@ commandParser =
         )
         <> command
           "compile"
-        ( info
-            (CmdCompile <$> compileCmdParser)
-            (progDesc "Compile from source files")
-        )
+          ( info
+              (CmdCompile <$> compileCmdParser)
+              (progDesc "Compile from source files")
+          )
         <> command
           "build"
           ( info

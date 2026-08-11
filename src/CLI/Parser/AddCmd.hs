@@ -8,24 +8,26 @@ addCmdParser :: Parser AddCmdOptions
 addCmdParser =
   AddCmdOptions
     <$> strArgument
-          ( metavar "GIT_URL"
-              <> help "Git repository URL"
-          )
+      ( metavar "GIT_URL"
+          <> help "Git repository URL"
+      )
     <*> optional
-          ( fmap Text.pack
-              ( strOption
-                  ( long "version"
-                      <> metavar "CONSTRAINT"
-                      <> help "SemVer constraint (defaults to *)"
-                  )
+      ( fmap
+          Text.pack
+          ( strOption
+              ( long "version"
+                  <> metavar "CONSTRAINT"
+                  <> help "SemVer constraint (defaults to *)"
               )
           )
+      )
     <*> optional
-          ( fmap Text.pack
-              ( strOption
-                  ( long "name"
-                      <> metavar "NAME"
-                      <> help "Package name (defaults to name from package's coal.json)"
-                  )
+      ( fmap
+          Text.pack
+          ( strOption
+              ( long "name"
+                  <> metavar "NAME"
+                  <> help "Package name (defaults to name from package's coal.json)"
               )
           )
+      )

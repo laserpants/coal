@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards, NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module CLI.Command.Add (addCommand) where
 
@@ -9,12 +10,11 @@ import CLI.Error (CLIError (..))
 import CLI.Git (gitCloneRepo)
 import CLI.Git.Repo (GitRepo (..))
 import CLI.Options.AddCmd (AddCmdOptions (..))
-import Control.Monad.Except
+import Control.Monad.Except (ExceptT, MonadError (throwError), runExceptT, withExceptT)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString (toStrict)
 import qualified Data.ByteString as ByteString
-import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
 import Data.SemVer.Constraint (Constraint (CAny))
@@ -34,12 +34,13 @@ addCommand AddCmdOptions{..} = do
   let repo = GitRepo (Text.pack addUrl)
   pkgName <- case addName of
     Just name -> pure name
-    Nothing   -> deriveNameFromRepo repo
-  let constraint = PackageConstraint <$> case addVersion of
-        Nothing  -> Just CAny
-        Just txt -> case SemVerConstraint.fromText txt of
-          Right c  -> Just c
-          Left _   -> Just CAny
+    Nothing -> deriveNameFromRepo repo
+  let constraint =
+        PackageConstraint <$> case addVersion of
+          Nothing -> Just CAny
+          Just txt -> case SemVerConstraint.fromText txt of
+            Right c -> Just c
+            Left _ -> Just CAny
       dep = PackageDependency{version = constraint, git = repo}
   let deps = fromMaybe mempty (dependencies manifest)
       newDeps = Map.insert pkgName dep deps
@@ -53,10 +54,15 @@ deriveNameFromRepo repo = do
   withSystemTempDirectory "coal-add" $ \tmpDir -> do
     gitCloneRepo repo tmpDir
     let manifestPath = tmpDir <> "/coal.json"
-    result <- liftIO $ runExceptT $ loadManifestFrom manifestPath
-      (\err -> EProjectInvalidManifestFormat ("invalid JSON: " <> err))
-      (EProjectInvalidManifestFormat
-        ("cloned repository at " <> repoUrl repo <> " has no coal.json"))
+    result <-
+      liftIO $
+        runExceptT $
+          loadManifestFrom
+            manifestPath
+            (\err -> EProjectInvalidManifestFormat ("invalid JSON: " <> err))
+            ( EProjectInvalidManifestFormat
+                ("cloned repository at " <> repoUrl repo <> " has no coal.json")
+            )
     case result of
       Left err -> throwError (EPackageError err)
       Right PackageManifest{name} -> pure name
