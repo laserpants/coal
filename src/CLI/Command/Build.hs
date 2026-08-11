@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards, LambdaCase #-}
 
-module CLI.Command.Build (buildCommand) where
+module CLI.Command.Build (buildCommand, deriveExecutableName) where
 
 import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
@@ -14,12 +14,14 @@ import Data.List (nub)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, maybeToList)
+import Data.SemVer (toText)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name, forM)
 import Package (packageIncludes)
 import Package.Error (PackageError (..))
 import Package.Manifest (PackageManifest (..), filePaths, loadProjectManifest)
+import Package.Version (PackageVersion (..))
 import System.Directory (canonicalizePath)
 
 buildCommand :: ExceptT CLIError IO ()
@@ -50,10 +52,12 @@ buildCommand = do
     let localSrcPaths = Text.unpack <$> fromMaybe ["src"] source_dirs
         pkgSrcPaths = [d | (d, _, _) <- canonNsInfo]
         entryPoint = parseEntryPoint entry_point
+        execName = deriveExecutableName name version
         config =
           defaultConfig
             { -- Local source dirs first so project modules shadow same-named package modules.
               configSourcePaths = nub ("src" : localSrcPaths <> pkgSrcPaths)
+            , configExecutableName = execName
             , configEntryPoint = entryPoint
             , configPackageNamespaces = canonNsInfo
             , -- C sources contributed by the project itself and by installed packages
@@ -85,3 +89,8 @@ parseEntryPoint = join . fmap parseDotSeparated
     case Text.splitOn "." t of
       [mod_, func] -> Just (mod_, func)
       _ -> Nothing
+-- | Derive the executable name from the project name and optional version.
+deriveExecutableName :: Text -> Maybe PackageVersion -> FilePath
+deriveExecutableName projectName = \case
+  Just (PackageVersion v) -> Text.unpack projectName <> "-" <> Text.unpack (toText v)
+  Nothing                 -> Text.unpack projectName

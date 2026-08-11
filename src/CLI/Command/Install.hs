@@ -4,6 +4,7 @@
 module CLI.Command.Install (installCommand, installProject) where
 
 import CLI.Error (CLIError (..))
+import CLI.Options.InstallCmd (InstallCmdOptions (..))
 import CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
@@ -108,7 +109,6 @@ installProject = do
 
       liftIO $ do
         ByteString.writeFile "coal.lock.json" (toStrict (encodePretty (PackageLock lockEntries)))
-        putStrLn "Writing coal.lock.json"
 
-installCommand :: ExceptT CLIError IO ()
-installCommand = installProject
+installCommand :: InstallCmdOptions -> ExceptT CLIError IO ()
+installCommand _opts = installProject
