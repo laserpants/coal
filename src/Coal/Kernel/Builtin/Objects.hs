@@ -44,6 +44,11 @@ objectList =
       , ("GreaterThan", Kernel.TCon "Ordering" [])
       , ("LessThan", Kernel.TCon "Ordering" [])
       ]
+  , DData
+      "Option"
+      [ ("None", Kernel.TCon "Option" [Kernel.TOpq])
+      , ("Some", Kernel.arrow Kernel.TOpq (Kernel.TCon "Option" [Kernel.TOpq]))
+      ]
   , -- Machine: single constructor taking one opaque argument (the state record).
     -- Declared here so Builtin$ bodies can use the unqualified name.
     DData
@@ -2064,8 +2069,7 @@ objectList =
       )
   , DFunction
       Exported
-      ( builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
-      )
+      (builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)")
       [ Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$a"
       , Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$b"
       , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t1"
@@ -2451,6 +2455,55 @@ objectList =
                                               )
                             }
                     }
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.event$_blocking_poll"
+      [ Kernel.Label Kernel.TOpq "state"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TCon "Option" [Kernel.TOpq]) "try_fn"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "block_fn"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*>(@<Option(*)>(try_fn : */Option(*), state : *)) {
+                    | ( None : Option(*) ) =>
+                        let _ : unit = 
+                          @<unit>(block_fn : */unit, state : *)
+                        in 
+                          @<*>
+                            ( `Builtin$.event$_blocking_poll` : */(*/Option(*))/(*/unit)/*
+                            , state : *
+                            , try_fn : */Option(*)
+                            , block_fn : */unit
+                            )
+                    | ( Some : */Option(*)
+                      , result : *
+                      ) =>
+                        result : *
+                  }
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.event$_loop"
+      [ Kernel.Label Kernel.TOpq "state"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TCon "Option" [Kernel.TOpq]) "step_fn"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*>(@<Option(*)>(step_fn : */Option(*), state : *)) {
+                    | ( None : Option(*) ) =>
+                        state : *
+                    | ( Some : */Option(*)
+                      , next : *
+                      ) =>
+                        @<*>
+                          ( `Builtin$.event$_loop` : */(*/Option(*))/*
+                          , next : *
+                          , step_fn : */Option(*)
+                          )
+                  }
         |]
       )
   ]

@@ -43,6 +43,10 @@ builtinModules =
     , $(embedFile "lang/Option.coal")
     )
   ,
+    ( "Runtime"
+    , $(embedFile "lang/Runtime.coal")
+    )
+  ,
     ( "Codata.Machine"
     , $(embedFile "lang/Codata/Machine.coal")
     )

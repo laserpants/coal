@@ -44,6 +44,9 @@ buildCommand = do
       \(dir, ns, mods) -> do
         canonDir <- liftIO $ canonicalizePath dir
         pure (canonDir, ns, mods)
+    -- Resolve the project's own C sources (declared in coal.json) relative to
+    -- the current directory so the linker can compile and link them.
+    localCFiles <- liftIO $ mapM canonicalizePath (fromMaybe [] c_sources)
     let localSrcPaths = Text.unpack <$> fromMaybe ["src"] source_dirs
         pkgSrcPaths = [d | (d, _, _) <- canonNsInfo]
         entryPoint = parseEntryPoint entry_point
@@ -53,9 +56,9 @@ buildCommand = do
               configSourcePaths = nub ("src" : localSrcPaths <> pkgSrcPaths)
             , configEntryPoint = entryPoint
             , configPackageNamespaces = canonNsInfo
-            , -- C sources contributed by installed packages (e.g. an EventSource
-              -- library shipping its native primitives).
-              configCFiles = pkgCFiles
+            , -- C sources contributed by the project itself and by installed packages
+              -- (e.g. an EventSource library shipping its native primitives).
+              configCFiles = localCFiles <> pkgCFiles
             }
     localFiles <- filePaths modules EProjectInvalidModuleFormat
     -- If the entry-point module is not listed in `modules`, add its file

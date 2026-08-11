@@ -247,4 +247,19 @@ builtinFunctions =
     ( "machine$_run_while"
     , forall1 $ \t -> (TIntrinsic IUnit ~> TIntrinsic IBool) ~> machineType (TIntrinsic IUnit) t ~> t
     )
+  ,
+    ( "event$_blocking_poll"
+    , forall2 $ \state result ->
+        state
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (result :| []))
+          ~> (state ~> TIntrinsic IUnit)
+          ~> result
+    )
+  ,
+    ( "event$_loop"
+    , forall1 $ \state ->
+        state
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (state :| []))
+          ~> state
+    )
   ]

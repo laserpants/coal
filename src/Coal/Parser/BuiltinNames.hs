@@ -99,6 +99,8 @@ builtinNames =
       , ("machine$_contramap_input", Codata)
       , ("machine$_cofix", Codata)
       , ("machine$_run_while", Codata)
+      , ("event$_blocking_poll", Codata)
+      , ("event$_loop", Codata)
       ]
 
 -- | All built-in names as a set (for faster lookup)

@@ -1,0 +1,23 @@
+module Runtime {
+
+  /** 
+   * Co-recursive event loop.
+   *
+   * Calls `step_fn` repeatedly with the current state. Continues as long
+   * as `step_fn` returns `Some(next_state)`. Stops and returns the current
+   * state when `step_fn` returns `None`.
+   */
+  fun event_loop(state : a, step_fn : a -> Option<a>) : a =
+    event$_loop(state, step_fn)
+
+  /** 
+   * Blocking poll loop.
+   *
+   * Calls `try_fn(state)`. If it returns `Some(result)`, returns `result`.
+   * Otherwise calls `block_fn(state)` to wait for data, then retries
+   * `try_fn` with the same state.
+   */
+  fun blocking_poll(state : a, try_fn : a -> Option<b>, block_fn : a -> unit) : b =
+    event$_blocking_poll(state, try_fn, block_fn)
+
+}
