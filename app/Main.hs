@@ -23,10 +23,11 @@ import CLI.Error (prettyCLIError)
 import CLI.Parser.Command (commandParser)
 import Coal.Compiler.Terminal (TerminalCapabilities (..), detectStderrCapabilities, sanitizeForTerminal)
 import Control.Exception (IOException, try)
-import Control.Monad.Except
+import Control.Monad.Except (runExceptT)
 import qualified Data.Text.IO as Text
+import GHC.IO.Encoding (setLocaleEncoding, utf8)
 import Options.Applicative
-import System.IO (hSetEncoding, stderr, stdout, utf8)
+import System.IO (hSetEncoding, stderr, stdout)
 
 runCommand :: TerminalCapabilities -> Command -> IO ()
 runCommand caps =
@@ -88,6 +89,12 @@ main = do
   -- set to C/POSIX. On modern terminals this is always safe; if encoding
   -- fails, we continue anyway (the terminal capability detection below will
   -- degrade output to ASCII-only).
+  --
+  -- Both handle encodings (for stdout/stderr) and the global locale encoding
+  -- (used by Data.Text.IO.readFile when reading source files) are set, so
+  -- reading Coal source files containing Unicode literals works regardless
+  -- of the C/POSIX locale.
+  setLocaleEncoding utf8
   _ <- try @IOException (hSetEncoding stdout utf8)
   _ <- try @IOException (hSetEncoding stderr utf8)
   caps <- detectStderrCapabilities
