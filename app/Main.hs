@@ -1,7 +1,14 @@
 {-# LANGUAGE ApplicativeDo #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
+{- | Main entry point for the Coal compiler CLI.
+
+Detects terminal capabilities at startup and sets UTF-8 encoding explicitly
+so the CLI works even when the locale is set to C/POSIX. Unicode output is
+degraded gracefully to ASCII on unsupported terminals.
+-}
 module Main (main) where
 
 import CLI.Command (Command (..))
@@ -14,27 +21,31 @@ import CLI.Command.Install (installCommand)
 import CLI.Command.Version (coalVersion)
 import CLI.Error (prettyCLIError)
 import CLI.Parser.Command (commandParser)
-import Control.Monad.Except
+import Coal.Compiler.Terminal (TerminalCapabilities (..), detectStderrCapabilities, sanitizeForTerminal)
+import Control.Exception (IOException, try)
+import Control.Monad.Except (runExceptT)
 import qualified Data.Text.IO as Text
+import GHC.IO.Encoding (setLocaleEncoding, utf8)
 import Options.Applicative
+import System.IO (hSetEncoding, stderr, stdout)
 
-runCommand :: Command -> IO ()
-runCommand =
+runCommand :: TerminalCapabilities -> Command -> IO ()
+runCommand caps =
   \case
     CmdAdd opts -> do
       r <- runExceptT (addCommand opts)
       case r of
         Left err ->
-          Text.putStrLn ("• " <> prettyCLIError err)
+          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
         Right{} ->
           pure ()
     CmdCompile opts ->
-      compileCommand opts
+      compileCommand caps opts
     CmdBuild -> do
-      r <- runExceptT buildCommand
+      r <- runExceptT (buildCommand caps)
       case r of
         Left err ->
-          Text.putStrLn ("• " <> prettyCLIError err)
+          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
         Right{} ->
           pure ()
     CmdClean ->
@@ -43,14 +54,14 @@ runCommand =
       r <- runExceptT (initCommand opts)
       case r of
         Left err ->
-          Text.putStrLn ("• " <> prettyCLIError err)
+          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
         Right{} ->
           pure ()
     CmdInstall opts -> do
       r <- runExceptT (installCommand opts)
       case r of
         Left err ->
-          Text.putStrLn ("• " <> prettyCLIError err)
+          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
         Right{} ->
           pure ()
 
@@ -74,5 +85,18 @@ commandInfo =
 
 main :: IO ()
 main = do
+  -- Set UTF-8 encoding explicitly so the CLI works even when the locale is
+  -- set to C/POSIX. On modern terminals this is always safe; if encoding
+  -- fails, we continue anyway (the terminal capability detection below will
+  -- degrade output to ASCII-only).
+  --
+  -- Both handle encodings (for stdout/stderr) and the global locale encoding
+  -- (used by Data.Text.IO.readFile when reading source files) are set, so
+  -- reading Coal source files containing Unicode literals works regardless
+  -- of the C/POSIX locale.
+  setLocaleEncoding utf8
+  _ <- try @IOException (hSetEncoding stdout utf8)
+  _ <- try @IOException (hSetEncoding stderr utf8)
+  caps <- detectStderrCapabilities
   cmd <- execParser commandInfo
-  runCommand cmd
+  runCommand caps cmd

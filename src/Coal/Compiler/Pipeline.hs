@@ -62,7 +62,8 @@ import System.IO (hPutStr, stderr)
 import Text.Megaparsec (errorBundlePretty)
 import TextShow (showt)
 
-import Coal.Compiler.Progress (ProgressRef, writeStatus, writeStatusSimple)
+import Coal.Compiler.Progress (ProgressRef, writeStatus, writeStatusSimpleUnsafe)
+import Coal.Compiler.Terminal (TerminalCapabilities (..), sanitizeForTerminal)
 
 pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
@@ -81,22 +82,22 @@ timed label p =
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-        liftIO $ writeStatusSimple (label <> ("... " <> show secs <> "s"))
+        liftIO $ writeStatusSimpleUnsafe (label <> "... " <> show secs <> "s")
         pure result
     }
 
-pipelineWithProgress :: (MonadIO m) => ProgressRef -> Pass Metadata m [FilePath] ()
-pipelineWithProgress ref =
-  timedWeighted ref "Parsing" Counts.weightParsing phaseParsing
+pipelineWithProgress :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> Pass Metadata m [FilePath] ()
+pipelineWithProgress caps ref =
+  timedWeighted caps ref "Parsing" Counts.weightParsing phaseParsing
     >-> Pass{runPass = updateTotal ref}
-    >-> timedWeighted ref "Preflight" Counts.weightPreflight phasePreflight
-    >-> perModulePasses ref phaseTypeChecking phaseTranslation
-    >-> timedWeighted ref "Kernel translate" Counts.weightKernelTranslate (mapPass passKernelTranslate)
-    >-> timedWeighted ref "Kernel codegen" Counts.weightKernelCodegen passKernelCodegen
-    >-> timedWeighted ref "Linking" Counts.weightLinking passLinking
+    >-> timedWeighted caps ref "Preflight" Counts.weightPreflight phasePreflight
+    >-> perModulePasses caps ref phaseTypeChecking phaseTranslation
+    >-> timedWeighted caps ref "Kernel translate" Counts.weightKernelTranslate (mapPass passKernelTranslate)
+    >-> timedWeighted caps ref "Kernel codegen" Counts.weightKernelCodegen passKernelCodegen
+    >-> timedWeighted caps ref "Linking" Counts.weightLinking passLinking
 
-timedWeighted :: (MonadIO m) => ProgressRef -> String -> Int -> Pass a m i o -> Pass a m i o
-timedWeighted ref label weight p =
+timedWeighted :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> String -> Int -> Pass a m i o -> Pass a m i o
+timedWeighted caps ref label weight p =
   Pass
     { runPass = \i -> do
         t0 <- liftIO getCurrentTime
@@ -105,28 +106,28 @@ timedWeighted ref label weight p =
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus ref (label <> ("... " <> show secs <> "s"))
+          writeStatus caps ref (label <> "... " <> show secs <> "s")
         pure result
     }
 
-perModulePasses :: (MonadIO m) => ProgressRef -> Pass Metadata m i o -> Pass Metadata m o p -> Pass Metadata m [BuildEnvelope i] [BuildEnvelope p]
-perModulePasses ref p1 p2 =
+perModulePasses :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> Pass Metadata m i o -> Pass Metadata m o p -> Pass Metadata m [BuildEnvelope i] [BuildEnvelope p]
+perModulePasses caps ref p1 p2 =
   Pass
     { runPass = traverse runOne
     }
  where
   sourceStage =
     liftPass
-      ( timedWeightedPerModule ref "Type checking" Counts.weightTypeChecking p1
-          >-> timedWeightedPerModule ref "Translation" Counts.weightTranslation p2
+      ( timedWeightedPerModule caps ref "Type checking" Counts.weightTypeChecking p1
+          >-> timedWeightedPerModule caps ref "Translation" Counts.weightTranslation p2
       )
   cachedStage = liftPass (p1 >-> p2)
   runOne env = case env of
     BSource _ -> runPass sourceStage env
     BCached _ -> runPass cachedStage env
 
-timedWeightedPerModule :: (MonadIO m) => ProgressRef -> String -> Int -> Pass Metadata m i o -> Pass Metadata m i o
-timedWeightedPerModule ref label weight p =
+timedWeightedPerModule :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> String -> Int -> Pass Metadata m i o -> Pass Metadata m i o
+timedWeightedPerModule caps ref label weight p =
   Pass
     { runPass = \i -> do
         t0 <- liftIO getCurrentTime
@@ -135,7 +136,7 @@ timedWeightedPerModule ref label weight p =
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus ref (label <> ("... " <> show secs <> "s"))
+          writeStatus caps ref (label <> "... " <> show secs <> "s")
         pure result
     }
 
@@ -152,12 +153,12 @@ updateTotal ref envelopes = do
 phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
 phaseMainPasses = mapPass . liftPass
 
-compileWithCFiles :: CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
-compileWithCFiles config files cFiles = do
+compileWithCFiles :: TerminalCapabilities -> CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
+compileWithCFiles caps config files cFiles = do
   ref <- newIORef (0, 0)
   let go = runCompilerT emptyCompilerEnvironment $ do
         setConfigC config{configCFiles = configCFiles config <> cFiles}
-        runPass (pipelineWithProgress ref) files
+        runPass (pipelineWithProgress caps ref) files
   res <- go
   case res of
     (e, CompilerState{compilerSources}, es) -> do
@@ -168,16 +169,16 @@ compileWithCFiles config files cFiles = do
               putStrLn ("\nIn module '" <> Text.unpack name <> "':\n")
             Nothing ->
               pure ()
-          Text.putStrLn (prettyError compilerSources err)
+          Text.putStrLn (sanitizeForTerminal caps $ prettyError compilerSources err)
       case e of
         Left e1 ->
           print e1
         Right{} -> do
-          liftIO $ writeStatus ref ("Executable written to: " <> configExecutableName config)
+          liftIO $ writeStatus caps ref ("Executable written to: " <> configExecutableName config)
           hPutStr stderr "\n"
 
-compile :: CompilerConfig -> [FilePath] -> IO ()
-compile config files = compileWithCFiles config files []
+compile :: TerminalCapabilities -> CompilerConfig -> [FilePath] -> IO ()
+compile caps config files = compileWithCFiles caps config files []
 
 prettyRule :: InferenceRule Kind a -> Text
 prettyRule =
