@@ -48,28 +48,38 @@ compileBitcode CompilerConfig{..} files =
           print err
           pure (Just CompilerError)
         Right objFiles -> do
-          ByteString.writeFile (tmpDir </> "runtime.c") runtimeLib
-          -- Copy each C source into the temp dir, preserving its path relative
-          -- to the project root so that same-named files from different
-          -- packages (e.g. two libraries each shipping an "event_source.c")
-          -- do not clobber each other. The copied paths are what gcc compiles.
           cFiles <- traverse canonicalizePath configCFiles
           projectRoot <- getCurrentDirectory
-          copiedCFiles <- forM cFiles $
-            \file -> do
-              let rel = makeRelative projectRoot file
-                  target = tmpDir </> rel
-              createDirectoryIfMissing True (takeDirectory target)
-              copyFile file target
-              pure target
-          gccRes <- runGCC CompilerConfig{..} tmpDir objFiles copiedCFiles
-          case gccRes of
-            Left e -> do
-              putStrLn ("gcc failed: " ++ show e)
+          let rels = map (makeRelative projectRoot) cFiles
+          if runtimeFileName `elem` rels
+            then do
+              putStrLn $
+                "Error: The filename '"
+                  ++ runtimeFileName
+                  ++ "' is reserved by the Coal compiler internally."
+              putStrLn "Please rename your C file and try again."
               pure (Just CompilerError)
-            Right _ -> do
-              copyFile (tmpDir </> "dist") configExecutableName
-              pure Nothing
+            else do
+              ByteString.writeFile (tmpDir </> runtimeFileName) runtimeLib
+              -- Copy each C source into the temp dir, preserving its path relative
+              -- to the project root so that same-named files from different
+              -- packages (e.g. two libraries each shipping an "event_source.c")
+              -- do not clobber each other. The copied paths are what gcc compiles.
+              copiedCFiles <- forM cFiles $
+                \file -> do
+                  let rel = makeRelative projectRoot file
+                      target = tmpDir </> rel
+                  createDirectoryIfMissing True (takeDirectory target)
+                  copyFile file target
+                  pure target
+              gccRes <- runGCC CompilerConfig{..} tmpDir objFiles copiedCFiles
+              case gccRes of
+                Left e -> do
+                  putStrLn ("gcc failed: " ++ show e)
+                  pure (Just CompilerError)
+                Right _ -> do
+                  copyFile (tmpDir </> "dist") configExecutableName
+                  pure Nothing
 
 runLLC :: FilePath -> Name -> ByteString -> IO (Either SomeException FilePath)
 runLLC dir name bcode = do
@@ -91,7 +101,7 @@ runGCC CompilerConfig{..} dir objFiles cFiles = do
   sanitizeFlags = if configSanitize then ["-fsanitize=address"] else []
   flags = ["-g", "-I."] <> sanitizeFlags
   commonArgs =
-    ["runtime.c"]
+    [runtimeFileName]
       <> cFiles
       <> objFiles
       <> ["-o", "dist"]
@@ -107,3 +117,6 @@ execProcess p = do
 
 runtimeLib :: ByteString
 runtimeLib = $(embedFile "runtime/dist/runtime-combined.c")
+
+runtimeFileName :: FilePath
+runtimeFileName = "__coal_runtime.c"
