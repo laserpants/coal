@@ -7,15 +7,15 @@ installCmdParser :: Parser InstallCmdOptions
 installCmdParser =
   InstallCmdOptions
     <$> strOption
-          ( long "target"
-              <> metavar "PATH"
-              <> value "."
-              <> help "Target directory (defaults to current directory)"
-          )
+      ( long "target"
+          <> metavar "PATH"
+          <> value "."
+          <> help "Target directory (defaults to current directory)"
+      )
     <*> optional
-          ( strOption
-              ( long "revision"
-                  <> metavar "REV"
-                  <> help "Specific Git revision to install"
-              )
+      ( strOption
+          ( long "revision"
+              <> metavar "REV"
+              <> help "Specific Git revision to install"
           )
+      )

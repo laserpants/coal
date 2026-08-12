@@ -4,10 +4,10 @@
 module CLI.Command.Install (installCommand, installProject) where
 
 import CLI.Error (CLIError (..))
-import CLI.Options.InstallCmd (InstallCmdOptions (..))
 import CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
+import CLI.Options.InstallCmd (InstallCmdOptions (..))
 import Control.Monad (unless)
 import Control.Monad.Except
 import Control.Monad.State

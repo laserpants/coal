@@ -1,5 +1,6 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards, LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module CLI.Command.Build (buildCommand, deriveExecutableName) where
 
@@ -89,8 +90,9 @@ parseEntryPoint = join . fmap parseDotSeparated
     case Text.splitOn "." t of
       [mod_, func] -> Just (mod_, func)
       _ -> Nothing
+
 -- | Derive the executable name from the project name and optional version.
 deriveExecutableName :: Text -> Maybe PackageVersion -> FilePath
 deriveExecutableName projectName = \case
   Just (PackageVersion v) -> Text.unpack projectName <> "-" <> Text.unpack (toText v)
-  Nothing                 -> Text.unpack projectName
+  Nothing -> Text.unpack projectName

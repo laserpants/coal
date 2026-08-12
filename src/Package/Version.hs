@@ -42,14 +42,14 @@ instance ToJSON PackageConstraint where
 
 constraintToText :: Constraint -> Text
 constraintToText = \case
-  CAny      -> "*"
-  CLt v     -> "<"  <> SemVerVersion.toText v
-  CLtEq v   -> "<=" <> SemVerVersion.toText v
-  CGt v     -> ">"  <> SemVerVersion.toText v
-  CGtEq v   -> ">=" <> SemVerVersion.toText v
-  CEq v     -> SemVerVersion.toText v
+  CAny -> "*"
+  CLt v -> "<" <> SemVerVersion.toText v
+  CLtEq v -> "<=" <> SemVerVersion.toText v
+  CGt v -> ">" <> SemVerVersion.toText v
+  CGtEq v -> ">=" <> SemVerVersion.toText v
+  CEq v -> SemVerVersion.toText v
   CAnd c1 c2 -> constraintToText c1 <> " " <> constraintToText c2
-  COr c1 c2  -> constraintToText c1 <> " || " <> constraintToText c2
+  COr c1 c2 -> constraintToText c1 <> " || " <> constraintToText c2
 
 instance FromJSON PackageConstraint where
   parseJSON =

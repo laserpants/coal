@@ -5,7 +5,7 @@ module Package.VersionSpec (versionSpec) where
 import Data.Aeson (eitherDecode, encode)
 import qualified Data.ByteString.Lazy as LBS
 import Package.Version (PackageConstraint)
-import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy, expectationFailure)
+import Test.Hspec (Spec, describe, expectationFailure, it, shouldBe, shouldSatisfy)
 
 decodeConstraint :: LBS.ByteString -> Either String PackageConstraint
 decodeConstraint = eitherDecode
