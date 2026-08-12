@@ -106,7 +106,7 @@ timedWeighted caps ref label weight p =
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus caps ref (label <> "... " <> show secs ++ "s")
+          writeStatus caps ref (label <> "... " <> show secs <> "s")
         pure result
     }
 

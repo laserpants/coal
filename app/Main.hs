@@ -1,14 +1,14 @@
+{-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
+
 {- | Main entry point for the Coal compiler CLI.
 
 Detects terminal capabilities at startup and sets UTF-8 encoding explicitly
 so the CLI works even when the locale is set to C/POSIX. Unicode output is
 degraded gracefully to ASCII on unsupported terminals.
 -}
-{-# LANGUAGE ApplicativeDo #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TypeApplications #-}
-
 module Main (main) where
 
 import CLI.Command (Command (..))

@@ -21,7 +21,7 @@ writeStatus caps ref msg
       (done, total) <- readIORef ref
       let pct = if total > 0 then (done * 100) `div` total else 0
           bar = renderBar caps done total 30
-      hPutStr stderr $ "\r\ESC[2K" ++ bar ++ " " ++ show pct ++ "% " ++ msg
+      hPutStr stderr $ "\r\ESC[2K" <> bar <> " " <> show pct <> "% " <> msg
       hFlush stderr
 
 renderBar :: TerminalCapabilities -> Int -> Int -> Int -> String
@@ -42,13 +42,13 @@ writeStatusSimple :: TerminalCapabilities -> String -> IO ()
 writeStatusSimple caps msg
   | not (termIsTerminal caps) = pure ()
   | otherwise = do
-      hPutStr stderr $ "\r\ESC[2K" ++ msg
+      hPutStr stderr $ "\r\ESC[2K" <> msg
       hFlush stderr
 
 -- | Apply an ANSI style escape code only if the terminal supports ANSI.
 withANSIStyle :: TerminalCapabilities -> String -> String -> String
 withANSIStyle caps code str
-  | termSupportsANSI caps = code ++ str
+  | termSupportsANSI caps = code <> str
   | otherwise = str
 
 {- | Version of 'writeStatusSimple' that writes unconditionally without
@@ -57,5 +57,5 @@ used by the test suite) where terminal detection is not relevant.
 -}
 writeStatusSimpleUnsafe :: String -> IO ()
 writeStatusSimpleUnsafe msg = do
-  hPutStr stderr $ "\r\ESC[2K" ++ msg
+  hPutStr stderr $ "\r\ESC[2K" <> msg
   hFlush stderr
