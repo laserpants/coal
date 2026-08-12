@@ -60,12 +60,18 @@
 # functions is often clearer in this codebase.
 - ignore: { name: "Use uncurry" }
 
+# "Avoid restricted extensions" — the project convention is to declare all
+# extensions per-file (StrictData, TemplateHaskell, QuasiQuotes, etc.),
+# never as default extensions in package.yaml.
+- ignore: { name: "Avoid restricted extensions" }
+
 # ── Custom project rules ───────────────────────────────────────────────
 
 # Prefer <$> over fmap where Applicative style is intended.
 - warn: { lhs: "fmap f x", rhs: "f <$> x" }
 
 # Discourage partial functions in favor of safe alternatives.
-- error: { name: "Avoid 'head'", lhs: "head", rhs: "listToMaybe or pattern match" }
-- error: { name: "Avoid 'tail'", lhs: "tail", rhs: "drop 1 or pattern match" }
+# These reference built-in HLint hints, elevated to error severity.
+- error: { name: "Avoid head" }
+- error: { name: "Avoid tail" }
 
