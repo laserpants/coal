@@ -138,6 +138,7 @@ library
       Coal.Compiler.Progress
       Coal.Compiler.Stack
       Coal.Compiler.State
+      Coal.Compiler.Terminal
       Coal.Compiler.TypeInference
       Coal.Compiler.TypeInference.Errors
       Coal.Debug
