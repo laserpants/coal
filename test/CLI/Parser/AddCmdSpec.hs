@@ -1,10 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module CLI.Parser.AddCmdSpec (addCmdSpec) where
 
 import CLI.Options.AddCmd (AddCmdOptions (..))
 import CLI.Parser.AddCmd (addCmdParser)
 import Options.Applicative
-import Test.Hspec (Spec, describe, it, shouldBe, expectationFailure)
+import Test.Hspec (Spec, describe, expectationFailure, it, shouldBe)
 
 parseAdd :: [String] -> Either String AddCmdOptions
 parseAdd args = case execParserPure defaultPrefs parserInfo args of

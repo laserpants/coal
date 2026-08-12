@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import CLI.Command.BuildSpec (buildSpec)
+import CLI.Parser.AddCmdSpec (addCmdSpec)
 import CLI.Parser.InstallCmdSpec (installCmdSpec)
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
 import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
-import CLI.Parser.AddCmdSpec (addCmdSpec)
 import E2E.Spec (e2eSpec)
 import Package.VersionSpec (versionSpec)
 import Test.Hspec (SpecWith, describe, hspec)
