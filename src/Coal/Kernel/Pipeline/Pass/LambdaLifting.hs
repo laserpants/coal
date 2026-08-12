@@ -373,7 +373,7 @@ substituteVar n replacement = go
           -- n is rebound here (letrec); leave the entire let untouched.
           expr
       | otherwise ->
-          ELet ((\ (Binding l e) -> Binding l (go e)) <$> bindings) (go body)
+          ELet ((\(Binding l e) -> Binding l (go e)) <$> bindings) (go body)
     ELam params body
       | any (\(Label _ pn) -> pn == n) (NonEmpty.toList params) ->
           -- n is a lambda parameter; do not substitute inside.
