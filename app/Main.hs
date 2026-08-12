@@ -46,8 +46,8 @@ runCommand =
           Text.putStrLn ("• " <> prettyCLIError err)
         Right{} ->
           pure ()
-    CmdInstall -> do
-      r <- runExceptT installCommand
+    CmdInstall opts -> do
+      r <- runExceptT (installCommand opts)
       case r of
         Left err ->
           Text.putStrLn ("• " <> prettyCLIError err)

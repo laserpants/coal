@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Package.Version (
   PackageVersion (..),
@@ -12,6 +14,7 @@ import Data.SemVer
 import qualified Data.SemVer as SemVerVersion
 import Data.SemVer.Constraint
 import qualified Data.SemVer.Constraint as SemVerConstraint
+import Data.Text (Text)
 import GHC.Generics (Generic)
 
 newtype PackageVersion = PackageVersion {getVersion :: Version}
@@ -35,12 +38,18 @@ instance FromJSON PackageVersion where
             pure (PackageVersion v)
 
 instance ToJSON PackageConstraint where
-  toJSON (PackageConstraint c) =
-    case c of
-      CEq v ->
-        toJSON (PackageVersion v)
-      _ ->
-        error "TODO"
+  toJSON (PackageConstraint c) = String (constraintToText c)
+
+constraintToText :: Constraint -> Text
+constraintToText = \case
+  CAny -> "*"
+  CLt v -> "<" <> SemVerVersion.toText v
+  CLtEq v -> "<=" <> SemVerVersion.toText v
+  CGt v -> ">" <> SemVerVersion.toText v
+  CGtEq v -> ">=" <> SemVerVersion.toText v
+  CEq v -> SemVerVersion.toText v
+  CAnd c1 c2 -> constraintToText c1 <> " " <> constraintToText c2
+  COr c1 c2 -> constraintToText c1 <> " || " <> constraintToText c2
 
 instance FromJSON PackageConstraint where
   parseJSON =
