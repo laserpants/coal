@@ -38,9 +38,10 @@ addCommand AddCmdOptions{..} = do
   let constraint =
         PackageConstraint <$> case addVersion of
           Nothing -> Just CAny
-          Just txt -> case SemVerConstraint.fromText txt of
-            Right c -> Just c
-            Left _ -> Just CAny
+          Just txt ->
+            case SemVerConstraint.fromText txt of
+              Right c -> Just c
+              Left _ -> Just CAny
       dep = PackageDependency{version = constraint, git = repo}
   let deps = fromMaybe mempty (dependencies manifest)
       newDeps = Map.insert pkgName dep deps
