@@ -7,6 +7,7 @@ module CLI.Command.Build (buildCommand, deriveExecutableName) where
 import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config
+import Coal.Compiler.Terminal (TerminalCapabilities)
 import Control.Monad (join)
 import Control.Monad.Except
 import Control.Monad.IO.Class (liftIO)
@@ -25,8 +26,8 @@ import Package.Manifest (PackageManifest (..), filePaths, loadProjectManifest)
 import Package.Version (PackageVersion (..))
 import System.Directory (canonicalizePath)
 
-buildCommand :: ExceptT CLIError IO ()
-buildCommand = do
+buildCommand :: TerminalCapabilities -> ExceptT CLIError IO ()
+buildCommand caps = do
   res <- liftIO $ runExceptT $ do
     PackageManifest{..} <- loadProjectManifest
 
@@ -76,7 +77,7 @@ buildCommand = do
     Left err ->
       throwError (EPackageError err)
     Right (config, files) ->
-      liftIO $ compile config files
+      liftIO $ compile caps config files
 
 -- | True when the manifest declares no external dependencies.
 noDependencies :: Maybe (Map Text a) -> Bool

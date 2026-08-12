@@ -6,13 +6,14 @@ module CLI.Command.Compile (compileCommand) where
 import CLI.Options.CompileCmd (CompileCmdOptions (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config (CompilerConfig (..))
+import Coal.Compiler.Terminal (TerminalCapabilities)
 import Data.List (nub)
 import Data.Text (Text)
 import qualified Data.Text as Text
 
-compileCommand :: CompileCmdOptions -> IO ()
-compileCommand CompileCmdOptions{..} = do
-  compile config inputFiles
+compileCommand :: TerminalCapabilities -> CompileCmdOptions -> IO ()
+compileCommand caps CompileCmdOptions{..} = do
+  compile caps config inputFiles
  where
   parsedEntryPoint = parseEntryPoint entryPoint
   config =
