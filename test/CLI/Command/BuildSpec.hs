@@ -9,9 +9,10 @@ import Package.Version (PackageVersion (..))
 import Test.Hspec
 
 mkVersion :: Text -> PackageVersion
-mkVersion t = case fromText t of
-  Right v -> PackageVersion v
-  Left e -> error ("Bad test version: " <> e)
+mkVersion t =
+  case fromText t of
+    Right v -> PackageVersion v
+    Left e -> error ("Bad test version: " <> e)
 
 buildSpec :: Spec
 buildSpec =
