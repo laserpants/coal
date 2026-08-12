@@ -10,21 +10,12 @@ import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.HasType (foldType, typeOf)
 import Coal.Kernel.Pipeline.Invariant (checkLambdasLifted)
 import Coal.Kernel.Pipeline.Pass.LambdaLifting (lambdaLifting)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, runPass, unit_)
-import Data.List.NonEmpty (NonEmpty (..))
-import Data.Text (Text)
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, ne, runPass, unit_, var)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
-
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
-
-var :: Text -> Expr Type
-var n = EVar (lbl n)
 
 -- | The type of a lambda @fn(p1..pn) => body@ given parameter labels and body.
 lamType :: [Label Type] -> Expr Type -> Type

@@ -1,82 +1,61 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec (collectEAnnotationConstraintsSpecAll) where
+module Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec (spec) where
 
 import Coal.Language
-import Coal.TypeSystem.Constraint
-import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Coal.TypeSystem.Constraint (Constraint (..))
+import Coal.TypeSystem.Constraint.Assumption (Assumption)
+import Coal.TypeSystem.Constraint.Generation (emitConstraints, evalConstraintsGenStack)
+import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
+import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenOutput, emptyConstraintsGenContext)
 import Data.Either (lefts, rights)
+import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
 
-collectEAnnotationConstraintsSpecAll :: IO ()
-collectEAnnotationConstraintsSpecAll = do
-  print collectEAnnotationConstraintsSpec1
-  print collectEAnnotationConstraintsSpec2
-  print collectEAnnotationConstraintsSpec3
-  print collectEAnnotationConstraintsSpec4
+{- | Run constraint generation for an expression, returning the generated
+assumptions alongside the raw constraint-generation outputs.
+-}
+runGen ::
+  Expression () Kind IndexedType ->
+  ([Assumption () IndexedType], [ConstraintsGenOutput () TypeIndex Kind IndexedType])
+runGen expr = evalConstraintsGenStack (freshIdIn expr) emptyConstraintsGenContext (emitConstraints expr)
 
-fixture1 :: Expression () () IndexedType
+fixture1 :: Expression () Kind IndexedType
 fixture1 =
   EAnnotation () (TIntrinsic IInt32) (ELiteral () (LInt32 1))
 
-collectEAnnotationConstraintsSpec1 :: Bool
-collectEAnnotationConstraintsSpec1 = undefined -- null ms && null (lefts outs)
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture1
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
 constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
-constraint1 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IInt32)) [TIntrinsic IInt32, TIntrinsic IInt32]
+constraint1 =
+  Equality
+    (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IInt32))
+    [TIntrinsic IInt32, TIntrinsic IInt32]
 
-collectEAnnotationConstraintsSpec2 :: Bool
-collectEAnnotationConstraintsSpec2 = undefined -- null ms && constraint1 `elem` rights outs
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture1
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
-fixture2 :: Expression () () IndexedType
+fixture2 :: Expression () Kind IndexedType
 fixture2 =
   EAnnotation () (TIntrinsic IBool) (ELiteral () (LInt32 1))
 
 constraint2 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
-constraint2 = Equality (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool)) [TIntrinsic IInt32, TIntrinsic IBool]
+constraint2 =
+  Equality
+    (RuleAnnotation () (TIntrinsic IInt32) (TIntrinsic IBool))
+    [TIntrinsic IInt32, TIntrinsic IBool]
 
-collectEAnnotationConstraintsSpec3 :: Bool
-collectEAnnotationConstraintsSpec3 = undefined -- null ms && constraint2 `elem` rights outs
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture2
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
-fixture3 :: Expression () () IndexedType
+fixture3 :: Expression () Kind IndexedType
 fixture3 =
-  EAnnotation () (TVariable (Parameter () "a")) (ELiteral () (LInt32 1))
+  EAnnotation () (TVariable (Parameter KType "a")) (ELiteral () (LInt32 1))
 
-collectEAnnotationConstraintsSpec4 :: Bool
-collectEAnnotationConstraintsSpec4 = undefined -- null ms && null (lefts outs)
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture3
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
+spec :: Spec
+spec = do
+  describe "emitEAnnotationConstraints" $ do
+    it "emits an equality constraint between the annotated and literal types" $ do
+      let (ms, outs) = runGen fixture1
+      ms `shouldBe` []
+      rights outs `shouldBe` [constraint1]
+
+    it "emits an equality constraint for a mismatching annotation" $ do
+      let (ms, outs) = runGen fixture2
+      ms `shouldBe` []
+      rights outs `shouldBe` [constraint2]
+
+    it "emits no errors when the annotation is a type variable" $ do
+      let (_, outs) = runGen fixture3
+      lefts outs `shouldSatisfy` null

@@ -1,97 +1,36 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec where
+module Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec (spec) where
 
-import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.TypeSystem.Constraint
-import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
-import Data.Either (lefts, rights)
+import Coal.TypeSystem.Constraint.Assumption (Assumption)
+import Coal.TypeSystem.Constraint.Generation (emitConstraints, evalConstraintsGenStack)
+import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
+import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenOutput, emptyConstraintsGenContext)
+import Data.Either (lefts)
+import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
 
-collectEConstructorConstraintsSpecAll = do
-  print collectEConstructorConstraintsSpec1
-  print collectEConstructorConstraintsSpec2
-  print collectEConstructorConstraintsSpec3
-  print collectEConstructorConstraintsSpec4
-  print collectEConstructorConstraintsSpec5
-  print collectEConstructorConstraintsSpec6
+{- | Run constraint generation for an expression, returning the generated
+assumptions alongside the raw constraint-generation outputs.
+-}
+runGen ::
+  Expression () Kind IndexedType ->
+  ([Assumption () IndexedType], [ConstraintsGenOutput () TypeIndex Kind IndexedType])
+runGen expr = evalConstraintsGenStack (freshIdIn expr) emptyConstraintsGenContext (emitConstraints expr)
 
-fixture1 :: Expression () () IndexedType
+fixture1 :: Expression () Kind IndexedType
 fixture1 =
   EConstructor () (Label (TConstructor KType "Color") "Blue")
 
-collectEConstructorConstraintsSpec1 :: Bool
-collectEConstructorConstraintsSpec1 = undefined -- null ms && ENoDataConstructor () "Blue" `elem` lefts outs
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture1
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
+spec :: Spec
+spec = do
+  describe "emitEConstructorConstraints" $ do
+    it "reports ENoDataConstructor for an unknown constructor" $ do
+      let (ms, outs) = runGen fixture1
+      ms `shouldBe` []
+      lefts outs `shouldSatisfy` (ENoDataConstructor () "Blue" `elem`)
 
-collectEConstructorConstraintsSpec2 :: Bool
-collectEConstructorConstraintsSpec2 = undefined -- null ms && null (lefts outs)
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture1
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
-fixture2 :: Expression () () IndexedType
-fixture2 =
-  EConstructor () (Label (TVariable (TypeIndex KType 0)) "Blue")
-
-collectEConstructorConstraintsSpec3 :: Bool
-collectEConstructorConstraintsSpec3 = undefined -- null ms && ENoDataConstructor () "Blue" `elem` lefts outs
--- where
---  expr = fixture2
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
-collectEConstructorConstraintsSpec4 :: Bool
-collectEConstructorConstraintsSpec4 = undefined -- null ms && null (lefts outs)
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture2
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
-constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
-constraint1 =
-  Explicit
-    (RuleDataConstructor () "Blue" (TVariable (TypeIndex KType 0)) (Forall mempty mempty (TConstructor KType "Color")))
-    (TVariable (TypeIndex KType 0))
-    (Forall mempty mempty (TConstructor KType "Color"))
-
-collectEConstructorConstraintsSpec5 :: Bool
-collectEConstructorConstraintsSpec5 = undefined -- null ms && constraint1 `elem` rights outs
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture2
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
-collectEConstructorConstraintsSpec6 :: Bool
-collectEConstructorConstraintsSpec6 = 1 == freshIdIn fixture2
+    it "emits no valid constraints for an unknown constructor" $ do
+      let (_, outs) = runGen fixture1
+      lefts outs `shouldBe` [ENoDataConstructor () "Blue"]

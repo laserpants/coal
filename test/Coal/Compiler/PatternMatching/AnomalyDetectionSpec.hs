@@ -253,23 +253,30 @@ runTest2 px = r2
 patternAnomaliesSpec :: Spec
 patternAnomaliesSpec =
   describe "PatternAnomalies" $ do
-    it "example1" (runTest example1)
-    it "example2" (not $ runTest example2)
-    it "example3" (not $ runTest example3)
-    it "example4" (runTest example4)
-    it "example5" (runTest example5)
-    it "example6" (runTest2 example6)
-    it "example7" (not $ runTest2 example7)
-    it "example8" (not $ runTest2 example8)
-    it "example9" (runTest2 example9)
-    it "example10" (runTest2 example10)
-    it "example11" (runTest2 example11)
-    it "example12" (runTest example12)
-    it "example13" (not $ runTest example13)
-    it "example14" (not $ runTest example14)
-    it "example15" (not $ runTest example15)
-    it "example16" (not $ runTest example16)
-    it "example17" (not $ runTest example17)
-    it "example18" (not $ runTest example18)
-    it "example19" (not $ runTest example19)
-    it "example20" (not $ runTest example20)
+    describe "list patterns" $ do
+      it "Cons(nested Cons) + Nil + Cons covers all lists" (runTest example1)
+      it "detects missing Cons(Any, Any) case" (not $ runTest example2)
+      it "detects missing Nil case" (not $ runTest example3)
+      it "wildcard makes the match exhaustive" (runTest example4)
+      it "a single wildcard covers everything" (runTest example5)
+
+    describe "translated patterns" $ do
+      it "Cons(nested Cons) + Nil + Cons covers all lists" (runTest2 example6)
+      it "detects missing Cons(Any, Any) case" (not $ runTest2 example7)
+      it "detects missing Nil case" (not $ runTest2 example8)
+      it "or-pattern covering Nil + Cons is exhaustive" (runTest2 example9)
+      it "wildcard makes the match exhaustive" (runTest2 example10)
+      it "a single wildcard covers everything" (runTest2 example11)
+
+    describe "boolean literal patterns" $ do
+      it "False + True covers all booleans" (runTest example12)
+
+    describe "nested constructor and literal patterns" $ do
+      it "detects missing Fez(True, A) case" (not $ runTest example13)
+      it "detects missing Fez(False, B) case" (not $ runTest example14)
+      it "detects missing Fez(True, A) case" (not $ runTest example15)
+      it "detects missing Fez(A, A) case" (not $ runTest example16)
+      it "detects missing Fez(B, A) case" (not $ runTest example17)
+      it "detects missing Fez(A, A) case" (not $ runTest example18)
+      it "detects missing Fez(A, True) case" (not $ runTest example19)
+      it "detects missing Fez(True, A) case" (not $ runTest example20)

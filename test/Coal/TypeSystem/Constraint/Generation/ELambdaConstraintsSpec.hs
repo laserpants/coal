@@ -1,18 +1,27 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec where
+module Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec (spec) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Language
-import Coal.TypeSystem.Constraint
-import Coal.TypeSystem.Constraint.Generation
-import Coal.TypeSystem.Constraint.Generation.InferenceRule
+import Coal.TypeSystem.Constraint (Constraint (..))
+import Coal.TypeSystem.Constraint.Assumption (Assumption)
+import Coal.TypeSystem.Constraint.Generation (emitConstraints, evalConstraintsGenStack)
+import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
+import Coal.TypeSystem.Constraint.Generation.Stack (ConstraintsGenOutput, emptyConstraintsGenContext)
 import Data.Either (rights)
 import Data.List.NonEmpty (NonEmpty (..))
-import qualified Data.Set as Set
+import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
 
-fixture1 :: Expression () () IndexedType
+{- | Run constraint generation for an expression, returning the generated
+assumptions alongside the raw constraint-generation outputs.
+-}
+runGen ::
+  Expression () Kind IndexedType ->
+  ([Assumption () IndexedType], [ConstraintsGenOutput () TypeIndex Kind IndexedType])
+runGen expr = evalConstraintsGenStack (freshIdIn expr) emptyConstraintsGenContext (emitConstraints expr)
+
+fixture1 :: Expression () Kind IndexedType
 fixture1 =
   ELambda
     ()
@@ -23,94 +32,22 @@ constraint1 :: Constraint (InferenceRule Kind ()) TypeIndex Kind IndexedType
 constraint1 =
   Equality
     (RuleAssumption () (TVariable (TypeIndex KType 1)) (TVariable (TypeIndex KType 0)))
-    [ TVariable (TypeIndex KType 1)
-    , TVariable (TypeIndex KType 0)
-    ]
+    [TVariable (TypeIndex KType 1), TVariable (TypeIndex KType 0)]
 
-collectELambdaConstraintsSpec1 :: Bool
-collectELambdaConstraintsSpec1 = undefined -- null ms && constraint1 `elem` rights outs
--- where
---  (ms, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture1
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
-
-fixture2 :: Expression () () IndexedType
+fixture2 :: Expression () Kind IndexedType
 fixture2 =
   ELambda
     ()
     (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
     (EVariable () (Label (TVariable (TypeIndex KType 1)) "y"))
 
-collectELambdaConstraintsSpec2 :: Bool
-collectELambdaConstraintsSpec2 = undefined -- null outs
--- where
---  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture2
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
+spec :: Spec
+spec = do
+  describe "emitELambdaConstraints" $ do
+    it "emits an assumption equality for a bound parameter" $ do
+      let (ms, outs) = runGen fixture1
+      ms `shouldBe` []
+      rights outs `shouldSatisfy` (constraint1 `elem`)
 
-collectELambdaConstraintsSpec3 :: Bool
-collectELambdaConstraintsSpec3 = 2 == freshIdIn fixture2
-
-fixture3 :: Expression () () IndexedType
-fixture3 =
-  -- fn(x) => let y = x in y
-  ELambda
-    ()
-    (PVariable () (Label (TVariable (TypeIndex KType 0)) "x") :| [])
-    ( ELet
-        ()
-        ( BPattern
-            ()
-            (PVariable () (Label (TVariable (TypeIndex KType 1)) "y"))
-            (EVariable () (Label (TVariable (TypeIndex KType 2)) "x"))
-            :| []
-        )
-        (EVariable () (Label (TVariable (TypeIndex KType 3)) "y"))
-    )
-
-muteConstraint :: Constraint c o k t -> Constraint () o k t
-muteConstraint =
-  \case
-    Equality _ ts ->
-      Equality () ts
-    Implicit _ t1 t2 m ->
-      Implicit () t1 t2 m
-    Explicit _ t s ->
-      Explicit () t s
-    _ ->
-      error "error"
-
-constraint2 :: Constraint () TypeIndex Kind IndexedType
-constraint2 = Equality () [TVariable (TypeIndex KType 1), TVariable (TypeIndex KType 2)]
-
-constraint3 :: Constraint () TypeIndex Kind IndexedType
-constraint3 = Implicit () (TVariable (TypeIndex KType 3)) (TVariable (TypeIndex KType 1)) (Monomorphic (Set.fromList [TypeIndex KType 0]))
-
-constraint4 :: Constraint () TypeIndex Kind IndexedType
-constraint4 = Equality () [TVariable (TypeIndex KType 2), TVariable (TypeIndex KType 0)]
-
-collectELambdaConstraintsSpec4 :: Bool
-collectELambdaConstraintsSpec4 =
-  undefined
-
---  constraint2 `elem` constraints && constraint3 `elem` constraints && constraint4 `elem` constraints
--- where
---  constraints = muteConstraint <$> rights outs
---  (_, outs) = evalConstraintsGenStack (freshIdIn expr) ctx (emitConstraints expr)
---  expr = fixture3
---  ctx =
---    ConstraintsGenContext
---      { constraintsGenContextMonomorphicSet = mempty
---      , constraintsGenContextDataConstructors = mempty
---      , constraintsGenContextTypeConstructors = mempty
---      }
+    it "computes a fresh id one past the largest used index" $ do
+      freshIdIn fixture2 `shouldBe` 2

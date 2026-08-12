@@ -8,25 +8,14 @@ import Coal.Kernel.Language.Module (Module (..), moduleObjects)
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Type (Type (..))
-import qualified Coal.Kernel.Language.Type.Constructors as Type
 import Coal.Kernel.Pipeline.Invariant (checkAdministrativeNormalForm)
 import Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (administrativeNormalForm)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, runPass, unit_)
-import Data.List.NonEmpty (NonEmpty (..))
-import Data.Text (Text)
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, ne, runPass, unit_, var)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
-
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
-
--- | A variable reference at opaque type.
-var :: Text -> Expr Type
-var n = EVar (lbl n)
 
 -- | A function application expression (non-atomic).
 app :: Expr Type -> [Expr Type] -> Expr Type
@@ -39,15 +28,6 @@ addExpr a b = EOp (OAddInt32 a b)
 -- | Module with a single zero-param function body.
 modWith :: Expr Type -> Module Type
 modWith e = mkModule [DFunction Local "f" [] e]
-
--- | Wrap a single binding and body into a let.
-wrapOne :: Text -> Expr Type -> Expr Type -> Expr Type
-wrapOne n rhs = ELet (ne [Binding (Label (typeOf_ rhs) n) rhs])
- where
-  typeOf_ (EVar (Label t _)) = t
-  typeOf_ (EApp t _ _) = t
-  typeOf_ (EOp _) = Type.int32
-  typeOf_ _ = TOpq
 
 -- ---------------------------------------------------------------------------
 -- Tests

@@ -5,25 +5,17 @@ module Coal.Kernel.Pipeline.Pass.LetBindingSimplificationSpec (spec) where
 
 import Coal.Kernel.Language.Expr (Binding (..), Expr (..))
 import Coal.Kernel.Language.Module (Module (..), moduleObjects)
-import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
+import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Pipeline.Invariant (checkLetBindingsSimplified)
 import Coal.Kernel.Pipeline.Pass.LetBindingSimplification (letBindingSimplification)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, runPass, unit_)
-import Data.List.NonEmpty (NonEmpty (..))
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, ne, runPass, unit_, var)
 import Data.Text (Text)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
-
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
-
-var :: Text -> Expr Type
-var name = EVar (lbl name)
 
 letBind :: [(Text, Expr Type)] -> Expr Type -> Expr Type
 letBind pairs = ELet (ne (map (\(n, e) -> Binding (lbl n) e) pairs))

@@ -2,30 +2,17 @@
 
 module Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec (spec) where
 
-import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..), moduleObjects)
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Pipeline.Invariant (checkTopLevelFunctionsNormalized)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkDData1, mkModule, runPass, unit_)
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lam1, lam2, lbl, mkDData1, mkModule, runPass, unit_)
 import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunctionNormalization)
-import Data.List.NonEmpty (NonEmpty (..))
-import Data.Text (Text)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
-
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
-
-lam1 :: Text -> Expr Type -> Expr Type
-lam1 p = ELam (ne [lbl p])
-
-lam2 :: Text -> Text -> Expr Type -> Expr Type
-lam2 p q = ELam (ne [lbl p, lbl q])
 
 -- ---------------------------------------------------------------------------
 -- Tests

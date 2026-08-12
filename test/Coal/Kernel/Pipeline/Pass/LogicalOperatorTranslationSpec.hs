@@ -11,18 +11,13 @@ import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Pipeline.Invariant (checkLogicalOperatorsTranslated)
 import Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (logicalOperatorTranslation)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, runPass, unit_)
-import Data.List.NonEmpty (NonEmpty (..))
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, ne, runPass, unit_)
 import Data.Text (Text)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
-
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
 
 -- | Boolean variable reference.
 bvar :: Text -> Expr Type

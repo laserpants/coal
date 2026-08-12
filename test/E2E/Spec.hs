@@ -914,24 +914,21 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  ========================= COMMENTED OUT =========================
-  --  describe "184" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/184"
-  --          [ "Main.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
-  --
-  --  describe "185" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <-
-  --        runSpec
-  --          "test/Coal/examples/185"
-  --          [ "Main.coal"
-  --          ]
-  --      res `shouldBe` Left PreflightFailure
+  describe "184" $ do
+    expectOutput
+      "-5"
+      "test/Coal/examples/184"
+      [ "Main.coal"
+      ]
+
+  describe "185" $ do
+    it "is ParserFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/185"
+          [ "Main.coal"
+          ]
+      res `shouldBe` Left ParserFailure
 
   describe "186" $ do
     expectOutput
@@ -1497,11 +1494,10 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/287" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
-  --  ========================= COMMENTED OUT =========================
-  --  describe "289" $ do
-  --    it "is PreflightFailure" $ do
-  --      res <- runSpec "test/Coal/examples/289" ["Main.coal"]
-  --      res `shouldBe` Left PreflightFailure
+  describe "289" $ do
+    it "is ParserFailure" $ do
+      res <- runSpec "test/Coal/examples/289" ["Main.coal"]
+      res `shouldBe` Left ParserFailure
 
   describe "290" $ do
     expectOutput
@@ -1763,7 +1759,7 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/334" ["Main.coal"]
       res `shouldBe` Left TypeError
 
-  --  ========================= COMMENTED OUT =========================
+  -- NOTE: Currently fails with a CompilerError; disabled until fixed.
   --  describe "335" $ do
   --    expectOutput
   --      "5"
@@ -1806,11 +1802,11 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  --  describe "344" $ do
-  --    expectOutput
-  --      "1"
-  --      "test/Coal/examples/344"
-  --      ["Main.coal"]
+  describe "344" $ do
+    expectOutput
+      "1"
+      "test/Coal/examples/344"
+      ["Main.coal"]
 
   describe "345" $ do
     expectOutput
@@ -2007,6 +2003,7 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/386" ["Main.coal"]
       res `shouldBe` Left TypeError
 
+  -- NOTE: Currently fails with a CallCycleError; disabled until fixed.
   --  describe "387" $ do
   --    expectOutput
   --      "40\n cells before clear\n\n0\n cells after clear"

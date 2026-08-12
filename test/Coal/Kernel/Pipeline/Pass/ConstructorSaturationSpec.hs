@@ -5,29 +5,20 @@ module Coal.Kernel.Pipeline.Pass.ConstructorSaturationSpec (spec) where
 
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..), moduleObjects)
-import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
+import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Language.Type.Constructors as Type
 import Coal.Kernel.Language.Type.Function ((~>))
 import Coal.Kernel.Pipeline (PipelineError (..))
 import Coal.Kernel.Pipeline.Invariant (checkConstructorsSaturated)
 import Coal.Kernel.Pipeline.Pass.ConstructorSaturation (constructorSaturation)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (mkModule, runPass)
-import Data.List.NonEmpty (NonEmpty (..))
+import Coal.Kernel.Pipeline.Pass.TestHelpers (mkModule, ne, runPass)
 import Data.Text (Text)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
-
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
-
--- | Constructor label with the given full type.
-conLbl :: Text -> Type -> Label Type
-conLbl name t = Label t name
 
 -- | A nullary constructor type.
 nullaryConType :: Type

@@ -15,6 +15,12 @@ module Coal.Kernel.Pipeline.Pass.TestHelpers (
   -- * Common expressions
   unit_,
   intLit,
+  var,
+  lam1,
+  lam2,
+
+  -- * Non-empty list construction
+  ne,
 
   -- * Common object constructors
   mkFn,
@@ -32,6 +38,7 @@ import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Language.Type.Constructors as Type
 import Coal.Kernel.Pipeline (Pass, PipelineError, evalPipeline, initialPipelineState)
 import Control.Monad.Identity (Identity)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Text (Text)
 
 -- ---------------------------------------------------------------------------
@@ -79,6 +86,27 @@ unit_ = ELit PUnit
 -- | A 32-bit integer literal.
 intLit :: Int -> Expr Type
 intLit n = ELit (PInt32 (fromIntegral n))
+
+-- | A variable reference at opaque type.
+var :: Text -> Expr Type
+var name = EVar (lbl name)
+
+-- | @fn(p) => body@
+lam1 :: Text -> Expr Type -> Expr Type
+lam1 p = ELam (ne [lbl p])
+
+-- | @fn(p, q) => body@
+lam2 :: Text -> Text -> Expr Type -> Expr Type
+lam2 p q = ELam (ne [lbl p, lbl q])
+
+-- ---------------------------------------------------------------------------
+-- Non-empty list helpers
+-- ---------------------------------------------------------------------------
+
+-- | Wrap a list into a 'NonEmpty', erroring on empty input.
+ne :: [a] -> NonEmpty a
+ne (x : xs) = x :| xs
+ne [] = error "ne: empty list"
 
 -- ---------------------------------------------------------------------------
 -- Object helpers

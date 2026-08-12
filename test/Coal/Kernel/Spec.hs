@@ -26,6 +26,7 @@ import qualified Coal.Kernel.Pipeline.Pass.LocalNameCanonicalizationSpec
 import qualified Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslationSpec
 import qualified Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec
 import qualified Coal.Kernel.Prettyprinter.RoundtripSpec
+import qualified Coal.Kernel.TypeCheckSpec
 import Test.Hspec (Spec, describe)
 
 kernelSpec :: Spec
@@ -40,6 +41,7 @@ kernelSpec = do
   describe "Coal.Kernel.Parser.Expr" Coal.Kernel.Parser.ExprSpec.spec
   describe "Coal.Kernel.Parser.Module" Coal.Kernel.Parser.ModuleSpec.spec
   describe "Coal.Kernel.Prettyprinter" Coal.Kernel.Prettyprinter.RoundtripSpec.spec
+  describe "Coal.Kernel.TypeCheck" Coal.Kernel.TypeCheckSpec.spec
   describe "Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonical" Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonicalSpec.spec
   describe "Coal.Kernel.Pipeline.Invariant.LocalNamesUnique" Coal.Kernel.Pipeline.Invariant.LocalNamesUniqueSpec.spec
   describe "Coal.Kernel.Pipeline.Invariant.LambdasFlattened" Coal.Kernel.Pipeline.Invariant.LambdasFlattenedSpec.spec
