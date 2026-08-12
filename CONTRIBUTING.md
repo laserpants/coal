@@ -161,10 +161,15 @@ ctest
 
 ### Haskell
 
-Haskell code is formatted with **fourmolu**. Run it before committing:
+Haskell code is formatted with **fourmolu** and linted with **HLint**. Run both before committing:
 
 ```bash
-fourmolu -i src/**/*.hs
+# Format
+fourmolu -i src/ app/ test/
+
+# Lint
+stack build hlint
+stack exec hlint -- src/ app/ test/
 ```
 
 Configuration is in `fourmolu.yaml` at the project root.
