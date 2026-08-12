@@ -101,7 +101,7 @@ objectNames obj =
     DFunction _ n _ _ -> [n]
     DConstant n _ -> [n]
     DExternal n _ -> [n]
-    DData _ ctors -> fmap fst ctors
+    DData _ ctors -> fst <$> ctors
 
 liftObjects ::
   (Monad m) =>
@@ -185,15 +185,15 @@ liftExpr globals scope expr =
               Nothing -> case [l | l@(Label _ n') <- fvAll, n' == n] of
                 (lbl : _) -> lbl
                 [] -> error "resolveFv: free variable not found in fvAll"
-          fvLabels = sortBy (comparing labelName) (fmap resolveFv (Set.toList fvNameSet))
+          fvLabels = sortBy (comparing labelName) (resolveFv <$> Set.toList fvNameSet)
       -- 3. Mint a fresh top-level name.
       liftedName <- freshName "lam"
       -- 4. Build the parameter list for the lifted function.
       let allParams = fvLabels <> NonEmpty.toList params
-      let liftedFnType = foldType (typeOf body') (fmap typeOf allParams)
+      let liftedFnType = foldType (typeOf body') (typeOf <$> allParams)
       let liftedFn = DFunction Local liftedName allParams body'
       -- 5. Build the call site expression.
-      let lambdaType = foldType (typeOf body') (fmap typeOf (NonEmpty.toList params))
+      let lambdaType = foldType (typeOf body') (typeOf <$> NonEmpty.toList params)
       let callSite = case NonEmpty.nonEmpty fvLabels of
             Nothing ->
               -- No captured free variables: just reference the lifted function.
@@ -303,11 +303,11 @@ liftBinding globals scope (Binding lbl e) = case e of
             Nothing -> case [l | l@(Label _ n') <- fvAll, n' == n] of
               (lbl_ : _) -> lbl_
               [] -> error "resolveFv: free variable not found in fvAll"
-        fvLabels = sortBy (comparing labelName) (fmap resolveFv (Set.toList fvNameSet))
+        fvLabels = sortBy (comparing labelName) (resolveFv <$> Set.toList fvNameSet)
     liftedName <- freshName "lam"
     let allParams = fvLabels <> NonEmpty.toList params
-        liftedFnType = foldType (typeOf body') (fmap typeOf allParams)
-        lambdaType = foldType (typeOf body') (fmap typeOf (NonEmpty.toList params))
+        liftedFnType = foldType (typeOf body') (typeOf <$> allParams)
+        lambdaType = foldType (typeOf body') (typeOf <$> NonEmpty.toList params)
         callSite = case NonEmpty.nonEmpty fvLabels of
           Nothing ->
             EVar (Label lambdaType liftedName)
@@ -387,7 +387,7 @@ substituteVar n replacement = go
       ECase t (go scrutinee) (goClause <$> clauses)
     EExt name e1 e2 -> EExt name (go e1) (go e2)
     EGet l e -> EGet l (go e)
-    ECall label args k -> ECall label (fmap go args) (go k)
+    ECall label args k -> ECall label (go <$> args) (go k)
   goClause (Clause labels body) =
     let (_ :| sndLabels) = labels
      in if any (\(Label _ pn) -> pn == n) sndLabels
