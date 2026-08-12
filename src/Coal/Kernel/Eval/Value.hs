@@ -94,16 +94,16 @@ showValue =
     VConstructor name _ [] ->
       show name
     VConstructor name _ args ->
-      show name ++ "(" ++ intercalate ", " (map showValue args) ++ ")"
+      show name <> "(" <> intercalate ", " (showValue <$> args) <> ")"
     VRecord m ->
       "{ "
-        ++ intercalate
+        <> intercalate
           " | "
-          [ show k ++ " = " ++ showValue v
+          [ show k <> " = " <> showValue v
           | (k, v) <- Map.toAscList m
           ]
-        ++ " }"
+        <> " }"
     VClosure c ->
-      "<closure:" ++ show (closureName c) ++ "/" ++ show (length (closureParams c)) ++ ">"
+      "<closure:" <> show (closureName c) <> "/" <> show (length (closureParams c)) <> ">"
     VExtern name ->
-      "<extern:" ++ show name ++ ">"
+      "<extern:" <> show name <> ">"

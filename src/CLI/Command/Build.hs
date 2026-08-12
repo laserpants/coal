@@ -7,7 +7,6 @@ module CLI.Command.Build (buildCommand, deriveExecutableName) where
 import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config
-import Control.Monad (join)
 import Control.Monad.Except
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
@@ -84,7 +83,7 @@ noDependencies = maybe True Map.null
 
 -- | Parse an entry point string like "Main.main" into (moduleName, functionName)
 parseEntryPoint :: Maybe Text -> Maybe (Name, Name)
-parseEntryPoint = join . fmap parseDotSeparated
+parseEntryPoint = (parseDotSeparated =<<)
  where
   parseDotSeparated t =
     case Text.splitOn "." t of

@@ -42,7 +42,7 @@ Short-circuit semantics are preserved. Applied recursively until no @&&@ or
 -}
 logicalOperatorTranslation :: (Monad m) => Pass m (Module Type) (Module Type)
 logicalOperatorTranslation m =
-  return m{moduleObjects = map translateObject (moduleObjects m)}
+  return m{moduleObjects = translateObject <$> moduleObjects m}
 
 -- --------------------------------------------------------------------------
 -- Object
@@ -76,11 +76,11 @@ translateExpr =
     expr@ENil ->
       expr
     ELet bindings body ->
-      ELet (fmap translateBinding bindings) (translateExpr body)
+      ELet (translateBinding <$> bindings) (translateExpr body)
     ELam params body ->
       ELam params (translateExpr body)
     EApp t f args ->
-      EApp t (translateExpr f) (fmap translateExpr args)
+      EApp t (translateExpr f) (translateExpr <$> args)
     EIf cond th el ->
       EIf (translateExpr cond) (translateExpr th) (translateExpr el)
     EOp op ->
@@ -93,15 +93,15 @@ translateExpr =
           EIf (translateExpr a) (ELit (PBool True)) (translateExpr b)
         _ ->
           -- All other operators: recurse into operands.
-          EOp (fmap translateExpr op)
+          EOp (translateExpr <$> op)
     ECase t scrutinee clauses ->
-      ECase t (translateExpr scrutinee) (fmap translateClause clauses)
+      ECase t (translateExpr scrutinee) (translateClause <$> clauses)
     EExt name e1 e2 ->
       EExt name (translateExpr e1) (translateExpr e2)
     EGet lbl e ->
       EGet lbl (translateExpr e)
     ECall (Label t name) args k ->
-      ECall (Label t name) (fmap translateExpr args) (translateExpr k)
+      ECall (Label t name) (translateExpr <$> args) (translateExpr k)
 
 -- --------------------------------------------------------------------------
 -- Helpers

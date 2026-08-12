@@ -60,6 +60,11 @@
 # functions is often clearer in this codebase.
 - ignore: { name: "Use uncurry" }
 
+# "Avoid NonEmpty.unzip" suggests using Data.Functor.unzip which is
+# deprecated in GHC 9.10+. Prelude.unzip is now generic and is the
+# correct replacement for both.
+- ignore: { name: "Avoid NonEmpty.unzip" }
+
 # "Avoid restricted extensions" — the project convention is to declare all
 # extensions per-file (StrictData, TemplateHaskell, QuasiQuotes, etc.),
 # never as default extensions in package.yaml.

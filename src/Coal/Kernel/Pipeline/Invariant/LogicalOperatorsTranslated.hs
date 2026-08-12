@@ -56,34 +56,34 @@ checkLogicalOperatorsTranslated expr = case expr of
   ENil -> []
   ELet bindings body ->
     foldMap checkBinding (NonEmpty.toList bindings)
-      ++ checkLogicalOperatorsTranslated body
+      <> checkLogicalOperatorsTranslated body
   ELam _ body ->
     checkLogicalOperatorsTranslated body
   EApp _ f args ->
     checkLogicalOperatorsTranslated f
-      ++ foldMap checkLogicalOperatorsTranslated args
+      <> foldMap checkLogicalOperatorsTranslated args
   EIf cond t f ->
     checkLogicalOperatorsTranslated cond
-      ++ checkLogicalOperatorsTranslated t
-      ++ checkLogicalOperatorsTranslated f
+      <> checkLogicalOperatorsTranslated t
+      <> checkLogicalOperatorsTranslated f
   EOp op ->
     ( case op of
         OAnd _ _ -> [AndOperatorPresent]
         OOr _ _ -> [OrOperatorPresent]
         _ -> []
     )
-      ++ foldMap checkLogicalOperatorsTranslated op
+      <> foldMap checkLogicalOperatorsTranslated op
   ECase _ scrutinee clauses ->
     checkLogicalOperatorsTranslated scrutinee
-      ++ foldMap checkClauseBody (NonEmpty.toList clauses)
+      <> foldMap checkClauseBody (NonEmpty.toList clauses)
   EExt _ e1 e2 ->
     checkLogicalOperatorsTranslated e1
-      ++ checkLogicalOperatorsTranslated e2
+      <> checkLogicalOperatorsTranslated e2
   EGet _ e ->
     checkLogicalOperatorsTranslated e
   ECall _ args k ->
     foldMap checkLogicalOperatorsTranslated args
-      ++ checkLogicalOperatorsTranslated k
+      <> checkLogicalOperatorsTranslated k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

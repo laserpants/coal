@@ -141,7 +141,7 @@ eval =
             Nothing ->
               throwEval
                 ( PatternMatchFailure
-                    ("Field not found in record: " ++ show fieldName)
+                    ("Field not found in record: " <> show fieldName)
                 )
             Just fieldVal -> return fieldVal
         other ->
@@ -162,7 +162,7 @@ apply fv args =
       applyToClosure closure args
     -- A constructor applied to arguments: accumulate fields.
     VConstructor name idx existing ->
-      return (VConstructor name idx (existing ++ args))
+      return (VConstructor name idx (existing <> args))
     -- An external function: delegate to the extern table.
     VExtern name ->
       callExtern name args
@@ -186,14 +186,14 @@ applyToClosure closure args =
               closure
                 { closureParams = drop given remaining
                 , closureEnv =
-                    Map.fromList (zip (map labelName (take given remaining)) args)
+                    Map.fromList (zip (labelName <$> take given remaining) args)
                       `Map.union` closureEnv closure
                 }
         else do
           -- Saturate: bind all params and evaluate body
-          let paramBindings = zip (map labelName remaining) (take needed args)
+          let paramBindings = zip (labelName <$> remaining) (take needed args)
               capturedBindings = Map.toList (closureEnv closure)
-              allBindings = capturedBindings ++ paramBindings
+              allBindings = capturedBindings <> paramBindings
               extraArgs = drop needed args
           result <- extendEnvMany allBindings (eval (closureBody closure))
           -- Over-saturation: apply remaining args to the result

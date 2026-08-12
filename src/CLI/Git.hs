@@ -112,7 +112,7 @@ isTagRef RemoteRef{refName} =
 
 availableVersionsFromLsRemote :: Text -> [AvailableVersion]
 availableVersionsFromLsRemote output =
-  map toAvailable (Map.toList tagCommits)
+  toAvailable <$> Map.toList tagCommits
  where
   refs =
     mapMaybe parseLsRemoteLine (Text.lines output)

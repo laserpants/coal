@@ -17,6 +17,7 @@ module Coal.Kernel.Parser.Module (
 
 import Control.Monad (void)
 import Data.List (sortBy)
+import Data.Maybe (fromMaybe)
 import Data.Ord (comparing)
 
 import Text.Megaparsec ((<|>))
@@ -100,7 +101,7 @@ pConstructor :: Type -> Parser (Name, Type)
 pConstructor retType = do
   ctorName <- qualifiedConstructor
   mFields <- P.optional pFields
-  let fieldTypes = maybe [] id mFields
+  let fieldTypes = fromMaybe [] mFields
       ctorType = foldType retType fieldTypes
   return (ctorName, ctorType)
 
@@ -113,15 +114,14 @@ pFields = do
 
 extractTypeName :: Type -> Name
 extractTypeName (TCon name _) = name
-extractTypeName t = error $ "Expected TCon as return type, got: " ++ show t
+extractTypeName t = error $ "Expected TCon as return type, got: " <> show t
 
 -- | Parse a constant: Name = expr
 pConstant :: Parser (Object Type)
 pConstant = do
   name <- pObjectName
   equals
-  e <- expr
-  return $ DConstant name e
+  DConstant name <$> expr
 
 -- | Parse a function: Name (param1, param2, ...) = expr
 pFunction :: Parser (Object Type)
@@ -129,8 +129,7 @@ pFunction = do
   name <- pObjectName
   params <- parens (commaSep1 label)
   equals
-  body <- expr
-  return $ DFunction Exported name params body
+  DFunction Exported name params <$> expr
  where
   parens :: Parser a -> Parser a
   parens p = do

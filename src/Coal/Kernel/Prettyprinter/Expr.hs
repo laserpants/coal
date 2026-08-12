@@ -55,7 +55,7 @@ prettyExpr pt expr =
           2
           ( line
               <> prettyLeadingCommaList
-                (prettyExpr pt func : map (prettyExpr pt) (NonEmpty.toList args))
+                (prettyExpr pt func : (prettyExpr pt <$> NonEmpty.toList args))
           )
     ELet bindings body ->
       -- let binding format:
@@ -69,7 +69,7 @@ prettyExpr pt expr =
         <> nest
           2
           ( line
-              <> vsep (intersperse ";" (map (prettyBinding pt) (NonEmpty.toList bindings)))
+              <> vsep (intersperse ";" (prettyBinding pt <$> NonEmpty.toList bindings))
               <> line
               <> "in"
               <> nest 2 (line <> prettyExpr pt body)
@@ -101,7 +101,7 @@ prettyExpr pt expr =
           ( nest
               2
               ( line
-                  <> vsep (map (prettyClause pt) (NonEmpty.toList clauses))
+                  <> vsep (prettyClause pt <$> NonEmpty.toList clauses)
               )
               <> line
           )
@@ -110,18 +110,17 @@ prettyExpr pt expr =
       -- Flatten nested record extensions: { x = 1 | y = 2 | {} }
       let (allFields, finalRest) = collectExtFields (EExt field value rest)
           fieldDocs =
-            map
-              ( \(f, v) ->
-                  pretty f
-                    <+> "="
-                      <> nest 2 (line <> prettyExpr pt v)
-              )
-              allFields
-          allDocs = fieldDocs ++ [prettyExpr pt finalRest]
+            ( \(f, v) ->
+                pretty f
+                  <+> "="
+                    <> nest 2 (line <> prettyExpr pt v)
+            )
+              <$> allFields
+          allDocs = fieldDocs <> [prettyExpr pt finalRest]
           -- Prefix all items except the first with "| "
           docsWithPipes = case allDocs of
             [] -> []
-            (x : xs) -> x : map ("|" <+>) xs
+            (x : xs) -> x : (("|" <+>) <$> xs)
        in "{ "
             <> vcat docsWithPipes
             <> line
@@ -164,7 +163,7 @@ prettyBinding pt (Binding lbl expr) =
 prettyClause :: (t -> Doc ann) -> Clause t -> Doc ann
 prettyClause pt (Clause patterns expr) =
   "|"
-    <+> prettyLeadingCommaList (map (prettyLabel pt) (NonEmpty.toList patterns))
+    <+> prettyLeadingCommaList (prettyLabel pt <$> NonEmpty.toList patterns)
     <+> "=>"
       <> nest 4 (line <> prettyExpr pt expr)
 
@@ -188,7 +187,7 @@ prettyLeadingCommaList (x : xs) =
   align
     ( "("
         <+> nest 2 x
-          <> mconcat (map (\item -> line <> hang 2 ("," <+> item)) xs)
+          <> mconcat ((\item -> line <> hang 2 ("," <+> item)) <$> xs)
           <> line
           <> ")"
     )

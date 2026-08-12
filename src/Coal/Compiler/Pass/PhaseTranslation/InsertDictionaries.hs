@@ -322,7 +322,7 @@ transformBindingWithTraits =
     BPattern a (PAnnotation _ _ p) e ->
       transformBindingWithTraits (BPattern a p e)
     binding ->
-      error $ "transformBindingWithTraits: unsupported binding pattern: " ++ show binding
+      error $ "transformBindingWithTraits: unsupported binding pattern: " <> show binding
 
 {- | Transform an expression scope to collect trait constraints and create dictionary lambdas
 Only truly polymorphic (unresolvable) traits become dictionary lambda parameters;

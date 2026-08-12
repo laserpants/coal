@@ -42,7 +42,7 @@ objectGlobalBinding :: Object Type -> Maybe (Name, IROperand)
 objectGlobalBinding =
   \case
     DFunction _ name lls expr ->
-      let tfun = TFun (irTypeRep (typeOf expr)) (map (irValueTypeRep . typeOf) lls)
+      let tfun = TFun (irTypeRep (typeOf expr)) ((irValueTypeRep . typeOf) <$> lls)
        in Just (name, OGlobal tfun name)
     DConstant name (ELit prim)
       | Just (irt, _) <- primToIRConstant prim ->

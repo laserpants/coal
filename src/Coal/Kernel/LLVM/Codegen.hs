@@ -349,7 +349,7 @@ irValue =
       br mergeL
       mergeL <- block "merge.if"
       boxed <- load TPtr resultSlot
-      irUnbox (typeOf (e3 :: Expr Type)) boxed
+      irUnbox (typeOf e3) boxed
     e ->
       throwError (UnsupportedExpression e)
 
@@ -441,7 +441,7 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} afterObject
     let importedConstantBindings = collectImportedConstants allModules moduleImports
         importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports
     emitImportedDeclarations allModules moduleImports importedConstantBindings importedFunctionBindings
-    let bindings = mapMaybe objectGlobalBinding moduleObjects ++ importedConstantBindings ++ importedFunctionBindings
+    let bindings = mapMaybe objectGlobalBinding moduleObjects <> importedConstantBindings <> importedFunctionBindings
         allTagBindings = buildTagBindings allModules
         excludedNames = buildExcludedNames bindings allModules moduleImports
     emitInlineExternalTrampolines moduleObjects excludedNames
@@ -520,7 +520,7 @@ buildExcludedNames :: [(Name, IROperand)] -> [Module Type] -> [Name] -> Set.Set 
 buildExcludedNames bindings allModules moduleImports =
   Set.union boundNames importedNames
  where
-  boundNames = Set.fromList (map fst bindings)
+  boundNames = Set.fromList (fst <$> bindings)
   importedNames = Set.fromList [n | (n, _) <- collectImportedFunctions allModules moduleImports]
 
 {- | Emit @$apply@ trampolines for inline C externals.

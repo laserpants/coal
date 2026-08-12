@@ -100,7 +100,7 @@ evalFunctionFromTexts externTable sources fnName args = do
     Left bundle ->
       return (Left (errorBundlePretty bundle))
     Right modules ->
-      fmap Right (evalFunction externTable modules fnName args)
+      Right <$> evalFunction externTable modules fnName args
 
 {- | Read and parse module files from a list of file paths, then call
 'evalFunction'.
@@ -117,4 +117,4 @@ evalFunctionFromFiles externTable paths fnName args = do
     Left bundle ->
       return (Left (errorBundlePretty bundle))
     Right modules ->
-      fmap Right (evalFunction externTable modules fnName args)
+      Right <$> evalFunction externTable modules fnName args

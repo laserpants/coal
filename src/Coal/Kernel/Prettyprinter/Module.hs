@@ -48,7 +48,7 @@ prettyModule pt (Module name imports objects) =
 
 -- | Pretty print imports
 prettyImports :: [Name] -> Doc ann
-prettyImports = vsep . map (\imp -> "import" <+> pretty imp)
+prettyImports = vsep . fmap (\imp -> "import" <+> pretty imp)
 
 -- | Pretty print objects with blank lines between them
 prettyObjects :: (Type -> Doc ann) -> [Object Type] -> Doc ann

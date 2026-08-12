@@ -173,7 +173,7 @@ instance (KindSubstitutable (o Kind)) => KindSubstitutable (Type o Kind) where
       TVariable param ->
         TVariable (applyKinds sub param)
       TAlias name ts t ->
-        TAlias name (fmap (applyKinds sub) ts) (applyKinds sub t)
+        TAlias name (applyKinds sub <$> ts) (applyKinds sub t)
   replaceVariables =
     \case
       TApplication k t1 t2 ->
@@ -191,7 +191,7 @@ instance (KindSubstitutable (o Kind)) => KindSubstitutable (Type o Kind) where
       TVariable var ->
         TVariable (replaceVariables var)
       TAlias name ts t ->
-        TAlias name (fmap replaceVariables ts) (replaceVariables t)
+        TAlias name (replaceVariables <$> ts) (replaceVariables t)
 
 instance (KindSubstitutable n, KindSubstitutable (o n), KindSubstitutable k) => KindSubstitutable (Row o n k) where
   applyKinds sub =

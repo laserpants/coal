@@ -74,6 +74,6 @@ writeBuildInfo label = do
   let path = principalPath buildPath
   liftIO $ do
     writeDebugFile (rootPath <> "_build_" <> Text.unpack path) (toStrict $ pShowNoColor $ Build{..})
-    writeDebugFile (rootPath <> "_names_" <> Text.unpack path) (toStrict $ pShowNoColor $ buildNames)
+    writeDebugFile (rootPath <> "_names_" <> Text.unpack path) (toStrict $ pShowNoColor buildNames)
  where
   rootPath = "./.debug" </> Text.unpack label

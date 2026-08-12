@@ -40,33 +40,33 @@ checkLambdasFlattened expr = case expr of
   ENil -> []
   ELet bindings body ->
     foldMap checkBinding (NonEmpty.toList bindings)
-      ++ checkLambdasFlattened body
+      <> checkLambdasFlattened body
   ELam _ body ->
     ( case body of
         ELam _ _ -> [NestedLambdaBody]
         _ -> []
     )
-      ++ checkLambdasFlattened body
+      <> checkLambdasFlattened body
   EApp _ f args ->
     checkLambdasFlattened f
-      ++ foldMap checkLambdasFlattened args
+      <> foldMap checkLambdasFlattened args
   EIf cond t f ->
     checkLambdasFlattened cond
-      ++ checkLambdasFlattened t
-      ++ checkLambdasFlattened f
+      <> checkLambdasFlattened t
+      <> checkLambdasFlattened f
   EOp op ->
     foldMap checkLambdasFlattened op
   ECase _ scrutinee clauses ->
     checkLambdasFlattened scrutinee
-      ++ foldMap checkClauseBody (NonEmpty.toList clauses)
+      <> foldMap checkClauseBody (NonEmpty.toList clauses)
   EExt _ e1 e2 ->
     checkLambdasFlattened e1
-      ++ checkLambdasFlattened e2
+      <> checkLambdasFlattened e2
   EGet _ e ->
     checkLambdasFlattened e
   ECall _ args k ->
     foldMap checkLambdasFlattened args
-      ++ checkLambdasFlattened k
+      <> checkLambdasFlattened k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

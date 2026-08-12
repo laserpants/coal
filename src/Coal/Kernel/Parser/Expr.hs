@@ -130,8 +130,7 @@ pBinding :: Parser (Binding Type)
 pBinding = do
   lbl <- label
   equals
-  e <- pExpr
-  return $ Binding lbl e
+  Binding lbl <$> pExpr
 
 -- | Parse let expression: let binding1; binding2; ... in body
 pLet :: Parser (Expr Type)
@@ -154,8 +153,7 @@ pIf = do
   reserved "then"
   thenExpr <- pExpr
   reserved "else"
-  elseExpr <- pExpr
-  return $ EIf cond thenExpr elseExpr
+  EIf cond thenExpr <$> pExpr
 
 -- | Parse lambda: fn(arg1 : type1, arg2 : type2, ...) => body
 pLam :: Parser (Expr Type)
@@ -242,9 +240,7 @@ pRecordExtension = braces pRecordExt
     equals
     value <- pExpr
     pipe
-    rest <- pRestRecord
-    return $ EExt fieldName value rest
-
+    EExt fieldName value <$> pRestRecord
   pRestRecord =
     P.choice
       [ P.try pRecordExt -- Another field without braces

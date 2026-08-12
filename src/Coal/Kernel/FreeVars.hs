@@ -53,7 +53,7 @@ freeVars expr =
     ENil -> Set.empty
     -- Let: collect free variables from all bindings and body, then remove bound names
     ELet bindings body ->
-      let boundNameSet = Set.fromList [n | Label _ n <- map bindingName (NonEmpty.toList bindings)]
+      let boundNameSet = Set.fromList [n | Label _ n <- bindingName <$> NonEmpty.toList bindings]
           bindingFreeVars = foldMap (freeVars . bindingExpr) bindings
           bodyFreeVars = freeVars body
        in Set.filter

@@ -192,10 +192,10 @@ translatePattern =
     PAtVariable{} ->
       Any
     PRecord _ _ fields rest ->
-      Con "$Record" (fieldPats ++ [restPat])
+      Con "$Record" (fieldPats <> [restPat])
      where
       sorted = sortOn fst (Map.toList fields)
-      fieldPats = map (translatePattern . snd) sorted
+      fieldPats = (translatePattern . snd) <$> sorted
       restPat =
         case rest of
           Just p -> translatePattern p
