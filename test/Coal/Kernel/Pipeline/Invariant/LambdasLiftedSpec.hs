@@ -26,15 +26,15 @@ lbl = Label TOpq
 
 -- | @let name = rhs in body@
 letOne :: Text -> Expr Type -> Expr Type -> Expr Type
-letOne name rhs body = ELet (Binding (lbl name) rhs :| []) body
+letOne name rhs = ELet (Binding (lbl name) rhs :| [])
 
 -- | @fn(p) => body@
 lam1 :: Text -> Expr Type -> Expr Type
-lam1 p body = ELam (lbl p :| []) body
+lam1 p = ELam (lbl p :| [])
 
 -- | @fn(p, q) => body@
 lam2 :: Text -> Text -> Expr Type -> Expr Type
-lam2 p q body = ELam (lbl p :| [lbl q]) body
+lam2 p q = ELam (lbl p :| [lbl q])
 
 -- ---------------------------------------------------------------------------
 -- Tests

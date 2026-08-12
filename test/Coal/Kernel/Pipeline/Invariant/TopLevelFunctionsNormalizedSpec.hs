@@ -26,7 +26,7 @@ lbl = Label TOpq
 
 -- | @fn(p) => body@ — a single-parameter lambda.
 lam1 :: Text -> Expr Type -> Expr Type
-lam1 p body = ELam (lbl p :| []) body
+lam1 p = ELam (lbl p :| [])
 
 -- ---------------------------------------------------------------------------
 -- Tests

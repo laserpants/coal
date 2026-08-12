@@ -18,7 +18,7 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 -- ---------------------------------------------------------------------------
 
 letBind :: [(Text, Expr Type)] -> Expr Type -> Expr Type
-letBind pairs = ELet (ne (map (\(n, e) -> Binding (lbl n) e) pairs))
+letBind pairs = ELet (ne ((\(n, e) -> Binding (lbl n) e) <$> pairs))
 
 modWith :: Expr Type -> Module Type
 modWith e = mkModule [DConstant "x" e]

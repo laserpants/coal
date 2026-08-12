@@ -49,7 +49,7 @@ testCompilePipelineWithC :: [FilePath] -> [FilePath] -> IO ()
 testCompilePipelineWithC cornFiles extraCFiles = do
   createDirectoryIfMissing True buildDir
   -- Phase 1: parse all modules and inject builtin constructors.
-  allModules <- map injectBuiltins <$> traverse parseOne cornFiles
+  allModules <- fmap injectBuiltins <$> traverse parseOne cornFiles
   -- Phase 2: run the full normalization pipeline on each module.
   allNormalized <- traverse runPipeline_ allModules
   -- Sort in dependency order (imports before importers); abort on cycles.

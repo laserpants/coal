@@ -19,7 +19,7 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- | The type of a lambda @fn(p1..pn) => body@ given parameter labels and body.
 lamType :: [Label Type] -> Expr Type -> Type
-lamType params body = foldType (typeOf body) (map typeOf params)
+lamType params body = foldType (typeOf body) (typeOf <$> params)
 
 -- ---------------------------------------------------------------------------
 -- Tests
@@ -59,7 +59,7 @@ spec = do
             lamParam = lbl "x"
             fvLabel = lbl "y"
             allParamLabels = [fvLabel, lamParam]
-            liftedFnType = foldType TOpq (map typeOf allParamLabels)
+            liftedFnType = foldType TOpq (typeOf <$> allParamLabels)
             lambdaType = foldType TOpq [typeOf lamParam]
             liftedName = "lam.0"
             input = mkModule [DConstant "c" (ELam (ne [lamParam]) bodyExpr)]

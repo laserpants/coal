@@ -234,31 +234,31 @@ spec = do
       it "parses %% as bignum, not int64" $
         case parse prim "" "%%42" of
           Right (PBignum 42) -> return ()
-          Right other -> expectationFailure $ "Expected PBignum, got " ++ show other
+          Right other -> expectationFailure $ "Expected PBignum, got " <> show other
           Left _ -> expectationFailure "Parse failed"
 
       it "parses single % as int64, not int32" $
         case parse prim "" "%42" of
           Right (PInt64 42) -> return ()
-          Right other -> expectationFailure $ "Expected PInt64, got " ++ show other
+          Right other -> expectationFailure $ "Expected PInt64, got " <> show other
           Left _ -> expectationFailure "Parse failed"
 
       it "parses number without prefix as int32" $
         case parse prim "" "42" of
           Right (PInt32 42) -> return ()
-          Right other -> expectationFailure $ "Expected PInt32, got " ++ show other
+          Right other -> expectationFailure $ "Expected PInt32, got " <> show other
           Left _ -> expectationFailure "Parse failed"
 
       it "parses decimal with f as float, not double" $
         case parse prim "" "3.14f" of
           Right (PFloat _) -> return ()
-          Right other -> expectationFailure $ "Expected PFloat, got " ++ show other
+          Right other -> expectationFailure $ "Expected PFloat, got " <> show other
           Left _ -> expectationFailure "Parse failed"
 
       it "parses decimal without suffix as double, not float" $
         case parse prim "" "3.14" of
           Right (PDouble _) -> return ()
-          Right other -> expectationFailure $ "Expected PDouble, got " ++ show other
+          Right other -> expectationFailure $ "Expected PDouble, got " <> show other
           Left _ -> expectationFailure "Parse failed"
 
     describe "whitespace handling" $ do

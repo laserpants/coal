@@ -88,7 +88,7 @@ spec = do
          in runPass caseExpressionCanonicalization input `shouldBe` Right expected
 
       it "case nested inside a let binding body is also sorted" $
-        let inner clauses = ECase TOpq unit_ (ne (map leaf clauses))
+        let inner clauses = ECase TOpq unit_ (ne (leaf <$> clauses))
             input =
               modWithData
                 [("A", 0), ("Z", 1)]

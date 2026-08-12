@@ -25,11 +25,11 @@ lbl = Label TOpq
 
 -- | @fn(p) => body@ — a single-parameter lambda.
 lam1 :: Text -> Expr Type -> Expr Type
-lam1 p body = ELam (lbl p :| []) body
+lam1 p = ELam (lbl p :| [])
 
 -- | @fn(p, q) => body@ — a two-parameter (already-flat) lambda.
 lam2 :: Text -> Text -> Expr Type -> Expr Type
-lam2 p q body = ELam (lbl p :| [lbl q]) body
+lam2 p q = ELam (lbl p :| [lbl q])
 
 -- ---------------------------------------------------------------------------
 -- Tests

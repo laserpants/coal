@@ -20,7 +20,7 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 -- starts at 0 and increments globally (not per-binding).
 
 letBind :: [(Text, Expr Type)] -> Expr Type -> Expr Type
-letBind pairs = ELet (ne (map (\(n, e) -> Binding (lbl n) e) pairs))
+letBind pairs = ELet (ne ((\(n, e) -> Binding (lbl n) e) <$> pairs))
 
 -- ---------------------------------------------------------------------------
 -- Tests
@@ -114,7 +114,7 @@ spec = do
               Left e -> fail (show e)
               Right m -> case moduleObjects m of
                 [DFunction _ _ params _] ->
-                  map (\(Label _ n) -> n) params `shouldBe` ["x"]
+                  (\(Label _ n) -> n) <$> params `shouldBe` ["x"]
                 _ -> fail "unexpected module structure"
 
       it "constructor name in ECon is unchanged" $

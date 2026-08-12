@@ -18,7 +18,7 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 -- ---------------------------------------------------------------------------
 
 lam3 :: Text -> Text -> Text -> Expr Type -> Expr Type
-lam3 p q r body = ELam (ne [lbl p, lbl q, lbl r]) body
+lam3 p q r = ELam (ne [lbl p, lbl q, lbl r])
 
 -- ---------------------------------------------------------------------------
 -- Tests
