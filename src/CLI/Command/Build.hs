@@ -93,6 +93,7 @@ parseEntryPoint = join . fmap parseDotSeparated
 
 -- | Derive the executable name from the project name and optional version.
 deriveExecutableName :: Text -> Maybe PackageVersion -> FilePath
-deriveExecutableName projectName = \case
-  Just (PackageVersion v) -> Text.unpack projectName <> "-" <> Text.unpack (toText v)
-  Nothing -> Text.unpack projectName
+deriveExecutableName projectName =
+  \case
+    Just (PackageVersion v) -> Text.unpack projectName <> "-" <> Text.unpack (toText v)
+    Nothing -> Text.unpack projectName
