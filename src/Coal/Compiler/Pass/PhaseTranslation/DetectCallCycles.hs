@@ -83,7 +83,7 @@ checkForCycles Module{modulePath, moduleDefinitions} = do
   case topoSortDefs buildFolds depGraph of
     Left cycles -> do
       let moduleName = principalPath modulePath
-          cycleNames = map (map fst) cycles
+          cycleNames = fmap fst <$> cycles
           errorLoc = case cycles of
             (((_, metadata) : _) : _) -> ErrorLocation moduleName metadata
             _ -> ErrorLocation moduleName mempty
@@ -102,11 +102,11 @@ Returns a list of (name, dependencies) pairs suitable for topological sorting.
 buildDependencyGraph :: (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [((Name, a), [Name])]
 buildDependencyGraph defs =
   let definedNamePairs = getDefinedNames defs
-      definedNames = Set.fromList (map fst definedNamePairs)
+      definedNames = Set.fromList (fst <$> definedNamePairs)
       depPairs = [(name, filter (`Set.member` definedNames) deps) | (name, deps) <- extractDependencies defs]
-      namesWithDeps = Set.fromList (map (fst . fst) depPairs)
+      namesWithDeps = Set.fromList ((fst . fst) <$> depPairs)
       namesWithoutDeps = [(nameLoc, []) | nameLoc <- definedNamePairs, fst nameLoc `Set.notMember` namesWithDeps]
-   in depPairs ++ namesWithoutDeps
+   in depPairs <> namesWithoutDeps
  where
   getDefinedNames :: [Definition a k t] -> [(Name, a)]
   getDefinedNames = concatMap getDefName
@@ -210,7 +210,7 @@ extractDependencies = concatMap extractDependency
   getDeps expr =
     let freeVars :: Set.Set (Coal.Common.Label.Label t)
         freeVars = Set.filter notConstructor (freeIn expr)
-     in nub $ map labelName $ Set.toList freeVars
+     in nub (labelName <$> Set.toList freeVars)
 
 {- | Topologically sort definitions by dependencies.
 

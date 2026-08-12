@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 {- |
 Module: Coal.Compiler.Build.Cache
 

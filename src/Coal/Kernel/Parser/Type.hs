@@ -172,8 +172,7 @@ pRowContent = do
   colon
   fieldType <- pType
   pipe
-  rest <- pRowTail
-  return $ RExt fieldName fieldType rest
+  RExt fieldName fieldType <$> pRowTail
  where
   pRowTail =
     P.choice

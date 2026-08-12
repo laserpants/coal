@@ -154,15 +154,15 @@ prettyTypePrec prec =
      where
       prettyArgs
         | null args = ""
-        | otherwise = typeBrackets (map (prettyTypePrec 0) args)
+        | otherwise = typeBrackets (prettyTypePrec 0 <$> args)
 
 prettyTypeApplicationPrec :: (Show (o k), Show k, CoalPretty k, CoalPretty (o k)) => Prec -> Type o k -> NonEmpty (Type o k) -> Doc ann
 prettyTypeApplicationPrec prec con args
   | isTupleType con =
-      parensIf (prec > precApp) $ group (tupled (map (prettyTypePrec 0) (NonEmpty.toList args)))
+      parensIf (prec > precApp) $ group (tupled (prettyTypePrec 0 <$> NonEmpty.toList args))
 prettyTypeApplicationPrec prec con args =
   parensIf (prec > precApp) $
-    group (prettyTypePrec precApp con <> typeBrackets (map (prettyTypePrec 0) (NonEmpty.toList args)))
+    group (prettyTypePrec precApp con <> typeBrackets (prettyTypePrec 0 <$> NonEmpty.toList args))
 
 prettyIntrinsic :: Intrinsic -> Doc ann
 prettyIntrinsic =

@@ -55,7 +55,7 @@ newtype PipelineState = PipelineState
   }
   deriving (Show, Eq, Ord)
 
-data PipelineError
+newtype PipelineError
   = -- | A constructor was applied to more arguments than its declared arity.
     OverSaturatedConstructor Name
   deriving (Show, Eq, Ord)

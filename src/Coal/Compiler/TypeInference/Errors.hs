@@ -36,9 +36,10 @@ prettyErrorMessage msg err src =
 
 extractSpan :: Text -> SourcePos -> SourcePos -> [(Int, Text, Text)]
 extractSpan src start end =
-  trimTrailingBlankLines $
-    map extractPointer $
-      filter (\(n, _) -> n >= startLine && n <= endLine) numberedLines
+  trimTrailingBlankLines
+    ( extractPointer
+        <$> filter (\(n, _) -> n >= startLine && n <= endLine) numberedLines
+    )
  where
   startLine = unPos (sourceLine start)
   endLine = unPos (sourceLine end)

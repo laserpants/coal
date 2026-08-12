@@ -100,7 +100,7 @@ expandGroups =
             LetDefinition
               { letDefinitionMetadata = loc
               , letDefinitionAnnotation = extractType <$> functionGroupDefinitionAnnotation
-              , letDefinitionConstraints = maybe [] extractConstraints functionGroupDefinitionAnnotation
+              , letDefinitionConstraints = foldMap extractConstraints functionGroupDefinitionAnnotation
               , letDefinitionType = With [] ()
               , letDefinitionExpression =
                   ELambda loc (varP <$> args) (matchE (packVariables args) (buildExpressionClauses functionGroupDefinitionBranches))

@@ -37,7 +37,7 @@ remain.
 -}
 lambdaFlattening :: (Monad m) => Pass m (Module Type) (Module Type)
 lambdaFlattening m =
-  pure m{moduleObjects = map flattenObject (moduleObjects m)}
+  pure m{moduleObjects = flattenObject <$> moduleObjects m}
 
 -- --------------------------------------------------------------------------
 -- Object
@@ -71,7 +71,7 @@ flattenExpr expr =
     ENil ->
       expr
     ELet bindings body ->
-      ELet (fmap flattenBinding bindings) (flattenExpr body)
+      ELet (flattenBinding <$> bindings) (flattenExpr body)
     ELam params body ->
       -- Flatten the body first, then collect any immediately nested lambda.
       case flattenExpr body of
@@ -81,19 +81,19 @@ flattenExpr expr =
         body' ->
           ELam params body'
     EApp t f args ->
-      EApp t (flattenExpr f) (fmap flattenExpr args)
+      EApp t (flattenExpr f) (flattenExpr <$> args)
     EIf cond t f ->
       EIf (flattenExpr cond) (flattenExpr t) (flattenExpr f)
     EOp op ->
-      EOp (fmap flattenExpr op)
+      EOp (flattenExpr <$> op)
     ECase t scrutinee clauses ->
-      ECase t (flattenExpr scrutinee) (fmap flattenClause clauses)
+      ECase t (flattenExpr scrutinee) (flattenClause <$> clauses)
     EExt name e1 e2 ->
       EExt name (flattenExpr e1) (flattenExpr e2)
     EGet lbl e ->
       EGet lbl (flattenExpr e)
     ECall (Label t name) args k ->
-      ECall (Label t name) (fmap flattenExpr args) (flattenExpr k)
+      ECall (Label t name) (flattenExpr <$> args) (flattenExpr k)
 
 -- --------------------------------------------------------------------------
 -- Helpers

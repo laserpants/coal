@@ -1,0 +1,82 @@
+# HLint configuration for the Coal programming language compiler
+# Run with: stack build hlint && stack exec hlint -- src/ app/ test/
+
+# ── GHC extensions needed to parse the codebase ─────────────────────────
+
+- extensions:
+  - { name: ApplicativeDo, within: [] }
+  - { name: ConstraintKinds, within: [] }
+  - { name: DeriveDataTypeable, within: [] }
+  - { name: DeriveFoldable, within: [] }
+  - { name: DeriveFunctor, within: [] }
+  - { name: DeriveGeneric, within: [] }
+  - { name: DeriveTraversable, within: [] }
+  - { name: DisambiguateRecordFields, within: [] }
+  - { name: FlexibleContexts, within: [] }
+  - { name: FlexibleInstances, within: [] }
+  - { name: FunctionalDependencies, within: [] }
+  - { name: GeneralizedNewtypeDeriving, within: [] }
+  - { name: LambdaCase, within: [] }
+  - { name: MultiParamTypeClasses, within: [] }
+  - { name: NamedFieldPuns, within: [] }
+  - { name: OverloadedStrings, within: [] }
+  - { name: QuasiQuotes, within: [] }
+  - { name: RankNTypes, within: [] }
+  - { name: RecordWildCards, within: [] }
+  - { name: RecursiveDo, within: [] }
+  - { name: ScopedTypeVariables, within: [] }
+  - { name: StrictData, within: [] }
+  - { name: TemplateHaskell, within: [] }
+  - { name: TupleSections, within: [] }
+  - { name: TypeApplications, within: [] }
+  - { name: TypeFamilies, within: [] }
+  - { name: UndecidableInstances, within: [] }
+
+# ── Project-specific import conventions ────────────────────────────────
+
+# Prefer strict container modules (project convention).
+- modules:
+  - { name: Data.Map, as: Map, message: "Use Data.Map.Strict instead of Data.Map" }
+  - { name: Data.HashMap.Strict, as: HashMap }
+  - { name: Data.IntMap.Strict, as: IntMap }
+
+# ── Hint groups ────────────────────────────────────────────────────────
+
+# Enable the 'generalise' group for stronger code suggestions
+# (eta-reduce, use fmap/<$>, use const/id, etc.)
+- group: { name: generalise, enabled: true }
+
+# ── Hints to ignore (conflict with fourmolu or intentional style) ──────
+
+# "Redundant bracket" conflicts with explicit parenthesization that aids
+# readability in complex type-level and expression-level code.
+- ignore: { name: "Redundant bracket" }
+
+# "Redundant lambda" can be noisy; the compiler codebase uses explicit
+# lambda syntax for clarity in some cases.
+- ignore: { name: "Redundant lambda" }
+
+# "Use uncurry" is a stylistic preference; partial application of uncurried
+# functions is often clearer in this codebase.
+- ignore: { name: "Use uncurry" }
+
+# "Avoid NonEmpty.unzip" suggests using Data.Functor.unzip which is
+# deprecated in GHC 9.10+. Prelude.unzip is now generic and is the
+# correct replacement for both.
+- ignore: { name: "Avoid NonEmpty.unzip" }
+
+# "Avoid restricted extensions" — the project convention is to declare all
+# extensions per-file (StrictData, TemplateHaskell, QuasiQuotes, etc.),
+# never as default extensions in package.yaml.
+- ignore: { name: "Avoid restricted extensions" }
+
+# ── Custom project rules ───────────────────────────────────────────────
+
+# Prefer <$> over fmap where Applicative style is intended.
+- warn: { lhs: "fmap f x", rhs: "f <$> x" }
+
+# Discourage partial functions in favor of safe alternatives.
+# These reference built-in HLint hints, elevated to error severity.
+- error: { name: "Avoid head" }
+- error: { name: "Avoid tail" }
+

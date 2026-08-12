@@ -152,7 +152,7 @@ fromSourceNamespaced ns nsMap derivedName file src = do
         else do
           let namespacedName = ns <> "." <> derivedName
               nsComps = Text.splitOn "." ns
-              rewrittenPath = Path (nsComps ++ pathComponents path)
+              rewrittenPath = Path (nsComps <> pathComponents path)
               rewrittenDefs = rewriteImports nsMap defs
               m' = Module rewrittenPath exportList rewrittenDefs
           Right <$> checkCacheAndRegister namespacedName src m'
@@ -165,7 +165,7 @@ Example: with @nsMap = [(\"Bar\", \"Foo.Bar\"), (\"MicroTest\", \"CoalMicroTest.
 @import MicroTest (...)@ becomes @import CoalMicroTest.MicroTest (...)@.
 -}
 rewriteImports :: Map.Map Name Name -> [Definition Metadata () ()] -> [Definition Metadata () ()]
-rewriteImports nsMap = map go
+rewriteImports nsMap = fmap go
  where
   go (DImport loc path imports)
     | Just newName <- Map.lookup (principalPath path) nsMap =

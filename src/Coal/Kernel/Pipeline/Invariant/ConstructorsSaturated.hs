@@ -59,7 +59,7 @@ checkConstructorsSaturated =
       []
     ELet bindings body ->
       foldMap checkBinding (NonEmpty.toList bindings)
-        ++ checkConstructorsSaturated body
+        <> checkConstructorsSaturated body
     ELam _ body ->
       checkConstructorsSaturated body
     EApp _ f args ->
@@ -72,24 +72,24 @@ checkConstructorsSaturated =
         _ ->
           -- Not a constructor application - recurse into function
           checkConstructorsSaturated f
-        ++ foldMap checkConstructorsSaturated args
+        <> foldMap checkConstructorsSaturated args
     EIf cond thenBranch elseBranch ->
       checkConstructorsSaturated cond
-        ++ checkConstructorsSaturated thenBranch
-        ++ checkConstructorsSaturated elseBranch
+        <> checkConstructorsSaturated thenBranch
+        <> checkConstructorsSaturated elseBranch
     EOp op ->
       foldMap checkConstructorsSaturated op
     ECase _ scrutinee clauses ->
       checkConstructorsSaturated scrutinee
-        ++ foldMap checkClauseBody (NonEmpty.toList clauses)
+        <> foldMap checkClauseBody (NonEmpty.toList clauses)
     EExt _ e1 e2 ->
       checkConstructorsSaturated e1
-        ++ checkConstructorsSaturated e2
+        <> checkConstructorsSaturated e2
     EGet _ e ->
       checkConstructorsSaturated e
     ECall _ args k ->
       foldMap checkConstructorsSaturated args
-        ++ checkConstructorsSaturated k
+        <> checkConstructorsSaturated k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

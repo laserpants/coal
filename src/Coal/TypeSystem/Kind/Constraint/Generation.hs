@@ -62,7 +62,7 @@ runKindConstraintsGen env gen = do
   pure (s, w)
 
 parameterMap :: [(Name, Kind)] -> Dictionary [Kind]
-parameterMap ps = Map.fromListWith (++) (fmap (second pure) ps)
+parameterMap ps = Map.fromListWith (++) (second pure <$> ps)
 
 tellTransitive :: (Monad m) => [Kind] -> KindConstraintsGen m ()
 tellTransitive [] = pure ()

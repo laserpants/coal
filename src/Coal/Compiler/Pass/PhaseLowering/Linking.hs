@@ -50,13 +50,13 @@ compileBitcode CompilerConfig{..} files =
         Right objFiles -> do
           cFiles <- traverse canonicalizePath configCFiles
           projectRoot <- getCurrentDirectory
-          let rels = map (makeRelative projectRoot) cFiles
+          let rels = makeRelative projectRoot <$> cFiles
           if runtimeFileName `elem` rels
             then do
               putStrLn $
                 "Error: The filename '"
-                  ++ runtimeFileName
-                  ++ "' is reserved by the Coal compiler internally."
+                  <> runtimeFileName
+                  <> "' is reserved by the Coal compiler internally."
               putStrLn "Please rename your C file and try again."
               pure (Just CompilerError)
             else do
@@ -75,7 +75,7 @@ compileBitcode CompilerConfig{..} files =
               gccRes <- runGCC CompilerConfig{..} tmpDir objFiles copiedCFiles
               case gccRes of
                 Left e -> do
-                  putStrLn ("gcc failed: " ++ show e)
+                  putStrLn ("gcc failed: " <> show e)
                   pure (Just CompilerError)
                 Right _ -> do
                   copyFile (tmpDir </> "dist") configExecutableName
@@ -98,7 +98,7 @@ runGCC CompilerConfig{..} dir objFiles cFiles = do
         (if isClang then flags else "-no-pie" : flags) <> commonArgs
   try $ execProcess $ (proc "gcc" args){cwd = Just dir}
  where
-  sanitizeFlags = if configSanitize then ["-fsanitize=address"] else []
+  sanitizeFlags = ["-fsanitize=address" | configSanitize]
   flags = ["-g", "-I."] <> sanitizeFlags
   commonArgs =
     [runtimeFileName]
@@ -113,7 +113,7 @@ execProcess p = do
   (exitCode, _, stderr) <- readCreateProcessWithExitCode p ""
   case exitCode of
     ExitSuccess -> pure ()
-    ExitFailure code -> error $ "Process failed with exit code " ++ show code ++ ":\n" ++ stderr
+    ExitFailure code -> error $ "Process failed with exit code " <> show code <> ":\n" <> stderr
 
 runtimeLib :: ByteString
 runtimeLib = $(embedFile "runtime/dist/runtime-combined.c")

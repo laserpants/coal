@@ -51,10 +51,10 @@ matchClause scrutinee clauses =
       throwEval
         ( PatternMatchFailure
             ( "No clause matched: "
-                ++ describeValue scrutinee
-                ++ " against clauses ["
-                ++ intercalate ", " (map showClauseHead (NonEmpty.toList clauses))
-                ++ "]"
+                <> describeValue scrutinee
+                <> " against clauses ["
+                <> intercalate ", " (showClauseHead <$> NonEmpty.toList clauses)
+                <> "]"
             )
         )
     (clause : _) ->
@@ -132,28 +132,28 @@ describeValue = \case
   VBool b ->
     if b then "true" else "false"
   VInt32 n ->
-    "int32:" ++ show n
+    "int32:" <> show n
   VInt64 n ->
-    "int64:" ++ show n
+    "int64:" <> show n
   VBignum n ->
-    "bignum:" ++ show n
+    "bignum:" <> show n
   VFloat f ->
-    "float:" ++ show f
+    "float:" <> show f
   VDouble d ->
-    "double:" ++ show d
+    "double:" <> show d
   VChar c ->
-    "char:" ++ show c
+    "char:" <> show c
   VString _ ->
     "string"
   VConstructor name _ _ ->
-    "constructor:" ++ show name
+    "constructor:" <> show name
   VRecord _ ->
     "record"
   VClosure _ ->
     "closure"
   VExtern name ->
-    "extern:" ++ show name
+    "extern:" <> show name
 
 showClauseHead :: Clause Type -> String
 showClauseHead (Clause pats _) =
-  "(" ++ intercalate ", " (map (\(Label _ n) -> show n) (NonEmpty.toList pats)) ++ ")"
+  "(" <> intercalate ", " ((\(Label _ n) -> show n) <$> NonEmpty.toList pats) <> ")"

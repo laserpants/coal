@@ -62,7 +62,7 @@ reserved :: Text -> Parser ()
 reserved keyword =
   lexeme $ P.try $ do
     void $ C.string keyword
-    P.notFollowedBy C.alphaNumChar <?> ("end of " ++ T.unpack keyword)
+    P.notFollowedBy C.alphaNumChar <?> ("end of " <> T.unpack keyword)
 
 -- | Parse a word (identifier): starts with letter or underscore, followed by alphanumeric or underscore
 word :: Parser Text
@@ -106,7 +106,7 @@ commaSepN n p = do
   items <- P.sepBy1 p (lexeme (C.char ','))
   if length items == n
     then return items
-    else fail $ "Expected exactly " ++ show n ++ " items, but got " ++ show (length items)
+    else fail $ "Expected exactly " <> show n <> " items, but got " <> show (length items)
 
 -- | Parse a backtick-quoted string: `string`
 backtickString :: Parser Text

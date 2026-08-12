@@ -45,7 +45,7 @@ irTypeRep t
   | arity t == 0 =
       typeToIRType t
   | otherwise =
-      TFun (typeToIRType rty) (fmap typeToIRType argts)
+      TFun (typeToIRType rty) (typeToIRType <$> argts)
  where
   (argts, rty) =
     unsnoc (unfoldType t)
