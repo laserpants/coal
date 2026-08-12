@@ -171,11 +171,12 @@ testEnv =
     ]
 
 runTest :: [Pat] -> Bool
-runTest px = r2
+runTest px =
+  case runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive px)) of
+    Right r -> r
+    Left err -> error ("Unexpected compiler failure: " ++ show err)
  where
-  Right r2 = runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive px))
   setupEnv = do
-    -- lift $ updateCurrentBuildC (pure . overBuildDataConstructors (const testEnv))
     put
       initialCompilerState
         { compilerCurrentPath = Path ["Test"]
@@ -232,9 +233,11 @@ example11 =
   ]
 
 runTest2 :: [Pattern a () t] -> Bool
-runTest2 px = r2
+runTest2 px =
+  case runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive (translatePattern <$> px))) of
+    Right r -> r
+    Left err -> error ("Unexpected compiler failure: " ++ show err)
  where
-  Right r2 = runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive (translatePattern <$> px)))
   setupEnv = do
     put
       initialCompilerState
