@@ -7,6 +7,7 @@ import CLI.Error (CLIError (..))
 import CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
+import CLI.Options.InstallCmd (InstallCmdOptions (..))
 import Control.Monad (unless)
 import Control.Monad.Except
 import Control.Monad.State
@@ -108,7 +109,6 @@ installProject = do
 
       liftIO $ do
         ByteString.writeFile "coal.lock.json" (toStrict (encodePretty (PackageLock lockEntries)))
-        putStrLn "Writing coal.lock.json"
 
-installCommand :: ExceptT CLIError IO ()
-installCommand = installProject
+installCommand :: InstallCmdOptions -> ExceptT CLIError IO ()
+installCommand _opts = installProject
