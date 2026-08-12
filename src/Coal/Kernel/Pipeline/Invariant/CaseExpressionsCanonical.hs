@@ -44,32 +44,32 @@ checkCaseExpressionsCanonical expr = case expr of
     []
   ELet bindings body ->
     foldMap checkBinding (NonEmpty.toList bindings)
-      ++ checkCaseExpressionsCanonical body
+      <> checkCaseExpressionsCanonical body
   ELam _ body ->
     checkCaseExpressionsCanonical body
   EApp _ f args ->
     checkCaseExpressionsCanonical f
-      ++ foldMap checkCaseExpressionsCanonical args
+      <> foldMap checkCaseExpressionsCanonical args
   EIf cond t f ->
     checkCaseExpressionsCanonical cond
-      ++ checkCaseExpressionsCanonical t
-      ++ checkCaseExpressionsCanonical f
+      <> checkCaseExpressionsCanonical t
+      <> checkCaseExpressionsCanonical f
   EOp op ->
     foldMap checkCaseExpressionsCanonical op
   ECase _ scrutinee clauses ->
-    let names = map clauseConName (NonEmpty.toList clauses)
+    let names = clauseConName <$> NonEmpty.toList clauses
         orderErrors = concat (zipWith checkPair names (drop 1 names))
         scrutineeErrors = checkCaseExpressionsCanonical scrutinee
         clauseErrors = foldMap checkClauseBody (NonEmpty.toList clauses)
-     in orderErrors ++ scrutineeErrors ++ clauseErrors
+     in orderErrors <> scrutineeErrors <> clauseErrors
   EExt _ e1 e2 ->
     checkCaseExpressionsCanonical e1
-      ++ checkCaseExpressionsCanonical e2
+      <> checkCaseExpressionsCanonical e2
   EGet _ e ->
     checkCaseExpressionsCanonical e
   ECall _ args k ->
     foldMap checkCaseExpressionsCanonical args
-      ++ checkCaseExpressionsCanonical k
+      <> checkCaseExpressionsCanonical k
  where
   checkBinding (Binding _ e) = checkCaseExpressionsCanonical e
   checkClauseBody (Clause _ body) = checkCaseExpressionsCanonical body

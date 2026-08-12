@@ -66,7 +66,7 @@ import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Parameterized (Parameterized (instantiateTypeIndexes), ToIndexed (toIndexed))
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
-import Control.Monad (unless)
+import Control.Monad (foldM_, unless)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
@@ -177,7 +177,7 @@ prepareDefinitions defs = do
   -- Step 1: Collect type constructors
   -- Must happen first because data constructors reference their parent type
   -- Track import sources to detect conflicts (same name from different modules)
-  _ <- foldM collectTypeConstructors Map.empty defs
+  foldM_ collectTypeConstructors Map.empty defs
 
   -- Step 2: Collect data constructors
   -- Depends on type constructors being registered (Step 1)
@@ -219,7 +219,7 @@ prepareDefinitions defs = do
     -- emit wrong qualifications (e.g. List.id__$impl_Monoid instead of
     -- Coal.Monoid.id__$impl_Monoid). Instance member type schemes come from
     -- instanceEntryTypeSchemes directly and do not require compilerNameStore.
-    forM_ (map (Path . pure) builtinModulesPaths) $ \path -> do
+    forM_ ((Path . pure) <$> builtinModulesPaths) $ \path -> do
       Build{buildInstances} <- lift $ lift $ importedBuild path
       forM_ (Environment.toList buildInstances) $
         \(traitName, instanceMap) ->
@@ -241,7 +241,7 @@ prepareDefinitions defs = do
   -- to step 7b). Without this, the code generator resolves instance member names
   -- against the current module (e.g. Main.Comparable$List<a>$(==)) instead of
   -- the source module (e.g. List.Comparable$List<a>$(==)), causing linker errors.
-  stdlibInstanceQNames <- concatForM (map (Path . pure) builtinModulesPaths) $ \path -> do
+  stdlibInstanceQNames <- concatForM ((Path . pure) <$> builtinModulesPaths) $ \path -> do
     Build{buildNames = importNames, buildInstances = importInstances, buildExportedNames = buildExportedNames'} <- lift $ lift $ importedBuild path
     generateQualifiedInstanceNames path importNames buildExportedNames' (Environment.toList importInstances)
   modify (setQualifiedNames (Environment.fromList (stdlibInstanceQNames <> concat qualifiedNames)))
@@ -466,7 +466,7 @@ collectTypeConstructors importSources = \case
         -- Check for unbound type variables in constructors
         -- Valid variables are those declared in the type definition parameters
         -- OR those quantified in the scheme itself (for existential types)
-        let declaredParams = Set.fromList (map parameterName typeDefinitionParameters)
+        let declaredParams = Set.fromList (parameterName <$> typeDefinitionParameters)
         forM_ typeDefinitionConstructors $ \ctor -> do
           let scheme_ = constructorScheme ctor
           let schemeVars = Set.map parameterName (schemeTypeVariables scheme_)
@@ -484,7 +484,7 @@ collectTypeConstructors importSources = \case
                   [ UnboundTypeVariable
                       var
                       name
-                      (map parameterName typeDefinitionParameters)
+                      (parameterName <$> typeDefinitionParameters)
                       (ErrorLocation (principalPath currentPath) loc)
                   ]
                 throwError PreflightFailure
@@ -724,7 +724,7 @@ collectTraits =
           , traitEntryName = name
           , traitEntryParameter = traitDefinitionParameter
           , traitEntryConstraints = traitDefinitionConstraints
-          , traitEntryInterface = Environment.fromList (fmap traitDefinitionInterfaceEntryToPair traitDefinitionInterface)
+          , traitEntryInterface = Environment.fromList (traitDefinitionInterfaceEntryToPair <$> traitDefinitionInterface)
           }
     -- Special case: Builtin$ module handling (see collectTypeConstructors)
     DImport _ (Path ["Builtin$"]) _ -> do
@@ -784,7 +784,7 @@ traitInstances :: Name -> Environment (InstanceMap a) -> [(Name, InstanceMap a)]
 traitInstances name instances = filter ((==) name . fst) (Environment.toList instances)
 
 typeInstances :: Name -> Environment (InstanceMap (InstanceEntry a)) -> [(Name, InstanceMap (InstanceEntry a))]
-typeInstances name instances = fmap (second (instancesForType name)) (Environment.toList instances)
+typeInstances name instances = second (instancesForType name) <$> Environment.toList instances
 
 instancesForType :: Name -> InstanceMap (InstanceEntry a) -> InstanceMap (InstanceEntry a)
 instancesForType name = Map.filter isType
@@ -1103,7 +1103,6 @@ collectImports =
                   modify (insertBuildNameEntry (NName sn s))
                   _ <- lift $ lift $ insertNameC sn s
                   pure ()
-                pure ()
               NType name k ->
                 modify (insertBuildNameEntry (NType (qualifiedName name) k))
               NTrait name ->

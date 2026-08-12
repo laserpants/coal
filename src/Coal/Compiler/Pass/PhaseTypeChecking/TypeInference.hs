@@ -107,7 +107,7 @@ inferTypes m = do
   sub <- solveT
   modify (overCompilerAssumptions (apply sub))
 
-  let newDefinitions = fmap (fmap rowNormalize) (apply sub moduleDefinitions)
+  let newDefinitions = fmap rowNormalize <$> apply sub moduleDefinitions
   return $
     Module
       { moduleDefinitions = normalizeTypeIndexes newDefinitions

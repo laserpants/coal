@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 {- |
 Normalization pass 4: Constructor saturation.
 
@@ -164,8 +162,8 @@ saturateCon conType name existingArgs _original = do
       let allArgTypes = NonEmpty.init (unfoldType conType) -- all but last = arg types
           missingArgTypes = drop k allArgTypes
       freshParams <- mapM (\t -> freshName name >>= \fresh -> pure (Label t fresh)) missingArgTypes
-      let freshVars = map EVar freshParams
-          saturatedArgs = existingArgs ++ freshVars
+      let freshVars = EVar <$> freshParams
+          saturatedArgs = existingArgs <> freshVars
           conExpr = ECon (Label conType name)
           appType = resultType conType n
       case NonEmpty.nonEmpty saturatedArgs of

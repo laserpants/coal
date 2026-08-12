@@ -11,7 +11,7 @@ initCmdParser =
   InitCmdOptions
     <$> optional
       ( option
-          (fmap Text.pack str)
+          (Text.pack <$> str)
           ( long "name"
               <> metavar "NAME"
               <> help "Project name (defaults to directory name"

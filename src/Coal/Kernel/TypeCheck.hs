@@ -110,8 +110,8 @@ checkModulesFromFiles paths = do
   let failures = lefts results
       modules = rights results
   if null failures
-    then pure (Right (map prettyTypeError (checkModules modules)))
-    else pure (Left (map errorBundlePretty failures))
+    then pure (Right (prettyTypeError <$> checkModules modules))
+    else pure (Left (errorBundlePretty <$> failures))
 
 {- | Parse, type-check, and print the results to stdout.
 

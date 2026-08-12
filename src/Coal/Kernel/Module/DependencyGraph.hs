@@ -43,7 +43,7 @@ first is reported.
 -}
 topoSortModules :: [Module t] -> Either [Name] [Module t]
 topoSortModules mods =
-  let available = Set.fromList (map moduleName mods)
+  let available = Set.fromList (moduleName <$> mods)
       edges m =
         Set.toList . Set.fromList $
           [ mname
@@ -54,7 +54,7 @@ topoSortModules mods =
    in traverse fromSCC sccs
  where
   fromSCC (AcyclicSCC m) = Right m
-  fromSCC (CyclicSCC ms) = Left (map moduleName ms)
+  fromSCC (CyclicSCC ms) = Left (moduleName <$> ms)
 
 {- | Return all @(importer, missing-import)@ pairs for imports that are not
 present in the supplied module list. An empty result means every import in the
@@ -66,7 +66,7 @@ generator.
 checkImportsSatisfied :: [Module t] -> [(Name, Name)]
 checkImportsSatisfied mods =
   let available :: Set Name
-      available = Set.fromList (map moduleName mods)
+      available = Set.fromList (moduleName <$> mods)
    in [ (moduleName m, imp)
       | m <- mods
       , imp <- moduleImports m

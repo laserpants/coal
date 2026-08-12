@@ -126,7 +126,7 @@ defaultExterns =
       ( "coal_println_int32"
       , \case
           [VInt32 n] -> do
-            putStrLn (show n)
+            print n
             return (Right VUnit)
           args -> return (Left (ArityMismatch "coal_println_int32" 1 (length args)))
       )
@@ -134,7 +134,7 @@ defaultExterns =
       ( "coal_println_int64"
       , \case
           [VInt64 n] -> do
-            putStrLn (show n)
+            print n
             return (Right VUnit)
           args -> return (Left (ArityMismatch "coal_println_int64" 1 (length args)))
       )

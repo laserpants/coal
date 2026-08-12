@@ -55,7 +55,7 @@ lambda body is itself a lambda.
 -}
 topLevelFunctionNormalization :: (Monad m) => Pass m (Module Type) (Module Type)
 topLevelFunctionNormalization m =
-  pure m{moduleObjects = map normalizeObject (moduleObjects m)}
+  pure m{moduleObjects = normalizeObject <$> moduleObjects m}
 
 -- --------------------------------------------------------------------------
 -- Object
@@ -66,7 +66,7 @@ normalizeObject obj =
   case obj of
     -- Rule 1: function whose body is a lambda → merge params.
     DFunction scope name params (ELam innerParams body) ->
-      DFunction scope name (params ++ NonEmpty.toList innerParams) body
+      DFunction scope name (params <> NonEmpty.toList innerParams) body
     -- Rule 2: constant whose RHS is a lambda → promote to function.
     DConstant name (ELam params body) ->
       DFunction Exported name (NonEmpty.toList params) body

@@ -49,7 +49,7 @@ import Coal.Language.Module (ExportList (..), Module (..))
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
-import Control.Monad (unless, when)
+import Control.Monad (foldM_, unless, when)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
@@ -129,9 +129,7 @@ insertBuildHash = do
       updateCurrentBuildPureC (insertHash source . setBuildConfigHash cfgHash)
 
 prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
-prepareDefinitions defs = do
-  _ <- foldM collectTypeAliases Map.empty defs
-  return ()
+prepareDefinitions = foldM_ collectTypeAliases Map.empty
 
 insertExportedName :: (Monad m) => Name -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertExportedName name
@@ -170,7 +168,7 @@ collectTypeAliases importSources = \case
         throwError PreflightFailure
       else do
         -- Check for unbound type variables in the alias definition
-        let declaredParams = Set.fromList (map parameterName aliasDefinitionParameters)
+        let declaredParams = Set.fromList (parameterName <$> aliasDefinitionParameters)
         let usedVars = collectTypeVarNames aliasDefinitionType
         let unboundVars = usedVars Set.\\ declaredParams
         unless (Set.null unboundVars) $ do
@@ -181,7 +179,7 @@ collectTypeAliases importSources = \case
                 [ UnboundTypeVariable
                     var
                     name
-                    (map parameterName aliasDefinitionParameters)
+                    (parameterName <$> aliasDefinitionParameters)
                     (ErrorLocation (principalPath currentPath) loc)
                 ]
               throwError PreflightFailure
@@ -202,8 +200,7 @@ collectTypeAliases importSources = \case
     return importSources
   DImport _ path imports -> do
     Build{buildExportedNames = exportedNames} <- lift $ lift $ importedBuild path
-    newSources <- foldM (checkAndImportType path exportedNames) importSources imports
-    return newSources
+    foldM (checkAndImportType path exportedNames) importSources imports
   DNamespaceImport _ _ ->
     return importSources
   _ ->

@@ -86,7 +86,7 @@ instance (Data a, Monoid a) => RecordContext a (Pattern a Kind IndexedType) wher
         PConstructor a ll <$> desugarRecordPatterns ps
       PRecord _ t@(TRecord r) d p -> do
         name <- supplied (freshName "row")
-        tellRecordEntry [(name, fmap desugarShorthandPatterns d, p)]
+        tellRecordEntry [(name, desugarShorthandPatterns <$> d, p)]
         pure (PConstructor mempty (Label t "$Record") [PVariable mempty (Label r name)])
       PListCons a t p1 p2 ->
         PListCons a t <$> desugarRecordPatterns p1 <*> desugarRecordPatterns p2
@@ -136,13 +136,13 @@ desugar t0 e0 rest (name, dict, p1) expr = do
           :| []
       )
 
-  processField ((fieldName, pattern), prefix) (currentVar, currentRow, currentExpr) = do
-    let fieldType = typeOf pattern
+  processField ((fieldName, pat), prefix) (currentVar, currentRow, currentExpr) = do
+    let fieldType = typeOf pat
         fieldLabel = Label fieldType (prefix <> ".field." <> fieldName)
         tailLabel = Label (TRecord (TRow currentRow)) (prefix <> ".tail")
         extendedRowType = TRow (RExtend fieldName fieldType currentRow)
 
-        makeClause pat body = EClause mempty pat (CPlain mempty [] body :| [])
+        makeClause p body = EClause mempty p (CPlain mempty [] body :| [])
 
         fieldFocus =
           EFocus
@@ -168,7 +168,7 @@ desugar t0 e0 rest (name, dict, p1) expr = do
           mempty
           (typeOf currentExpr)
           (EVariable mempty fieldLabel)
-          (makeClause pattern currentExpr :| fallbackClauses)
+          (makeClause pat currentExpr :| fallbackClauses)
 
     let wrappedExpr =
           if currentVar == varName

@@ -28,7 +28,7 @@ Examples: @"foo"@ → @"Foo"@, @"my-pkg"@ → @"MyPkg"@, @"Coal"@ → @"Coal"@.
 -}
 toModuleNamespace :: Text -> Text
 toModuleNamespace t =
-  Text.concat (map capitalizeSegment (Text.splitOn "-" t))
+  Text.concat (capitalizeSegment <$> Text.splitOn "-" t)
  where
   capitalizeSegment s = case Text.uncons s of
     Nothing -> ""
