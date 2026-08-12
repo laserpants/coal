@@ -65,5 +65,5 @@ The 'Bool' parameter is 'True' for the filled portion, 'False' for the empty por
 -}
 progressChar :: TerminalCapabilities -> Bool -> Char
 progressChar caps filled
-  | termSupportsUnicode caps = if filled then '━' else '━'
+  | termSupportsUnicode caps = if filled then '━' else '─'
   | otherwise = if filled then '=' else '-'
