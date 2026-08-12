@@ -42,9 +42,9 @@ prettyObject pt obj =
                       else
                         pretty ctorName
                           <> parens
-                            (mconcat $ punctuate ", " (map pt fieldTypes))
+                            (mconcat $ punctuate ", " (pt <$> fieldTypes))
               firstCtorLine = "  = " <> prettyConstructor firstCtor
-              restCtorLines = map (("  | " <>) . prettyConstructor) restCtors
+              restCtorLines = (("  | " <>) . prettyConstructor) <$> restCtors
            in vsep $ ("data " <> pt retType) : firstCtorLine : restCtorLines
     DFunction _ name params body ->
       case params of
@@ -60,7 +60,7 @@ prettyObject pt obj =
             <> nest
               2
               ( line
-                  <> prettyLeadingCommaList (map (prettyLabel pt) params)
+                  <> prettyLeadingCommaList (prettyLabel pt <$> params)
                   <+> "="
                     <> nest 2 (line <> prettyExpr pt body)
               )

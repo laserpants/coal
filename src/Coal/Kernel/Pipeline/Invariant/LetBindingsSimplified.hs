@@ -51,30 +51,30 @@ checkLetBindingsSimplified expr = case expr of
     -- Check each binding for trivial aliases
     foldMap checkBindingNotTrivial (NonEmpty.toList bindings)
       -- Also recurse into the binding definitions and body
-      ++ foldMap checkBindingExpr (NonEmpty.toList bindings)
-      ++ checkLetBindingsSimplified body
+      <> foldMap checkBindingExpr (NonEmpty.toList bindings)
+      <> checkLetBindingsSimplified body
   ELam _ body ->
     checkLetBindingsSimplified body
   EApp _ f args ->
     checkLetBindingsSimplified f
-      ++ foldMap checkLetBindingsSimplified args
+      <> foldMap checkLetBindingsSimplified args
   EIf cond thenBranch elseBranch ->
     checkLetBindingsSimplified cond
-      ++ checkLetBindingsSimplified thenBranch
-      ++ checkLetBindingsSimplified elseBranch
+      <> checkLetBindingsSimplified thenBranch
+      <> checkLetBindingsSimplified elseBranch
   EOp op ->
     foldMap checkLetBindingsSimplified op
   ECase _ scrutinee clauses ->
     checkLetBindingsSimplified scrutinee
-      ++ foldMap checkClauseBody (NonEmpty.toList clauses)
+      <> foldMap checkClauseBody (NonEmpty.toList clauses)
   EExt _ e1 e2 ->
     checkLetBindingsSimplified e1
-      ++ checkLetBindingsSimplified e2
+      <> checkLetBindingsSimplified e2
   EGet _ e ->
     checkLetBindingsSimplified e
   ECall _ args k ->
     foldMap checkLetBindingsSimplified args
-      ++ checkLetBindingsSimplified k
+      <> checkLetBindingsSimplified k
 
 -- | Check if a binding is a trivial alias (x = y) and report it as an error.
 checkBindingNotTrivial :: Binding Type -> [InvariantError]

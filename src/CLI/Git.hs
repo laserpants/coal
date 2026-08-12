@@ -24,7 +24,6 @@ import Data.Ord (Down (..))
 import Data.SemVer (fromText)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import qualified Data.Text.IO as Text
 import Package.Version (AvailableVersion (..), PackageVersion (..))
 import System.Exit (ExitCode (..))
 import System.Process
@@ -57,7 +56,7 @@ gitCheckoutCommit (GitCommit hash) path = do
   (exit, _, err) <- liftIO $ readCreateProcessWithExitCode process []
   case exit of
     ExitSuccess ->
-      liftIO $ Text.putStrLn hash
+      pure ()
     ExitFailure{} ->
       throwError (EGitError (Text.pack err))
  where
@@ -113,7 +112,7 @@ isTagRef RemoteRef{refName} =
 
 availableVersionsFromLsRemote :: Text -> [AvailableVersion]
 availableVersionsFromLsRemote output =
-  map toAvailable (Map.toList tagCommits)
+  toAvailable <$> Map.toList tagCommits
  where
   refs =
     mapMaybe parseLsRemoteLine (Text.lines output)

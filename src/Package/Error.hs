@@ -37,7 +37,7 @@ prettyPackageError =
     ENoLockFile ->
       "No project lock-file found.\n\nTry running `coal install`."
     EDependencyManifestMissing name text ->
-      "The package '" <> name <> "' is missinig a manifest file." <> maybe "" ("\n\nLocation: " <>) text
+      "The package '" <> name <> "' is missing a manifest file." <> maybe "" ("\n\nLocation: " <>) text
     EDependencyInvalidManifestFormat name text ->
       "Package '" <> name <> "' manifest file format is invalid:\n\n" <> text
     EDependencyInvalidModuleFormat name moduleName ->

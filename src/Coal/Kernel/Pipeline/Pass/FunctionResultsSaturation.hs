@@ -72,7 +72,7 @@ saturateObject obj =
       if isFunction body
         then do
           (extraParams, body') <- etaExpand body
-          pure (DFunction scope name (params ++ extraParams) body')
+          pure (DFunction scope name (params <> extraParams) body')
         else pure obj
     DConstant name body ->
       if isFunction body
@@ -113,12 +113,12 @@ etaExpand body = do
       -- Not actually a function type (no arg types); nothing to expand.
       pure ([], body)
     Just freshNE -> do
-      let freshVars = fmap EVar freshNE
+      let freshVars = EVar <$> freshNE
           appType = resultType
           body' = EApp appType body freshVars
       -- If the result is still a function, recurse.
       if isFunction body'
         then do
           (moreParams, body'') <- etaExpand body'
-          pure (freshParams ++ moreParams, body'')
+          pure (freshParams <> moreParams, body'')
         else pure (freshParams, body')

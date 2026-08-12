@@ -62,7 +62,7 @@ pBinaryOpConstructor = do
         SymSub -> return OSubInt32
         SymMul -> return OMulInt32
         SymDiv -> return ODivInt32
-        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type int32"
+        _ -> fail $ "Invalid operator '" <> show sym <> "' for type int32"
     Just "int64" ->
       case sym of
         SymEq -> return OEqInt64
@@ -75,7 +75,7 @@ pBinaryOpConstructor = do
         SymSub -> return OSubInt64
         SymMul -> return OMulInt64
         SymDiv -> return ODivInt64
-        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type int64"
+        _ -> fail $ "Invalid operator '" <> show sym <> "' for type int64"
     Just "float" ->
       case sym of
         SymEq -> return OEqFloat
@@ -88,7 +88,7 @@ pBinaryOpConstructor = do
         SymSub -> return OSubFloat
         SymMul -> return OMulFloat
         SymDiv -> return ODivFloat
-        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type float"
+        _ -> fail $ "Invalid operator '" <> show sym <> "' for type float"
     Just "double" ->
       case sym of
         SymEq -> return OEqDouble
@@ -101,24 +101,24 @@ pBinaryOpConstructor = do
         SymSub -> return OSubDouble
         SymMul -> return OMulDouble
         SymDiv -> return ODivDouble
-        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type double"
+        _ -> fail $ "Invalid operator '" <> show sym <> "' for type double"
     Just "bool" ->
       case sym of
         SymEq -> return OEqBool
         SymNe -> return ONeBool
-        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type bool"
+        _ -> fail $ "Invalid operator '" <> show sym <> "' for type bool"
     Just "char" ->
       case sym of
         SymEq -> return OEqChar
         SymNe -> return ONeChar
-        _ -> fail $ "Invalid operator '" ++ show sym ++ "' for type char"
+        _ -> fail $ "Invalid operator '" <> show sym <> "' for type char"
     Nothing ->
       case sym of
         SymOr -> return OOr
         SymAnd -> return OAnd
-        _ -> fail $ "Operator '" ++ show sym ++ "' requires a type annotation"
+        _ -> fail $ "Operator '" <> show sym <> "' requires a type annotation"
     Just t ->
-      fail $ "Unknown type: " ++ T.unpack t
+      fail $ "Unknown type: " <> T.unpack t
 
 -- | Parse a unary operator constructor inside brackets
 pUnaryOpConstructor :: Parser (a -> Op a)
@@ -144,7 +144,7 @@ pNegOp = do
     "int64" -> return ONegInt64
     "float" -> return ONegFloat
     "double" -> return ONegDouble
-    _ -> fail $ "Invalid type for negation: " ++ T.unpack t
+    _ -> fail $ "Invalid type for negation: " <> T.unpack t
 
 -- | Binary operator symbols
 data Op2Symbol

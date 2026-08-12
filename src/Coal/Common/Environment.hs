@@ -56,7 +56,7 @@ overEnvironment fn (Environment e) = Environment (fn e)
 
 {-# INLINE mapEnvironment #-}
 mapEnvironment :: (a -> b) -> Environment a -> Environment b
-mapEnvironment f (Environment e) = Environment (fmap f e)
+mapEnvironment f (Environment e) = Environment (f <$> e)
 
 {-# INLINE mapMEnvironment #-}
 mapMEnvironment :: (Monad m) => (a -> m b) -> Environment a -> m (Environment b)

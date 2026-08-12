@@ -52,7 +52,7 @@ Returns an empty list when all local binder names are distinct, or one
 -}
 checkLocalNamesUnique :: Expr Type -> [InvariantError]
 checkLocalNamesUnique expr =
-  map DuplicateLocalBinder (findDuplicates (collectLocalBinders expr))
+  DuplicateLocalBinder <$> findDuplicates (collectLocalBinders expr)
 
 {- | Recursively collect the names of all locally bound variables in the
 expression tree.
@@ -70,30 +70,30 @@ collectLocalBinders =
       []
     ELet bindings body ->
       foldMap bindingBinders (NonEmpty.toList bindings)
-        ++ collectLocalBinders body
+        <> collectLocalBinders body
     ELam params body ->
-      map labelName (NonEmpty.toList params)
-        ++ collectLocalBinders body
+      (labelName <$> NonEmpty.toList params)
+        <> collectLocalBinders body
     EApp _ f args ->
       collectLocalBinders f
-        ++ foldMap collectLocalBinders args
+        <> foldMap collectLocalBinders args
     EIf cond t f ->
       collectLocalBinders cond
-        ++ collectLocalBinders t
-        ++ collectLocalBinders f
+        <> collectLocalBinders t
+        <> collectLocalBinders f
     EOp op ->
       foldMap collectLocalBinders op
     ECase _ scrutinee clauses ->
       collectLocalBinders scrutinee
-        ++ foldMap clauseBinders (NonEmpty.toList clauses)
+        <> foldMap clauseBinders (NonEmpty.toList clauses)
     EExt _ e1 e2 ->
       collectLocalBinders e1
-        ++ collectLocalBinders e2
+        <> collectLocalBinders e2
     EGet _ e ->
       collectLocalBinders e
     ECall _ es e ->
       foldMap collectLocalBinders es
-        ++ collectLocalBinders e
+        <> collectLocalBinders e
 
 {- | Collect the binder name introduced by a @let@ binding and then recurse
 into the binding's definition expression.
@@ -108,7 +108,7 @@ the first, which is the constructor) and recurse into the clause body.
 clauseBinders :: Clause Type -> [Name]
 clauseBinders (Clause labels body) =
   case labels of
-    _ :| rest -> map labelName rest ++ collectLocalBinders body
+    _ :| rest -> (labelName <$> rest) <> collectLocalBinders body
 
 -- | Extract the 'Name' from a 'Label'.
 labelName :: Label t -> Name

@@ -49,7 +49,7 @@ assigned by lexicographic position, so index validation is no longer needed.
 -}
 caseExpressionCanonicalization :: (Monad m) => Pass m (Module Type) (Module Type)
 caseExpressionCanonicalization m = do
-  pure m{moduleObjects = map canonicalizeObject (moduleObjects m)}
+  pure m{moduleObjects = canonicalizeObject <$> moduleObjects m}
 
 -- --------------------------------------------------------------------------
 -- Object
@@ -83,20 +83,20 @@ canonicalizeExpr expr =
     ENil ->
       expr
     ELet bindings body ->
-      ELet (fmap (canonicalizeBinding) bindings) (canonicalizeExpr body)
+      ELet (canonicalizeBinding <$> bindings) (canonicalizeExpr body)
     ELam params body ->
       ELam params (canonicalizeExpr body)
     EApp t f args ->
-      EApp t (canonicalizeExpr f) (fmap canonicalizeExpr args)
+      EApp t (canonicalizeExpr f) (canonicalizeExpr <$> args)
     EIf cond t f ->
       EIf
         (canonicalizeExpr cond)
         (canonicalizeExpr t)
         (canonicalizeExpr f)
     EOp op ->
-      EOp (fmap canonicalizeExpr op)
+      EOp (canonicalizeExpr <$> op)
     ECase t scrutinee clauses ->
-      ECase t (canonicalizeExpr scrutinee) (fmap canonicalizeClause sorted)
+      ECase t (canonicalizeExpr scrutinee) (canonicalizeClause <$> sorted)
      where
       sorted =
         NonEmpty.fromList $
@@ -106,7 +106,7 @@ canonicalizeExpr expr =
     EGet lbl e ->
       EGet lbl (canonicalizeExpr e)
     ECall (Label t name) args k ->
-      ECall (Label t name) (fmap canonicalizeExpr args) (canonicalizeExpr k)
+      ECall (Label t name) (canonicalizeExpr <$> args) (canonicalizeExpr k)
 
 -- --------------------------------------------------------------------------
 -- Helpers

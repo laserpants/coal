@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
@@ -90,7 +89,7 @@ lambdaLifting :: (Monad m) => Pass m (Module Type) (Module Type)
 lambdaLifting m = do
   let globals = Set.fromList (concatMap objectNames (moduleObjects m))
   (objs', newFns) <- liftObjects globals (moduleObjects m)
-  pure m{moduleObjects = objs' ++ newFns}
+  pure m{moduleObjects = objs' <> newFns}
 
 -- --------------------------------------------------------------------------
 -- Object
@@ -102,7 +101,7 @@ objectNames obj =
     DFunction _ n _ _ -> [n]
     DConstant n _ -> [n]
     DExternal n _ -> [n]
-    DData _ ctors -> map fst ctors
+    DData _ ctors -> fst <$> ctors
 
 liftObjects ::
   (Monad m) =>
@@ -113,7 +112,7 @@ liftObjects _ [] = pure ([], [])
 liftObjects globals (obj : rest) = do
   (obj', new1) <- liftObject globals obj
   (rest', new2) <- liftObjects globals rest
-  pure (obj' : rest', new1 ++ new2)
+  pure (obj' : rest', new1 <> new2)
 
 liftObject ::
   (Monad m) =>
@@ -160,7 +159,7 @@ liftExpr globals scope expr =
             Map.fromList [(n, lbl) | Binding lbl@(Label _ n) _ <- NonEmpty.toList bindings]
               `Map.union` scope
       (body', new2) <- liftExpr globals letScope body
-      pure (ELet bindings' body', new1 ++ new2)
+      pure (ELet bindings' body', new1 <> new2)
     ELam params body -> do
       -- 1. Recursively lift any inner lambdas first, extending scope with this
       --    lambda's own params so nested lambdas resolve types correctly.
@@ -186,32 +185,32 @@ liftExpr globals scope expr =
               Nothing -> case [l | l@(Label _ n') <- fvAll, n' == n] of
                 (lbl : _) -> lbl
                 [] -> error "resolveFv: free variable not found in fvAll"
-          fvLabels = sortBy (comparing labelName) (map resolveFv (Set.toList fvNameSet))
+          fvLabels = sortBy (comparing labelName) (resolveFv <$> Set.toList fvNameSet)
       -- 3. Mint a fresh top-level name.
       liftedName <- freshName "lam"
       -- 4. Build the parameter list for the lifted function.
-      let allParams = fvLabels ++ NonEmpty.toList params
-      let liftedFnType = foldType (typeOf body') (map typeOf allParams)
+      let allParams = fvLabels <> NonEmpty.toList params
+      let liftedFnType = foldType (typeOf body') (typeOf <$> allParams)
       let liftedFn = DFunction Local liftedName allParams body'
       -- 5. Build the call site expression.
-      let lambdaType = foldType (typeOf body') (map typeOf (NonEmpty.toList params))
+      let lambdaType = foldType (typeOf body') (typeOf <$> NonEmpty.toList params)
       let callSite = case NonEmpty.nonEmpty fvLabels of
             Nothing ->
               -- No captured free variables: just reference the lifted function.
               EVar (Label lambdaType liftedName)
             Just fvNE ->
               -- Apply the lifted function to the captured free variables.
-              EApp lambdaType (EVar (Label liftedFnType liftedName)) (fmap EVar fvNE)
-      pure (callSite, newFromBody ++ [liftedFn])
+              EApp lambdaType (EVar (Label liftedFnType liftedName)) (EVar <$> fvNE)
+      pure (callSite, newFromBody <> [liftedFn])
     EApp t f args -> do
       (f', new1) <- liftExpr globals scope f
       (argList, new2) <- liftAll globals scope (NonEmpty.toList args)
-      pure (EApp t f' (NonEmpty.fromList argList), new1 ++ new2)
+      pure (EApp t f' (NonEmpty.fromList argList), new1 <> new2)
     EIf cond th el -> do
       (cond', new1) <- liftExpr globals scope cond
       (th', new2) <- liftExpr globals scope th
       (el', new3) <- liftExpr globals scope el
-      pure (EIf cond' th' el', new1 ++ new2 ++ new3)
+      pure (EIf cond' th' el', new1 <> new2 <> new3)
     EOp op -> do
       let operands = opOperands op
       pairs <- mapM (liftExpr globals scope) operands
@@ -221,18 +220,18 @@ liftExpr globals scope expr =
     ECase t scrutinee clauses -> do
       (scrutinee', new1) <- liftExpr globals scope scrutinee
       (clauses', new2) <- liftClauses globals scope clauses
-      pure (ECase t scrutinee' clauses', new1 ++ new2)
+      pure (ECase t scrutinee' clauses', new1 <> new2)
     EExt name e1 e2 -> do
       (e1', new1) <- liftExpr globals scope e1
       (e2', new2) <- liftExpr globals scope e2
-      pure (EExt name e1' e2', new1 ++ new2)
+      pure (EExt name e1' e2', new1 <> new2)
     EGet lbl e -> do
       (e', new) <- liftExpr globals scope e
       pure (EGet lbl e', new)
     ECall (Label t name) args k -> do
       (args', new1) <- liftAll globals scope args
       (k', new2) <- liftExpr globals scope k
-      pure (ECall (Label t name) args' k', new1 ++ new2)
+      pure (ECall (Label t name) args' k', new1 <> new2)
 
 -- --------------------------------------------------------------------------
 -- Helpers
@@ -251,7 +250,7 @@ liftAll _ _ [] = pure ([], [])
 liftAll globals scope (e : es) = do
   (e', new1) <- liftExpr globals scope e
   (es', new2) <- liftAll globals scope es
-  pure (e' : es', new1 ++ new2)
+  pure (e' : es', new1 <> new2)
 
 liftBindings ::
   (Monad m) =>
@@ -304,21 +303,21 @@ liftBinding globals scope (Binding lbl e) = case e of
             Nothing -> case [l | l@(Label _ n') <- fvAll, n' == n] of
               (lbl_ : _) -> lbl_
               [] -> error "resolveFv: free variable not found in fvAll"
-        fvLabels = sortBy (comparing labelName) (map resolveFv (Set.toList fvNameSet))
+        fvLabels = sortBy (comparing labelName) (resolveFv <$> Set.toList fvNameSet)
     liftedName <- freshName "lam"
-    let allParams = fvLabels ++ NonEmpty.toList params
-        liftedFnType = foldType (typeOf body') (map typeOf allParams)
-        lambdaType = foldType (typeOf body') (map typeOf (NonEmpty.toList params))
+    let allParams = fvLabels <> NonEmpty.toList params
+        liftedFnType = foldType (typeOf body') (typeOf <$> allParams)
+        lambdaType = foldType (typeOf body') (typeOf <$> NonEmpty.toList params)
         callSite = case NonEmpty.nonEmpty fvLabels of
           Nothing ->
             EVar (Label lambdaType liftedName)
           Just fvNE ->
-            EApp lambdaType (EVar (Label liftedFnType liftedName)) (fmap EVar fvNE)
+            EApp lambdaType (EVar (Label liftedFnType liftedName)) (EVar <$> fvNE)
         -- For recursive lambdas, replace the self-reference with callSite so
         -- the lifted function calls itself by its new top-level name.
         body'' = if isRecursive then substituteVar bindingName callSite body' else body'
         liftedFn = DFunction Local liftedName allParams body''
-    pure (Binding lbl callSite, newFromBody ++ [liftedFn])
+    pure (Binding lbl callSite, newFromBody <> [liftedFn])
   _ -> do
     (e', new) <- liftExpr globals scope e
     pure (Binding lbl e', new)
@@ -374,21 +373,21 @@ substituteVar n replacement = go
           -- n is rebound here (letrec); leave the entire let untouched.
           expr
       | otherwise ->
-          ELet (fmap (\(Binding l e) -> Binding l (go e)) bindings) (go body)
+          ELet ((\(Binding l e) -> Binding l (go e)) <$> bindings) (go body)
     ELam params body
       | any (\(Label _ pn) -> pn == n) (NonEmpty.toList params) ->
           -- n is a lambda parameter; do not substitute inside.
           expr
       | otherwise ->
           ELam params (go body)
-    EApp t f args -> EApp t (go f) (fmap go args)
+    EApp t f args -> EApp t (go f) (go <$> args)
     EIf cond th el -> EIf (go cond) (go th) (go el)
-    EOp op -> EOp (fmap go op)
+    EOp op -> EOp (go <$> op)
     ECase t scrutinee clauses ->
-      ECase t (go scrutinee) (fmap goClause clauses)
+      ECase t (go scrutinee) (goClause <$> clauses)
     EExt name e1 e2 -> EExt name (go e1) (go e2)
     EGet l e -> EGet l (go e)
-    ECall label args k -> ECall label (map go args) (go k)
+    ECall label args k -> ECall label (go <$> args) (go k)
   goClause (Clause labels body) =
     let (_ :| sndLabels) = labels
      in if any (\(Label _ pn) -> pn == n) sndLabels

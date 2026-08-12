@@ -71,20 +71,20 @@ checkInTailPosition expr =
       -- Bindings must not contain control flow, and their RHS must be checked in operand position
       foldMap checkBinding (NonEmpty.toList bindings)
         -- Body is in tail position
-        ++ checkInTailPosition body
+        <> checkInTailPosition body
     ELam _ body ->
       -- Lambda body is in tail position (though lambdas should be lifted)
       checkInTailPosition body
     EApp _ f args ->
       -- Function and all arguments must be atomic
       checkAtomic f
-        ++ foldMap checkAtomic args
+        <> foldMap checkAtomic args
     EIf cond thenBranch elseBranch ->
       -- Condition must be atomic
       checkAtomic cond
         -- Branches are in tail position
-        ++ checkInTailPosition thenBranch
-        ++ checkInTailPosition elseBranch
+        <> checkInTailPosition thenBranch
+        <> checkInTailPosition elseBranch
     EOp op ->
       -- All operator operands must be atomic
       foldMap checkAtomic op
@@ -92,18 +92,18 @@ checkInTailPosition expr =
       -- Scrutinee must be atomic
       checkAtomic scrutinee
         -- All clause bodies are in tail position
-        ++ foldMap checkClauseBody (NonEmpty.toList clauses)
+        <> foldMap checkClauseBody (NonEmpty.toList clauses)
     EExt _ fieldValue tailRow ->
       -- Field value and tail row must be atomic
       checkAtomic fieldValue
-        ++ checkAtomic tailRow
+        <> checkAtomic tailRow
     EGet _ record ->
       -- Record operand must be atomic
       checkAtomic record
     ECall _ args k ->
       -- All arguments must be atomic; continuation is in tail position
       foldMap checkAtomic args
-        ++ checkInTailPosition k
+        <> checkInTailPosition k
 
 -- | Check that an expression is atomic, report error if not
 checkAtomic :: Expr Type -> [InvariantError]
@@ -129,11 +129,11 @@ checkBinding :: Binding Type -> [InvariantError]
 checkBinding (Binding _ expr) = case expr of
   EIf cond thenBranch elseBranch ->
     checkAtomic cond
-      ++ checkInTailPosition thenBranch
-      ++ checkInTailPosition elseBranch
+      <> checkInTailPosition thenBranch
+      <> checkInTailPosition elseBranch
   ECase _ scrutinee clauses ->
     checkAtomic scrutinee
-      ++ foldMap checkClauseBody (NonEmpty.toList clauses)
+      <> foldMap checkClauseBody (NonEmpty.toList clauses)
   -- For all other expressions, check them in operand context
   -- (they must not contain control flow in their subexpressions)
   _ ->
@@ -155,14 +155,14 @@ checkInOperandPosition expr =
       -- Bindings checked as usual
       foldMap checkBinding (NonEmpty.toList bindings)
         -- Body is still in operand position (not tail)
-        ++ checkInOperandPosition body
+        <> checkInOperandPosition body
     ELam _ body ->
       -- Lambda body in operand position (though lambdas should be lifted)
       checkInOperandPosition body
     EApp _ f args ->
       -- Function and all arguments must be atomic
       checkAtomic f
-        ++ foldMap checkAtomic args
+        <> foldMap checkAtomic args
     EIf{} ->
       -- Control flow in operand position
       [ControlFlowInOperandPosition]
@@ -175,14 +175,14 @@ checkInOperandPosition expr =
     EExt _ fieldValue tailRow ->
       -- Field value and tail row must be atomic
       checkAtomic fieldValue
-        ++ checkAtomic tailRow
+        <> checkAtomic tailRow
     EGet _ record ->
       -- Record operand must be atomic
       checkAtomic record
     ECall _ args k ->
       -- All arguments must be atomic; continuation is in operand position
       foldMap checkAtomic args
-        ++ checkInOperandPosition k
+        <> checkInOperandPosition k
 
 -- | Check a clause body (in tail position)
 checkClauseBody :: Clause Type -> [InvariantError]

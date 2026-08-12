@@ -43,6 +43,11 @@ jobs:
       - name: Prepare
         run: bash runtime/scripts/combine.sh
 
+      - name: Lint (HLint)
+        run: |
+          stack build hlint
+          stack exec hlint -- src/ app/ test/
+
       - name: Build
         run: stack --allow-different-user build --test --no-run-tests
 

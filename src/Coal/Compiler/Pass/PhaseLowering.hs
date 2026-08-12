@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Coal.Compiler.Pass.PhaseLowering (phaseLowering) where
 

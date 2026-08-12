@@ -46,7 +46,7 @@ builtinNames =
     [ ("nat$_pack", Nat)
     , ("nat$_unpack", Nat)
     ]
-      ++
+      <>
       -- IO operations
       [ ("io$_println_string", IO)
       , ("io$_print_string", IO)
@@ -67,7 +67,7 @@ builtinNames =
       , ("io$_eval", IO)
       , ("io$_return", IO)
       ]
-      ++
+      <>
       -- String operations
       [ ("string$_char_to_string", String)
       , ("string$_bool_to_string", String)
@@ -83,16 +83,16 @@ builtinNames =
       , ("string$_length", String)
       , ("string$_head_unsafe", String)
       ]
-      ++
+      <>
       -- Number operations
       [ ("number$_unsafe_parse_bignum", Number)
       ]
-      ++
+      <>
       -- Char operations
       [ ("char$_ord", Char)
       , ("char$_chr", Char)
       ]
-      ++
+      <>
       -- Codata operations
       [ ("machine$_machine", Codata)
       , ("machine$_map_machine", Codata)

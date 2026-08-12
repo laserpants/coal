@@ -20,9 +20,9 @@ errorMessage =
     EmptyComponent ->
       "Empty path component"
     InvalidStart c ->
-      "Component must start with an upper-case letter or underscore: " ++ show c
+      "Component must start with an upper-case letter or underscore: " <> show c
     InvalidChar c ->
-      "Component contains invalid characters: " ++ show c
+      "Component contains invalid characters: " <> show c
 
 isDirectoryPrefix :: FilePath -> FilePath -> Bool
 isDirectoryPrefix root path =
@@ -48,7 +48,7 @@ resolveModule roots fp =
     choice <-
       case existing of
         [] ->
-          throwError $ "File not found. Tried these candidate paths:\n  " ++ unlines candidates
+          throwError $ "File not found. Tried these candidate paths:\n  " <> unlines candidates
         (c : _) ->
           return c
 
@@ -60,7 +60,7 @@ resolveModule roots fp =
     bestRoot <-
       case matching of
         [] ->
-          throwError $ "File is not inside any source root. Canonical file: " ++ canFile
+          throwError $ "File is not inside any source root. Canonical file: " <> canFile
         _ ->
           return $ maximumBy (comparing length) matching
 
@@ -68,7 +68,7 @@ resolveModule roots fp =
     let rel = makeRelative bestRoot canFile
     when (takeExtension rel /= ".coal") $
       throwError $
-        "Unsupported extension: " ++ takeExtension rel ++ " (file: " ++ canFile ++ ")"
+        "Unsupported extension: " <> takeExtension rel <> " (file: " <> canFile <> ")"
 
     -- Split into components and validate
     let relNoExt = dropExtension rel

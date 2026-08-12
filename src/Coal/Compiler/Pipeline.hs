@@ -81,7 +81,7 @@ timed label p =
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-        liftIO $ writeStatusSimple (label ++ "... " ++ show secs ++ "s")
+        liftIO $ writeStatusSimple (label <> ("... " <> show secs <> "s"))
         pure result
     }
 
@@ -105,7 +105,7 @@ timedWeighted ref label weight p =
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus ref (label ++ "... " ++ show secs ++ "s")
+          writeStatus ref (label <> ("... " <> show secs <> "s"))
         pure result
     }
 
@@ -135,7 +135,7 @@ timedWeightedPerModule ref label weight p =
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus ref (label ++ "... " ++ show secs ++ "s")
+          writeStatus ref (label <> ("... " <> show secs <> "s"))
         pure result
     }
 
@@ -173,7 +173,7 @@ compileWithCFiles config files cFiles = do
         Left e1 ->
           print e1
         Right{} -> do
-          liftIO $ writeStatus ref ("Executable written to: " ++ configExecutableName config)
+          liftIO $ writeStatus ref ("Executable written to: " <> configExecutableName config)
           hPutStr stderr "\n"
 
 compile :: CompilerConfig -> [FilePath] -> IO ()
@@ -218,7 +218,7 @@ prettyRule =
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
     RuleApplication _ t1 ts ->
-      "Cannot apply function of type " <> prettyType (normalizeTypeIndexes t1) <> " to arguments of types " <> Text.intercalate ", " (map (prettyType . normalizeTypeIndexes) ts)
+      "Cannot apply function of type " <> prettyType (normalizeTypeIndexes t1) <> " to arguments of types " <> Text.intercalate ", " ((prettyType . normalizeTypeIndexes) <$> ts)
     RuleIfCondition _ t1 ->
       "Condition must have type `bool`, but got type " <> prettyType (normalizeTypeIndexes t1)
     RuleIfBranches _ t1 t2 ->
@@ -364,11 +364,11 @@ prettyError env =
     OrPatternVariableMismatch _ _ erl ->
       errorMessage ["Sub-patterns must bind the same variable in or-patterns"] env erl
     CallCycle cycles erl ->
-      errorMessage (fmap (\cs -> "Explicit recursion detected: " <> Text.intercalate " → " cs) cycles) env erl
+      errorMessage ((\cs -> "Explicit recursion detected: " <> Text.intercalate " → " cs) <$> cycles) env erl
     MissingTraitAnnotation name traits erl ->
       errorMessage
         [ "Missing trait annotation for '" <> name <> "'"
-        , "Required traits: " <> Text.intercalate ", " (fmap prettyType traits)
+        , "Required traits: " <> Text.intercalate ", " (prettyType <$> traits)
         , "When type parameters are explicitly annotated, all required trait constraints must be included in the annotation."
         ]
         env

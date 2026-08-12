@@ -737,7 +737,7 @@ generateDotSyntax ast =
     , "  node [shape=box];"
     , "  edge [arrowhead=none];"
     ]
-      <> map ("  " <>) (reverse dotNodes ++ dotEdges)
+      <> (("  " <>) <$> (reverse dotNodes <> dotEdges))
       <> ["}"]
  where
   initialState = DotState 0 [] []

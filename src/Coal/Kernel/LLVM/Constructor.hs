@@ -66,7 +66,7 @@ copy and avoid duplicate-symbol linker errors.
 -}
 irDataConstructor :: Name -> ConstructorDefinition -> IRCodegen ()
 irDataConstructor name ConstructorDefinition{constructorFieldCount, constructorIndex} = do
-  emitTypeDecl name (TStruct $ [i32] <> fmap fst args)
+  emitTypeDecl name (TStruct $ [i32] <> (fst <$> args))
   -- Built-in constructors (names beginning with '$') are declared in every
   -- module, so we use LInternal linkage to give each translation unit a
   -- private copy and avoid duplicate-symbol linker errors.

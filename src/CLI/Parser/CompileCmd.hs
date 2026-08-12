@@ -35,7 +35,7 @@ compileCmdParser = do
       ( strOption
           ( long "path"
               <> short 'I'
-              <> metavar "FILE"
+              <> metavar "DIR"
               <> help "Source file directory path (can be passed multiple times)"
           )
       )

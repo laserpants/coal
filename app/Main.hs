@@ -5,6 +5,7 @@
 module Main (main) where
 
 import CLI.Command (Command (..))
+import CLI.Command.Add (addCommand)
 import CLI.Command.Build (buildCommand)
 import CLI.Command.Clean (cleanCommand)
 import CLI.Command.Compile (compileCommand)
@@ -20,6 +21,13 @@ import Options.Applicative
 runCommand :: Command -> IO ()
 runCommand =
   \case
+    CmdAdd opts -> do
+      r <- runExceptT (addCommand opts)
+      case r of
+        Left err ->
+          Text.putStrLn ("• " <> prettyCLIError err)
+        Right{} ->
+          pure ()
     CmdCompile opts ->
       compileCommand opts
     CmdBuild -> do
@@ -38,8 +46,8 @@ runCommand =
           Text.putStrLn ("• " <> prettyCLIError err)
         Right{} ->
           pure ()
-    CmdInstall -> do
-      r <- runExceptT installCommand
+    CmdInstall opts -> do
+      r <- runExceptT (installCommand opts)
       case r of
         Left err ->
           Text.putStrLn ("• " <> prettyCLIError err)

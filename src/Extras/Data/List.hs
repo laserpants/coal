@@ -9,4 +9,4 @@ groupByEq :: (Eq b) => (a -> b) -> [a] -> [[a]]
 groupByEq = groupBy . on (==)
 
 groupByKey :: (Ord a) => [(a, b)] -> [(a, [b])]
-groupByKey = Map.toList . Map.fromListWith (++) . map (\(k, v) -> (k, [v]))
+groupByKey = Map.toList . Map.fromListWith (++) . fmap (\(k, v) -> (k, [v]))

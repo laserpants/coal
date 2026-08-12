@@ -29,6 +29,7 @@ custom-setup
 library
   exposed-modules:
       CLI.Command
+      CLI.Command.Add
       CLI.Command.Build
       CLI.Command.Clean
       CLI.Command.Compile
@@ -39,12 +40,15 @@ library
       CLI.Git
       CLI.Git.Commit
       CLI.Git.Repo
+      CLI.Options.AddCmd
       CLI.Options.CompileCmd
       CLI.Options.InitCmd
       CLI.Options.InstallCmd
+      CLI.Parser.AddCmd
       CLI.Parser.Command
       CLI.Parser.CompileCmd
       CLI.Parser.InitCmd
+      CLI.Parser.InstallCmd
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
@@ -408,6 +412,9 @@ test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      CLI.Command.BuildSpec
+      CLI.Parser.AddCmdSpec
+      CLI.Parser.InstallCmdSpec
       Coal.Compiler.BuildSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
       Coal.Kernel.Eval.EvalSpec
@@ -451,6 +458,7 @@ test-suite coal-test
       Coal.TypeSystem.UnificationSpec
       Coal.TypeSystemSpec
       E2E.Spec
+      Package.VersionSpec
       Paths_coal
   hs-source-dirs:
       test

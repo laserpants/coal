@@ -48,30 +48,30 @@ checkLambdasLifted expr = case expr of
     []
   ELet bindings body ->
     foldMap checkBinding (NonEmpty.toList bindings)
-      ++ checkLambdasLifted body
+      <> checkLambdasLifted body
   -- Lambda: this should not exist after lambda lifting
   ELam _ _ ->
     [LambdaNotLifted]
   EApp _ f args ->
     checkLambdasLifted f
-      ++ foldMap checkLambdasLifted args
+      <> foldMap checkLambdasLifted args
   EIf cond t f ->
     checkLambdasLifted cond
-      ++ checkLambdasLifted t
-      ++ checkLambdasLifted f
+      <> checkLambdasLifted t
+      <> checkLambdasLifted f
   EOp op ->
     foldMap checkLambdasLifted op
   ECase _ scrutinee clauses ->
     checkLambdasLifted scrutinee
-      ++ foldMap checkClauseBody (NonEmpty.toList clauses)
+      <> foldMap checkClauseBody (NonEmpty.toList clauses)
   EExt _ e1 e2 ->
     checkLambdasLifted e1
-      ++ checkLambdasLifted e2
+      <> checkLambdasLifted e2
   EGet _ e ->
     checkLambdasLifted e
   ECall _ args k ->
     foldMap checkLambdasLifted args
-      ++ checkLambdasLifted k
+      <> checkLambdasLifted k
 
 -- | Recurse into a let-binding's definition expression.
 checkBinding :: Binding Type -> [InvariantError]

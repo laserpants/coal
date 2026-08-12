@@ -59,7 +59,7 @@ occurrences of @x@ become @z@.
 -}
 letBindingSimplification :: (Monad m) => Pass m (Module Type) (Module Type)
 letBindingSimplification m =
-  pure m{moduleObjects = map simplifyObject (moduleObjects m)}
+  pure m{moduleObjects = simplifyObject <$> moduleObjects m}
 
 -- --------------------------------------------------------------------------
 -- Object
@@ -98,19 +98,19 @@ simplifyExpr subst expr =
     ELam params body ->
       ELam params (simplifyExpr subst body)
     EApp t f args ->
-      EApp t (simplifyExpr subst f) (fmap (simplifyExpr subst) args)
+      EApp t (simplifyExpr subst f) (simplifyExpr subst <$> args)
     EIf cond th el ->
       EIf (simplifyExpr subst cond) (simplifyExpr subst th) (simplifyExpr subst el)
     EOp op ->
-      EOp (fmap (simplifyExpr subst) op)
+      EOp (simplifyExpr subst <$> op)
     ECase t scrutinee clauses ->
-      ECase t (simplifyExpr subst scrutinee) (fmap (simplifyClause subst) clauses)
+      ECase t (simplifyExpr subst scrutinee) (simplifyClause subst <$> clauses)
     EExt name e1 e2 ->
       EExt name (simplifyExpr subst e1) (simplifyExpr subst e2)
     EGet lbl e ->
       EGet lbl (simplifyExpr subst e)
     ECall (Label t name) args k ->
-      ECall (Label t name) (fmap (simplifyExpr subst) args) (simplifyExpr subst k)
+      ECall (Label t name) (simplifyExpr subst <$> args) (simplifyExpr subst k)
 
 -- --------------------------------------------------------------------------
 -- Let simplification
@@ -126,7 +126,7 @@ simplifyLet subst bindings body =
     -- Partition into alias and real bindings, building an extended subst.
     (subst', realBindings) = foldl processBinding (subst, []) (NonEmpty.toList bindings)
     -- Simplify each real binding's RHS under the extended subst.
-    realBindings' = map (\(Binding lbl e) -> Binding lbl (simplifyExpr subst' e)) realBindings
+    realBindings' = (\(Binding lbl e) -> Binding lbl (simplifyExpr subst' e)) <$> realBindings
     body' = simplifyExpr subst' body
    in
     case NonEmpty.nonEmpty realBindings' of
@@ -151,7 +151,7 @@ processBinding (subst, real) (Binding (Label t name) rhs) =
        in (Map.insert name target subst, real)
     _ ->
       -- Real binding: keep it.
-      (subst, real ++ [Binding (Label t name) rhs])
+      (subst, real <> [Binding (Label t name) rhs])
 
 -- --------------------------------------------------------------------------
 -- Helpers

@@ -12,7 +12,7 @@ import Extras.Data.Functor ((<$$$>))
 -- | Monadic version of concatMap
 {-# INLINE concatMapM #-}
 concatMapM :: (Monad m, Traversable f) => (a -> m [b]) -> f a -> m [b]
-concatMapM f xs = fmap concat (mapM f xs)
+concatMapM f xs = concat <$> mapM f xs
 
 -- | concatMapM with the arguments flipped
 {-# INLINE concatForM #-}

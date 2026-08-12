@@ -71,7 +71,7 @@ pass envelopes = do
       cached =
         [ (principalPath (buildPath b), bc)
         | BCached b <- envelopes
-        , bc <- maybe [] pure (buildBitcode b)
+        , bc <- foldMap pure (buildBitcode b)
         ]
 
   -- Optionally dump pretty-printed NK modules for debugging.
@@ -87,7 +87,7 @@ pass envelopes = do
   -- Also inject into the Builtin$ module itself, since it uses $Cons/$Nil etc.
   let injectDData m = m{moduleObjects = builtinDData <> moduleObjects m}
       builtinMod = injectDData Builtin.builtinObjects
-      augmented = map injectDData (snd <$> sources)
+      augmented = injectDData . snd <$> sources
 
   -- Reconstruct data constructor tag bindings for BCached modules.
   -- Cached builds store constructors in declaration order via buildTypeConstructors,
@@ -141,7 +141,7 @@ pass envelopes = do
     Right assembled -> do
       -- Persist build artifacts to the .build/ cache for incremental compilation.
       -- Skip Builtin$ (first entry in assembled), write only user source modules.
-      forM_ (zip (fst <$> sources) (map snd (drop 1 assembled))) $ \(name, bc) -> do
+      forM_ (zip (fst <$> sources) (snd <$> drop 1 assembled)) $ \(name, bc) -> do
         setBitcodeC name bc
         getBuildC name >>= \case
           Nothing -> pure ()
@@ -183,7 +183,7 @@ runLLVMAs src =
 temporary file names.
 -}
 nameToPath :: Name -> String
-nameToPath = map (\c -> if c == '.' then '_' else c) . Text.unpack
+nameToPath = fmap (\c -> if c == '.' then '_' else c) . Text.unpack
 
 {- | Built-in constructor 'DData' objects injected into every source module.
 

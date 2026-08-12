@@ -38,7 +38,7 @@ instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Expression a k t) 
   expandAsPatterns =
     \case
       EMatch a t e cs ->
-        EMatch a t e (fmap (expandClause t) cs)
+        EMatch a t e (expandClause t <$> cs)
       e ->
         descend expandAsPatterns e
 
@@ -46,7 +46,7 @@ instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Choice Expression 
   expandAsPatterns =
     \case
       CPlain a gs e ->
-        CPlain a (fmap expandAsPatterns gs) (expandAsPatterns e)
+        CPlain a (expandAsPatterns <$> gs) (expandAsPatterns e)
 
 instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Guard Expression a k t) where
   expandAsPatterns =
@@ -98,7 +98,7 @@ instance (Data a, Data k, Data t, Monoid a) => ExpandContext (Module a k t) wher
     \case
       Module{modulePath, moduleExportList, moduleDefinitions} ->
         Module
-          { moduleDefinitions = fmap expandAsPatterns moduleDefinitions
+          { moduleDefinitions = expandAsPatterns <$> moduleDefinitions
           , ..
           }
 
