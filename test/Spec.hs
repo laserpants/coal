@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import CLI.Command.BuildSpec (buildSpec)
+import CLI.Parser.AddCmdSpec (addCmdSpec)
 import CLI.Parser.InstallCmdSpec (installCmdSpec)
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
@@ -23,10 +24,10 @@ main =
   hspec $ do
     spec
     describe "CLI tests" $ do
+      addCmdSpec
       buildSpec
       versionSpec
       installCmdSpec
+
     describe "Kernel tests" kernelSpec
     describe "E2E tests" e2eSpec
-
---    e2eKernelSpec

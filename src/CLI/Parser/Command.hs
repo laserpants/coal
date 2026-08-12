@@ -2,6 +2,7 @@ module CLI.Parser.Command (commandParser) where
 
 import CLI.Command (Command (..))
 
+import CLI.Parser.AddCmd (addCmdParser)
 import CLI.Parser.CompileCmd (compileCmdParser)
 import CLI.Parser.InitCmd (initCmdParser)
 import CLI.Parser.InstallCmd (installCmdParser)
@@ -11,11 +12,17 @@ commandParser :: Parser Command
 commandParser =
   hsubparser
     ( command
-        "compile"
+        "add"
         ( info
-            (CmdCompile <$> compileCmdParser)
-            (progDesc "Compile from source files")
+            (CmdAdd <$> addCmdParser)
+            (progDesc "Add a dependency from a Git repository")
         )
+        <> command
+          "compile"
+          ( info
+              (CmdCompile <$> compileCmdParser)
+              (progDesc "Compile from source files")
+          )
         <> command
           "build"
           ( info
