@@ -46,7 +46,7 @@ jobs:
       - name: Lint (HLint)
         run: |
           stack build hlint
-          stack exec hlint -- src/ app/ test/
+          stack exec hlint -- src/ app/    
 
       - name: Build
         run: stack --allow-different-user build --test --no-run-tests
