@@ -416,7 +416,6 @@ test-suite coal-test
       CLI.Command.BuildSpec
       CLI.Parser.AddCmdSpec
       CLI.Parser.InstallCmdSpec
-      Coal.Compiler.BuildSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
       Coal.Kernel.Eval.EvalSpec
       Coal.Kernel.FreeVarsSpec
@@ -448,12 +447,11 @@ test-suite coal-test
       Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalizationSpec
       Coal.Kernel.Prettyprinter.RoundtripSpec
       Coal.Kernel.Spec
+      Coal.Kernel.TypeCheckSpec
       Coal.Language.TypeSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec
-      Coal.TypeSystem.Constraint.GenerationSpec
-      Coal.TypeSystem.Kind.InferenceSpec
       Coal.TypeSystem.SubstitutionSpec
       Coal.TypeSystem.TypeIndexedSpec
       Coal.TypeSystem.UnificationSpec

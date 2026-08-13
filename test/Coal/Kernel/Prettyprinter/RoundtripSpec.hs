@@ -16,17 +16,13 @@ import Coal.Kernel.Prettyprinter (renderModule)
 import Coal.Kernel.Prettyprinter.Expr (prettyExpr)
 import Coal.Kernel.Prettyprinter.Prim (prettyPrim)
 import Coal.Kernel.Prettyprinter.Type (prettyType)
-import Control.Monad (forM_)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as Text
-import qualified Data.Text.IO as TextIO
 import Data.Void (Void)
 import Prettyprinter (Doc, defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
-import System.Directory (doesDirectoryExist, doesFileExist, listDirectory)
-import System.FilePath (takeExtension, (</>))
-import Test.Hspec (Spec, describe, expectationFailure, it, runIO, shouldBe)
-import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, parse)
+import Test.Hspec (Spec, describe, it, shouldBe)
+import Text.Megaparsec (ParseErrorBundle, parse)
 
 -- | Helper to parse a module
 parseModule :: Text.Text -> Either (ParseErrorBundle Text.Text Void) (Module Type)
@@ -128,8 +124,11 @@ spec = do
         let rendered = renderModule original
         parseModule rendered `shouldBe` Right original
 
--- NOTE: File-based roundtrip tests temporarily disabled while .corn example
--- files are being updated to use the new grouped data syntax.
+-- NOTE: File-based roundtrip tests are temporarily disabled. Some .corn
+-- example files under test/examples have not yet been migrated to the current
+-- grouped data syntax (e.g. @data Foo.Bar<0, Foo.Baz(*)>@), and one file
+-- currently fails to reparse its own prettyprinted output. Re-enable once
+-- these are resolved.
 -- describe "File-based roundtrip tests" $ do
 --   cornFiles <- runIO findCornFiles
 --   forM_ cornFiles $ \filePath -> do
@@ -147,28 +146,3 @@ spec = do
 --                   ++ "\n\nPrettyprinted output:\n"
 --                   ++ Text.unpack rendered
 --             Right reparsed -> reparsed `shouldBe` original
-
--- | Recursively find all .corn files in the test/examples directory
-findCornFiles :: IO [FilePath]
-findCornFiles = findCornFiles' "test/examples"
- where
-  findCornFiles' :: FilePath -> IO [FilePath]
-  findCornFiles' dir = do
-    exists <- doesDirectoryExist dir
-    if not exists
-      then return []
-      else do
-        entries <- listDirectory dir
-        let paths = map (dir </>) entries
-        files <- filterM doesFileExist paths
-        let cornFiles = filter (\f -> takeExtension f == ".corn") files
-        dirs <- filterM doesDirectoryExist paths
-        subFiles <- concat <$> mapM findCornFiles' dirs
-        return (cornFiles ++ subFiles)
-
-  filterM :: (Monad m) => (a -> m Bool) -> [a] -> m [a]
-  filterM _ [] = return []
-  filterM p (x : xs) = do
-    flg <- p x
-    ys <- filterM p xs
-    return (if flg then x : xs else ys)

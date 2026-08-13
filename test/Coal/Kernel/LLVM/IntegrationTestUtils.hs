@@ -11,16 +11,10 @@ module Coal.Kernel.LLVM.IntegrationTestUtils (
   -- * Full Pipeline Tests
   testCompilePipeline,
   testCompilePipelineWithC,
-  testCompile,
-
-  -- * Test Runners
-  runTest,
-  runTestForFile,
 ) where
 
 import Coal.Kernel.LLVM.TestUtils (evaluateModule, injectBuiltins)
 import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Module.DependencyGraph (checkImportsSatisfied, topoSortModules)
 import qualified Coal.Kernel.Parser.Module as Parser
 import Coal.Kernel.Pipeline (evalPipeline, initialPipelineState)
@@ -55,7 +49,7 @@ testCompilePipelineWithC :: [FilePath] -> [FilePath] -> IO ()
 testCompilePipelineWithC cornFiles extraCFiles = do
   createDirectoryIfMissing True buildDir
   -- Phase 1: parse all modules and inject builtin constructors.
-  allModules <- map injectBuiltins <$> traverse parseOne cornFiles
+  allModules <- fmap injectBuiltins <$> traverse parseOne cornFiles
   -- Phase 2: run the full normalization pipeline on each module.
   allNormalized <- traverse runPipeline_ allModules
   -- Sort in dependency order (imports before importers); abort on cycles.
@@ -103,67 +97,3 @@ testCompilePipelineWithC cornFiles extraCFiles = do
     let outFile = buildDir </> takeBaseName fname <> ".ll"
     Text.writeFile outFile (LLVM.IRRenderer.renderModule ir)
     return outFile
-
-{- | Test compilation without running the normalization pipeline.
-
-This test parses and compiles modules directly without normalization,
-useful for testing the code generator in isolation.
--}
-testCompile :: [FilePath] -> IO ()
-testCompile cornFiles = do
-  createDirectoryIfMissing True buildDir
-  -- Phase 1: parse all modules, inject builtin constructors, so that
-  -- cross-module DData info is available.
-  allModules <- map injectBuiltins <$> traverse parseOne cornFiles
-  -- Sort in dependency order; abort on cycles or missing imports.
-  let nameToFile = Map.fromList [(moduleName m, f) | (f, m) <- zip cornFiles allModules]
-  sortedModules <- case topoSortModules allModules of
-    Left names ->
-      error ("Module dependency cycle: " <> Text.unpack (Text.intercalate ", " names))
-    Right sorted -> do
-      let missing = checkImportsSatisfied sorted
-      unless (null missing) $
-        error ("Unsatisfied module imports: " <> show missing)
-      return sorted
-  -- Phase 2: compile each module in dependency order.
-  let sortedPairs = [(nameToFile Map.! moduleName m, m) | m <- sortedModules]
-  llFiles <- traverse (compileOne sortedModules) sortedPairs
-  callProcess "clang" $
-    ["-Wno-override-module", "-lgc", "-lgmp"]
-      <> llFiles
-      <> [runtimeC]
-      <> ["-o", buildDir </> "dist"]
- where
-  buildDir = ".build"
-  runtimeC = "runtime/dist/runtime-combined.c"
-  parseOne fname = do
-    content <- Text.readFile fname
-    case parse Parser.module_ "" content of
-      Left err -> error (errorBundlePretty err)
-      Right m -> return m
-  compileOne allMods (fname, m) = do
-    ir <- case evaluateModule mempty emptyIRBuilderEnv allMods m of
-      Left err -> error err
-      Right r -> return r
-    let outFile = buildDir </> takeBaseName fname <> ".ll"
-    Text.writeFile outFile (LLVM.IRRenderer.renderModule ir)
-    return outFile
-
--- | Run a test on a file, parsing and compiling it, then printing the result.
-runTestForFile :: FilePath -> IO ()
-runTestForFile fname = do
-  content <- Text.readFile fname
-  case parse Parser.module_ "" content of
-    Left err ->
-      error (errorBundlePretty err)
-    Right m ->
-      runTest m
-
--- | Run a test on a parsed module, compiling it and printing the LLVM IR.
-runTest :: Module Type -> IO ()
-runTest module_ =
-  case evaluateModule mempty emptyIRBuilderEnv [] module_ of
-    Right r ->
-      Text.putStrLn (LLVM.IRRenderer.renderModule r)
-    Left err ->
-      error (show err)

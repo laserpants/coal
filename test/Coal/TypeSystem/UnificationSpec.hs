@@ -616,10 +616,10 @@ runHspecTestCase specTestCase = do
       MatchTestCase _ _ e -> e
   testDescription =
     case specTestCase of
-      UnifyTestCase t1 t2 expected ->
-        prettyType t1 ++ " ~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
-      MatchTestCase t1 t2 expected ->
-        prettyType t1 ++ " >~ " ++ prettyType t2 ++ " ⇒ " ++ show expected
+      UnifyTestCase t1 t2 e ->
+        prettyType t1 <> " ~ " <> prettyType t2 <> " ⇒ " <> show e
+      MatchTestCase t1 t2 e ->
+        prettyType t1 <> " >~ " <> prettyType t2 <> " ⇒ " <> show e
 
 prettyType :: IndexedType -> String
 prettyType = renderString . layoutPretty defaultLayoutOptions . prettyCoal

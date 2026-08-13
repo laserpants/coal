@@ -58,9 +58,9 @@ checkMain files expectedOutput expectedResult = do
   output `shouldBe` expectedOutput
   case result of
     Left parseErr ->
-      expectationFailure $ "Parse error: " ++ parseErr
+      expectationFailure $ "Parse error: " <> parseErr
     Right (Left evalErr) ->
-      expectationFailure $ "Eval error: " ++ show evalErr
+      expectationFailure $ "Eval error: " <> show evalErr
     Right (Right val) ->
       showValue val `shouldBe` expectedResult
 

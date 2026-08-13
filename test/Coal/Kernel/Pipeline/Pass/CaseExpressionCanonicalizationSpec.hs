@@ -3,18 +3,18 @@
 
 module Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalizationSpec (spec) where
 
-import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
+import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..))
 import Coal.Kernel.Language.Module (Module (..), moduleObjects)
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Pipeline.Invariant (checkCaseExpressionsCanonical)
 import Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalization (caseExpressionCanonicalization)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, runPass, unit_)
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, ne, runPass, unit_)
 import Data.List (sortBy)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Ord (comparing)
 import Data.Text (Text)
-import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
+import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -23,11 +23,6 @@ import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
 -- | A nullary-constructor clause: @| ConName => unit_@.
 leaf :: Text -> Clause Type
 leaf name = Clause (ne [lbl name]) unit_
-
--- | Helper to build NonEmpty from a non-empty list.
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
 
 {- | Module with DData for the given (name, index) pairs and a single function
 whose body is the given expression.
@@ -93,7 +88,7 @@ spec = do
          in runPass caseExpressionCanonicalization input `shouldBe` Right expected
 
       it "case nested inside a let binding body is also sorted" $
-        let inner clauses = ECase TOpq unit_ (ne (map leaf clauses))
+        let inner clauses = ECase TOpq unit_ (ne (leaf <$> clauses))
             input =
               modWithData
                 [("A", 0), ("Z", 1)]

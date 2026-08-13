@@ -32,9 +32,9 @@ spec = do
           b = mkModule "B" ["C"]
           c = mkModule "C" []
           expectNames = ["C", "B", "A"]
-      fmap (map moduleName) (topoSortModules [a, b, c]) `shouldBe` Right expectNames
-      fmap (map moduleName) (topoSortModules [c, a, b]) `shouldBe` Right expectNames
-      fmap (map moduleName) (topoSortModules [b, c, a]) `shouldBe` Right expectNames
+      fmap moduleName <$> topoSortModules [a, b, c] `shouldBe` Right expectNames
+      fmap moduleName <$> topoSortModules [c, a, b] `shouldBe` Right expectNames
+      fmap moduleName <$> topoSortModules [b, c, a] `shouldBe` Right expectNames
 
     it "detects a two-module cycle" $ do
       let a = mkModule "A" ["B"]

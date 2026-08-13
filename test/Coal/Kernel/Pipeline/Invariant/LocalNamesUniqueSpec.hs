@@ -25,7 +25,7 @@ lbl = Label TOpq
 
 -- | @let name = rhs in body@
 letOne :: Text -> Expr Type -> Expr Type -> Expr Type
-letOne name rhs body = ELet (Binding (lbl name) rhs :| []) body
+letOne name rhs = ELet (Binding (lbl name) rhs :| [])
 
 -- ---------------------------------------------------------------------------
 -- Tests
