@@ -155,8 +155,7 @@ collectCachedImports ::
   Map Name ObjectInterface ->
   [Name] ->
   ([(Name, IROperand)], [(Name, IROperand)], [(Name, Int)])
-collectCachedImports objs importNames =
-  foldr step ([], [], []) importNames
+collectCachedImports objs = foldr step ([], [], [])
  where
   step name acc@(consts, fns, arities) =
     case Map.lookup name objs of
