@@ -2157,7 +2157,7 @@ The @".coal.b"@ suffix mirrors the extension used in
 'Coal.Compiler.Build.Cache.writeBuildFile'.
 -}
 builtinCacheFiles :: [FilePath]
-builtinCacheFiles = map (\name -> unpack name <> ".coal.b") builtinModulesPaths
+builtinCacheFiles = (\name -> unpack name <> ".coal.b") <$> builtinModulesPaths
 
 {- | Remove every user-module cache file from `.build/`, keeping only the
 built-in module caches. Other artifacts (e.g. kernel integration-test
