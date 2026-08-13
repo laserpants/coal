@@ -2147,7 +2147,6 @@ runSpec :: FilePath -> [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec srcPath files = do
   e <-
     evalCompilerT emptyCompilerEnvironment $ do
-      -- TODO: cache?
       setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
       runPass pipeline files
   case e of
