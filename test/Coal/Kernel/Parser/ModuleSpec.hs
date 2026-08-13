@@ -10,14 +10,10 @@ import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Language.Type.Constructors as T
 import Coal.Kernel.Parser.Module (module_)
-import Control.Monad (forM_)
 import qualified Data.Text as Text
-import qualified Data.Text.IO as TextIO
 import Data.Void (Void)
-import System.Directory (doesDirectoryExist, doesFileExist, listDirectory)
-import System.FilePath (takeExtension, (</>))
-import Test.Hspec (Spec, describe, expectationFailure, it, runIO, shouldBe, shouldSatisfy)
-import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, parse)
+import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
+import Text.Megaparsec (ParseErrorBundle, parse)
 
 -- | Helper to parse a module
 parseModule :: Text.Text -> Either (ParseErrorBundle Text.Text Void) (Module Type)
@@ -32,38 +28,6 @@ isRight _ = False
 isLeft :: Either a b -> Bool
 isLeft (Left _) = True
 isLeft (Right _) = False
-
--- | Assert that a module parses successfully, with pretty error messages
-shouldParseSuccessfully :: Either (ParseErrorBundle Text.Text Void) (Module Type) -> IO ()
-shouldParseSuccessfully (Right _) = return ()
-shouldParseSuccessfully (Left err) = expectationFailure $ errorBundlePretty err
-
--- ============================================================================
--- File Discovery Helpers
--- ============================================================================
-
--- | Find all .corn files recursively in a directory
-findCornFiles :: FilePath -> IO [FilePath]
-findCornFiles dir = do
-  exists <- doesDirectoryExist dir
-  if not exists
-    then return []
-    else do
-      entries <- listDirectory dir
-      let paths = map (dir </>) entries
-      files <- filterM doesFileExist paths
-      let cornFiles = filter (\f -> takeExtension f == ".corn") files
-      subdirs <- filterM doesDirectoryExist paths
-      subCornFiles <- concat <$> mapM findCornFiles subdirs
-      return (cornFiles ++ subCornFiles)
-
--- | Filter predicate for IO
-filterM :: (Monad m) => (a -> m Bool) -> [a] -> m [a]
-filterM _ [] = return []
-filterM p (x : xs) = do
-  flg <- p x
-  ys <- filterM p xs
-  return (if flg then x : ys else ys)
 
 -- | Test specification for the Module parser
 spec :: Spec
@@ -329,15 +293,15 @@ spec = do
         parseModule "module Test { F () = 1 }" `shouldSatisfy` isLeft
 
     describe "full module examples from files" $ do
-      let examplesDir = "test/examples"
-      cornFiles <- runIO $ findCornFiles examplesDir
-
       it "parses simple module with tuple2 type constructor" $
         parseModule "module Test { X = $Tuple2 : tuple2(int32,int32) }"
           `shouldSatisfy` isRight
 
-    -- NOTE: File-based tests temporarily disabled while .corn example files
-    -- are being updated to use the new grouped data syntax.
+    -- NOTE: File-based tests temporarily disabled. Some .corn example files
+    -- under test/examples have not yet been migrated to the current grouped
+    -- data syntax. Re-enable once the migration is complete.
+    -- let examplesDir = "test/examples"
+    -- cornFiles <- runIO $ findCornFiles examplesDir
     -- forM_ cornFiles $ \filePath -> do
     --   content <- runIO $ TextIO.readFile filePath
     --   it ("parses " ++ filePath) $

@@ -9,11 +9,7 @@ import Control.Monad (forM_)
 import qualified Data.List.NonEmpty as NonEmpty
 import Test.Hspec
 
-data SubstitutionSpecTestCase = SubstitutionSpecTestCase
-  { substitution :: Substitution
-  , input :: IndexedType
-  , expected :: IndexedType
-  }
+data SubstitutionSpecTestCase = SubstitutionSpecTestCase Substitution IndexedType IndexedType
 
 substitutionTests :: [SubstitutionSpecTestCase]
 substitutionTests =
@@ -113,11 +109,11 @@ substitutionSpec =
   describe "Substitution tests" $ do
     describe "apply" $ do
       forM_ substitutionTests $ \(SubstitutionSpecTestCase sub inp expct) ->
-        it (show inp ++ " under " ++ show sub) $
+        it (show inp <> " under " <> show sub) $
           apply sub inp `shouldBe` expct
     describe "merge" $ do
       forM_ mergeTests $ \(s1, s2, expected) ->
-        it (show s1 ++ " <> " ++ show s2) $
+        it (show s1 <> " <> " <> show s2) $
           merge s1 s2 `shouldBe` expected
     describe "normalizeTypeIndexes" $ do
       forM_ normalizeTests $ \(inp, expected) ->

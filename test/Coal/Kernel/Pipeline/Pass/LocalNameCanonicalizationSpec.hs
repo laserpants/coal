@@ -9,8 +9,7 @@ import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Pipeline.Invariant (checkLocalNamesUnique)
 import Coal.Kernel.Pipeline.Pass.LocalNameCanonicalization (localNameCanonicalization)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, runPass, unit_)
-import Data.List.NonEmpty (NonEmpty (..))
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, ne, runPass, unit_, var)
 import Data.Text (Text)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
@@ -20,19 +19,8 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 -- Fresh names follow the pattern "<original>.<counter>" where the counter
 -- starts at 0 and increments globally (not per-binding).
 
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
-
--- | Variable reference by label.
-var :: Text -> Expr Type
-var n = EVar (lbl n)
-
 letBind :: [(Text, Expr Type)] -> Expr Type -> Expr Type
-letBind pairs = ELet (ne (map (\(n, e) -> Binding (lbl n) e) pairs))
-
-letBindRenamed :: [(Text, Expr Type)] -> Expr Type -> Expr Type
-letBindRenamed pairs = ELet (ne (map (\(n, e) -> Binding (Label TOpq n) e) pairs))
+letBind pairs = ELet (ne ((\(n, e) -> Binding (lbl n) e) <$> pairs))
 
 -- ---------------------------------------------------------------------------
 -- Tests
@@ -126,7 +114,7 @@ spec = do
               Left e -> fail (show e)
               Right m -> case moduleObjects m of
                 [DFunction _ _ params _] ->
-                  map (\(Label _ n) -> n) params `shouldBe` ["x"]
+                  (\(Label _ n) -> n) <$> params `shouldBe` ["x"]
                 _ -> fail "unexpected module structure"
 
       it "constructor name in ECon is unchanged" $

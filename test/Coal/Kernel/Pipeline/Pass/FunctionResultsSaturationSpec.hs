@@ -11,26 +11,12 @@ import qualified Coal.Kernel.Language.Type.Constructors as Type
 import Coal.Kernel.Language.Type.Function ((~>))
 import Coal.Kernel.Pipeline.Invariant (checkFunctionResultsSaturated)
 import Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation (functionResultsSaturation)
-import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, runPass, unit_)
-import Data.List.NonEmpty (NonEmpty (..))
-import Data.Text (Text)
+import Coal.Kernel.Pipeline.Pass.TestHelpers (lbl, mkModule, ne, runPass, unit_)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
 -- ---------------------------------------------------------------------------
 -- Helpers
 -- ---------------------------------------------------------------------------
-
-ne :: [a] -> NonEmpty a
-ne (x : xs) = x :| xs
-ne [] = error "ne: empty list"
-
--- | Variable reference with int32 type.
-ivar :: Text -> Expr Type
-ivar n = EVar (Label Type.int32 n)
-
--- | Variable reference with bool type.
-bvar :: Text -> Expr Type
-bvar n = EVar (Label Type.bool n)
 
 {- | A body expression whose type is @int32 ~> bool@ (a function type).
 We use a variable whose label has this type.
