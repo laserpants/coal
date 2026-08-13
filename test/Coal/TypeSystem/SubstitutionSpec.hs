@@ -9,11 +9,7 @@ import Control.Monad (forM_)
 import qualified Data.List.NonEmpty as NonEmpty
 import Test.Hspec
 
-data SubstitutionSpecTestCase = SubstitutionSpecTestCase
-  { substitution :: Substitution
-  , input :: IndexedType
-  , expected :: IndexedType
-  }
+data SubstitutionSpecTestCase = SubstitutionSpecTestCase Substitution IndexedType IndexedType
 
 substitutionTests :: [SubstitutionSpecTestCase]
 substitutionTests =
