@@ -12,7 +12,7 @@ it to bitcode via @llvm-as@.
 module Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen) where
 
 import qualified Coal.Common.Environment as Environment
-import Coal.Compiler.Build (Build (..))
+import Coal.Compiler.Build (Build (..), setBuildKernelInterface)
 import Coal.Compiler.Build.Cache (buildCacheDir, writeBuildFile)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Build.NameEntry (DataConstructorEntry (..), TypeConstructorEntry (..))
@@ -25,6 +25,7 @@ import Coal.Compiler.State (CompilerState (compilerConfig))
 import Coal.Debug (writeDebugFile)
 import qualified Coal.Kernel.Builtin.Objects as Builtin
 import qualified Coal.Kernel.Compiler as Kernel
+import Coal.Kernel.Language.Interface (moduleInterface)
 import Coal.Kernel.Language.Module (Module (..))
 import qualified Coal.Kernel.Language.Object as Kernel
 import qualified Coal.Kernel.Language.Type as Kernel
@@ -114,14 +115,29 @@ pass envelopes = do
           , (_, entry) <- Environment.toList (buildDataConstructors b)
           ]
 
+  -- Reconstruct the codegen interface (functions and constants) of BCached
+  -- modules so freshly compiled modules can resolve references to imports
+  -- that live in cached builds.
+  let cachedObjects =
+        Map.unions
+          [ buildKernelInterface b
+          | BCached b <- envelopes
+          ]
+
   -- Run the new-kernel compiler purely on all source modules together
   -- (cross-module context is required for LLVM codegen).
-  irs <- case Kernel.runCompiler (Kernel.compileModules config cachedTagBindings cachedDDataInfo (builtinMod : augmented)) of
+  (normalized, irs) <- case Kernel.runCompiler (Kernel.compileModules config cachedTagBindings cachedDDataInfo cachedObjects (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError
-    Right irs ->
-      pure irs
+    Right result ->
+      pure result
+
+  -- The cache interface must reflect the *normalized* modules (whose curried
+  -- functions have been eta-expanded by functionResultsSaturation), so that
+  -- the reconstructed cross-module bindings use flat (non-nested) IR types.
+  -- normalized[0] is Builtin$; normalized[1..] align with `sources`.
+  let sourceMap = Map.fromList (zip (fst <$> sources) (drop 1 normalized))
 
   -- Assemble each module's LLVM IR to bitcode via llvm-as.
   -- irs[0] is Builtin$'s IR; irs[1..n] correspond to augmented[0..n-1].
@@ -145,7 +161,9 @@ pass envelopes = do
         setBitcodeC name bc
         getBuildC name >>= \case
           Nothing -> pure ()
-          Just build_ -> writeBuildFile buildCacheDir name build_
+          Just build_ -> do
+            let iface = maybe mempty moduleInterface (Map.lookup name sourceMap)
+            writeBuildFile buildCacheDir name (setBuildKernelInterface iface build_)
       pure (assembled <> cached)
 
 {- | Render one IR module to text, optionally write a debug @.ll@ file,

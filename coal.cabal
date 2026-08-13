@@ -157,6 +157,7 @@ library
       Coal.Kernel.FreeVars
       Coal.Kernel.Graphviz.Dot
       Coal.Kernel.Language.Expr
+      Coal.Kernel.Language.Interface
       Coal.Kernel.Language.Module
       Coal.Kernel.Language.Object
       Coal.Kernel.Language.Op

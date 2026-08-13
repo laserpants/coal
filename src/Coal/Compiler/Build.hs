@@ -31,6 +31,7 @@ module Coal.Compiler.Build (
   -- * Path and hash operations
   setBuildPath,
   setBuildBitcode,
+  setBuildKernelInterface,
   setBuildHash,
   setBuildConfigHash,
   insertHash,
@@ -74,6 +75,7 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Build.NameEntry
+import Coal.Kernel.Language.Interface (ObjectInterface)
 import Coal.Language (IndexedScheme, IndexedType)
 import Coal.Language.Module.Path (Path (..))
 import Control.Monad.State (execState, modify)
@@ -133,6 +135,7 @@ data Build a = Build
   , buildBitcode :: Maybe ByteString
   , buildHash :: Maybe Hash256
   , buildConfigHash :: Maybe Hash256
+  , buildKernelInterface :: Map Name ObjectInterface
   }
   deriving (Show, Eq, Ord, Generic, Functor, Foldable, Traversable)
 
@@ -160,6 +163,7 @@ emptyBuild =
     , buildBitcode = Nothing
     , buildHash = Nothing
     , buildConfigHash = Nothing
+    , buildKernelInterface = mempty
     }
 
 -- -----------------------------------------------------------------------------
@@ -179,6 +183,14 @@ setBuildBitcode :: ByteString -> Build a -> Build a
 setBuildBitcode newBuildBitcode Build{..} =
   Build
     { buildBitcode = Just newBuildBitcode
+    , ..
+    }
+
+-- | Set the serialized kernel module interface used for cross-module codegen
+setBuildKernelInterface :: Map Name ObjectInterface -> Build a -> Build a
+setBuildKernelInterface newBuildKernelInterface Build{..} =
+  Build
+    { buildKernelInterface = newBuildKernelInterface
     , ..
     }
 
