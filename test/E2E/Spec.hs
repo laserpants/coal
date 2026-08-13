@@ -3,10 +3,17 @@
 module E2E.Spec (e2eSpec, runSpec) where
 
 import Coal.Compiler (pipeline)
+import Coal.Compiler.Build.Cache (buildCacheDir)
+import Coal.Compiler.Builtin.Modules (builtinModulesPaths)
 import Coal.Compiler.Config (CompilerConfig (..), defaultConfig)
 import Coal.Compiler.Environment (emptyCompilerEnvironment)
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
+import Control.Monad (forM_, when)
+import Data.List (isSuffixOf)
+import Data.Text (unpack)
+import System.Directory (doesDirectoryExist, listDirectory, removeFile)
+import System.FilePath ((</>))
 import System.Process (readProcess)
 import Test.Hspec (Spec, describe, it, shouldBe)
 
@@ -2143,11 +2150,34 @@ expectOutput expt srcPath files =
     res <- runSpec srcPath files
     res `shouldBe` Right (expt <> "\n")
 
+{- | Cache file names (relative to `.build/`) for the compiler's built-in
+modules. These are preserved across examples so the (expensive) built-in
+compilation only happens once per test run.
+The @".coal.b"@ suffix mirrors the extension used in
+'Coal.Compiler.Build.Cache.writeBuildFile'.
+-}
+builtinCacheFiles :: [FilePath]
+builtinCacheFiles = map (\name -> unpack name <> ".coal.b") builtinModulesPaths
+
+{- | Remove every user-module cache file from `.build/`, keeping only the
+built-in module caches. Other artifacts (e.g. kernel integration-test
+@.ll@ files and @dist@) are left untouched.
+-}
+clearUserBuildCache :: IO ()
+clearUserBuildCache = do
+  exists <- doesDirectoryExist buildCacheDir
+  when exists $ do
+    files <- listDirectory buildCacheDir
+    forM_ files $ \f ->
+      when (".coal.b" `isSuffixOf` f && f `notElem` builtinCacheFiles) $
+        removeFile (buildCacheDir </> f)
+
 runSpec :: FilePath -> [FilePath] -> IO (Either CompilerFailureMode String)
 runSpec srcPath files = do
+  clearUserBuildCache
   e <-
     evalCompilerT emptyCompilerEnvironment $ do
-      setConfigC defaultConfig{configNoCache = True, configSilent = True, configSourcePaths = [srcPath]}
+      setConfigC defaultConfig{configNoCache = False, configSilent = True, configSourcePaths = [srcPath]}
       runPass pipeline files
   case e of
     Left e1 ->
