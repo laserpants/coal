@@ -174,7 +174,7 @@ runTest :: [Pat] -> Bool
 runTest px =
   case runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive px)) of
     Right r -> r
-    Left err -> error ("Unexpected compiler failure: " ++ show err)
+    Left err -> error ("Unexpected compiler failure: " <> show err)
  where
   setupEnv = do
     put
@@ -236,7 +236,7 @@ runTest2 :: [Pattern a () t] -> Bool
 runTest2 px =
   case runIdentity (evalCompilerT emptyCompilerEnvironment (setupEnv >> exhaustive (translatePattern <$> px))) of
     Right r -> r
-    Left err -> error ("Unexpected compiler failure: " ++ show err)
+    Left err -> error ("Unexpected compiler failure: " <> show err)
  where
   setupEnv = do
     put
