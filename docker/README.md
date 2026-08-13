@@ -25,7 +25,7 @@ Use this image if you want to **compile and run Coal programs** without building
 
 The **development image for contributors**. This image includes only the build toolchain needed to compile Coal from source:
 
-- Haskell toolchain (GHC 9.4.8, Stack)
+- Haskell toolchain (GHC 9.10.3, Stack)
 - LLVM / Clang
 - GCC / build-essential
 - GMP and Boehm GC development libraries

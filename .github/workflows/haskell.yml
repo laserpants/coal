@@ -28,6 +28,11 @@ jobs:
 
       - uses: haskell-actions/setup@v2
         with:
+          # Keep in sync with the GHC version used by the resolver in stack.yaml
+          # (lts-24.50 -> ghc-9.10.3). Using "latest" pulls a newer GHC that no
+          # longer compiles older hlint dependencies (conduit, ghc-lib-parser)
+          # which use `~` in type signatures without the TypeOperators extension.
+          ghc-version: '9.10.3'
           enable-stack: true
 
       - name: Cache Stack

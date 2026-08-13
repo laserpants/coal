@@ -66,8 +66,8 @@ ENV PATH="/root/.ghcup/bin:${PATH}"
 # Adjust these versions as desired.
 # -----------------------------------------------------------------------------
 
-RUN ghcup install ghc 9.4.8
-RUN ghcup set ghc 9.4.8
+RUN ghcup install ghc 9.10.3
+RUN ghcup set ghc 9.10.3
 
 RUN ghcup install stack
 RUN ghcup set stack

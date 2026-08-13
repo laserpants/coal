@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
 {- |
@@ -18,8 +19,10 @@ subexpressions.
 -}
 module Coal.Kernel.Language.Prim (Prim (..)) where
 
+import Data.Binary (Binary)
 import Data.ByteString (ByteString)
 import Data.Int (Int32, Int64)
+import GHC.Generics (Generic)
 
 {- | Core language primitive literals.
 
@@ -46,4 +49,6 @@ data Prim
     PChar Int32
   | -- | UTF-8 encoded strings
     PString ByteString
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance Binary Prim

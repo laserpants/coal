@@ -10,6 +10,7 @@ global bindings, imported symbols, and variable references. Used by the main
 code generator to build the IR environment before compiling function bodies.
 -}
 module Coal.Kernel.LLVM.Module (
+  collectCachedImports,
   collectImportedConstants,
   collectImportedDData,
   collectImportedFunctionBindings,
@@ -18,6 +19,8 @@ module Coal.Kernel.LLVM.Module (
   objectExprVarRefs,
 ) where
 
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 
 import LLVM.IR (IROperand (OGlobal), IRType (TFun, TPtr))
@@ -27,6 +30,7 @@ import Coal.Kernel.FreeVars (freeVars)
 import Coal.Kernel.LLVM.Boxing (irTypeRep, irValueTypeRep)
 import Coal.Kernel.LLVM.Prim (primToIRConstant)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
+import Coal.Kernel.Language.Interface (ObjectInterface (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
@@ -133,3 +137,40 @@ objectExprVarRefs = \case
   DConstant _ expr ->
     [(n, t) | Label t n <- Set.toList (freeVars expr)]
   _ -> []
+
+{- | Reconstruct the imported function/constant bindings for names that live in
+cached ('BCached') modules rather than in @allModules@.
+
+Returns @(constantBindings, functionBindings, functionArities)@, mirroring what
+'collectImportedConstants', 'collectImportedFunctionBindings', and
+'collectImportedFunctions' produce for source modules, so 'irModule' can treat
+cached and source imports uniformly.
+
+The reconstruction matches 'objectGlobalBinding' exactly: functions bind to
+@OGlobal (TFun resultIRType paramIRTypes) name@; directly-representable literal
+constants bind to their global IR type; every other constant is a thunk bound to
+@force#_name@.
+-}
+collectCachedImports ::
+  Map Name ObjectInterface ->
+  [Name] ->
+  ([(Name, IROperand)], [(Name, IROperand)], [(Name, Int)])
+collectCachedImports objs = foldr step ([], [], [])
+ where
+  step name acc@(consts, fns, arities) =
+    case Map.lookup name objs of
+      Nothing ->
+        acc
+      Just (IFunction params rty) ->
+        let op = OGlobal (TFun (irTypeRep rty) (irValueTypeRep <$> params)) name
+         in (consts, (name, op) : fns, (name, length params) : arities)
+      Just (IConstant (Just prim)) ->
+        case primToIRConstant prim of
+          Just (irt, _) ->
+            ((name, OGlobal irt name) : consts, fns, arities)
+          Nothing ->
+            ((name, thunk name) : consts, fns, arities)
+      Just (IConstant Nothing) ->
+        ((name, thunk name) : consts, fns, arities)
+
+  thunk n = OGlobal (TFun TPtr []) ("force#_" <> n)
