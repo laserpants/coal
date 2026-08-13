@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE StrictData #-}
 
 {- |
@@ -22,6 +23,8 @@ structural comparison of record types.
 module Coal.Kernel.Language.Type (Type (..)) where
 
 import Coal.Common.Name (Name)
+import Data.Binary (Binary)
+import GHC.Generics (Generic)
 
 {- | Core language types.
 
@@ -43,4 +46,6 @@ data Type
     RExt Name Type Type
   | -- | Empty row
     RNil
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Generic)
+
+instance Binary Type

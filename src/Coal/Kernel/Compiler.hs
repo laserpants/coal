@@ -56,6 +56,7 @@ import Coal.Common.Name (Name)
 import Coal.Compiler.Config (CompilerConfig (configEntryPoint))
 import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
 import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..), IRCodegenError, runIRCodegen)
+import Coal.Kernel.Language.Interface (ObjectInterface)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Type (Type)
 import qualified Coal.Kernel.Parser.Module as Parser
@@ -162,8 +163,8 @@ list of all (normalized) modules for cross-module context.
 For the entry point module (default: "Main"), additionally emits the C main
 entry point via 'irMainModule'.
 -}
-codeGenModule :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> [Module Type] -> Module Type -> CompilerT m IRModule
-codeGenModule config extraTags cachedDData allModules m =
+codeGenModule :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> Module Type -> CompilerT m IRModule
+codeGenModule config extraTags cachedDData cachedObjects allModules m =
   let isEntryPoint = case configEntryPoint config of
         Nothing -> moduleName m == Text.pack "Main"
         Just (entryMod, _) -> moduleName m == entryMod
@@ -173,7 +174,7 @@ codeGenModule config extraTags cachedDData allModules m =
       entryPointFunc = case configEntryPoint config of
         Nothing -> Text.pack "main"
         Just (_, entryFunc) -> entryFunc
-      initEnv = IRCodegenEnv{codegenVarEnv = mempty, codegenTagEnv = extraTags, codegenImportedDData = cachedDData}
+      initEnv = IRCodegenEnv{codegenVarEnv = mempty, codegenTagEnv = extraTags, codegenImportedDData = cachedDData, codegenImportedObjects = cachedObjects}
    in CompilerT $
         either throwError return $
           if isEntryPoint
@@ -185,7 +186,8 @@ codeGenModule config extraTags cachedDData allModules m =
 -- ---------------------------------------------------------------------------
 
 {- | Compile a list of modules through the full normalization pipeline
-and LLVM IR code generator, producing one 'IRModule' per input module.
+and LLVM IR code generator, producing the normalized modules and one
+'IRModule' per input module.
 
 The pipeline is run purely (no IO required); the base monad @m@ is
 unconstrained beyond 'Monad'.
@@ -193,14 +195,15 @@ unconstrained beyond 'Monad'.
 Example:
 @
   case runCompiler (compileModules modules) of
-    Left  err -> putStrLn ("Compiler error: " <> show err)
-    Right irs -> mapM_ (Text.putStrLn . runIRRenderer . renderModule) irs
+    Left  err -> putStrLn (\"Compiler error: \" <> show err)
+    Right (_, irs) -> mapM_ (Text.putStrLn . runIRRenderer . renderModule) irs
 @
 -}
-compileModules :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> [Module Type] -> CompilerT m [IRModule]
-compileModules config extraTags cachedDData mods = do
+compileModules :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> CompilerT m ([Module Type], [IRModule])
+compileModules config extraTags cachedDData cachedObjects mods = do
   normalized <- traverse normalizeModule mods
-  traverse (codeGenModule config extraTags cachedDData normalized) normalized
+  irs <- traverse (codeGenModule config extraTags cachedDData cachedObjects normalized) normalized
+  pure (normalized, irs)
 
 {- | Read and parse source files from the given paths, then call
 'compileModules'.
@@ -212,7 +215,7 @@ Parse errors for any file abort the compilation and are reported as
 compileFiles :: CompilerConfig -> [FilePath] -> CompilerT IO [IRModule]
 compileFiles config paths = do
   mods <- traverse parseOne paths
-  compileModules config Map.empty Map.empty mods
+  snd <$> compileModules config Map.empty Map.empty Map.empty mods
  where
   parseOne path = do
     src <- liftIO (Text.readFile path)

@@ -50,7 +50,7 @@ import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import Coal.Kernel.LLVM.Constructor (irCaseValue)
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
 import qualified Coal.Kernel.LLVM.Function as Function
-import qualified Coal.Kernel.LLVM.Module as MA (collectImportedConstants, collectImportedDData, collectImportedFunctionBindings, collectImportedFunctions, objectExprVarRefs, objectGlobalBinding)
+import qualified Coal.Kernel.LLVM.Module as MA (collectCachedImports, collectImportedConstants, collectImportedDData, collectImportedFunctionBindings, collectImportedFunctions, objectExprVarRefs, objectGlobalBinding)
 import Coal.Kernel.LLVM.Monad
 import Coal.Kernel.LLVM.Prim (irPrim)
 import qualified Coal.Kernel.LLVM.Prim as Prim
@@ -438,12 +438,16 @@ irModule :: [Module Type] -> Module Type -> IRCodegen () -> IRCodegen IRModule
 irModule allModules Module{moduleName, moduleObjects, moduleImports} afterObjects =
   buildModuleM moduleName $ do
     emitImportedDataConstructors allModules moduleImports
-    let importedConstantBindings = collectImportedConstants allModules moduleImports
-        importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports
-    emitImportedDeclarations allModules moduleImports importedConstantBindings importedFunctionBindings
+    cachedObjects <- asks codegenImportedObjects
+    let (cachedConstants, cachedFunctions, cachedArities) = MA.collectCachedImports cachedObjects moduleImports
+        sourceArities = collectImportedFunctions allModules moduleImports
+        importedConstantBindings = collectImportedConstants allModules moduleImports <> cachedConstants
+        importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports <> cachedFunctions
+        importedFunctionArities = sourceArities <> cachedArities
+    emitImportedDeclarations importedFunctionArities importedConstantBindings importedFunctionBindings
     let bindings = mapMaybe objectGlobalBinding moduleObjects <> importedConstantBindings <> importedFunctionBindings
         allTagBindings = buildTagBindings allModules
-        excludedNames = buildExcludedNames bindings allModules moduleImports
+        excludedNames = buildExcludedNames bindings (fst <$> importedFunctionArities)
     emitInlineExternalTrampolines moduleObjects excludedNames
     local
       ( \e ->
@@ -488,9 +492,9 @@ function type (e.g. @always : (a -> a) -> b -> (a -> a)@) has an arity of 3
 according to 'unfoldType' but only 2 actual parameters; deriving the
 declaration from the definition avoids this disagreement.
 -}
-emitImportedDeclarations :: [Module Type] -> [Name] -> [(Name, IROperand)] -> [(Name, IROperand)] -> IRCodegen ()
-emitImportedDeclarations allModules moduleImports importedConstantBindings importedFunctionBindings = do
-  forM_ (collectImportedFunctions allModules moduleImports) $
+emitImportedDeclarations :: [(Name, Int)] -> [(Name, IROperand)] -> [(Name, IROperand)] -> IRCodegen ()
+emitImportedDeclarations importedFunctionArities importedConstantBindings importedFunctionBindings = do
+  forM_ importedFunctionArities $
     uncurry irImportedFunctionTrampoline
   forM_ importedConstantBindings $ \(_, op) ->
     case op of
@@ -516,12 +520,12 @@ buildTagBindings allModules =
 {- | Names that must not be treated as inline C externals: module-local
 bindings and imported Coal functions.
 -}
-buildExcludedNames :: [(Name, IROperand)] -> [Module Type] -> [Name] -> Set.Set Name
-buildExcludedNames bindings allModules moduleImports =
+buildExcludedNames :: [(Name, IROperand)] -> [Name] -> Set.Set Name
+buildExcludedNames bindings importedFunctionNames =
   Set.union boundNames importedNames
  where
   boundNames = Set.fromList (fst <$> bindings)
-  importedNames = Set.fromList [n | (n, _) <- collectImportedFunctions allModules moduleImports]
+  importedNames = Set.fromList importedFunctionNames
 
 {- | Emit @$apply@ trampolines for inline C externals.
 
