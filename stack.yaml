@@ -44,6 +44,12 @@ packages:
 extra-deps:
   - ir-builder-0.1.0.0
 
+# Apply TypeOperators to every package (including dependencies) so that older
+# packages such as conduit and ghc-lib-parser, which use `~` in type signatures
+# without enabling TypeOperators, keep compiling on newer GHC versions.
+ghc-options:
+  "$everything": -XTypeOperators
+
 # Override default flag values for project packages and extra-deps
 # flags: {}
 
