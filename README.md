@@ -1,4 +1,6 @@
-# Coal
+# Coal 
+
+[![Haskell CI](https://github.com/laserpants/coal/actions/workflows/haskell.yml/badge.svg)](https://github.com/laserpants/coal/actions/workflows/haskell.yml)
 
 This repository is the home of the **Coal programming language** and compiler. 
 
