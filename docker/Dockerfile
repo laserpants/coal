@@ -36,6 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgmp-dev \
     libgc-dev \
     llvm \
+    openssh-client \
     clang \
     && rm -rf /var/lib/apt/lists/*
 
