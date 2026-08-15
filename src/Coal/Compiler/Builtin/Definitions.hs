@@ -180,8 +180,7 @@ builtinDefinitions =
                                       `TArrow` applyTypeArgs
                                         ()
                                         (TConstructor () "Machine")
-                                        ( TVariable (Parameter () "i") :| [TVariable (Parameter () "o")]
-                                        )
+                                        (TVariable (Parameter () "i") :| [TVariable (Parameter () "o")])
                                   )
                                   ( RExtend
                                       "view"
@@ -194,8 +193,7 @@ builtinDefinitions =
                       `TArrow` applyTypeArgs
                         ()
                         (TConstructor () "Machine")
-                        ( TVariable (Parameter () "i") :| [TVariable (Parameter () "o")]
-                        )
+                        (TVariable (Parameter () "i") :| [TVariable (Parameter () "o")])
                   )
               )
           ]

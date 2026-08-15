@@ -41,9 +41,10 @@ data Value
   | VDouble Double
   | VChar Int32
   | VString ByteString
-  | -- | A fully-applied or partially-applied data constructor.
-    -- The Name is the constructor's qualified name (e.g. "Main.Node").
-    -- The Int is the declared constructor index (from DData).
+  | {- | A fully-applied or partially-applied data constructor.
+    The Name is the constructor's qualified name (e.g. "Main.Node").
+    The Int is the declared constructor index (from DData).
+    -}
     VConstructor Name Int [Value]
   | -- | A record value: ordered mapping from field name to value.
     VRecord (Map Name Value)

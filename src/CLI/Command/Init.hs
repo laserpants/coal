@@ -47,6 +47,7 @@ initCommand InitCmdOptions{..} = do
           , c_sources = Nothing
           , dependencies = Nothing
           , entry_point = Just "Main.main"
+          , executable_name = Nothing
           }
   liftIO $ ByteString.writeFile "coal.json" (toStrict (encodePretty manifest))
 

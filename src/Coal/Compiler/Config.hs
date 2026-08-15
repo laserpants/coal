@@ -38,8 +38,9 @@ data CompilerConfig = CompilerConfig
   , configNoCache :: Bool
   , configEntryPoint :: Maybe (Name, Name)
   , configPackageNamespaces :: [(FilePath, Text, [Name])]
-  -- ^ Each triple: (canonical source dir, namespace prefix, unqualified module names).
-  --   Package modules from a given source dir are renamed as @namespace.ModuleName@.
+  {- ^ Each triple: (canonical source dir, namespace prefix, unqualified module names).
+  Package modules from a given source dir are renamed as @namespace.ModuleName@.
+  -}
   , configSanitize :: Bool
   }
   deriving (Show, Eq, Ord, Read)

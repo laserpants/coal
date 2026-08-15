@@ -87,11 +87,11 @@ canMatch scrutinee pats =
     [Label _ name] ->
       if isConstructorName name
         then -- Constructor pattern: only matches the named constructor.
-        case scrutinee of
-          VConstructor conName _ _ ->
-            conName == name
-          _ ->
-            False
+          case scrutinee of
+            VConstructor conName _ _ ->
+              conName == name
+            _ ->
+              False
         else True -- Variable binder: always matches.
     (Label _ conName : _) ->
       -- Multi-label: first label must name the constructor.

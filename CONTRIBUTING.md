@@ -126,8 +126,9 @@ submitting a pull request:
   `brew install llvm`. On Debian/Ubuntu: `apt install llvm clang`.
 - **Boehm GC** and **GMP**: `brew install bdw-gc gmp` (macOS) or
   `apt install libgc-dev libgmp-dev` (Debian/Ubuntu).
-- **fourmolu**: The Haskell formatter. Install with `stack install fourmolu`
-  or `cabal install fourmolu`.
+- **fourmolu**: The Haskell formatter. Install with `stack install fourmolu-0.20.0.0`
+  or `cabal install fourmolu-0.20.0.0`. The codebase is formatted with
+  fourmolu 0.20.0.0; the configuration is pinned in `fourmolu.yaml`.
 - **clang-format**: Required for the C runtime. Part of the LLVM/clang
   distribution.
 - **CMake**: Required to build the runtime tests: `brew install cmake` (macOS)

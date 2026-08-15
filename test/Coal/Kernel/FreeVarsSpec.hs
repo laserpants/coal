@@ -240,8 +240,8 @@ spec = do
                   (lbl "Cons" :| [lbl "x", lbl "xs1"])
                   (EApp TOpq (EVar (lbl "add")) (EVar (lbl "x") :| [EVar (lbl "y")]))
                   :| [ Clause
-                        (lbl "Nil" :| [])
-                        (EVar (lbl "z"))
+                         (lbl "Nil" :| [])
+                         (EVar (lbl "z"))
                      ]
               )
           )
