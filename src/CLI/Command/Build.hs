@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module CLI.Command.Build (buildCommand, deriveExecutableName) where
+module CLI.Command.Build (buildCommand, deriveExecutableName, resolveExecutableName) where
 
 import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
@@ -53,7 +53,7 @@ buildCommand caps = do
     let localSrcPaths = Text.unpack <$> fromMaybe ["src"] source_dirs
         pkgSrcPaths = [d | (d, _, _) <- canonNsInfo]
         entryPoint = parseEntryPoint entry_point
-        execName = deriveExecutableName name version
+        execName = resolveExecutableName name version executable_name
         config =
           defaultConfig
             { -- Local source dirs first so project modules shadow same-named package modules.
@@ -97,3 +97,9 @@ deriveExecutableName projectName =
   \case
     Just (PackageVersion v) -> Text.unpack projectName <> "-" <> Text.unpack (toText v)
     Nothing -> Text.unpack projectName
+
+{- | Resolve the final executable name, preferring an explicit @executable_name@
+override from the manifest over the derived @name-version@ form.
+-}
+resolveExecutableName :: Text -> Maybe PackageVersion -> Maybe FilePath -> FilePath
+resolveExecutableName projectName version = fromMaybe (deriveExecutableName projectName version)

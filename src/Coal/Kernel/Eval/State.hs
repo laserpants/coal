@@ -65,8 +65,9 @@ data EvalEnv = EvalEnv
   { envBindings :: Map Name Value
   -- ^ Local and global variable/function bindings.
   , envExterns :: Map Name ([Value] -> IO (Either EvalError Value))
-  -- ^ Host-provided handlers for external functions (coal_* etc.).
-  -- Using IO so handlers can perform real side effects.
+  {- ^ Host-provided handlers for external functions (coal_* etc.).
+  Using IO so handlers can perform real side effects.
+  -}
   }
 
 -- ---------------------------------------------------------------------------

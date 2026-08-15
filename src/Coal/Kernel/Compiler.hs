@@ -72,18 +72,22 @@ import Text.Megaparsec (errorBundlePretty, parse)
 through parsing, normalization passes, and LLVM IR code generation.
 -}
 data CompilerError
-  = -- | A source file failed to parse.  The string is the output of
-    --     'errorBundlePretty', suitable for direct display to the user.
+  = {- | A source file failed to parse.  The string is the output of
+    'errorBundlePretty', suitable for direct display to the user.
+    -}
     CompilerParseError String
-  | -- | A normalization pass signalled an error (e.g. over-saturated
-    --     constructor application).
+  | {- | A normalization pass signalled an error (e.g. over-saturated
+    constructor application).
+    -}
     CompilerPipelineError PipelineError
-  | -- | The IR code-generation phase encountered a semantic error
-    --     (e.g. unbound variable or non-function type in call position).
+  | {- | The IR code-generation phase encountered a semantic error
+    (e.g. unbound variable or non-function type in call position).
+    -}
     CompilerIRCodegenError IRCodegenError
-  | -- | The LLVM IR builder signalled an internal construction error
-    --     (e.g. block already terminated).  These indicate a compiler bug
-    --     rather than a user error.
+  | {- | The LLVM IR builder signalled an internal construction error
+    (e.g. block already terminated).  These indicate a compiler bug
+    rather than a user error.
+    -}
     CompilerIRBuilderError IRBuilderError
   deriving (Show, Eq)
 

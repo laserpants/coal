@@ -122,7 +122,7 @@ prettyLeadingCommaList (x : xs) =
   align
     ( "("
         <+> nest 2 x
-          <> mconcat ((\item -> line <> hang 2 ("," <+> item)) <$> xs)
-          <> line
-          <> ")"
+        <> mconcat ((\item -> line <> hang 2 ("," <+> item)) <$> xs)
+        <> line
+        <> ")"
     )

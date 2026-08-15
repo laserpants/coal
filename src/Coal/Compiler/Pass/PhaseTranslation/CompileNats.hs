@@ -145,7 +145,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
                       (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")))
                       ( EVariable mempty (Label (TIntrinsic IInt32) name)
                           <| ELiteral mempty (LInt32 0)
-                          :| []
+                            :| []
                       )
                   )
                   (EConstructor mempty (Label natType "$Zero"))
@@ -159,7 +159,7 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
                           (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")))
                           ( EVariable mempty (Label (TIntrinsic IInt32) name)
                               <| ELiteral mempty (LInt32 1)
-                              :| []
+                                :| []
                           )
                           :| []
                       )

@@ -464,7 +464,6 @@ expandLetDefinitionTraits name =
                   , ..
                   }
             else -- Check if a trait constraint is on a type variable (not yet resolved)
-
               pure $
                 LetDefinition
                   { letDefinitionType = With (tr : trs) t

@@ -69,42 +69,42 @@ typeApplicationSpec =
       -- Foo<nat>
       applyTypeArgs KType (TConstructor (KArrow KType KType) "Foo") (TIntrinsic INat :| [])
         `shouldBe` ( TApplication
-                      KType
-                      (TConstructor (KArrow KType KType) "Foo")
-                      (TIntrinsic INat) ::
-                      IndexedType
+                       KType
+                       (TConstructor (KArrow KType KType) "Foo")
+                       (TIntrinsic INat) ::
+                       IndexedType
                    )
 
     it "applies two type arguments" $
       -- Foo2<nat, int32>
       applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Foo2") (TIntrinsic INat :| [TIntrinsic IInt32])
         `shouldBe` ( TApplication
-                      KType
-                      ( TApplication
-                          (KArrow KType KType)
-                          (TConstructor (KArrow KType (KArrow KType KType)) "Foo2")
-                          (TIntrinsic INat) ::
-                          IndexedType
-                      )
-                      (TIntrinsic IInt32) ::
-                      IndexedType
+                       KType
+                       ( TApplication
+                           (KArrow KType KType)
+                           (TConstructor (KArrow KType (KArrow KType KType)) "Foo2")
+                           (TIntrinsic INat) ::
+                           IndexedType
+                       )
+                       (TIntrinsic IInt32) ::
+                       IndexedType
                    )
 
     it "applies three type arguments" $
       -- Foo3<nat, string, int32,>
       applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Foo3") (TIntrinsic INat :| [TIntrinsic IString, TIntrinsic IInt32])
         `shouldBe` ( TApplication
-                      KType
-                      ( TApplication
-                          (KArrow KType KType)
-                          ( TApplication
-                              (KArrow KType (KArrow KType KType))
-                              (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Foo3")
-                              (TIntrinsic INat) ::
-                              IndexedType
-                          )
-                          (TIntrinsic IString)
-                      )
-                      (TIntrinsic IInt32) ::
-                      IndexedType
+                       KType
+                       ( TApplication
+                           (KArrow KType KType)
+                           ( TApplication
+                               (KArrow KType (KArrow KType KType))
+                               (TConstructor (KArrow KType (KArrow KType (KArrow KType KType))) "Foo3")
+                               (TIntrinsic INat) ::
+                               IndexedType
+                           )
+                           (TIntrinsic IString)
+                       )
+                       (TIntrinsic IInt32) ::
+                       IndexedType
                    )

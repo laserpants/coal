@@ -46,7 +46,7 @@ prettyExpr pt expr =
       "fn"
         <> parens (prettyCommaSep (NonEmpty.toList params) (prettyLabel pt))
         <+> "=>"
-          <> nest 2 (line <> prettyExpr pt body)
+        <> nest 2 (line <> prettyExpr pt body)
     EApp retType func args ->
       "@<"
         <> pt retType
@@ -113,7 +113,7 @@ prettyExpr pt expr =
             ( \(f, v) ->
                 pretty f
                   <+> "="
-                    <> nest 2 (line <> prettyExpr pt v)
+                  <> nest 2 (line <> prettyExpr pt v)
             )
               <$> allFields
           allDocs = fieldDocs <> [prettyExpr pt finalRest]
@@ -165,7 +165,7 @@ prettyClause pt (Clause patterns expr) =
   "|"
     <+> prettyLeadingCommaList (prettyLabel pt <$> NonEmpty.toList patterns)
     <+> "=>"
-      <> nest 4 (line <> prettyExpr pt expr)
+    <> nest 4 (line <> prettyExpr pt expr)
 
 -- | Helper: comma-separated list
 prettyCommaSep :: [a] -> (a -> Doc ann) -> Doc ann
@@ -187,7 +187,7 @@ prettyLeadingCommaList (x : xs) =
   align
     ( "("
         <+> nest 2 x
-          <> mconcat ((\item -> line <> hang 2 ("," <+> item)) <$> xs)
-          <> line
-          <> ")"
+        <> mconcat ((\item -> line <> hang 2 ("," <+> item)) <$> xs)
+        <> line
+        <> ")"
     )

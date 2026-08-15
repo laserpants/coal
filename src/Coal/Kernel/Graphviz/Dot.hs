@@ -489,18 +489,18 @@ generateDotSyntax ast =
   (_, finalState) = runState (toDot ast) initialState
   dotNodes =
     [ showt dotNodeId
-      <> " [shape="
-      <> shapeToDotSyntax dotNodeShape
-      <> ", label="
-      <> labelToDotSyntax dotNodeLabel dotNodeName
-      <> "];"
+        <> " [shape="
+        <> shapeToDotSyntax dotNodeShape
+        <> ", label="
+        <> labelToDotSyntax dotNodeLabel dotNodeName
+        <> "];"
     | DotNode{..} <- dotStateNodes finalState
     ]
   dotEdges =
     [ showt dotEdgeFrom
-      <> " -> "
-      <> showt dotEdgeTo
-      <> edgeLabelToDotSyntax dotEdgeLabel
-      <> ";"
+        <> " -> "
+        <> showt dotEdgeTo
+        <> edgeLabelToDotSyntax dotEdgeLabel
+        <> ";"
     | DotEdge{..} <- dotStateEdges finalState
     ]
