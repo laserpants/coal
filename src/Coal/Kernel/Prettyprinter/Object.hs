@@ -53,7 +53,7 @@ prettyObject pt obj =
           pretty name
             <> parens (prettyLabel pt param)
             <+> "="
-              <> nest 2 (line <> prettyExpr pt body)
+            <> nest 2 (line <> prettyExpr pt body)
         _ ->
           -- Multi param: Name\n  ( param1\n  , param2\n  ) =\n    body
           pretty name
@@ -62,7 +62,7 @@ prettyObject pt obj =
               ( line
                   <> prettyLeadingCommaList (prettyLabel pt <$> params)
                   <+> "="
-                    <> nest 2 (line <> prettyExpr pt body)
+                  <> nest 2 (line <> prettyExpr pt body)
               )
     DConstant name expr ->
       -- Qualified.Name = expr

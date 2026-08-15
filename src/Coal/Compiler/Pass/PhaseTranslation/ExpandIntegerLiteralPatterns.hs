@@ -153,10 +153,10 @@ numericLiteral (ll@(Label t _), int) e1 =
     (EOperator mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
     ( e1
         :| [ EApplication
-              mempty
-              (TIntrinsic IBool)
-              (EVariable mempty (Label (t `TArrow` t `TArrow` TIntrinsic IBool) "(==)"))
-              (EVariable mempty ll :| [fromLiteral t int])
+               mempty
+               (TIntrinsic IBool)
+               (EVariable mempty (Label (t `TArrow` t `TArrow` TIntrinsic IBool) "(==)"))
+               (EVariable mempty ll :| [fromLiteral t int])
            ]
     )
 

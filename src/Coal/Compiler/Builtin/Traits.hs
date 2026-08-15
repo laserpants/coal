@@ -55,24 +55,19 @@ builtinTraits =
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
               "from_bignum"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
               "negate"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
               "(+)"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
               "(-)"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
               "(*)"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           ]
       )
   , DTrait
@@ -85,8 +80,7 @@ builtinTraits =
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
               "compare"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering"
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TConstructor () "Ordering")
           ]
       )
   , DTrait
@@ -99,8 +93,7 @@ builtinTraits =
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
               "(==)"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TIntrinsic IBool)
           ]
       )
   , DTrait
@@ -113,8 +106,7 @@ builtinTraits =
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
               "(/)"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           ]
       )
   , DTrait
@@ -127,8 +119,7 @@ builtinTraits =
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
               "(%)"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           ]
       )
   , DTrait
@@ -141,8 +132,7 @@ builtinTraits =
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
               "(<>)"
-              ( Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a")
-              )
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           ]
       )
   ]
