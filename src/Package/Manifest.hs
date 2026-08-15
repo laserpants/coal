@@ -42,6 +42,7 @@ data PackageManifest = PackageManifest
   , c_sources :: Maybe [FilePath]
   , dependencies :: Maybe (Map Text PackageDependency)
   , entry_point :: Maybe Text
+  , executable_name :: Maybe FilePath
   --  , compiler_version :: Text
   }
   deriving (Generic, Show, Eq)
