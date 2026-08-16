@@ -1,4 +1,4 @@
 module Coal.Version (version) where
 
 version :: String
-version = "v0.1.0-alpha.29"
+version = "v0.1.0-alpha.29-next"
