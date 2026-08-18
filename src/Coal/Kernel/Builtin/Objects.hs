@@ -2506,4 +2506,26 @@ objectList =
                   }
         |]
       )
+  , DFunction
+      Exported
+      "Builtin$.event$_loop_io"
+      [ Kernel.Label Kernel.TOpq "state"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "step_fn"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<IO(*)>(@<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*), @<IO(Option(*))>(step_fn : */IO(Option(*)), state : *))) {
+                    | ( None : Option(*) ) =>
+                        @<IO(*)>(`Builtin$.io$_return` : */IO(*), state : *)
+                    | ( Some : */Option(*)
+                      , next : *
+                      ) =>
+                        @<IO(*)>
+                          ( `Builtin$.event$_loop_io` : */(*/IO(Option(*)))/IO(*)
+                          , next : *
+                          , step_fn : */IO(Option(*))
+                          )
+                  }
+        |]
+      )
   ]
