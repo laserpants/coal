@@ -11,6 +11,17 @@ module Runtime {
     event$_loop(state, step_fn)
 
   /** 
+   * Co-recursive event loop with IO effects.
+   *
+   * Calls `step_fn` repeatedly with the current state, where `step_fn`
+   * returns an `IO` action producing `Option<next_state>`. Continues as
+   * long as the action yields `Some(next_state)`. Stops and returns the
+   * current state (wrapped in `IO`) when it yields `None`.
+   */
+  fun event_loop_io(state : a, step_fn : a -> IO<Option<a>>) : IO<a> =
+    event$_loop_io(state, step_fn)
+
+  /** 
    * Blocking poll loop.
    *
    * Calls `try_fn(state)`. If it returns `Some(result)`, returns `result`.

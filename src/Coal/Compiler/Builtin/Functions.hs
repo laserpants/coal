@@ -262,4 +262,11 @@ builtinFunctions =
           ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (state :| []))
           ~> state
     )
+  ,
+    ( "event$_loop_io"
+    , forall1 $ \state ->
+        state
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (state :| []) :| []))
+          ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (state :| [])
+    )
   ]

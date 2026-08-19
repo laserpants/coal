@@ -101,6 +101,7 @@ builtinNames =
       , ("machine$_run_while", Codata)
       , ("event$_blocking_poll", Codata)
       , ("event$_loop", Codata)
+      , ("event$_loop_io", Codata)
       ]
 
 -- | All built-in names as a set (for faster lookup)
