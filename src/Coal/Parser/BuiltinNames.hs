@@ -36,6 +36,8 @@ data BuiltinCategory
     Char
   | -- | Codata operations
     Codata
+    -- | Runtime support
+  | Runtime
   deriving (Eq, Ord, Show)
 
 -- | Registry of all built-in function names with their categories
@@ -102,6 +104,10 @@ builtinNames =
       , ("event$_blocking_poll", Codata)
       , ("event$_loop", Codata)
       , ("event$_loop_io", Codata)
+      ]
+      <>
+      -- Runtime support
+      [ ("runtime$_panic", Runtime)
       ]
 
 -- | All built-in names as a set (for faster lookup)

@@ -2528,4 +2528,17 @@ objectList =
                   }
         |]
       )
+  , DFunction
+      Exported
+      "Builtin$.runtime$_panic"
+      [ Kernel.Label Kernel.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
+                        @<*>
+                          ( coal_panic : string/*
+                          , str : string
+                          )
+        |]
+      )
   ]
