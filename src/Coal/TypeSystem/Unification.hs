@@ -65,7 +65,7 @@ instance (Substitutable u, Data u, Unifiable u) => Unifiable [u] where
     pure mempty
   match (t1 : ts1) (t2 : ts2) = do
     sub1 <- match t1 t2
-    sub2 <- match ts1 ts2
+    sub2 <- match (apply sub1 ts1) ts2
     maybe (throwError ECannotMatch) pure (merge sub1 sub2)
   match _ _ =
     error "Implementation error"
@@ -129,7 +129,7 @@ instance Unifiable (Row TypeIndex Kind IndexedType) where
         case extractField name row2 of
           Just (t2, r2) -> do
             sub1 <- match r1 r2
-            sub2 <- match t1 t2
+            sub2 <- match (apply sub1 t1) t2
             maybe (throwError ECannotMatch) pure (merge sub1 sub2)
           Nothing -> do
             error "Not implemented"
