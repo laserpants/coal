@@ -102,3 +102,17 @@ tests:
     dependencies:
       - coal
       - hspec >= 2.10.10 && < 2.12
+
+benchmarks:
+  coal-bench-compiler:
+    main: Main.hs
+    source-dirs: bench/compiler
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+      - -O2
+    dependencies:
+      - coal
+      - criterion >= 1.6 && < 1.7
+      - deepseq >= 1.4 && < 1.6
