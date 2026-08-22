@@ -98,15 +98,28 @@ A global nullary function ('TFun t []') is a lazy thunk and must be called to
 produce its value. An operand with a non-pointer global type (e.g. @i32@,
 @i64@) refers to a global variable, which in LLVM IR always has pointer type,
 so a 'load' is emitted. Other operands are returned unchanged.
+
+The result is returned in /native/ representation (see 'irValue'): thunk
+bodies are boxed (@ptr@) by construction, so a forced value of a primitive
+type is unboxed to match the type carried by the variable's label. Without
+this, a constant of e.g. @bool@ type would flow into @condbr@ as a raw
+pointer, or be double-boxed when passed through 'Boxing.irBoxed'.
 -}
-forceThunk :: IROperand -> IRCodegen IROperand
-forceThunk op =
+forceThunk :: Type -> IROperand -> IRCodegen IROperand
+forceThunk t op =
   case op of
-    OGlobal (TFun t []) _ ->
-      call NoTail t op []
-    OGlobal t name
-      | t /= TPtr ->
-          load t (OGlobal TPtr name)
+    OGlobal (TFun rt []) _ -> do
+      r <- call NoTail rt op []
+      case rt of
+        TPtr
+          -- The thunk returned a boxed value; unbox it unless the label's type
+          -- is already pointer-represented (boxing is a no-op for it).
+          | not (Boxing.isIdentityBox t) -> irUnbox t r
+        _ ->
+          pure r
+    OGlobal tg name
+      | tg /= TPtr ->
+          load tg (OGlobal TPtr name)
     _ ->
       return op
 
@@ -132,7 +145,7 @@ irTail =
           let n = arity t
           callRuntime rtClosureNew [OGlobal TPtr (fname <> "$apply"), O.i32 n]
         _ ->
-          forceThunk r1
+          forceThunk t r1
       ret r2
     EIf e1 e2 e3 -> mdo
       r1 <- irValue e1
@@ -253,7 +266,7 @@ irValue =
           let n = arity t
           callRuntime rtClosureNew [OGlobal TPtr (fname <> "$apply"), O.i32 n]
         _ ->
-          forceThunk op
+          forceThunk t op
     EOp op ->
       irOp op
     ELit prim ->

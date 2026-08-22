@@ -1,0 +1,13 @@
+module Helpers {
+
+  // Regression test (compiler issue): list equality miscompiled when a
+  // top-level constant holding the comparison result was referenced from
+  // another module — the forced thunk returned a boxed value that was never
+  // unboxed before being used as a branch condition.
+
+  fun lists_equal(xs : List<int32>, ys : List<int32>) : bool =
+    xs == ys
+
+  let spec_result : bool = lists_equal([1, 2], [1, 2])
+
+}

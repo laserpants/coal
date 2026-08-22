@@ -1,0 +1,9 @@
+module Main {
+
+  import Helpers(spec_result)
+  import IO(println_string)
+
+  fun main() =
+    println_string(if (spec_result) then "equal" else "not equal")
+
+}
