@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
+{- HLINT ignore -}
+
 module Coal.Kernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
 import qualified Coal.Compiler.Builtin.Traits as Trait
