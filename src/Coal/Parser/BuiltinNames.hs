@@ -36,8 +36,8 @@ data BuiltinCategory
     Char
   | -- | Codata operations
     Codata
-    -- | Runtime support
-  | Runtime
+  | -- | Runtime support
+    Runtime
   deriving (Eq, Ord, Show)
 
 -- | Registry of all built-in function names with their categories

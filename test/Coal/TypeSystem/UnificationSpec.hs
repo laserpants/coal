@@ -606,7 +606,8 @@ matchTestCases =
       )
       ( Right $
           Substitution.fromList
-            [ ( 0
+            [
+              ( 0
               , applyTypeArgs
                   KType
                   (TConstructor (KArrow KType KType) "List")
