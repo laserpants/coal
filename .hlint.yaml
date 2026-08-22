@@ -46,6 +46,12 @@
 # (eta-reduce, use fmap/<$>, use const/id, etc.)
 - group: { name: generalise, enabled: true }
 
+# ── Files to ignore (exceed hlint parser capabilities) ─────────────
+
+# Uses complex raw-string-qq quasiquoting patterns with concatenation
+# that hlint's parser cannot handle.
+- ignore: {path: src/Coal/Kernel/Builtin/Objects.hs}
+
 # ── Hints to ignore (conflict with fourmolu or intentional style) ──────
 
 # "Redundant bracket" conflicts with explicit parenthesization that aids

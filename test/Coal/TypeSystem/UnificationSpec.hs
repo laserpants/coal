@@ -587,6 +587,33 @@ matchTestCases =
       )
       (TArrow (TIntrinsic IInt32) (TIntrinsic IString))
       (Left ECannotMatch)
+  , -- Regression: a type variable occurring in several positions of the matched
+    -- (left-hand) type must have earlier bindings applied before matching later
+    -- positions. Matching '0 -> '0 against List<Id<int32>> -> List<int32> first
+    -- binds '0 := List<Id<int32>>, then must match that substituted type against
+    -- List<int32> (the nested alias is unwrapped) rather than re-binding
+    -- '0 := List<int32>, which would conflict when merging.
+    MatchTestCase
+      (TVariable (TypeIndex KType 0) `TArrow` TVariable (TypeIndex KType 0))
+      ( applyTypeArgs
+          KType
+          (TConstructor (KArrow KType KType) "List")
+          (NonEmpty.singleton (TAlias "Id" [TIntrinsic IInt32] (TIntrinsic IInt32)))
+          `TArrow` applyTypeArgs
+            KType
+            (TConstructor (KArrow KType KType) "List")
+            (NonEmpty.singleton (TIntrinsic IInt32))
+      )
+      ( Right $
+          Substitution.fromList
+            [ ( 0
+              , applyTypeArgs
+                  KType
+                  (TConstructor (KArrow KType KType) "List")
+                  (NonEmpty.singleton (TAlias "Id" [TIntrinsic IInt32] (TIntrinsic IInt32)))
+              )
+            ]
+      )
   , MatchTestCase
       ( (TVariable (TypeIndex KType 312) `TArrow` TVariable (TypeIndex KType 311))
           `TArrow` applyTypeArgs KType (TVariable (TypeIndex (KArrow KType KType) 310)) (TVariable (TypeIndex KType 312) :| [])

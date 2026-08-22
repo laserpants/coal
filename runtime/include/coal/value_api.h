@@ -11,6 +11,7 @@
 #include "coal/apply.h"
 #include "coal/runtime.h"
 #include "coal/math.h"
+#include "coal/panic.h"
 
 /**
  * Runtime API wrappers for code generation.
@@ -228,6 +229,13 @@ extern rt_value_t coal_int64_mod(rt_value_t m, rt_value_t n);
 extern rt_value_t coal_float_random(void);
 /** Generate random boxed double in [0.0, 1.0) */
 extern rt_value_t coal_double_random(void);
+
+/* ============================================================================
+ * Panic
+ * ============================================================================ */
+
+/** Terminate the program with a panic message from a boxed string */
+extern _Noreturn void coal_panic(rt_value_t v);
 
 /* ============================================================================
  * File I/O

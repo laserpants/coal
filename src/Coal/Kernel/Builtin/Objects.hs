@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
+{- HLINT ignore -}
+
 module Coal.Kernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
 import qualified Coal.Compiler.Builtin.Traits as Trait
@@ -2526,6 +2528,19 @@ objectList =
                           , step_fn : */IO(Option(*))
                           )
                   }
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.runtime$_panic"
+      [ Kernel.Label Kernel.string "str"
+      ]
+      ( unsafeParseExpr
+          [r|
+                        @<*>
+                          ( coal_panic : string/*
+                          , str : string
+                          )
         |]
       )
   ]

@@ -269,4 +269,8 @@ builtinFunctions =
           ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (state :| []) :| []))
           ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (state :| [])
     )
+  ,
+    ( "runtime$_panic"
+    , forall1 $ \t1 -> TIntrinsic IString ~> t1
+    )
   ]
