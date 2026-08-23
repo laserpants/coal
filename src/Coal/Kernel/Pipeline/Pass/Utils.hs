@@ -19,8 +19,8 @@ opOperands :: (Foldable f) => f a -> [a]
 opOperands = toList
 
 {- | Rebuild a 'Traversable' functor by popping from a replacement list in
-order.  The replacement list must supply exactly as many elements as the
-functor contains.
+order. The replacement list must supply exactly as many elements as the functor
+contains.
 -}
 rebuildOp :: (Traversable f) => [a] -> f b -> f a
 rebuildOp ts op = evalState (traverse (const pop) op) ts
