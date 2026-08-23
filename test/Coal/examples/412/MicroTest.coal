@@ -1,0 +1,36 @@
+module MicroTest {
+
+  import IO(return)
+
+  type TestResult
+    = Pass
+    | Fail(string)
+
+  type alias Test = List<TestResult>
+
+  fun assert_with_remark(rem : string, condition : bool) : TestResult =
+    if (condition)
+      then Pass
+      else Fail(rem)
+
+  fun assert_eq(x : a, y : a) : TestResult with (Comparable<a>) =
+    if (x == y)
+      then Pass
+      else Fail("Equality assertion failed")
+
+  fun check_with_remark(rem : string, condition : bool) : TestResult =
+    if (condition)
+      then Pass
+      else Fail(rem)
+
+  fun suite(tests : List<TestResult>) : Test =
+    tests
+
+  fun failures(tests : Test) : int32 =
+    fold(tests) {
+      | []                => 0
+      | Fail(_) :: @rest  => 1 + rest
+      | Pass :: @rest     => rest
+    }
+
+}

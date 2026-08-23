@@ -1,0 +1,45 @@
+module Helpers {
+
+  import MicroTest(suite, check_with_remark, Test)
+
+  type alias Source<a> =
+    { poll : unit -> Option<a>
+    }
+
+  fun make(poll_fn : unit -> Option<a>) : Source<a> =
+    { poll = poll_fn }
+
+  fun yields_none_first(src : Source<int32>) : bool =
+    match(src.poll()) {
+      | None => true
+      | Some(_) => false
+    }
+
+  fun two_values_then_none(src : Source<int32>, expected : int32) : bool =
+    match(src.poll()) {
+      | Some(v1) =>
+          if (v1 == expected) then
+            match(src.poll()) {
+              | Some(v2) =>
+                  if (v2 == expected) then yields_none_first(src)
+                  else false
+              | None => false
+            }
+          else false
+      | None => false
+    }
+
+  // Eagerly evaluated top-level suite list — the exact shape from issue 3.
+  let event_source_spec : Test =
+    suite([
+      check_with_remark(
+        "take: yields exactly n values then None",
+        two_values_then_none(make(fn(_) => Some(4)), 4)
+      ),
+      check_with_remark(
+        "once",
+        two_values_then_none(make(fn(_) => Some(-1)), -1)
+      )
+    ])
+
+}

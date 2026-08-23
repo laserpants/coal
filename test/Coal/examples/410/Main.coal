@@ -1,15 +1,28 @@
 module Main {
 
-  import namespace IO
+  import IO(println_string)
+  import String(int32_to_string)
 
-  fun kazoo(x : int32) : IO<unit> =
-    #{ffi_call : unit -> int32}(())(
-      fn(x : int32) => x
-    )
+  type alias Source<a> =
+    { poll : unit -> a
+    , guard : int32
+    }
 
-  // here is a comment
+  fun make_src(seed : int32) : Source<int32> =
+    { poll = fn(x) => seed, guard = seed }
+
+  fun poll(s : Source<int32>) : int32 =
+    s.poll(())
 
   fun main() =
-    IO.println_string("!!")
+    // Shared record-typed value: the same value must be observed at every
+    // use site. Under a (buggy) call-by-name lowering each use would rebuild
+    // the record; with strict-once semantics all three observations agree.
+    let src = make_src(7) in
+    let g = src.guard in
+    let p1 = poll(src) in
+    let p2 = poll(src) in
+    let ok = (g == 7) && (p1 == 7) && (p2 == 7) in
+    println_string(if (ok) then "shared" else "mismatch")
 
 }

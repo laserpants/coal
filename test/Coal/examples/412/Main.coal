@@ -1,8 +1,17 @@
 module Main {
 
-  import namespace IO
+  import Helpers(event_source_spec)
+  import MicroTest(failures)
+  import IO(println_string)
 
   fun main() =
-    IO.println_bool([1, 2] == [1, 2])
+    // Forces eager evaluation of the cross-module top-level suite value.
+    // Regression guard for issue 3: this shape used to abort at startup with
+    // `PANIC: Record field not found: from_int32` when compiled from a
+    // non-entry module. Successful evaluation and printing is the pass
+    // condition; the tests themselves report HAS FAILURES because the pure
+    // stand-in `make` has no stateful take/guard behind it.
+    let n = failures(event_source_spec) in
+    println_string(if (n >= 0) then "evaluated" else "impossible")
 
 }
