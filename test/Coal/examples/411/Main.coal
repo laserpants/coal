@@ -1,0 +1,11 @@
+module Main {
+
+  import namespace IO
+
+  fun comp(x : a, y : a) : bool =
+    x == y
+
+  fun main() =
+    IO.println_string("!!")
+
+}

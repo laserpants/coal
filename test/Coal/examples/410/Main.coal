@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+
+  fun kazoo(x : int32) : IO<unit> =
+    #{ffi_call : unit -> int32}(())(
+      fn(x : int32) => x
+    )
+
+  // here is a comment
+
+  fun main() =
+    IO.println_string("!!")
+
+}
