@@ -7,9 +7,3 @@ dist
 coal.lock.json
 coal.json
 tmp
-
-# let-evaluation regression fixture binary
-test/regression/let-evaluation/let-evaluation-*
-# ...but keep its project manifest (root pattern above would exclude it)
-!test/regression/let-evaluation/coal.json
-
