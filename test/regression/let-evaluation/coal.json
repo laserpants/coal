@@ -1,0 +1,14 @@
+{
+  "name": "let-evaluation",
+  "version": "0.1.0",
+  "modules": [
+    "Main"
+  ],
+  "entry_point": "Main.main",
+  "source_dirs": [
+    "src"
+  ],
+  "c_sources": [
+    "counter.c"
+  ]
+}
