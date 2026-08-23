@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 {- |
 Free variable analysis.
 
@@ -41,8 +43,8 @@ fn(x : int32) =>
 has free variables @{ y : int32 }@, not just the name @\"y\"@.
 -}
 freeVars :: (Ord t) => Expr t -> Set (Label t)
-freeVars expr =
-  case expr of
+freeVars =
+  \case
     -- Variable: the variable itself is free
     EVar x -> Set.singleton x
     -- Constructor: not a variable, no free variables
