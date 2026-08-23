@@ -170,7 +170,7 @@ liftExpr globals scope expr =
               `Map.union` scope
       (body', newFromBody) <- liftExpr globals innerScope body
       -- 2. Compute free variables of the lifted body, excluding lambda params
-      --    and globally-defined names.  Deduplicate by name, resolving each
+      --    and globally-defined names. Deduplicate by name, resolving each
       --    to its binding-site label from the outer scope.
       let fvAll = Set.toList (freeVars body')
           fvNameSet =
@@ -264,11 +264,11 @@ liftBindings globals scope bindings = do
   let (bs, news) = unzip pairs
   pure (bs, concat (NonEmpty.toList news))
 
-{- | Lift a single let binding.  When the RHS is an 'ELam' whose body
-references the binding name (self-recursion), the binding name is excluded
-from the captured free-variable list and instead substituted with the
-lifted function's call site inside the body, breaking the circular
-fixpoint that would otherwise result.
+{- | Lift a single let binding. When the RHS is an 'ELam' whose body references
+the binding name (self-recursion), the binding name is excluded from the
+captured free-variable list and instead substituted with the lifted function's
+call site inside the body, breaking the circular fixpoint that would otherwise
+result.
 -}
 liftBinding ::
   (Monad m) =>
