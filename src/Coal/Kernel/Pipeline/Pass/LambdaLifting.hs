@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
@@ -96,8 +97,8 @@ lambdaLifting m = do
 -- --------------------------------------------------------------------------
 
 objectNames :: Object t -> [Name]
-objectNames obj =
-  case obj of
+objectNames =
+  \case
     DFunction _ n _ _ -> [n]
     DConstant n _ -> [n]
     DExternal n _ -> [n]
