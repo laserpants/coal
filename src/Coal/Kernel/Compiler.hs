@@ -169,16 +169,20 @@ entry point via 'irMainModule'.
 -}
 codeGenModule :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> Module Type -> CompilerT m IRModule
 codeGenModule config extraTags cachedDData cachedObjects allModules m =
-  let isEntryPoint = case configEntryPoint config of
-        Nothing -> moduleName m == Text.pack "Main"
-        Just (entryMod, _) -> moduleName m == entryMod
-      entryPointModule = case configEntryPoint config of
-        Nothing -> Text.pack "Main"
-        Just (entryMod, _) -> entryMod
-      entryPointFunc = case configEntryPoint config of
-        Nothing -> Text.pack "main"
-        Just (_, entryFunc) -> entryFunc
-      initEnv = IRCodegenEnv{codegenVarEnv = mempty, codegenTagEnv = extraTags, codegenImportedDData = cachedDData, codegenImportedObjects = cachedObjects}
+  let isEntryPoint =
+        case configEntryPoint config of
+          Nothing -> moduleName m == Text.pack "Main"
+          Just (entryMod, _) -> moduleName m == entryMod
+      entryPointModule =
+        case configEntryPoint config of
+          Nothing -> Text.pack "Main"
+          Just (entryMod, _) -> entryMod
+      entryPointFunc =
+        case configEntryPoint config of
+          Nothing -> Text.pack "main"
+          Just (_, entryFunc) -> entryFunc
+      initEnv =
+        IRCodegenEnv{codegenVarEnv = mempty, codegenTagEnv = extraTags, codegenImportedDData = cachedDData, codegenImportedObjects = cachedObjects}
    in CompilerT $
         either throwError return $
           if isEntryPoint
