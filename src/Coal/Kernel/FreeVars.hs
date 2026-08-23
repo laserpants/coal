@@ -102,5 +102,6 @@ Only the remaining labels bind pattern variables.
 -}
 clauseFreeVars :: (Ord t) => Clause t -> Set (Label t)
 clauseFreeVars (Clause labels body) =
-  let patternNameSet = Set.fromList [n | Label _ n <- NonEmpty.tail labels]
-   in Set.filter (\(Label _ n) -> Set.notMember n patternNameSet) (freeVars body)
+  Set.filter (\(Label _ n) -> Set.notMember n patternNameSet) (freeVars body)
+ where
+  patternNameSet = Set.fromList [n | Label _ n <- NonEmpty.tail labels]
