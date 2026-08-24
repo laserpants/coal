@@ -1,0 +1,21 @@
+module Main {
+
+  import namespace IO
+
+  // No return annotation: `5` is inferred as `a with Numeric<a>`, so the
+  // `let x = f(())` in `main` must NOT be generalized over that constraint —
+  // otherwise `x` becomes a dictionary lambda that is re-applied (and `f`
+  // re-evaluated) at each use, printing "f called" twice.
+  fun f(() : unit) =
+    let
+      _ = IO.println_string("f called")
+    in
+    5
+
+  fun main() =
+    let
+      x = f(() : unit)
+    in
+    IO.println_int32(x + x)
+
+}

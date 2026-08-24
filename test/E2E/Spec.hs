@@ -2167,6 +2167,14 @@ e2eSpec = do
       , "Main.coal"
       ]
 
+  -- A `let` whose right-hand side has an unresolved trait constraint must
+  -- still be evaluated exactly once ("f called" appears once, not twice).
+  describe "413" $
+    expectOutput
+      "f called\n10"
+      "test/Coal/examples/413"
+      ["Main.coal"]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
