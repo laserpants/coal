@@ -420,13 +420,21 @@ def extract_module_docblock(filepath: Path) -> Optional[str]:
         return None
 
     raw = m.group(1)
-    # Strip the leading * from each line, clean up whitespace
+    # Strip the leading * from each line, clean up trailing whitespace.
+    # Preserve blank lines for paragraph separation (matching how
+    # function-level docblocks are processed in parse_coal_file).
     lines = []
     for line in raw.split("\n"):
-        cleaned = re.sub(r'^\s*\*\s?', '', line).strip()
-        if cleaned:
-            lines.append(cleaned)
-    return " ".join(lines) if lines else None
+        cleaned = re.sub(r'^\s*\*\s?', '', line).rstrip()
+        lines.append(cleaned)
+
+    # Strip leading/trailing blank lines
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+
+    return "\n".join(lines).strip() if lines else None
 
 
 def docblock_to_markdown(entry: dict) -> str:
