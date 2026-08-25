@@ -35,7 +35,7 @@ module Main {
     let p3 = poll(s) in
     get()
 
-  // --- Polymorphic right-hand side (compiler issue #2) --------------------
+  // --- Polymorphic right-hand side (strict-once regression guard) ---------
   //
   // NOTE: the return type is deliberately NOT annotated. The literal `5` is
   // inferred as `a with Numeric<a>`, so `poly_mk : unit -> a with Numeric<a>`

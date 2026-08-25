@@ -1,5 +1,6 @@
 #!/bin/bash
-# Regression check for compiler issue #2 (let-bound values re-evaluated per use).
+# Regression check: let-bound values must be evaluated exactly once, not
+# once per use (see README.md).
 #
 # Verifies strict-once (`let`) and strict (function parameter) evaluation
 # semantics using an FFI counter fixture. A `let`-bound value must be

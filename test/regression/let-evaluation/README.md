@@ -1,36 +1,36 @@
 # let-evaluation — strict-`let` regression fixture
 
-Regression guard for compiler issue #2: a `let`-bound value whose right-hand
-side performs an FFI side effect must be evaluated **exactly once**
-(strict-once), not once per use. Pure-Coal E2E examples cannot observe
-evaluation counts, hence the C counter fixture (`counter.c`) and the expected
-counts in `.expected`.
+Guards strict-once evaluation of `let`: a binding's right-hand side must be
+evaluated **exactly once**, at the binding site — never once per use. A
+re-evaluated binding would multiply side effects (e.g. duplicate resource
+registration), which pure-Coal E2E examples cannot observe. Hence the C
+counter fixture (`counter.c`) and the expected counts in `.expected`.
 
 > **Not part of `stack test`.** Run it manually:
 
     COAL=/path/to/coal bash run.sh
 
-`PASS: let is strict-once on …` means each binding's RHS ran exactly once and
-the subsequent uses did not re-run it. Any growth of the counts with the
-number of uses (call-by-name without memoization) fails with an
-expected/actual diff.
+`PASS: let is strict-once on …` means every binding's RHS ran exactly once.
+Growth of any count with the number of uses fails with an expected/actual
+diff.
 
-## The two cases
+## The case that matters
 
-`before` / `after` / `src.guard` cover a **monomorphic** `let` (`take` has a
-concrete `Source<int32>` return annotation).
+`before` / `after` / `src.guard` / `polls` / `param_driven` cover plain
+strict-once behaviour with fully annotated types; they pass even on a broken
+compiler.
 
-`poly_calls` covers the **polymorphic** case, and is the line that actually
-catches issue #2. `poly_mk` has *no* return annotation, so its `5` is inferred
-as `a with Numeric<a>`. If the `let` in `poly_driven` generalizes over that
-constraint, `InsertDictionaries` rewrites the binding into a dictionary lambda
-and re-applies it at every use of `x`, giving `poly_calls=2`. The fix is the
-value restriction in `Coal.TypeSystem.Constraint.Generation` (`isExpansive` /
-`letAssertion`), which keeps an expansive right-hand side monomorphic.
-
-Removing the annotation is essential: with a concrete return type no trait
-constraint survives and the dictionary-lambda path never fires, so the
-monomorphic cases alone pass even on a broken compiler.
+`poly_calls` is the line that catches the regression this fixture exists for:
+`poly_mk` has *no* return annotation, so its `5` infers as `a with
+Numeric<a>`. If the `let` in `poly_driven` generalizes over that trait
+constraint, dictionary insertion rewrites the binding into a dictionary
+lambda and re-applies it at every use of `x`, so `mk()` runs twice
+(`poly_calls=2`). The fix is the value restriction in
+`Coal.TypeSystem.Constraint.Generation` (`isExpansive` / `letAssertion`),
+which keeps an expansive right-hand side monomorphic so it evaluates exactly
+once. Removing the annotation from `poly_mk` is essential: with a concrete
+return type no trait constraint survives and the dictionary-lambda path never
+fires.
 
 ## Artifacts
 
