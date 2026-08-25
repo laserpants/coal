@@ -52,7 +52,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern (..), Qualified (..))
-import Coal.Language.AST.Builders (applicationE, lambda1E, matchE, varE)
+import Coal.Language.AST.Builders (applicationE', lambda1E', matchE', varE')
 import Coal.Language.AST.Rewrite (replace)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
@@ -73,10 +73,10 @@ constructor patterns and report errors for misplaced fold patterns. This
 transformation enables structural recursion by making the recursive function
 binding and call sites explicit.
 -}
-passExpandTopLevelFolds :: (Monad m, Monoid a, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
+passExpandTopLevelFolds :: (Monad m, Data a) => Pass a m (Module a Kind ()) (Module a Kind ())
 passExpandTopLevelFolds = Pass{runPass = passImpl}
 
-passImpl :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
+passImpl :: (Monad m, Data a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 passImpl Module{..} = do
   setCurrentModuleC Module{..}
   newModuleDefinitions <- traverse expandTopLevelFolds moduleDefinitions
@@ -86,11 +86,11 @@ passImpl Module{..} = do
       , ..
       }
 
-expandTopLevelFolds :: (Monad m, Monoid a, Data a) => Definition a Kind () -> CompilerT a m (Definition a Kind ())
+expandTopLevelFolds :: (Monad m, Data a) => Definition a Kind () -> CompilerT a m (Definition a Kind ())
 expandTopLevelFolds =
   \case
     DFold loc name FoldDefinition{foldDefinitionAnnotation, foldDefinitionConstraints, foldDefinitionClauses} -> do
-      newExpression <- expandClauses foldDefinitionClauses
+      newExpression <- expandClauses loc foldDefinitionClauses
       let def =
             LetDefinition
               { letDefinitionMetadata = loc
@@ -103,11 +103,18 @@ expandTopLevelFolds =
     o ->
       return o
 
-expandClauses :: (Monad m, Monoid a, Data a) => NonEmpty (Clause a Kind ()) -> CompilerT a m (Expression a Kind ())
-expandClauses clauses = do
+{- | Expand the clauses of a top-level fold definition.
+
+All synthesized nodes carry @loc@ (the location of the fold definition) so
+that diagnostics surfacing through the generated scaffolding are reported
+at the @fold@ definition instead of at the start of the module.
+-}
+expandClauses :: (Monad m, Data a) => a -> NonEmpty (Clause a Kind ()) -> CompilerT a m (Expression a Kind ())
+expandClauses loc clauses = do
   name <- supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
-  return $ lambda1E (name <> ".expr") (matchE (varE (name <> ".expr")) expr)
+  return $
+    lambda1E' loc (name <> ".expr") (matchE' loc (varE' loc (name <> ".expr")) expr)
 
 class ExpandContext a e where
   expandFolds :: (Monad m) => Name -> [(Name, Label ())] -> e -> CompilerT a m e
@@ -118,7 +125,7 @@ instance (ExpandContext a e) => ExpandContext a [e] where
 instance (ExpandContext a e) => ExpandContext a (NonEmpty e) where
   expandFolds name = traverse . expandFolds name
 
-instance (Monoid a, Data a) => ExpandContext a (Clause a Kind ()) where
+instance (Data a) => ExpandContext a (Clause a Kind ()) where
   expandFolds name _ =
     \case
       EClause _ (PAtVariable loc _) _ -> do
@@ -137,21 +144,23 @@ instance (Monoid a, Data a) => ExpandContext a (Clause a Kind ()) where
             (transform eliminateAtPatterns clausePattern)
             newClauseChoices
 
-instance (Monoid a, Data a) => ExpandContext a (Choice Expression a Kind ()) where
+instance (Data a) => ExpandContext a (Choice Expression a Kind ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
         CPlain a gs <$> expandFolds name lls e
 
-instance (Monoid a, Data a) => ExpandContext a (Expression a Kind ()) where
+instance (Data a) => ExpandContext a (Expression a Kind ()) where
   expandFolds = flip . foldrM . const (uncurry updateName)
 
-updateName :: (Monad m, Monoid a, Data a) => Name -> Label () -> Expression a Kind () -> CompilerT a m (Expression a Kind ())
+updateName :: (Monad m, Data a) => Name -> Label () -> Expression a Kind () -> CompilerT a m (Expression a Kind ())
 updateName name label =
   return
     . replace
       (labelName label)
-      (\loc _ -> applicationE (varE name) (EVariable loc label :| []))
+      -- Keep the source location of the replaced occurrence, so that type
+      -- errors involving the recursive call are reported at the call site.
+      (\loc _ -> applicationE' loc (varE' loc name) (EVariable loc label :| []))
 
 eliminateAtPatterns :: Pattern a Kind () -> Pattern a Kind ()
 eliminateAtPatterns =

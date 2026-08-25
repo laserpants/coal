@@ -1244,11 +1244,13 @@ e2eSpec = do
       res `shouldBe` Left PreflightFailure
 
   describe "236" $ do
-    expectOutput
-      "hello"
-      "test/Coal/examples/236"
-      [ "Main.coal"
-      ]
+    it "is TypeError" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/236"
+          [ "Main.coal"
+          ]
+      res `shouldBe` Left TypeError
 
   describe "237" $ do
     expectOutput

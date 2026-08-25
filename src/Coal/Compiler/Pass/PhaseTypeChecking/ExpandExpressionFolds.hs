@@ -53,7 +53,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language (Choice (..), Clause (..), Expression (..), Pattern (..))
-import Coal.Language.AST.Builders (applicationE, lambda1E, letE, matchE, varE)
+import Coal.Language.AST.Builders (applicationE', lambda1E', letE', matchE', varE')
 import Coal.Language.AST.Flattening (flattenApplicationsDeep)
 import Coal.Language.AST.Rewrite (replace)
 import Coal.Language.Definition
@@ -66,7 +66,7 @@ import Control.Monad.Writer (execWriter, tell)
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (descendM, transformM)
 import Data.List.NonEmpty (NonEmpty (..))
-import Extras (Dictionary, Name, const2, traverse_)
+import Extras (Dictionary, Name, traverse_)
 
 {- | Expression fold expansion pass.
 
@@ -119,7 +119,7 @@ checkPatterns =
     p ->
       descendM checkPatterns p
 
-instance (Monoid a, Data a, Data k) => FoldContext a (Choice Expression a k ()) where
+instance (Data a, Data k) => FoldContext a (Choice Expression a k ()) where
   expandFolds name lls =
     \case
       CPlain a gs e ->
@@ -129,15 +129,17 @@ instance (Monoid a, Data a, Data k) => FoldContext a (Choice Expression a k ()) 
       CPlain _ _ e ->
         expandMatch e
 
-instance (Monoid a, Data a, Data k) => FoldContext a (Expression a k ()) where
+instance (Data a, Data k) => FoldContext a (Expression a k ()) where
   expandFolds name lls expr = return (foldr (updateName name) expr lls)
   expandMatch _ = return ()
 
-updateName :: (Monoid a, Data a, Data k) => Name -> Label () -> Expression a k () -> Expression a k ()
+updateName :: (Data a, Data k) => Name -> Label () -> Expression a k () -> Expression a k ()
 updateName name label =
   replace
     (labelName label)
-    (const2 (applicationE (varE name) (EVariable mempty label :| [])))
+    -- Keep the source location of the replaced occurrence, so that type
+    -- errors involving the recursive call are reported at the call site.
+    (\loc _ -> applicationE' loc (varE' loc name) (EVariable loc label :| []))
 
 eliminateAtPatterns :: (Monad m) => Pattern a k () -> CompilerT a m (Pattern a k ())
 eliminateAtPatterns =
@@ -163,19 +165,27 @@ atLabels =
             return p
       )
 
-expandFoldExpr :: (Monad m, Monoid a, Data a, Data k) => NonEmpty (Expression a k ()) -> NonEmpty (Clause a k ()) -> CompilerT a m (Expression a k ())
-expandFoldExpr args clauses = do
+{- | Expand a fold expression into a recursive let binding.
+
+All synthesized nodes carry @loc@ (the location of the fold expression) so
+that diagnostics surfacing through the generated scaffolding are reported
+at the @fold@ expression instead of at the start of the module.
+-}
+expandFoldExpr :: (Monad m, Monoid a, Data a, Data k) => a -> NonEmpty (Expression a k ()) -> NonEmpty (Clause a k ()) -> CompilerT a m (Expression a k ())
+expandFoldExpr loc args clauses = do
   name <- supplied (freshName "fold")
   expr <- traverse (expandFolds name []) clauses
   return $
     flattenApplicationsDeep $
-      letE
+      letE'
+        loc
         name
-        ( lambda1E
+        ( lambda1E'
+            loc
             (name <> ".expr")
-            (matchE (varE (name <> ".expr")) expr)
+            (matchE' loc (varE' loc (name <> ".expr")) expr)
         )
-        (applicationE (varE name) args)
+        (applicationE' loc (varE' loc name) args)
 
 class CompileContext a e where
   compileFolds :: (Monad m) => e -> CompilerT a m e
@@ -250,8 +260,8 @@ instance (Monoid a, Data a, Data k) => CompileContext a (Expression a k ()) wher
   compileFolds =
     transformM $
       \case
-        EFold _ _ es cs ->
-          expandFoldExpr es cs
+        EFold loc _ es cs ->
+          expandFoldExpr loc es cs
         e@(EMatch _ _ _ cs) -> do
           expandMatch cs
           return e

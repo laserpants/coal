@@ -153,7 +153,6 @@ module Main {
   // Deletion
 
   fold delete_min_node  
-
     | Empty =>
         (None, None, Empty)
 
@@ -163,8 +162,6 @@ module Main {
     | Map({ left = delete_min_node(@left) | _ } as m) =>
         let (k, v, new_left) = left 
         in
-//        (k, v, rebalance(make_node(m.key, m.value, new_left, m.right)))
-
         (Some(k), Some(v), rebalance(make_node(m.key, m.value, new_left, m.right)))
 
 //  fun delete(key, map) =
