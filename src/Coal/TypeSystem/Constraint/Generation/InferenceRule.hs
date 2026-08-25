@@ -39,7 +39,7 @@ data InferenceRule k a
   | RuleEntrypoint a (Type TypeIndex k)
   | RuleTraitInstance a (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | RuleAssumption a (Type TypeIndex k) (Type TypeIndex k)
-  | RuleAssumptionExplicit a (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
+  | RuleAssumptionExplicit a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   deriving (Show, Eq, Ord, Read, Data, Typeable)
 
 instance (Data a) => Substitutable (InferenceRule Kind a) where

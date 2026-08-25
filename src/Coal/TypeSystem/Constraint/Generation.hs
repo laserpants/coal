@@ -64,6 +64,59 @@ withMonomorphic = localMonoset . monosetInsertMultiple . typeIndexesIn
 
 type Assertion a = IndexedType -> [Assumption a IndexedType] -> ConstraintsGen a ()
 
+{- | Value restriction: is an expression __expansive__, i.e. may evaluating it
+perform work or observable side effects?
+
+Only non-expansive right-hand sides (syntactic values) may be generalized at a
+@let@ binding. In Coal this is not merely a typing subtlety: a generalized
+binding that retains trait constraints is rewritten by
+"Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries" into a /dictionary
+lambda/, and every use site is turned into an application of that lambda. A
+generalized @let x = f(())@ would therefore evaluate @f(())@ once per
+occurrence of @x@. Coal is strict, so a @let@ right-hand side must be
+evaluated exactly once, at the binding site.
+
+Note that @let@-bound /functions/ stay generalizable: 'normalizeBinding'
+rewrites @BFunction@ into a @BPattern@ whose right-hand side is an 'ELambda',
+which is a value and hence non-expansive.
+-}
+isExpansive :: Expression a Kind IndexedType -> Bool
+isExpansive =
+  \case
+    ELiteral{} ->
+      False
+    EVariable{} ->
+      False
+    EConstructor{} ->
+      False
+    EOperator{} ->
+      False
+    ELambda{} ->
+      False
+    EAnnotation _ _ e ->
+      isExpansive e
+    ETuple _ _ es ->
+      any isExpansive es
+    EListLiteral _ _ es ->
+      any isExpansive es
+    EListCons _ _ e1 e2 ->
+      isExpansive e1 || isExpansive e2
+    ERecord _ _ fields e ->
+      any isExpansive fields || any isExpansive e
+    _ ->
+      True
+
+{- | Choose the assertion used for a @let@ binder.
+
+Non-expansive right-hand sides are generalized (an 'Implicit' constraint);
+expansive ones are kept monomorphic (an 'Equality' constraint). See
+'isExpansive'.
+-}
+letAssertion :: a -> Expression a Kind IndexedType -> Assertion a
+letAssertion loc e
+  | isExpansive e = assertEqualityAssumptions loc
+  | otherwise = assertImplicitAssumptions loc
+
 emitPAnnotationConstraints :: (Show a, Data a) => a -> Type Parameter Kind -> Pattern a Kind IndexedType -> ConstraintsGen a ()
 emitPAnnotationConstraints loc t p = do
   r <- instantiateAnnotation loc t
@@ -251,8 +304,12 @@ emitELetConstraints loc gs e1 = do
         error "Implementation error"
   names <- concatForM gs' $
     \case
-      BPattern _ p _ ->
-        emitPatternConstraints (assertImplicitAssumptions loc) ms1 p
+      BPattern _ p e ->
+        -- Value restriction: only generalize when the right-hand side is a
+        -- syntactic value. Generalizing an expansive right-hand side would let
+        -- 'InsertDictionaries' turn it into a dictionary lambda that is
+        -- re-applied — and therefore re-evaluated — at every use site.
+        emitPatternConstraints (letAssertion loc e) ms1 p
       BFunction{} ->
         error "Implementation error"
   pure (filter (assumptionNameIsNotOneOf names) ms1 <> ms2)

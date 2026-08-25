@@ -1244,11 +1244,13 @@ e2eSpec = do
       res `shouldBe` Left PreflightFailure
 
   describe "236" $ do
-    expectOutput
-      "hello"
-      "test/Coal/examples/236"
-      [ "Main.coal"
-      ]
+    it "is TypeError" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/236"
+          [ "Main.coal"
+          ]
+      res `shouldBe` Left TypeError
 
   describe "237" $ do
     expectOutput
@@ -2166,6 +2168,14 @@ e2eSpec = do
       , "Helpers.coal"
       , "Main.coal"
       ]
+
+  -- A `let` whose right-hand side has an unresolved trait constraint must
+  -- still be evaluated exactly once ("f called" appears once, not twice).
+  describe "413" $
+    expectOutput
+      "f called\n10"
+      "test/Coal/examples/413"
+      ["Main.coal"]
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

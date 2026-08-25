@@ -99,7 +99,7 @@ inferTypes m = do
           tellErrors [NameNotInScope assumptionName (ErrorLocation (principalPath modulePath) assumptionMetadata)]
           throwError NoSuchIdentifier
         Just s -> do
-          insertConstraintsC [Explicit (RuleAssumptionExplicit assumptionMetadata t s) t s]
+          insertConstraintsC [Explicit (RuleAssumptionExplicit assumptionMetadata assumptionName t s) t s]
          where
           t = apply compilerSubstitution assumptionType
 

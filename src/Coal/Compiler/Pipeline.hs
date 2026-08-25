@@ -258,8 +258,15 @@ prettyRule =
       "Entrypoint type " <> prettyType (normalizeTypeIndexes t1) <> " is invalid. Main function must return `IO<unit>`."
     RuleTraitInstance _ t1 s ->
       "Trait instance type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType s
-    RuleAssumptionExplicit _ t1 s ->
-      "Explicit type assumption " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expected type " <> prettyType s
+    RuleAssumptionExplicit _ name t1 s ->
+      "Use of '"
+        <> name
+        <> "' here has type "
+        <> prettyType u1
+        <> ", but its definition has type "
+        <> prettyType s
+     where
+      u1 = normalizeTypeIndexes t1
 
 prettyType :: (CoalPretty t) => t -> Text
 prettyType p = "`" <> (renderStrict . layoutPretty defaultLayoutOptions $ prettyCoal p) <> "`"

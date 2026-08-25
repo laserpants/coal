@@ -95,7 +95,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleFoldType a -> a
       RuleOrConstraint a _ _ -> a
       RuleTraitInstance a _ _ -> a
-      RuleAssumptionExplicit a _ _ -> a
+      RuleAssumptionExplicit a _ _ _ -> a
 
 instance HasMetadata (ConstraintsGenError Metadata) where
   getMetadata =

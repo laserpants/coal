@@ -1,5 +1,6 @@
 module Coal.Language.AST.Builders (
   matchE,
+  matchE',
   varE,
   varE',
   letE,
@@ -10,6 +11,7 @@ module Coal.Language.AST.Builders (
   lambdaE,
   lambdaE',
   lambda1E,
+  lambda1E',
   lambdaAnyE,
   lambdaAnyE',
   selectE,
@@ -32,6 +34,10 @@ import Extras (Name)
 {-# INLINE matchE #-}
 matchE :: (Monoid a) => Expression a k () -> NonEmpty (Clause a k ()) -> Expression a k ()
 matchE = EMatch mempty ()
+
+{-# INLINE matchE' #-}
+matchE' :: a -> Expression a k () -> NonEmpty (Clause a k ()) -> Expression a k ()
+matchE' a = EMatch a ()
 
 {-# INLINE varE #-}
 varE :: (Monoid a) => Name -> Expression a k ()
@@ -72,6 +78,10 @@ lambdaE' = ELambda
 {-# INLINE lambda1E #-}
 lambda1E :: (Monoid a) => Name -> Expression a k () -> Expression a k ()
 lambda1E var = ELambda mempty (PVariable mempty (label var) :| [])
+
+{-# INLINE lambda1E' #-}
+lambda1E' :: a -> Name -> Expression a k () -> Expression a k ()
+lambda1E' a var = ELambda a (PVariable a (label var) :| [])
 
 {-# INLINE lambdaAnyE #-}
 lambdaAnyE :: (Monoid a) => Expression a k () -> Expression a k ()
