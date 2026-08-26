@@ -8,7 +8,7 @@ module Coal.Compiler.Error (
   errorLocation,
 ) where
 
-import Coal.Language (IndexedType, Kind (..), Trait (..))
+import Coal.Language (IndexedType, Kind, Parameter (..), Trait (..), Type (..))
 import Coal.Language.Module.Path (Path (..))
 import Coal.Parser (ParserError)
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
@@ -53,7 +53,7 @@ data CompilerError a
   | KindError KindError (ErrorLocation a)
   | OrPatternVariableMismatch (Set Name) (Set Name) (ErrorLocation a)
   | CallCycle [[Name]] (ErrorLocation a)
-  | MissingTraitAnnotation Name [Trait IndexedType] (ErrorLocation a)
+  | MissingTraitAnnotation Name [Trait (Type Parameter Kind)] (ErrorLocation a)
   | UnboundTypeVariable Name Name [Name] (ErrorLocation a)
   deriving (Show, Eq)
 

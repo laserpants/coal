@@ -55,6 +55,12 @@ Only checks definitions where the user wrote explicit annotations. A definition 
 5. Checks that every filtered inferred trait has a matching annotated trait
 6. Reports `MissingTraitAnnotation` for any uncovered inferred traits
 
+Reported traits are displayed using the names of the user-written type parameters:
+`renameMapFromSubstitution` maps substituted (inferred) variable indices back to
+the names of the annotated parameters they were unified with, and
+`renameTraitWithNames` rewrites the reported traits accordingly. Variables with no
+corresponding parameter fall back to their internal rendering.
+
 ### Trait matching
 
 Uses structural equality (`typesStructurallyEqual`) which treats type variables as equal regardless of their identity. Two traits are considered matching if:

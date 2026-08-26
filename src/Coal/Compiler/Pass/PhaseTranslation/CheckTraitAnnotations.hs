@@ -16,13 +16,16 @@ import Coal.Language
 import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Substitution
 import Coal.TypeSystem.Unification
-import Coal.Utils (lexOrderRank)
+import Coal.Utils (intToVar, lexOrderRank)
 import Control.Monad (unless, when)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (gets)
 import qualified Data.List.NonEmpty as NonEmpty
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 import Extras (Name, concatMapM, foldrM, forM_)
 
 passCheckTraitAnnotations :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
@@ -80,46 +83,45 @@ hasExplicitPatternAnnotation =
     PAs _ _ p -> hasExplicitPatternAnnotation p
     _ -> False
 
--- | Collect all type variables from a type (Parameter version - for user-written annotations)
-collectTypeVariables :: Type Parameter Kind -> Set.Set Int
-collectTypeVariables =
+{- | Collect all type variables from a type (Parameter version - for user-written annotations)
+| Collect all type variables with their user-written names from a type
+(Parameter version). Maps each annotation index to the parameter name.
+-}
+collectNamedTypeVariables :: Type Parameter Kind -> Map Int Name
+collectNamedTypeVariables =
   \case
-    TVariable Parameter{..} -> Set.singleton (annotationIndex parameterName)
-    TArrow t1 t2 -> collectTypeVariables t1 <> collectTypeVariables t2
-    TApplication _ t1 t2 -> collectTypeVariables t1 <> collectTypeVariables t2
-    TRecord t -> collectTypeVariables t
-    TRow row -> collectTypeVariablesInRow row
-    TAlias _ ts t -> foldMap collectTypeVariables ts <> collectTypeVariables t
-    _ -> Set.empty
+    TVariable Parameter{..} -> Map.singleton (annotationIndex parameterName) parameterName
+    TArrow t1 t2 -> collectNamedTypeVariables t1 <> collectNamedTypeVariables t2
+    TApplication _ t1 t2 -> collectNamedTypeVariables t1 <> collectNamedTypeVariables t2
+    TRecord t -> collectNamedTypeVariables t
+    TRow row -> collectNamedTypeVariablesInRow row
+    TAlias _ ts t -> foldMap collectNamedTypeVariables ts <> collectNamedTypeVariables t
+    _ -> Map.empty
 
-collectTypeVariablesInRow :: Row Parameter Kind (Type Parameter Kind) -> Set.Set Int
-collectTypeVariablesInRow =
+collectNamedTypeVariablesInRow :: Row Parameter Kind (Type Parameter Kind) -> Map Int Name
+collectNamedTypeVariablesInRow =
   \case
-    RExtend _ t row -> collectTypeVariables t <> collectTypeVariablesInRow row
-    _ -> Set.empty
+    RExtend _ t row -> collectNamedTypeVariables t <> collectNamedTypeVariablesInRow row
+    _ -> Map.empty
 
--- | Collect type variables from pattern annotations (user-written)
-collectPatternTypeVariables :: Pattern Metadata Kind IndexedType -> Set.Set Int
-collectPatternTypeVariables =
+-- | Collect named type variables from pattern annotations (user-written)
+collectNamedPatternTypeVariables :: Pattern Metadata Kind IndexedType -> Map Int Name
+collectNamedPatternTypeVariables =
   \case
-    PAnnotation _ t _ -> collectTypeVariables t
-    PConstructor _ _ ps -> foldMap collectPatternTypeVariables ps
+    PAnnotation _ t _ -> collectNamedTypeVariables t
+    PConstructor _ _ ps -> foldMap collectNamedPatternTypeVariables ps
     PRecord _ _ fields rest ->
-      foldMap collectPatternTypeVariables fields <> maybe Set.empty collectPatternTypeVariables rest
-    PListCons _ _ p1 p2 -> collectPatternTypeVariables p1 <> collectPatternTypeVariables p2
-    PListLiteral _ _ ps -> foldMap collectPatternTypeVariables ps
-    PTuple _ _ ps -> foldMap collectPatternTypeVariables (NonEmpty.toList ps)
-    POr _ _ p1 p2 -> collectPatternTypeVariables p1 <> collectPatternTypeVariables p2
-    PAs _ _ p -> collectPatternTypeVariables p
-    _ -> Set.empty
+      foldMap collectNamedPatternTypeVariables fields <> maybe Map.empty collectNamedPatternTypeVariables rest
+    PListCons _ _ p1 p2 -> collectNamedPatternTypeVariables p1 <> collectNamedPatternTypeVariables p2
+    PListLiteral _ _ ps -> foldMap collectNamedPatternTypeVariables ps
+    PTuple _ _ ps -> foldMap collectNamedPatternTypeVariables (NonEmpty.toList ps)
+    POr _ _ p1 p2 -> collectNamedPatternTypeVariables p1 <> collectNamedPatternTypeVariables p2
+    PAs _ _ p -> collectNamedPatternTypeVariables p
+    _ -> Map.empty
 
--- | Collect type variables from trait annotations (user-written)
-collectTraitTypeVariables :: Trait (Type Parameter Kind) -> Set.Set Int
-collectTraitTypeVariables (Trait _ t) = collectTypeVariables t
-
--- | Collect type variables from trait constraints (user-written)
-collectConstraintTypeVariables :: [Trait (Type Parameter Kind)] -> Set.Set Int
-collectConstraintTypeVariables = foldMap collectTraitTypeVariables
+-- | Collect named type variables from trait constraints (user-written)
+collectNamedConstraintTypeVariables :: [Trait (Type Parameter Kind)] -> Map Int Name
+collectNamedConstraintTypeVariables = foldMap (\(Trait _ t) -> collectNamedTypeVariables t)
 
 -- | Collect all type variables from an indexed type
 collectIndexedTypeVariables :: IndexedType -> Set.Set Int
@@ -173,19 +175,62 @@ normalizeExplicitVariables sub paramIndices =
       TVariable (TypeIndex _ idx') -> [idx']
       t -> Set.toList (collectIndexedTypeVariables t)
 
--- | Check if all inferred traits are covered by annotated traits
+{- | Map substituted (inferred) type variable indices back to the names of the
+user-written parameters they were unified with.
+-}
+renameMapFromSubstitution :: Substitution -> Map Int Name -> Map Int Name
+renameMapFromSubstitution sub =
+  Map.foldMapWithKey $ \idx name ->
+    Map.fromList
+      [(i, name) | i <- Set.toList (collectIndexedTypeVariables (apply sub (TVariable (TypeIndex KType idx))))]
+
+{- | Rename type variables according to a map from type variable index to the
+name of the corresponding user-written parameter. Indices not present in the
+map fall back to their internal rendering.
+-}
+renameTraitWithNames :: Map Int Name -> Trait IndexedType -> Trait (Type Parameter Kind)
+renameTraitWithNames names (Trait traitName t) = Trait traitName (renameTypeWithNames names t)
+
+renameTypeWithNames :: Map Int Name -> IndexedType -> Type Parameter Kind
+renameTypeWithNames names = go
+ where
+  go =
+    \case
+      TVariable (TypeIndex k i) -> TVariable (variable k i)
+      TArrow t1 t2 -> TArrow (go t1) (go t2)
+      TApplication k t1 t2 -> TApplication k (go t1) (go t2)
+      TConstructor k c -> TConstructor k c
+      TIntrinsic i -> TIntrinsic i
+      TRecord t -> TRecord (go t)
+      TRow row -> TRow (goRow row)
+      TAlias n ts t -> TAlias n (go <$> ts) (go t)
+
+  goRow =
+    \case
+      RExtend fieldName t row -> RExtend fieldName (go t) (goRow row)
+      RVariable (TypeIndex k i) -> RVariable (variable k i)
+      RNil -> RNil
+
+  variable k i = Parameter k (Map.findWithDefault (Text.pack (intToVar i)) i names)
+
+{- | Check if all inferred traits are covered by annotated traits. Traits that
+are not covered are reported using the names of the user-written parameters,
+when known.
+-}
 checkTraitCoverage ::
   (MonadIO m) =>
   Metadata ->
   Name ->
+  Map Int Name ->
   Qualified IndexedType ->
   Qualified IndexedType ->
   CompilerT Metadata m ()
-checkTraitCoverage loc name (With annTraits _) (With infTraits _) = do
+checkTraitCoverage loc name paramNames (With annTraits _) (With infTraits _) = do
   path <- gets compilerCurrentPath
   let missing = findMissingTraits annTraits infTraits
-  unless (null missing) $
-    tellErrors [MissingTraitAnnotation name missing (ErrorLocation (principalPath path) loc)]
+      renamed = renameTraitWithNames paramNames <$> missing
+  unless (null renamed) $
+    tellErrors [MissingTraitAnnotation name renamed (ErrorLocation (principalPath path) loc)]
 
 -- | Find traits in inferred set that are not covered by annotated set
 findMissingTraits :: [Trait IndexedType] -> [Trait IndexedType] -> [Trait IndexedType]
@@ -276,10 +321,10 @@ checkTraitAnnotations Module{..} = do
                   pure ()
                 Just s -> do
                   -- Collect explicitly mentioned type variables from USER-WRITTEN annotations only
-                  let explicitReturnVars = maybe Set.empty collectTypeVariables functionDefinitionAnnotation
-                  let explicitPatternVars = foldMap collectPatternTypeVariables functionDefinitionPatterns
-                  let explicitTraitVars = collectConstraintTypeVariables functionDefinitionConstraints
-                  let allExplicitParamIndices = explicitReturnVars <> explicitPatternVars <> explicitTraitVars
+                  let namedReturnVars = maybe Map.empty collectNamedTypeVariables functionDefinitionAnnotation
+                  let namedPatternVars = foldMap collectNamedPatternTypeVariables functionDefinitionPatterns
+                  let namedTraitVars = collectNamedConstraintTypeVariables functionDefinitionConstraints
+                  let allExplicitParamIndices = namedReturnVars <> namedPatternVars <> namedTraitVars
 
                   annType <- indexedReturnType functionDefinitionAnnotation
                   argTypes <- traverse indexedPatternTypes functionDefinitionPatterns
@@ -300,13 +345,16 @@ checkTraitAnnotations Module{..} = do
                       let normalizedInf = apply sub inferredType
 
                       -- Normalize the explicit parameter indices to their substituted indexed type indices
-                      let normalizedExplicitVars = normalizeExplicitVariables sub allExplicitParamIndices
+                      let normalizedExplicitVars = normalizeExplicitVariables sub (Map.keysSet allExplicitParamIndices)
+
+                      -- Map substituted type variable indices back to user-written parameter names
+                      let paramNames = renameMapFromSubstitution sub allExplicitParamIndices
 
                       -- Filter inferred traits to only those referencing explicit variables
                       let With infTraits infType = normalizedInf
                       let relevantInfTraits = filter (traitReferencesVariables normalizedExplicitVars) infTraits
                       let filteredInf = With relevantInfTraits infType
-                      checkTraitCoverage functionDefinitionMetadata name normalizedAnn filteredInf
+                      checkTraitCoverage functionDefinitionMetadata name paramNames normalizedAnn filteredInf
           DLet _ name LetDefinition{..} -> do
             when (isExplicitReturnType letDefinitionAnnotation || not (null letDefinitionConstraints)) $ do
               case Environment.lookup name names of
@@ -315,6 +363,9 @@ checkTraitAnnotations Module{..} = do
                 Just s -> do
                   annType <- indexedReturnType letDefinitionAnnotation
                   annTraits <- indexedConstraints letDefinitionConstraints
+                  let namedParams =
+                        maybe Map.empty collectNamedTypeVariables letDefinitionAnnotation
+                          <> collectNamedConstraintTypeVariables letDefinitionConstraints
                   let annQualifiedType = With annTraits annType
 
                   inferredType <- instantiate s
@@ -327,7 +378,8 @@ checkTraitAnnotations Module{..} = do
                     Right sub -> do
                       let normalizedAnn = apply sub annQualifiedType
                       let normalizedInf = apply sub inferredType
-                      checkTraitCoverage letDefinitionMetadata name normalizedAnn normalizedInf
+                      let paramNames = renameMapFromSubstitution sub namedParams
+                      checkTraitCoverage letDefinitionMetadata name paramNames normalizedAnn normalizedInf
           DInstance _ InstanceDefinition{..} ->
             forM_ instanceDefinitionImplementations $
               \case
