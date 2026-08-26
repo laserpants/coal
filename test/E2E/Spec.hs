@@ -2160,6 +2160,11 @@ e2eSpec = do
       "test/Coal/examples/410"
       ["Main.coal"]
 
+  describe "411" $ do
+    it "is TraitAnnotationError" $ do
+      res <- runSpec "test/Coal/examples/411" ["Main.coal"]
+      res `shouldBe` Left TraitAnnotationError
+
   describe "412" $
     expectOutput
       "evaluated"

@@ -86,19 +86,20 @@ extractSpan src start end0 =
       let stripped = Text.stripStart m
        in not (Text.null stripped) && Text.length stripped <= 2
 
--- | Shrink the recorded end of a span back to the last real character of the
--- construct it belongs to.
---
--- The parser consumes whitespace and comments /after/ every token, so a
--- recorded end position usually sits right before the next construct —
--- across blank lines, comments, or even the beginning of the following
--- definition. Everything between the true end of a construct and its
--- recorded end is exactly what the lexer's space consumer accepts:
--- whitespace, @\/\/@ line comments and matched @\/* .. *\/@ block comments.
--- Walking the source backwards through those yields the precise end.
---
--- Positions are mapped through flat character indices assuming LF line
--- endings, matching how @'extractSpan'@ slices the source.
+{- | Shrink the recorded end of a span back to the last real character of the
+construct it belongs to.
+
+The parser consumes whitespace and comments /after/ every token, so a
+recorded end position usually sits right before the next construct —
+across blank lines, comments, or even the beginning of the following
+definition. Everything between the true end of a construct and its
+recorded end is exactly what the lexer's space consumer accepts:
+whitespace, @\/\/@ line comments and matched @\/* .. *\/@ block comments.
+Walking the source backwards through those yields the precise end.
+
+Positions are mapped through flat character indices assuming LF line
+endings, matching how @'extractSpan'@ slices the source.
+-}
 shrinkSpanEnd :: Text -> SourcePos -> SourcePos -> SourcePos
 shrinkSpanEnd src start end
   | endIdx <= startIdx = end
@@ -113,14 +114,14 @@ shrinkSpanEnd src start end
     | Text.null t = t
     | isSpace c = stripSpace (Text.init t)
     -- Trailing block comment: jump back to its opening @\/*@.
-    | Text.isSuffixOf "*/" t,
-      (block, _) <- Text.breakOnEnd "/*" t,
-      not (Text.null block) =
+    | Text.isSuffixOf "*/" t
+    , (block, _) <- Text.breakOnEnd "/*" t
+    , not (Text.null block) =
         stripSpace (Text.dropEnd 2 block)
     -- Trailing line comment: cut everything from the last @\/\/@ onwards,
     -- keeping whatever precedes it on the same line for the next round.
-    | (beforeComment, _) <- Text.breakOnEnd "//" (lastLine t),
-      not (Text.null beforeComment) =
+    | (beforeComment, _) <- Text.breakOnEnd "//" (lastLine t)
+    , not (Text.null beforeComment) =
         stripSpace
           ( Text.dropEnd (Text.length (lastLine t)) t
               <> Text.dropEnd 2 beforeComment
@@ -148,8 +149,9 @@ posToIndex src pos =
         [] -> Text.length src
         (l : rest) -> lineOffset (n - 1) (acc + Text.length l + 1) rest
 
--- | Build a 'SourcePos' from a 0-based character index into @src@, keeping
--- the source name from the template position.
+{- | Build a 'SourcePos' from a 0-based character index into @src@, keeping
+the source name from the template position.
+-}
 indexToPos :: Text -> Int -> SourcePos -> SourcePos
 indexToPos src idx template =
   template
