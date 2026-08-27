@@ -4,7 +4,7 @@
 module Coal.Kernel.Eval.EvalSpec (spec) where
 
 import Coal.Kernel.Eval
-import Data.IORef
+import Data.IORef (IORef, modifyIORef, newIORef, readIORef)
 import qualified Data.Map.Strict as Map
 import Test.Hspec
 
