@@ -1,0 +1,15 @@
+module Main {
+  
+  import namespace IO
+  
+  fun m(x : int32) =
+    match(x) {
+      | 4 => IO.println_string("4")
+      | 2 => IO.println_string("2")
+      | _ => IO.println_string("?")
+    }
+
+  fun main() =
+    m(2)
+    
+}
