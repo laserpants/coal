@@ -13,7 +13,7 @@ Coal provides two official Docker images:
 
 ### `ghcr.io/laserpants/coal:latest`
 
-The **recommended image for most users**. This image includes the complete Coal compiler toolchain with the `coal` binary pre-installed and ready to use. It's based on `coal-dev` and includes:
+The **recommended image for most users**. This image includes the complete Coal compiler toolchain with the `coal` binary pre-installed and ready to use. This image is based on `coal-dev` and includes:
 
 - The Coal compiler (`coal` CLI command)
 - All runtime dependencies (LLVM, GHC, Stack, GMP, Boehm GC)
