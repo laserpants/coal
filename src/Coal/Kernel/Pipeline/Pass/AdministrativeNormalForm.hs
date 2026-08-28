@@ -189,8 +189,6 @@ anfTail expr =
         anfValue k $ \kAtom ->
           pure (ECall (Label t name) argAtoms kAtom)
 
--- --------------------------------------------------------------------------
--- Operand-position (let-binding RHS) normalization
 -- ---------------------------------------------------------------------------
 -- Value-position normalization (continuation-passing)
 -- ---------------------------------------------------------------------------
