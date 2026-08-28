@@ -22,17 +22,23 @@ After this pass:
 = Example transformation
 
 @
-let x = if c then a else b
-in body
+f(if c then a else b)
 @
 
-becomes (the control flow is bound to the let-variable, it is /not/ floated
-outward into the branches):
+becomes (the @if@ sits in operand position, so the control flow is bound to a
+fresh @let@-variable; the surrounding computation is applied exactly once and
+is /not/ floated outward into the branches):
 
 @
-let x = if c then a else b
-in body
+let anf.N = if c then a else b
+in f(anf.N)
 @
+
+(Here @a@, @b@ and @c@ are taken to be already atomic.) In particular, the
+pass never duplicates the continuation into the branches, e.g. it does /not/
+produce @if c then f(a) else f(b)@: doing so would blow up quadratically for
+nested control flow, whereas binding at the point of use keeps the size of
+the output linear in the size of the input.
 -}
 module Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (
   administrativeNormalForm,
@@ -63,7 +69,25 @@ After this pass:
      applied exactly once. They may also appear in __tail position__.
   3. Non-atomic subexpressions are extracted into fresh @let@-bindings.
 
-= Example
+= Examples
+
+__Example 1: control flow in operand position.__
+
+@
+f(if c then a else b)
+@
+
+becomes:
+
+@
+let anf.N = if c then a else b
+in f(anf.N)
+@
+
+The @if@ is in operand position, so it is bound to a fresh @let@-variable at
+its point of use; the continuation @f(__)@ is applied exactly once.
+
+__Example 2: control flow in binding position.__
 
 @
 let x = if c then a else b
@@ -77,8 +101,13 @@ let x = if c then a else b
 in body
 @
 
-(control flow is not floated outward into the branches; this keeps the
-transformation linear in the size of the input program).
+Here the @if@ is already the RHS of a @let@-binding, so no rewrite is needed.
+In particular the pass does /not/ float it outward into the branches: control
+flow is kept bound at its point of use, applying the surrounding continuation
+exactly once and keeping the size of the output linear in the size of the
+input.
+
+In both examples @a@, @b@ and @c@ are taken to be already atomic.
 -}
 administrativeNormalForm :: (Monad m) => Pass m (Module Type) (Module Type)
 administrativeNormalForm m = do
