@@ -6,10 +6,6 @@ import Data.Aeson
 import Data.Text (Text)
 import GHC.Generics (Generic)
 
--- TODO:
--- Should be something like:
---    data GitRepo = GitSsh .. | GitHttps ..
---
 newtype GitRepo = GitRepo {repoUrl :: Text}
   deriving (Show, Eq, Ord, Generic)
 
