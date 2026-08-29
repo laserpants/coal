@@ -25,9 +25,15 @@ fun f(x) = g(x)
 fun g(x) = f(x)
 @
 
-This creates a cycle @[f, g]@ that cannot be resolved. Note that structural
-recursion through fold/match expressions is valid and not considered a cycle,
-as the recursion is bounded by pattern matching.
+This creates a cycle @[f, g]@ that cannot be resolved.
+
+Top-level folds are handled specially. The @-patterns in a fold allow valid
+structural recursion: a fold may re-invoke another fold on structurally smaller
+subterms via the pattern machinery. Such references are recorded in
+'buildFoldExprDeps' at expand time (they do not appear as free variables of the
+expanded body, which is computed while the source patterns still exist). Any
+reference made from a fold's expression body is an ordinary call, and cycles
+through such calls are rejected exactly like cycles among regular functions.
 -}
 module Coal.Compiler.Pass.PhaseTranslation.DetectCallCycles (
   passDetectCallCycles,
@@ -77,10 +83,12 @@ detectCallCycles m = do
 
 checkForCycles :: (Monad m, Ord t, Data k, Data t) => Module Metadata k t -> CompilerT Metadata m ()
 checkForCycles Module{modulePath, moduleDefinitions} = do
-  -- Get fold names to exclude from cycle detection (mutually recursive folds are valid)
-  Build{buildFolds} <- getCurrentBuildC
-  let depGraph = buildDependencyGraph moduleDefinitions
-  case topoSortDefs buildFolds depGraph of
+  -- Fold expression-level dependencies recorded during ExpandTopLevelFolds.
+  -- These are the only edges that may legitimately reference other folds (via
+  -- @-patterns); expression-level recursion among folds must still be caught.
+  Build{buildFoldExprDeps} <- getCurrentBuildC
+  let depGraph = buildDependencyGraph buildFoldExprDeps moduleDefinitions
+  case topoSortDefs depGraph of
     Left cycles -> do
       let moduleName = principalPath modulePath
           cycleNames = fmap fst <$> cycles
@@ -97,10 +105,15 @@ For each definition that contains executable code (functions, lets, instances),
 extract the free variables and filter to only include names defined in the
 current module. Constructors and imported names are excluded.
 
+Top-level-fold-derived @DLet@ nodes use the expression-level dependencies
+recorded in @foldExprDeps@ (the @-pattern structural recursion is not a free
+variable of the expanded body). This keeps valid pattern recursion out of the
+graph while still exposing cyclic expression-level calls.
+
 Returns a list of (name, dependencies) pairs suitable for topological sorting.
 -}
-buildDependencyGraph :: (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [((Name, a), [Name])]
-buildDependencyGraph defs =
+buildDependencyGraph :: (Ord t, Data a, Data k, Data t) => Map.Map Name (Set.Set Name) -> [Definition a k t] -> [((Name, a), [Name])]
+buildDependencyGraph foldExprDeps defs =
   let definedNamePairs = getDefinedNames defs
       definedNames = Set.fromList (fst <$> definedNamePairs)
       depPairs = [(name, filter (`Set.member` definedNames) deps) | (name, deps) <- extractDependencies defs]
@@ -134,15 +147,16 @@ buildDependencyGraph defs =
       _ ->
         []
 
-{- | Extract dependencies from definitions.
+  -- Extract dependencies from definitions.
+  --
+  -- For each definition, compute the set of free variables in its body and
+  -- return as a (name, dependencies) pair. Fold-derived DLet definitions use
+  -- their recorded expression-level dependencies instead of the expanded body
+  -- free variables, so that structural recursion through @-patterns is not
+  -- mistaken for an ordinary (cyclic) call.
+  extractDependencies :: [Definition a k t] -> [((Name, a), [Name])]
+  extractDependencies = concatMap extractDependency
 
-For each definition, compute the set of free variables in its body and
-return as a (name, dependencies) pair. Mutually recursive folds are filtered
-out during topological sorting using the buildFolds set.
--}
-extractDependencies :: forall a k t. (Ord t, Data a, Data k, Data t) => [Definition a k t] -> [((Name, a), [Name])]
-extractDependencies = concatMap extractDependency
- where
   extractDependency :: Definition a k t -> [((Name, a), [Name])]
   extractDependency =
     \case
@@ -153,23 +167,15 @@ extractDependencies = concatMap extractDependency
           { functionDefinitionMetadata
           , functionDefinitionExpression
           } ->
-          [
-            (
-              ( name
-              , functionDefinitionMetadata
-              )
-            , getDeps functionDefinitionExpression
-            )
+          [ ((name, functionDefinitionMetadata), getDeps functionDefinitionExpression)
           ]
-      DLet _ name LetDefinition{letDefinitionMetadata, letDefinitionExpression} ->
-        [
-          (
-            ( name
-            , letDefinitionMetadata
-            )
-          , getDeps letDefinitionExpression
-          )
-        ]
+      DLet _ name LetDefinition{letDefinitionMetadata, letDefinitionExpression}
+        | name `Map.member` foldExprDeps ->
+            [ ((name, letDefinitionMetadata), Set.toList (foldExprDeps Map.! name))
+            ]
+        | otherwise ->
+            [ ((name, letDefinitionMetadata), getDeps letDefinitionExpression)
+            ]
       DInstance _ InstanceDefinition{..} ->
         let
           tr = Trait instanceDefinitionTraitName instanceDefinitionType
@@ -182,22 +188,10 @@ extractDependencies = concatMap extractDependency
                   { functionDefinitionMetadata
                   , functionDefinitionExpression
                   } ->
-                  [
-                    (
-                      ( instanceLabel tr name
-                      , functionDefinitionMetadata
-                      )
-                    , getDeps functionDefinitionExpression
-                    )
+                  [ ((instanceLabel tr name, functionDefinitionMetadata), getDeps functionDefinitionExpression)
                   ]
               DLet _ name LetDefinition{letDefinitionMetadata, letDefinitionExpression} ->
-                [
-                  (
-                    ( instanceLabel tr name
-                    , letDefinitionMetadata
-                    )
-                  , getDeps letDefinitionExpression
-                  )
+                [ ((instanceLabel tr name, letDefinitionMetadata), getDeps letDefinitionExpression)
                 ]
               _ ->
                 []

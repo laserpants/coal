@@ -1029,10 +1029,26 @@ instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 collectFolds :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectFolds =
   \case
-    DFold _ name _ ->
+    DFold _ name FoldDefinition{foldDefinitionClauses} -> do
       insertFold name
+      modify (Build.insertBuildFoldExprDeps name (foldExprDeps foldDefinitionClauses))
     _ ->
       pure ()
+
+-- | Compute the expression-level dependencies of a fold's clauses.
+--
+-- Only the 'choiceExpression' bodies (and guards) of each clause contribute;
+-- references in the pattern (plain variables as well as @-patterns / fold
+-- patterns) are deliberately excluded. This is what lets the call-cycle checker
+-- later distinguish valid structural recursion (through patterns, bounded by
+-- destructuration) from invalid unbounded recursion through the fold's body.
+foldExprDeps :: (Data a, Data t) => NonEmpty (Clause a Kind t) -> Set Name
+foldExprDeps =
+  Set.fromList
+    . fmap labelName
+    . Set.toList
+    . Set.filter notConstructor
+    . foldMap (foldMap (freeIn . choiceExpression) . clauseChoices)
 
 collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectImports =
