@@ -1388,6 +1388,17 @@ objectList =
       )
   , DFunction
       Exported
+      (builtinInstance (Trait.ordered (TIntrinsic IUnit)) "compare")
+      [ Kernel.Label Kernel.unit "x"
+      , Kernel.Label Kernel.unit "y"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  EqualTo : Ordering 
+        |]
+      )
+  , DFunction
+      Exported
       (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
       [ Kernel.Label Kernel.int32 "x"
       , Kernel.Label Kernel.int32 "y"
@@ -1811,6 +1822,17 @@ objectList =
       )
   , DFunction
       Exported
+      (builtinInstance (Trait.comparable (TIntrinsic IUnit)) "(==)")
+      [ Kernel.Label Kernel.unit "x"
+      , Kernel.Label Kernel.unit "y"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  true
+        |]
+      )
+  , DFunction
+      Exported
       (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")
       [ Kernel.Label Kernel.int32 "x"
       , Kernel.Label Kernel.int32 "y"
@@ -1997,6 +2019,17 @@ objectList =
                     , q : bignum
                     , r : bignum
                     )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.semigroup (TIntrinsic IUnit)) "(<>)")
+      [ Kernel.Label Kernel.unit "a"
+      , Kernel.Label Kernel.unit "b"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  () 
         |]
       )
   , DFunction
