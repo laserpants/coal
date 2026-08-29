@@ -2185,9 +2185,22 @@ e2eSpec = do
   describe "415" $
     expectOutput
       "2"
-      "test/Coal/examples/412"
+      "test/Coal/examples/415"
       [ "Main.coal"
       ]
+
+  describe "416" $ do
+    it "is CallCycleError" $ do
+      res <- runSpec "test/Coal/examples/416" ["Main.coal"]
+      res `shouldBe` Left CallCycleError
+
+  describe "417" $
+    expectOutput
+      "true"
+      "test/Coal/examples/417"
+      [ "Main.coal"
+      ]
+
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

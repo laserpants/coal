@@ -54,6 +54,7 @@ module Coal.Compiler.Build (
 
   -- * Fold operations
   insertBuildFold,
+  insertBuildFoldExprDeps,
 
   -- * Trait operations
   insertBuildTrait,
@@ -106,6 +107,7 @@ information collected during compilation phases:
 - 'buildNames': Environment mapping names to their entries (values, types, traits, etc.)
 - 'buildExportedNames': Set of names exported from the module
 - 'buildFolds': Set that contains the names of all fold definitions
+- 'buildFoldExprDeps': Map from fold name to expression-level dependencies
 - 'buildDataConstructors': Data constructor information
 - 'buildTypeConstructors': Type constructor information (arities, kinds)
 - 'buildTraits': Trait (typeclass) definitions
@@ -125,6 +127,7 @@ data Build a = Build
   , buildNames :: Environment [NameEntry]
   , buildExportedNames :: Set Name
   , buildFolds :: Set Name
+  , buildFoldExprDeps :: Map Name (Set Name)
   , buildDataConstructors :: Environment (DataConstructorEntry a)
   , buildTypeConstructors :: Environment (TypeConstructorEntry a)
   , buildTraits :: Environment (TraitEntry a)
@@ -153,6 +156,7 @@ emptyBuild =
     , buildNames = mempty
     , buildExportedNames = mempty
     , buildFolds = mempty
+    , buildFoldExprDeps = mempty
     , buildDataConstructors = mempty
     , buildTypeConstructors = mempty
     , buildTraits = mempty
@@ -330,6 +334,21 @@ overBuildFolds f Build{..} =
 -- | Register a top-level fold
 insertBuildFold :: Name -> Build a -> Build a
 insertBuildFold name = overBuildFolds (Set.insert name)
+
+{- | Record the expression-level dependencies of a top-level fold.
+
+A fold's @-patterns may validly reference other top-level folds (structural
+recursion, bounded by pattern matching). Those references are not part of this
+map. Any reference that appears in the fold's clause /expression/ bodies is an
+ordinary (potentially cyclic) call and is recorded so that the call-cycle
+checker may reject expression-level recursion among folds.
+-}
+insertBuildFoldExprDeps :: Name -> Set Name -> Build a -> Build a
+insertBuildFoldExprDeps name deps Build{..} =
+  Build
+    { buildFoldExprDeps = Map.insert name deps buildFoldExprDeps
+    , ..
+    }
 
 -- -----------------------------------------------------------------------------
 
