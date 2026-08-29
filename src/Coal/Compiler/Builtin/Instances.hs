@@ -251,6 +251,21 @@ builtinInstances =
     )
   ,
     ( "Ordered"
+    , TIntrinsic IUnit
+    , InstanceEntry
+        mempty
+        (TIntrinsic IUnit)
+        (TIntrinsic IUnit)
+        ( Map.fromList
+            [
+              ( "compare"
+              , Forall mempty mempty (TIntrinsic IUnit `TArrow` TIntrinsic IUnit `TArrow` TConstructor KType "Ordering")
+              )
+            ]
+        )
+    )
+  ,
+    ( "Ordered"
     , TIntrinsic IInt32
     , InstanceEntry
         mempty
@@ -395,6 +410,21 @@ builtinInstances =
             [
               ( "compare"
               , Forall mempty [Trait "Ordered" (TVariable (TypeIndex KType 0)), Trait "Ordered" (TVariable (TypeIndex KType 1))] (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]) `TArrow` TConstructor KType "Ordering")
+              )
+            ]
+        )
+    )
+  ,
+    ( "Comparable"
+    , TIntrinsic IUnit
+    , InstanceEntry
+        mempty
+        (TIntrinsic IUnit)
+        (TIntrinsic IUnit)
+        ( Map.fromList
+            [
+              ( "(==)"
+              , Forall mempty mempty (TIntrinsic IUnit `TArrow` TIntrinsic IUnit `TArrow` TIntrinsic IBool)
               )
             ]
         )
@@ -620,6 +650,21 @@ builtinInstances =
             [
               ( "(%)"
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              )
+            ]
+        )
+    )
+  ,
+    ( "Semigroup"
+    , TIntrinsic IUnit
+    , InstanceEntry
+        mempty
+        (TIntrinsic IUnit)
+        (TIntrinsic IUnit)
+        ( Map.fromList
+            [
+              ( "(<>)"
+              , Forall mempty mempty (TIntrinsic IUnit `TArrow` TIntrinsic IUnit `TArrow` TIntrinsic IUnit)
               )
             ]
         )

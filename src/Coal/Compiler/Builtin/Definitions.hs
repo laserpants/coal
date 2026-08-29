@@ -79,7 +79,8 @@ builtinTraitInstances =
   , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "(*)"
   , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "negate"
   , -- Ordered
-    instanceLabel (Trait.ordered (TIntrinsic IInt32)) "compare"
+    instanceLabel (Trait.ordered (TIntrinsic IUnit)) "compare"
+  , instanceLabel (Trait.ordered (TIntrinsic IInt32)) "compare"
   , instanceLabel (Trait.ordered (TIntrinsic IInt64)) "compare"
   , instanceLabel (Trait.ordered (TIntrinsic INat)) "compare"
   , instanceLabel (Trait.ordered (TIntrinsic IFloat)) "compare"
@@ -90,7 +91,8 @@ builtinTraitInstances =
   , instanceLabel (Trait.ordered (TIntrinsic IString)) "compare"
   , instanceLabel (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare"
   , -- Comparable
-    instanceLabel (Trait.comparable (TIntrinsic IInt32)) "(==)"
+    instanceLabel (Trait.comparable (TIntrinsic IUnit)) "(==)"
+  , instanceLabel (Trait.comparable (TIntrinsic IInt32)) "(==)"
   , instanceLabel (Trait.comparable (TIntrinsic IInt64)) "(==)"
   , instanceLabel (Trait.comparable (TIntrinsic INat)) "(==)"
   , instanceLabel (Trait.comparable (TIntrinsic IFloat)) "(==)"
@@ -108,7 +110,8 @@ builtinTraitInstances =
   , instanceLabel (Trait.modulo (TIntrinsic IInt64)) "(%)"
   , instanceLabel (Trait.modulo (TIntrinsic IBignum)) "(%)"
   , -- Semigroup
-    instanceLabel (Trait.semigroup (TIntrinsic IString)) "(<>)"
+    instanceLabel (Trait.semigroup (TIntrinsic IUnit)) "(<>)"
+  , instanceLabel (Trait.semigroup (TIntrinsic IString)) "(<>)"
   , instanceLabel (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)"
   ]
 
