@@ -64,6 +64,7 @@ import Control.Monad.Except (throwError)
 import Data.Data (Data)
 import Data.Graph (SCC (..), stronglyConnComp)
 import Data.List (nub)
+import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Extras (Name)
 
@@ -112,7 +113,7 @@ graph while still exposing cyclic expression-level calls.
 
 Returns a list of (name, dependencies) pairs suitable for topological sorting.
 -}
-buildDependencyGraph :: (Ord t, Data a, Data k, Data t) => Map.Map Name (Set.Set Name) -> [Definition a k t] -> [((Name, a), [Name])]
+buildDependencyGraph :: forall a k t. (Ord t, Data a, Data k, Data t) => Map.Map Name (Set.Set Name) -> [Definition a k t] -> [((Name, a), [Name])]
 buildDependencyGraph foldExprDeps defs =
   let definedNamePairs = getDefinedNames defs
       definedNames = Set.fromList (fst <$> definedNamePairs)
@@ -209,30 +210,26 @@ buildDependencyGraph foldExprDeps defs =
 {- | Topologically sort definitions by dependencies.
 
 Uses strongly connected components to detect cycles. Reports all cyclic
-dependencies (both self-recursion and mutual recursion) EXCEPT for folds,
-which represent valid structural recursion in Coal.
-
-Folds are excluded because they are pattern-matched and structurally recursive,
-making them safe. Regular recursive functions (using if/else) are not bounded
-by pattern matching and should be caught.
+dependencies (both self-recursion and mutual recursion). Fold pattern-recursion
+is not present here as an edge: fold-derived lets use the recorded
+expression-level dependencies, so a cycle in this graph always represents
+ordinary (unbounded) recursion and is reported.
 
 If any problematic cycles exist, returns Left with the list of cycles.
 Otherwise returns Right with a valid topological ordering.
 -}
-topoSortDefs :: Set.Set Name -> [((Name, a), [Name])] -> Either [[(Name, a)]] [(Name, a)]
-topoSortDefs folds defs =
+topoSortDefs :: [((Name, a), [Name])] -> Either [[(Name, a)]] [(Name, a)]
+topoSortDefs defs =
   if null problematicCycles
     then Right (concatMap flatten sccs)
     else Left problematicCycles
  where
   edges = [((name, loc), name, deps) | ((name, loc), deps) <- defs]
   sccs = stronglyConnComp edges
-  -- Report all cycles (self-recursion and mutual recursion)
-  -- EXCEPT cycles where all participants are folds (valid structural recursion)
+  -- Report all cycles (self-recursion and mutual recursion).
   problematicCycles =
     [ xs
     | CyclicSCC xs <- sccs
-    , not (all (\(name, _) -> name `Set.member` folds) xs) -- Exclude if all are folds
     ]
   flatten (AcyclicSCC x) = [x]
   flatten (CyclicSCC xs) = xs

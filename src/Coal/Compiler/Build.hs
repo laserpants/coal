@@ -76,7 +76,6 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build.Hash256 (Hash256 (..))
 import Coal.Compiler.Build.NameEntry
-import qualified Data.Map.Strict as Map
 import Coal.Kernel.Language.Interface (ObjectInterface)
 import Coal.Language (IndexedScheme, IndexedType)
 import Coal.Language.Module.Path (Path (..))
@@ -336,13 +335,14 @@ overBuildFolds f Build{..} =
 insertBuildFold :: Name -> Build a -> Build a
 insertBuildFold name = overBuildFolds (Set.insert name)
 
--- | Record the expression-level dependencies of a top-level fold.
---
--- A fold's @-patterns may validly reference other top-level folds (structural
--- recursion, bounded by pattern matching). Those references are not part of this
--- map. Any reference that appears in the fold's clause /expression/ bodies is an
--- ordinary (potentially cyclic) call and is recorded so that the call-cycle
--- checker may reject expression-level recursion among folds.
+{- | Record the expression-level dependencies of a top-level fold.
+
+A fold's @-patterns may validly reference other top-level folds (structural
+recursion, bounded by pattern matching). Those references are not part of this
+map. Any reference that appears in the fold's clause /expression/ bodies is an
+ordinary (potentially cyclic) call and is recorded so that the call-cycle
+checker may reject expression-level recursion among folds.
+-}
 insertBuildFoldExprDeps :: Name -> Set Name -> Build a -> Build a
 insertBuildFoldExprDeps name deps Build{..} =
   Build

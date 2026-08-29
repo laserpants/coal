@@ -3,6 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 {- |
 Module: Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild
@@ -44,6 +45,8 @@ module Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild (
 
 import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.FreeVars (freeIn, notConstructor)
+import Coal.Common.Label (Label, labelName)
 import Coal.Compiler.Build
 import qualified Coal.Compiler.Build as Build
 import Coal.Compiler.Build.NameEntry
@@ -72,7 +75,9 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
+import Data.Data (Data)
 import Data.List (intersect)
+import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, (\\))
 import qualified Data.Set as Set
@@ -125,7 +130,7 @@ insertExportedName name
  where
   insertName = modify (Build.insertBuildExportedName name)
 
-prepareBuild :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
+prepareBuild :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m ()
 prepareBuild Module{..} =
   updateCurrentBuildC $
     \build ->
@@ -135,7 +140,7 @@ prepareBuild Module{..} =
           { buildPath = modulePath
           }
 
-prepareDefinitions :: (Monad m, Monoid a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
+prepareDefinitions :: (Monad m, Monoid a, Data a) => [Definition a Kind ()] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 prepareDefinitions defs = do
   -- Insert built-in type and data constructors that are always available
   -- These are compiler-provided primitives for lists and natural numbers
@@ -1026,7 +1031,7 @@ instantiateScheme Forall{..} =
 instantiateType :: (Monad m) => Type Parameter Kind -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) IndexedType
 instantiateType t = lift $ lift $ runReaderT (toIndexed t) mempty
 
-collectFolds :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
+collectFolds :: (Monad m, Data a) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectFolds =
   \case
     DFold _ name FoldDefinition{foldDefinitionClauses} -> do
@@ -1035,20 +1040,22 @@ collectFolds =
     _ ->
       pure ()
 
--- | Compute the expression-level dependencies of a fold's clauses.
---
--- Only the 'choiceExpression' bodies (and guards) of each clause contribute;
--- references in the pattern (plain variables as well as @-patterns / fold
--- patterns) are deliberately excluded. This is what lets the call-cycle checker
--- later distinguish valid structural recursion (through patterns, bounded by
--- destructuration) from invalid unbounded recursion through the fold's body.
-foldExprDeps :: (Data a, Data t) => NonEmpty (Clause a Kind t) -> Set Name
-foldExprDeps =
-  Set.fromList
-    . fmap labelName
-    . Set.toList
-    . Set.filter notConstructor
-    . foldMap (foldMap (freeIn . choiceExpression) . clauseChoices)
+{- | Compute the expression-level dependencies of a fold's clauses.
+
+Only the 'choiceExpression' bodies (and guards) of each clause contribute;
+references in the pattern (plain variables as well as @-patterns / fold
+patterns) are deliberately excluded. This is what lets the call-cycle checker
+later distinguish valid structural recursion (through patterns, bounded by
+destructuration) from invalid unbounded recursion through the fold's body.
+-}
+foldExprDeps :: forall a t. (Data a, Data t, Ord t) => NonEmpty (Clause a Kind t) -> Set Name
+foldExprDeps clauses = foldMap (foldMap choiceNames . clauseChoices) clauses
+ where
+  choiceNames :: Choice Expression a Kind t -> Set Name
+  choiceNames choice =
+    let freeVars :: Set (Label t)
+        freeVars = Set.filter notConstructor (freeIn (choiceExpression choice))
+     in Set.fromList (labelName <$> Set.toList freeVars)
 
 collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectImports =

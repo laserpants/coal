@@ -1,0 +1,30 @@
+module Main {
+
+  import namespace IO
+
+  type V
+    = A
+    | B(List<V>)
+
+  fold gork : List<V> -> string
+    | [] => ""
+    | ( baz(@v) as y ) :: gork(@vs) => let zzz = baz(y) in v <> vs
+
+  fold baz : V -> string
+    | A => "A"
+    | B(gork(@vs) as xs) => let zzz = gork(xs) in vs
+
+/*
+  fun gork2 : List<V> -> string
+    | [] => ""
+    | y :: ys => let zzz = baz2(y) in ""
+
+  fold baz2 : V -> string
+    | A => "A"
+    | B(xs) => let zzz = gork2(xs) in ""
+*/
+
+  fun main() =
+    IO.println_string("!!")
+
+}

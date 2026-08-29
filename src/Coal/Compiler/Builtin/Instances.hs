@@ -427,7 +427,7 @@ builtinInstances =
               , Forall mempty mempty (TIntrinsic IUnit `TArrow` TIntrinsic IUnit `TArrow` TIntrinsic IBool)
               )
             ]
-        
+        )
     )
   ,
     ( "Comparable"
