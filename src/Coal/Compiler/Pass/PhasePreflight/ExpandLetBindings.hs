@@ -97,15 +97,15 @@ expandLetBindings =
 
 nestBindings :: Metadata -> NonEmpty (Binding Expression Metadata () ()) -> Expression Metadata () () -> Expression Metadata () ()
 nestBindings loc bindings = go True (NonEmpty.toList bindings)
-  where
-    go _ [] =
-      id
-    go isFirst (b : bs) =
-      \body ->
-        ELet
-          (if isFirst then loc else bindingMetadata b)
-          (b :| [])
-          (go False bs body)
+ where
+  go _ [] =
+    id
+  go isFirst (b : bs) =
+    \body ->
+      ELet
+        (if isFirst then loc else bindingMetadata b)
+        (b :| [])
+        (go False bs body)
 
 bindingMetadata :: Binding Expression Metadata () () -> Metadata
 bindingMetadata (BPattern a _ _) = a

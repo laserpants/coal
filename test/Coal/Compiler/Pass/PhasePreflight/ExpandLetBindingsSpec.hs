@@ -11,8 +11,8 @@ import Data.Generics.Uniplate.Data (universeBi)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Text as Text
-import Text.Megaparsec (parse)
 import Test.Hspec
+import Text.Megaparsec (parse)
 
 expandLetBindingsSpec :: Spec
 expandLetBindingsSpec =
@@ -99,9 +99,9 @@ singleBindingSource =
 countLets :: Module Metadata () () -> Int
 countLets m =
   length (filter isLet (universeBi m :: [Expression Metadata () ()]))
-  where
-    isLet ELet{} = True
-    isLet _ = False
+ where
+  isLet ELet{} = True
+  isLet _ = False
 
 -- | @let a = e1; b = e2 in body@ (the pre-expansion representation)
 letGroup :: [(Text.Text, Expression Metadata () ())] -> Expression Metadata () () -> Expression Metadata () ()
@@ -112,8 +112,8 @@ letGroup bindings body =
 nestedLet :: [(Text.Text, Expression Metadata () ())] -> Expression Metadata () () -> Expression Metadata () ()
 nestedLet bindings body =
   foldr step body (map (uncurry patternBinding) bindings)
-  where
-    step b acc = ELet mempty (b :| []) acc
+ where
+  step b acc = ELet mempty (b :| []) acc
 
 patternBinding :: Text.Text -> Expression Metadata () () -> Binding Expression Metadata () ()
 patternBinding n = BPattern mempty (varP n)
