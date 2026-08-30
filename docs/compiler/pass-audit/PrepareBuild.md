@@ -48,7 +48,9 @@ The `prepareDefinitions` function runs 10 steps:
 2. **Type constructors** (`collectTypeConstructors`): Gathers `DType` definitions with their kinds
 3. **Data constructors** (`collectDataConstructors`): Gathers data constructors with schemes
 4. **Folds** (`collectFolds`): Registers fold names
-5. **Export expansion** (`expandExports`): Converts `Type(*)` to explicit constructor lists
+5. **Export expansion** (`expandExports`): Converts `Type(*)` to explicit constructor
+   lists; keeps `Type(Name)` exports for type aliases unchanged (aliases carry no
+   constructors of their own)
 6. **Traits** (`collectTraits`): Registers trait definitions and imported traits
 7. **Trait interfaces** (`collectTraitsInterface`): Registers trait member signatures
 8. **Instances** (`collectInstances`): Registers trait implementations with their methods

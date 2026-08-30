@@ -1,0 +1,14 @@
+module Main {
+
+  import IO(println_string)
+
+  import namespace UInt8
+  import namespace IO
+  
+  let test_n =
+    UInt8.from_int(3)
+
+  fun main() =
+    IO.println_int32(UInt8.to_int(test_n))
+
+}
