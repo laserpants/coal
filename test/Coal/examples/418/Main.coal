@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+  import String(int32_to_string)
+
+  // Multi-binding let groups have sequential (left-to-right) scope: each
+  // binding's right-hand side may refer to the bindings to its left.
+  //   a = 3, b = a * 2 = 6, c = a + b = 9
+  fun main() =
+    let a = 3;
+        b = a * 2;
+        c = a + b
+    in IO.println_string(int32_to_string(c))
+
+}

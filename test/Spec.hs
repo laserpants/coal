@@ -3,6 +3,7 @@
 import CLI.Command.BuildSpec (buildSpec)
 import CLI.Parser.AddCmdSpec (addCmdSpec)
 import CLI.Parser.InstallCmdSpec (installCmdSpec)
+import Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec (expandLetBindingsSpec)
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
 import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
@@ -18,6 +19,7 @@ spec =
     typeArgsSpec
     typeApplicationSpec
     patternAnomaliesSpec
+    expandLetBindingsSpec
 
 main :: IO ()
 main =
