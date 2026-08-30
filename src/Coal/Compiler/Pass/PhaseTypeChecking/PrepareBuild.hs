@@ -430,7 +430,7 @@ qualified name path = principalPath path <> "." <> name
 expandExports :: (Monad m) => ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
 expandExports = do
   exportList <- ask
-  Build{buildTypeConstructors} <- get
+  Build{buildTypeConstructors, buildAliases} <- get
   case exportList of
     ExportAll ->
       return ExportAll
@@ -438,15 +438,22 @@ expandExports = do
       newExports <-
         forM exports $
           \case
-            TypeExport loc name [] ->
+            TypeExport loc name [] -> do
               case Environment.lookup name buildTypeConstructors of
-                Nothing -> do
-                  lift $ lift $ do
-                    path <- gets compilerCurrentPath
-                    tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
-                  return (TypeExport loc name mempty)
+                -- Data types: also export their constructor names
                 Just TypeConstructorEntry{..} ->
                   return (TypeExport loc name typeConstructorEntryDataConstructors)
+                Nothing ->
+                  case Environment.lookup name buildAliases of
+                    -- Type aliases have no constructors of their own; keep the
+                    -- export unchanged so the alias name itself is exported
+                    Just _ ->
+                      return (TypeExport loc name mempty)
+                    Nothing -> do
+                      lift $ lift $ do
+                        path <- gets compilerCurrentPath
+                        tellErrors [MissingType name path (ErrorLocation (principalPath path) loc)]
+                      return (TypeExport loc name mempty)
             e ->
               return e
       return
@@ -557,7 +564,7 @@ insertTypeName Build{..} loc name =
           Nothing -> do
             lift $ lift $ do
               path <- gets compilerCurrentPath
-              tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+              tellErrors [MissingType name buildPath (ErrorLocation (principalPath path) loc)]
             return False
           Just entry -> do
             Build
@@ -584,7 +591,7 @@ insertTypeName Build{..} loc name =
           Nothing ->
             lift $ lift $ do
               path <- gets compilerCurrentPath
-              tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+              tellErrors [MissingType name buildPath (ErrorLocation (principalPath path) loc)]
               return False
           Just entry -> do
             Build
@@ -611,7 +618,7 @@ insertTypeName Build{..} loc name =
           Nothing ->
             lift $ lift $ do
               path <- gets compilerCurrentPath
-              tellErrors [MissingType name (Path []) (ErrorLocation (principalPath path) loc)]
+              tellErrors [MissingType name buildPath (ErrorLocation (principalPath path) loc)]
               return False
           Just AliasEntry{..} -> do
             forM_ (constructors aliasEntryType) (insertTypeName Build{..} loc)

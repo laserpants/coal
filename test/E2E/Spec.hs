@@ -2201,6 +2201,13 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  describe "419" $
+    expectOutput
+      "3"
+      "test/Coal/examples/419"
+      [ "UInt8.coal"
+      , "Main.coal"
+      ]
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
