@@ -1,6 +1,6 @@
 cabal-version: 1.24
 
--- This file has been generated from package.yaml by hpack version 0.38.3.
+-- This file has been generated from package.yaml by hpack version 0.39.6.
 --
 -- see: https://github.com/sol/hpack
 
@@ -99,6 +99,7 @@ library
       Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing
       Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements
       Coal.Compiler.Pass.PhasePreflight.DetectShadowing
+      Coal.Compiler.Pass.PhasePreflight.ExpandLetBindings
       Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions
       Coal.Compiler.Pass.PhasePreflight.RefreshCache
       Coal.Compiler.Pass.PhasePreflight.SortModules
@@ -417,6 +418,7 @@ test-suite coal-test
       CLI.Command.BuildSpec
       CLI.Parser.AddCmdSpec
       CLI.Parser.InstallCmdSpec
+      Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
       Coal.Kernel.Eval.EvalSpec
       Coal.Kernel.FreeVarsSpec

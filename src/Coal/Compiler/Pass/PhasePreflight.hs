@@ -11,6 +11,7 @@ import Coal.Compiler.Pass.PhasePreflight.DetectInvalidExports (passDetectInvalid
 import Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing (passDetectMainEntrypointMissing)
 import Coal.Compiler.Pass.PhasePreflight.DetectMisplacedImportStatements (passDetectMisplacedImportStatements)
 import Coal.Compiler.Pass.PhasePreflight.DetectShadowing (passDetectShadowing)
+import Coal.Compiler.Pass.PhasePreflight.ExpandLetBindings (passExpandLetBindings)
 import Coal.Compiler.Pass.PhasePreflight.InsertBuiltinDefinitions (passInsertBuiltinDefinitions)
 import Coal.Compiler.Pass.PhasePreflight.RefreshCache (passRefreshCache)
 import Coal.Compiler.Pass.PhasePreflight.SortModules (passSortModules)
@@ -25,6 +26,7 @@ phasePreflight =
     >-> passInsertBuiltinDefinitions
     >-> passDesugarWhereClauses
     >-> passDesugarDoNotation
+    >-> passExpandLetBindings
     >-> passDetectAliasCycles
     >-> passDetectShadowing
     >-> passDetectDuplicateParams

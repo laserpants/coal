@@ -2201,6 +2201,15 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- Multi-binding let groups have sequential (left-to-right) scope: each
+  -- binding's right-hand side may refer to earlier bindings of the group.
+  describe "418" $
+    expectOutput
+      "9"
+      "test/Coal/examples/418"
+      [ "Main.coal"
+      ]
+
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
