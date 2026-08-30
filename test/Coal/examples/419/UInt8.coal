@@ -1,0 +1,15 @@
+module UInt8(UInt8, to_int, from_int) {
+
+  type UInt8I = UInt8I(int32)
+
+  type alias UInt8 = UInt8I
+
+  fun from_int(n : int32) = 
+    UInt8I(n)
+
+  fun to_int(UInt8I(n) : UInt8I) = 
+    n
+    
+  let zz = 8
+
+}

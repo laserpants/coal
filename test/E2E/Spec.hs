@@ -2201,6 +2201,7 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+
   -- Multi-binding let groups have sequential (left-to-right) scope: each
   -- binding's right-hand side may refer to earlier bindings of the group.
   describe "418" $
@@ -2208,6 +2209,13 @@ e2eSpec = do
       "9"
       "test/Coal/examples/418"
       [ "Main.coal"
+
+  describe "419" $
+    expectOutput
+      "3"
+      "test/Coal/examples/419"
+      [ "UInt8.coal"
+      , "Main.coal"
       ]
 
 expectOutput :: String -> String -> [FilePath] -> Spec
