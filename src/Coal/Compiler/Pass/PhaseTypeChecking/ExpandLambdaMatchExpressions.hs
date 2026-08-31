@@ -125,9 +125,11 @@ instance (Monoid a, Data a) => ExpandContext (Expression a Kind ()) where
       \case
         ELambdaMatch a _ clauses ->
           return $
-            lambdaE' a
+            lambdaE'
+              a
               (varP "$lambda_match" :| [])
-              ( matchE' a
+              ( matchE'
+                  a
                   (varE "$lambda_match")
                   clauses
               )
