@@ -45,7 +45,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, setCurrentModuleC)
 import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern, Qualified (..))
-import Coal.Language.AST.Builders (matchE, tupleE, tupleP, varE, varP)
+import Coal.Language.AST.Builders (matchE', tupleE, tupleP, varE, varP)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
 import Data.List.NonEmpty (NonEmpty (..))
@@ -103,7 +103,7 @@ expandGroups =
               , letDefinitionConstraints = foldMap extractConstraints functionGroupDefinitionAnnotation
               , letDefinitionType = With [] ()
               , letDefinitionExpression =
-                  ELambda loc (varP <$> args) (matchE (packVariables args) (buildExpressionClauses functionGroupDefinitionBranches))
+                  ELambda loc (varP <$> args) (matchE' loc (packVariables args) (buildExpressionClauses functionGroupDefinitionBranches))
               }
         ]
      where
