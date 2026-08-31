@@ -45,7 +45,7 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandLambdaMatchExpressions (
 
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT)
-import Coal.Language.AST.Builders (lambdaE, matchE, varE, varP)
+import Coal.Language.AST.Builders (lambdaE', matchE', varE, varP)
 import Coal.Language.Definition
 import Coal.Language.Expression (Expression (ELambdaMatch))
 import Coal.Language.Module (Module (..))
@@ -123,11 +123,13 @@ instance (Monoid a, Data a) => ExpandContext (Expression a Kind ()) where
   expandLambdaMatchExpressions =
     transformM $
       \case
-        ELambdaMatch _ _ clauses ->
+        ELambdaMatch a _ clauses ->
           return $
-            lambdaE
+            lambdaE'
+              a
               (varP "$lambda_match" :| [])
-              ( matchE
+              ( matchE'
+                  a
                   (varE "$lambda_match")
                   clauses
               )

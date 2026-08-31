@@ -1,0 +1,16 @@
+module Main {
+
+  import namespace IO
+
+  type Letter
+    = A
+    | B
+    | C
+    
+  fun f1
+    | A => true
+
+  fun main() =
+    IO.println_string("hello")
+
+}
