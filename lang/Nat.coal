@@ -9,6 +9,18 @@
  *   = Zero
  *   | Succ(nat)
  * ```
+ *
+ * Note that it is not necessary to use `pack` explicitly when working with
+ * numeric literals. For example, you can write:
+ *
+ * ```
+ * let
+ *   x : nat = 5
+ *   in
+ * ```
+ *
+ * and the compiler will perform the conversion automatically. This works
+ * because numeric literals are overloaded.
  */
 module Nat {
 
