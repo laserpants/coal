@@ -1,0 +1,102 @@
+/**
+ * A list type that guarantees at least one element at compile time, eliminating
+ * the need for runtime checks when you know a list will never be empty.
+ */ 
+module Containers.NonEmpty.List {
+
+  import namespace List
+  import List(head)
+
+  /**
+   * A list that is guaranteed to contain at least one element
+   */
+  type NonEmptyList<a> = Cons(a, List<a>)
+
+  instance Comparable<NonEmptyList<a>> {
+    fun `==`(Cons(x, xs), Cons(y, ys)) =
+      x == y && xs == ys
+  }
+
+  /**
+   * Convert a non-empty list into an ordinary list
+   */
+  fun to_list(Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    x :: xs
+
+  /**
+   * Convert an ordinary list into a non-empty list, if it is not empty
+   */
+  fun from_list(list : List<a>) : Option<NonEmptyList<a>> =
+    match(list) {
+      | [] => None
+      | x :: xs => Some(Cons(x, xs))
+    }
+
+  /**
+   * Get the first element of a non-empty list
+   */
+  fun first(Cons(x, _) : NonEmptyList<a>) : a = x
+
+  /**
+   * Get the elements of a non-empty list after the first, as an ordinary list
+   */
+  fun rest(Cons(_, xs) : NonEmptyList<a>) : List<a> = xs
+
+  /**
+   * Extract the first element and the remaining elements as a pair
+   */
+  fun uncons(Cons(x, xs) : NonEmptyList<a>) : (a, List<a>) = (x, xs)
+
+  /**
+   * Get the number of elements in a non-empty list
+   */
+  fun length(Cons(_, xs) : NonEmptyList<a>) : nat =
+    Succ(List.length(xs))
+
+  /**
+   * Create a non-empty list with a single element
+   */
+  fun singleton(elem : a) : NonEmptyList<a> = Cons(elem, [])
+
+  /**
+   * Transform all elements of a non-empty list with a function
+   */
+  fun map(f : a -> b, Cons(x, xs) : NonEmptyList<a>) : NonEmptyList<b> =
+    Cons(f(x), List.map(f, xs))
+
+  /**
+   * Take the first n elements as an ordinary list
+   */
+  fun take(n : nat, Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    List.take(n, x :: xs)
+
+  /**
+   * Drop the first n elements, returning the remainder as an ordinary list
+   */
+  fun drop(n : nat, Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    List.drop(n, x :: xs)
+
+  /**
+   * Keep only the elements of a non-empty list matching a predicate
+   */
+  fun filter(p : a -> bool, Cons(x, xs) : NonEmptyList<a>) : List<a> =
+    List.filter(p, x :: xs)
+
+  /**
+   * Concatenate two non-empty lists
+   */
+  fun append(Cons(x, xs) : NonEmptyList<a>, Cons(y, ys) : NonEmptyList<a>) : NonEmptyList<a> =
+    Cons(x, xs <> (y :: ys))
+
+  /**
+   * Reverse a non-empty list
+   */
+  fun reverse(Cons(x, xs) : NonEmptyList<a>) : NonEmptyList<a> =
+    let q = singleton(x)
+    in
+    match(List.reverse(xs)) {
+      | [] => q
+      | r :: rs => append(Cons(r, rs), q)
+    }
+
+}

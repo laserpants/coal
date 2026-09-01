@@ -1,0 +1,104 @@
+/**
+ * A set collection for storing unique elements, implemented using Map internally.
+ */ 
+module Containers.Set {
+
+  import namespace Containers.Map
+  import namespace List
+  import Containers.Map(Map)
+
+  /**
+   * A collection of unique elements of type a
+   */
+  type Set<a> = Set(Map<a, unit>)
+  
+  instance Comparable<Set<a>> {
+    fun `==`(Set(s1), Set(s2)) = s1 == s2
+  }
+
+  /**
+   * Add an element to the set
+   */
+  fun insert(element : a, Set(map) : Set<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
+    Set(Containers.Map.insert(element, (), map))
+
+  /**
+   * Remove an element from the set
+   */
+  fun delete(element : a, Set(map) : Set<a>) : Set<a> with (Comparable<a>, Ordered<a>) =
+    Set(Containers.Map.delete(element, map))
+
+  /**
+   * Create a set with a single element
+   */
+  fun singleton(element : a) : Set<a> =
+    Set(Containers.Map.singleton(element, ()))
+
+  /**
+   * Create an empty set
+   */
+  let empty : Set<a> = Set(Containers.Map.empty)
+
+  /**
+   * Check if the set is empty
+   */
+  fun is_empty(Set(map) : Set<a>) : bool =
+    Containers.Map.is_empty(map)
+
+  /**
+   * Check whether an element is a member of the set
+   */
+  fun is_member(element : a, Set(map) : Set<a>) : bool with (Comparable<a>, Ordered<a>) =
+    match(Containers.Map.lookup(element, map)) {
+      | Some(_) => true
+      | _ => false
+    }
+
+  /**
+   * Get the number of elements in the set
+   */
+  fun size(Set(map) : Set<a>) = Containers.Map.size(map)
+
+  /**
+   * Convert the set into a list of its elements in ascending order
+   */
+  fun to_list(Set(map) : Set<a>) : List<a> =
+    fold(map) {
+      | Empty => []
+      | Map({ key = key, left = @left, right = @right | _ }) => 
+          left <> (key :: right)
+    }
+
+  /**
+   * Create a set containing the elements of a list
+   */
+  fun from_list(list : List<a>) : Set<a> =
+    List.reduce(insert, empty, list)
+
+  /**
+   * Transform all elements of the set with a function
+   */
+  fun map(f : a -> b, set : Set<a>) : Set<b> =
+    from_list(List.map(f, to_list(set)))
+
+  /**
+   * Keep only the elements of the set matching a predicate
+   */
+  fun filter(predicate : a -> bool, set : Set<a>) : Set<a> =
+    from_list(List.filter(predicate, to_list(set)))
+
+  /**
+   * Compute the union of two sets
+   */
+  fun union(fst : Set<a>, snd : Set<a>) : Set<a> =
+    from_list(to_list(fst) <> to_list(snd))
+
+  /**
+   * Compute the intersection of two sets
+   */
+  fun intersection(fst : Set<a>, snd : Set<a>) : Set<a> =
+    let (m, n) = if (size(fst) < size(snd)) then (fst, snd) else (snd, fst)
+    in
+    filter(fn(element) => n |. is_member(element), m)
+
+}

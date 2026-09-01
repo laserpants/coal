@@ -1,0 +1,18 @@
+module Spec {
+
+  import IO(return, println_string, println_int32)
+  import MicroTest(Test, suite, run, check, assert)
+  import namespace List
+
+  import Data.VariantSpec(variant_spec)
+
+  let
+    spec : Test =
+      suite([
+        variant_spec()
+      ])
+
+  fun main() =
+    run(spec)
+
+}

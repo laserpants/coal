@@ -1,0 +1,669 @@
+/**
+ * A dynamically typed value type that can represent primitive values,
+ * strings, arrays, objects, maps, byte strings, and datetimes, together
+ * with equality, ordering, and pretty-printing support.
+ */
+module Data.Variant {
+
+  import Containers.Map(Map)
+  import Pretty(Pretty)
+  import String(intercalate)
+  import Data.UInt8(UInt8, to_num)
+  import DateTime
+    ( DateTime(DateTime)
+    , Date(Date)
+    , Time(Time)
+    , MonthOfYear
+        ( January
+        , February
+        , March
+        , April
+        , May
+        , June
+        , July
+        , August
+        , September
+        , October
+        , November
+        , December
+        )
+    )
+
+  import namespace Containers.Map
+  import namespace List
+
+  /**
+   * A dynamically typed value that wraps one of several primitive types,
+   * a list of variants, a string-keyed map of variants, a variant-keyed
+   * map of variants, a list of bytes, or a datetime
+   */
+  type Variant
+    = VNull
+    | VUnit
+    | VBool(bool)
+    | VInt32(int32)
+    | VInt64(int64)
+    | VNat(nat)
+    | VBignum(bignum)
+    | VFloat(float)
+    | VDouble(double)
+    | VChar(char)
+    | VString(string)
+    | VArray(List<Variant>)
+    | VObject(Map<string, Variant>)
+    | VMap(Map<Variant, Variant>)
+    | VBytes(List<UInt8>)
+    | VDateTime(DateTime)
+
+  instance Comparable<Variant> {
+    /**
+     * Compare two variants for structural equality
+     */
+    fun `==`
+     | VNull, VNull => true
+     | VUnit, VUnit => true
+     | VBool(b1), VBool(b2) => b1 == b2
+     | VInt32(n1), VInt32(n2) => n1 == n2
+     | VInt64(n1), VInt64(n2) => n1 == n2
+     | VNat(n1), VNat(n2) => n1 == n2
+     | VBignum(b1), VBignum(b2) => b1 == b2
+     | VFloat(f1), VFloat(f2) => f1 == f2
+     | VDouble(d1), VDouble(d2) => d1 == d2
+     | VChar(c1), VChar(c2) => c1 == c2
+     | VString(s1), VString(s2) => s1 == s2
+     | VArray(a1), VArray(a2) =>
+         (List.length(a1) == List.length(a2)) && equals_variant_list(List.zip(a1, a2))
+     | VObject(m1), VObject(m2) => 
+         (Containers.Map.size(m1) == Containers.Map.size(m2)) && 
+         equals_variant_object_entry_list(List.zip(
+           Containers.Map.to_sorted_list(m1), 
+           Containers.Map.to_sorted_list(m2)
+         ))
+     | VMap(m1), VMap(m2) => 
+         (Containers.Map.size(m1) == Containers.Map.size(m2)) && 
+         equals_variant_map_entry_list(List.zip(
+           Containers.Map.to_sorted_list(m1), 
+           Containers.Map.to_sorted_list(m2)
+         ))
+     | VBytes(b1), VBytes(b2) =>
+         (List.length(b1) == List.length(b2)) && 
+         equals_int32_pair_list(List.zip(
+           List.map(uint8_to_int32, b1),
+           List.map(uint8_to_int32, b2)
+         ))
+     | VDateTime(dt1), VDateTime(dt2) => equals_datetime(dt1, dt2)
+     | _, _ => 
+         false
+  }
+  
+  /**
+   * Check that two lists of variants are pairwise equal
+   */
+  fold equals_variant_list : List<(Variant, Variant)> -> bool 
+    | [] => 
+        true
+    | (v1, v2) :: equals_variant_list(@vs) => 
+         v1 == v2 && vs
+
+  /**
+   * Check that two lists of object entries are pairwise equal
+   */
+  fold equals_variant_object_entry_list : List<((string, Variant), (string, Variant))> -> bool
+    | [] => 
+        true
+    | (a1, a2) :: equals_variant_object_entry_list(@rest) => 
+        a1 == a2 && rest
+
+  /**
+   * Check that two lists of map entries are pairwise equal
+   */
+  fold equals_variant_map_entry_list : List<((Variant, Variant), (Variant, Variant))> -> bool
+    | [] => 
+        true
+    | (a1, a2) :: equals_variant_map_entry_list(@rest) => 
+        a1 == a2 && rest
+
+  /**
+   * Convert a UInt8 value to an int32
+   */
+  fun uint8_to_int32(u : UInt8) : int32 = to_num(u)
+
+  /**
+   * Check that two lists of int32 values are pairwise equal
+   */
+  fold equals_int32_pair_list : List<(int32, int32)> -> bool
+    | [] => 
+        true
+    | (n1, n2) :: equals_int32_pair_list(@rest) => 
+        n1 == n2 && rest
+
+  instance Pretty<Variant> {
+    let pretty = pretty_variant
+  }
+
+  /**
+   * Render a variant as a string
+   */
+  fold pretty_variant : Variant -> string 
+    | VNull => "VNull"
+    | VUnit => "VUnit"
+    | VBool(b) => "VBool(" <> pretty(b) <> ")"
+    | VInt32(n) => "VInt32(" <> pretty(n) <> ")"
+    | VInt64(n) => "VInt64(" <> pretty(n) <> ")"
+    | VNat(n) => "VNat(" <> pretty(n) <> ")"
+    | VBignum(b) => "VBignum(" <> pretty(b) <> ")"
+    | VFloat(f) => "VFloat(" <> pretty(f) <> ")"
+    | VDouble(d) => "VDouble(" <> pretty(d) <> ")"
+    | VChar(c) => "VChar(" <> pretty(c) <> ")"
+    | VString(s) => "VString(" <> pretty(s) <> ")"
+    | VArray(vs) => "VArray([" <> pretty_variant_list(vs) <> "])"
+    | VObject(m) => "VObject(Map(" <> pretty_variant_object_entry_list(Containers.Map.to_list(m)) <> "))"
+    | VMap(m) => "VMap(Map(" <> pretty_variant_map_entry_list(Containers.Map.to_list(m)) <> "))"
+    | VBytes(bs) => "VBytes([" <> pretty_int32_list(List.map(uint8_to_int32, bs)) <> "])"
+    | VDateTime(dt) => "VDateTime(" <> pretty(dt) <> ")"
+  
+  /**
+   * Render a list of variants as a comma-separated string
+   */
+  fold pretty_variant_list : List<Variant> -> string 
+    | pretty_variant(@v) :: pretty_variant_list(@vs) => insert_comma(v, vs)
+    | [] => ""
+    
+  /**
+   * Render a key-value entry as a string of the form (key,value)
+   */
+  fold pretty_variant_object_entry : (string, Variant) -> string
+    | (key, pretty_variant(@v)) => "(" <> key <> "," <> v <> ")" 
+
+  /**
+   * Render a list of key-value entries as a comma-separated string
+   */
+  fold pretty_variant_object_entry_list : List<(string, Variant)> -> string
+    | pretty_variant_object_entry(@v) :: pretty_variant_object_entry_list(@vs) => 
+        insert_comma(v, vs)
+    | [] => ""
+
+  /**
+   * Render a key-value entry as a string of the form (key,value)
+   */
+  fold pretty_variant_map_entry : (Variant, Variant) -> string
+    | (pretty_variant(@k), pretty_variant(@v)) => "(" <> k <> "," <> v <> ")"
+
+  /**
+   * Render a list of key-value entries as a comma-separated string
+   */
+  fold pretty_variant_map_entry_list : List<(Variant, Variant)> -> string
+    | pretty_variant_map_entry(@v) :: pretty_variant_map_entry_list(@vs) => 
+        insert_comma(v, vs)
+    | [] => ""
+
+  /**
+   * Render a list of int32 values as a comma-separated string
+   */
+  fold pretty_int32_list : List<int32> -> string
+    | n :: pretty_int32_list(@rest) => 
+        insert_comma(pretty(n), rest)
+    | [] => ""
+
+  fun insert_comma(v) =
+    match {
+      | "" => v
+      | vs => v <> "," <> vs
+    }
+
+  /**
+   * The constructor rank of a variant, in declaration order
+   */
+  fold variant_rank : Variant -> int32
+    | VNull => 0
+    | VUnit => 1
+    | VBool(_) => 2
+    | VInt32(_) => 3
+    | VInt64(_) => 4
+    | VNat(_) => 5
+    | VBignum(_) => 6
+    | VFloat(_) => 7
+    | VDouble(_) => 8
+    | VChar(_) => 9
+    | VString(_) => 10
+    | VArray(_) => 11
+    | VObject(_) => 12
+    | VMap(_) => 13
+    | VBytes(_) => 14
+    | VDateTime(_) => 15
+
+  /**
+   * Compare two variants of the same constructor by their payloads
+   */
+  fold compare_same_constructor : (Variant, Variant) -> Ordering
+    | (VNull, VNull) => EqualTo
+    | (VUnit, VUnit) => EqualTo
+    | (VBool(b1), VBool(b2)) => compare(b1, b2)
+    | (VInt32(n1), VInt32(n2)) => compare(n1, n2)
+    | (VInt64(n1), VInt64(n2)) => compare(n1, n2)
+    | (VNat(n1), VNat(n2)) => compare(n1, n2)
+    | (VBignum(b1), VBignum(b2)) => compare(b1, b2)
+    | (VFloat(f1), VFloat(f2)) => compare(f1, f2)
+    | (VDouble(d1), VDouble(d2)) => compare(d1, d2)
+    | (VChar(c1), VChar(c2)) => compare(c1, c2)
+    | (VString(s1), VString(s2)) => compare(s1, s2)
+    | (VArray(a1), VArray(a2)) =>
+        if (List.length(a1) == List.length(a2)) then
+          compare_variant_pair_list(List.zip(a1, a2))
+        else if (List.length(a1) < List.length(a2)) then
+          LessThan
+        else
+          GreaterThan
+    | (VObject(m1), VObject(m2)) =>
+        if (Containers.Map.size(m1) == Containers.Map.size(m2)) then
+          compare_object_entry_pair_list(List.zip(
+            Containers.Map.to_sorted_list(m1),
+            Containers.Map.to_sorted_list(m2)
+          ))
+        else if (Containers.Map.size(m1) < Containers.Map.size(m2)) then
+          LessThan
+        else
+          GreaterThan
+    | (VMap(m1), VMap(m2)) =>
+        if (Containers.Map.size(m1) == Containers.Map.size(m2)) then
+          compare_map_entry_pair_list(List.zip(
+            Containers.Map.to_sorted_list(m1),
+            Containers.Map.to_sorted_list(m2)
+          ))
+        else if (Containers.Map.size(m1) < Containers.Map.size(m2)) then
+          LessThan
+        else
+          GreaterThan
+    | (VBytes(b1), VBytes(b2)) =>
+        if (List.length(b1) == List.length(b2)) then
+          compare_int32_pair_list(List.zip(
+            List.map(uint8_to_int32, b1),
+            List.map(uint8_to_int32, b2)
+          ))
+        else if (List.length(b1) < List.length(b2)) then
+          LessThan
+        else
+          GreaterThan
+    | (VDateTime(dt1), VDateTime(dt2)) => compare_datetime(dt1, dt2)
+    | (_, _) => EqualTo
+
+  instance Ordered<Variant> {
+    /**
+     * Compare two variants: first by constructor rank (in declaration
+     * order), then by payload
+     */
+    fun compare(v1, v2) =
+      let r1 = variant_rank(v1);
+          r2 = variant_rank(v2)
+      in
+      if (r1 == r2) then
+        compare_same_constructor((v1, v2))
+      else if (r1 < r2) then
+        LessThan
+      else
+        GreaterThan
+  }
+
+  /**
+   * Compare two lists of variants pairwise, returning the ordering of the
+   * first unequal pair, or EqualTo if all pairs are equal
+   */
+  fold compare_variant_pair_list : List<(Variant, Variant)> -> Ordering
+    | [] => 
+        EqualTo
+    | (v1, v2) :: compare_variant_pair_list(@rest) => 
+        if (v1 == v2) then rest else compare(v1, v2)
+
+  /**
+   * Compare two lists of object entries pairwise, by key, then by value
+   */
+  fold compare_object_entry_pair_list : List<((string, Variant), (string, Variant))> -> Ordering
+    | [] => 
+        EqualTo
+    | ((k1, v1), (k2, v2)) :: compare_object_entry_pair_list(@rest) => 
+        if (k1 == k2) then
+          if (v1 == v2) then rest else compare(v1, v2)
+        else if (k1 < k2) then
+          LessThan
+        else
+          GreaterThan
+
+  /**
+   * Compare two lists of map entries pairwise, by key, then by value
+   */
+  fold compare_map_entry_pair_list : List<((Variant, Variant), (Variant, Variant))> -> Ordering
+    | [] => 
+        EqualTo
+    | ((k1, v1), (k2, v2)) :: compare_map_entry_pair_list(@rest) => 
+        if (k1 == k2) then
+          if (v1 == v2) then rest else compare(v1, v2)
+        else if (k1 < k2) then
+          LessThan
+        else
+          GreaterThan
+
+  /**
+   * Compare two lists of int32 values pairwise
+   */
+  fold compare_int32_pair_list : List<(int32, int32)> -> Ordering
+    | [] => 
+        EqualTo
+    | (n1, n2) :: compare_int32_pair_list(@rest) => 
+        if (n1 == n2) then
+          rest
+        else if (n1 < n2) then
+          LessThan
+        else
+          GreaterThan
+
+  // ---------------------------------------------------------------------------
+  // Datetime helpers
+  //
+  // The DateTime type from coal-datetime does not provide Comparable or
+  // Ordered instances for its civil types (only for Instant), so equality
+  // and ordering of datetime payloads are implemented structurally here.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * The 1-based calendar month number of a MonthOfYear
+   */
+  fold month_rank : MonthOfYear -> int32
+    | January => 1
+    | February => 2
+    | March => 3
+    | April => 4
+    | May => 5
+    | June => 6
+    | July => 7
+    | August => 8
+    | September => 9
+    | October => 10
+    | November => 11
+    | December => 12
+
+  /**
+   * Check two civil dates for equality
+   */
+  fun equals_date(d1 : Date, d2 : Date) : bool =
+    match((d1, d2)) {
+      | (Date(r1), Date(r2)) =>
+          r1.year == r2.year &&
+          month_rank(r1.month) == month_rank(r2.month) &&
+          r1.day == r2.day
+    }
+
+  /**
+   * Check two times of day for equality
+   */
+  fun equals_time(t1 : Time, t2 : Time) : bool =
+    match((t1, t2)) {
+      | (Time(r1), Time(r2)) =>
+          r1.hour == r2.hour && r1.minute == r2.minute &&
+          r1.second == r2.second && r1.nanosecond == r2.nanosecond
+    }
+
+  /**
+   * Check two datetimes for equality
+   */
+  fun equals_datetime(dt1 : DateTime, dt2 : DateTime) : bool =
+    match((dt1, dt2)) {
+      | (DateTime(r1), DateTime(r2)) =>
+          equals_date(r1.date, r2.date) && equals_time(r1.time, r2.time)
+    }
+
+  /**
+   * Compare two civil dates by year, then month, then day
+   */
+  fun compare_date(d1 : Date, d2 : Date) : Ordering =
+    match((d1, d2)) {
+      | (Date(r1), Date(r2)) =>
+          if (r1.year < r2.year) then LessThan
+          else if (r1.year > r2.year) then GreaterThan
+          else if (month_rank(r1.month) < month_rank(r2.month)) then LessThan
+          else if (month_rank(r1.month) > month_rank(r2.month)) then GreaterThan
+          else if (r1.day < r2.day) then LessThan
+          else if (r1.day > r2.day) then GreaterThan
+          else EqualTo
+    }
+
+  /**
+   * Compare two times of day by hour, then minute, then second, then
+   * nanosecond
+   */
+  fun compare_time(t1 : Time, t2 : Time) : Ordering =
+    match((t1, t2)) {
+      | (Time(r1), Time(r2)) =>
+          if (r1.hour < r2.hour) then LessThan
+          else if (r1.hour > r2.hour) then GreaterThan
+          else if (r1.minute < r2.minute) then LessThan
+          else if (r1.minute > r2.minute) then GreaterThan
+          else if (r1.second < r2.second) then LessThan
+          else if (r1.second > r2.second) then GreaterThan
+          else if (r1.nanosecond < r2.nanosecond) then LessThan
+          else if (r1.nanosecond > r2.nanosecond) then GreaterThan
+          else EqualTo
+    }
+
+  /**
+   * Compare two datetimes by date, then by time
+   */
+  fun compare_datetime(dt1 : DateTime, dt2 : DateTime) : Ordering =
+    match((dt1, dt2)) {
+      | (DateTime(r1), DateTime(r2)) =>
+          if (equals_date(r1.date, r2.date)) then
+            compare_time(r1.time, r2.time)
+          else
+            compare_date(r1.date, r2.date)
+    }
+
+  /**
+   * Check whether the variant is null
+   */
+  fun is_null
+    | VNull => true
+    | _ => false
+
+  /**
+   * Check whether the variant is the unit value
+   */
+  fun is_unit
+    | VUnit => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a boolean
+   */
+  fun is_bool
+    | VBool(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a 32-bit integer
+   */
+  fun is_int32
+    | VInt32(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a 64-bit integer
+   */
+  fun is_int64
+    | VInt64(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a natural number
+   */
+  fun is_nat
+    | VNat(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is an arbitrary-precision integer
+   */
+  fun is_bignum
+    | VBignum(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a single-precision float
+   */
+  fun is_float
+    | VFloat(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a double-precision float
+   */
+  fun is_double
+    | VDouble(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a character
+   */
+  fun is_char
+    | VChar(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a string
+   */
+  fun is_string
+    | VString(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is an array of variants
+   */
+  fun is_array
+    | VArray(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is an object
+   */
+  fun is_object
+    | VObject(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a variant-keyed map
+   */
+  fun is_map
+    | VMap(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a byte string
+   */
+  fun is_bytes
+    | VBytes(_) => true
+    | _ => false
+
+  /**
+   * Check whether the variant is a datetime
+   */
+  fun is_datetime
+    | VDateTime(_) => true
+    | _ => false
+
+  /**
+   * Extract the boolean value of a VBool variant
+   */
+  fun as_bool
+    | VBool(b) => Some(b)
+    | _ => None
+
+  /**
+   * Extract the 32-bit integer value of a VInt32 variant
+   */
+  fun as_int32
+    | VInt32(n) => Some(n)
+    | _ => None
+
+  /**
+   * Extract the 64-bit integer value of a VInt64 variant
+   */
+  fun as_int64
+    | VInt64(n) => Some(n)
+    | _ => None
+
+  /**
+   * Extract the natural number value of a VNat variant
+   */
+  fun as_nat
+    | VNat(n) => Some(n)
+    | _ => None
+
+  /**
+   * Extract the arbitrary-precision integer value of a VBignum variant
+   */
+  fun as_bignum
+    | VBignum(b) => Some(b)
+    | _ => None
+
+  /**
+   * Extract the float value of a VFloat variant
+   */
+  fun as_float
+    | VFloat(f) => Some(f)
+    | _ => None
+
+  /**
+   * Extract the double value of a VDouble variant
+   */
+  fun as_double
+    | VDouble(d) => Some(d)
+    | _ => None
+
+  /**
+   * Extract the character value of a VChar variant
+   */
+  fun as_char
+    | VChar(c) => Some(c)
+    | _ => None
+
+  /**
+   * Extract the string value of a VString variant
+   */
+  fun as_string
+    | VString(s) => Some(s)
+    | _ => None
+
+  /**
+   * Extract the list of variants of a VArray variant
+   */
+  fun as_array
+    | VArray(arr) => Some(arr)
+    | _ => None
+
+  /**
+   * Extract the map of entries of a VObject variant
+   */
+  fun as_object
+    | VObject(obj) => Some(obj)
+    | _ => None
+
+  /**
+   * Extract the map of entries of a VMap variant
+   */
+  fun as_map
+    | VMap(m) => Some(m)
+    | _ => None
+
+  /**
+   * Extract the byte string of a VBytes variant
+   */
+  fun as_bytes
+    | VBytes(bs) => Some(bs)
+    | _ => None
+
+  /**
+   * Extract the datetime value of a VDateTime variant
+   */
+  fun as_datetime
+    | VDateTime(dt) => Some(dt)
+    | _ => None
+
+}
