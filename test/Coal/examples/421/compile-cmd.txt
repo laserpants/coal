@@ -1,7 +1,0 @@
-
-
-Coal.Compiler.compile (TerminalCapabilities True True True) defaultConfig{ configCFiles = ["./test/Coal/examples/421/uint8-runtime.c", "./test/Coal/examples/421/datetime-runtime.c"], configEntryPoint = Just ("Spec", "main"), configNoCache = True, configSourcePaths = ["./test/Coal/examples/421"], configGenerateLLVMOutput = True, configGenerateDebugArtifacts = True, configSilent = False } ["Data/Variant.coal", "Data/VariantSpec.coal", "Spec.coal", "MicroTest.coal", "Containers/Set.coal", "Containers/Map.coal", "Containers/Tree.coal", "Containers/NonEmpty/List.coal", "Pretty.coal", "DateTime.coal", "Data/UInt8.coal"]
-
-
-
-coal compile -I./ Data/UInt8.coal Containers/Map.coal Containers/Tree.coal Containers/Set.coal Containers/NonEmpty/List.coal DateTime.coal MicroTest.coal Pretty.coal Data/Variant.coal Data/VariantSpec.coal Spec.coal --entry-point Spec.main --extra-c uint8-runtime.c --extra-c datetime-runtime.c  -o dist
