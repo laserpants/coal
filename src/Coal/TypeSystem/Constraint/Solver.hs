@@ -36,7 +36,7 @@ import Coal.Language (
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Coal.TypeSystem.Unification (UnificationError, Unifier (..), runUnifier, unifyAll)
-import Control.Monad.RWS (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
+import Control.Monad.RWS.Strict (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
 import Data.Data (Data)
 import Data.List (delete, find)
 import Data.Set (intersection, (\\))

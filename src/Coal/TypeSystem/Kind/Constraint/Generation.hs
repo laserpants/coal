@@ -30,7 +30,7 @@ import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
 import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
 import Coal.TypeSystem.Kind.Error (KindError (..))
-import Control.Monad.RWS
+import Control.Monad.RWS.Strict
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Map.Strict (Map)
