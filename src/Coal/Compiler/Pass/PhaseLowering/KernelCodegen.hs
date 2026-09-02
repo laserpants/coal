@@ -1,8 +1,8 @@
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeApplications #-}
 
 {- | New-kernel LLVM codegen pass.
 
@@ -35,7 +35,7 @@ import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Module.Path (principalPath)
 import Control.DeepSeq (force)
-import Control.Exception (SomeException, throwIO, try, evaluate)
+import Control.Exception (SomeException, evaluate, throwIO, try)
 import Control.Monad (forM, forM_, when)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -144,10 +144,10 @@ pass envelopes = do
   -- normalized[0] is Builtin$; normalized[1..] align with `sources`.
   let sourceMap = Map.fromList (zip (fst <$> sources) (drop 1 normalized))
 
-   -- Generate, render, and assemble one module at a time. Each 'IRModule'
- -- becomes unreachable as soon as its bitcode has been forced to normal
- -- form, so LLVM IR (whose builder library retains thunks) does not
- -- accumulate across modules.
+  -- Generate, render, and assemble one module at a time. Each 'IRModule'
+  -- becomes unreachable as soon as its bitcode has been forced to normal
+  -- form, so LLVM IR (whose builder library retains thunks) does not
+  -- accumulate across modules.
   let targets =
         case normalized of
           [] -> []
