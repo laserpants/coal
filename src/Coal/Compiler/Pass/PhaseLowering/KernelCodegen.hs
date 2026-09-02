@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -33,8 +34,9 @@ import qualified Coal.Kernel.Language.Type.Constructors as Kernel
 import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Module.Path (principalPath)
-import Control.Exception (SomeException, try)
-import Control.Monad (forM_, when)
+import Control.DeepSeq (force)
+import Control.Exception (SomeException, throwIO, try, evaluate)
+import Control.Monad (forM, forM_, when)
 import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
@@ -125,8 +127,11 @@ pass envelopes = do
           ]
 
   -- Run the new-kernel compiler purely on all source modules together
-  -- (cross-module context is required for LLVM codegen).
-  (normalized, irs) <- case Kernel.runCompiler (Kernel.compileModules config cachedTagBindings cachedDDataInfo cachedObjects (builtinMod : augmented)) of
+  -- (cross-module context is required for LLVM codegen). The IR list
+  -- returned by 'compileModules' is deliberately left un-evaluated: the
+  -- IR for each module is generated one at a time in the loop below, so
+  -- that at most one 'IRModule' is resident at any point.
+  (normalized, _irs) <- case Kernel.runCompiler (Kernel.compileModules config cachedTagBindings cachedDDataInfo cachedObjects (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError
@@ -139,32 +144,47 @@ pass envelopes = do
   -- normalized[0] is Builtin$; normalized[1..] align with `sources`.
   let sourceMap = Map.fromList (zip (fst <$> sources) (drop 1 normalized))
 
-  -- Assemble each module's LLVM IR to bitcode via llvm-as.
-  -- irs[0] is Builtin$'s IR; irs[1..n] correspond to augmented[0..n-1].
-  named <- case irs of
-    (builtinIR : sourceIRs) ->
-      pure (("Builtin$", builtinIR) : zip (fst <$> sources) sourceIRs)
-    [] ->
-      error "KernelCodegen: compileModules returned empty IR list"
-  results <- liftIO $
-    withSystemTempDirectory "coal-build-nk" $ \tmpDir ->
-      traverse (assembleOne configGenerateLLVMOutput tmpDir) named
+   -- Generate, render, and assemble one module at a time. Each 'IRModule'
+ -- becomes unreachable as soon as its bitcode has been forced to normal
+ -- form, so LLVM IR (whose builder library retains thunks) does not
+ -- accumulate across modules.
+  let targets =
+        case normalized of
+          [] -> []
+          (builtinNorm : rest) ->
+            ("Builtin$", builtinNorm)
+              : zip (fst <$> sources) rest
+  eAssembled <-
+    liftIO $
+      try @SomeException $
+        withSystemTempDirectory "coal-build-nk" $ \tmpDir ->
+          Kernel.runCompilerT $
+            forM targets $ \(name, moduleNormalized) -> do
+              ir <- Kernel.codeGenModule config cachedTagBindings cachedDDataInfo cachedObjects normalized moduleNormalized
+              liftIO $
+                assembleOne configGenerateLLVMOutput tmpDir (name, ir)
+                  >>= either throwIO (evaluate . force)
 
-  case sequence results of
+  assembled <- case eAssembled of
     Left ex -> do
       liftIO $ putStrLn ("llvm-as failed: " <> show ex)
       throwError CompilerError
-    Right assembled -> do
-      -- Persist build artifacts to the .build/ cache for incremental compilation.
-      -- Skip Builtin$ (first entry in assembled), write only user source modules.
-      forM_ (zip (fst <$> sources) (snd <$> drop 1 assembled)) $ \(name, bc) -> do
-        setBitcodeC name bc
-        getBuildC name >>= \case
-          Nothing -> pure ()
-          Just build_ -> do
-            let iface = maybe mempty moduleInterface (Map.lookup name sourceMap)
-            writeBuildFile buildCacheDir name (setBuildKernelInterface iface build_)
-      pure (assembled <> cached)
+    Right (Left err) -> do
+      liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
+      throwError CompilerError
+    Right (Right assembled) ->
+      pure assembled
+
+  -- Persist build artifacts to the .build/ cache for incremental compilation.
+  -- Skip Builtin$ (first entry in assembled), write only user source modules.
+  forM_ (zip (fst <$> sources) (snd <$> drop 1 assembled)) $ \(name, bc) -> do
+    setBitcodeC name bc
+    getBuildC name >>= \case
+      Nothing -> pure ()
+      Just build_ -> do
+        let iface = maybe mempty moduleInterface (Map.lookup name sourceMap)
+        writeBuildFile buildCacheDir name (setBuildKernelInterface iface build_)
+  pure (assembled <> cached)
 
 {- | Render one IR module to text, optionally write a debug @.ll@ file,
 then call @llvm-as@ to produce bitcode.
