@@ -26,7 +26,7 @@ import Coal.TypeSystem.Constraint.Generation.Context (ConstraintsGenContext (..)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Constraint.Generation.State (ConstraintsGenState (..), overConstraintsGenStateSupply)
-import Control.Monad.RWS
+import Control.Monad.RWS.Strict
 import qualified Data.Set as Set
 
 type ConstraintsGenOutput g o a t =

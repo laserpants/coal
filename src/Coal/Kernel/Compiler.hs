@@ -38,6 +38,9 @@ module Coal.Kernel.Compiler (
   -- * Entry points
   compileModules,
   compileFiles,
+
+  -- * Per-module code generation
+  codeGenModule,
 ) where
 
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError)
