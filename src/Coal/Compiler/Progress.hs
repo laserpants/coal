@@ -10,13 +10,13 @@ module Coal.Compiler.Progress (
 
 import Coal.Compiler.Terminal (TerminalCapabilities (..), progressChar)
 import Data.IORef (IORef, readIORef)
-import System.IO (hFlush, hPutStr, stderr)
+import System.IO (hFlush, hPutStr, hPutStrLn, stderr)
 
 type ProgressRef = IORef (Int, Int)
 
 writeStatus :: TerminalCapabilities -> ProgressRef -> String -> IO ()
 writeStatus caps ref msg
-  | not (termIsTerminal caps) = pure ()
+  | not (termIsTerminal caps) = hPutStrLn stderr msg
   | otherwise = do
       (done, total) <- readIORef ref
       let pct = if total > 0 then (done * 100) `div` total else 0
@@ -40,7 +40,7 @@ renderBar caps done total width
 
 writeStatusSimple :: TerminalCapabilities -> String -> IO ()
 writeStatusSimple caps msg
-  | not (termIsTerminal caps) = pure ()
+  | not (termIsTerminal caps) = hPutStrLn stderr msg
   | otherwise = do
       hPutStr stderr $ "\r\ESC[2K" <> msg
       hFlush stderr
