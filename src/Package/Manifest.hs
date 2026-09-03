@@ -12,6 +12,7 @@ module Package.Manifest (
   loadPackageLockManifests,
   loadManifestFrom,
   filePaths,
+  encodePrettyOrdered,
 ) where
 
 import CLI.Git.Commit (GitCommit (..))
@@ -20,6 +21,7 @@ import Control.Monad (unless)
 import Control.Monad.Except
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
+import Data.Aeson.Encode.Pretty (Config (..), defConfig, encodePretty', keyOrder)
 import qualified Data.ByteString.Lazy as LazyByteString
 import Data.Either.Extra (eitherToMaybe)
 import Data.Map.Strict (Map)
@@ -46,7 +48,7 @@ data BuildConfig = BuildConfig
   deriving (Generic, Show, Eq)
 
 {- | All fields default to @False@ so that a partial @"build"@ section in
-@coal.json@ only needs to specify the flags that are enabled.
+ @coal.json@ only needs to specify the flags that are enabled.
 -}
 instance FromJSON BuildConfig where
   parseJSON = withObject "BuildConfig" $ \o ->
@@ -58,20 +60,33 @@ instance FromJSON BuildConfig where
       <*> o .:? "no_cache" .!= False
       <*> o .:? "sanitize" .!= False
 
+buildConfigOptions :: Options
+buildConfigOptions =
+  defaultOptions
+    { fieldLabelModifier = go
+    }
+ where
+  go "generateDebugArtifacts" = "generate_debug_artifacts"
+  go "debugLLVMOutput" = "debug_llvm_ir"
+  go "silent" = "silent"
+  go "showTiming" = "show_timing"
+  go "noCache" = "no_cache"
+  go "sanitize" = "sanitize"
+  go other = other
+
 instance ToJSON BuildConfig where
-  toJSON = genericToJSON defaultOptions
+  toJSON = genericToJSON buildConfigOptions
 
 data PackageManifest = PackageManifest
   { name :: Text
   , version :: Maybe PackageVersion
-  , source_dirs :: Maybe [Text]
   , modules :: [Text]
-  , c_sources :: Maybe [FilePath]
-  , dependencies :: Maybe (Map Text PackageDependency)
+  , source_dirs :: Maybe [Text]
   , entry_point :: Maybe Text
   , executable_name :: Maybe FilePath
   , build_config :: Maybe BuildConfig
-  --  , compiler_version :: Text
+  , dependencies :: Maybe (Map Text PackageDependency)
+  , c_sources :: Maybe [FilePath]
   }
   deriving (Generic, Show, Eq)
 
@@ -80,6 +95,37 @@ instance ToJSON PackageManifest where
 
 instance FromJSON PackageManifest where
   parseJSON = genericParseJSON defaultOptions
+
+{- | Desired field order for coal.json objects. Keys not in this list
+ (e.g., dependency names) are placed at the end in their natural order.
+-}
+manifestFieldOrder :: [Text]
+manifestFieldOrder =
+  [ "name"
+  , "version"
+  , "modules"
+  , "source_dirs"
+  , "entry_point"
+  , "executable_name"
+  , "build_config"
+  , "dependencies"
+  , "c_sources"
+  , "generate_debug_artifacts"
+  , "debug_llvm_ir"
+  , "silent"
+  , "show_timing"
+  , "no_cache"
+  , "sanitize"
+  , "git"
+  ]
+
+{- | Pretty-encode a value to JSON with fields in the documented order.
+
+ Used when writing @coal.json@ so that the output matches the structure
+ shown in the documentation.
+-}
+encodePrettyOrdered :: (ToJSON a) => a -> LazyByteString.ByteString
+encodePrettyOrdered = encodePretty' defConfig{confCompare = keyOrder manifestFieldOrder}
 
 basePath :: Text -> GitCommit -> FilePath
 basePath pkgName (GitCommit hash) =

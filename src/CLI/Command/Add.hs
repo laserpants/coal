@@ -11,7 +11,6 @@ import CLI.Git.Repo (GitRepo (..))
 import CLI.Options.AddCmd (AddCmdOptions (..))
 import Control.Monad.Except (ExceptT, MonadError (throwError), runExceptT, withExceptT)
 import Control.Monad.IO.Class (liftIO)
-import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString (toStrict)
 import qualified Data.ByteString as ByteString
 import qualified Data.Map.Strict as Map
@@ -23,7 +22,7 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Package.Dependency (PackageDependency (..))
 import Package.Error (PackageError (..))
-import Package.Manifest (PackageManifest (..), loadManifestFrom, loadProjectManifest)
+import Package.Manifest (PackageManifest (..), encodePrettyOrdered, loadManifestFrom, loadProjectManifest)
 import Package.Version (PackageConstraint (..))
 import System.IO.Temp (withSystemTempDirectory)
 
@@ -45,7 +44,7 @@ addCommand AddCmdOptions{..} = do
   let deps = fromMaybe mempty (dependencies manifest)
       newDeps = Map.insert pkgName dep deps
       newManifest = manifest{dependencies = Just newDeps}
-  liftIO $ ByteString.writeFile "coal.json" (toStrict (encodePretty newManifest))
+  liftIO $ ByteString.writeFile "coal.json" (toStrict (encodePrettyOrdered newManifest))
   installProject
   liftIO $ Text.putStrLn ("Added dependency: " <> pkgName)
 
