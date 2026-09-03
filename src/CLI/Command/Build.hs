@@ -4,6 +4,7 @@
 
 module CLI.Command.Build (buildCommand, deriveExecutableName, resolveExecutableName) where
 
+import CLI.Command.EntryPoint (parseEntryPoint)
 import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config
@@ -17,7 +18,6 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, maybeToList)
 import Data.SemVer (toText)
 import Data.Text (Text)
-import qualified Data.Text as Text
 import Extras (Name, forM)
 import Package (packageIncludes)
 import Package.Error (PackageError (..))
@@ -81,15 +81,6 @@ buildCommand caps = do
 -- | True when the manifest declares no external dependencies.
 noDependencies :: Maybe (Map Text a) -> Bool
 noDependencies = maybe True Map.null
-
--- | Parse an entry point string like "Main.main" into (moduleName, functionName)
-parseEntryPoint :: Maybe Text -> Maybe (Name, Name)
-parseEntryPoint = (parseDotSeparated =<<)
- where
-  parseDotSeparated t =
-    case Text.splitOn "." t of
-      [mod_, func] -> Just (mod_, func)
-      _ -> Nothing
 
 -- | Derive the executable name from the project name and optional version.
 deriveExecutableName :: Text -> Maybe PackageVersion -> FilePath
