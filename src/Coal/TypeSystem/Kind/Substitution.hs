@@ -329,7 +329,7 @@ instance KindSubstitutable (Expression a Kind ()) where
       EFocus a name ll1 ll2 e1 e2 ->
         EFocus a name ll1 ll2 (applyKinds sub e1) (applyKinds sub e2)
       EFFICall a () ll es e ->
-        EFFICall a () ll (applyKinds sub es) (applyKinds sub e)
+        EFFICall a () (applyKinds sub <$> ll) (applyKinds sub es) (applyKinds sub e)
       EDoBlock a is ->
         EDoBlock a (applyKinds sub is)
       e ->
@@ -369,7 +369,7 @@ instance KindSubstitutable (Expression a Kind ()) where
       EFocus a name ll1 ll2 e1 e2 ->
         EFocus a name ll1 ll2 (replaceVariables e1) (replaceVariables e2)
       EFFICall a () ll es e ->
-        EFFICall a () ll (replaceVariables es) (replaceVariables e)
+        EFFICall a () (replaceVariables <$> ll) (replaceVariables es) (replaceVariables e)
       EDoBlock a is ->
         EDoBlock a (replaceVariables is)
       e ->
