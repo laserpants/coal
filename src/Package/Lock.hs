@@ -8,7 +8,7 @@ module Package.Lock (
   loadLockFile,
 ) where
 
-import Control.Monad.Except
+import Control.Monad.Except (ExceptT, MonadError (throwError))
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import qualified Data.ByteString.Lazy as LazyByteString
@@ -18,7 +18,7 @@ import qualified Data.Text as Text
 import GHC.Generics (Generic)
 import Package.Error (PackageError (..))
 import Package.Lock.Spec (LockSpec (..))
-import System.Directory
+import System.Directory (doesFileExist)
 
 newtype PackageLock = PackageLock
   { packages :: Map Text LockSpec
