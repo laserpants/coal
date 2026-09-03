@@ -33,6 +33,7 @@ library
       CLI.Command.Build
       CLI.Command.Clean
       CLI.Command.Compile
+      CLI.Command.EntryPoint
       CLI.Command.Init
       CLI.Command.Install
       CLI.Command.Version

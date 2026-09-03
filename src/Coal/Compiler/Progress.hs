@@ -8,14 +8,16 @@ module Coal.Compiler.Progress (
   writeStatusSimpleUnsafe,
 ) where
 
+import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Terminal (TerminalCapabilities (..), progressChar)
 import Data.IORef (IORef, readIORef)
 import System.IO (hFlush, hPutStr, hPutStrLn, stderr)
 
 type ProgressRef = IORef (Int, Int)
 
-writeStatus :: TerminalCapabilities -> ProgressRef -> String -> IO ()
-writeStatus caps ref msg
+writeStatus :: CompilerConfig -> TerminalCapabilities -> ProgressRef -> String -> IO ()
+writeStatus config caps ref msg
+  | configSilent config = pure ()
   | not (termIsTerminal caps) = hPutStrLn stderr msg
   | otherwise = do
       (done, total) <- readIORef ref
@@ -38,8 +40,9 @@ renderBar caps done total width
             <> withANSIStyle caps "\ESC[90m" (replicate empty_ chEmpty)
             <> "\ESC[0m"
 
-writeStatusSimple :: TerminalCapabilities -> String -> IO ()
-writeStatusSimple caps msg
+writeStatusSimple :: CompilerConfig -> TerminalCapabilities -> String -> IO ()
+writeStatusSimple config caps msg
+  | configSilent config = pure ()
   | not (termIsTerminal caps) = hPutStrLn stderr msg
   | otherwise = do
       hPutStr stderr $ "\r\ESC[2K" <> msg
@@ -51,11 +54,13 @@ withANSIStyle caps code str
   | termSupportsANSI caps = code <> str
   | otherwise = str
 
-{- | Version of 'writeStatusSimple' that writes unconditionally without
-terminal capability checks. Intended for internal use (e.g. @pipeline@
+{- | Version of 'writeStatusSimple' that writes without terminal capability
+checks, but respects 'configSilent'. Intended for internal use (e.g. @pipeline@
 used by the test suite) where terminal detection is not relevant.
 -}
-writeStatusSimpleUnsafe :: String -> IO ()
-writeStatusSimpleUnsafe msg = do
-  hPutStr stderr $ "\r\ESC[2K" <> msg
-  hFlush stderr
+writeStatusSimpleUnsafe :: CompilerConfig -> String -> IO ()
+writeStatusSimpleUnsafe config msg
+  | configSilent config = pure ()
+  | otherwise = do
+      hPutStr stderr $ "\r\ESC[2K" <> msg
+      hFlush stderr

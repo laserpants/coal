@@ -12,6 +12,7 @@ data CompileCmdOptions = CompileCmdOptions
   , debugLLVMOutput :: Bool
   , extraSourceFiles :: [FilePath]
   , silent :: Bool
+  , showTiming :: Bool
   , noCache :: Bool
   , entryPoint :: Maybe Text
   , sanitize :: Bool
