@@ -18,10 +18,11 @@ import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe, maybeToList)
 import Data.SemVer (toText)
 import Data.Text (Text)
-import Extras (Name, forM)
+import qualified Data.Text as Text
+import Extras (forM)
 import Package (packageIncludes)
 import Package.Error (PackageError (..))
-import Package.Manifest (PackageManifest (..), filePaths, loadProjectManifest)
+import Package.Manifest (BuildConfig (..), PackageManifest (..), filePaths, loadProjectManifest)
 import Package.Version (PackageVersion (..))
 import System.Directory (canonicalizePath)
 
@@ -54,7 +55,7 @@ buildCommand caps = do
         pkgSrcPaths = [d | (d, _, _) <- canonNsInfo]
         entryPoint = parseEntryPoint entry_point
         execName = resolveExecutableName name version executable_name
-        config =
+        baseConfig =
           defaultConfig
             { -- Local source dirs first so project modules shadow same-named package modules.
               configSourcePaths = nub ("src" : localSrcPaths <> pkgSrcPaths)
@@ -65,6 +66,7 @@ buildCommand caps = do
               -- (e.g. an EventSource library shipping its native primitives).
               configCFiles = localCFiles <> pkgCFiles
             }
+        config = applyBuildConfig build_config baseConfig
     localFiles <- filePaths modules EProjectInvalidModuleFormat
     -- If the entry-point module is not listed in `modules`, add its file
     -- automatically so the user doesn't have to duplicate it there.
@@ -94,3 +96,20 @@ override from the manifest over the derived @name-version@ form.
 -}
 resolveExecutableName :: Text -> Maybe PackageVersion -> Maybe FilePath -> FilePath
 resolveExecutableName projectName version = fromMaybe (deriveExecutableName projectName version)
+
+{- | Apply a @BuildConfig@ from the manifest to a @CompilerConfig@, overriding
+the default values. When the manifest has no @build@ section, the config
+is unchanged.
+-}
+applyBuildConfig :: Maybe BuildConfig -> CompilerConfig -> CompilerConfig
+applyBuildConfig Nothing = id
+applyBuildConfig (Just BuildConfig{..}) =
+  \cfg ->
+    cfg
+      { configGenerateDebugArtifacts = generateDebugArtifacts
+      , configGenerateLLVMOutput = debugLLVMOutput
+      , configSilent = silent
+      , configShowTiming = showTiming
+      , configNoCache = noCache
+      , configSanitize = sanitize
+      }

@@ -5,6 +5,7 @@
 
 module Package.Manifest (
   PackageManifest (..),
+  BuildConfig (..),
   basePath,
   loadManifest,
   loadProjectManifest,
@@ -34,6 +35,32 @@ import Package.Version (PackageVersion (..))
 import System.Directory
 import System.FilePath
 
+data BuildConfig = BuildConfig
+  { generateDebugArtifacts :: Bool
+  , debugLLVMOutput :: Bool
+  , silent :: Bool
+  , showTiming :: Bool
+  , noCache :: Bool
+  , sanitize :: Bool
+  }
+  deriving (Generic, Show, Eq)
+
+{- | All fields default to @False@ so that a partial @"build"@ section in
+@coal.json@ only needs to specify the flags that are enabled.
+-}
+instance FromJSON BuildConfig where
+  parseJSON = withObject "BuildConfig" $ \o ->
+    BuildConfig
+      <$> o .:? "generate_debug_artifacts" .!= False
+      <*> o .:? "debug_llvm_ir" .!= False
+      <*> o .:? "silent" .!= False
+      <*> o .:? "show_timing" .!= False
+      <*> o .:? "no_cache" .!= False
+      <*> o .:? "sanitize" .!= False
+
+instance ToJSON BuildConfig where
+  toJSON = genericToJSON defaultOptions
+
 data PackageManifest = PackageManifest
   { name :: Text
   , version :: Maybe PackageVersion
@@ -43,6 +70,7 @@ data PackageManifest = PackageManifest
   , dependencies :: Maybe (Map Text PackageDependency)
   , entry_point :: Maybe Text
   , executable_name :: Maybe FilePath
+  , build_config :: Maybe BuildConfig
   --  , compiler_version :: Text
   }
   deriving (Generic, Show, Eq)
