@@ -35,6 +35,7 @@ data CompilerConfig = CompilerConfig
   , configSourcePaths :: [FilePath]
   , configCFiles :: [FilePath]
   , configSilent :: Bool
+  , configShowTiming :: Bool
   , configNoCache :: Bool
   , configEntryPoint :: Maybe (Name, Name)
   , configPackageNamespaces :: [(FilePath, Text, [Name])]
@@ -55,6 +56,7 @@ defaultConfig =
     , configSourcePaths = ["src"]
     , configCFiles = []
     , configSilent = False
+    , configShowTiming = False
     , configNoCache = False
     , configEntryPoint = Nothing
     , configPackageNamespaces = []

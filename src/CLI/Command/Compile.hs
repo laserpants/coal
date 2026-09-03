@@ -24,6 +24,7 @@ compileCommand caps CompileCmdOptions{..} = do
       , configSourcePaths = nub ("src" : srcPaths)
       , configCFiles = extraSourceFiles
       , configSilent = silent
+      , configShowTiming = showTiming
       , configNoCache = noCache
       , configEntryPoint = parsedEntryPoint
       , configPackageNamespaces = []

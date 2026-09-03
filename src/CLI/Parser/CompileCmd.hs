@@ -56,6 +56,12 @@ compileCmdParser = do
           <> help "Supress terminal output"
       )
 
+  showTiming <-
+    switch
+      ( long "show-timing"
+          <> help "Show elapsed time for each compiler phase"
+      )
+
   noCache <-
     switch
       ( long "no-cache"

@@ -49,6 +49,7 @@ import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.State (gets)
 import Data.IORef (modifyIORef', newIORef)
 import Data.List (nub)
 import Data.Text (Text)
@@ -74,15 +75,19 @@ pipeline =
     >-> timed "Kernel codegen" passKernelCodegen
     >-> timed "Linking" passLinking
 
-timed :: (MonadIO m) => String -> Pass a m i o -> Pass a m i o
+timed :: (MonadIO m) => String -> Pass Metadata m i o -> Pass Metadata m i o
 timed label p =
   Pass
     { runPass = \i -> do
+        config <- gets compilerConfig
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-        liftIO $ writeStatusSimpleUnsafe (label <> "... " <> show secs <> "s")
+            msg = if configShowTiming config
+                  then label <> "... " <> show secs <> "s"
+                  else label <> "..."
+        liftIO $ writeStatusSimpleUnsafe config msg
         pure result
     }
 
@@ -96,17 +101,21 @@ pipelineWithProgress caps ref =
     >-> timedWeighted caps ref "Kernel codegen" Counts.weightKernelCodegen passKernelCodegen
     >-> timedWeighted caps ref "Linking" Counts.weightLinking passLinking
 
-timedWeighted :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> String -> Int -> Pass a m i o -> Pass a m i o
+timedWeighted :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> String -> Int -> Pass Metadata m i o -> Pass Metadata m i o
 timedWeighted caps ref label weight p =
   Pass
     { runPass = \i -> do
+        config <- gets compilerConfig
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
+            msg = if configShowTiming config
+                  then label <> "... " <> show secs <> "s"
+                  else label <> "..."
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus caps ref (label <> "... " <> show secs <> "s")
+          writeStatus config caps ref msg
         pure result
     }
 
@@ -130,13 +139,17 @@ timedWeightedPerModule :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> 
 timedWeightedPerModule caps ref label weight p =
   Pass
     { runPass = \i -> do
+        config <- gets compilerConfig
         t0 <- liftIO getCurrentTime
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
+            msg = if configShowTiming config
+                  then label <> "... " <> show secs <> "s"
+                  else label <> "..."
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
-          writeStatus caps ref (label <> "... " <> show secs <> "s")
+          writeStatus config caps ref msg
         pure result
     }
 
@@ -174,7 +187,7 @@ compileWithCFiles caps config files cFiles = do
         Left e1 ->
           print e1
         Right{} -> do
-          liftIO $ writeStatus caps ref ("Executable written to: " <> configExecutableName config)
+          liftIO $ writeStatus config caps ref ("Executable written to: " <> configExecutableName config)
           hPutStr stderr "\n"
 
 compile :: TerminalCapabilities -> CompilerConfig -> [FilePath] -> IO ()
