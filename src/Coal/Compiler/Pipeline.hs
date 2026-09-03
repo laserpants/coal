@@ -84,9 +84,10 @@ timed label p =
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-            msg = if configShowTiming config
-                  then label <> "... " <> show secs <> "s"
-                  else label <> "..."
+            msg =
+              if configShowTiming config
+                then label <> "... " <> show secs <> "s"
+                else label <> "..."
         liftIO $ writeStatusSimpleUnsafe config msg
         pure result
     }
@@ -110,9 +111,10 @@ timedWeighted caps ref label weight p =
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-            msg = if configShowTiming config
-                  then label <> "... " <> show secs <> "s"
-                  else label <> "..."
+            msg =
+              if configShowTiming config
+                then label <> "... " <> show secs <> "s"
+                else label <> "..."
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
           writeStatus config caps ref msg
@@ -144,9 +146,10 @@ timedWeightedPerModule caps ref label weight p =
         result <- runPass p i
         t1 <- liftIO getCurrentTime
         let secs = realToFrac (diffUTCTime t1 t0) :: Double
-            msg = if configShowTiming config
-                  then label <> "... " <> show secs <> "s"
-                  else label <> "..."
+            msg =
+              if configShowTiming config
+                then label <> "... " <> show secs <> "s"
+                else label <> "..."
         liftIO $ do
           modifyIORef' ref (\(done, total) -> (done + weight, total))
           writeStatus config caps ref msg
