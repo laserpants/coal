@@ -22,7 +22,7 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Package.Dependency (PackageDependency (..))
 import Package.Error (PackageError (..))
-import Package.Manifest (PackageManifest (..), loadManifestFrom, loadProjectManifest, encodePrettyOrdered)
+import Package.Manifest (PackageManifest (..), encodePrettyOrdered, loadManifestFrom, loadProjectManifest)
 import Package.Version (PackageConstraint (..))
 import System.IO.Temp (withSystemTempDirectory)
 

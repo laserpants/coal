@@ -61,16 +61,18 @@ instance FromJSON BuildConfig where
       <*> o .:? "sanitize" .!= False
 
 buildConfigOptions :: Options
-buildConfigOptions = defaultOptions
-  { fieldLabelModifier = go }
-  where
-    go "generateDebugArtifacts" = "generate_debug_artifacts"
-    go "debugLLVMOutput" = "debug_llvm_ir"
-    go "silent" = "silent"
-    go "showTiming" = "show_timing"
-    go "noCache" = "no_cache"
-    go "sanitize" = "sanitize"
-    go other = other
+buildConfigOptions =
+  defaultOptions
+    { fieldLabelModifier = go
+    }
+ where
+  go "generateDebugArtifacts" = "generate_debug_artifacts"
+  go "debugLLVMOutput" = "debug_llvm_ir"
+  go "silent" = "silent"
+  go "showTiming" = "show_timing"
+  go "noCache" = "no_cache"
+  go "sanitize" = "sanitize"
+  go other = other
 
 instance ToJSON BuildConfig where
   toJSON = genericToJSON buildConfigOptions
@@ -122,7 +124,7 @@ manifestFieldOrder =
  Used when writing @coal.json@ so that the output matches the structure
  shown in the documentation.
 -}
-encodePrettyOrdered :: ToJSON a => a -> LazyByteString.ByteString
+encodePrettyOrdered :: (ToJSON a) => a -> LazyByteString.ByteString
 encodePrettyOrdered = encodePretty' defConfig{confCompare = keyOrder manifestFieldOrder}
 
 basePath :: Text -> GitCommit -> FilePath
