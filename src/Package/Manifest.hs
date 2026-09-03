@@ -46,7 +46,7 @@ data BuildConfig = BuildConfig
   deriving (Generic, Show, Eq)
 
 {- | All fields default to @False@ so that a partial @"build"@ section in
-@coal.json@ only needs to specify the flags that are enabled.
+ @coal.json@ only needs to specify the flags that are enabled.
 -}
 instance FromJSON BuildConfig where
   parseJSON = withObject "BuildConfig" $ \o ->
@@ -58,20 +58,31 @@ instance FromJSON BuildConfig where
       <*> o .:? "no_cache" .!= False
       <*> o .:? "sanitize" .!= False
 
+buildConfigOptions :: Options
+buildConfigOptions = defaultOptions
+  { fieldLabelModifier = go }
+  where
+    go "generateDebugArtifacts" = "generate_debug_artifacts"
+    go "debugLLVMOutput" = "debug_llvm_ir"
+    go "silent" = "silent"
+    go "showTiming" = "show_timing"
+    go "noCache" = "no_cache"
+    go "sanitize" = "sanitize"
+    go other = other
+
 instance ToJSON BuildConfig where
-  toJSON = genericToJSON defaultOptions
+  toJSON = genericToJSON buildConfigOptions
 
 data PackageManifest = PackageManifest
   { name :: Text
   , version :: Maybe PackageVersion
-  , source_dirs :: Maybe [Text]
   , modules :: [Text]
-  , c_sources :: Maybe [FilePath]
-  , dependencies :: Maybe (Map Text PackageDependency)
+  , source_dirs :: Maybe [Text]
   , entry_point :: Maybe Text
   , executable_name :: Maybe FilePath
   , build_config :: Maybe BuildConfig
-  --  , compiler_version :: Text
+  , dependencies :: Maybe (Map Text PackageDependency)
+  , c_sources :: Maybe [FilePath]
   }
   deriving (Generic, Show, Eq)
 
