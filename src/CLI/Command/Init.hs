@@ -8,13 +8,12 @@ import CLI.Options.InitCmd (InitCmdOptions (..))
 import Control.Monad (unless, when)
 import Control.Monad.Except (ExceptT, MonadError (throwError))
 import Control.Monad.IO.Class (liftIO)
-import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.ByteString (toStrict)
 import qualified Data.ByteString as ByteString
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
-import Package.Manifest (PackageManifest (..))
+import Package.Manifest (PackageManifest (..), encodePrettyOrdered)
 import System.Directory (createDirectoryIfMissing, doesFileExist, getCurrentDirectory)
 import System.FilePath (takeFileName)
 
@@ -50,7 +49,7 @@ initCommand InitCmdOptions{..} = do
           , executable_name = Nothing
           , build_config = Nothing
           }
-  liftIO $ ByteString.writeFile "coal.json" (toStrict (encodePretty manifest))
+  liftIO $ ByteString.writeFile "coal.json" (toStrict (encodePrettyOrdered manifest))
 
   -- Print success message
   liftIO $ Text.putStrLn $ "Initialised project: " <> projectName
