@@ -1,0 +1,22 @@
+module Main {
+ 
+  import namespace IO
+
+  fun main() = 
+  let 
+    a1 = EqualTo == EqualTo;
+    a2 = EqualTo == LessThan;
+    a3 = EqualTo == GreaterThan;
+    a4 = LessThan == EqualTo;
+    a5 = LessThan == LessThan;
+    a6 = LessThan == GreaterThan
+  in do {
+    IO.print_bool(a1);        // true
+    IO.print_bool(a2);        // false
+    IO.print_bool(a3);        // false
+    IO.print_bool(a4);        // false
+    IO.print_bool(a5);        // true
+    IO.println_bool(a6);      // false
+  }
+
+}

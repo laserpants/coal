@@ -416,6 +416,21 @@ builtinInstances =
     )
   ,
     ( "Comparable"
+    , TConstructor KType "Ordering"
+    , InstanceEntry
+        mempty
+        (TConstructor KType "Ordering")
+        (TConstructor KType "Ordering")
+        ( Map.fromList
+            [
+              ( "(==)"
+              , Forall mempty mempty (TConstructor KType "Ordering" `TArrow` TConstructor KType "Ordering" `TArrow` TIntrinsic IBool)
+              )
+            ]
+        )
+    )
+  ,
+    ( "Comparable"
     , TIntrinsic IUnit
     , InstanceEntry
         mempty

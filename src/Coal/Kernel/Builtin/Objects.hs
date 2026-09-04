@@ -1926,6 +1926,36 @@ objectList =
       )
   , DFunction
       Exported
+      (builtinInstance (Trait.comparable (TConstructor () "Ordering")) "(==)")
+      [ Kernel.Label (Kernel.TCon "Ordering" []) "ord1"
+      , Kernel.Label (Kernel.TCon "Ordering" []) "ord2"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bool>(ord1 : Ordering) {
+                    | ( EqualTo : Ordering ) => 
+                        case<bool>(ord2 : Ordering) {
+                          | ( EqualTo     : Ordering ) => true
+                          | ( LessThan    : Ordering ) => false
+                          | ( GreaterThan : Ordering ) => false
+                        }
+                    | ( LessThan : Ordering ) => 
+                        case<bool>(ord2 : Ordering) {
+                          | ( EqualTo     : Ordering ) => false
+                          | ( LessThan    : Ordering ) => true
+                          | ( GreaterThan : Ordering ) => false
+                        }
+                    | ( GreaterThan : Ordering ) =>
+                        case<bool>(ord2 : Ordering) {
+                          | ( EqualTo     : Ordering ) => false
+                          | ( LessThan    : Ordering ) => false
+                          | ( GreaterThan : Ordering ) => true
+                        }
+                  }
+        |]
+      )
+  , DFunction
+      Exported
       (builtinInstance (Trait.comparable (TIntrinsic IString)) "(==)")
       [ Kernel.Label Kernel.string "str1"
       , Kernel.Label Kernel.string "str2"

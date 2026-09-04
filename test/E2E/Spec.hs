@@ -2223,6 +2223,13 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/420" ["Main.coal"]
       res `shouldBe` Left PatternAnomaly
 
+  describe "422" $
+    expectOutput
+      "truefalsefalsefalsetruefalse"
+      "test/Coal/examples/422"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

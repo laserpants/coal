@@ -102,6 +102,7 @@ builtinTraitInstances =
   , instanceLabel (Trait.comparable (TIntrinsic IBignum)) "(==)"
   , instanceLabel (Trait.comparable (TIntrinsic IString)) "(==)"
   , instanceLabel (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)"
+  , instanceLabel (Trait.comparable (TConstructor () "Ordering")) "(==)"
   , -- Divisible
     instanceLabel (Trait.divisible (TIntrinsic IFloat)) "(/)"
   , instanceLabel (Trait.divisible (TIntrinsic IDouble)) "(/)"
