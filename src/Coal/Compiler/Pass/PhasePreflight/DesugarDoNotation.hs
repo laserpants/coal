@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -177,7 +178,7 @@ instance (Data a, Monoid a) => DoNotationContext (Choice Expression a () ()) whe
 instance (Data a, Monoid a) => DoNotationContext (Guard Expression a () ()) where
   desugarDoNotation =
     \case
-      CGuard{..} ->
+      CGuard{guardExpression} ->
         CGuard <$> desugarDoNotation guardExpression
 
 normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), [(Pattern a () (), Expression a () ())])
