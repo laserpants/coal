@@ -88,7 +88,6 @@ instance ExpandContext (Module Metadata Kind ()) where
             , ..
             }
 
--- TODO: annotations
 expandGroups :: (Monad m) => Definition Metadata Kind () -> CompilerT Metadata m [Definition Metadata Kind ()]
 expandGroups =
   \case
