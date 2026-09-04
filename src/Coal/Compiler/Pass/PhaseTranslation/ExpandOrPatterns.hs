@@ -127,8 +127,7 @@ instance (Data t) => PatternContext (Pattern Metadata Kind t) where
             vars2 = boundIn p2
         when (vars1 /= vars2) $ do
           tellErrors [OrPatternVariableMismatch vars1 vars2 (ErrorLocation this loc)]
-          -- TODO: ??
-          throwError PreflightFailure
+          throwError PatternAnomaly
         qs1 <- expandOrPatterns p1
         qs2 <- expandOrPatterns p2
         pure (qs1 <> qs2)
