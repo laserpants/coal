@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -42,12 +43,17 @@ module Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation (
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
-import Coal.Compiler.Stack
+import Coal.Compiler.Stack (CompilerT)
 import Coal.Language
-import Coal.Language.AST.Builders
+import Coal.Language.AST.Builders (
+  applicationE,
+  lambdaE,
+  literalE,
+  varE,
+ )
 import Control.Monad.IO.Class (MonadIO)
 import Data.Data (Data)
-import Data.Foldable (foldr')
+import Data.Foldable (foldrM)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
@@ -140,16 +146,16 @@ instance (Data a, Monoid a) => DoNotationContext (LetDefinition a () ()) where
 instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
   desugarDoNotation =
     \case
-      EDoBlock _ es ->
-        case es of
-          (p, e2) :| [] -> do
-            pure (lambdaE (p :| []) e2)
-          _ ->
-            pure (foldr' go e' es')
+      EDoBlock _ es -> do
+        let (e', es') = normalize es
+        e'' <- desugarDoNotation e'
+        foldrM go e'' es'
        where
-        (e', es') = normalize es
         bind e1 e2 = applicationE (varE "bind") (e1 :| [e2])
-        go (p, e) e2 = bind e (lambdaE (p :| []) e2)
+        go (p, e) e2 = do
+          e' <- desugarDoNotation e
+          e2' <- desugarDoNotation e2
+          pure (bind e' (lambdaE (p :| []) e2'))
       e ->
         descendM desugarDoNotation e
 
@@ -174,10 +180,10 @@ instance (Data a, Monoid a) => DoNotationContext (Guard Expression a () ()) wher
       CGuard{..} ->
         CGuard <$> desugarDoNotation guardExpression
 
-normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), NonEmpty (Pattern a () (), Expression a () ()))
+normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), [(Pattern a () (), Expression a () ())])
 normalize es =
   case NonEmpty.last es of
     (PAny _ (), e) ->
-      (e, NonEmpty.fromList $ NonEmpty.init es)
+      (e, NonEmpty.init es)
     _ ->
-      (applicationE (varE "pure") (literalE LUnit :| []), es)
+      (applicationE (varE "pure") (literalE LUnit :| []), NonEmpty.toList es)

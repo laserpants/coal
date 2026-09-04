@@ -1,0 +1,14 @@
+module Main {
+
+  import namespace IO
+  
+  fun main() = do {
+    IO.println_int32(1);
+    if (3 == 5) then 
+      IO.println_int32(3)
+    else do {
+      IO.println_int32(222);
+    };
+  }
+
+}
