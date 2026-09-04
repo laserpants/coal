@@ -1063,13 +1063,13 @@ e2eSpec = do
       ]
 
   describe "208" $ do
-    it "is PreflightFailure" $ do
+    it "is PatternAnomaly" $ do
       res <-
         runSpec
           "test/Coal/examples/208"
           [ "Main.coal"
           ]
-      res `shouldBe` Left PreflightFailure
+      res `shouldBe` Left PatternAnomaly
 
   describe "210" $ do
     expectOutput
