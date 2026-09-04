@@ -33,7 +33,7 @@ import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Dictionary, Name, forM, forM_)
-import Prettyprinter
+import Prettyprinter (defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
 import TextShow (showt)
 
