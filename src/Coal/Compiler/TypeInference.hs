@@ -80,7 +80,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name, concatMapM, forM_)
 
-generateKindConstraints :: (Monad m) => Module a Kind () -> CompilerT a m ()
+generateKindConstraints :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do
   env <- moduleKindEnvironment modul
   (_, result) <- runKindConstraintsGen env (emitKindConstraints modul)

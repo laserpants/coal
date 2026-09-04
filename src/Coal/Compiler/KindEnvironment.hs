@@ -9,7 +9,9 @@ import Coal.Common.Environment (Environment (..))
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Build.NameEntry
-import Coal.Compiler.Stack (CompilerT)
+import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
+import Coal.Compiler.Journal (tellErrors)
+import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT)
 import Coal.Compiler.State
 import Coal.Language.Definition
 import Coal.Language.HasKind (HasKind (..), foldKindOf)
@@ -18,11 +20,12 @@ import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind (Kind (..))
 import Control.Applicative ((<|>))
+import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.State (get)
 import Data.Maybe (fromMaybe)
 import Extras (Name, concatForM, forM, (<.>))
 
-moduleKindEnvironment :: (Monad m) => Module a Kind () -> CompilerT b m (Environment Kind)
+moduleKindEnvironment :: (Monad m, Monoid b) => Module a Kind () -> CompilerT b m (Environment Kind)
 moduleKindEnvironment Module{moduleDefinitions} = do
   res <- forM moduleDefinitions $
     \case
@@ -123,12 +126,12 @@ aliasKind name Build{buildAliases} =
     Just AliasEntry{..} ->
       Just (kindOf aliasEntryType)
 
-importedBuild :: (Monad m) => Path -> CompilerT a m (Build a)
+importedBuild :: (Monad m, Monoid a) => Path -> CompilerT a m (Build a)
 importedBuild path = do
   CompilerState{compilerModules} <- get
   case Environment.lookup (principalPath path) compilerModules of
-    Nothing ->
-      -- TODO
-      error ("No module: " <> show path)
+    Nothing -> do
+      tellErrors [ModuleNotFound (principalPath path) (ErrorLocation (principalPath path) mempty)]
+      throwError CompilerError
     Just build ->
       pure build
