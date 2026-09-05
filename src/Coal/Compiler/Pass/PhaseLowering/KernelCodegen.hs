@@ -251,7 +251,7 @@ builtinDData =
     -- Nat: $Succ (tag 0) < $Zero (tag 1) lexicographically
     Kernel.DData
       "nat"
-      [ ("$Succ", Kernel.arrow (Kernel.TCon "int32" []) (Kernel.TCon "nat" []))
+      [ ("$Succ", Kernel.arrow (Kernel.TCon "int64" []) (Kernel.TCon "nat" []))
       , ("$Zero", Kernel.TCon "nat" [])
       ]
     :

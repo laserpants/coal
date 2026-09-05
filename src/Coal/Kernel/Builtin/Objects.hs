@@ -540,11 +540,11 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  case<int32>(nat: $Nat) {
-                    | ( $Succ : int32/$Nat
-                      , succ : int32
+                  case<int64>(nat: $Nat) {
+                    | ( $Succ : int64/$Nat
+                      , succ : int64
                       ) =>
-                        [+ int32](succ : int32, 1)
+                        [+ int64](succ : int64, 1)
                     | ( $Zero : $Nat
                       ) =>
                         0
@@ -554,17 +554,17 @@ objectList =
   , DFunction
       Exported
       "Builtin$.nat$_pack"
-      [ Kernel.Label Kernel.int32 "n"
+      [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
           [r|
-                  if ([<= int32](n : int32, 0))
+                  if ([<= int64](n : int64, 0))
                     then
                       $Zero : $Nat
                     else
                       @<$Nat>
-                        ( $Succ : int32/$Nat
-                        , [- int32](n : int32, 1)
+                        ( $Succ : int64/$Nat
+                        , [- int64](n : int64, 1)
                         )
         |]
       )
@@ -997,13 +997,12 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<$Nat>
-                    ( `Builtin$.nat$_pack` : int32/$Nat
+                    ( `Builtin$.nat$_pack` : int64/$Nat
                     , m : int32
                     )
         |]
       )
   , DFunction
-      -- TODO: fix
       Exported
       (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int64")
       [ Kernel.Label Kernel.int64 "m"
@@ -1011,7 +1010,7 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<$Nat>
-                    ( `Builtin$.nat$_pack` : int32/$Nat
+                    ( `Builtin$.nat$_pack` : int64/$Nat
                     , m : int64
                     )
         |]
@@ -1024,9 +1023,9 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<$Nat>
-                    ( `Builtin$.nat$_pack` : int32/$Nat
-                    , @<int32>
-                        ( coal_bignum_to_int32 : bignum/int32
+                    ( `Builtin$.nat$_pack` : int64/$Nat
+                    , @<int64>
+                        ( coal_bignum_to_int64 : bignum/int64
                         , n : bignum
                         )
                     )
@@ -1041,14 +1040,14 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<$Nat>
-                    ( `Builtin$.nat$_pack` : int32/$Nat
-                    , [+ int32]
-                        ( @<int32>
-                            ( `Builtin$.nat$_unpack` : $Nat/int32
+                    ( `Builtin$.nat$_pack` : int64/$Nat
+                    , [+ int64]
+                        ( @<int64>
+                            ( `Builtin$.nat$_unpack` : $Nat/int64
                             , lhs : $Nat
                             )
-                        , @<int32>
-                            ( `Builtin$.nat$_unpack` : $Nat/int32
+                        , @<int64>
+                            ( `Builtin$.nat$_unpack` : $Nat/int64
                             , rhs : $Nat
                             )
                         )
@@ -1064,23 +1063,23 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<$Nat>
-                    ( `Builtin$.nat$_pack` : int32/$Nat
+                    ( `Builtin$.nat$_pack` : int64/$Nat
                     , let
-                        n : int32 =
-                          [- int32]
-                            ( @<int32>
-                                ( `Builtin$.nat$_unpack` : $Nat/int32
+                        n : int64 =
+                          [- int64]
+                            ( @<int64>
+                                ( `Builtin$.nat$_unpack` : $Nat/int64
                                 , lhs : $Nat
                                 )
-                            , @<int32>
-                                ( `Builtin$.nat$_unpack` : $Nat/int32
+                            , @<int64>
+                                ( `Builtin$.nat$_unpack` : $Nat/int64
                                 , rhs : $Nat
                                 )
                             )
                         in
-                          if ([< int32] (n : int32, 0)) 
+                          if ([< int64] (n : int64, 0)) 
                             then 0
-                            else n : int32
+                            else n : int64
                     )
         |]
       )
@@ -1093,14 +1092,14 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<$Nat>
-                    ( `Builtin$.nat$_pack` : int32/$Nat
-                    , [* int32]
-                        ( @<int32>
-                            ( `Builtin$.nat$_unpack` : $Nat/int32
+                    ( `Builtin$.nat$_pack` : int64/$Nat
+                    , [* int64]
+                        ( @<int64>
+                            ( `Builtin$.nat$_unpack` : $Nat/int64
                             , lhs : $Nat
                             )
-                        , @<int32>
-                            ( `Builtin$.nat$_unpack` : $Nat/int32
+                        , @<int64>
+                            ( `Builtin$.nat$_unpack` : $Nat/int64
                             , rhs : $Nat
                             )
                         )
@@ -1255,22 +1254,22 @@ objectList =
                                     )
                                 in
                                   let
-                                    z : int32 =
-                                      @<int32>
-                                        ( `Builtin$.nat$_unpack` : $Nat/int32
+                                    z : int64 =
+                                      @<int64>
+                                        ( `Builtin$.nat$_unpack` : $Nat/int64
                                         , n : $Nat 
                                         )
                                     in
                                       let
-                                        h : int32/*/* =
-                                          fn(q : int32, r : *) =>
-                                            if ([== int32](q : int32, 0))
+                                        h : int64/*/* =
+                                          fn(q : int64, r : *) =>
+                                            if ([== int64](q : int64, 0))
                                               then
                                                 r : *
                                               else
                                                 @<*>
-                                                  ( h : int32/*/*
-                                                  , [- int32](q : int32, 1)
+                                                  ( h : int64/*/*
+                                                  , [- int64](q : int64, 1)
                                                   , @<*>
                                                       ( $f : */*/*
                                                       , m : *
@@ -1279,8 +1278,8 @@ objectList =
                                                   )
                                         in
                                           @<*>
-                                            ( h : int32/*/*
-                                            , z : int32
+                                            ( h : int64/*/*
+                                            , z : int64
                                             , one : *
                                             )
                 }
@@ -1482,23 +1481,23 @@ objectList =
       ( unsafeParseExpr
           ( [r|
                   let 
-                    a : int32 = 
-                      @<int32>
-                        ( `Builtin$.nat$_unpack` : $Nat/int32
+                    a : int64 = 
+                      @<int64>
+                        ( `Builtin$.nat$_unpack` : $Nat/int64
                         , x : $Nat )
                       in
                         let
-                          b : int32 =
-                            @<int32>
-                              ( `Builtin$.nat$_unpack` : $Nat/int32
+                          b : int64 =
+                            @<int64>
+                              ( `Builtin$.nat$_unpack` : $Nat/int64
                               , y : $Nat )
                           in
                             @<Ordering>
                               ( `|]
-              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
-              <> [r|` : int32/int32/Ordering
-                              , a : int32
-                              , b : int32 
+              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
+              <> [r|` : int64/int64/Ordering
+                              , a : int64
+                              , b : int64 
                               )
         |]
           )
@@ -1662,8 +1661,8 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<int32>
-                    ( coal_string_length : string/int32
+                  @<int64>
+                    ( coal_string_length : string/int64
                     , str : string
                     )
         |]
@@ -1906,20 +1905,20 @@ objectList =
       ( unsafeParseExpr
           [r|
                   let 
-                    a : int32 = 
-                      @<int32>
-                        ( `Builtin$.nat$_unpack` : $Nat/int32
+                    a : int64 = 
+                      @<int64>
+                        ( `Builtin$.nat$_unpack` : $Nat/int64
                         , x : $Nat 
                         )
                       in
                         let
-                          b : int32 =
-                            @<int32>
-                              ( `Builtin$.nat$_unpack` : $Nat/int32
+                          b : int64 =
+                            @<int64>
+                              ( `Builtin$.nat$_unpack` : $Nat/int64
                               , y : $Nat 
                               )
                           in
-                            if ([== int32](a : int32, b : int32)) 
+                            if ([== int64](a : int64, b : int64)) 
                               then true 
                               else false 
         |]

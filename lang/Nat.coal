@@ -25,23 +25,23 @@
 module Nat {
 
   /**
-   * Convert an `int32` value into a natural number.
+   * Convert an `int64` value into a natural number.
    *
    * Interpret the given integer as a natural number and return the
    * corresponding `nat` value. If the input is negative, the function
    * will return `Zero`.
    *
-   * **Type**: `pack : int32 -> nat`
+   * **Type**: `pack : int64 -> nat`
    */
-  fun pack(m : int32) : nat = nat$_pack(m)
+  fun pack(m : int64) : nat = nat$_pack(m)
 
   /**
-   * Convert a natural number into an `int32` value.
+   * Convert a natural number into an `int64` value.
    *
-   * Return the integer representation of the given value as an `int32`.
+   * Return the integer representation of the given value as an `int64`.
    *
-   * **Type**: `unpack : nat -> int32`
+   * **Type**: `unpack : nat -> int64`
    */
-  fun unpack(n : nat) : int32 = nat$_unpack(n)
+  fun unpack(n : nat) : int64 = nat$_unpack(n)
 
 }

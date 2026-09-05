@@ -1,9 +1,9 @@
 module Main {
 
   import Math(factorial)
-  import IO(println_int32)
+  import IO(println_int64)
 
   fun main() =
-    println_int32(factorial(8))
+    println_int64(factorial(8))
 
 }

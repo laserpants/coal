@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Compile natural number types and constructors into an efficient int32-backed runtime
+Compile natural number types and constructors into an efficient int64-backed runtime
 representation.
 
 ---
@@ -18,7 +18,7 @@ src/Coal/Compiler/Pass/PhaseTranslation/CompileNats.hs
 ## Summary
 
 Transforms the `nat` type and its constructors (`Zero`, `Succ`) into an internal
-`$Nat` type. The `Nat` type becomes `$Nat`, which is backed by `int32`. `Zero`
+`$Nat` type. The `Nat` type becomes `$Nat`, which is backed by `int64`. `Zero`
 becomes `$Zero`, `Succ(n)` becomes `$Succ(unpack(n))`. Pattern matching on `nat`
 constructors is compiled to efficient integer comparisons, reconstructing the
 recursive structure only when needed.
@@ -49,17 +49,17 @@ recursive structure only when needed.
 - `EConstructor "Zero"` → `EConstructor "$Zero" : $Nat`
 - `EApplication (EConstructor "Succ") args` →
   `EApplication (EConstructor "$Succ") (EApplication (var "Builtin$.nat$_unpack") args)`
-  — unpacks the nat to int32 before wrapping in `$Succ`
+  — unpacks the nat to int64 before wrapping in `$Succ`
 
 ### Clause transformation (`compileNats` CompiledClause instance)
 
 For `Succ` patterns:
-1. Generates fresh name `nats.N` for the int32 value
+1. Generates fresh name `nats.N` for the int64 value
 2. Reconstructs the recursive nat structure: checks `nats.N == 0`
    (via `Builtin$.comparable.(==)`) — if zero, returns `$Zero`, otherwise
    `$Succ(nats.N - 1)` (via `Builtin$.numeric.(-)`)
 3. This ensures the matched variable `s` retains its `$Nat` type for recursive
-   use, even though matching tests the underlying int32
+   use, even though matching tests the underlying int64
 
 For `Zero` patterns: simply changes the label from `Zero` to `$Zero`.
 
@@ -81,7 +81,7 @@ For `Zero` patterns: simply changes the label from `Zero` to `$Zero`.
 
 ## Notes
 
-The `nat` → `int32` compilation provides efficient runtime representation while
+The `nat` → `int64` compilation provides efficient runtime representation while
 preserving structural recursion semantics. The `$Nat` type is a kind-indexed
 type constructor `KType`, and the unpack/repack pattern ensures stack safety
 for deep nat values.
