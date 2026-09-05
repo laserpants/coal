@@ -4,7 +4,7 @@ module Data.Json.Decoding(decode) {
   import Data.Json.Value(JsonValue)
   import Data.Json.Tokenizer(tokenize)
   import namespace List
-  import Number(int32_to_double, double_to_int32)
+  import Number(int32_to_double, double_to_int64)
   import Nat(pack)
   import String(to_list)
   import Char(digit_to_int32)
@@ -109,10 +109,10 @@ module Data.Json.Decoding(decode) {
     let (exp_is_neg, exp_digits) = exp_parts in
     let exp_val_opt =
       match(exp_digits) {
-        | [] => Some((0 : int32))
+        | [] => Some((0 : int64))
         | _  =>
             match(digits_to_double(exp_digits)) {
-              | Some(d) => Some(double_to_int32(d))
+              | Some(d) => Some(double_to_int64(d))
               | None    => None
             }
       }
