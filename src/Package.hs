@@ -6,7 +6,7 @@
 
 module Package (packageIncludes, toModuleNamespace) where
 
-import Control.Monad.Except
+import Control.Monad.Except (ExceptT, MonadError (throwError))
 import Control.Monad.IO.Class (liftIO)
 import Data.Char (toUpper)
 import Data.Map.Strict (Map)
