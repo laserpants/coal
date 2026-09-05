@@ -26,7 +26,7 @@ Transforms `do { x <- action1(); y <- action2(x); pure(x + y) }` into
 ## Input
 
 - **AST representation**: `[BuildEnvelope (Module Metadata () ())]`
-- **Required invariants**: Builtins inserted, where-clauses desugared
+- **Required invariants**: Builtins inserted
 
 ---
 
@@ -87,7 +87,7 @@ bind(action1(), fn(x) => bind(action2(x), fn(y) => pure(x + y)))
 
 ## Compiler Interactions
 
-- **Earlier passes this relies on**: DesugarWhereClauses
+- **Earlier passes this relies on**: InsertBuiltinDefinitions
 - **Later passes that rely on this pass**: DetectAliasCycles, DetectShadowing
   (must run after do-notation is flattened)
 

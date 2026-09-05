@@ -68,7 +68,7 @@ module embeddings. Produces a list of `BuildEnvelope` values that may be cached 
 parsed.
 
 ### PhasePreflight
-Performs 11 passes that validate module structure, detect errors, insert builtins, and
+Performs 10 passes that validate module structure, detect errors, insert builtins, and
 prepare the module for type checking. Includes topological sort, shadowing detection,
 alias cycle detection, and do-notation desugaring.
 
@@ -100,7 +100,6 @@ Assembles LLVM bitcode to object files via `llc`, compiles the runtime C library
   - [RefreshCache.md](RefreshCache.md)
   - [DetectMisplacedImportStatements.md](DetectMisplacedImportStatements.md)
   - [InsertBuiltinDefinitions.md](InsertBuiltinDefinitions.md)
-  - [DesugarWhereClauses.md](DesugarWhereClauses.md)
   - [DesugarDoNotation.md](DesugarDoNotation.md)
   - [DetectAliasCycles.md](DetectAliasCycles.md)
   - [DetectShadowing.md](DetectShadowing.md)
