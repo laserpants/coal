@@ -1,6 +1,6 @@
 module Main {
 
-  import IO(println_int32, println_bool, println_string, println_char)
+  import IO(println_int64, println_bool, println_string, println_char)
   import Nat(pack, unpack)
 
   fun factorial(n : nat) =
@@ -12,6 +12,6 @@ module Main {
     }
 
   fun main() =
-    println_int32(unpack(factorial(4)))
+    println_int64(unpack(factorial(4)))
 
 }

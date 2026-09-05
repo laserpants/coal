@@ -1,6 +1,6 @@
 module Main {
 
-  import IO(println_string, println_int32, println_bool)
+  import IO(println_string, println_int64, println_bool)
 
   import Nat(pack, unpack)
 
@@ -19,6 +19,6 @@ module Main {
       res
 
   fun main() =
-    println_int32(unpack(fib(6)))
+    println_int64(unpack(fib(6)))
 
 }

@@ -10,7 +10,7 @@ Module: Coal.Compiler.Pass.PhaseTranslation.CompileNats
 Compile natural number types and constructors into efficient runtime representation.
 
 This pass transforms the @nat@ type and its constructors (@Zero@ and @Succ@) into
-an internal representation backed by @int32@ for efficient execution. The
+an internal representation backed by @int64@ for efficient execution. The
 transformation converts the intrinsic @nat@ type to a compiled representation
 that relies on primitive integer operations.
 
@@ -21,17 +21,17 @@ Zero => $Zero
 Succ(n) => $Succ(unpack(n))
 @
 
-Where unpacking converts the @nat@ to its @int32@ backing value. Pattern matching
+Where unpacking converts the @nat@ to its @int64@ backing value. Pattern matching
 on @nat@ constructors is also compiled to efficient integer comparisons:
 
 @
 match(n) {
   | Zero => ...
-  | Succ(m) => ...  // m is reconstructed from int32
+  | Succ(m) => ...  // m is reconstructed from int64
 }
 @
 
-becomes runtime checks on the @int32@ value, reconstructing the recursive @nat@
+becomes runtime checks on the @int64@ value, reconstructing the recursive @nat@
 structure only when needed. This provides an efficient implementation of
 natural numbers while maintaining the structural recursion guarantees.
 -}
@@ -111,11 +111,11 @@ instance (Monoid a, Data a) => CompileNatsContext (Expression a Kind IndexedType
             EApplication
               a1
               natType
-              (EConstructor mempty (Label (TIntrinsic IInt32 `TArrow` natType) "$Succ"))
+              (EConstructor mempty (Label (TIntrinsic IInt64 `TArrow` natType) "$Succ"))
               ( EApplication
                   mempty
-                  (TIntrinsic IInt32)
-                  (EVariable mempty (Label (natType `TArrow` TIntrinsic IInt32) "Builtin$.nat$_unpack"))
+                  (TIntrinsic IInt64)
+                  (EVariable mempty (Label (natType `TArrow` TIntrinsic IInt64) "Builtin$.nat$_unpack"))
                   es
                   :| []
               )
@@ -132,19 +132,19 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
       ECompiledClause loc (Label _ "Succ" :| [Label _ s]) e -> do
         name <- supplied (freshName "nats")
         pure $
-          ECompiledClause loc (Label (natType `TArrow` natType) "$Succ" :| [Label (TIntrinsic IInt32) name]) $
+          ECompiledClause loc (Label (natType `TArrow` natType) "$Succ" :| [Label (TIntrinsic IInt64) name]) $
             ERecursiveLet
               mempty
               (PVariable mempty (Label natType s))
               ( EIf
                   mempty
-                  (TIntrinsic IInt32)
+                  (TIntrinsic IInt64)
                   ( EApplication
                       mempty
                       (TIntrinsic IBool)
-                      (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IBool) (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")))
-                      ( EVariable mempty (Label (TIntrinsic IInt32) name)
-                          <| ELiteral mempty (LInt32 0)
+                      (EVariable mempty (Label (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IBool) (builtinInstance (Trait.comparable (TIntrinsic IInt64)) "(==)")))
+                      ( EVariable mempty (Label (TIntrinsic IInt64) name)
+                          <| ELiteral mempty (LInt64 0)
                             :| []
                       )
                   )
@@ -152,13 +152,13 @@ instance (Monoid a) => CompileNatsContext (CompiledClause a Kind IndexedType) wh
                   ( EApplication
                       mempty
                       natType
-                      (EConstructor mempty (Label (TIntrinsic IInt32 `TArrow` natType) "$Succ"))
+                      (EConstructor mempty (Label (TIntrinsic IInt64 `TArrow` natType) "$Succ"))
                       ( EApplication
                           mempty
-                          (TIntrinsic IInt32)
-                          (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32) (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")))
-                          ( EVariable mempty (Label (TIntrinsic IInt32) name)
-                              <| ELiteral mempty (LInt32 1)
+                          (TIntrinsic IInt64)
+                          (EVariable mempty (Label (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64) (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(-)")))
+                          ( EVariable mempty (Label (TIntrinsic IInt64) name)
+                              <| ELiteral mempty (LInt64 1)
                                 :| []
                           )
                           :| []

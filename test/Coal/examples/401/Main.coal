@@ -34,7 +34,7 @@ module Main {
 
   instance Pretty<nat> {
     fun pretty(n : nat) =
-      int32_to_string(unpack(n))
+      int64_to_string(unpack(n))
   }
 
   instance Pretty<bignum> {

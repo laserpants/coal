@@ -192,7 +192,7 @@ module IO {
    * **Type**: `println_nat : nat -> IO<unit>`
    */
   fun println_nat(n : nat) : IO<unit> =
-    io$_println_int32(unpack(n))
+    io$_println_int64(unpack(n))
 
   /**
    * Print a natural number without a trailing newline.
@@ -203,7 +203,7 @@ module IO {
    * **Type**: `print_nat : nat -> IO<unit>`
    */
   fun print_nat(n : nat) : IO<unit> =
-    io$_print_int32(unpack(n))
+    io$_print_int64(unpack(n))
 
   /**
    * Evaluate an IO action and extract its result.

@@ -18,7 +18,7 @@ module Package.Manifest (
 import CLI.Git.Commit (GitCommit (..))
 import Coal.Language.Module.Path (parsePath, toFilePath)
 import Control.Monad (unless)
-import Control.Monad.Except
+import Control.Monad.Except (ExceptT (..), MonadError (throwError))
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Aeson.Encode.Pretty (Config (..), defConfig, encodePretty', keyOrder)
@@ -34,8 +34,8 @@ import Package.Dependency (PackageDependency)
 import Package.Error (PackageError (..))
 import Package.Lock (LockSpec (..), PackageLock (..))
 import Package.Version (PackageVersion (..))
-import System.Directory
-import System.FilePath
+import System.Directory (doesFileExist)
+import System.FilePath ((</>))
 
 data BuildConfig = BuildConfig
   { generateDebugArtifacts :: Bool

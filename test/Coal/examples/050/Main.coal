@@ -1,6 +1,6 @@
 module Main {
 
-  import IO(println_int32, println_bool, println_string, println_char)
+  import IO(println_int64, println_bool, println_string, println_char)
   import Nat(pack, unpack)
 
   fun fold_list(f : a -> b -> b, xs : List<a>, x : b) =
@@ -11,7 +11,7 @@ module Main {
           fn(r) => go(f(n, r))
     }
 
-  fun product(nums : List<int32>) : int32 =
+  fun product(nums : List<int64>) : int64 =
     match(nums) {
       | [] =>
           1
@@ -19,7 +19,7 @@ module Main {
           fold_list(fn(a, b) => a * b, xs, x)
     }
 
-  fun enum_to(n : int32) : List<int32> =
+  fun enum_to(n : int64) : List<int64> =
     fold(pack(n)) {
       | Zero =>
           []
@@ -27,9 +27,9 @@ module Main {
           next ++ [unpack(m)]
     }
 
-  fun factorial(n : int32) =
+  fun factorial(n : int64) =
     product(enum_to(n))  // product of numbers 1, 2, ..., n
 
   fun main() = 
-    println_int32(factorial(6))
+    println_int64(factorial(6))
 }

@@ -1,9 +1,9 @@
 module Main {
 
   import Nat(pack, unpack)
-  import IO(println_int32)
+  import IO(println_int64)
 
-  fun factorial(n : int32) =
+  fun factorial(n : int64) =
     fold(pack(n)) {
       | Zero =>
           1
@@ -12,6 +12,6 @@ module Main {
     }
 
   fun main() : IO<unit> =
-    println_int32(factorial(4))
+    println_int64(factorial(4))
 
 }

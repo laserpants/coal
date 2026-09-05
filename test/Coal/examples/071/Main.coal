@@ -4,7 +4,7 @@ module Main {
   import Nat(pack, unpack)
   import Codata.Stream(Stream, head, tail, enum_from)
 
-  fun drop(n : int32, s) =
+  fun drop(n : int64, s) =
     fold(pack(n), s) {
       | Zero =>
           fn(t) => t

@@ -10,9 +10,9 @@ module Package.Version (
 
 import CLI.Git.Commit (GitCommit (..))
 import Data.Aeson
-import Data.SemVer
+import Data.SemVer (Version)
 import qualified Data.SemVer as SemVerVersion
-import Data.SemVer.Constraint
+import Data.SemVer.Constraint (Constraint (..))
 import qualified Data.SemVer.Constraint as SemVerConstraint
 import Data.Text (Text)
 import GHC.Generics (Generic)

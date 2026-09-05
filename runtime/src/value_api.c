@@ -79,6 +79,12 @@ coal_int64_to_bignum(rt_value_t v)
     return rt_bignum_box(rt_int64_to_bignum(rt_int64_unbox(v)));
 }
 
+rt_value_t
+coal_int32_to_int64(rt_value_t v)
+{
+    return rt_int64_box((int64_t) rt_int32_unbox(v));
+}
+
 /* ============================================================================
  * I/O operations
  * ============================================================================

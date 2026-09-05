@@ -161,15 +161,15 @@ builtinFunctions =
     )
   ,
     ( "string$_length"
-    , forall0 (TIntrinsic IString ~> TIntrinsic IInt32)
+    , forall0 (TIntrinsic IString ~> TIntrinsic IInt64)
     )
   ,
     ( "nat$_unpack"
-    , forall0 (TIntrinsic INat ~> TIntrinsic IInt32)
+    , forall0 (TIntrinsic INat ~> TIntrinsic IInt64)
     )
   ,
     ( "nat$_pack"
-    , forall0 (TIntrinsic IInt32 ~> TIntrinsic INat)
+    , forall0 (TIntrinsic IInt64 ~> TIntrinsic INat)
     )
   ,
     ( "not"

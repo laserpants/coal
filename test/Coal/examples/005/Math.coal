@@ -2,7 +2,7 @@ module Math {
 
   import Nat(pack, unpack)
 
-  fun factorial(n : int32) : int32 =
+  fun factorial(n : int64) : int64 =
     fold(pack(n)) {
       | Zero =>
           1
