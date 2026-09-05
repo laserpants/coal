@@ -88,6 +88,27 @@ module Number {
     #{coal_double_to_int64 : double -> int64}(d)(fn(n) => n)
 
   /**
+   * Convert a 32-bit integer to a 64-bit integer.
+   *
+   * The value is sign-extended.
+   *
+   * **Type**: `int32_to_int64 : int32 -> int64`
+   */
+  fun int32_to_int64(n : int32) : int64 =
+    #{coal_int32_to_int64 : int32 -> int64}(n)(fn(m) => m)
+
+  /**
+   * Convert a 64-bit integer to a 32-bit integer.
+   *
+   * The value is truncated; the result is implementation-defined if
+   * the value does not fit in 32 bits.
+   *
+   * **Type**: `int64_to_int32 : int64 -> int32`
+   */
+  fun int64_to_int32(n : int64) : int32 =
+    #{coal_int64_to_int32 : int64 -> int32}(n)(fn(m) => m)
+
+  /**
    * Parse a decimal string into a 32-bit integer.
    *
    * Returns `None` if parsing fails (invalid format or overflow), 
