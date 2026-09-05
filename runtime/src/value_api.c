@@ -85,6 +85,12 @@ coal_int32_to_int64(rt_value_t v)
     return rt_int64_box((int64_t) rt_int32_unbox(v));
 }
 
+rt_value_t
+coal_int64_to_int32(rt_value_t v)
+{
+    return rt_int32_box((int32_t) rt_int64_unbox(v));
+}
+
 /* ============================================================================
  * I/O operations
  * ============================================================================

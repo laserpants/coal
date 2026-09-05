@@ -403,6 +403,26 @@ test_char_wrappers(void)
 }
 
 static void
+test_int_width_conversion_wrappers(void)
+{
+    /* Test int32 to int64 (sign extension) */
+    rt_value_t i32_val = rt_int32_box(-7);
+    rt_value_t i64_val = coal_int32_to_int64(i32_val);
+    assert(rt_int64_unbox(i64_val) == -7);
+
+    /* Test int64 to int32 (round trip) */
+    rt_value_t i32_back = coal_int64_to_int32(i64_val);
+    assert(rt_int32_unbox(i32_back) == -7);
+
+    /* Test int64 to int32 with in-range value */
+    rt_value_t i64_in_range = rt_int64_box(123456789);
+    rt_value_t i32_in_range = coal_int64_to_int32(i64_in_range);
+    assert(rt_int32_unbox(i32_in_range) == 123456789);
+
+    printf("test_int_width_conversion_wrappers: PASS (int32 <-> int64)\n");
+}
+
+static void
 test_bignum_conversion_wrappers(void)
 {
     /* Test bignum to int32 */
@@ -481,6 +501,7 @@ main(void)
     printf("\nRunning wrapper tests...\n");
     test_io_wrappers();
     test_bignum_wrappers();
+    test_int_width_conversion_wrappers();
     test_bignum_conversion_wrappers();
     test_string_wrappers();
     test_char_wrappers();
