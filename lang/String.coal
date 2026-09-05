@@ -4,7 +4,8 @@
 module String {
 
   import List(reduce)
-  import Nat(pack)
+  import Nat(pack, unpack)
+
   import namespace List
 
   /**
@@ -54,6 +55,14 @@ module String {
    */
   fun double_to_string(d : double) : string =
     string$_double_to_string(d)
+
+  /**
+   * Convert a nat value to its string representation.
+   *
+   * **Type**: `nat_to_string : nat -> string`
+   */
+  fun nat_to_string(n : nat) : string =
+    int64_to_string(unpack(n))
 
   /**
    * Convert a string into a list of its characters.

@@ -2,7 +2,7 @@ module Test {
 
   import List(concat, length, reduce)
   import IO(return)
-  import String(int32_to_string)
+  import String(int32_to_string, int64_to_string)
   import namespace IO
   import namespace Nat
 
@@ -75,7 +75,7 @@ module Test {
       else
         IO.println_string(
           "✗ "
-          <> int32_to_string(Nat.unpack(failed_count))
+          <> int64_to_string(Nat.unpack(failed_count))
           <> " test(s) failed, "
           <> int32_to_string(summary.passed)
           <> " passed"

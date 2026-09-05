@@ -50,6 +50,8 @@ extern rt_value_t coal_double_to_float(rt_value_t v);
 extern rt_value_t coal_int32_to_bignum(rt_value_t v);
 /** Convert boxed int64 to bignum */
 extern rt_value_t coal_int64_to_bignum(rt_value_t v);
+/** Convert boxed int32 to int64 (sign-extends) */
+extern rt_value_t coal_int32_to_int64(rt_value_t v);
 
 /* ============================================================================
  * I/O operations

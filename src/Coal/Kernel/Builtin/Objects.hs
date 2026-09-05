@@ -544,10 +544,10 @@ objectList =
                     | ( $Succ : int64/$Nat
                       , succ : int64
                       ) =>
-                        [+ int64](succ : int64, 1)
+                        [+ int64](succ : int64, %1)
                     | ( $Zero : $Nat
                       ) =>
-                        0
+                        %0
                   }
         |]
       )
@@ -558,13 +558,13 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  if ([<= int64](n : int64, 0))
+                  if ([<= int64](n : int64, %0))
                     then
                       $Zero : $Nat
                     else
                       @<$Nat>
                         ( $Succ : int64/$Nat
-                        , [- int64](n : int64, 1)
+                        , [- int64](n : int64, %1)
                         )
         |]
       )
@@ -998,7 +998,10 @@ objectList =
           [r|
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int64/$Nat
-                    , m : int32
+                    , @<int64>
+                        ( coal_int32_to_int64 : int32/int64
+                        , m : int32
+                        )
                     )
         |]
       )
@@ -1077,8 +1080,8 @@ objectList =
                                 )
                             )
                         in
-                          if ([< int64] (n : int64, 0)) 
-                            then 0
+                          if ([< int64] (n : int64, %0))
+                            then %0
                             else n : int64
                     )
         |]
@@ -1263,13 +1266,13 @@ objectList =
                                       let
                                         h : int64/*/* =
                                           fn(q : int64, r : *) =>
-                                            if ([== int64](q : int64, 0))
+                                            if ([== int64](q : int64, %0))
                                               then
                                                 r : *
                                               else
                                                 @<*>
                                                   ( h : int64/*/*
-                                                  , [- int64](q : int64, 1)
+                                                  , [- int64](q : int64, %1)
                                                   , @<*>
                                                       ( $f : */*/*
                                                       , m : *
