@@ -66,12 +66,11 @@ ticksParsing = 1
 
 {- | Preflight phase tick count (total, not per module)
 Includes: passSortModules, passRefreshCache, passDetectMisplacedImportStatements,
-passInsertBuiltinDefinitions, passDesugarWhereClauses, passDesugarDoNotation,
-passDetectAliasCycles, passDetectShadowing, passDetectMainEntrypointMissing,
-passDetectDuplicateParams
+passInsertBuiltinDefinitions, passDesugarDoNotation, passDetectAliasCycles,
+passDetectShadowing, passDetectMainEntrypointMissing, passDetectDuplicateParams
 -}
 ticksPreflight :: Int
-ticksPreflight = 10
+ticksPreflight = 9
 
 {- | Type checking phase tick count (per module)
 Includes: passKindIndexing, passExpandFunctionGroups, passExpandAliases,

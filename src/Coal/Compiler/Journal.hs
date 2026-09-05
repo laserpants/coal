@@ -31,8 +31,7 @@ type RecordEntry a = (Name, Dictionary (Pattern a Kind IndexedType), Maybe (Patt
 
 data CompilerJournal a = CompilerJournal
   { compilerJournalPatterns :: [(Name, Pattern a Kind IndexedType)]
-  , --  , compilerJournalWhereClauses :: [(Name, Name)]
-    compilerJournalRecordEntries :: [RecordEntry a]
+  , compilerJournalRecordEntries :: [RecordEntry a]
   , compilerJournalDictionaryTraits :: Set (Trait IndexedType)
   , compilerJournalErrors :: [CompilerError a]
   }

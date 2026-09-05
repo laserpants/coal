@@ -35,8 +35,7 @@ left untouched.
 ## Input
 
 - **AST representation**: `[BuildEnvelope (Module Metadata () ())]`
-- **Required invariants**: Builtins inserted, where-clauses and do-notation
-  desugared
+- **Required invariants**: Builtins inserted, do-notation desugared
 
 ---
 
