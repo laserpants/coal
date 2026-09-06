@@ -24,6 +24,8 @@
  */
 module Nat {
 
+  import namespace Number
+
   /**
    * Convert an `int64` value into a natural number.
    *
@@ -43,5 +45,20 @@ module Nat {
    * **Type**: `unpack : nat -> int64`
    */
   fun unpack(n : nat) : int64 = nat$_unpack(n)
+
+  /**
+   * Trait that comprises types that can be converted to `nat`.
+   */
+  trait Natural<n> {
+    to_nat : n -> nat
+  }
+
+  instance Natural<int32> {
+    let to_nat = pack << Number.int32_to_int64
+  }
+
+  instance Natural<int64> {
+    let to_nat = pack
+  }
 
 }

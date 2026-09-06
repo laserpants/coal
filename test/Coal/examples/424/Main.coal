@@ -1,0 +1,9 @@
+module Main {
+
+  import Nat(to_nat)
+  import namespace IO
+
+  fun main() =
+    IO.println_nat(to_nat(5 : int32) + to_nat(5 : int64))
+
+}
