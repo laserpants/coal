@@ -42,7 +42,8 @@ packages:
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
 extra-deps:
-  - ir-builder-0.1.0.0
+  - git: https://codeberg.org/laserpants/ir-builder.git
+    commit: 106ead1aaf90df3317fcfa4d423b65bb83d5f79b
   - criterion-1.6.5.0
 
 # Apply TypeOperators to every package (including dependencies) so that older

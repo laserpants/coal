@@ -5,12 +5,16 @@
 
 packages:
 - completed:
-    hackage: ir-builder-0.1.0.0@sha256:bfd39f2970ea4ba07635f8e85807e3ec98e803bb385130f3d54d14ee55457909,5451
+    commit: 106ead1aaf90df3317fcfa4d423b65bb83d5f79b
+    git: https://codeberg.org/laserpants/ir-builder.git
+    name: ir-builder
     pantry-tree:
-      sha256: 840a48194c2ce9703151551aa17be781c97e954aa398b3ffc6b3285c263bacd3
-      size: 3295
+      sha256: b87f23167e6ea1534733dbe3f8b0d9a5b6fefabf58839e25f48c4b68b93828f8
+      size: 3847
+    version: 0.1.0.0
   original:
-    hackage: ir-builder-0.1.0.0
+    commit: 106ead1aaf90df3317fcfa4d423b65bb83d5f79b
+    git: https://codeberg.org/laserpants/ir-builder.git
 - completed:
     hackage: criterion-1.6.5.0@sha256:3d4b74d802923dc17491980b32e27e70ad93405432f254997f877beda794a24d,5041
     pantry-tree:
