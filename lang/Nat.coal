@@ -47,7 +47,9 @@ module Nat {
   fun unpack(n : nat) : int64 = nat$_unpack(n)
 
   /**
-   * Trait that comprises types that can be converted to `nat`.
+   * Trait that comprises types that can be converted to `nat`, via:
+   *
+   * - `to_nat : n -> nat`
    */
   trait Natural<n> {
     to_nat : n -> nat

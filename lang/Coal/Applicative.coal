@@ -12,8 +12,8 @@ module Coal.Applicative {
    * 
    * An Applicative functor must support:
    * 
-   * - `pure`, which lifts a value into the context, and
-   * - `ap`, which applies a context-wrapped function to a context-wrapped value.
+   * - `pure : a -> f<a>`, which lifts a value into the context, and
+   * - `ap : f<a -> b> -> f<a> -> f<b>`, which applies a context-wrapped function to a context-wrapped value.
    */
   trait Applicative<f> with (Functor<f>) {
     ap : f<a -> b> -> f<a> -> f<b>
