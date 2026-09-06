@@ -113,9 +113,22 @@ setConfigSanitize flag CompilerConfig{..} =
     , ..
     }
 
+{- | Version marker for the on-disk Binary encoding of build artifacts.
+
+Bump whenever any type serialized into the build cache changes shape (e.g. a
+field is added to an entry type) so that stale cache files are invalidated
+instead of being decoded misaligned.
+
+History:
+
+  * @"2"@ — added @instanceEntryModule@ to @InstanceEntry@.
+-}
+buildCacheFormatVersion :: Text
+buildCacheFormatVersion = "2"
+
 {- | Compute a hash of the configuration fields that affect compilation output.
 Used to invalidate cached builds when relevant config (e.g. package namespaces) changes.
 -}
 configHash :: CompilerConfig -> Hash256
 configHash CompilerConfig{configPackageNamespaces} =
-  Hash256 (hash (encodeUtf8 (pack (show configPackageNamespaces))))
+  Hash256 (hash (encodeUtf8 (pack (show configPackageNamespaces) <> buildCacheFormatVersion)))

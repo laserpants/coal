@@ -2,23 +2,42 @@
 
 module Coal.Compiler.Builtin.Instances (builtinInstances) where
 
-import Coal.Compiler.Build.NameEntry (InstanceEntry (InstanceEntry))
+import Coal.Compiler.Build.NameEntry (InstanceEntry (..))
+import Coal.Language.Module.Path (Path (..))
 import Coal.Language.Trait (Trait (..))
 import Coal.Language.Type (IndexedType, Parameter (Parameter), Type (..), TypeIndex (TypeIndex), applyTypeArgs)
 import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (KArrow, KType))
 import Coal.Language.Type.Operations (tupleType)
-import Coal.Language.Type.Scheme (Scheme (Forall))
+import Coal.Language.Type.Scheme (IndexedScheme, Scheme (Forall))
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import Extras (Name)
+import Extras (Dictionary, Name)
+
+{- | Smart constructor for builtin instance entries.
+
+The member implementations of builtin instances are emitted in the
+compiler-internal @Builtin$@ kernel module, so that is the defining module
+recorded on the entry (used to qualify instance member names at lowering
+time).
+-}
+builtinInstanceEntry ::
+  a -> Type Parameter Kind -> IndexedType -> Dictionary IndexedScheme -> InstanceEntry a
+builtinInstanceEntry meta t idx schemes =
+  InstanceEntry
+    { instanceEntryMetadata = meta
+    , instanceEntryModule = Path ["Builtin$"]
+    , instanceEntryType = t
+    , instanceEntryIndexedType = idx
+    , instanceEntryTypeSchemes = schemes
+    }
 
 builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
 builtinInstances =
   [
     ( "Numeric"
     , TIntrinsic IInt32
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -57,7 +76,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IInt64
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -96,7 +115,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IFloat
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -135,7 +154,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IDouble
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -174,7 +193,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic INat
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -213,7 +232,7 @@ builtinInstances =
   ,
     ( "Numeric"
     , TIntrinsic IBignum
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -252,7 +271,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IUnit
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IUnit)
         (TIntrinsic IUnit)
@@ -267,7 +286,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IInt32
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -282,7 +301,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IInt64
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -297,7 +316,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IBool
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IBool)
         (TIntrinsic IBool)
@@ -312,7 +331,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic INat
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -327,7 +346,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IFloat
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -342,7 +361,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IDouble
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -357,7 +376,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IChar
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IChar)
         (TIntrinsic IChar)
@@ -372,7 +391,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IString
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IString)
         (TIntrinsic IString)
@@ -387,7 +406,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , TIntrinsic IBignum
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -402,7 +421,7 @@ builtinInstances =
   ,
     ( "Ordered"
     , tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "#Tuple2") (TVariable (Parameter KType "a") :| [TVariable (Parameter KType "b")]))
         (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]))
@@ -417,7 +436,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TConstructor KType "Ordering"
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TConstructor KType "Ordering")
         (TConstructor KType "Ordering")
@@ -432,7 +451,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IUnit
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IUnit)
         (TIntrinsic IUnit)
@@ -447,7 +466,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IInt32
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -462,7 +481,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IInt64
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -477,7 +496,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IBool
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IBool)
         (TIntrinsic IBool)
@@ -492,7 +511,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic INat
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic INat)
         (TIntrinsic INat)
@@ -507,7 +526,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IFloat
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -522,7 +541,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IDouble
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -537,7 +556,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IChar
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IChar)
         (TIntrinsic IChar)
@@ -552,7 +571,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IBignum
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -567,7 +586,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , TIntrinsic IString
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IString)
         (TIntrinsic IString)
@@ -582,7 +601,7 @@ builtinInstances =
   ,
     ( "Comparable"
     , tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)])
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "#Tuple2") (TVariable (Parameter KType "a") :| [TVariable (Parameter KType "b")]))
         (tupleType (TVariable (TypeIndex KType 0) :| [TVariable (TypeIndex KType 1)]))
@@ -597,7 +616,7 @@ builtinInstances =
   ,
     ( "Divisible"
     , TIntrinsic IFloat
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IFloat)
         (TIntrinsic IFloat)
@@ -612,7 +631,7 @@ builtinInstances =
   ,
     ( "Divisible"
     , TIntrinsic IDouble
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IDouble)
         (TIntrinsic IDouble)
@@ -627,7 +646,7 @@ builtinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IInt32
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt32)
         (TIntrinsic IInt32)
@@ -642,7 +661,7 @@ builtinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IInt64
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IInt64)
         (TIntrinsic IInt64)
@@ -657,7 +676,7 @@ builtinInstances =
   ,
     ( "Modulo"
     , TIntrinsic IBignum
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IBignum)
         (TIntrinsic IBignum)
@@ -672,7 +691,7 @@ builtinInstances =
   ,
     ( "Semigroup"
     , TIntrinsic IUnit
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IUnit)
         (TIntrinsic IUnit)
@@ -687,7 +706,7 @@ builtinInstances =
   ,
     ( "Semigroup"
     , TIntrinsic IString
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (TIntrinsic IString)
         (TIntrinsic IString)
@@ -702,7 +721,7 @@ builtinInstances =
   ,
     ( "Semigroup"
     , applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty)
-    , InstanceEntry
+    , builtinInstanceEntry
         mempty
         (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (Parameter KType "a") :| mempty))
         (applyTypeArgs KType (TConstructor (KArrow KType KType) "List") (TVariable (TypeIndex KType 0) :| mempty))

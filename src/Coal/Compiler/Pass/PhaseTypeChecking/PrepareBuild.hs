@@ -240,7 +240,7 @@ prepareDefinitions defs = do
     -- Creates entries for definitions that will be type-checked later
     traverse_ collectPlaceholders defs
 
-  build <- get
+  build@Build{buildInstances, buildPath} <- get
   qualifiedNames <- traverse (qualifiedImports build) defs
   -- Generate qualified name mappings for all stdlib module instances (complement
   -- to step 7b). Without this, the code generator resolves instance member names
@@ -249,7 +249,31 @@ prepareDefinitions defs = do
   stdlibInstanceQNames <- concatForM ((Path . pure) <$> builtinModulesPaths) $ \path -> do
     Build{buildNames = importNames, buildInstances = importInstances, buildExportedNames = buildExportedNames'} <- lift $ lift $ importedBuild path
     generateQualifiedInstanceNames path importNames buildExportedNames' (Environment.toList importInstances)
-  modify (setQualifiedNames (Environment.fromList (stdlibInstanceQNames <> concat qualifiedNames)))
+  -- Generate qualified name mappings for instance members by their defining
+  -- module. Instances are imported globally (step 8) regardless of which names
+  -- the importing module lists, so an instance can reach a module through a
+  -- transitive dependency without any of its own import statements covering it.
+  -- Without this mapping, qualifyName falls back to prefixing the member name
+  -- with the *current* module (e.g. Main.pretty__$impl_Pretty(...)), while the
+  -- symbol is defined in the module that declared the instance, causing an
+  -- undefined reference at link time. Instances defined by the current module
+  -- itself are skipped: their member references already resolve through the
+  -- qualifyName fallback to the local definition, and adding them to
+  -- buildQualifiedNames would make the code generator emit a duplicate
+  -- declaration for a function the module also defines. These mappings take
+  -- precedence over the import-scoped ones below, whose fallback attributes
+  -- transitively imported instances to the intermediate (importing) module
+  -- rather than the definer.
+  let instanceMemberQNames =
+        [ (instanceName, principalPath module_ <.> instanceName)
+        | (traitName, instanceMap) <- Environment.toList buildInstances
+        , (_, InstanceEntry{..}) <- Map.toList instanceMap
+        , member <- Map.keys instanceEntryTypeSchemes
+        , let instanceName = instanceLabel (Trait traitName instanceEntryType) member
+        , let module_ = instanceEntryModule
+        , module_ /= buildPath
+        ]
+  modify (setQualifiedNames (Environment.fromList (instanceMemberQNames <> stdlibInstanceQNames <> concat qualifiedNames)))
 
 {- |
 Generate qualified names for trait instance members.
@@ -924,7 +948,7 @@ collectInstances =
           _ ->
             pure ()
 
-      Build{buildTraits, buildTypeConstructors} <- get
+      Build{buildTraits, buildTypeConstructors, buildPath} <- get
       case Environment.lookup instanceDefinitionTraitName buildTraits of
         Just TraitEntry{..} -> do
           Environment env <- flip Environment.mapMEnvironment traitEntryInterface $
@@ -954,6 +978,7 @@ collectInstances =
           let entry =
                 InstanceEntry
                   { instanceEntryMetadata = instanceDefinitionMetadata
+                  , instanceEntryModule = buildPath
                   , instanceEntryType = instanceDefinitionType
                   , instanceEntryIndexedType = t
                   , instanceEntryTypeSchemes = normalizeScheme <$> env

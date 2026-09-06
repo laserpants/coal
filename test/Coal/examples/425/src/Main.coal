@@ -1,0 +1,16 @@
+module Main {
+
+  import IO(println_string)
+  import Data.Variant(Variant)
+  import Pretty(Pretty)
+
+  fun baz(v : Variant) =
+    match(v) {
+      | VDateTime(dt) => pretty(dt)
+      | _ => "-"
+    }
+
+  fun main() =
+    println_string("Hello, world!")
+
+}

@@ -36,6 +36,7 @@ import Coal.Language (
  )
 import Coal.Language.Module.Export (Export (..))
 import Coal.Language.Module.Import (Import (..))
+import Coal.Language.Module.Path (Path)
 import Data.Binary (Binary)
 import Extras (Dictionary, Name, Set)
 import GHC.Generics (Generic)
@@ -75,6 +76,7 @@ instance (Binary a) => Binary (TraitEntry a)
 
 data InstanceEntry a = InstanceEntry
   { instanceEntryMetadata :: a
+  , instanceEntryModule :: Path
   , instanceEntryType :: Type Parameter Kind
   , instanceEntryIndexedType :: IndexedType
   , instanceEntryTypeSchemes :: Dictionary IndexedScheme
