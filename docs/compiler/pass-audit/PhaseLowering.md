@@ -8,13 +8,13 @@ and kernel code generation (all modules together).
 
 ## Passes Executed
 
-1. **KernelTranslateNew** — translate surface AST to kernel IR modules (per-module)
+1. **KernelTranslate** — translate surface AST to kernel IR modules (per-module)
 2. **KernelCodegen** — compile all kernel IR modules to LLVM bitcode (together)
 
 ## Execution Order
 
 ```
-mapPass passKernelTranslateNew
+mapPass passKernelTranslate
   >-> passKernelCodegen
 ```
 

@@ -85,7 +85,7 @@ pattern match compilation, trait dictionary insertion, and nat compilation.
 
 ### PhaseLowering
 Translates surface language modules to kernel IR modules, then compiles kernel IR to
-LLVM bitcode. Consists of `passKernelTranslateNew` (per-module, via `mapPass`) and
+LLVM bitcode. Consists of `passKernelTranslate` (per-module, via `mapPass`) and
 `passKernelCodegen` (all modules together).
 
 ### Linking
@@ -137,6 +137,6 @@ Assembles LLVM bitcode to object files via `llc`, compiles the runtime C library
   - [DenormalizeAST.md](DenormalizeAST.md)
   - [CheckTraitAnnotations.md](CheckTraitAnnotations.md)
 - [PhaseLowering.md](PhaseLowering.md) — overview of the lowering phase
-  - [KernelTranslateNew.md](KernelTranslateNew.md)
+  - [KernelTranslate.md](KernelTranslate.md)
   - [KernelCodegen.md](KernelCodegen.md)
   - [Linking.md](Linking.md)
