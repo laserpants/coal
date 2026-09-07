@@ -3,7 +3,7 @@
 ## Purpose
 
 Validate module structure, detect errors, insert builtins, and prepare modules for type
-checking. This phase operates on the entire module collection and performs 10 sequential
+checking. This phase operates on the entire module collection and performs 12 sequential
 passes that establish the structural and naming invariants required for type checking.
 
 ## Passes Executed
@@ -13,11 +13,13 @@ passes that establish the structural and naming invariants required for type che
 3. **DetectMisplacedImportStatements** — enforce imports at top of module
 4. **InsertBuiltinDefinitions** — inject compiler-provided builtin definitions
 5. **DesugarDoNotation** — desugar do-notation into monadic bind operations
-6. **DetectAliasCycles** — detect cyclic type alias definitions
-7. **DetectShadowing** — detect variable shadowing in nested scopes
-8. **DetectDuplicateParams** — detect duplicate parameter names
-9. **DetectInvalidExports** — validate export lists against module definitions
-10. **DetectMainEntrypointMissing** — verify Main module has a `main` function
+6. **ExpandLetBindings** — rewrite multi-binding `let` into nested single-binding `let`
+7. **DetectAliasCycles** — detect cyclic type alias definitions
+8. **DetectShadowing** — detect variable shadowing in nested scopes
+9. **DetectDuplicateParams** — detect duplicate parameter names
+10. **CheckTupleArity** — reject tuple literals/patterns exceeding the kernel limit (8)
+11. **DetectInvalidExports** — validate export lists against module definitions
+12. **DetectMainEntrypointMissing** — verify Main module has a `main` function
 
 ## Execution Order
 
@@ -27,9 +29,11 @@ SortModules
   >-> DetectMisplacedImportStatements
   >-> InsertBuiltinDefinitions
   >-> DesugarDoNotation
+  >-> ExpandLetBindings
   >-> DetectAliasCycles
   >-> DetectShadowing
   >-> DetectDuplicateParams
+  >-> CheckTupleArity
   >-> DetectInvalidExports
   >-> DetectMainEntrypointMissing
 ```
@@ -55,6 +59,8 @@ SortModules
 - No type alias cycles exist
 - No variable shadowing occurs
 - No duplicate parameters exist in any definition
+- `let` bindings have sequential scope (multi-binding groups expanded)
+- All tuple literals and patterns have arity ≤ 8
 - All exported names exist in the module
 - Cache entries reflect the current dependency state
 

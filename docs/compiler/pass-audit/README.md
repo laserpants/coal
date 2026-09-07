@@ -9,7 +9,7 @@ The compiler pipeline is defined in `src/Coal/Compiler/Pipeline.hs` and consists
 six sequential phases:
 
 ```
-phaseParsing >-> phasePreflight >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation) >-> extraTicks >-> phaseLowering >-> passLinking
+phaseParsing >-> phasePreflight >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation) >-> phaseLowering >-> passLinking
 ```
 
 The type-checking and translation phases (`phaseMainPasses`) run **in parallel across
@@ -29,11 +29,11 @@ sequentially.
 
 Phases 3 and 4 are run together as `phaseMainPasses`, mapping each module in parallel.
 
-### Extra Ticks
+### Progress tracking
 
-Between `phaseMainPasses` and `phaseLowering`, the pipeline inserts progress bar ticks
-for cached modules via `extraTicks`. This ensures the progress bar reaches 100% even
-when all modules are cached.
+The interactive CLI pipeline (`pipelineWithProgress` in `Pipeline.hs`) tracks
+progress with per-phase weights from `Coal.Compiler.Pass.Counts`, accumulating
+them against a total computed by `updateTotal`.
 
 ## Dependency Graph Between Phases
 
@@ -68,9 +68,10 @@ module embeddings. Produces a list of `BuildEnvelope` values that may be cached 
 parsed.
 
 ### PhasePreflight
-Performs 10 passes that validate module structure, detect errors, insert builtins, and
+Performs 12 passes that validate module structure, detect errors, insert builtins, and
 prepare the module for type checking. Includes topological sort, shadowing detection,
-alias cycle detection, and do-notation desugaring.
+alias cycle detection, let-binding expansion, tuple arity validation, and do-notation
+desugaring.
 
 ### PhaseTypeChecking
 Performs 10 passes that annotate the AST with kind and type information, expand aliases,
@@ -101,9 +102,11 @@ Assembles LLVM bitcode to object files via `llc`, compiles the runtime C library
   - [DetectMisplacedImportStatements.md](DetectMisplacedImportStatements.md)
   - [InsertBuiltinDefinitions.md](InsertBuiltinDefinitions.md)
   - [DesugarDoNotation.md](DesugarDoNotation.md)
+  - [ExpandLetBindings.md](ExpandLetBindings.md)
   - [DetectAliasCycles.md](DetectAliasCycles.md)
   - [DetectShadowing.md](DetectShadowing.md)
   - [DetectDuplicateParams.md](DetectDuplicateParams.md)
+  - [CheckTupleArity.md](CheckTupleArity.md)
   - [DetectInvalidExports.md](DetectInvalidExports.md)
   - [DetectMainEntrypointMissing.md](DetectMainEntrypointMissing.md)
 - [PhaseTypeChecking.md](PhaseTypeChecking.md) — overview of the type checking phase
