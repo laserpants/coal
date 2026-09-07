@@ -17,7 +17,7 @@ passes that establish the structural and naming invariants required for type che
 7. **DetectAliasCycles** — detect cyclic type alias definitions
 8. **DetectShadowing** — detect variable shadowing in nested scopes
 9. **DetectDuplicateParams** — detect duplicate parameter names
-10. **CheckTupleArity** — reject tuple literals/patterns exceeding the kernel limit (8)
+10. **CheckTupleArity** — reject tuple literals/patterns exceeding the kernel limit (16)
 11. **DetectInvalidExports** — validate export lists against module definitions
 12. **DetectMainEntrypointMissing** — verify Main module has a `main` function
 
@@ -60,7 +60,7 @@ SortModules
 - No variable shadowing occurs
 - No duplicate parameters exist in any definition
 - `let` bindings have sequential scope (multi-binding groups expanded)
-- All tuple literals and patterns have arity ≤ 8
+- All tuple literals and patterns have arity ≤ 16
 - All exported names exist in the module
 - Cache entries reflect the current dependency state
 

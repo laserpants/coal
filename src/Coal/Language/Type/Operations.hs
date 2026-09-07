@@ -62,7 +62,7 @@ arities 2 through 'maxTupleArity'; tuple expressions or patterns with more
 elements are rejected before code generation.
 -}
 maxTupleArity :: Int
-maxTupleArity = 8
+maxTupleArity = 16
 
 -- | Construct a record type from a row
 {-# INLINE recordType #-}
