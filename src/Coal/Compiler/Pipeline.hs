@@ -397,6 +397,12 @@ prettyError env =
         ]
         env
         erl
+    TupleTooLarge actual limit erl ->
+      errorMessage
+        [ "Tuple has " <> showt actual <> " elements, but tuples are limited to at most " <> showt limit <> " elements."
+        ]
+        env
+        erl
     NamedFoldNotAllowed erl ->
       errorMessage ["Named fold pattern inside expression fold."] env erl
 

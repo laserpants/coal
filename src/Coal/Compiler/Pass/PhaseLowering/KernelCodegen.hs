@@ -34,6 +34,7 @@ import qualified Coal.Kernel.Language.Type.Constructors as Kernel
 import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Module.Path (principalPath)
+import Coal.Language.Type.Operations (maxTupleArity)
 import Control.DeepSeq (force)
 import Control.Exception (SomeException, evaluate, throwIO, try)
 import Control.Monad (forM, forM_, when)
@@ -259,5 +260,5 @@ builtinDData =
     [ Kernel.DData
         ("tuple" <> showt n)
         [("$Tuple" <> showt n, foldr Kernel.arrow (Kernel.TCon "tuple" (replicate n Kernel.TOpq)) (replicate n Kernel.TOpq))]
-    | n <- [2 .. 8 :: Int]
+    | n <- [2 .. maxTupleArity]
     ]
