@@ -55,6 +55,7 @@ data CompilerError a
   | CallCycle [[Name]] (ErrorLocation a)
   | MissingTraitAnnotation Name [Trait (Type Parameter Kind)] (ErrorLocation a)
   | UnboundTypeVariable Name Name [Name] (ErrorLocation a)
+  | TupleTooLarge Int Int (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -140,4 +141,6 @@ errorLocation =
     MissingTraitAnnotation _ _ erl ->
       Just erl
     UnboundTypeVariable _ _ _ erl ->
+      Just erl
+    TupleTooLarge _ _ erl ->
       Just erl

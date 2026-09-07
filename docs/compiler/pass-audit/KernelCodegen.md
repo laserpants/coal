@@ -18,7 +18,7 @@ src/Coal/Compiler/Pass/PhaseLowering/KernelCodegen.hs
 
 ## Summary
 
-Takes all kernel modules (from `KernelTranslateNew`), injects builtin `DData`
+Takes all kernel modules (from `KernelTranslate`), injects builtin `DData`
 constructor definitions into every module, runs the kernel compiler pure pipeline
 to produce `IRModule`s, renders LLVM assembly text, and assembles it to bitcode.
 Cached modules bypass this process and contribute their stored bitcode directly.

@@ -12,6 +12,7 @@ module Coal.Language.Type.Operations (
   listType,
   tupleType,
   tupleTypeConstructor,
+  maxTupleArity,
   recordType,
   fieldsRecordType,
 
@@ -53,6 +54,15 @@ tupleType ts = applyTypeArgs KType (TConstructor (tupleKind n) (tupleTypeConstru
 {-# INLINE tupleTypeConstructor #-}
 tupleTypeConstructor :: Int -> Name
 tupleTypeConstructor n = "#Tuple" <> showt n
+
+{- | Maximum tuple arity supported by the kernel code generator.
+
+The kernel LLVM codegen only declares tuple constructor functions for
+arities 2 through 'maxTupleArity'; tuple expressions or patterns with more
+elements are rejected before code generation.
+-}
+maxTupleArity :: Int
+maxTupleArity = 16
 
 -- | Construct a record type from a row
 {-# INLINE recordType #-}

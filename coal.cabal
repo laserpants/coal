@@ -92,6 +92,7 @@ library
       Coal.Compiler.Pass.PhaseParsing
       Coal.Compiler.Pass.PhaseParsing.Parsing
       Coal.Compiler.Pass.PhasePreflight
+      Coal.Compiler.Pass.PhasePreflight.CheckTupleArity
       Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation
       Coal.Compiler.Pass.PhasePreflight.DetectAliasCycles
       Coal.Compiler.Pass.PhasePreflight.DetectDuplicateParams
