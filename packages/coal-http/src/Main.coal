@@ -1,0 +1,7 @@
+module Main {
+
+  import Network.HTTPTest(run_all)
+
+  fun main() =
+    run_all()
+}

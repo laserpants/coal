@@ -1,0 +1,437 @@
+/**
+ * Network.HTTPTest - unit tests for the Network.HTTP library.
+ *
+ * Tests are run from `Main`. Pure unit tests don't need IO; integration
+ * tests against a local HTTP server are attempted when a server is running.
+ */
+module Network.HTTPTest {
+
+  import IO(println_string, println_int32, println_bool, __return_io)
+  import namespace String
+
+  import Network.HTTP(
+    Method,
+    Version,
+    URL,
+    Headers,
+    Request,
+    Response,
+    Error,
+    ResponseHead,
+    Bytes,
+    parse_url,
+    url_to_string,
+    empty_headers,
+    get_header,
+    set_header,
+    remove_header,
+    has_header,
+    request,
+    get_request,
+    post_request,
+    parse_response_head,
+    serialize_request_head,
+    response_version,
+    response_status,
+    response_headers,
+    response_body,
+    is_success,
+    is_redirect,
+    is_client_error,
+    is_server_error,
+    bytes_empty,
+    bytes_from_string,
+    bytes_to_string,
+    bytes_length,
+    error_to_string,
+    method_to_string,
+    version_to_string
+  )
+
+  // ---------------------------------------------------------------------------
+  // Test infrastructure
+  // ---------------------------------------------------------------------------
+
+  /** Run a pure boolean test; prints PASS or FAIL. */
+  fun check(name : string, condition : bool) : IO<unit> =
+    if (condition)
+      then println_string("PASS: " +++ name)
+      else println_string("FAIL: " +++ name)
+
+  /** Assert two string Options are equal. */
+  fun assert_eq_option(
+    name : string,
+    expected : Option<string>,
+    actual : Option<string>
+  ) : IO<unit> =
+    let
+      ok =
+        match(expected) {
+          | Some(e) =>
+              match(actual) {
+                | Some(a) => e == a
+                | None => false
+              }
+          | None =>
+              match(actual) {
+                | None => true
+                | Some(_) => false
+              }
+        }
+    in
+      check(name, ok)
+
+    /** Construct a Response for testing. */
+  fun test_response(status_code : int32) : Response =
+    Response({
+      version = HTTP11,
+      status = status_code,
+      headers = empty_headers(),
+      body = bytes_empty
+    })
+
+  // ---------------------------------------------------------------------------
+  // URL tests
+  // ---------------------------------------------------------------------------
+
+  fun test_parse_url_basic() : IO<unit> =
+    match(parse_url("http://example.com")) {
+      | Ok(u) => check("parse_url_basic", url_to_string(u) == "http://example.com")
+      | Err(e) => check("parse_url_basic", false)
+    }
+
+  fun test_parse_url_with_path() : IO<unit> =
+    match(parse_url("http://example.com/path")) {
+      | Ok(u) => check("parse_url_with_path", url_to_string(u) == "http://example.com/path")
+      | Err(e) => check("parse_url_with_path", false)
+    }
+
+  fun test_parse_url_with_query() : IO<unit> =
+    match(parse_url("http://example.com/search?q=hello")) {
+      | Ok(u) => check("parse_url_with_query", url_to_string(u) == "http://example.com/search?q=hello")
+      | Err(e) => check("parse_url_with_query", false)
+    }
+
+  fun test_parse_url_with_port() : IO<unit> =
+    match(parse_url("http://localhost:8080/hello")) {
+      | Ok(u) => check("parse_url_with_port", url_to_string(u) == "http://localhost:8080/hello")
+      | Err(e) => check("parse_url_with_port", false)
+    }
+
+  fun test_parse_url_default_port_omitted() : IO<unit> =
+    match(parse_url("http://example.com:80/path")) {
+      | Ok(u) => check("parse_url_default_port_omitted", url_to_string(u) == "http://example.com/path")
+      | Err(e) => check("parse_url_default_port_omitted", false)
+    }
+
+  fun test_parse_url_invalid() : IO<unit> =
+    match(parse_url("not a url")) {
+      | Ok(u) => check("parse_url_invalid", false)
+      | Err(e) => check("parse_url_invalid", true)
+    }
+
+  fun test_parse_url_https_rejected() : IO<unit> =
+    match(parse_url("https://example.com/path")) {
+      | Ok(u) => check("parse_url_https_rejected", false)
+      | Err(UnsupportedHTTPS) => check("parse_url_https_rejected", true)
+      | Err(e) => check("parse_url_https_rejected", false)
+    }
+
+  fun test_parse_url_unsupported_scheme() : IO<unit> =
+    match(parse_url("ftp://example.com/path")) {
+      | Ok(u) => check("parse_url_unsupported_scheme", false)
+      | Err(UnsupportedScheme(s)) => check("parse_url_unsupported_scheme", true)
+      | Err(e) => check("parse_url_unsupported_scheme", false)
+    }
+
+  // ---------------------------------------------------------------------------
+  // Headers tests
+  // ---------------------------------------------------------------------------
+
+  fun test_headers_empty() : IO<unit> =
+    let
+      hs = empty_headers()
+    in
+      check("headers_empty",
+        has_header("X-Custom", hs) == false)
+
+  fun test_headers_set_get() : IO<unit> =
+    let
+      hs = set_header("Content-Type", "text/plain", empty_headers())
+    in
+      assert_eq_option("headers_set_get",
+        Some("text/plain"),
+        get_header("Content-Type", hs))
+
+  fun test_headers_case_insensitive() : IO<unit> =
+    let
+      hs = set_header("Content-Type", "text/plain", empty_headers())
+    in
+      assert_eq_option("headers_case_insensitive",
+        Some("text/plain"),
+        get_header("content-type", hs))
+
+  fun test_headers_remove() : IO<unit> =
+    let
+      hs = set_header("Content-Type", "text/plain",
+                set_header("X-Custom", "value", empty_headers()))
+    in
+    let
+      hs_removed = remove_header("Content-Type", hs)
+    in
+      check("headers_remove",
+        has_header("Content-Type", hs_removed) == false &&
+        has_header("X-Custom", hs_removed) == true)
+
+  fun test_headers_overwrite() : IO<unit> =
+    let
+      hs = set_header("Content-Length", "5",
+                set_header("Content-Length", "10", empty_headers()))
+    in
+            assert_eq_option("headers_overwrite",
+        Some("10"),
+        get_header("Content-Length", hs))
+
+  // ---------------------------------------------------------------------------
+  // Method / Version tests
+  // ---------------------------------------------------------------------------
+
+  fun test_method_to_string() : IO<unit> =
+    check("method_to_string",
+      method_to_string(GET) == "GET" &&
+      method_to_string(POST) == "POST" &&
+      method_to_string(PUT) == "PUT" &&
+      method_to_string(PATCH) == "PATCH" &&
+      method_to_string(DELETE) == "DELETE" &&
+      method_to_string(HEAD) == "HEAD" &&
+      method_to_string(OPTIONS) == "OPTIONS")
+
+  fun test_version_to_string() : IO<unit> =
+    check("version_to_string",
+      version_to_string(HTTP11) == "HTTP/1.1" &&
+      version_to_string(HTTP10) == "HTTP/1.0")
+
+  // ---------------------------------------------------------------------------
+  // Request construction tests
+  // ---------------------------------------------------------------------------
+
+  fun test_get_request() : IO<unit> =
+    match(parse_url("http://localhost:8080/test")) {
+      | Ok(u) =>
+          do {
+            req <- __return_io(get_request(u));
+            len <- bytes_length(match(req) { | Request(rec) => rec.body });
+            check("get_request",
+              method_to_string(match(req) { | Request(rec) => rec.method }) == "GET" &&
+              len == 0);
+          }
+      | Err(e) => check("get_request", false)
+    }
+
+  fun test_post_request() : IO<unit> =
+    match(parse_url("http://localhost:8080/test")) {
+      | Ok(u) =>
+          do {
+            body <- bytes_from_string("hello");
+            req <- __return_io(post_request(u, body));
+            len <- bytes_length(match(req) { | Request(rec) => rec.body });
+            check("post_request",
+              method_to_string(match(req) { | Request(rec) => rec.method }) == "POST" &&
+              len == 5);
+          }
+      | Err(e) => check("post_request", false)
+    }
+
+  fun test_request_with_headers() : IO<unit> =
+    match(parse_url("http://localhost:8080/test")) {
+      | Ok(u) =>
+          do {
+            hs <- __return_io(set_header("X-Custom", "value", empty_headers()));
+            body <- bytes_from_string("data");
+            req <- __return_io(request(POST, u, hs, body));
+            len <- bytes_length(match(req) { | Request(rec) => rec.body });
+            check("request_with_headers",
+              method_to_string(match(req) { | Request(rec) => rec.method }) == "POST" &&
+              has_header("X-Custom", match(req) { | Request(rec) => rec.headers }) &&
+              len == 4);
+          }
+      | Err(e) => check("request_with_headers", false)
+    }
+
+  // ---------------------------------------------------------------------------
+  // Request serialization tests
+  // ---------------------------------------------------------------------------
+
+  fun test_serialize_get_request() : IO<unit> =
+    match(parse_url("http://localhost:8080/test")) {
+      | Ok(u) =>
+          do {
+            req <- __return_io(get_request(u));
+            head <- __return_io(serialize_request_head(req, 0));
+            check("serialize_get_request",
+              String.is_prefix_of("GET /test HTTP/1.1\r\n", head) &&
+              String.is_prefix_of("Host: ", head) &&
+              String.is_prefix_of("Connection: close\r\n", head) &&
+              String.is_prefix_of("Content-Length: 0\r\n", head));
+          }
+      | Err(e) => check("serialize_get_request", false)
+    }
+
+  fun test_serialize_post_request() : IO<unit> =
+    match(parse_url("http://localhost:8080/echo")) {
+      | Ok(u) =>
+          do {
+            body <- bytes_from_string("hello");
+            req <- __return_io(post_request(u, body));
+            head <- __return_io(serialize_request_head(req, 5));
+            check("serialize_post_request",
+              String.is_prefix_of("POST /echo HTTP/1.1\r\n", head) &&
+              String.is_prefix_of("Content-Length: 5\r\n", head) &&
+              String.is_prefix_of("Host: localhost:8080\r\n", head));
+          }
+      | Err(e) => check("serialize_post_request", false)
+    }
+
+  // ---------------------------------------------------------------------------
+  // Response parsing tests
+  // ---------------------------------------------------------------------------
+
+  fun test_parse_response_ok() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello")) {
+      | Err(e) => check("parse_response_ok", false)
+      | Ok(head) =>
+          check("parse_response_ok",
+            match(head) {
+              | ResponseHead(rh) =>
+                  version_to_string(rh.version) == "HTTP/1.1" && rh.status == 200
+            })
+    }
+
+  fun test_parse_response_multiple_headers() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.1 200 OK\r\nContent-Length: 5\r\nContent-Type: text/plain\r\nX-Custom: yes\r\n\r\nhello")) {
+      | Err(e) => check("parse_response_multiple_headers", false)
+      | Ok(head) =>
+          match(head) {
+            | ResponseHead(rh) =>
+                check("parse_response_multiple_headers",
+                  get_header("Content-Type", rh.headers) == Some("text/plain") &&
+                  get_header("X-Custom", rh.headers) == Some("yes"))
+          }
+    }
+
+  fun test_parse_response_empty_body() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n\r\n")) {
+      | Err(e) => check("parse_response_empty_body", false)
+      | Ok(head) =>
+          match(head) {
+            | ResponseHead(rh) => check("parse_response_empty_body", rh.status == 204)
+          }
+    }
+
+  fun test_parse_response_404() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.1 404 Not Found\r\nContent-Length: 3\r\n\r\n404")) {
+      | Err(e) => check("parse_response_404", false)
+      | Ok(head) =>
+          match(head) {
+            | ResponseHead(rh) => check("parse_response_404", rh.status == 404)
+          }
+    }
+
+  fun test_parse_response_500() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n")) {
+      | Err(e) => check("parse_response_500", false)
+      | Ok(head) =>
+          match(head) {
+            | ResponseHead(rh) => check("parse_response_500", rh.status == 500)
+          }
+    }
+
+  fun test_parse_response_http10() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.0 200 OK\r\nContent-Length: 5\r\n\r\nhello")) {
+      | Err(e) => check("parse_response_http10", false)
+      | Ok(head) =>
+          match(head) {
+            | ResponseHead(rh) => check("parse_response_http10", version_to_string(rh.version) == "HTTP/1.0")
+          }
+    }
+
+  fun test_parse_response_malformed_status() : IO<unit> =
+    match(parse_response_head(
+            "NOTHTTP 200 OK\r\nContent-Length: 5\r\n\r\nhello")) {
+      | Err(e) => check("parse_response_malformed_status", true)
+      | Ok(head) => check("parse_response_malformed_status", false)
+    }
+
+  fun test_parse_response_invalid_status_code() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.1 999 Invalid\r\nContent-Length: 5\r\n\r\nhello")) {
+      | Err(e) => check("parse_response_invalid_status_code", true)
+      | Ok(head) => check("parse_response_invalid_status_code", false)
+    }
+
+  fun test_parse_response_malformed_header() : IO<unit> =
+    match(parse_response_head(
+            "HTTP/1.1 200 OK\r\nNoColonHere\r\n\r\nhello")) {
+      | Err(e) => check("parse_response_malformed_header", true)
+      | Ok(head) => check("parse_response_malformed_header", false)
+    }
+
+  // ---------------------------------------------------------------------------
+  // Status helper tests
+  // ---------------------------------------------------------------------------
+
+  fun test_status_helpers() : IO<unit> =
+    let
+      ok_resp = test_response(200);
+      redirect = test_response(301);
+      client_err = test_response(404);
+      server_err = test_response(500)
+    in
+      check("status_helpers",
+        is_success(ok_resp) == true &&
+        is_redirect(redirect) == true &&
+        is_client_error(client_err) == true &&
+        is_server_error(server_err) == true &&
+        is_success(redirect) == false &&
+        is_success(client_err) == false &&
+        is_success(server_err) == false)
+
+  // ---------------------------------------------------------------------------
+  // Run all pure unit tests
+  // ---------------------------------------------------------------------------
+
+  fun run_all() : IO<unit> =
+    do {
+      test_parse_url_basic();
+      test_parse_url_with_path();
+      test_parse_url_with_query();
+      test_parse_url_with_port();
+      test_parse_url_default_port_omitted();
+      test_parse_url_invalid();
+      test_parse_url_https_rejected();
+      test_parse_url_unsupported_scheme();
+      test_headers_empty();
+      test_headers_set_get();
+      test_headers_case_insensitive();
+      test_headers_remove();
+      test_headers_overwrite();
+      test_method_to_string();
+      test_version_to_string();
+      test_get_request();
+      test_post_request();
+      test_request_with_headers();
+      test_serialize_get_request();
+      test_serialize_post_request();
+      test_parse_response_ok();
+      test_parse_response_multiple_headers();
+      test_parse_response_empty_body();
+      test_parse_response_404();
+      test_parse_response_500();
+    }
+}

@@ -54,6 +54,7 @@ import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
 import LLVM.IR
+import LLVM.IRRenderer (renderModule)
 
 import Coal.Common.Name (Name)
 import Coal.Compiler.Config (CompilerConfig (configEntryPoint))
@@ -65,6 +66,17 @@ import Coal.Kernel.Language.Type (Type)
 import qualified Coal.Kernel.Parser.Module as Parser
 import Coal.Kernel.Pipeline (PipelineError, evalPipeline, initialPipelineState)
 import Coal.Kernel.Pipeline.Passes (pipeline)
+import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm, functionalNorm, controlFlowNorm)
+import Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (administrativeNormalForm)
+import Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation (functionResultsSaturation)
+import Coal.Kernel.Pipeline.Pass.LambdaLifting (lambdaLifting)
+import Coal.Kernel.Pipeline.Pass.LetBindingSimplification (letBindingSimplification)
+import Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (logicalOperatorTranslation)
+import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunctionNormalization)
+import qualified Coal.Kernel.Prettyprinter as NKPretty
+import Data.Time.Clock (diffUTCTime, getCurrentTime)
+import Debug.Trace (trace)
+import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty, parse)
 
 -- ---------------------------------------------------------------------------
@@ -141,11 +153,38 @@ runCompiler = runIdentity . runCompilerT
 -- ---------------------------------------------------------------------------
 
 -- | Run all normalization passes on a single module.
+--
+-- TEMPORARY DEBUG INSTRUMENTATION (kernel allocation-storm investigation):
+-- runs each normalization pass individually and traces wall time and
+-- pretty-printed output size per pass. Revert to the plain 'pipeline' run
+-- once the investigation is complete.
 normalizeModule :: (Monad m) => Module Type -> CompilerT m (Module Type)
-normalizeModule m =
-  CompilerT $
-    either (throwError . CompilerPipelineError) return $
-      evalPipeline initialPipelineState (pipeline m)
+normalizeModule m = do
+  m1 <- step "structuralNorm" Passes.structuralNorm m
+  m2 <- step "lambdaLifting" lambdaLifting m1
+  m3 <- step "topLevelFnNorm" topLevelFunctionNormalization m2
+  m4 <- step "fnResultSat" functionResultsSaturation m3
+  m5 <- step "logicalOpTrans" logicalOperatorTranslation m4
+  m6 <- step "letBindSimp" letBindingSimplification m5
+  m7 <- step "anf" administrativeNormalForm m6
+  pure m7
+  where
+    step name p input = do
+      let t0 = unsafePerformIO getCurrentTime
+      t0 `seq` return ()
+      out <- case evalPipeline initialPipelineState (p input) of
+        Left err -> throwError (CompilerPipelineError err)
+        Right o -> return o
+      let sz = Text.length (NKPretty.renderModule out)
+          t1 = unsafePerformIO getCurrentTime
+          dt = realToFrac (diffUTCTime t1 t0) :: Double
+          report =
+            "[norm] " ++ Text.unpack (moduleName m) ++ " pass="
+              ++ name ++ " time=" ++ show dt ++ "s size=" ++ show sz
+      t0 `seq` t1 `seq` sz `seq` return (trace report out)
+
+
+
 
 {- | Run the LLVM IR builder and 'IRCodegen' action with a given initial
 environment, producing an 'IRModule' or a 'CompilerError'.
@@ -170,14 +209,26 @@ list of all (normalized) modules for cross-module context.
 For the entry point module (default: "Main"), additionally emits the C main
 entry point via 'irMainModule'.
 -}
-codeGenModule :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> Module Type -> CompilerT m IRModule
 codeGenModule config extraTags cachedDData cachedObjects allModules m =
-  CompilerT $
-    either throwError return $
-      if isEntryPoint
-        then buildIR initEnv (irModule allModules m (irMainModule entryPointModule entryPointFunc))
-        else buildIR initEnv (irModule allModules m (return ()))
- where
+  CompilerT $ do
+    let t0 = unsafePerformIO getCurrentTime
+    t0 `seq` return ()
+    let action =
+          if isEntryPoint
+            then irModule allModules m (irMainModule entryPointModule entryPointFunc)
+            else irModule allModules m (return ())
+        res0 = buildIR initEnv action
+    case res0 of
+      Left e -> throwError e
+      Right ir ->
+        let l = Text.length (renderModule ir)
+            t1 = unsafePerformIO getCurrentTime
+            dt = realToFrac (diffUTCTime t1 t0) :: Double
+            report =
+              "[codegen] " ++ Text.unpack (moduleName m)
+                ++ " time=" ++ show dt ++ "s irLen=" ++ show l
+         in t0 `seq` t1 `seq` l `seq` return (trace report ir)
+  where
   isEntryPoint =
     case configEntryPoint config of
       Nothing -> moduleName m == Text.pack "Main"
