@@ -172,13 +172,21 @@ liftExpr globals scope expr =
       -- 2. Compute free variables of the lifted body, excluding lambda params
       --    and globally-defined names. Deduplicate by name, resolving each
       --    to its binding-site label from the outer scope.
+      --
+      -- References to functions lifted from THIS body (newFromBody) are
+      -- top-level references, not captures: capturing them would embed
+      -- their full arrow types in every enclosing lambda's type, which
+      -- compounds exponentially for deeply-nested continuation chains
+      -- (desugared do-notation).
       let fvAll = Set.toList (freeVars body')
+          liftedNames = Set.fromList (concatMap objectNames newFromBody)
           fvNameSet =
             Set.fromList
               [ n
               | Label _ n <- fvAll
               , not (Set.member n paramNameSet)
               , not (Set.member n globals)
+              , not (Set.member n liftedNames)
               ]
           resolveFv n =
             case Map.lookup n scope of
@@ -287,6 +295,7 @@ liftBinding globals scope (Binding lbl e) = case e of
     let bindingName = labelName lbl
         fvAll = Set.toList (freeVars body')
         isRecursive = any (\(Label _ n) -> n == bindingName) fvAll
+        liftedNames = Set.fromList (concatMap objectNames newFromBody)
         -- Collect distinct free-variable names (not own params, not globals,
         -- not self-reference for recursive bindings).
         fvNameSet =
@@ -296,6 +305,7 @@ liftBinding globals scope (Binding lbl e) = case e of
             , not (Set.member n paramNameSet)
             , not (Set.member n globals)
             , not (isRecursive && n == bindingName)
+            , not (Set.member n liftedNames)
             ]
         -- Resolve each name to its binding-site label from the outer scope.
         resolveFv n =
