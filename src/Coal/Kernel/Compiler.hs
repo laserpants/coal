@@ -73,7 +73,7 @@ import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunction
 import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm)
 import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Control.Monad (when, (>=>))
-import Data.Time.Clock (diffUTCTime, getCurrentTime)
+import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
 import Debug.Trace (traceM)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty, parse)
@@ -204,49 +204,51 @@ codeGenModule ::
   [Module Type] ->
   Module Type ->
   CompilerT m IRModule
-codeGenModule config extraTags cachedDData cachedObjects allModules m =
-  CompilerT $ do
-    let t0 = unsafePerformIO getCurrentTime
-    t0 `seq` return ()
-    let action =
-          if isEntryPoint
-            then irModule allModules m (irMainModule entryPointModule entryPointFunc)
-            else irModule allModules m (return ())
-    case buildIR initEnv action of
-      Left e -> throwError e
-      Right ir ->
-        when (configShowTiming config) (traceM report) >> pure ir
-       where
-        len = Text.length (renderModule ir)
-        t1 = unsafePerformIO getCurrentTime
-        dt = realToFrac (diffUTCTime t1 t0) :: Double
-        report =
-          "[codegen] "
-            ++ Text.unpack (moduleName m)
-            ++ " time="
-            ++ show dt
-            ++ "s irLen="
-            ++ show len
+codeGenModule config extraTags cachedDData cachedObjects allModules m = do
+  -- Codegen runs in a pure monad, so the start time is sampled with
+  -- 'unsafePerformIO' and forced before 'buildIR' begins; the end time is
+  -- sampled lazily in 'timingReport', i.e. only when timing is enabled.
+  let t0 = unsafePerformIO getCurrentTime
+  t0 `seq` return ()
+  let action =
+        irModule allModules m (when isEntryPoint (irMainModule entryPointModule entryPointFunc))
+  case buildIR initEnv action of
+    Left err ->
+      throwError err
+    Right ir ->
+      when (configShowTiming config) (traceM (timingReport m t0 ir))
+        >> pure ir
  where
-  isEntryPoint =
+  -- Entry point module and function, defaulting to @Main.main@.
+  (entryPointModule, entryPointFunc) =
     case configEntryPoint config of
-      Nothing -> moduleName m == Text.pack "Main"
-      Just (entryMod, _) -> moduleName m == entryMod
-  entryPointModule =
-    case configEntryPoint config of
-      Nothing -> Text.pack "Main"
-      Just (entryMod, _) -> entryMod
-  entryPointFunc =
-    case configEntryPoint config of
-      Nothing -> Text.pack "main"
-      Just (_, entryFunc) -> entryFunc
+      Nothing -> (Text.pack "Main", Text.pack "main")
+      Just entry -> entry
+
+  isEntryPoint = moduleName m == entryPointModule
+
   initEnv =
-    IRCodegenEnv
-      { codegenVarEnv = mempty
-      , codegenTagEnv = extraTags
+    mempty
+      { codegenTagEnv = extraTags
       , codegenImportedDData = cachedDData
       , codegenImportedObjects = cachedObjects
       }
+
+{- | Format a '[codegen]' timing line for one generated 'IRModule'.
+
+The end time is sampled here, i.e. only when the caller runs the returned
+thunk (which happens only when @configShowTiming@ is enabled).
+-}
+timingReport :: Module Type -> UTCTime -> IRModule -> String
+timingReport m t0 ir =
+  "[codegen] "
+    ++ Text.unpack (moduleName m)
+    ++ " time="
+    ++ show elapsed
+    ++ "s irLen="
+    ++ show (Text.length (renderModule ir))
+ where
+  elapsed = realToFrac (diffUTCTime (unsafePerformIO getCurrentTime) t0) :: Double
 
 -- ---------------------------------------------------------------------------
 -- Public entry points
