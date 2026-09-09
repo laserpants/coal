@@ -414,7 +414,6 @@ executable coal
     , uniplate >=1.6.13 && <1.7
   default-language: Haskell2010
 
-
 test-suite coal-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
