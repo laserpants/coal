@@ -73,7 +73,7 @@ import Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (logicalOperatorTran
 import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunctionNormalization)
 import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm)
 import qualified Coal.Kernel.Prettyprinter as NKPretty
-import Control.Monad (when)
+import Control.Monad (when, (>=>))
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Debug.Trace (trace)
 import System.IO.Unsafe (unsafePerformIO)
@@ -152,18 +152,16 @@ runCompiler = runIdentity . runCompilerT
 -- Internal helpers
 -- ---------------------------------------------------------------------------
 
-{- | Run all normalization passes on a single module.
--}
+-- | Run all normalization passes on a single module.
 normalizeModule :: (Monad m) => CompilerConfig -> Module Type -> CompilerT m (Module Type)
-normalizeModule config m = do
-  m1 <- step "structuralNorm" Passes.structuralNorm m
-  m2 <- step "lambdaLifting" lambdaLifting m1
-  m3 <- step "topLevelFnNorm" topLevelFunctionNormalization m2
-  m4 <- step "fnResultSat" functionResultsSaturation m3
-  m5 <- step "logicalOpTrans" logicalOperatorTranslation m4
-  m6 <- step "letBindSimp" letBindingSimplification m5
-  m7 <- step "anf" administrativeNormalForm m6
-  pure m7
+normalizeModule config =
+  step "structuralNorm" Passes.structuralNorm
+    >=> step "lambdaLifting" lambdaLifting
+    >=> step "topLevelFnNorm" topLevelFunctionNormalization
+    >=> step "fnResultSat" functionResultsSaturation
+    >=> step "logicalOpTrans" logicalOperatorTranslation
+    >=> step "letBindSimp" letBindingSimplification
+    >=> step "anf" administrativeNormalForm
  where
   step name p input = do
     out <- case evalPipeline initialPipelineState (p input) of
@@ -171,8 +169,8 @@ normalizeModule config m = do
       Right o -> return o
     let sz = Text.length (NKPretty.renderModule out)
     when (configShowTiming config) $
-      let msg = "[norm] " ++ Text.unpack (moduleName m) ++ " pass=" ++ name ++ " size=" ++ show sz
-      in trace msg (pure ())
+      let msg = "[norm] " ++ Text.unpack (moduleName input) ++ " pass=" ++ name ++ " size=" ++ show sz
+       in trace msg (pure ())
     pure out
 
 {- | Run the LLVM IR builder and 'IRCodegen' action with a given initial
@@ -215,8 +213,7 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
           if isEntryPoint
             then irModule allModules m (irMainModule entryPointModule entryPointFunc)
             else irModule allModules m (return ())
-        res0 = buildIR initEnv action
-    case res0 of
+    case buildIR initEnv action of
       Left e -> throwError e
       Right ir ->
         let l = Text.length (renderModule ir)
@@ -230,7 +227,7 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
                 ++ "s irLen="
                 ++ show l
             msg = report
-          in when (configShowTiming config) (trace msg (pure ())) >> pure ir
+         in when (configShowTiming config) (trace msg (pure ())) >> pure ir
  where
   isEntryPoint =
     case configEntryPoint config of
