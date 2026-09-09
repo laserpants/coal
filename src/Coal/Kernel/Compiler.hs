@@ -49,14 +49,14 @@ import Control.Monad.Identity (Identity, runIdentity)
 import Control.Monad.State (runStateT)
 import Control.Monad.Trans (MonadTrans (..))
 import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
 import LLVM.IR
+import LLVM.IRRenderer (renderModule)
 
 import Coal.Common.Name (Name)
-import Coal.Compiler.Config (CompilerConfig (configEntryPoint))
+import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
 import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..), IRCodegenError, runIRCodegen)
 import Coal.Kernel.Language.Interface (ObjectInterface)
@@ -64,7 +64,18 @@ import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Type (Type)
 import qualified Coal.Kernel.Parser.Module as Parser
 import Coal.Kernel.Pipeline (PipelineError, evalPipeline, initialPipelineState)
-import Coal.Kernel.Pipeline.Passes (pipeline)
+import Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (administrativeNormalForm)
+import Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation (functionResultsSaturation)
+import Coal.Kernel.Pipeline.Pass.LambdaLifting (lambdaLifting)
+import Coal.Kernel.Pipeline.Pass.LetBindingSimplification (letBindingSimplification)
+import Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (logicalOperatorTranslation)
+import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunctionNormalization)
+import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm)
+import qualified Coal.Kernel.Prettyprinter as NKPretty
+import Control.Monad (when, (>=>))
+import Data.Time.Clock (UTCTime, diffUTCTime, getCurrentTime)
+import Debug.Trace (traceM)
+import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty, parse)
 
 -- ---------------------------------------------------------------------------
@@ -141,11 +152,25 @@ runCompiler = runIdentity . runCompilerT
 -- ---------------------------------------------------------------------------
 
 -- | Run all normalization passes on a single module.
-normalizeModule :: (Monad m) => Module Type -> CompilerT m (Module Type)
-normalizeModule m =
-  CompilerT $
-    either (throwError . CompilerPipelineError) return $
-      evalPipeline initialPipelineState (pipeline m)
+normalizeModule :: (Monad m) => CompilerConfig -> Module Type -> CompilerT m (Module Type)
+normalizeModule config =
+  step "structuralNorm" Passes.structuralNorm
+    >=> step "lambdaLifting" lambdaLifting
+    >=> step "topLevelFnNorm" topLevelFunctionNormalization
+    >=> step "fnResultSat" functionResultsSaturation
+    >=> step "logicalOpTrans" logicalOperatorTranslation
+    >=> step "letBindSimp" letBindingSimplification
+    >=> step "anf" administrativeNormalForm
+ where
+  step name p input = do
+    out <- case evalPipeline initialPipelineState (p input) of
+      Left err -> throwError (CompilerPipelineError err)
+      Right o -> return o
+    let sz = Text.length (NKPretty.renderModule out)
+    when (configShowTiming config) $
+      let msg = "[norm] " ++ Text.unpack (moduleName input) ++ " pass=" ++ name ++ " size=" ++ show sz
+       in traceM msg
+    pure out
 
 {- | Run the LLVM IR builder and 'IRCodegen' action with a given initial
 environment, producing an 'IRModule' or a 'CompilerError'.
@@ -170,33 +195,60 @@ list of all (normalized) modules for cross-module context.
 For the entry point module (default: "Main"), additionally emits the C main
 entry point via 'irMainModule'.
 -}
-codeGenModule :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> Module Type -> CompilerT m IRModule
-codeGenModule config extraTags cachedDData cachedObjects allModules m =
-  CompilerT $
-    either throwError return $
-      if isEntryPoint
-        then buildIR initEnv (irModule allModules m (irMainModule entryPointModule entryPointFunc))
-        else buildIR initEnv (irModule allModules m (return ()))
+codeGenModule ::
+  (Monad m) =>
+  CompilerConfig ->
+  Map Name Int ->
+  Map Name Int ->
+  Map Name ObjectInterface ->
+  [Module Type] ->
+  Module Type ->
+  CompilerT m IRModule
+codeGenModule config extraTags cachedDData cachedObjects allModules m = do
+  -- Codegen runs in a pure monad, so the start time is sampled with
+  -- 'unsafePerformIO' and forced before 'buildIR' begins; the end time is
+  -- sampled lazily in 'timingReport', i.e. only when timing is enabled.
+  let t0 = unsafePerformIO getCurrentTime
+  t0 `seq` return ()
+  let action =
+        irModule allModules m (when isEntryPoint (irMainModule entryPointModule entryPointFunc))
+  case buildIR initEnv action of
+    Left err ->
+      throwError err
+    Right ir ->
+      when (configShowTiming config) (traceM (timingReport m t0 ir))
+        >> pure ir
  where
-  isEntryPoint =
+  -- Entry point module and function, defaulting to @Main.main@.
+  (entryPointModule, entryPointFunc) =
     case configEntryPoint config of
-      Nothing -> moduleName m == Text.pack "Main"
-      Just (entryMod, _) -> moduleName m == entryMod
-  entryPointModule =
-    case configEntryPoint config of
-      Nothing -> Text.pack "Main"
-      Just (entryMod, _) -> entryMod
-  entryPointFunc =
-    case configEntryPoint config of
-      Nothing -> Text.pack "main"
-      Just (_, entryFunc) -> entryFunc
+      Nothing -> (Text.pack "Main", Text.pack "main")
+      Just entry -> entry
+
+  isEntryPoint = moduleName m == entryPointModule
+
   initEnv =
-    IRCodegenEnv
-      { codegenVarEnv = mempty
-      , codegenTagEnv = extraTags
+    mempty
+      { codegenTagEnv = extraTags
       , codegenImportedDData = cachedDData
       , codegenImportedObjects = cachedObjects
       }
+
+{- | Format a '[codegen]' timing line for one generated 'IRModule'.
+
+The end time is sampled here, i.e. only when the caller runs the returned
+thunk (which happens only when @configShowTiming@ is enabled).
+-}
+timingReport :: Module Type -> UTCTime -> IRModule -> String
+timingReport m t0 ir =
+  "[codegen] "
+    ++ Text.unpack (moduleName m)
+    ++ " time="
+    ++ show elapsed
+    ++ "s irLen="
+    ++ show (Text.length (renderModule ir))
+ where
+  elapsed = realToFrac (diffUTCTime (unsafePerformIO getCurrentTime) t0) :: Double
 
 -- ---------------------------------------------------------------------------
 -- Public entry points
@@ -206,8 +258,8 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
 and LLVM IR code generator, producing the normalized modules and one
 'IRModule' per input module.
 
-The pipeline is run purely (no IO required); the base monad @m@ is
-unconstrained beyond 'Monad'.
+The pipeline is run purely except for optional timing diagnostics
+emitted to stderr when @configShowTiming@ is enabled.
 
 Example:
 @
@@ -218,7 +270,7 @@ Example:
 -}
 compileModules :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> CompilerT m ([Module Type], [IRModule])
 compileModules config extraTags cachedDData cachedObjects mods = do
-  normalized <- traverse normalizeModule mods
+  normalized <- traverse (normalizeModule config) mods
   irs <- traverse (codeGenModule config extraTags cachedDData cachedObjects normalized) normalized
   pure (normalized, irs)
 
@@ -229,10 +281,10 @@ Parse errors for any file abort the compilation and are reported as
 'CompilerParseError' (the bundled message from @megaparsec@'s
 'errorBundlePretty').
 -}
-compileFiles :: CompilerConfig -> [FilePath] -> CompilerT IO [IRModule]
+compileFiles :: (MonadIO m) => CompilerConfig -> [FilePath] -> CompilerT m [IRModule]
 compileFiles config paths = do
   mods <- traverse parseOne paths
-  snd <$> compileModules config Map.empty Map.empty Map.empty mods
+  snd <$> compileModules config mempty mempty mempty mods
  where
   parseOne path = do
     src <- liftIO (Text.readFile path)

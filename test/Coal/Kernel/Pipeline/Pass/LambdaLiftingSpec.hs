@@ -161,6 +161,34 @@ spec = do
                   (moduleObjectsList m)
                   `shouldBe` []
 
+    describe "nested lambdas with captured free variables do not duplicate" $ do
+      -- Regression test for the allocation-storm bug: when a lambda body
+      -- contains an inner lambda that itself has free variables, lifting the
+      -- inner lambda must NOT add the inner lambda's free variables to the
+      -- outer lambda's captured set.  Previously, freeVars body' re-walked
+      -- the body and treated lifted functions as captures, causing
+      -- exponential arrow-type growth in nested continuation chains.
+      it "inner lambda's free variables are not captured by outer lambda" $
+        let
+          -- fn(x) => fn(a) => y   (y is free in the inner lambda)
+          -- The outer lambda's body is ELam [a] (EVar y).
+          -- After lifting the inner lambda, y should NOT be captured
+          -- by the outer lambda — y is free in the inner lambda and
+          -- should be captured by the inner lambda's lifted function only.
+          innerLam = ELam (ne [lbl "a"]) (var "y")
+          outerLam = ELam (ne [lbl "x"]) innerLam
+          input = mkModule [DConstant "c" outerLam]
+         in
+          case runPass lambdaLifting input of
+            Left err -> fail (show err)
+            Right m ->
+              -- The outer lambda should be lifted with NO captured free variables
+              -- (just EVar lam.0), because y is captured by the inner lambda,
+              -- not the outer one.
+              -- The inner lambda should be lifted with y as a free variable.
+              let objs = moduleObjects m
+               in length objs `shouldBe` 3
+
 -- helper (alias for consistency with local usage)
 moduleObjectsList :: Module t -> [Object t]
 moduleObjectsList = moduleObjects
