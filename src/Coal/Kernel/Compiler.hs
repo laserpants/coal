@@ -57,7 +57,7 @@ import LLVM.IR
 import LLVM.IRRenderer (renderModule)
 
 import Coal.Common.Name (Name)
-import Coal.Compiler.Config (CompilerConfig (configEntryPoint))
+import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
 import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..), IRCodegenError, runIRCodegen)
 import Coal.Kernel.Language.Interface (ObjectInterface)
@@ -73,6 +73,7 @@ import Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (logicalOperatorTran
 import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunctionNormalization)
 import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm)
 import qualified Coal.Kernel.Prettyprinter as NKPretty
+import Control.Monad (when)
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Debug.Trace (trace)
 import System.IO.Unsafe (unsafePerformIO)
@@ -152,14 +153,9 @@ runCompiler = runIdentity . runCompilerT
 -- ---------------------------------------------------------------------------
 
 {- | Run all normalization passes on a single module.
-
-TEMPORARY DEBUG INSTRUMENTATION (kernel allocation-storm investigation):
-runs each normalization pass individually and traces wall time and
-pretty-printed output size per pass. Revert to the plain 'pipeline' run
-once the investigation is complete.
 -}
-normalizeModule :: (Monad m) => Module Type -> CompilerT m (Module Type)
-normalizeModule m = do
+normalizeModule :: (Monad m) => CompilerConfig -> Module Type -> CompilerT m (Module Type)
+normalizeModule config m = do
   m1 <- step "structuralNorm" Passes.structuralNorm m
   m2 <- step "lambdaLifting" lambdaLifting m1
   m3 <- step "topLevelFnNorm" topLevelFunctionNormalization m2
@@ -170,24 +166,14 @@ normalizeModule m = do
   pure m7
  where
   step name p input = do
-    let t0 = unsafePerformIO getCurrentTime
-    t0 `seq` return ()
     out <- case evalPipeline initialPipelineState (p input) of
       Left err -> throwError (CompilerPipelineError err)
       Right o -> return o
     let sz = Text.length (NKPretty.renderModule out)
-        t1 = unsafePerformIO getCurrentTime
-        dt = realToFrac (diffUTCTime t1 t0) :: Double
-        report =
-          "[norm] "
-            ++ Text.unpack (moduleName m)
-            ++ " pass="
-            ++ name
-            ++ " time="
-            ++ show dt
-            ++ "s size="
-            ++ show sz
-    t0 `seq` t1 `seq` sz `seq` return (trace report out)
+    when (configShowTiming config) $
+      let msg = "[norm] " ++ Text.unpack (moduleName m) ++ " pass=" ++ name ++ " size=" ++ show sz
+      in trace msg (pure ())
+    pure out
 
 {- | Run the LLVM IR builder and 'IRCodegen' action with a given initial
 environment, producing an 'IRModule' or a 'CompilerError'.
@@ -243,7 +229,8 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
                 ++ show dt
                 ++ "s irLen="
                 ++ show l
-         in t0 `seq` t1 `seq` l `seq` return (trace report ir)
+            msg = report
+          in when (configShowTiming config) (trace msg (pure ())) >> pure ir
  where
   isEntryPoint =
     case configEntryPoint config of
@@ -273,8 +260,8 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
 and LLVM IR code generator, producing the normalized modules and one
 'IRModule' per input module.
 
-The pipeline is run purely (no IO required); the base monad @m@ is
-unconstrained beyond 'Monad'.
+The pipeline is run purely except for optional timing diagnostics
+emitted to stderr when @configShowTiming@ is enabled.
 
 Example:
 @
@@ -285,7 +272,7 @@ Example:
 -}
 compileModules :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> CompilerT m ([Module Type], [IRModule])
 compileModules config extraTags cachedDData cachedObjects mods = do
-  normalized <- traverse normalizeModule mods
+  normalized <- traverse (normalizeModule config) mods
   irs <- traverse (codeGenModule config extraTags cachedDData cachedObjects normalized) normalized
   pure (normalized, irs)
 
@@ -296,7 +283,7 @@ Parse errors for any file abort the compilation and are reported as
 'CompilerParseError' (the bundled message from @megaparsec@'s
 'errorBundlePretty').
 -}
-compileFiles :: CompilerConfig -> [FilePath] -> CompilerT IO [IRModule]
+compileFiles :: (MonadIO m) => CompilerConfig -> [FilePath] -> CompilerT m [IRModule]
 compileFiles config paths = do
   mods <- traverse parseOne paths
   snd <$> compileModules config Map.empty Map.empty Map.empty mods
