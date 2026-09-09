@@ -74,7 +74,7 @@ import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm)
 import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Control.Monad (when, (>=>))
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
-import Debug.Trace (trace)
+import Debug.Trace (traceM)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Megaparsec (errorBundlePretty, parse)
 
@@ -169,7 +169,7 @@ normalizeModule config =
     let sz = Text.length (NKPretty.renderModule out)
     when (configShowTiming config) $
       let msg = "[norm] " ++ Text.unpack (moduleName input) ++ " pass=" ++ name ++ " size=" ++ show sz
-       in trace msg (pure ())
+       in traceM msg
     pure out
 
 {- | Run the LLVM IR builder and 'IRCodegen' action with a given initial
@@ -226,7 +226,7 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
                 ++ "s irLen="
                 ++ show l
             msg = report
-         in when (configShowTiming config) (trace msg (pure ())) >> pure ir
+         in when (configShowTiming config) (traceM msg) >> pure ir
  where
   isEntryPoint =
     case configEntryPoint config of
