@@ -65,14 +65,13 @@ import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Type (Type)
 import qualified Coal.Kernel.Parser.Module as Parser
 import Coal.Kernel.Pipeline (PipelineError, evalPipeline, initialPipelineState)
-import Coal.Kernel.Pipeline.Passes (pipeline)
-import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm, functionalNorm, controlFlowNorm)
 import Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (administrativeNormalForm)
 import Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation (functionResultsSaturation)
 import Coal.Kernel.Pipeline.Pass.LambdaLifting (lambdaLifting)
 import Coal.Kernel.Pipeline.Pass.LetBindingSimplification (letBindingSimplification)
 import Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (logicalOperatorTranslation)
 import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunctionNormalization)
+import qualified Coal.Kernel.Pipeline.Passes as Passes (structuralNorm)
 import qualified Coal.Kernel.Prettyprinter as NKPretty
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Debug.Trace (trace)
@@ -152,12 +151,13 @@ runCompiler = runIdentity . runCompilerT
 -- Internal helpers
 -- ---------------------------------------------------------------------------
 
--- | Run all normalization passes on a single module.
---
--- TEMPORARY DEBUG INSTRUMENTATION (kernel allocation-storm investigation):
--- runs each normalization pass individually and traces wall time and
--- pretty-printed output size per pass. Revert to the plain 'pipeline' run
--- once the investigation is complete.
+{- | Run all normalization passes on a single module.
+
+TEMPORARY DEBUG INSTRUMENTATION (kernel allocation-storm investigation):
+runs each normalization pass individually and traces wall time and
+pretty-printed output size per pass. Revert to the plain 'pipeline' run
+once the investigation is complete.
+-}
 normalizeModule :: (Monad m) => Module Type -> CompilerT m (Module Type)
 normalizeModule m = do
   m1 <- step "structuralNorm" Passes.structuralNorm m
@@ -168,23 +168,26 @@ normalizeModule m = do
   m6 <- step "letBindSimp" letBindingSimplification m5
   m7 <- step "anf" administrativeNormalForm m6
   pure m7
-  where
-    step name p input = do
-      let t0 = unsafePerformIO getCurrentTime
-      t0 `seq` return ()
-      out <- case evalPipeline initialPipelineState (p input) of
-        Left err -> throwError (CompilerPipelineError err)
-        Right o -> return o
-      let sz = Text.length (NKPretty.renderModule out)
-          t1 = unsafePerformIO getCurrentTime
-          dt = realToFrac (diffUTCTime t1 t0) :: Double
-          report =
-            "[norm] " ++ Text.unpack (moduleName m) ++ " pass="
-              ++ name ++ " time=" ++ show dt ++ "s size=" ++ show sz
-      t0 `seq` t1 `seq` sz `seq` return (trace report out)
-
-
-
+ where
+  step name p input = do
+    let t0 = unsafePerformIO getCurrentTime
+    t0 `seq` return ()
+    out <- case evalPipeline initialPipelineState (p input) of
+      Left err -> throwError (CompilerPipelineError err)
+      Right o -> return o
+    let sz = Text.length (NKPretty.renderModule out)
+        t1 = unsafePerformIO getCurrentTime
+        dt = realToFrac (diffUTCTime t1 t0) :: Double
+        report =
+          "[norm] "
+            ++ Text.unpack (moduleName m)
+            ++ " pass="
+            ++ name
+            ++ " time="
+            ++ show dt
+            ++ "s size="
+            ++ show sz
+    t0 `seq` t1 `seq` sz `seq` return (trace report out)
 
 {- | Run the LLVM IR builder and 'IRCodegen' action with a given initial
 environment, producing an 'IRModule' or a 'CompilerError'.
@@ -209,6 +212,15 @@ list of all (normalized) modules for cross-module context.
 For the entry point module (default: "Main"), additionally emits the C main
 entry point via 'irMainModule'.
 -}
+codeGenModule ::
+  (Monad m) =>
+  CompilerConfig ->
+  Map Name Int ->
+  Map Name Int ->
+  Map Name ObjectInterface ->
+  [Module Type] ->
+  Module Type ->
+  CompilerT m IRModule
 codeGenModule config extraTags cachedDData cachedObjects allModules m =
   CompilerT $ do
     let t0 = unsafePerformIO getCurrentTime
@@ -225,10 +237,14 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
             t1 = unsafePerformIO getCurrentTime
             dt = realToFrac (diffUTCTime t1 t0) :: Double
             report =
-              "[codegen] " ++ Text.unpack (moduleName m)
-                ++ " time=" ++ show dt ++ "s irLen=" ++ show l
+              "[codegen] "
+                ++ Text.unpack (moduleName m)
+                ++ " time="
+                ++ show dt
+                ++ "s irLen="
+                ++ show l
          in t0 `seq` t1 `seq` l `seq` return (trace report ir)
-  where
+ where
   isEntryPoint =
     case configEntryPoint config of
       Nothing -> moduleName m == Text.pack "Main"
