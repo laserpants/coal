@@ -49,7 +49,6 @@ import Control.Monad.Identity (Identity, runIdentity)
 import Control.Monad.State (runStateT)
 import Control.Monad.Trans (MonadTrans (..))
 import Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 
@@ -283,7 +282,7 @@ Parse errors for any file abort the compilation and are reported as
 compileFiles :: (MonadIO m) => CompilerConfig -> [FilePath] -> CompilerT m [IRModule]
 compileFiles config paths = do
   mods <- traverse parseOne paths
-  snd <$> compileModules config Map.empty Map.empty Map.empty mods
+  snd <$> compileModules config mempty mempty mempty mods
  where
   parseOne path = do
     src <- liftIO (Text.readFile path)
