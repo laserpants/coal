@@ -97,14 +97,6 @@ executables:
       - '"-with-rtsopts=-N -A32m"'
     dependencies:
       - coal
-  passharness:
-    main: PassHarness.hs
-    source-dirs: tools
-    ghc-options:
-      - -rtsopts
-      - -O2
-    dependencies:
-      - coal
 
 tests:
   coal-test:
