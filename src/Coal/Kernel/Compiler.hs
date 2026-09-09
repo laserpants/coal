@@ -215,18 +215,18 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m =
     case buildIR initEnv action of
       Left e -> throwError e
       Right ir ->
-        let l = Text.length (renderModule ir)
-            t1 = unsafePerformIO getCurrentTime
-            dt = realToFrac (diffUTCTime t1 t0) :: Double
-            report =
-              "[codegen] "
-                ++ Text.unpack (moduleName m)
-                ++ " time="
-                ++ show dt
-                ++ "s irLen="
-                ++ show l
-            msg = report
-         in when (configShowTiming config) (traceM msg) >> pure ir
+        when (configShowTiming config) (traceM report) >> pure ir
+       where
+        len = Text.length (renderModule ir)
+        t1 = unsafePerformIO getCurrentTime
+        dt = realToFrac (diffUTCTime t1 t0) :: Double
+        report =
+          "[codegen] "
+            ++ Text.unpack (moduleName m)
+            ++ " time="
+            ++ show dt
+            ++ "s irLen="
+            ++ show len
  where
   isEntryPoint =
     case configEntryPoint config of
