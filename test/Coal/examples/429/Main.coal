@@ -1,0 +1,14 @@
+module Main {
+
+  import namespace IO
+
+  fold ping : int32 -> int32
+    | _ => pong(0)
+
+  fold pong : int32 -> int32
+    | _ => ping(0)
+
+  fun main() =
+    IO.println_int32(ping(0))
+
+}

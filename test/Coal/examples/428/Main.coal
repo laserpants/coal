@@ -1,0 +1,18 @@
+module Main {
+
+  import namespace IO
+
+  type X = A(X) | B
+
+  fold f : X -> int32
+    | A(g(@x)) => x
+    | B => 1
+
+  fold g : X -> int32
+    | A(f(@x)) => x
+    | B => 2
+
+  fun main() =
+    IO.println_int32(f(A(A(B))))
+
+}
