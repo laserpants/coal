@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -134,8 +135,42 @@ instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Paramet
         DType loc name <$> aliasTransform def
       DTypeAlias loc name def ->
         DTypeAlias loc name <$> aliasTransform def
+      DFold loc name def ->
+        DFold loc name <$> aliasTransform def
       o ->
         return o
+
+instance (Data a, Data k, Data t, AliasTransform (Type Parameter k)) => AliasTransform (FoldDefinition a k t) where
+  aliasTransform =
+    \case
+      FoldDefinition{..} ->
+        FoldDefinition foldDefinitionMetadata
+          <$> aliasTransform foldDefinitionAnnotation
+          <*> aliasTransform foldDefinitionConstraints
+          <*> aliasTransform foldDefinitionClauses
+
+instance (Data a, Data k, Data t, AliasTransform (Type Parameter k)) => AliasTransform (Clause a k t) where
+  aliasTransform :: (MonadIO m, Show a1) => Clause a k t -> CompilerT a1 m (Clause a k t)
+  aliasTransform =
+    \case
+      EClause{..} ->
+        EClause clauseMetadata
+          <$> aliasTransform clausePattern
+          <*> aliasTransform clauseChoices
+
+instance (AliasTransform (e a s t)) => AliasTransform (Choice e a s t) where
+  aliasTransform =
+    \CPlain{..} ->
+      CPlain
+        choiceMetadata
+        <$> aliasTransform choiceGuards
+        <*> aliasTransform choiceExpression
+
+instance (AliasTransform (e a s t)) => AliasTransform (Guard e a s t) where
+  aliasTransform =
+    \case
+      CGuard{..} ->
+        CGuard <$> aliasTransform guardExpression
 
 instance (Data e, Data a, Data t, AliasTransform t, AliasTransform (Type Parameter a)) => AliasTransform (FunctionDefinition e a t) where
   aliasTransform =
