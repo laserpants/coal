@@ -1,0 +1,17 @@
+module Main {
+
+  import namespace IO
+
+  type X = A(X) | B
+
+  fold baz : X -> int32
+    | A(foo(@x)) => x
+    | B => 2
+
+  fold foo : X -> int32
+    | _ => baz(A(B))
+
+  fun main() =
+    IO.println_int32(foo(A(B)))
+
+}

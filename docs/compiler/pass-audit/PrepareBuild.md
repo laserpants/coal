@@ -47,7 +47,8 @@ The `prepareDefinitions` function runs 10 steps:
 1. **Builtin type/data constructors**: Inserts `List`, `Zero`, `Succ` as compiler-provided
 2. **Type constructors** (`collectTypeConstructors`): Gathers `DType` definitions with their kinds
 3. **Data constructors** (`collectDataConstructors`): Gathers data constructors with schemes
-4. **Folds** (`collectFolds`): Registers fold names
+4. **Folds** (`collectFolds`): Registers fold names and records their expression-level and
+   @-pattern (structural recursion) dependencies (`foldExprDeps` / `foldPatternDeps`)
 5. **Export expansion** (`expandExports`): Converts `Type(*)` to explicit constructor
    lists; keeps `Type(Name)` exports for type aliases unchanged (aliases carry no
    constructors of their own)

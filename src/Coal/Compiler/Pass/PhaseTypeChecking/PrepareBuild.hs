@@ -75,7 +75,9 @@ import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
 import Control.Monad.State (StateT, execStateT, get, gets, modify)
 import Control.Monad.Trans (lift)
+import Control.Monad.Writer (Writer, execWriter, tell)
 import Data.Data (Data)
+import Data.Generics.Uniplate.Data (transformM)
 import Data.List (intersect)
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Map.Strict as Map
@@ -1069,6 +1071,7 @@ collectFolds =
     DFold _ name FoldDefinition{foldDefinitionClauses} -> do
       insertFold name
       modify (Build.insertBuildFoldExprDeps name (foldExprDeps foldDefinitionClauses))
+      modify (Build.insertBuildFoldPatternDeps name (foldPatternDeps foldDefinitionClauses))
     _ ->
       pure ()
 
@@ -1088,6 +1091,34 @@ foldExprDeps clauses = foldMap (foldMap choiceNames . clauseChoices) clauses
     let freeVars :: Set (Label t)
         freeVars = Set.filter notConstructor (freeIn (choiceExpression choice))
      in Set.fromList (labelName <$> Set.toList freeVars)
+
+{- | Compute the @-pattern (structural recursion) dependencies of a fold's clauses.
+
+Only the clause /patterns/ contribute: a 'PNamedFold' pattern (a fold name
+applied in a guarded constructor position, e.g. @encode_array@) contributes a
+reference to the named fold, marking a structural recursion call. A bare
+'PAtVariable' pattern merely binds the subterm (no call is generated for it),
+so it contributes nothing. Expression bodies contribute nothing here either
+(see 'foldExprDeps').
+
+Together with 'foldExprDeps' this gives the call-cycle checker a typed call
+graph: references in this map are structural recursion calls, references in
+'foldExprDeps' are ordinary calls.
+-}
+foldPatternDeps :: forall a. (Data a) => NonEmpty (Clause a Kind ()) -> Set Name
+foldPatternDeps clauses = Set.fromList (foldMap patternDeps clauses)
+ where
+  patternDeps :: Clause a Kind () -> [Name]
+  patternDeps clause = execWriter (transformM go (clausePattern clause))
+
+  go :: Pattern a Kind () -> Writer [Name] (Pattern a Kind ())
+  go =
+    \case
+      p@(PNamedFold _ target _) -> do
+        tell [target]
+        pure p
+      p ->
+        pure p
 
 collectImports :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectImports =

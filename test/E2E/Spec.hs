@@ -2249,6 +2249,29 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/426" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
+  -- Mixed call cycle: an ordinary call (foo's body calls baz) combined with
+  -- an @-pattern call (baz's clause pattern calls foo). A cycle must consist
+  -- purely of @-pattern (structural recursion) calls to be accepted.
+  describe "427" $ do
+    it "is CallCycleError" $ do
+      res <- runSpec "test/Coal/examples/427" ["Main.coal"]
+      res `shouldBe` Left CallCycleError
+
+  -- Pure @-pattern (structural recursion) call cycle: f and g only re-invoke
+  -- each other in guarded pattern positions, which is guaranteed to terminate.
+  describe "428" $
+    expectOutput
+      "1"
+      "test/Coal/examples/428"
+      [ "Main.coal"
+      ]
+
+  -- All-ordinary call cycle between two folds (category 1).
+  describe "429" $ do
+    it "is CallCycleError" $ do
+      res <- runSpec "test/Coal/examples/429" ["Main.coal"]
+      res `shouldBe` Left CallCycleError
+
   describe "430" $
     expectOutput
       "A"

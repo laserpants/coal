@@ -19,7 +19,7 @@ after the type-checking phase.
 9. **CompileMatchExpressions** — compile match expressions into decision trees
 10. **InsertDictionaries** — insert trait dictionaries (dictionary-passing style)
 11. **CompileNats** — compile nat types to int32-backed representation
-12. **DetectCallCycles** — detect explicit recursion cycles (currently commented out)
+12. **DetectCallCycles** — detect call cycles (cycles containing ordinary calls are rejected; purely structural @-pattern cycles are allowed)
 13. **DenormalizeAST** — apply `denormalizeObject` reverse transformation
 14. **CheckTraitAnnotations** — verify trait annotations cover inferred constraints
 
@@ -37,7 +37,7 @@ NormalizeAST
   >-> CompileMatchExpressions
   >-> InsertDictionaries
   >-> CompileNats
-  >-> (DetectCallCycles -- currently skipped)
+  >-> DetectCallCycles
   >-> DenormalizeAST
   >-> CheckTraitAnnotations
 ```

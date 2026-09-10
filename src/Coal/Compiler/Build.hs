@@ -55,6 +55,7 @@ module Coal.Compiler.Build (
   -- * Fold operations
   insertBuildFold,
   insertBuildFoldExprDeps,
+  insertBuildFoldPatternDeps,
 
   -- * Trait operations
   insertBuildTrait,
@@ -108,6 +109,7 @@ information collected during compilation phases:
 - 'buildExportedNames': Set of names exported from the module
 - 'buildFolds': Set that contains the names of all fold definitions
 - 'buildFoldExprDeps': Map from fold name to expression-level dependencies
+- 'buildFoldPatternDeps': Map from fold name to @-pattern (structural recursion) dependencies
 - 'buildDataConstructors': Data constructor information
 - 'buildTypeConstructors': Type constructor information (arities, kinds)
 - 'buildTraits': Trait (typeclass) definitions
@@ -128,6 +130,7 @@ data Build a = Build
   , buildExportedNames :: Set Name
   , buildFolds :: Set Name
   , buildFoldExprDeps :: Map Name (Set Name)
+  , buildFoldPatternDeps :: Map Name (Set Name)
   , buildDataConstructors :: Environment (DataConstructorEntry a)
   , buildTypeConstructors :: Environment (TypeConstructorEntry a)
   , buildTraits :: Environment (TraitEntry a)
@@ -157,6 +160,7 @@ emptyBuild =
     , buildExportedNames = mempty
     , buildFolds = mempty
     , buildFoldExprDeps = mempty
+    , buildFoldPatternDeps = mempty
     , buildDataConstructors = mempty
     , buildTypeConstructors = mempty
     , buildTraits = mempty
@@ -347,6 +351,24 @@ insertBuildFoldExprDeps :: Name -> Set Name -> Build a -> Build a
 insertBuildFoldExprDeps name deps Build{..} =
   Build
     { buildFoldExprDeps = Map.insert name deps buildFoldExprDeps
+    , ..
+    }
+
+{- | Record the @-pattern (structural recursion) dependencies of a top-level
+fold.
+
+A fold's clause /patterns/ may reference other top-level folds through
+@-patterns (a fold name applied in a guarded constructor position, e.g.
+@encode_array@). Such references are structural recursion calls: the invoked
+fold is applied to a subterm bound by destructuring, so they are the only kind
+of call edge that may legitimately form a cycle. They are recorded separately
+from 'insertBuildFoldExprDeps' so that the call-cycle checker can allow purely
+structural cycles while rejecting mixed ones.
+-}
+insertBuildFoldPatternDeps :: Name -> Set Name -> Build a -> Build a
+insertBuildFoldPatternDeps name deps Build{..} =
+  Build
+    { buildFoldPatternDeps = Map.insert name deps buildFoldPatternDeps
     , ..
     }
 
