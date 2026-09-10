@@ -17,11 +17,11 @@ src/Coal/Compiler/Pass/PhaseTranslation/DetectCallCycles.hs
 
 ## Summary
 
-The pass is active: it runs in the translation pipeline between CompileNats and
-DenormalizeAST (`>-> passDetectCallCycles` in `PhaseTranslation.hs`). It builds
-an edge-typed call graph over the module's definitions and rejects every call
-cycle that contains at least one ordinary call edge. There are two kinds of
-call edges:
+The pass runs in the translation pipeline between CompileNats and
+DenormalizeAST (`>-> passDetectCallCycles` in `PhaseTranslation.hs`). It
+builds an edge-typed call graph over the module's definitions and rejects every
+call cycle that contains at least one ordinary call edge. There are two kinds
+of call edges:
 
 1. **Ordinary calls** — a reference to another definition from an expression
    body (function body, let body, or fold clause body). Extracted by free
