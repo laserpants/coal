@@ -1,0 +1,19 @@
+module Main {
+
+  import namespace IO
+  import Foo(UInt8)
+
+  type Banana
+    = Banana(List<UInt8>)
+
+  fold pretty_banana : Banana -> string
+    | Banana(pretty_uint8_list(@xs)) => xs
+
+  fold pretty_uint8_list : List<UInt8> -> string
+    | [] => ""
+    | _  => ""
+
+  fun main() =
+    IO.println_string("A")
+
+}

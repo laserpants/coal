@@ -1,0 +1,5 @@
+module Foo {
+
+  type alias UInt8 = int32
+
+}
