@@ -145,6 +145,12 @@ pass envelopes = do
   -- normalized[0] is Builtin$; normalized[1..] align with `sources`.
   let sourceMap = Map.fromList (zip (fst <$> sources) (drop 1 normalized))
 
+  -- Precompute the cross-module codegen context (constructor tags, constructor
+  -- field counts, and object interfaces) once, so each module's 'irModule'
+  -- does not rescan every module (which would be quadratic in the module
+  -- count for import-heavy multi-module builds).
+  let context = Kernel.codegenContext cachedTagBindings cachedDDataInfo cachedObjects normalized
+
   -- Generate, render, and assemble one module at a time. Each 'IRModule'
   -- becomes unreachable as soon as its bitcode has been forced to normal
   -- form, so LLVM IR (whose builder library retains thunks) does not
@@ -161,7 +167,7 @@ pass envelopes = do
         withSystemTempDirectory "coal-build-nk" $ \tmpDir ->
           Kernel.runCompilerT $
             forM targets $ \(name, moduleNormalized) -> do
-              ir <- Kernel.codeGenModule config cachedTagBindings cachedDDataInfo cachedObjects normalized moduleNormalized
+              ir <- Kernel.codeGenModule config context moduleNormalized
               liftIO $
                 assembleOne configGenerateLLVMOutput tmpDir (name, ir)
                   >>= either throwIO (evaluate . force)

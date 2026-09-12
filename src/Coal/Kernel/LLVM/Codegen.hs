@@ -26,7 +26,7 @@ Expressions are compiled in two modes:
 The tail-call optimization strategy ensures that functions always end with a
 proper terminator instruction, eliminating unnecessary temporary variables.
 -}
-module Coal.Kernel.LLVM.Codegen (irModule, irMainModule) where
+module Coal.Kernel.LLVM.Codegen (crossModuleEnv, irModule, irMainModule) where
 
 import Control.Monad (forM_)
 import Control.Monad.Except (throwError)
@@ -50,7 +50,7 @@ import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import Coal.Kernel.LLVM.Constructor (irCaseValue)
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
 import qualified Coal.Kernel.LLVM.Function as Function
-import qualified Coal.Kernel.LLVM.Module as MA (collectCachedImports, collectImportedConstants, collectImportedDData, collectImportedFunctionBindings, collectImportedFunctions, objectExprVarRefs, objectGlobalBinding)
+import qualified Coal.Kernel.LLVM.Module as MA (buildConstructorFieldCounts, buildConstructorTagEnv, buildModuleObjectIndex, collectImportedBindings, objectExprVarRefs, objectGlobalBinding)
 import Coal.Kernel.LLVM.Monad
 import Coal.Kernel.LLVM.Prim (irPrim)
 import qualified Coal.Kernel.LLVM.Prim as Prim
@@ -379,23 +379,24 @@ function in 'irApplyConstructor'.
 objectGlobalBinding :: Object Type -> Maybe (Name, IROperand)
 objectGlobalBinding = MA.objectGlobalBinding
 
-{- | Search all modules for 'DConstant' objects whose name appears in the given
-import list, returning (name, operand) pairs.
--}
-collectImportedConstants :: [Module Type] -> [Name] -> [(Name, IROperand)]
-collectImportedConstants = MA.collectImportedConstants
+{- | Compute the cross-module codegen context used by 'irModule'.
 
-{- | Search all modules for 'DData' objects whose name appears in the given
-import list, returning (constructorName, fieldCount) pairs.
--}
-collectImportedDData :: [Module Type] -> [Name] -> [(Name, Int)]
-collectImportedDData = MA.collectImportedDData
+This is evaluated once per compilation over the full list of modules and then
+reused for every module. Previously the constructor tag map, the constructor
+field counts, and the imported-function/constant index were recomputed from
+scratch for each module, which is quadratic in the number of modules for
+import-heavy multi-module builds.
 
-{- | Search all modules for 'DFunction' objects whose name appears in the given
-import list, returning (functionName, arity) pairs.
+The cached-build context (@BCached@ modules) must be merged into this
+environment by the caller; see 'Coal.Kernel.Compiler.codegenContext'.
 -}
-collectImportedFunctions :: [Module Type] -> [Name] -> [(Name, Int)]
-collectImportedFunctions = MA.collectImportedFunctions
+crossModuleEnv :: [Module Type] -> IRCodegenEnv
+crossModuleEnv allModules =
+  mempty
+    { codegenTagEnv = MA.buildConstructorTagEnv allModules
+    , codegenImportedDData = MA.buildConstructorFieldCounts allModules
+    , codegenImportedObjects = MA.buildModuleObjectIndex allModules
+    }
 
 {- | Collect free variable references from the body of an object as
 (name, type) pairs.
@@ -447,26 +448,21 @@ irImportedFunctionTrampoline :: Name -> Int -> IRCodegen ()
 irImportedFunctionTrampoline name arity_ =
   declare (name <> "$apply") TPtr (replicate arity_ TPtr)
 
-irModule :: [Module Type] -> Module Type -> IRCodegen () -> IRCodegen IRModule
-irModule allModules Module{moduleName, moduleObjects, moduleImports} afterObjects =
+irModule :: Module Type -> IRCodegen () -> IRCodegen IRModule
+irModule Module{moduleName, moduleObjects, moduleImports} afterObjects =
   buildModuleM moduleName $ do
-    emitImportedDataConstructors allModules moduleImports
-    cachedObjects <- asks codegenImportedObjects
-    let (cachedConstants, cachedFunctions, cachedArities) = MA.collectCachedImports cachedObjects moduleImports
-        sourceArities = collectImportedFunctions allModules moduleImports
-        importedConstantBindings = collectImportedConstants allModules moduleImports <> cachedConstants
-        importedFunctionBindings = MA.collectImportedFunctionBindings allModules moduleImports <> cachedFunctions
-        importedFunctionArities = sourceArities <> cachedArities
-    emitImportedDeclarations importedFunctionArities importedConstantBindings importedFunctionBindings
-    let bindings = mapMaybe objectGlobalBinding moduleObjects <> importedConstantBindings <> importedFunctionBindings
-        allTagBindings = buildTagBindings allModules
+    emitImportedDataConstructors moduleImports
+    importedObjects <- asks codegenImportedObjects
+    let (importedConstants, importedFunctions, importedFunctionArities) =
+          MA.collectImportedBindings importedObjects moduleImports
+    emitImportedDeclarations importedFunctionArities importedConstants importedFunctions
+    let bindings = mapMaybe objectGlobalBinding moduleObjects <> importedConstants <> importedFunctions
         excludedNames = buildExcludedNames bindings (fst <$> importedFunctionArities)
     emitInlineExternalTrampolines moduleObjects excludedNames
     local
       ( \e ->
           e
             { codegenVarEnv = Environment.insertMultiple bindings (codegenVarEnv e)
-            , codegenTagEnv = allTagBindings <> codegenTagEnv e
             }
       )
       $ emitModuleObjects moduleObjects
@@ -478,16 +474,14 @@ irModule allModules Module{moduleName, moduleObjects, moduleImports} afterObject
 constructors imported from other modules.
 
 These declarations allow case expressions ('irClause') to use sized
-getelementptr on the constructor structs. Both constructors from freshly
-compiled modules ('allModules') and from BCached modules (via the
-'codegenImportedDData' environment entry) are covered.
+getelementptr on the constructor structs. Constructors are resolved from the
+precomputed 'codegenImportedDData' environment entry (built once per
+compilation over all source and cached modules).
 -}
-emitImportedDataConstructors :: [Module Type] -> [Name] -> IRCodegen ()
-emitImportedDataConstructors allModules moduleImports = do
-  forM_ (collectImportedDData allModules moduleImports) $
-    uncurry irImportedDataConstructor
-  cachedDData <- asks codegenImportedDData
-  forM_ [(n, fc) | n <- moduleImports, Just fc <- [Map.lookup n cachedDData]] $
+emitImportedDataConstructors :: [Name] -> IRCodegen ()
+emitImportedDataConstructors moduleImports = do
+  importedDData <- asks codegenImportedDData
+  forM_ [(n, fc) | n <- moduleImports, Just fc <- [Map.lookup n importedDData]] $
     uncurry irImportedDataConstructor
 
 {- | Declare imported functions, thunks, and constants in this module.
@@ -519,16 +513,6 @@ emitImportedDeclarations importedFunctionArities importedConstantBindings import
     case op of
       OGlobal (TFun rty ts) _ -> declare name rty ts
       _ -> return ()
-
--- | Build the map from constructor name to its tag index across all modules.
-buildTagBindings :: [Module Type] -> Map.Map Name Int
-buildTagBindings allModules =
-  Map.fromList
-    [ (ctorName, idx)
-    | Module{moduleObjects = objs} <- allModules
-    , DData _ ctors <- objs
-    , (idx, (ctorName, _)) <- zip [0 ..] ctors
-    ]
 
 {- | Names that must not be treated as inline C externals: module-local
 bindings and imported Coal functions.
