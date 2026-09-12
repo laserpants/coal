@@ -16,6 +16,9 @@ module Codata.Stream {
   let tail = receive()
   let head = observe
 
+  fun cons(state : a, Machine(m) : Stream<a>) : Stream<a> =
+    Machine({ state = state, step = fn(_, _) => Machine(m), view = m.view })
+
   fun map_stream(f : a -> b, stream : Stream<a>) : Stream<b> =
     map_machine(f, stream)
 

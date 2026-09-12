@@ -1,0 +1,15 @@
+module Main {
+
+  import Number(_INT32_MAX, is_odd)
+  import namespace IO
+
+  let
+    x = _INT32_MAX
+
+  let 
+    y = x + x
+
+  fun main() =
+    IO.println_bool(is_odd(y))
+
+}

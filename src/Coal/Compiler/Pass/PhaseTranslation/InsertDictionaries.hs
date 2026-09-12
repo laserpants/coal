@@ -82,6 +82,13 @@ import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import Extras (Dictionary, Name, forM, forM_, traverse_, twice)
 
+{- | Default type used to resolve trait constraints that propagate all the way
+to the entry point (or to a fully concrete let-bound expression) without
+being pinned to a concrete type by any use site.
+-}
+defaultNumericType :: IndexedType
+defaultNumericType = TIntrinsic IBignum
+
 passInsertDictionaries :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passInsertDictionaries = Pass{runPass = pass}
 
@@ -350,16 +357,16 @@ transformScopeWithTraits bindingType e = do
     tr : trs ->
       -- If all remaining traits are type-variable traits (unresolved by inference)
       -- AND the expression's type is fully concrete (no free type variables),
-      -- resolve them to int32 inline rather than deferring to the caller. This
-      -- handles let-bound expressions whose type is concrete but whose body
-      -- references a polymorphic helper.
+      -- resolve them to 'defaultNumericType' inline rather than deferring to
+      -- the caller. This handles let-bound expressions whose type is concrete
+      -- but whose body references a polymorphic helper.
       let exprIsConcrete = Set.null (typeIndexesIn bindingType :: Set (TypeIndex Kind))
           allVar = all isVariable (tr : trs)
        in if exprIsConcrete && allVar
             then do
               recs <- forM (tr :| trs) $ \(Trait trait ty) -> do
                 let concreteType = case ty of
-                      TVariable{} -> TIntrinsic IInt32
+                      TVariable{} -> defaultNumericType
                       other -> other
                 mFields <- lookupTraitInstance mempty (Trait trait concreteType)
                 case mFields of
@@ -435,21 +442,22 @@ expandLetDefinitionTraits name =
           let isEntryPoint = case configEntryPoint cfg of
                 Nothing -> "main" == name && Path ["Main"] == path
                 Just (entryMod, entryFunc) -> entryFunc == name && Path [entryMod] == path
-          -- Insert default int32 instance for Numeric and Ordered traits for main function
+          -- Insert a default instance ('defaultNumericType') for any trait
+          -- constraint that reaches the entry point unresolved.
           if isEntryPoint
             then do
               recs <- forM (tr :| trs) $
                 \(Trait trait _) -> do
-                  mFields <- lookupTraitInstance letDefinitionMetadata (Trait trait (TIntrinsic IInt32))
+                  mFields <- lookupTraitInstance letDefinitionMetadata (Trait trait defaultNumericType)
                   fields <- case mFields of
                     Nothing -> do
-                      tellErrors [MissingInstance (Trait trait (TIntrinsic IInt32)) (ErrorLocation (principalPath path) letDefinitionMetadata)]
+                      tellErrors [MissingInstance (Trait trait defaultNumericType) (ErrorLocation (principalPath path) letDefinitionMetadata)]
                       throwError TraitError
                     Just f -> pure f
                   pure $
                     ERecord
                       mempty
-                      (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (TIntrinsic IInt32 :| []))
+                      (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (defaultNumericType :| []))
                       fields
                       Nothing
               pure $
