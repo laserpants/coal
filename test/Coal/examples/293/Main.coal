@@ -2,7 +2,8 @@ module Main {
 
   import IO(println_int32, println_string)
   import String(is_prefix_of, length, drop)
-  import Codata.Machine(process, map_machine, cons)
+  import Codata.Machine(process, map_machine)
+  import Codata.Stream(cons)
   import Containers.Set(Set)
   import namespace Containers.Set
   import Coal.Combinators(snd)
