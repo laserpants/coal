@@ -195,7 +195,8 @@ prepareDefinitions defs = do
   -- Step 3: Expand wildcard exports
   -- Converts Type(*) exports to explicit constructor lists (Type(A, B, C))
   -- Must happen after type/data collection to know what constructors exist
-  exports <- expandExports
+  let traitNames = Set.fromList [name | DTrait _ name _ <- defs]
+  exports <- expandExports traitNames
   local (const exports) $ do
     -- Step 4: Collect trait definitions
     -- Must happen before trait interfaces and instances
@@ -453,8 +454,8 @@ qualifiedImports Build{..} =
 qualified :: Name -> Path -> Name
 qualified name path = principalPath path <> "." <> name
 
-expandExports :: (Monad m) => ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
-expandExports = do
+expandExports :: (Monad m) => Set Name -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
+expandExports traitNames = do
   exportList <- ask
   Build{buildTypeConstructors, buildAliases} <- get
   case exportList of
@@ -475,11 +476,17 @@ expandExports = do
                     -- export unchanged so the alias name itself is exported
                     Just _ ->
                       return (TypeExport loc name mempty)
-                    Nothing -> do
-                      lift $ lift $ do
-                        path <- gets compilerCurrentPath
-                        tellErrors [MissingType name path (ErrorLocation (principalPath path) loc)]
-                      return (TypeExport loc name mempty)
+                    Nothing ->
+                      if name `Set.member` traitNames
+                        then
+                          -- Traits have no constructors of their own; keep the
+                          -- export unchanged so the trait name itself is exported
+                          return (TypeExport loc name mempty)
+                        else do
+                          lift $ lift $ do
+                            path <- gets compilerCurrentPath
+                            tellErrors [MissingType name path (ErrorLocation (principalPath path) loc)]
+                          return (TypeExport loc name mempty)
             e ->
               return e
       return

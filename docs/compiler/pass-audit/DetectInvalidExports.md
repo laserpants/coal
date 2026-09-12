@@ -43,13 +43,14 @@ name.
 ### `checkExport`
 
 - `NameExport loc name`: Checks `name ∈ definedNames`; if not, reports `ExportNotInModule`
-- `TypeExport loc typeName memberNames`: Checks `typeName ∈ definedTypeNames`;
-  then for each memberName, checks it's a constructor belonging to that type
+- `TypeExport loc typeName memberNames`: Checks `typeName ∈ definedTypeNames`
+  (type, type-alias, or trait names); then for each memberName, checks it's a
+  constructor belonging to that type
 
 ### Helper functions
 
 - `definitionNames`: extracts all user-visible names from a definition
-- `typeNames`: extracts type and alias names
+- `typeNames`: extracts type, type-alias, and trait names
 - `typeConstructorMap`: builds `[(typeName, constructorName)]` mapping
 
 ---

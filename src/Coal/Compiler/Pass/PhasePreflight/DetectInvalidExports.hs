@@ -97,7 +97,7 @@ checkExport Module{..} export =
   -- All user-visible names defined at module level
   definedNames = concatMap definitionNames moduleDefinitions
 
-  -- Names of types (DType and DTypeAlias)
+  -- Names of types, type aliases, and traits
   definedTypeNames = concatMap typeNames moduleDefinitions
 
   -- Type → its constructor names (from DType)
@@ -143,6 +143,8 @@ typeNames =
     DType _ name _ ->
       [name]
     DTypeAlias _ name _ ->
+      [name]
+    DTrait _ name _ ->
       [name]
     _ ->
       []

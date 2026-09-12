@@ -1,0 +1,13 @@
+module Extra(ToInt32, foo) {
+
+  trait ToInt32<a> {
+    to_int32 : a -> int32
+  }
+
+  instance ToInt32<int32> {
+    fun to_int32(x) = x
+  }
+
+  let foo = 5
+
+}
