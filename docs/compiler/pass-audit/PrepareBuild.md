@@ -50,8 +50,8 @@ The `prepareDefinitions` function runs 10 steps:
 4. **Folds** (`collectFolds`): Registers fold names and records their expression-level and
    @-pattern (structural recursion) dependencies (`foldExprDeps` / `foldPatternDeps`)
 5. **Export expansion** (`expandExports`): Converts `Type(*)` to explicit constructor
-   lists; keeps `Type(Name)` exports for type aliases unchanged (aliases carry no
-   constructors of their own)
+   lists; keeps `Type(Name)` exports for type aliases and traits unchanged
+   (neither aliases nor traits carry constructors of their own)
 6. **Traits** (`collectTraits`): Registers trait definitions and imported traits
 7. **Trait interfaces** (`collectTraitsInterface`): Registers trait member signatures
 8. **Instances** (`collectInstances`): Registers trait implementations with their methods

@@ -2292,6 +2292,18 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- Regression: exporting a trait by name in an explicit export list used to
+  -- fail because the trait name was parsed as a type export and not recognised
+  -- as a module-level definition. Importing the trait must make its methods
+  -- available to the importing module.
+  describe "434" $
+    expectOutput
+      "5"
+      "test/Coal/examples/434"
+      [ "Extra.coal"
+      , "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

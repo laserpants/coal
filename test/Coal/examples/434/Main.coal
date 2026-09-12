@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import Extra(ToInt32)
+
+  fun main() =
+    IO.println_int32(to_int32(5 : int32))
+
+}
