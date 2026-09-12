@@ -40,6 +40,7 @@ module Coal.Kernel.Compiler (
   compileFiles,
 
   -- * Per-module code generation
+  codegenContext,
   codeGenModule,
 ) where
 
@@ -57,7 +58,7 @@ import LLVM.IRRenderer (renderModule)
 
 import Coal.Common.Name (Name)
 import Coal.Compiler.Config (CompilerConfig (..))
-import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
+import Coal.Kernel.LLVM.Codegen (crossModuleEnv, irMainModule, irModule)
 import Coal.Kernel.LLVM.Monad (IRCodegen, IRCodegenEnv (..), IRCodegenError, runIRCodegen)
 import Coal.Kernel.Language.Interface (ObjectInterface)
 import Coal.Kernel.Language.Module (Module (..))
@@ -189,8 +190,9 @@ buildIR initEnv action =
     Right (Right ir, _) ->
       Right ir
 
-{- | Run LLVM IR code generation for one normalized module, given the full
-list of all (normalized) modules for cross-module context.
+{- | Run LLVM IR code generation for one normalized module, given the
+precomputed cross-module codegen context (constructor tags, constructor field
+counts, and object interfaces — see 'codegenContext').
 
 For the entry point module (default: "Main"), additionally emits the C main
 entry point via 'irMainModule'.
@@ -198,21 +200,18 @@ entry point via 'irMainModule'.
 codeGenModule ::
   (Monad m) =>
   CompilerConfig ->
-  Map Name Int ->
-  Map Name Int ->
-  Map Name ObjectInterface ->
-  [Module Type] ->
+  IRCodegenEnv ->
   Module Type ->
   CompilerT m IRModule
-codeGenModule config extraTags cachedDData cachedObjects allModules m = do
+codeGenModule config context m = do
   -- Codegen runs in a pure monad, so the start time is sampled with
   -- 'unsafePerformIO' and forced before 'buildIR' begins; the end time is
   -- sampled lazily in 'timingReport', i.e. only when timing is enabled.
   let t0 = unsafePerformIO getCurrentTime
   t0 `seq` return ()
   let action =
-        irModule allModules m (when isEntryPoint (irMainModule entryPointModule entryPointFunc))
-  case buildIR initEnv action of
+        irModule m (when isEntryPoint (irMainModule entryPointModule entryPointFunc))
+  case buildIR context action of
     Left err ->
       throwError err
     Right ir ->
@@ -227,12 +226,27 @@ codeGenModule config extraTags cachedDData cachedObjects allModules m = do
 
   isEntryPoint = moduleName m == entryPointModule
 
-  initEnv =
-    mempty
-      { codegenTagEnv = extraTags
-      , codegenImportedDData = cachedDData
-      , codegenImportedObjects = cachedObjects
-      }
+{- | Build the cross-module codegen environment once per compilation.
+
+The source context is computed from the (normalized) modules with
+'crossModuleEnv'; the cached-build context (@BCached@ modules) is merged in.
+'codeGenModule' then reads the precomputed constructor tags, constructor field
+counts, and object interfaces from this environment instead of rescanning all
+modules for every module (which would be quadratic in the number of modules).
+-}
+codegenContext ::
+  Map Name Int ->
+  Map Name Int ->
+  Map Name ObjectInterface ->
+  [Module Type] ->
+  IRCodegenEnv
+codegenContext extraTags cachedDData cachedObjects allModules =
+  let source = crossModuleEnv allModules
+   in source
+        { codegenTagEnv = codegenTagEnv source <> extraTags
+        , codegenImportedDData = codegenImportedDData source <> cachedDData
+        , codegenImportedObjects = codegenImportedObjects source <> cachedObjects
+        }
 
 {- | Format a '[codegen]' timing line for one generated 'IRModule'.
 
@@ -271,7 +285,8 @@ Example:
 compileModules :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> CompilerT m ([Module Type], [IRModule])
 compileModules config extraTags cachedDData cachedObjects mods = do
   normalized <- traverse (normalizeModule config) mods
-  irs <- traverse (codeGenModule config extraTags cachedDData cachedObjects normalized) normalized
+  let context = codegenContext extraTags cachedDData cachedObjects normalized
+  irs <- traverse (codeGenModule config context) normalized
   pure (normalized, irs)
 
 {- | Read and parse source files from the given paths, then call

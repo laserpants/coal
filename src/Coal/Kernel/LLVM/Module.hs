@@ -10,11 +10,10 @@ global bindings, imported symbols, and variable references. Used by the main
 code generator to build the IR environment before compiling function bodies.
 -}
 module Coal.Kernel.LLVM.Module (
-  collectCachedImports,
-  collectImportedConstants,
-  collectImportedDData,
-  collectImportedFunctionBindings,
-  collectImportedFunctions,
+  buildConstructorFieldCounts,
+  buildConstructorTagEnv,
+  buildModuleObjectIndex,
+  collectImportedBindings,
   objectGlobalBinding,
   objectExprVarRefs,
 ) where
@@ -30,7 +29,7 @@ import Coal.Kernel.FreeVars (freeVars)
 import Coal.Kernel.LLVM.Boxing (irTypeRep, irValueTypeRep)
 import Coal.Kernel.LLVM.Prim (primToIRConstant)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
-import Coal.Kernel.Language.Interface (ObjectInterface (..))
+import Coal.Kernel.Language.Interface (ObjectInterface (..), moduleInterface)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type)
@@ -62,66 +61,40 @@ objectGlobalBinding =
     DData{} ->
       Nothing
 
-{- | Search all modules for 'DData' objects whose name appears in the given
-import list, returning (constructorName, fieldCount) pairs.
+{- | Build the constructor tag map (constructor name → tag index) across all
+modules. Used once per compilation to seed the code generator's tag
+environment, rather than being recomputed for every module (which would be
+quadratic in the number of modules).
 -}
-collectImportedDData :: [Module Type] -> [Name] -> [(Name, Int)]
-collectImportedDData allModules importNames =
-  [ (ctorName, arity ctorType)
-  | importName <- importNames
-  , Module{moduleObjects} <- allModules
-  , DData _ ctors <- moduleObjects
-  , (ctorName, ctorType) <- ctors
-  , ctorName == importName
-  ]
+buildConstructorTagEnv :: [Module Type] -> Map Name Int
+buildConstructorTagEnv allModules =
+  Map.fromList
+    [ (ctorName, idx)
+    | Module{moduleObjects = objs} <- allModules
+    , DData _ ctors <- objs
+    , (idx, (ctorName, _)) <- zip [0 ..] ctors
+    ]
 
-{- | Search all modules for 'DFunction' objects whose name appears in the given
-import list, returning (functionName, arity) pairs.
+{- | Build the constructor field-count map (constructor name → field count)
+across all modules. Used to emit sized struct declarations for constructors
+imported from other modules.
 -}
-collectImportedFunctions :: [Module Type] -> [Name] -> [(Name, Int)]
-collectImportedFunctions allModules importNames =
-  [ (name, length params)
-  | importName <- importNames
-  , Module{moduleObjects} <- allModules
-  , DFunction _ name params _ <- moduleObjects
-  , name == importName
-  ]
+buildConstructorFieldCounts :: [Module Type] -> Map Name Int
+buildConstructorFieldCounts allModules =
+  Map.fromList
+    [ (ctorName, arity ctorType)
+    | Module{moduleObjects = objs} <- allModules
+    , DData _ ctors <- objs
+    , (ctorName, ctorType) <- ctors
+    ]
 
-{- | Search all modules for 'DFunction' objects whose name appears in the given
-import list, returning @(name, operand)@ pairs with the exact IR type derived
-from the function's definition — the same way 'objectGlobalBinding' handles
-module-local functions.
-
-Used to pre-populate the codegen environment so that 'nameLookup' uses the
-declared parameter count rather than the (potentially wrong) arity derived
-from usage-site type annotations.
+{- | Build the full object interface index (object name → 'ObjectInterface')
+across all modules. Used to resolve imported functions and constants in
+constant time per import, rather than scanning every module.
 -}
-collectImportedFunctionBindings :: [Module Type] -> [Name] -> [(Name, IROperand)]
-collectImportedFunctionBindings allModules importNames =
-  [ (name, op)
-  | importName <- importNames
-  , Module{moduleObjects} <- allModules
-  , obj@(DFunction _ name _ _) <- moduleObjects
-  , name == importName
-  , Just (_, op) <- [objectGlobalBinding obj]
-  ]
-
-{- | Search all modules for 'DConstant' objects whose name appears in the given
-import list, returning (name, operand) pairs suitable for insertion into the
-codegen variable environment.
-
-String and bignum constants are thunks (@force#_\<name\>@; arity 0 functions);
-directly representable constants (int32, bool, etc.) are global references.
--}
-collectImportedConstants :: [Module Type] -> [Name] -> [(Name, IROperand)]
-collectImportedConstants allModules importNames =
-  [ (name, op)
-  | importName <- importNames
-  , Module{moduleObjects} <- allModules
-  , obj@(DConstant name _) <- moduleObjects
-  , name == importName
-  , Just (_, op) <- [objectGlobalBinding obj]
-  ]
+buildModuleObjectIndex :: [Module Type] -> Map Name ObjectInterface
+buildModuleObjectIndex allModules =
+  Map.fromList (concatMap (Map.toList . moduleInterface) allModules)
 
 {- | Collect free variable references from the body of an object as (name,
 type) pairs.
@@ -138,24 +111,21 @@ objectExprVarRefs = \case
     [(n, t) | Label t n <- Set.toList (freeVars expr)]
   _ -> []
 
-{- | Reconstruct the imported function/constant bindings for names that live in
-cached ('BCached') modules rather than in @allModules@.
-
-Returns @(constantBindings, functionBindings, functionArities)@, mirroring what
-'collectImportedConstants', 'collectImportedFunctionBindings', and
-'collectImportedFunctions' produce for source modules, so 'irModule' can treat
-cached and source imports uniformly.
+{- | Resolve the imported function/constant bindings for the given import list
+using a precomputed object interface index (built once per compilation by
+'buildModuleObjectIndex'), returning
+@(constantBindings, functionBindings, functionArities)@.
 
 The reconstruction matches 'objectGlobalBinding' exactly: functions bind to
 @OGlobal (TFun resultIRType paramIRTypes) name@; directly-representable literal
 constants bind to their global IR type; every other constant is a thunk bound to
 @force#_name@.
 -}
-collectCachedImports ::
+collectImportedBindings ::
   Map Name ObjectInterface ->
   [Name] ->
   ([(Name, IROperand)], [(Name, IROperand)], [(Name, Int)])
-collectCachedImports objs = foldr step ([], [], [])
+collectImportedBindings objs = foldr step ([], [], [])
  where
   step name acc@(consts, fns, arities) =
     case Map.lookup name objs of

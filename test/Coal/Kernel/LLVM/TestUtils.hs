@@ -16,7 +16,7 @@ module Coal.Kernel.LLVM.TestUtils (
   evaluateModule,
 ) where
 
-import Coal.Kernel.LLVM.Codegen (irMainModule, irModule)
+import Coal.Kernel.LLVM.Codegen (crossModuleEnv, irMainModule, irModule)
 import Coal.Kernel.LLVM.Monad (IRCodegenEnv, runIRCodegen)
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
@@ -74,8 +74,9 @@ returning either an error message or the generated IR module.
 -}
 evaluateModule :: IRCodegenEnv -> IRBuilderEnv -> [Module Type] -> Module Type -> Either String IRModule
 evaluateModule codeGenEnv builderEnv allModules module_ =
-  let k = (when (moduleName module_ == "Main") $ irMainModule "Main" "main")
-   in case runIdentity $ runExceptT $ runStateT (runIRBuilder (runIRCodegen codeGenEnv (irModule allModules module_ k))) builderEnv of
+  let env = crossModuleEnv allModules <> codeGenEnv
+      k = (when (moduleName module_ == "Main") $ irMainModule "Main" "main")
+   in case runIdentity $ runExceptT $ runStateT (runIRBuilder (runIRCodegen env (irModule module_ k))) builderEnv of
         Left builderErr ->
           Left (show builderErr)
         Right (Left codeGenErr, _) ->
