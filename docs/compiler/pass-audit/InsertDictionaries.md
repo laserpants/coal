@@ -76,9 +76,9 @@ Creates `fn(impl_Show, impl_Eq) => body` for each required trait, using
 
 ### `expandLetDefinitionTraits`
 
-Special-cases `main` function: if it has trait constraints on a type
-variable, inserts a default `int32` instance. For other definitions, wraps
-in dictionary lambdas that accept the trait dictionaries.
+Special-cases the entry point (`main` by default): if it has trait constraints
+on a type variable, inserts a default `bignum` instance. For other definitions,
+wraps in dictionary lambdas that accept the trait dictionaries.
 
 ### Two-pass strategy
 
