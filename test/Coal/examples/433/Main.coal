@@ -1,0 +1,15 @@
+module Main {
+
+  import IO(println_string)
+  import String(int32_to_string)
+
+  fun pick() : int32 =
+    let t = (1, 2) in
+    let (a, b) = t in
+    a
+
+  fun main() =
+    do {
+      println_string(int32_to_string(pick()));
+    }
+}

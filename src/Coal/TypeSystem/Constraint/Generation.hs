@@ -292,7 +292,14 @@ normalizeBinding =
 emitELetConstraints :: (Show a, Data a) => a -> NonEmpty (Binding Expression a Kind IndexedType) -> Expression a Kind IndexedType -> ConstraintsGen a [Assumption a IndexedType]
 emitELetConstraints loc gs e1 = do
   let gs' = normalizeBinding <$> gs
-  ms1 <- emitConstraints e1
+      -- Value restriction: the type variables of an expansive right-hand side
+      -- must remain monomorphic in the let body. Otherwise a nested let whose
+      -- right-hand side merely *references* this binding (a non-expansive
+      -- variable) would re-generalize those variables, yielding fresh
+      -- instantiations that are no longer unified with the element types built
+      -- here — e.g. breaking an enclosing return-type annotation.
+      expansiveTypes = [(typeOf e :: IndexedType) | BPattern _ _ e <- toList gs', isExpansive e]
+  ms1 <- foldr withMonomorphic (emitConstraints e1) expansiveTypes
   ms2 <- concatForM gs' $
     \case
       BPattern _ p e -> do
