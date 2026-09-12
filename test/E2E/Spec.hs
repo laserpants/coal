@@ -2280,6 +2280,18 @@ e2eSpec = do
       , "Foo.coal"
       ]
 
+  -- Regression: a function return-type annotation must constrain the inner
+  -- tuple element types through an intervening expansive `let` binding. This
+  -- pair of lets used to over-generalize the element type variables (value
+  -- restriction gap), leaving `1` as a dangling type variable that crashed the
+  -- LLVM backend (`ret ptr` in an `i32` function).
+  describe "433" $
+    expectOutput
+      "1"
+      "test/Coal/examples/433"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
