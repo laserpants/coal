@@ -9,6 +9,7 @@ import CLI.Error (CLIError (..))
 import CLI.Git (gitCloneRepo)
 import CLI.Git.Repo (GitRepo (..))
 import CLI.Options.AddCmd (AddCmdOptions (..))
+import Coal.Compiler.Terminal (TerminalCapabilities)
 import Control.Monad.Except (ExceptT, MonadError (throwError), runExceptT, withExceptT)
 import Control.Monad.IO.Class (liftIO)
 import Data.ByteString (toStrict)
@@ -26,8 +27,8 @@ import Package.Manifest (PackageManifest (..), encodePrettyOrdered, loadManifest
 import Package.Version (PackageConstraint (..))
 import System.IO.Temp (withSystemTempDirectory)
 
-addCommand :: AddCmdOptions -> ExceptT CLIError IO ()
-addCommand AddCmdOptions{..} = do
+addCommand :: TerminalCapabilities -> AddCmdOptions -> ExceptT CLIError IO ()
+addCommand caps AddCmdOptions{..} = do
   manifest <- withExceptT EPackageError loadProjectManifest
   let repo = GitRepo (Text.pack addUrl)
   pkgName <- case addName of
@@ -45,7 +46,7 @@ addCommand AddCmdOptions{..} = do
       newDeps = Map.insert pkgName dep deps
       newManifest = manifest{dependencies = Just newDeps}
   liftIO $ ByteString.writeFile "coal.json" (toStrict (encodePrettyOrdered newManifest))
-  installProject
+  installProject caps
   liftIO $ Text.putStrLn ("Added dependency: " <> pkgName)
 
 deriveNameFromRepo :: GitRepo -> ExceptT CLIError IO Text

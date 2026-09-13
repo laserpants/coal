@@ -10,6 +10,7 @@ dist
 .coal
 coal.lock.json
 coal.json
+packages
 tmp
 
 # let-evaluation regression fixture binary

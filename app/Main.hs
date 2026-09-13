@@ -33,7 +33,7 @@ runCommand :: TerminalCapabilities -> Command -> IO ()
 runCommand caps =
   \case
     CmdAdd opts -> do
-      r <- runExceptT (addCommand opts)
+      r <- runExceptT (addCommand caps opts)
       case r of
         Left err ->
           Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
@@ -58,7 +58,7 @@ runCommand caps =
         Right{} ->
           pure ()
     CmdInstall opts -> do
-      r <- runExceptT (installCommand opts)
+      r <- runExceptT (installCommand caps opts)
       case r of
         Left err ->
           Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
