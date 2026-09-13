@@ -52,7 +52,7 @@ overLockEntries fn InstallState{..} = InstallState{lockEntries = fn lockEntries,
 
 {-# INLINE initialInstallState #-}
 initialInstallState :: TerminalCapabilities -> InstallState
-initialInstallState = InstallState mempty mempty 
+initialInstallState = InstallState mempty mempty
 
 addVisited :: (Name, GitCommit) -> StateT InstallState (ExceptT CLIError IO) ()
 addVisited pkg = modify (overVisited (Set.insert pkg))
@@ -140,7 +140,8 @@ installProject caps = do
     Right PackageManifest{..} -> do
       let deps = fromMaybe mempty dependencies
       when (not (Map.null deps)) $
-        liftIO $ announce caps "Resolving project dependencies..."
+        liftIO $
+          announce caps "Resolving project dependencies..."
       -- Bind only 'lockEntries': the '..' wildcard would also bind this
       -- record's 'caps' field, shadowing the 'caps' parameter. The 'caps'
       -- below is the parameter (from 'installCommand'), seeding the state.
