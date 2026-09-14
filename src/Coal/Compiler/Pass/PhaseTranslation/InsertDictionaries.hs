@@ -67,27 +67,21 @@ import Coal.Language
 import Coal.Language.Module.Path (Path (Path), principalPath)
 import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
 import Coal.TypeSystem.Unification
+import Control.Monad (guard)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (execStateT, get, gets, modify, put)
 import Data.Data (Data)
-import Data.Foldable (foldrM)
+import Data.Foldable (asum, foldrM)
 import Data.Generics.Uniplate.Data (descendM)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, listToMaybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (isPrefixOf)
 import Extras (Dictionary, Name, forM, forM_, traverse_, twice)
-
-{- | Default type used to resolve trait constraints that propagate all the way
-to the entry point (or to a fully concrete let-bound expression) without
-being pinned to a concrete type by any use site.
--}
-defaultNumericType :: IndexedType
-defaultNumericType = TIntrinsic IBignum
 
 passInsertDictionaries :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passInsertDictionaries = Pass{runPass = pass}
@@ -176,16 +170,14 @@ collectTraits u name = do
           -- Type mismatch during trait collection - this shouldn't happen in well-typed code
           -- Return empty list and let type checker catch the error
           pure mempty
-        Right sub2 ->
-          -- Return the scheme's declared trait list as-is (preserving
-          -- multiplicity and order). Supertrait constraints (e.g. Numeric
-          -- extends BasicNumeric) are NOT closed here: kernel builtin
-          -- accessors take exactly the dictionaries declared on their
-          -- schemes, and any additional supertrait dictionaries a user
-          -- definition needs are collected from the body's own uses of
-          -- trait members. The supertrait relation is instead honoured
-          -- by the annotation coverage check (CheckTraitAnnotations).
-          pure (apply (sub2 <> sub1) ts)
+        Right sub2 -> do
+          -- Close the trait list under the supertrait relation. For example,
+          -- Numeric<a> extends BasicNumeric<a>, so a Numeric instance also
+          -- provides all BasicNumeric members. This allows trait lookup to
+          -- find subsumed instances via the subsumption path in
+          -- findFirstMatch/lookupTraitInstance.
+          closed <- supertraitListClosure (apply (sub2 <> sub1) ts)
+          pure closed
  where
   instantiate (TypeIndex k index) acc = do
     var <- supplied (TVariable . TypeIndex k)
@@ -197,6 +189,35 @@ tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
 
+
+-- | Collect the immediate supertraits of a trait, preserving the type index.
+immediateSupertraits :: (Monad m) => Trait IndexedType -> CompilerT a m (Set.Set (Trait IndexedType))
+immediateSupertraits (Trait name t) = do
+  Build{buildTraits} <- getCurrentBuildC
+  pure $ case Environment.lookup name buildTraits of
+    Just TraitEntry{traitEntryConstraints} ->
+      Set.fromList [Trait sn t | Trait sn _ <- traitEntryConstraints]
+    Nothing ->
+      Set.empty
+
+-- | Compute the transitive closure of traits under the supertrait relation.
+supertraitListClosure :: (Monad m) => [Trait IndexedType] -> CompilerT a m [Trait IndexedType]
+supertraitListClosure ts = do
+  let names = Set.fromList ts
+  go names
+ where
+  go visited = do
+    supers <- Set.unions <$> traverse immediateSupertraits (Set.toList visited)
+    let newTraits = supers `Set.difference` visited
+    if Set.null newTraits
+      then pure (Set.toList visited)
+      else go (visited <> newTraits)
+
+
+isConcrete :: Trait IndexedType -> Bool
+isConcrete (Trait _ TIntrinsic{}) = True
+isConcrete (Trait _ TRecord{}) = True
+isConcrete _ = False
 {- | Find the first matching trait instance for a trait constraint.
 Returns the instance type, indexed type, and member type schemes if found.
 -}
@@ -205,15 +226,18 @@ findFirstMatch (Trait name t) = do
   Build{buildInstances} <- getCurrentBuildC
   case Environment.lookup name buildInstances of
     Nothing ->
-      pure Nothing
+      -- No exact match; try subsumption: look for a supertrait whose
+      -- constraints include this trait.
+      subsumeTraitSchemes (Trait name t)
     Just env1 -> do
       kvs <- go (`tryMatch` t) env1
       case kvs of
         [] ->
-          pure Nothing
+          -- No exact match; try subsumption via supertraits.
+          subsumeTraitSchemes (Trait name t)
         (t1, k, v) : _ ->
           pure (Just (t1, k, v))
- where
+  where
   go f m = fmap catMaybes . forM (Map.toList m) $
     \(k, InstanceEntry{instanceEntryType, instanceEntryTypeSchemes}) -> do
       result <- f k
@@ -236,22 +260,90 @@ lookupTraitInstance loc trait@(Trait name _) = do
     Nothing -> do
       if isConcrete trait
         then do
-          path <- gets compilerCurrentPath
-          tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
-          throwError TraitError
+          -- Try subsumption before reporting an error.
+          subsumed <- subsumeTraitDict loc trait
+          case subsumed of
+            Just subDict -> pure (Just subDict)
+            Nothing -> do
+              path <- gets compilerCurrentPath
+              tellErrors [MissingInstance trait (ErrorLocation (principalPath path) loc)]
+              throwError TraitError
         else pure Nothing
     Just (t, a, b) ->
       Just <$> Map.traverseWithKey (go t (Trait name a)) b
- where
+  where
   go t1 (Trait tn _) n (Forall _ ts t) =
     applyTraits loc (Label t (instanceLabel (Trait tn t1) n)) ts
       >>= expandTraits
 
--- | Check if a trait's type is concrete (not a type variable)
-isConcrete :: Trait IndexedType -> Bool
-isConcrete (Trait _ TIntrinsic{}) = True
-isConcrete (Trait _ TRecord{}) = True
-isConcrete _ = False
+-- | Try subsumption: find a supertrait whose constraints include this trait,
+-- then project the relevant member schemes.
+subsumeTraitSchemes :: (Monad m) => Trait IndexedType -> CompilerT a m (Maybe (Type Parameter Kind, IndexedType, Dictionary IndexedScheme))
+subsumeTraitSchemes (Trait name t) = do
+  Build{buildInstances, buildTraits} <- getCurrentBuildC
+  let candidates = do
+        (superName, TraitEntry{traitEntryConstraints}) <- Environment.toList buildTraits
+        Trait subName _ <- traitEntryConstraints
+        guard (subName == name)
+        pure superName
+  results <- forM candidates $ \subName -> do
+    case Environment.lookup subName buildInstances of
+      Nothing -> pure Nothing
+      Just env1 -> do
+        kvs <- fmap catMaybes . forM (Map.toList env1) $
+              \(k, InstanceEntry{instanceEntryType, instanceEntryTypeSchemes}) -> do
+                result <- tryMatch k t
+                case result of
+                  Left _ -> pure Nothing
+                  Right _ -> pure (Just (instanceEntryType, k, instanceEntryTypeSchemes))
+        pure (listToMaybe kvs)
+  case asum results of
+    Nothing -> pure Nothing
+    Just (instType, k, instSchemes) -> do
+      let reqMembers = case Environment.lookup name buildTraits of
+            Just TraitEntry{traitEntryInterface} -> Environment.names traitEntryInterface
+            Nothing -> []
+          projected = Map.fromList
+            [ (n, s) | (n, s) <- Map.toList instSchemes
+            , n `elem` reqMembers ]
+      pure (Just (instType, k, projected))
+
+-- | Try subsumption: find a supertrait whose constraints include this trait,
+-- then project and expand the relevant member expressions.
+subsumeTraitDict :: (Show a, Monoid a, Data a, Data k, Show k, Monad m) => a -> Trait IndexedType -> CompilerT a m (Maybe (Dictionary (Expression a k IndexedType)))
+subsumeTraitDict loc (Trait name t) = do
+  Build{buildInstances, buildTraits} <- getCurrentBuildC
+  let candidates = do
+        (superName, TraitEntry{traitEntryConstraints}) <- Environment.toList buildTraits
+        Trait subName _ <- traitEntryConstraints
+        guard (subName == name)
+        pure superName
+  results <- forM candidates $ \subName -> do
+    case Environment.lookup subName buildInstances of
+      Nothing -> pure Nothing
+      Just env1 -> do
+        kvs <- fmap catMaybes . forM (Map.toList env1) $
+              \(k, InstanceEntry{instanceEntryType, instanceEntryTypeSchemes}) -> do
+                result <- tryMatch k t
+                case result of
+                  Left _ -> pure Nothing
+                  Right _ -> pure (Just (instanceEntryType, k, instanceEntryTypeSchemes))
+        pure (listToMaybe kvs)
+  case asum results of
+    Nothing -> pure Nothing
+    Just (instType, k, instSchemes) -> do
+      let reqMembers = case Environment.lookup name buildTraits of
+            Just TraitEntry{traitEntryInterface} -> Environment.names traitEntryInterface
+            Nothing -> []
+          projectedSchemes = Map.fromList
+            [ (n, s) | (n, s) <- Map.toList instSchemes
+            , n `elem` reqMembers ]
+      dict <- Map.traverseWithKey (makeDictEntry (Trait name k)) projectedSchemes
+      pure (Just dict)
+  where
+    makeDictEntry (Trait tn t) n scheme =
+      applyTraits loc (Label t (instanceLabel (Trait tn t) n)) [] >>= expandTraits
+
 
 -- | Apply trait dictionaries to a variable reference, wrapping in application if needed
 applyTraits :: (Show a, Monoid a, Data a, Data k, Show k, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a k IndexedType)
@@ -359,40 +451,7 @@ transformScopeWithTraits bindingType e = do
   case Set.toList polymorphicTraits of
     [] -> pure (expr', mempty)
     tr : trs ->
-      -- If all remaining traits are type-variable traits (unresolved by inference)
-      -- AND the expression's type is fully concrete (no free type variables),
-      -- resolve them to 'defaultNumericType' inline rather than deferring to
-      -- the caller. This handles let-bound expressions whose type is concrete
-      -- but whose body references a polymorphic helper.
-      let exprIsConcrete = Set.null (typeIndexesIn bindingType :: Set (TypeIndex Kind))
-          allVar = all isVariable (tr : trs)
-       in if exprIsConcrete && allVar
-            then do
-              recs <- forM (tr :| trs) $ \(Trait trait ty) -> do
-                let concreteType = case ty of
-                      TVariable{} -> defaultNumericType
-                      other -> other
-                mFields <- lookupTraitInstance mempty (Trait trait concreteType)
-                case mFields of
-                  Nothing -> do
-                    -- Can't resolve — fall back to dictionary lambda
-                    pure (ETraitInstance mempty concreteType (Trait trait concreteType))
-                  Just fields ->
-                    pure $
-                      ERecord
-                        mempty
-                        (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (concreteType :| []))
-                        fields
-                        Nothing
-              pure
-                ( EApplication
-                    mempty
-                    bindingType
-                    (dictionaryLambda tr trs expr')
-                    recs
-                , mempty
-                )
-            else pure (dictionaryLambda tr trs expr', polymorphicTraits)
+      pure (dictionaryLambda tr trs expr', polymorphicTraits)
 
 {- | Replace ETraitInstance occurrences for traits in the given set with
 concrete ERecord dictionaries obtained from lookupTraitInstance.
@@ -441,48 +500,12 @@ expandLetDefinitionTraits name =
         [] ->
           pure $ LetDefinition{letDefinitionType = With [] t, letDefinitionExpression = expr, ..}
         tr : trs -> do
-          path <- gets compilerCurrentPath
-          cfg <- gets compilerConfig
-          let isEntryPoint = case configEntryPoint cfg of
-                Nothing -> "main" == name && Path ["Main"] == path
-                Just (entryMod, entryFunc) -> entryFunc == name && Path [entryMod] == path
-          -- Insert a default instance ('defaultNumericType') for any trait
-          -- constraint that reaches the entry point unresolved.
-          if isEntryPoint
-            then do
-              recs <- forM (tr :| trs) $
-                \(Trait trait _) -> do
-                  mFields <- lookupTraitInstance letDefinitionMetadata (Trait trait defaultNumericType)
-                  fields <- case mFields of
-                    Nothing -> do
-                      tellErrors [MissingInstance (Trait trait defaultNumericType) (ErrorLocation (principalPath path) letDefinitionMetadata)]
-                      throwError TraitError
-                    Just f -> pure f
-                  pure $
-                    ERecord
-                      mempty
-                      (applyTypeArgs KTrait (TConstructor (KArrow KType KTrait) trait) (defaultNumericType :| []))
-                      fields
-                      Nothing
-              pure $
-                LetDefinition
-                  { letDefinitionType = With (tr : trs) t
-                  , letDefinitionExpression =
-                      EApplication
-                        mempty
-                        t
-                        (dictionaryLambda tr trs expr)
-                        recs
-                  , ..
-                  }
-            else -- Check if a trait constraint is on a type variable (not yet resolved)
-              pure $
-                LetDefinition
-                  { letDefinitionType = With (tr : trs) t
-                  , letDefinitionExpression = dictionaryLambda tr trs expr
-                  , ..
-                  }
-
+          pure $
+            LetDefinition
+              { letDefinitionType = With (tr : trs) t
+              , letDefinitionExpression = dictionaryLambda tr trs expr
+              , ..
+              }
 -- | Check if a trait constraint is on a type variable (not yet resolved)
 isVariable :: Trait IndexedType -> Bool
 isVariable (Trait _ TVariable{}) = True
