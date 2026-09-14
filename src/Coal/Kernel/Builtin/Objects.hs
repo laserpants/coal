@@ -571,12 +571,12 @@ objectList =
   , DFunction
       Exported
       "Builtin$.from_int32"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "BasicNumeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
-                  case<int32/*>($a : Numeric(*)) {
-                    | ( $Record : { from_int32 : int32/* | * }/Numeric(*)
+                  case<int32/*>($a : BasicNumeric(*)) {
+                    | ( $Record : { from_int32 : int32/* | * }/BasicNumeric(*)
                       , $r : { from_int32 : int32/* | * }
                       ) =>
                         get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
@@ -586,12 +586,12 @@ objectList =
   , DFunction
       Exported
       "Builtin$.from_int64"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "BasicNumeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
-                  case<int64/*>($a : Numeric(*)) {
-                    | ( $Record : { from_int64 : int64/* | * }/Numeric(*)
+                  case<int64/*>($a : BasicNumeric(*)) {
+                    | ( $Record : { from_int64 : int64/* | * }/BasicNumeric(*)
                       , $r : { from_int64 : int64/* | * }
                       ) =>
                         get?_from_int64<int64/*>($r : { from_int64 : int64/* | * })
@@ -601,18 +601,66 @@ objectList =
   , DFunction
       Exported
       "Builtin$.from_bignum"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "BasicNumeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
-                  case<bignum/*>($a : Numeric(*)) {
-                    | ( $Record : { from_bignum : bignum/* | * }/Numeric(*)
+                  case<bignum/*>($a : BasicNumeric(*)) {
+                    | ( $Record : { from_bignum : bignum/* | * }/BasicNumeric(*)
                       , $r : { from_bignum : bignum/* | * }
                       ) =>
                         get?_from_bignum<bignum/*>($r : { from_bignum : bignum/* | * })
                   }
         |]
       )
+  , DFunction
+      Exported
+      "Builtin$.from_negative_int32"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<int32/*>($a : Numeric(*)) {
+                    | ( $Record : { from_negative_int32 : int32/* | * }/Numeric(*)
+                      , $r : { from_negative_int32 : int32/* | * }
+                      ) =>
+                        get?_from_negative_int32<int32/*>($r : { from_negative_int32 : int32/* | * })
+                  }
+        |]
+      )
+
+  , DFunction
+      Exported
+      "Builtin$.from_negative_int64"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<int64/*>($a : Numeric(*)) {
+                    | ( $Record : { from_negative_int64 : int64/* | * }/Numeric(*)
+                      , $r : { from_negative_int64 : int64/* | * }
+                      ) =>
+                        get?_from_negative_int64<int64/*>($r : { from_negative_int64 : int64/* | * })
+                  }
+        |]
+      )
+
+  , DFunction
+      Exported
+      "Builtin$.from_negative_bignum"
+      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<bignum/*>($a : Numeric(*)) {
+                    | ( $Record : { from_negative_bignum : bignum/* | * }/Numeric(*)
+                      , $r : { from_negative_bignum : bignum/* | * }
+                      ) =>
+                        get?_from_negative_bignum<bignum/*>($r : { from_negative_bignum : bignum/* | * })
+                  }
+        |]
+      )
+
   , DFunction
       Exported
       "Builtin$.negate"
@@ -631,12 +679,12 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(+)"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "BasicNumeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
-                  case<*/*/*>($a : Numeric(*)) {
-                    | ( $Record : { `(+)` : */*/* | * }/Numeric(*)
+                  case<*/*/*>($a : BasicNumeric(*)) {
+                    | ( $Record : { `(+)` : */*/* | * }/BasicNumeric(*)
                       , $r : { `(+)` : */*/* | * }
                       ) =>
                         get?_`(+)`<*/*/*>($r : { `(+)` : */*/* | * })
@@ -661,12 +709,12 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(*)"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "BasicNumeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
-                  case<*/*/*>($a : Numeric(*)) {
-                    | ( $Record : { `(*)` : */*/* | * }/Numeric(*)
+                  case<*/*/*>($a : BasicNumeric(*)) {
+                    | ( $Record : { `(*)` : */*/* | * }/BasicNumeric(*)
                       , $r : { `(*)` : */*/* | * }
                       ) =>
                         get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
@@ -675,7 +723,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int32")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt32)) "from_int32")
       [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
@@ -685,7 +733,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_int64")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt32)) "from_int64")
       [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
@@ -695,7 +743,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_bignum")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt32)) "from_bignum")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
@@ -708,7 +756,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(+)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt32)) "(+)")
       [ Kernel.Label Kernel.int32 "lhs"
       , Kernel.Label Kernel.int32 "rhs"
       ]
@@ -730,7 +778,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(*)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt32)) "(*)")
       [ Kernel.Label Kernel.int32 "lhs"
       , Kernel.Label Kernel.int32 "rhs"
       ]
@@ -751,7 +799,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int32")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt64)) "from_int32")
       [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
@@ -761,7 +809,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_int64")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt64)) "from_int64")
       [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
@@ -771,7 +819,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_bignum")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt64)) "from_bignum")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
@@ -784,7 +832,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(+)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt64)) "(+)")
       [ Kernel.Label Kernel.int64 "lhs"
       , Kernel.Label Kernel.int64 "rhs"
       ]
@@ -806,7 +854,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(*)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IInt64)) "(*)")
       [ Kernel.Label Kernel.int64 "lhs"
       , Kernel.Label Kernel.int64 "rhs"
       ]
@@ -827,7 +875,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int32")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IFloat)) "from_int32")
       [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
@@ -840,7 +888,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_int64")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IFloat)) "from_int64")
       [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
@@ -853,7 +901,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_bignum")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IFloat)) "from_bignum")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
@@ -866,7 +914,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(+)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IFloat)) "(+)")
       [ Kernel.Label Kernel.float "lhs"
       , Kernel.Label Kernel.float "rhs"
       ]
@@ -888,7 +936,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(*)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IFloat)) "(*)")
       [ Kernel.Label Kernel.float "lhs"
       , Kernel.Label Kernel.float "rhs"
       ]
@@ -909,7 +957,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int32")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IDouble)) "from_int32")
       [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
@@ -922,7 +970,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_int64")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IDouble)) "from_int64")
       [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
@@ -935,7 +983,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_bignum")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IDouble)) "from_bignum")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
@@ -948,7 +996,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(+)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IDouble)) "(+)")
       [ Kernel.Label Kernel.double "lhs"
       , Kernel.Label Kernel.double "rhs"
       ]
@@ -970,7 +1018,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(*)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IDouble)) "(*)")
       [ Kernel.Label Kernel.double "lhs"
       , Kernel.Label Kernel.double "rhs"
       ]
@@ -991,7 +1039,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int32")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic INat)) "from_int32")
       [ Kernel.Label Kernel.int32 "m"
       ]
       ( unsafeParseExpr
@@ -1007,7 +1055,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_int64")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic INat)) "from_int64")
       [ Kernel.Label Kernel.int64 "m"
       ]
       ( unsafeParseExpr
@@ -1020,7 +1068,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic INat)) "from_bignum")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic INat)) "from_bignum")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
@@ -1036,7 +1084,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic INat)) "(+)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic INat)) "(+)")
       [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
       , Kernel.Label (Kernel.TCon "nat" []) "rhs"
       ]
@@ -1059,36 +1107,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic INat)) "(-)")
-      [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
-      , Kernel.Label (Kernel.TCon "nat" []) "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<$Nat>
-                    ( `Builtin$.nat$_pack` : int64/$Nat
-                    , let
-                        n : int64 =
-                          [- int64]
-                            ( @<int64>
-                                ( `Builtin$.nat$_unpack` : $Nat/int64
-                                , lhs : $Nat
-                                )
-                            , @<int64>
-                                ( `Builtin$.nat$_unpack` : $Nat/int64
-                                , rhs : $Nat
-                                )
-                            )
-                        in
-                          if ([< int64] (n : int64, %0))
-                            then %0
-                            else n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic INat)) "(*)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic INat)) "(*)")
       [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
       , Kernel.Label (Kernel.TCon "nat" []) "rhs"
       ]
@@ -1111,17 +1130,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic INat)) "negate")
-      [ Kernel.Label (Kernel.TCon "nat" []) "_"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  $Zero : $Nat
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int32")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IBignum)) "from_int32")
       [ Kernel.Label Kernel.int32 "n"
       ]
       ( unsafeParseExpr
@@ -1134,7 +1143,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_int64")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IBignum)) "from_int64")
       [ Kernel.Label Kernel.int64 "n"
       ]
       ( unsafeParseExpr
@@ -1147,7 +1156,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_bignum")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IBignum)) "from_bignum")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
@@ -1157,7 +1166,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(+)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IBignum)) "(+)")
       [ Kernel.Label Kernel.bignum "p"
       , Kernel.Label Kernel.bignum "q"
       ]
@@ -1187,7 +1196,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(*)")
+      (builtinInstance (Trait.basicNumeric (TIntrinsic IBignum)) "(*)")
       [ Kernel.Label Kernel.bignum "p"
       , Kernel.Label Kernel.bignum "q"
       ]
@@ -1215,6 +1224,186 @@ objectList =
       )
   , DFunction
       Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_int32")
+      [ Kernel.Label Kernel.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  n : int32
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_int64")
+      [ Kernel.Label Kernel.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  n : int64
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_bignum")
+      [ Kernel.Label Kernel.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<int32>
+                    ( coal_bignum_to_int32 : bignum/int32
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_int32")
+      [ Kernel.Label Kernel.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  n : int32
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_int64")
+      [ Kernel.Label Kernel.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  n : int64
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_bignum")
+      [ Kernel.Label Kernel.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<int64>
+                    ( coal_bignum_to_int64 : bignum/int64
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_int32")
+      [ Kernel.Label Kernel.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<float>
+                    ( coal_int32_to_float : int32/float
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_int64")
+      [ Kernel.Label Kernel.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<float>
+                    ( coal_int64_to_float : int64/float
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_bignum")
+      [ Kernel.Label Kernel.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<float>
+                    ( coal_bignum_to_float : bignum/float
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_int32")
+      [ Kernel.Label Kernel.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<double>
+                    ( coal_int32_to_double : int32/double
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_int64")
+      [ Kernel.Label Kernel.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<double>
+                    ( coal_int64_to_double : int64/double
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_bignum")
+      [ Kernel.Label Kernel.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<double>
+                    ( coal_bignum_to_double : bignum/double
+                    , n : bignum
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_int32")
+      [ Kernel.Label Kernel.int32 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_int32_to_bignum : int32/bignum
+                    , n : int32
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_int64")
+      [ Kernel.Label Kernel.int64 "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<bignum>
+                    ( coal_int64_to_bignum : int64/bignum
+                    , n : int64
+                    )
+        |]
+      )
+  , DFunction
+      Exported
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_bignum")
+      [ Kernel.Label Kernel.bignum "n"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  n : bignum
+        |]
+      )
+  , DFunction
+      Exported
       "Builtin$.compare"
       [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
       ]
@@ -1231,14 +1420,14 @@ objectList =
   , DFunction
       Exported
       "Builtin$.(^)"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
+      [ Kernel.Label (Kernel.TCon "BasicNumeric" [Kernel.TOpq]) "$a"
       , Kernel.Label Kernel.TOpq "m"
       , Kernel.Label (Kernel.TCon "nat" []) "n"
       ]
       ( unsafeParseExpr
           [r|
-                  case<*>($a : Numeric(*)) {
-                    | ( $Record : { `(*)` : */*/* | from_int32 : int32/* | * }/Numeric(*)
+                  case<*>($a : BasicNumeric(*)) {
+                    | ( $Record : { `(*)` : */*/* | from_int32 : int32/* | * }/BasicNumeric(*)
                       , $r : { `(*)` : */*/* | from_int32 : int32/* | * }
                       ) =>
                         let

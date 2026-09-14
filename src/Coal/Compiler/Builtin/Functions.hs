@@ -189,14 +189,26 @@ builtinFunctions =
     )
   ,
     ( "from_int32"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
+    , forall1' (\t0 -> ([Trait "BasicNumeric" t0], TIntrinsic IInt32 ~> t0))
     )
   ,
     ( "from_int64"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt64 ~> t0))
+    , forall1' (\t0 -> ([Trait "BasicNumeric" t0], TIntrinsic IInt64 ~> t0))
     )
   ,
     ( "from_bignum"
+    , forall1' (\t0 -> ([Trait "BasicNumeric" t0], TIntrinsic IBignum ~> t0))
+    )
+  ,
+    ( "from_negative_int32"
+    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt32 ~> t0))
+    )
+  ,
+    ( "from_negative_int64"
+    , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt64 ~> t0))
+    )
+  ,
+    ( "from_negative_bignum"
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IBignum ~> t0))
     )
   ,
@@ -225,7 +237,7 @@ builtinFunctions =
     )
   ,
     ( "(^)"
-    , forall1' (\t0 -> ([Trait "Numeric" t0], t0 ~> TIntrinsic INat ~> t0))
+    , forall1' (\t0 -> ([Trait "BasicNumeric" t0], t0 ~> TIntrinsic INat ~> t0))
     )
   ,
     ( "(!=)"

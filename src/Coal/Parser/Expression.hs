@@ -274,22 +274,34 @@ parseInt = do
 
 fromLiteral :: Metadata -> Integer -> Expression Metadata () ()
 fromLiteral loc n
-  | n <= fromIntegral (maxBound :: Int32) =
-      EApplication loc () (EVariable loc (Label () "from_int32")) (ELiteral loc (LInt32 (fromIntegral n)) :| [])
-  | n <= fromIntegral (maxBound :: Int64) =
-      EApplication loc () (EVariable loc (Label () "from_int64")) (ELiteral loc (LInt64 (fromIntegral n)) :| [])
+  | n >= 0 && m <= fromIntegral (maxBound :: Int32) =
+      fromInt "from_int32" (LInt32 (fromIntegral n))
+  | n >= 0 && m <= fromIntegral (maxBound :: Int64) =
+      fromInt "from_int64" (LInt64 (fromIntegral n))
+  | n >= 0 =
+      fromBignum "from_bignum" n
+  | m <= fromIntegral (maxBound :: Int32) =
+      fromInt "from_negative_int32" (LInt32 (fromIntegral n))
+  | m <= fromIntegral (maxBound :: Int64) =
+      fromInt "from_negative_int64" (LInt64 (fromIntegral n))
   | otherwise =
-      EApplication
-        loc
-        ()
-        (EVariable loc (Label () "from_bignum"))
-        ( EApplication
-            mempty
-            ()
-            (EVariable mempty (Label () "number$_unsafe_parse_bignum"))
-            (ELiteral mempty (LString (ByteString.pack $ show n)) :| [])
-            :| []
-        )
+      fromBignum "from_negative_bignum" n
+ where
+  m = abs n
+  fromInt name lit =
+    EApplication loc () (EVariable loc (Label () name)) (ELiteral loc lit :| [])
+  fromBignum name v =
+    EApplication
+      loc
+      ()
+      (EVariable loc (Label () name))
+      ( EApplication
+          mempty
+          ()
+          (EVariable mempty (Label () "number$_unsafe_parse_bignum"))
+          (ELiteral mempty (LString (ByteString.pack $ show v)) :| [])
+          :| []
+      )
 
 parseListLiteral :: Parser (Expression Metadata () ())
 parseListLiteral =

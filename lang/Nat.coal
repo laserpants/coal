@@ -24,7 +24,7 @@
  */
 module Nat {
 
-  import namespace Number
+  import Number(int32_to_int64)
 
   /**
    * Convert an `int64` value into a natural number.
@@ -56,7 +56,7 @@ module Nat {
   }
 
   instance Natural<int32> {
-    let to_nat = pack << Number.int32_to_int64
+    let to_nat = pack << int32_to_int64
   }
 
   instance Natural<int64> {

@@ -35,7 +35,7 @@ builtinInstanceEntry meta t idx schemes =
 builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
 builtinInstances =
   [
-    ( "Numeric"
+    ( "BasicNumeric"
     , TIntrinsic IInt32
     , builtinInstanceEntry
         mempty
@@ -55,15 +55,7 @@ builtinInstances =
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
               )
             ,
-              ( "negate"
-              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-              )
-            ,
               ( "(+)"
-              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
-              )
-            ,
-              ( "(-)"
               , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
               )
             ,
@@ -75,6 +67,37 @@ builtinInstances =
     )
   ,
     ( "Numeric"
+    , TIntrinsic IInt32
+    , builtinInstanceEntry
+        mempty
+        (TIntrinsic IInt32)
+        (TIntrinsic IInt32)
+        ( Map.fromList
+            [
+              ( "from_negative_int32"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              )
+            ,
+              ( "from_negative_int64"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt32)
+              )
+            ,
+              ( "from_negative_bignum"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt32)
+              )
+            ,
+              ( "negate"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              )
+            ,
+              ( "(-)"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              )
+            ]
+        )
+    )
+  ,
+    ( "BasicNumeric"
     , TIntrinsic IInt64
     , builtinInstanceEntry
         mempty
@@ -94,15 +117,7 @@ builtinInstances =
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
               )
             ,
-              ( "negate"
-              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
-              )
-            ,
               ( "(+)"
-              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
-              )
-            ,
-              ( "(-)"
               , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
               )
             ,
@@ -114,6 +129,37 @@ builtinInstances =
     )
   ,
     ( "Numeric"
+    , TIntrinsic IInt64
+    , builtinInstanceEntry
+        mempty
+        (TIntrinsic IInt64)
+        (TIntrinsic IInt64)
+        ( Map.fromList
+            [
+              ( "from_negative_int32"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt64)
+              )
+            ,
+              ( "from_negative_int64"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              )
+            ,
+              ( "from_negative_bignum"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IInt64)
+              )
+            ,
+              ( "negate"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              )
+            ,
+              ( "(-)"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              )
+            ]
+        )
+    )
+  ,
+    ( "BasicNumeric"
     , TIntrinsic IFloat
     , builtinInstanceEntry
         mempty
@@ -133,15 +179,7 @@ builtinInstances =
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
               )
             ,
-              ( "negate"
-              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
-              )
-            ,
               ( "(+)"
-              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
-              )
-            ,
-              ( "(-)"
               , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ,
@@ -153,6 +191,37 @@ builtinInstances =
     )
   ,
     ( "Numeric"
+    , TIntrinsic IFloat
+    , builtinInstanceEntry
+        mempty
+        (TIntrinsic IFloat)
+        (TIntrinsic IFloat)
+        ( Map.fromList
+            [
+              ( "from_negative_int32"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IFloat)
+              )
+            ,
+              ( "from_negative_int64"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IFloat)
+              )
+            ,
+              ( "from_negative_bignum"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IFloat)
+              )
+            ,
+              ( "negate"
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              )
+            ,
+              ( "(-)"
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
+              )
+            ]
+        )
+    )
+  ,
+    ( "BasicNumeric"
     , TIntrinsic IDouble
     , builtinInstanceEntry
         mempty
@@ -172,65 +241,49 @@ builtinInstances =
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
               )
             ,
+              ( "(+)"
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              )
+            ,
+              ( "(*)"
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
+              )
+            ]
+        )
+    )
+  ,
+    ( "Numeric"
+    , TIntrinsic IDouble
+    , builtinInstanceEntry
+        mempty
+        (TIntrinsic IDouble)
+        (TIntrinsic IDouble)
+        ( Map.fromList
+            [
+              ( "from_negative_int32"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IDouble)
+              )
+            ,
+              ( "from_negative_int64"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IDouble)
+              )
+            ,
+              ( "from_negative_bignum"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IDouble)
+              )
+            ,
               ( "negate"
               , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ,
-              ( "(+)"
-              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
-              )
-            ,
               ( "(-)"
-              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
-              )
-            ,
-              ( "(*)"
               , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ]
         )
     )
   ,
-    ( "Numeric"
-    , TIntrinsic INat
-    , builtinInstanceEntry
-        mempty
-        (TIntrinsic INat)
-        (TIntrinsic INat)
-        ( Map.fromList
-            [
-              ( "from_int32"
-              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
-              )
-            ,
-              ( "from_int64"
-              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic INat)
-              )
-            ,
-              ( "from_bignum"
-              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic INat)
-              )
-            ,
-              ( "negate"
-              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat)
-              )
-            ,
-              ( "(+)"
-              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
-              )
-            ,
-              ( "(-)"
-              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
-              )
-            ,
-              ( "(*)"
-              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
-              )
-            ]
-        )
-    )
-  ,
-    ( "Numeric"
+    ( "BasicNumeric"
     , TIntrinsic IBignum
     , builtinInstanceEntry
         mempty
@@ -250,20 +303,74 @@ builtinInstances =
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
-              ( "negate"
-              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
-              )
-            ,
               ( "(+)"
-              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
-              )
-            ,
-              ( "(-)"
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
               )
             ,
               ( "(*)"
               , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              )
+            ]
+        )
+    )
+  ,
+    ( "Numeric"
+    , TIntrinsic IBignum
+    , builtinInstanceEntry
+        mempty
+        (TIntrinsic IBignum)
+        (TIntrinsic IBignum)
+        ( Map.fromList
+            [
+              ( "from_negative_int32"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IBignum)
+              )
+            ,
+              ( "from_negative_int64"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IBignum)
+              )
+            ,
+              ( "from_negative_bignum"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              )
+            ,
+              ( "negate"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              )
+            ,
+              ( "(-)"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              )
+            ]
+        )
+    )
+  ,
+    ( "BasicNumeric"
+    , TIntrinsic INat
+    , builtinInstanceEntry
+        mempty
+        (TIntrinsic INat)
+        (TIntrinsic INat)
+        ( Map.fromList
+            [
+              ( "from_int32"
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic INat)
+              )
+            ,
+              ( "from_int64"
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic INat)
+              )
+            ,
+              ( "from_bignum"
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic INat)
+              )
+            ,
+              ( "(+)"
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
+              )
+            ,
+              ( "(*)"
+              , Forall mempty mempty (TIntrinsic INat `TArrow` TIntrinsic INat `TArrow` TIntrinsic INat)
               )
             ]
         )

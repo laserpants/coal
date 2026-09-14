@@ -177,10 +177,14 @@ collectTraits u name = do
           -- Return empty list and let type checker catch the error
           pure mempty
         Right sub2 ->
-          -- Return a list (not Set) to preserve multiplicity from the scheme's trait list.
-          -- Two distinct type variables that both resolve to the same concrete type must
-          -- still produce two separate dictionary arguments to match the two lambda params
-          -- created at the definition site (where the variables were distinct).
+          -- Return the scheme's declared trait list as-is (preserving
+          -- multiplicity and order). Supertrait constraints (e.g. Numeric
+          -- extends BasicNumeric) are NOT closed here: kernel builtin
+          -- accessors take exactly the dictionaries declared on their
+          -- schemes, and any additional supertrait dictionaries a user
+          -- definition needs are collected from the body's own uses of
+          -- trait members. The supertrait relation is instead honoured
+          -- by the annotation coverage check (CheckTraitAnnotations).
           pure (apply (sub2 <> sub1) ts)
  where
   instantiate (TypeIndex k index) acc = do
