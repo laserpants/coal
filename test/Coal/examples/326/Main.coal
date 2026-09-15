@@ -5,7 +5,7 @@ module Main {
 
   type Complex = Complex(double, double)
 
-  instance BasicNumeric<Complex> {
+  instance NumericBase<Complex> {
     fun from_int32(n : int32) = 
       Complex(Number.int32_to_double(n), 0)
     fun from_int64(n : int64) = 

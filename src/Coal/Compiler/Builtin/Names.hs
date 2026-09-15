@@ -16,7 +16,7 @@ builtinNames =
     , "(<>)"
     , "(==)"
     , "(!=)"
-    , "BasicNumeric"
+    , "NumericBase"
     , "Comparable"
     , "Divisible"
     , "EqualTo"

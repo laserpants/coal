@@ -22,7 +22,7 @@ compiler.
 
 `poly_calls` is the line that catches the regression this fixture exists for:
 `poly_mk` has *no* return annotation, so its `5` infers as `a with
-BasicNumeric<a>`. If the `let` in `poly_driven` generalizes over that trait
+NumericBase<a>`. If the `let` in `poly_driven` generalizes over that trait
 constraint, dictionary insertion rewrites the binding into a dictionary
 lambda and re-applies it at every use of `x`, so `mk()` runs twice
 (`poly_calls=2`). The fix is the value restriction in

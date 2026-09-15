@@ -275,7 +275,7 @@ rowsStructurallyEqual r1 r2 =
 
 {- | Compute the transitive supertrait closure of a trait constraint, including
 the constraint itself. Used here so an annotation such as @Numeric<a>@ covers
-inferred requirements on its supertrait @BasicNumeric<a>@.
+inferred requirements on its supertrait @NumericBase<a>@.
 -}
 supertraitClosure :: (MonadIO m) => Trait IndexedType -> CompilerT Metadata m (Set.Set (Trait IndexedType))
 supertraitClosure tr = go Set.empty [tr]

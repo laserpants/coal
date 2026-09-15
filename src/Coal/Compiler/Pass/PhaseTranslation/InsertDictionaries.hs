@@ -180,7 +180,7 @@ collectTraits u name = do
         Right sub2 ->
           -- Return the scheme's declared trait list as-is (preserving
           -- multiplicity and order). Supertrait constraints (e.g. Numeric
-          -- extends BasicNumeric) are NOT closed here: kernel builtin
+          -- extends NumericBase) are NOT closed here: kernel builtin
           -- accessors take exactly the dictionaries declared on their
           -- schemes, and any additional supertrait dictionaries a user
           -- definition needs are collected from the body's own uses of
@@ -197,29 +197,6 @@ tryMatch :: (Monad m) => IndexedType -> IndexedType -> CompilerT a m (Either Uni
 tryMatch t u = do
   var <- supplied id
   pure (evalUnifier var (match t u))
-
--- | Collect the immediate supertraits of a trait, preserving the type index.
-immediateSupertraits :: (Monad m) => Trait IndexedType -> CompilerT a m (Set.Set (Trait IndexedType))
-immediateSupertraits (Trait name t) = do
-  Build{buildTraits} <- getCurrentBuildC
-  pure $ case Environment.lookup name buildTraits of
-    Just TraitEntry{traitEntryConstraints} ->
-      Set.fromList [Trait sn t | Trait sn _ <- traitEntryConstraints]
-    Nothing ->
-      Set.empty
-
--- | Compute the transitive closure of traits under the supertrait relation.
-supertraitListClosure :: (Monad m) => [Trait IndexedType] -> CompilerT a m [Trait IndexedType]
-supertraitListClosure ts = do
-  let names = Set.fromList ts
-  go names
- where
-  go visited = do
-    supers <- Set.unions <$> traverse immediateSupertraits (Set.toList visited)
-    let newTraits = supers `Set.difference` visited
-    if Set.null newTraits
-      then pure (Set.toList visited)
-      else go (visited <> newTraits)
 
 isConcrete :: Trait IndexedType -> Bool
 isConcrete (Trait _ TIntrinsic{}) = True
@@ -344,7 +321,7 @@ subsumeTraitDict loc (Trait name t) = do
         pure (listToMaybe kvs)
   case asum results of
     Nothing -> pure Nothing
-    Just (instType, k, instSchemes) -> do
+    Just (_, k, instSchemes) -> do
       let reqMembers = case Environment.lookup name buildTraits of
             Just TraitEntry{traitEntryInterface} -> Environment.names traitEntryInterface
             Nothing -> []
@@ -357,8 +334,8 @@ subsumeTraitDict loc (Trait name t) = do
       dict <- Map.traverseWithKey (makeDictEntry (Trait name k)) projectedSchemes
       pure (Just dict)
  where
-  makeDictEntry (Trait tn t) n scheme =
-    applyTraits loc (Label t (instanceLabel (Trait tn t) n)) [] >>= expandTraits
+  makeDictEntry (Trait tn tt) n _ =
+    applyTraits loc (Label t (instanceLabel (Trait tn tt) n)) [] >>= expandTraits
 
 -- | Apply trait dictionaries to a variable reference, wrapping in application if needed
 applyTraits :: (Show a, Monoid a, Data a, Data k, Show k, Monad m) => a -> Label IndexedType -> [Trait IndexedType] -> CompilerT a m (Expression a k IndexedType)

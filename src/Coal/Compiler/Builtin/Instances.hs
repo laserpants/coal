@@ -35,7 +35,7 @@ builtinInstanceEntry meta t idx schemes =
 builtinInstances :: (Monoid a) => [(Name, IndexedType, InstanceEntry a)]
 builtinInstances =
   [
-    ( "BasicNumeric"
+    ( "NumericBase"
     , TIntrinsic IInt32
     , builtinInstanceEntry
         mempty
@@ -97,7 +97,7 @@ builtinInstances =
         )
     )
   ,
-    ( "BasicNumeric"
+    ( "NumericBase"
     , TIntrinsic IInt64
     , builtinInstanceEntry
         mempty
@@ -159,7 +159,7 @@ builtinInstances =
         )
     )
   ,
-    ( "BasicNumeric"
+    ( "NumericBase"
     , TIntrinsic IFloat
     , builtinInstanceEntry
         mempty
@@ -221,7 +221,7 @@ builtinInstances =
         )
     )
   ,
-    ( "BasicNumeric"
+    ( "NumericBase"
     , TIntrinsic IDouble
     , builtinInstanceEntry
         mempty
@@ -283,7 +283,7 @@ builtinInstances =
         )
     )
   ,
-    ( "BasicNumeric"
+    ( "NumericBase"
     , TIntrinsic IBignum
     , builtinInstanceEntry
         mempty
@@ -345,7 +345,7 @@ builtinInstances =
         )
     )
   ,
-    ( "BasicNumeric"
+    ( "NumericBase"
     , TIntrinsic INat
     , builtinInstanceEntry
         mempty

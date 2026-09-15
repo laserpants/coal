@@ -348,7 +348,7 @@ module List {
    *
    * **Type**: `range : n -> nat -> List<n>`
    */
-  fun range(start : n, count : nat) : List<n> with (BasicNumeric<n>) =
+  fun range(start : n, count : nat) : List<n> with (NumericBase<n>) =
     fold(count, start) {
       | Zero      => fn(_) => []
       | Succ(@go) => fn(s) => s :: go(s + 1)

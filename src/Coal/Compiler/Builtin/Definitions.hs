@@ -30,66 +30,66 @@ builtinFunctionNames = "machine$_machine" : for builtinFunctions fst
 
 builtinTraitInstances :: [Name]
 builtinTraitInstances =
-  [ -- BasicNumeric<int32>
-    instanceLabel (Trait.basicNumeric (TIntrinsic IInt32)) "from_bignum"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt32)) "from_int32"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt32)) "from_int64"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt32)) "(+)"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt32)) "(*)"
+  [ -- NumericBase<int32>
+    instanceLabel (Trait.numericBase (TIntrinsic IInt32)) "from_bignum"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt32)) "from_int32"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt32)) "from_int64"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt32)) "(+)"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt32)) "(*)"
   , -- Numeric<int32>
     instanceLabel (Trait.numeric (TIntrinsic IInt32)) "from_negative_bignum"
   , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "from_negative_int32"
   , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "from_negative_int64"
   , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "negate"
   , instanceLabel (Trait.numeric (TIntrinsic IInt32)) "(-)"
-  , -- BasicNumeric<int64>
-    instanceLabel (Trait.basicNumeric (TIntrinsic IInt64)) "from_bignum"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt64)) "from_int32"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt64)) "from_int64"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt64)) "(+)"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IInt64)) "(*)"
+  , -- NumericBase<int64>
+    instanceLabel (Trait.numericBase (TIntrinsic IInt64)) "from_bignum"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt64)) "from_int32"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt64)) "from_int64"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt64)) "(+)"
+  , instanceLabel (Trait.numericBase (TIntrinsic IInt64)) "(*)"
   , -- Numeric<int64>
     instanceLabel (Trait.numeric (TIntrinsic IInt64)) "from_negative_bignum"
   , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "from_negative_int32"
   , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "from_negative_int64"
   , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "negate"
   , instanceLabel (Trait.numeric (TIntrinsic IInt64)) "(-)"
-  , -- BasicNumeric<float>
-    instanceLabel (Trait.basicNumeric (TIntrinsic IFloat)) "from_bignum"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IFloat)) "from_int32"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IFloat)) "from_int64"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IFloat)) "(+)"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IFloat)) "(*)"
+  , -- NumericBase<float>
+    instanceLabel (Trait.numericBase (TIntrinsic IFloat)) "from_bignum"
+  , instanceLabel (Trait.numericBase (TIntrinsic IFloat)) "from_int32"
+  , instanceLabel (Trait.numericBase (TIntrinsic IFloat)) "from_int64"
+  , instanceLabel (Trait.numericBase (TIntrinsic IFloat)) "(+)"
+  , instanceLabel (Trait.numericBase (TIntrinsic IFloat)) "(*)"
   , -- Numeric<float>
     instanceLabel (Trait.numeric (TIntrinsic IFloat)) "from_negative_bignum"
   , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "from_negative_int32"
   , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "from_negative_int64"
   , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "negate"
   , instanceLabel (Trait.numeric (TIntrinsic IFloat)) "(-)"
-  , -- BasicNumeric<double>
-    instanceLabel (Trait.basicNumeric (TIntrinsic IDouble)) "from_bignum"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IDouble)) "from_int32"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IDouble)) "from_int64"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IDouble)) "(+)"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IDouble)) "(*)"
+  , -- NumericBase<double>
+    instanceLabel (Trait.numericBase (TIntrinsic IDouble)) "from_bignum"
+  , instanceLabel (Trait.numericBase (TIntrinsic IDouble)) "from_int32"
+  , instanceLabel (Trait.numericBase (TIntrinsic IDouble)) "from_int64"
+  , instanceLabel (Trait.numericBase (TIntrinsic IDouble)) "(+)"
+  , instanceLabel (Trait.numericBase (TIntrinsic IDouble)) "(*)"
   , -- Numeric<double>
     instanceLabel (Trait.numeric (TIntrinsic IDouble)) "from_negative_bignum"
   , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "from_negative_int32"
   , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "from_negative_int64"
   , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "negate"
   , instanceLabel (Trait.numeric (TIntrinsic IDouble)) "(-)"
-  , -- BasicNumeric<nat>
-    instanceLabel (Trait.basicNumeric (TIntrinsic INat)) "from_bignum"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic INat)) "from_int32"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic INat)) "from_int64"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic INat)) "(+)"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic INat)) "(*)"
-  , -- BasicNumeric<bignum>
-    instanceLabel (Trait.basicNumeric (TIntrinsic IBignum)) "from_bignum"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IBignum)) "from_int32"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IBignum)) "from_int64"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IBignum)) "(+)"
-  , instanceLabel (Trait.basicNumeric (TIntrinsic IBignum)) "(*)"
+  , -- NumericBase<nat>
+    instanceLabel (Trait.numericBase (TIntrinsic INat)) "from_bignum"
+  , instanceLabel (Trait.numericBase (TIntrinsic INat)) "from_int32"
+  , instanceLabel (Trait.numericBase (TIntrinsic INat)) "from_int64"
+  , instanceLabel (Trait.numericBase (TIntrinsic INat)) "(+)"
+  , instanceLabel (Trait.numericBase (TIntrinsic INat)) "(*)"
+  , -- NumericBase<bignum>
+    instanceLabel (Trait.numericBase (TIntrinsic IBignum)) "from_bignum"
+  , instanceLabel (Trait.numericBase (TIntrinsic IBignum)) "from_int32"
+  , instanceLabel (Trait.numericBase (TIntrinsic IBignum)) "from_int64"
+  , instanceLabel (Trait.numericBase (TIntrinsic IBignum)) "(+)"
+  , instanceLabel (Trait.numericBase (TIntrinsic IBignum)) "(*)"
   , -- Numeric<bignum>
     instanceLabel (Trait.numeric (TIntrinsic IBignum)) "from_negative_bignum"
   , instanceLabel (Trait.numeric (TIntrinsic IBignum)) "from_negative_int32"

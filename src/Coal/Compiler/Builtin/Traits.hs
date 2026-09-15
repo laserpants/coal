@@ -2,7 +2,7 @@
 
 module Coal.Compiler.Builtin.Traits (
   builtinTraits,
-  basicNumeric,
+  numericBase,
   numeric,
   ordered,
   comparable,
@@ -14,9 +14,9 @@ module Coal.Compiler.Builtin.Traits (
 import Coal.Language
 import qualified Data.Set as Set
 
-{-# INLINE basicNumeric #-}
-basicNumeric :: ParameterizedType -> Trait ParameterizedType
-basicNumeric = Trait "BasicNumeric"
+{-# INLINE numericBase #-}
+numericBase :: ParameterizedType -> Trait ParameterizedType
+numericBase = Trait "NumericBase"
 
 {-# INLINE numeric #-}
 numeric :: ParameterizedType -> Trait ParameterizedType
@@ -46,10 +46,10 @@ builtinTraits :: (Monoid a) => [Definition a () ()]
 builtinTraits =
   [ DTrait
       mempty
-      "BasicNumeric"
+      "NumericBase"
       ( TraitDefinition
           mempty
-          "BasicNumeric"
+          "NumericBase"
           []
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
@@ -75,7 +75,7 @@ builtinTraits =
       ( TraitDefinition
           mempty
           "Numeric"
-          [Trait "BasicNumeric" (Parameter () "a")]
+          [Trait "NumericBase" (Parameter () "a")]
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
               "from_negative_int32"
