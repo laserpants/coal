@@ -210,7 +210,7 @@ codeGenModule config context m = do
   let t0 = unsafePerformIO getCurrentTime
   t0 `seq` return ()
   let action =
-        irModule m (when isEntryPoint (irMainModule entryPointModule entryPointFunc))
+        irModule m (when isEntryPoint (irMainModule m entryPointFunc))
   case buildIR context action of
     Left err ->
       throwError err

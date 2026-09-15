@@ -35,7 +35,7 @@ import Control.Monad.State (gets, modify)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import qualified Data.Map.Strict as Map
-import Data.Maybe (mapMaybe)
+import Data.Maybe (listToMaybe, mapMaybe)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as Text
@@ -45,7 +45,7 @@ import qualified LLVM.IROperand.Constructors as O
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Name (Name)
-import Coal.Kernel.LLVM.Boxing (irTypeRep, irUnbox)
+import Coal.Kernel.LLVM.Boxing (irTypeRep, irUnbox, irValueTypeRep)
 import qualified Coal.Kernel.LLVM.Boxing as Boxing
 import Coal.Kernel.LLVM.Constructor (irCaseValue)
 import qualified Coal.Kernel.LLVM.Constructor as Constructor
@@ -594,14 +594,36 @@ toIRLinkage Local = LInternal
 {- | Emit the C main entry point for the entry point module.
 
 This must be called after 'irModule' on the entry point module. It defines the
-program entry point that initializes the runtime and calls the entry function.
-
-The entry point is specified by module and function name, e.g., ("Main", "main").
+program entry point that initializes the runtime and calls the entry function,
+passing one null argument per declared parameter of the entry function.
 -}
-irMainModule :: Name -> Name -> IRCodegen ()
-irMainModule moduleName_ funcName = do
+irMainModule :: Module Type -> Name -> IRCodegen ()
+irMainModule m funcName = do
   declare "rt_runtime_init" TVoid []
   define i32 "main" [] LExternal [] $ do
     callVoid NoTail TVoid (OGlobal (TFun TVoid []) "rt_runtime_init") []
-    callVoid NoTail TPtr (OGlobal (TFun TPtr [TPtr]) (moduleName_ <> "." <> funcName)) [O.nullPtr TPtr]
+    callVoid
+      NoTail
+      TPtr
+      (OGlobal entryFunTy fullName)
+      (O.nullPtr <$> entryParamTypes)
     ret (O.i32 @Int 0)
+ where
+  fullName = moduleName m <> "." <> funcName
+  -- The entry function's LLVM signature, reconstructed exactly as
+  -- 'objectGlobalBinding' binds it, and one null argument per declared
+  -- parameter. This keeps the C main call ABI-compatible with the entry
+  -- function even if the entry function ends up with extra parameters
+  -- (e.g. unresolved dictionary parameters). Falls back to a single
+  -- null-argument call if the entry object cannot be found (e.g. the
+  -- entry point is a constant thunk).
+  (entryFunTy, entryParamTypes) =
+    case listToMaybe
+      [ TFun (irTypeRep (typeOf expr)) ((irValueTypeRep . typeOf) <$> lls)
+      | DFunction _ n lls expr <- moduleObjects m
+      , n == funcName
+      ] of
+      Just funTy@TFun{} -> (funTy, funTys funTy)
+      _ -> (TFun TPtr [TPtr], [TPtr])
+  funTys (TFun _ tys) = tys
+  funTys _ = []
