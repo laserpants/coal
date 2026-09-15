@@ -1,12 +1,12 @@
 module Main {
 
-  import IO(println_string, println_int64, println_bool)
+  import IO(println_nat)
 
-  import Nat(pack, unpack)
+  import Nat(unpack, pred)
 
   fun fib(p : nat) =
     let (res, _) =
-      fold(p - 1) {
+      fold(pred(p)) {
         | Zero => 
             (1 : nat, 1)
         | Succ(@x) => 
@@ -19,6 +19,6 @@ module Main {
       res
 
   fun main() =
-    println_int64(unpack(fib(6)))
+    println_nat(fib(6))
 
 }

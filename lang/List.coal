@@ -174,20 +174,12 @@ module List {
   /**
    * Extract a range of elements from the list.
    *
-   * ```
-   * slice(m, n, xs) = xs |. drop(m) |. take(pack(max(0, unpack(n) - unpack(m))))
-   * ```
-   *
-   * Note that nat subtraction is not available (there is no `Numeric<nat>`
-   * instance), so the implementation converts the arguments to `int64`,
-   * computes the difference, and then converts the result back to `nat`.
+   * ```slice(m, n, xs) = xs |. drop(m) |. take(Nat.sub(n, m))```
    *
    * **Type**: `slice : nat -> nat -> List<a> -> List<a>`
    */
   fun slice(m : nat, n : nat, list : List<a>) : List<a> =
-    let diff = Nat.pack(Number.max(0, Nat.unpack(n) - Nat.unpack(m)))
-    in
-      list |. drop(m) |. take(diff)
+    list |. drop(m) |. take(Nat.sub(n, m))
 
   /**
    * Return the element at index `n`, or `None` if out of bounds.

@@ -8,10 +8,10 @@ module Coal.Compiler.Pass.PhaseTranslation.CheckTraitAnnotations (
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (supplied)
-import Coal.Compiler.Journal (listenErrors, tellErrors)
-import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Build (Build (..))
 import Coal.Compiler.Build.NameEntry (TraitEntry (..))
+import Coal.Compiler.Journal (listenErrors, tellErrors)
+import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack
 import Coal.Compiler.State
@@ -272,7 +272,6 @@ rowsStructurallyEqual r1 r2 =
     (RExtend n1 t1 r1', RExtend n2 t2 r2') ->
       n1 == n2 && typesStructurallyEqual t1 t2 && rowsStructurallyEqual r1' r2'
     _ -> False
-
 
 {- | Compute the transitive supertrait closure of a trait constraint, including
 the constraint itself. Used here so an annotation such as @Numeric<a>@ covers

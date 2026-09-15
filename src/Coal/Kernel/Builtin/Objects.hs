@@ -628,7 +628,6 @@ objectList =
                   }
         |]
       )
-
   , DFunction
       Exported
       "Builtin$.from_negative_int64"
@@ -644,7 +643,6 @@ objectList =
                   }
         |]
       )
-
   , DFunction
       Exported
       "Builtin$.from_negative_bignum"
@@ -660,7 +658,6 @@ objectList =
                   }
         |]
       )
-
   , DFunction
       Exported
       "Builtin$.negate"
