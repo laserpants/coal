@@ -14,9 +14,11 @@ module Main (main) where
 
 import Criterion.Main
 import qualified Kernel.Normalization as Normalization
+import qualified TypeSystem.Constraints as Constraints
 
 main :: IO ()
 main =
   defaultMain
     [ bgroup "kernel" Normalization.benchmarks
+    , bgroup "typechecking" Constraints.benchmarks
     ]
