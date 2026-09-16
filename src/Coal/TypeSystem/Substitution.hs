@@ -12,6 +12,7 @@ module Coal.TypeSystem.Substitution (
   normalizeScheme,
   normalizeTypeIndexes,
   applyT,
+  applyIndexedType,
   merge,
 ) where
 
@@ -19,7 +20,7 @@ import Coal.Common.Environment (Environment (..))
 import Coal.Language
 import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transform, transformBi)
+import Data.Generics.Uniplate.Data (transformBi)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map, keysSet, restrictKeys, union)
 import qualified Data.Map.Strict as Map
@@ -34,14 +35,45 @@ applyT :: Substitution -> IndexedType -> IndexedType
 applyT sub =
   \case
     TRow row ->
-      TRow (transform (apply sub) row)
+      TRow (apply sub row)
     TVariable t ->
       fromMaybe (TVariable t) (substitutionIndex t sub)
     t ->
       t
 
+{- | Explicit hand-written traversal for indexed types, replacing the
+@transform . applyT@ uniplate traversal that previously ran here.
+
+@transform@ descends into /every/ nested 'Data' value (kinds, names, row
+tails, ...) and rebuilds the whole spine even for types that mention no
+bound variable. This explicit recursion visits only type structure and
+never descends into 'Kind', 'Name' or 'Intrinsic' payloads.
+-}
+applyIndexedType :: Substitution -> IndexedType -> IndexedType
+applyIndexedType sub
+  | Map.null (substitutionMap sub) = id
+  | otherwise = go
+ where
+  go t = case t of
+    TApplication k t1 t2 ->
+      TApplication k (go t1) (go t2)
+    TArrow t1 t2 ->
+      TArrow (go t1) (go t2)
+    TConstructor{} ->
+      t
+    TIntrinsic{} ->
+      t
+    TRecord t1 ->
+      TRecord (go t1)
+    TRow row ->
+      TRow (apply sub row)
+    TVariable v ->
+      fromMaybe (TVariable v) (substitutionIndex v sub)
+    TAlias name ts t1 ->
+      TAlias name (go <$> ts) (go t1)
+
 instance Substitutable IndexedType where
-  apply = transform . applyT
+  apply = applyIndexedType
 
 instance Substitutable (Monomorphic (TypeIndex Kind)) where
   apply sub =

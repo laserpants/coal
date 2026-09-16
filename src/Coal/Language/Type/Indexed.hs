@@ -28,7 +28,6 @@ import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Pattern (Pattern (..))
 import Coal.Language.Trait (Qualified (..), Trait (..))
 import Coal.Language.Type (IndexedType, Type (..), TypeIndex (..))
-import Coal.Language.Type.Intrinsic (Intrinsic (..))
 import Coal.Language.Type.Kind (Kind (..))
 import Coal.Language.Type.Row (Row (..))
 import Coal.Language.Type.Scheme (Scheme (..))
@@ -43,6 +42,45 @@ import Extras.Data.Set (unionMap)
 
 class TypeIndexed k t where
   typeIndexesIn :: t -> Set (TypeIndex k)
+
+{- | Explicit hand-written traversals for indexed types, replacing the
+@Set.fromList . universeBi@ generic traversals that previously ran here.
+
+'universeBi' walks the full generic structure of every nested 'Data' value
+(kinds, names, row tails, ...) to collect 'TypeIndex' occurrences. The
+explicit recursion below visits only type structure.
+-}
+typeIndexesInType :: Type TypeIndex Kind -> Set (TypeIndex Kind)
+typeIndexesInType = go
+ where
+  go = \case
+    TApplication _ t1 t2 ->
+      go t1 <> go t2
+    TArrow t1 t2 ->
+      go t1 <> go t2
+    TConstructor{} ->
+      mempty
+    TIntrinsic{} ->
+      mempty
+    TRecord t ->
+      go t
+    TRow row ->
+      typeIndexesInRow row
+    TVariable v ->
+      singleton v
+    TAlias _ ts t ->
+      foldr (\x s -> go x <> s) (go t) ts
+
+typeIndexesInRow :: Row TypeIndex Kind IndexedType -> Set (TypeIndex Kind)
+typeIndexesInRow = go
+ where
+  go = \case
+    RExtend _ t r ->
+      typeIndexesInType t <> go r
+    RVariable v ->
+      singleton v
+    RNil ->
+      mempty
 
 instance TypeIndexed k (TypeIndex k) where
   typeIndexesIn = singleton
@@ -68,14 +106,11 @@ instance (Ord k, TypeIndexed k t) => TypeIndexed k (Set t) where
 instance (Ord k, Data t, Data k) => TypeIndexed k (Label t) where
   typeIndexesIn = Set.fromList . universeBi
 
-instance (Ord k, Data t, Data k) => TypeIndexed k (Row TypeIndex k t) where
-  typeIndexesIn = Set.fromList . universeBi
+instance TypeIndexed Kind (Row TypeIndex Kind IndexedType) where
+  typeIndexesIn = typeIndexesInRow
 
-instance (Ord k, Data k) => TypeIndexed k Intrinsic where
-  typeIndexesIn = Set.fromList . universeBi
-
-instance (Ord k, Data k) => TypeIndexed k (Type TypeIndex k) where
-  typeIndexesIn = Set.fromList . universeBi
+instance TypeIndexed Kind IndexedType where
+  typeIndexesIn = typeIndexesInType
 
 instance (Ord k, Data k, Data t, Data a, Data s) => TypeIndexed k (Pattern a s t) where
   typeIndexesIn = Set.fromList . universeBi
