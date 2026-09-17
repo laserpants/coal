@@ -18,8 +18,9 @@ stack bench coal-bench-compiler --ba='--output report.html'  # HTML report
 - **`NFData` is `show`-based.** `NFData (Module Type)` is implemented as
   `rnf m = rnf (show m)`, which adds serialization overhead that scales with
   output size. Cross-pass comparisons are therefore approximate, not exact.
-- **Coverage is normalization-only.** There are no benchmarks for parsing,
-  type checking, translation, lowering, LLVM code generation, or the
-  end-to-end `coal compile` flow.
+- **Coverage is normalization-only.** Parsing, translation, lowering, LLVM code
+  generation, and the end-to-end `coal compile` flow are not benchmarked. The
+  `typechecking` group covers the type constraint solver and substitution
+  application; constraint *generation* and the kind solver are not benchmarked.
 - **Inputs are loaded with `unsafePerformIO`** and crash the benchmark at
   startup if a `.corn` file is missing or fails to parse.

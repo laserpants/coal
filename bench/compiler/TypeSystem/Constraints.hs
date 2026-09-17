@@ -1,4 +1,6 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 {- |
 Module: TypeSystem.Constraints
 Description: Benchmarks for the type constraint solver and substitution.
@@ -50,8 +52,8 @@ substitutions have to propagate between constraints.
 -}
 mkChain :: Int -> [BenchConstraint]
 mkChain n =
-     [Equality rule [tvar i, listOf (tvar (n + i))] | i <- [0 .. n - 1]]
-  <> [Equality rule [tvar (n + i), TIntrinsic IInt32] | i <- [0 .. n - 1]]
+  [Equality rule [tvar i, listOf (tvar (n + i))] | i <- [0 .. n - 1]]
+    <> [Equality rule [tvar (n + i), TIntrinsic IInt32] | i <- [0 .. n - 1]]
 
 -- | Fresh variable supply large enough for 'mkChain'.
 chainSupply :: Int -> Int
@@ -69,8 +71,27 @@ mkListLiteral k =
 deepType :: Int -> IndexedType
 deepType d = iterate listOf (TIntrinsic IInt32) !! d
 
--- | Solve a system and project the result to the number of bindings, so that
--- @criterion@ can force the solver's full result without needing @NFData@.
+{- | Number of nodes in a type, used to force the result of a substitution
+application without needing @NFData@ on @IndexedType@.
+-}
+typeSize :: IndexedType -> Int
+typeSize = \case
+  TApplication _ t1 t2 ->
+    1 + typeSize t1 + typeSize t2
+  TArrow t1 t2 ->
+    1 + typeSize t1 + typeSize t2
+  TRecord t ->
+    1 + typeSize t
+  TRow{} ->
+    1
+  TAlias _ ts t ->
+    1 + sum (fmap typeSize ts) + typeSize t
+  _ ->
+    1
+
+{- | Solve a system and project the result to the number of bindings, so that
+@criterion@ can force the solver's full result without needing @NFData@.
+-}
 solveSize :: Int -> [BenchConstraint] -> Int
 solveSize supply constraints =
   case solveConstraints supply constraints of
@@ -95,7 +116,7 @@ benchmarks =
       "substitution"
       [ bench
           ("apply/depth-" <> show d)
-          (nf (apply (mapsTo 0 (TIntrinsic IInt32))) (deepType d))
+          (nf (typeSize . apply (mapsTo 0 (TIntrinsic IInt32))) (deepType d))
       | d <- depths
       ]
   ]
