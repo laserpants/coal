@@ -6,5 +6,5 @@
   "[haskell]": {
     "editor.formatOnSave": true
   },
-  "cmake.sourceDirectory": "/home/johannes/Code/coal/runtime"
+  "cmake.sourceDirectory": "${workspaceFolder}/runtime"
 }
