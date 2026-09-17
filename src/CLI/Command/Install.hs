@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
@@ -142,10 +143,7 @@ installProject caps = do
       when (not (Map.null deps)) $
         liftIO $
           announce caps "Resolving project dependencies..."
-      -- Bind only 'lockEntries': the '..' wildcard would also bind this
-      -- record's 'caps' field, shadowing the 'caps' parameter. The 'caps'
-      -- below is the parameter (from 'installCommand'), seeding the state.
-      InstallState{lockEntries = lockEntries} <-
+      InstallState{lockEntries} <-
         flip execStateT (initialInstallState caps) $
           installDependencies deps
 
