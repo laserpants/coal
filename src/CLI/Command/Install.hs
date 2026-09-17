@@ -8,7 +8,6 @@ import CLI.Error (CLIError (..))
 import CLI.Git (gitCheckoutCommit, gitCloneRepo, gitLsRemoteVersions)
 import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
-import CLI.Options.InstallCmd (InstallCmdOptions (..))
 import Coal.Compiler.Terminal (TerminalCapabilities, sanitizeForTerminal)
 import Control.Monad (unless, when)
 import Control.Monad.Except
@@ -151,5 +150,5 @@ installProject caps = do
         ByteString.writeFile "coal.lock.json" (toStrict (encodePretty (PackageLock lockEntries)))
       liftIO $ announce caps ("Wrote coal.lock.json with " <> showt (Map.size lockEntries) <> " packages")
 
-installCommand :: TerminalCapabilities -> InstallCmdOptions -> ExceptT CLIError IO ()
-installCommand caps _opts = installProject caps
+installCommand :: TerminalCapabilities -> ExceptT CLIError IO ()
+installCommand = installProject

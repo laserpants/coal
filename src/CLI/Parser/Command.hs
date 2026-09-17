@@ -5,7 +5,6 @@ import CLI.Command (Command (..))
 import CLI.Parser.AddCmd (addCmdParser)
 import CLI.Parser.CompileCmd (compileCmdParser)
 import CLI.Parser.InitCmd (initCmdParser)
-import CLI.Parser.InstallCmd (installCmdParser)
 import Options.Applicative
 
 commandParser :: Parser Command
@@ -38,7 +37,7 @@ commandParser =
         <> command
           "install"
           ( info
-              (CmdInstall <$> installCmdParser)
+              (pure CmdInstall)
               (progDesc "Install packages from project manifest")
           )
         <> command
