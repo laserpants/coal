@@ -37,7 +37,7 @@ import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Coal.TypeSystem.Unification (UnificationError, Unifier (..), runUnifier, unifyAll)
 import Control.Monad.RWS.Strict (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
-import Data.List (delete, find, foldl')
+import Data.List (delete, find)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, intersection, (\\))
 import qualified Data.Set as Set
@@ -204,7 +204,7 @@ composeSubstitutions =
       | otherwise =
           let value' = apply sub value
            in (typeIdsIn value', value')
-    ownBindings = fmap (\value -> (typeIdsIn value, value)) m
+    ownBindings = (\value -> (typeIdsIn value, value)) <$> m
 
 {-# INLINE generalize #-}
 generalize :: (TypeIndexed k t) => Monomorphic (TypeIndex k) -> t -> Scheme TypeIndex k t
