@@ -460,6 +460,7 @@ test-suite coal-test
       Coal.TypeSystem.UnificationSpec
       Coal.TypeSystemSpec
       E2E.Spec
+      Package.ConstraintValidationSpec
       Package.VersionSpec
       Paths_coal
   hs-source-dirs:
