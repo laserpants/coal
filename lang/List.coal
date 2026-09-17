@@ -4,6 +4,8 @@
 module List {
 
   import Coal.Combinators(always, identity)
+  import namespace Nat
+  import namespace Number
 
   instance Comparable<List<a>> with (Comparable<a>) {
     fun `==`(xs, ys) =
@@ -172,14 +174,12 @@ module List {
   /**
    * Extract a range of elements from the list.
    *
-   * ```
-   * slice(m, n, xs) = xs |. drop(m) |. take(n - m)
-   * ```
+   * ```slice(m, n, xs) = xs |. drop(m) |. take(Nat.sub(n, m))```
    *
    * **Type**: `slice : nat -> nat -> List<a> -> List<a>`
    */
   fun slice(m : nat, n : nat, list : List<a>) : List<a> =
-    list |. drop(m) |. take(n - m)
+    list |. drop(m) |. take(Nat.sub(n, m))
 
   /**
    * Return the element at index `n`, or `None` if out of bounds.
@@ -348,7 +348,7 @@ module List {
    *
    * **Type**: `range : n -> nat -> List<n>`
    */
-  fun range(start : n, count : nat) : List<n> with (Numeric<n>) =
+  fun range(start : n, count : nat) : List<n> with (NumericBase<n>) =
     fold(count, start) {
       | Zero      => fn(_) => []
       | Succ(@go) => fn(s) => s :: go(s + 1)

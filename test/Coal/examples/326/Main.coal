@@ -5,21 +5,30 @@ module Main {
 
   type Complex = Complex(double, double)
 
-  instance Numeric<Complex> {
+  instance NumericBase<Complex> {
     fun from_int32(n : int32) = 
       Complex(Number.int32_to_double(n), 0)
     fun from_int64(n : int64) = 
       Complex(Number.int64_to_double(n), 0)
     fun from_bignum(n : bignum) = 
       Complex(Number.bignum_to_double(n), 0)
-    fun negate(Complex(r, i)) =
-      Complex(-r, -i)
     fun `+`(Complex(r, i), Complex(q, j)) =
       Complex(r + q, i + j)
-    fun `-`(Complex(r, i), Complex(q, j)) =
-      Complex(r - q, i - j)
     fun `*`(Complex(r, i), Complex(q, j)) =
       Complex(r * q - i * j, r * j + i * q)
+  }
+
+  instance Numeric<Complex> {
+    fun from_negative_int32(n : int32) =
+      Complex(Number.int32_to_double(n), 0)
+    fun from_negative_int64(n : int64) =
+      Complex(Number.int64_to_double(n), 0)
+    fun from_negative_bignum(n : bignum) =
+      Complex(Number.bignum_to_double(n), 0)
+    fun negate(Complex(r, i)) =
+      Complex(-r, -i)
+    fun `-`(Complex(r, i), Complex(q, j)) =
+      Complex(r - q, i - j)
   }
 
   let q1 = Complex(1, 2)

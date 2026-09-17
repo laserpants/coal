@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Coal.Compiler.Pass.PhaseTranslation.CheckTraitAnnotations (
@@ -7,6 +8,8 @@ module Coal.Compiler.Pass.PhaseTranslation.CheckTraitAnnotations (
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (supplied)
+import Coal.Compiler.Build (Build (..))
+import Coal.Compiler.Build.NameEntry (TraitEntry (..))
 import Coal.Compiler.Journal (listenErrors, tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
@@ -227,7 +230,8 @@ checkTraitCoverage ::
   CompilerT Metadata m ()
 checkTraitCoverage loc name paramNames (With annTraits _) (With infTraits _) = do
   path <- gets compilerCurrentPath
-  let missing = findMissingTraits annTraits infTraits
+  annTraits' <- concat <$> mapM (fmap Set.toList . supertraitClosure) annTraits
+  let missing = findMissingTraits annTraits' infTraits
       renamed = renameTraitWithNames paramNames <$> missing
   unless (null renamed) $
     tellErrors [MissingTraitAnnotation name renamed (ErrorLocation (principalPath path) loc)]
@@ -268,6 +272,29 @@ rowsStructurallyEqual r1 r2 =
     (RExtend n1 t1 r1', RExtend n2 t2 r2') ->
       n1 == n2 && typesStructurallyEqual t1 t2 && rowsStructurallyEqual r1' r2'
     _ -> False
+
+{- | Compute the transitive supertrait closure of a trait constraint, including
+the constraint itself. Used here so an annotation such as @Numeric<a>@ covers
+inferred requirements on its supertrait @NumericBase<a>@.
+-}
+supertraitClosure :: (MonadIO m) => Trait IndexedType -> CompilerT Metadata m (Set.Set (Trait IndexedType))
+supertraitClosure tr = go Set.empty [tr]
+ where
+  go acc [] = pure acc
+  go acc (t@(Trait _ _) : rest)
+    | t `Set.member` acc = go acc rest
+    | otherwise = do
+        supers <- immediateSupertraits t
+        go (Set.insert t acc) (Set.toList supers <> rest)
+
+immediateSupertraits :: (MonadIO m) => Trait IndexedType -> CompilerT Metadata m (Set.Set (Trait IndexedType))
+immediateSupertraits (Trait name t) = do
+  Build{buildTraits} <- getCurrentBuildC
+  pure $ case Environment.lookup name buildTraits of
+    Just TraitEntry{traitEntryConstraints} ->
+      Set.fromList [Trait sn t | Trait sn _ <- traitEntryConstraints]
+    Nothing ->
+      Set.empty
 
 indexedAnnotationTrait :: (MonadIO m) => Trait (Type Parameter Kind) -> CompilerT Metadata m [Trait IndexedType]
 indexedAnnotationTrait =

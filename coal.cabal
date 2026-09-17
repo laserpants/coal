@@ -516,6 +516,7 @@ benchmark coal-bench-compiler
   main-is: Main.hs
   other-modules:
       Kernel.Normalization
+      TypeSystem.Constraints
       Paths_coal
   hs-source-dirs:
       bench/compiler

@@ -16,6 +16,7 @@ builtinNames =
     , "(<>)"
     , "(==)"
     , "(!=)"
+    , "NumericBase"
     , "Comparable"
     , "Divisible"
     , "EqualTo"
@@ -38,5 +39,8 @@ builtinNames =
     , "from_int32"
     , "from_int64"
     , "from_bignum"
+    , "from_negative_int32"
+    , "from_negative_int64"
+    , "from_negative_bignum"
     , "negate"
     ]

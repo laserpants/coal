@@ -38,7 +38,7 @@ module Main {
   // --- Polymorphic right-hand side (strict-once regression guard) ---------
   //
   // NOTE: the return type is deliberately NOT annotated. The literal `5` is
-  // inferred as `a with Numeric<a>`, so `poly_mk : unit -> a with Numeric<a>`
+  // inferred as `a with NumericBase<a>`, so `poly_mk : unit -> a with NumericBase<a>`
   // and the trait constraint survives into the translation phase. A `let`
   // that generalizes over that constraint is rewritten by InsertDictionaries
   // into a dictionary lambda which is re-applied at every use site, so the

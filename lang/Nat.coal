@@ -24,7 +24,7 @@
  */
 module Nat {
 
-  import namespace Number
+  import Number(int32_to_int64)
 
   /**
    * Convert an `int64` value into a natural number.
@@ -56,11 +56,97 @@ module Nat {
   }
 
   instance Natural<int32> {
-    let to_nat = pack << Number.int32_to_int64
+    let to_nat = pack << int32_to_int64
   }
 
   instance Natural<int64> {
     let to_nat = pack
   }
+
+  /**
+   * Return the predecessor of a natural number.
+   *
+   * Returns `Zero` for `Zero` (saturation), otherwise strips one `Succ`
+   * constructor.
+   *
+   * **Type**: `pred : nat -> nat`
+   */
+  fun pred(n : nat) : nat =
+    match(n) {
+      | Zero => Zero
+      | Succ(m) => m
+    }
+
+  /**
+   * Saturating subtraction of natural numbers.
+   *
+   * Returns `Zero` when `n` is greater than `m` (the result would be
+   * negative), following the convention of `pack`, which likewise maps 
+   * negative integers to `Zero`.
+   *
+   * **Type**: `sub : nat -> nat -> nat`
+   */
+  fun sub(m : nat, n : nat) : nat =
+    pack(unpack(m) - unpack(n))
+
+  /**
+   * Checked subtraction of natural numbers.
+   *
+   * Returns `None` when `n` is greater than `m` (there is no natural number 
+   * result), otherwise `Some` of the difference. 
+   *
+   * **Type**: `checked_sub : nat -> nat -> Option<nat>`
+   */
+  fun checked_sub(m : nat, n : nat) : Option<nat> =
+    if (n > m) then None else Some(sub(m, n))
+
+  /**
+   * Division with remainder in a single pass.
+   *
+   * Returns `None` when the divisor is `Zero`, otherwise `Some` of the
+   * `(quotient, remainder)` pair. Satisfies the law: `Some((q, r))`
+   * implies `n = d * q + r` with `r < d`. 
+   *
+   * **Type**: `div_mod : nat -> nat -> Option<(nat, nat)>`
+   */
+  fun div_mod(n : nat, d : nat) : Option<(nat, nat)> =
+    match(d) {
+      | Zero => None
+      | Succ(_) =>
+        Some(
+          fold(n, (Zero, Zero)) {
+            | Zero => fn(acc) => acc
+            | Succ(@go) => fn((q, r)) => if (Succ(r) == d) then go((Succ(q), Zero)) else go((q, Succ(r)))
+          }
+        )
+    }
+
+  /**
+   * Checked division of natural numbers.
+   *
+   * Returns `None` when the divisor is `Zero`, otherwise `Some` of the
+   * quotient. 
+   *
+   * **Type**: `checked_div : nat -> nat -> Option<nat>`
+   */
+  fun checked_div(n : nat, d : nat) : Option<nat> =
+    match(div_mod(n, d)) {
+      | Some((q, _)) => Some(q)
+      | None => None
+    }
+
+  /**
+   * Checked remainder of natural numbers.
+   *
+   * Returns `None` when the divisor is `Zero`, otherwise `Some` of the
+   * remainder. 
+   *
+   * **Type**: `checked_mod : nat -> nat -> Option<nat>`
+   */
+  fun checked_mod(n : nat, d : nat) : Option<nat> =
+    match(div_mod(n, d)) {
+      | Some((_, r)) => Some(r)
+      | None => None
+    }
 
 }

@@ -222,22 +222,39 @@ Chooses between from_int32, from_int64, or from_bignum based on the value.
 -}
 fromLiteral :: IndexedType -> Integer -> Expression Metadata k IndexedType
 fromLiteral t int
-  | int <= fromIntegral (maxBound :: Int32) =
-      EApplication mempty t (EVariable mempty (Label (TIntrinsic IInt32 `TArrow` t) "from_int32")) (ELiteral mempty (LInt32 (fromIntegral int)) :| [])
-  | int <= fromIntegral (maxBound :: Int64) =
-      EApplication mempty t (EVariable mempty (Label (TIntrinsic IInt64 `TArrow` t) "from_int64")) (ELiteral mempty (LInt64 (fromIntegral int)) :| [])
+  | int >= 0 && m <= fromIntegral (maxBound :: Int32) =
+      fromInt "from_int32" (LInt32 (fromIntegral int))
+  | int >= 0 && m <= fromIntegral (maxBound :: Int64) =
+      fromInt "from_int64" (LInt64 (fromIntegral int))
+  | int >= 0 =
+      fromBignum "from_bignum" int
+  | m <= fromIntegral (maxBound :: Int32) =
+      fromInt "from_negative_int32" (LInt32 (fromIntegral int))
+  | m <= fromIntegral (maxBound :: Int64) =
+      fromInt "from_negative_int64" (LInt64 (fromIntegral int))
   | otherwise =
-      EApplication
-        mempty
-        t
-        (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "from_bignum"))
-        ( EApplication
-            mempty
-            (TIntrinsic IBignum)
-            (EVariable mempty (Label (TIntrinsic IString `TArrow` t) "number$_unsafe_parse_bignum"))
-            (ELiteral mempty (LString (ByteString.pack $ show int)) :| [])
-            :| []
-        )
+      fromBignum "from_negative_bignum" int
+ where
+  m = abs int
+  fromInt name lit =
+    EApplication mempty t (EVariable mempty (Label (argType lit `TArrow` t) name)) (ELiteral mempty lit :| [])
+  argType =
+    \case
+      LInt32{} -> TIntrinsic IInt32
+      LInt64{} -> TIntrinsic IInt64
+      _ -> TIntrinsic IBignum
+  fromBignum name v =
+    EApplication
+      mempty
+      t
+      (EVariable mempty (Label (TIntrinsic IBignum `TArrow` t) name))
+      ( EApplication
+          mempty
+          (TIntrinsic IBignum)
+          (EVariable mempty (Label (TIntrinsic IString `TArrow` TIntrinsic IBignum) "number$_unsafe_parse_bignum"))
+          (ELiteral mempty (LString (ByteString.pack $ show v)) :| [])
+          :| []
+      )
 
 {- | Collect all integer literal patterns in a pattern, replacing them with fresh variables.
 Returns the transformed pattern and a list of (variable, integer) pairs.

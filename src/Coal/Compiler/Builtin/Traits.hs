@@ -2,6 +2,7 @@
 
 module Coal.Compiler.Builtin.Traits (
   builtinTraits,
+  numericBase,
   numeric,
   ordered,
   comparable,
@@ -12,6 +13,10 @@ module Coal.Compiler.Builtin.Traits (
 
 import Coal.Language
 import qualified Data.Set as Set
+
+{-# INLINE numericBase #-}
+numericBase :: ParameterizedType -> Trait ParameterizedType
+numericBase = Trait "NumericBase"
 
 {-# INLINE numeric #-}
 numeric :: ParameterizedType -> Trait ParameterizedType
@@ -41,10 +46,10 @@ builtinTraits :: (Monoid a) => [Definition a () ()]
 builtinTraits =
   [ DTrait
       mempty
-      "Numeric"
+      "NumericBase"
       ( TraitDefinition
           mempty
-          "Numeric"
+          "NumericBase"
           []
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
@@ -57,16 +62,35 @@ builtinTraits =
               "from_bignum"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
-              "negate"
-              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
-          , TraitDefinitionInterfaceEntry
               "(+)"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
-              "(-)"
-              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
-          , TraitDefinitionInterfaceEntry
               "(*)"
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+          ]
+      )
+  , DTrait
+      mempty
+      "Numeric"
+      ( TraitDefinition
+          mempty
+          "Numeric"
+          [Trait "NumericBase" (Parameter () "a")]
+          (Parameter () "a")
+          [ TraitDefinitionInterfaceEntry
+              "from_negative_int32"
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IInt32 `TArrow` TVariable (Parameter () "a"))
+          , TraitDefinitionInterfaceEntry
+              "from_negative_int64"
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
+          , TraitDefinitionInterfaceEntry
+              "from_negative_bignum"
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
+          , TraitDefinitionInterfaceEntry
+              "negate"
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+          , TraitDefinitionInterfaceEntry
+              "(-)"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
           ]
       )

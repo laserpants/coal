@@ -77,6 +77,70 @@ For `DFunction` and `DLet`: stores the type via `define`. For `DInstance`: uses 
 
 ---
 
+## Performance notes
+
+Type inference is the most expensive phase for definition-heavy programs, and its
+cost is dominated by `solveT` (constraint solving), not by `inferKinds`, the
+substitution application to the finished module, or the debug dumps.
+
+Solving happens **per definition** (`inferTypes` calls `generateConstraints` then
+`solveT` for each definition in turn). Consequently a module whose constraints are
+spread over many small definitions is cheap, whereas a single definition that
+carries thousands of constraints (e.g. one large list literal of assertions) is
+expensive: the solver's work grows super-linearly in the number of constraints of
+that *one* definition, not in module size.
+
+The solver (`Coal.TypeSystem.Constraint.Solver`) historically re-applied every
+discovered substitution to the *entire* remaining constraint set and composed
+substitutions left-nested, and `apply` used generic uniplate traversals. Two
+compiler-level changes removed most of that cost while keeping the solve order —
+and therefore the output — byte-for-byte identical:
+
+1. **Dirty-set substitution application.** Each constraint is wrapped in a
+   `SolverEntry` that caches its free type-index set and its active set (the exact
+   `HasActive` value). A new substitution is applied only to the entries that
+   mention one of the bound variables; constraints that avoid the bound variables
+   are provably unaffected, and `isSolvable`'s active-set query is answered from
+   the cached sets instead of a fresh generic traversal of every constraint.
+2. **Hand-written traversals.** `apply` for `IndexedType` (`applyIndexedType`) and
+   `typeIndexesIn` for `IndexedType`/`Row` are explicit recursions over the type
+   constructors instead of `transform . applyT` / `Set.fromList . universeBi`,
+   which used to rebuild and scan every nested `Data` value (kinds, names, rows).
+
+Measured on `test/Coal/examples/435` (40 source modules including builtins). The
+per-definition figure comes from the `TypeInference__*` dump timestamps, the phase
+figure from the compiler's own phase timings:
+
+| | `passTypeInference`, `Data.VariantSpec` | type-checking phase, all 40 modules |
+|---|---|---|
+| before | 11.66 s (60.8 s in the original report's environment) | 18.04 s |
+| after (both changes) | 1.13 s | 5.97 s |
+
+That is 10.4x for the hot definition and 3.0x for the phase. The 60.8 s / 11.66 s
+spread for identical pre-change code is environmental (the original run shared the
+machine with a build); the before/after pair above was measured back to back under
+the same conditions. The remaining 5.97 s is spread evenly over the other 39 modules
+(worst module 0.34 s), i.e. the single-definition hot spot is gone. Splitting the
+large definition into several smaller ones is still the cheapest way to avoid the
+remaining super-linear terms, but it is no longer necessary for this program.
+
+Validation: the `.debug` artifact tree (every pass dump, including inferred and
+substituted types) is byte-identical to the pre-change baseline, and the compiled
+example's own suite reports all 200 tests passing.
+
+Not addressed (no longer on the critical path at this scale): `unifyAll`
+re-applies a substitution per element of its argument list, the solver's
+per-step choice/rewrite scan is linear in the remaining constraint count
+(quadratic across a solve), and constraint *generation* accumulates output
+through a left-nested writer list. All three are super-linear, but their
+contribution is small once the changes above are in place. The solver's
+final composition of substitution fragments is incremental (each fragment
+only rewrites accumulated bindings whose variables it binds), replacing the
+nested `Semigroup` composition that re-applied every fragment to the whole
+accumulated map.
+
+---
+
 ## Compiler Interactions
 
 - **Earlier passes this relies on**: ExpandLambdaMatchExpressions, PrepareBuild, KindIndexing
