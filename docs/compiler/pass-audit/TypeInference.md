@@ -116,7 +116,7 @@ figure from the compiler's own phase timings:
 | before | 11.66 s (60.8 s in the original report's environment) | 18.04 s |
 | after (both changes) | 1.13 s | 5.97 s |
 
-That is 10.4× for the hot definition and 3.0× for the phase. The 60.8 s / 11.66 s
+That is 10.4x for the hot definition and 3.0x for the phase. The 60.8 s / 11.66 s
 spread for identical pre-change code is environmental (the original run shared the
 machine with a build); the before/after pair above was measured back to back under
 the same conditions. The remaining 5.97 s is spread evenly over the other 39 modules
