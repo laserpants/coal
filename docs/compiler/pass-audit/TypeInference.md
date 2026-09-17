@@ -128,10 +128,16 @@ Validation: the `.debug` artifact tree (every pass dump, including inferred and
 substituted types) is byte-identical to the pre-change baseline, and the compiled
 example's own suite reports all 200 tests passing.
 
-Not addressed (no longer on the critical path at this scale): `unifyAll` re-applies
-a substitution per element of its argument list, and constraint *generation*
-accumulates output through a left-nested writer list. Both are super-linear, but
-their contribution is small once the two changes above are in place.
+Not addressed (no longer on the critical path at this scale): `unifyAll`
+re-applies a substitution per element of its argument list, the solver's
+per-step choice/rewrite scan is linear in the remaining constraint count
+(quadratic across a solve), and constraint *generation* accumulates output
+through a left-nested writer list. All three are super-linear, but their
+contribution is small once the changes above are in place. The solver's
+final composition of substitution fragments is incremental (each fragment
+only rewrites accumulated bindings whose variables it binds), replacing the
+nested `Semigroup` composition that re-applied every fragment to the whole
+accumulated map.
 
 ---
 

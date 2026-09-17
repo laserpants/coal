@@ -37,7 +37,7 @@ import Coal.TypeSystem.Constraint (Constraint (..), Monomorphic (..))
 import Coal.TypeSystem.Substitution (Substitutable (..), Substitution (..), mapsTo)
 import Coal.TypeSystem.Unification (UnificationError, Unifier (..), runUnifier, unifyAll)
 import Control.Monad.RWS.Strict (MonadState, MonadWriter, RWS, get, put, runRWS, tell)
-import Data.List (delete, find)
+import Data.List (delete, find, foldl')
 import qualified Data.Map.Strict as Map
 import Data.Set (Set, intersection, (\\))
 import qualified Data.Set as Set
@@ -159,8 +159,52 @@ solve = go [] . fmap mkEntry
       Choice rest Lacks{} ->
         go frags rest
 
+{- | Combine the substitution fragments produced while solving.
+
+Fragments arrive most recent first; the nested composition they replace,
+@foldr (<>) mempty frags@, puts the newest fragment outermost, i.e. newer
+fragments are applied to the maps of older fragments (and to each other in
+solving order, oldest first).
+
+This function computes the same composition incrementally, walking the
+fragments in solving order (oldest first) and maintaining the composition of
+the fragments processed so far. A fragment's map rewrites every accumulated
+binding whose type mentions one of the fragment's bound variables — exactly
+what the nested @apply newer (map older)@ does — while bindings that avoid
+the new variables cannot be affected (@apply@ is the identity on types that
+do not mention a bound variable) and are kept unchanged. The fragment's own
+bindings are added as they are; on the (not expected to occur) key collision
+with an older binding, the rewritten older entry wins, matching the
+left-biased union in 'Semigroup'.
+
+The result is the same substitution the nested composition yields, but its
+cost is proportional to the number of bindings actually affected rather than
+to (fragments × accumulated map size).
+-}
+
+-- An accumulated binding in 'composeSubstitutions': its composed value plus
+-- the ids of the type variables occurring in it, used to skip fragments that
+-- cannot affect it.
+type ComposedEntry = (Set Int, IndexedType)
+
 composeSubstitutions :: [Substitution] -> Substitution
-composeSubstitutions = foldr (<>) mempty
+composeSubstitutions =
+  Substitution . Map.map snd . foldl' addFragment Map.empty . reverse
+ where
+  addFragment :: Map.Map Int ComposedEntry -> Substitution -> Map.Map Int ComposedEntry
+  addFragment acc sub@(Substitution m)
+    | Map.null m = acc
+    | otherwise = Map.union rewritten ownBindings
+   where
+    keys = Map.keysSet m
+    rewritten = Map.map passThrough acc
+    passThrough entry@(freeVars, value)
+      | Set.null (freeVars `Set.intersection` keys) =
+          entry
+      | otherwise =
+          let value' = apply sub value
+           in (typeIdsIn value', value')
+    ownBindings = fmap (\value -> (typeIdsIn value, value)) m
 
 {-# INLINE generalize #-}
 generalize :: (TypeIndexed k t) => Monomorphic (TypeIndex k) -> t -> Scheme TypeIndex k t
