@@ -288,13 +288,13 @@ fromLiteral loc n
       fromBignum "from_negative_bignum" n
  where
   m = abs n
-  fromInt name lit =
-    EApplication loc () (EVariable loc (Label () name)) (ELiteral loc lit :| [])
-  fromBignum name v =
+  fromInt name_ lit =
+    EApplication loc () (EVariable loc (Label () name_)) (ELiteral loc lit :| [])
+  fromBignum name_ v =
     EApplication
       loc
       ()
-      (EVariable loc (Label () name))
+      (EVariable loc (Label () name_))
       ( EApplication
           mempty
           ()
