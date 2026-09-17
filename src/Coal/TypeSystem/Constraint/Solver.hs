@@ -179,7 +179,7 @@ left-biased union in 'Semigroup'.
 
 The result is the same substitution the nested composition yields, but its
 cost is proportional to the number of bindings actually affected rather than
-to (fragments × accumulated map size).
+to (fragments * accumulated map size).
 -}
 
 -- An accumulated binding in 'composeSubstitutions': its composed value plus
