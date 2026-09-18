@@ -43,6 +43,7 @@ library
       CLI.Git.Commit
       CLI.Git.Repo
       CLI.Options.AddCmd
+      CLI.Options.Command
       CLI.Options.CompileCmd
       CLI.Options.InitCmd
       CLI.Options.UpdateCmd
@@ -422,6 +423,7 @@ test-suite coal-test
   other-modules:
       CLI.Command.BuildSpec
       CLI.Parser.AddCmdSpec
+      CLI.Parser.CommandSpec
       CLI.Parser.UpdateCmdSpec
       Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec

@@ -21,13 +21,15 @@ import CLI.Command.Install (installCommand)
 import CLI.Command.Update (updateCommand)
 import CLI.Command.Version (coalVersion)
 import CLI.Error (prettyCLIError)
-import CLI.Parser.Command (commandParser)
+import CLI.Options.Command (CommandOptions (..))
+import CLI.Parser.Command (commandOptionsParser)
 import Coal.Compiler.Terminal (TerminalCapabilities (..), detectStderrCapabilities, sanitizeForTerminal)
 import Control.Exception (IOException, try)
 import Control.Monad.Except (runExceptT)
 import qualified Data.Text.IO as Text
 import GHC.IO.Encoding (setLocaleEncoding, utf8)
-import Options.Applicative
+import Options.Applicative hiding (command)
+import System.Directory (setCurrentDirectory)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hSetEncoding, stderr, stdout)
 
@@ -63,10 +65,10 @@ versionOption =
         <> help "Show compiler version"
     )
 
-commandInfo :: ParserInfo Command
+commandInfo :: ParserInfo CommandOptions
 commandInfo =
   info
-    (commandParser <**> helper <**> versionOption)
+    (commandOptionsParser <**> helper <**> versionOption)
     ( fullDesc
         <> progDesc "The Coal compiler command-line interface"
         <> header "Welcome to the Coal compiler"
@@ -87,5 +89,19 @@ main = do
   _ <- try @IOException (hSetEncoding stdout utf8)
   _ <- try @IOException (hSetEncoding stderr utf8)
   caps <- detectStderrCapabilities
-  cmd <- execParser commandInfo
-  runCommand caps cmd
+  opts <- execParser commandInfo
+  -- Apply the global -C/--directory override before any command runs. Every
+  -- project command reads coal.json / .coal / .build relative to the current
+  -- directory, so channelling the flag through setCurrentDirectory makes it
+  -- uniform across install, update, build, add and clean with no per-command
+  -- plumbing.
+  case commandDir opts of
+    Just dir -> do
+      eDir <- try @IOException (setCurrentDirectory dir)
+      case eDir of
+        Left err -> do
+          putStrLn $ "• Could not change directory to '" ++ dir ++ "': " ++ show err
+          exitWith (ExitFailure 1)
+        Right () -> pure ()
+    Nothing -> pure ()
+  runCommand caps (command opts)
