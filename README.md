@@ -167,25 +167,6 @@ When the manifest changes in a way the lockfile cannot satisfy — for example a
 
 The same rules apply to every package in the graph: two manifests that require incompatible versions of one package are reported as a conflict, with the conflicting requirements attributed to the manifests that declared them.
 
-<!--
-
-## Project status and roadmap
-
-### Roadmap
-
-#### Next milestone: 1
-
-![](https://geps.dev/progress/75)
--->
-
-<!--
-| Milestone  | Feature/Fix                                           |                                                                                                                                                              
-| ---------- | ----------------------------------------------------- |                                                                                                                                                              
-| 1          | FFI                                                   |             
-
- - from_int32 -> from_integer
--->
-
 ## How to contribute
 
 This is an open and evolving project &mdash; contributions are welcome. Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
