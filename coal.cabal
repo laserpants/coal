@@ -36,6 +36,7 @@ library
       CLI.Command.EntryPoint
       CLI.Command.Init
       CLI.Command.Install
+      CLI.Command.Update
       CLI.Command.Version
       CLI.Error
       CLI.Git
@@ -44,10 +45,12 @@ library
       CLI.Options.AddCmd
       CLI.Options.CompileCmd
       CLI.Options.InitCmd
+      CLI.Options.UpdateCmd
       CLI.Parser.AddCmd
       CLI.Parser.Command
       CLI.Parser.CompileCmd
       CLI.Parser.InitCmd
+      CLI.Parser.UpdateCmd
       Coal.Common.Environment
       Coal.Common.FreeVars
       Coal.Common.Label
@@ -316,6 +319,7 @@ library
       Package.Lock
       Package.Lock.Spec
       Package.Manifest
+      Package.Resolution
       Package.Version
   other-modules:
       Paths_coal
@@ -418,6 +422,7 @@ test-suite coal-test
   other-modules:
       CLI.Command.BuildSpec
       CLI.Parser.AddCmdSpec
+      CLI.Parser.UpdateCmdSpec
       Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
       Coal.Kernel.Eval.EvalSpec
@@ -461,6 +466,7 @@ test-suite coal-test
       Coal.TypeSystemSpec
       E2E.Spec
       Package.ConstraintValidationSpec
+      Package.ResolutionSpec
       Package.VersionSpec
       Paths_coal
   hs-source-dirs:

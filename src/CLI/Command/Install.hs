@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -35,10 +36,17 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name, Over, forM_)
 import Package.Dependency (PackageDependency (..))
-import Package.Error (PackageError (..), Requirement (..))
-import Package.Lock (PackageLock (..))
+import Package.Error (ConflictHint (..), PackageError (..), Requirement (..))
+import Package.Lock (PackageLock (..), loadLockFile)
 import Package.Lock.Spec (LockSpec (..))
 import Package.Manifest
+import Package.Resolution (
+  LockChange,
+  LockMode (..),
+  ResolutionSource (..),
+  chooseSource,
+  lockDiff,
+ )
 import Package.Version (AvailableVersion (..), PackageConstraint (..), PackageVersion (..), getConstraint)
 import System.Directory (doesDirectoryExist)
 import System.IO (hPutStrLn, stderr)
@@ -48,6 +56,13 @@ data InstallState = InstallState
   { visited :: Set (Name, GitCommit)
   , lockEntries :: Map Name LockSpec
   , requirements :: Map Name [Requirement]
+  , refreshed :: Set Name
+  {- ^ Packages whose subtrees are being re-resolved rather than taken
+  from the lockfile.
+  -}
+  , lockedPackages :: Map Name LockSpec
+  -- ^ The lockfile as loaded, used to decide what may be reused.
+  , lockMode :: LockMode
   , caps :: TerminalCapabilities
   }
   deriving (Show, Eq)
@@ -61,9 +76,23 @@ overLockEntries fn InstallState{..} = InstallState{lockEntries = fn lockEntries,
 overRequirements :: Over InstallState (Map Name [Requirement])
 overRequirements fn InstallState{..} = InstallState{requirements = fn requirements, ..}
 
+overRefreshed :: Over InstallState (Set Name)
+overRefreshed fn InstallState{..} = InstallState{refreshed = fn refreshed, ..}
+
 {-# INLINE initialInstallState #-}
-initialInstallState :: TerminalCapabilities -> InstallState
-initialInstallState = InstallState mempty mempty mempty
+initialInstallState :: TerminalCapabilities -> LockMode -> Map Name LockSpec -> InstallState
+initialInstallState caps mode locked =
+  InstallState
+    { visited = mempty
+    , lockEntries = mempty
+    , requirements = mempty
+    , refreshed = case mode of
+        LockRefresh names -> names
+        _ -> mempty
+    , lockedPackages = locked
+    , lockMode = mode
+    , caps = caps
+    }
 
 addVisited :: (Name, GitCommit) -> StateT InstallState (ExceptT CLIError IO) ()
 addVisited pkg = modify (overVisited (Set.insert pkg))
@@ -74,6 +103,12 @@ addLockEntry name spec = modify (overLockEntries (Map.insert name spec))
 addRequirement :: Name -> Requirement -> StateT InstallState (ExceptT CLIError IO) ()
 addRequirement name requirement =
   modify (overRequirements (Map.insertWith (<>) name [requirement]))
+
+{- | Mark a package whose version was resolved fresh, so that its
+dependencies are re-resolved as well rather than pinned by the lockfile.
+-}
+addRefreshed :: Name -> StateT InstallState (ExceptT CLIError IO) ()
+addRefreshed name = modify (overRefreshed (Set.insert name))
 
 {- | Print a progress line to stderr, degrading gracefully to ASCII on
 terminals that don't support Unicode (e.g. when output is piped).
@@ -104,7 +139,9 @@ installPackage name version repo commit = do
         progress ("Cloning " <> name <> " from " <> repoUrl repo <> "...")
         lift (gitCloneRepo repo dir)
         progress ("Checking out " <> describe name version commit <> "...")
-        lift (gitCheckoutCommit commit dir)
+        lift (gitCheckoutCommit commit dir) `catchError` \case
+          EGitError{} -> throwError (EPackageError (ECommitUnavailable name commit))
+          err -> throwError err
         progress ("Installed " <> describe name version commit)
 
     addLockEntry name LockSpec{version = version, source = repo, commit = commit}
@@ -112,24 +149,42 @@ installPackage name version repo commit = do
     installDependencies name (fromMaybe mempty deps)
 
 installDependencies :: Name -> Map Text PackageDependency -> StateT InstallState (ExceptT CLIError IO) ()
-installDependencies source deps =
+installDependencies source deps = do
+  InstallState{lockMode, refreshed, lockedPackages} <- get
+  let underRefresh = source `Set.member` refreshed
   forM_ (Map.toList deps) $
     \(pkgName, PackageDependency{git = repo, version = constraint}) -> do
-      addRequirement pkgName Requirement{requirementSource = source, requirementConstraint = constraint, requirementRepo = repo}
-      progress ("Resolving versions for " <> pkgName <> " (" <> repoUrl repo <> ")...")
-      versions <- lift $ gitLsRemoteVersions repo
-      case pickVersionHash constraint versions of
-        Nothing -> do
-          throwError (EPackageError err)
-         where
-          err =
-            ENoPackageVersionMatch
-              pkgName
-              (fromMaybe (PackageConstraint CAny) constraint)
-              (availableVersion <$> versions)
-        Just (AvailableVersion pkgVersion commit) -> do
-          progress ("Resolved " <> describe pkgName pkgVersion commit)
+      let requirement =
+            Requirement
+              { requirementSource = source
+              , requirementConstraint = constraint
+              , requirementRepo = repo
+              }
+      addRequirement pkgName requirement
+      case chooseSource lockMode underRefresh lockedPackages pkgName repo constraint of
+        FromLock LockSpec{version = pkgVersion, commit} -> do
+          progress ("Using locked " <> describe pkgName pkgVersion commit)
           installPackage pkgName pkgVersion repo commit
+        LockStale LockSpec{version = lockedVersion} staleConstraint ->
+          throwError $
+            EPackageError $
+              EStaleLock pkgName requirement{requirementConstraint = Just staleConstraint} lockedVersion
+        FreshResolve -> do
+          progress ("Resolving versions for " <> pkgName <> " (" <> repoUrl repo <> ")...")
+          versions <- lift $ gitLsRemoteVersions repo
+          case pickVersionHash constraint versions of
+            Nothing -> do
+              throwError (EPackageError err)
+             where
+              err =
+                ENoPackageVersionMatch
+                  pkgName
+                  (fromMaybe (PackageConstraint CAny) constraint)
+                  (availableVersion <$> versions)
+            Just (AvailableVersion pkgVersion commit) -> do
+              progress ("Resolved " <> describe pkgName pkgVersion commit)
+              addRefreshed pkgName
+              installPackage pkgName pkgVersion repo commit
 
 constraintSatisfies :: PackageConstraint -> AvailableVersion -> Bool
 constraintSatisfies (PackageConstraint constraint) (AvailableVersion{availableVersion = PackageVersion version}) =
@@ -207,8 +262,8 @@ locked version alongside the violated requirements, for rendering. The
 error also carries the satisfied requirements on the same package, so
 the message can show the other side of the conflict.
 -}
-violationsToErrors :: Map Name [Requirement] -> Map Name LockSpec -> Map Name [Violation] -> [PackageError]
-violationsToErrors requirements entries =
+violationsToErrors :: ConflictHint -> Map Name [Requirement] -> Map Name LockSpec -> Map Name [Violation] -> [PackageError]
+violationsToErrors hint requirements entries =
   Map.foldMapWithKey toError
  where
   toError :: Name -> [Violation] -> [PackageError]
@@ -216,7 +271,7 @@ violationsToErrors requirements entries =
     case Map.lookup pkgName entries of
       Nothing -> []
       Just LockSpec{version} ->
-        [EVersionConstraintConflict pkgName version (toRequirement <$> violations) (satisfiedOn pkgName)]
+        [EVersionConstraintConflict hint pkgName version (toRequirement <$> violations) (satisfiedOn pkgName)]
   satisfiedOn :: Name -> [Requirement]
   satisfiedOn pkgName =
     [ req
@@ -238,30 +293,68 @@ describe :: Name -> PackageVersion -> GitCommit -> Text
 describe name (PackageVersion version) (GitCommit hash) =
   name <> "@" <> toText version <> " (" <> Text.take 8 hash <> ")"
 
-installProject :: TerminalCapabilities -> ExceptT CLIError IO ()
-installProject caps = do
+installProject :: TerminalCapabilities -> LockMode -> ExceptT CLIError IO [LockChange]
+installProject caps mode = do
   res <- liftIO $ runExceptT loadProjectManifest
   case res of
     Left err ->
       throwError (EPackageError err)
     Right PackageManifest{..} -> do
+      loaded <- withExceptT EPackageError loadLockFile
       let deps = fromMaybe mempty dependencies
+          lockedPackages = maybe mempty packages loaded
+          -- Without a lockfile there is nothing to trust, so resolve fresh.
+          effectiveMode = case (mode, loaded) of
+            (LockPreferred, Nothing) -> LockIgnored
+            (m, _) -> m
+      validateUpdateTargets effectiveMode lockedPackages deps
       when (not (Map.null deps)) $
         liftIO $
-          announce caps "Resolving project dependencies..."
+          announce caps $
+            case effectiveMode of
+              LockIgnored -> "Resolving project dependencies..."
+              _ -> "Resolving project dependencies using coal.lock.json..."
       InstallState{lockEntries, requirements} <-
-        flip execStateT (initialInstallState caps) $
+        flip execStateT (initialInstallState caps effectiveMode lockedPackages) $
           installDependencies name deps
 
-      case violationsToErrors requirements lockEntries (validateLockEntries requirements lockEntries) of
+      -- A re-resolved graph may contain a conflict that only the lockfile
+      -- was hiding; report it before touching coal.lock.json.
+      let hint = case effectiveMode of
+            LockIgnored -> HintEditManifests
+            _ -> HintRunUpdate
+      case violationsToErrors hint requirements lockEntries (validateLockEntries requirements lockEntries) of
         [] ->
           pure ()
         err : _ ->
           throwError (EPackageError err)
 
-      liftIO $ do
-        ByteString.writeFile "coal.lock.json" (toStrict (encodePretty (PackageLock lockEntries)))
-      liftIO $ announce caps ("Wrote coal.lock.json with " <> showt (Map.size lockEntries) <> " packages")
+      let changes = lockDiff lockedPackages lockEntries
+      -- Only rewrite the lockfile when something actually changed, so that
+      -- a lock-faithful install leaves the working tree untouched.
+      when (loaded == Nothing || not (null changes)) $
+        liftIO $ do
+          ByteString.writeFile "coal.lock.json" (toStrict (encodePretty (PackageLock lockEntries)))
+          announce caps ("Wrote coal.lock.json with " <> showt (Map.size lockEntries) <> " packages")
+      when (loaded /= Nothing && null changes) $
+        liftIO $
+          announce caps ("coal.lock.json is up to date (" <> showt (Map.size lockEntries) <> " packages)")
+      pure changes
+
+{- | Reject `coal update` targets that name no package in the lockfile or
+the project manifest, so the user finds out before anything is fetched.
+-}
+validateUpdateTargets :: LockMode -> Map Name LockSpec -> Map Text PackageDependency -> ExceptT CLIError IO ()
+validateUpdateTargets mode lockedPackages deps =
+  case mode of
+    LockRefresh names -> do
+      let known = Map.keysSet lockedPackages `Set.union` Map.keysSet deps
+          unknown = Set.toList (names `Set.difference` known)
+      unless (null unknown) $
+        throwError (EPackageError (EUnknownUpdateTarget unknown (Set.toList known)))
+    _ -> pure ()
 
 installCommand :: TerminalCapabilities -> ExceptT CLIError IO ()
-installCommand = installProject
+installCommand caps = do
+  _ <- installProject caps LockPreferred
+  pure ()

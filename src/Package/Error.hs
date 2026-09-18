@@ -3,8 +3,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Package.Error (PackageError (..), Requirement (..), prettyPackageError) where
+module Package.Error (PackageError (..), ConflictHint (..), Requirement (..), prettyPackageError) where
 
+import CLI.Git.Commit (GitCommit (..))
 import CLI.Git.Repo (GitRepo (..))
 import Data.SemVer (Version, toText)
 import Data.Text (Text)
@@ -26,7 +27,21 @@ data PackageError
   | EDependencyInvalidManifestFormat Name Text
   | EDependencyInvalidModuleFormat Name Name
   | ENoPackageVersionMatch Name PackageConstraint [PackageVersion]
-  | EVersionConstraintConflict Name PackageVersion [Requirement] [Requirement]
+  | EVersionConstraintConflict ConflictHint Name PackageVersion [Requirement] [Requirement]
+  | EStaleLock Name Requirement PackageVersion
+  | ECommitUnavailable Name GitCommit
+  | EUnknownUpdateTarget [Name] [Name]
+  deriving (Show, Eq)
+
+{- | What the user should do about a version conflict. A conflict
+discovered while re-resolving the whole graph means the manifest
+declarations themselves are incompatible; a conflict involving locked
+versions means the lockfile predates a manifest change and needs
+refreshing.
+-}
+data ConflictHint
+  = HintEditManifests
+  | HintRunUpdate
   deriving (Show, Eq)
 
 {- | A single declaration of interest in a package: @source@ names the
@@ -61,7 +76,7 @@ prettyPackageError = \case
     "Module '" <> moduleName <> "' in the package '" <> name <> "' is not a valid module name."
   ENoPackageVersionMatch name _ _ ->
     "No install candidate found for package '" <> name <> "'"
-  EVersionConstraintConflict name (PackageVersion version) violated satisfied ->
+  EVersionConstraintConflict hint name (PackageVersion version) violated satisfied ->
     "Conflicting version requirements for package '"
       <> name
       <> "':\n\n"
@@ -74,7 +89,42 @@ prettyPackageError = \case
                  <> "':\n\n"
                  <> Text.intercalate "\n" (prettySatisfiedRequirement <$> satisfied)
          )
-      <> "\n\nNo lockfile was written. Update the conflicting dependency declarations or choose compatible package releases. Only relax a constraint after checking compatibility."
+      <> "\n\n"
+      <> conflictFooter hint
+  EStaleLock name requirement (PackageVersion locked) ->
+    "The lockfile is out of date for package '"
+      <> name
+      <> "':\n\n- '"
+      <> requirementSource requirement
+      <> "' requires '"
+      <> maybe "*" prettyPackageConstraint (requirementConstraint requirement)
+      <> "' from "
+      <> repoUrl (requirementRepo requirement)
+      <> "\n- coal.lock.json pins "
+      <> toText locked
+      <> "\n\nRun `coal update` to re-resolve the dependency graph."
+  ECommitUnavailable name (GitCommit hash) ->
+    "Could not check out commit "
+      <> Text.take 8 hash
+      <> " for package '"
+      <> name
+      <> "'.\n\nThe revision may no longer exist upstream (for example after a force-push). Run `coal update` to re-resolve the dependency graph."
+  EUnknownUpdateTarget unknown known ->
+    "Unknown package(s): "
+      <> Text.intercalate ", " unknown
+      <> if null known
+        then ""
+        else "\n\nKnown packages: " <> Text.intercalate ", " known
+
+{- | Closing advice for a version conflict, depending on whether the
+manifest declarations or the lockfile are the thing to change.
+-}
+conflictFooter :: ConflictHint -> Text
+conflictFooter = \case
+  HintEditManifests ->
+    "No lockfile was written. Update the conflicting dependency declarations or choose compatible package releases. Only relax a constraint after checking compatibility."
+  HintRunUpdate ->
+    "The lockfile is out of date with the project manifest; no lockfile was written. Run `coal update` to re-resolve the dependency graph."
 
 {- | Render one violated requirement: who declared it, which version
 constraint it stated, and which locked version it is incompatible with.

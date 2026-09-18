@@ -136,6 +136,37 @@ Save this program as "Main.coal". Compile the program with the command:
 ```
 coal compile -I. Main.coal -o dist
 ```
+
+## Package management
+
+A project declares its dependencies in a `coal.json` manifest. Start a new project with `coal init`, then add packages:
+
+```
+coal add https://codeberg.org/laserpants/coal-containers.git
+```
+
+Each dependency is pinned by a [SemVer](https://semver.org/) constraint, e.g. `"0.5.1"` (exact), `">=0.5.0"`, or `"*"`.
+
+### install and update
+
+`coal install` resolves the dependency graph and checks every package out into `.coal/packages/<name>/<commit>`. Once a `coal.lock.json` exists, install is *lock-faithful*: it reuses the locked version of every package whose entry still satisfies the manifest constraints, clones only missing checkouts, and prunes entries that are no longer part of the graph. With a warm cache this requires no network access, and an up-to-date lockfile is left untouched.
+
+When the manifest changes in a way the lockfile cannot satisfy — for example a dependency is bumped beyond its pinned version — install fails and asks for a refresh:
+
+```
+* The lockfile is out of date for package 'coal-micro-test':
+  - 'coal-json' requires '0.10.0' from ...
+  - coal.lock.json pins 0.9.0
+  Run `coal update` to re-resolve the dependency graph.
+```
+
+`coal update` re-resolves dependencies to the newest versions allowed by the manifests and rewrites the lockfile:
+
+- `coal update` refreshes every package.
+- `coal update <package> ...` refreshes only the named packages and their dependencies, keeping everything else at its locked version.
+
+The same rules apply to every package in the graph: two manifests that require incompatible versions of one package are reported as a conflict, with the conflicting requirements attributed to the manifests that declared them.
+
 <!--
 
 ## Project status and roadmap
