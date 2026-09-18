@@ -2,6 +2,7 @@
 
 import CLI.Command.BuildSpec (buildSpec)
 import CLI.Parser.AddCmdSpec (addCmdSpec)
+import CLI.Parser.CommandSpec (commandSpec)
 import CLI.Parser.UpdateCmdSpec (updateCmdSpec)
 import Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec (expandLetBindingsSpec)
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
@@ -29,6 +30,7 @@ main =
     spec
     describe "CLI tests" $ do
       addCmdSpec
+      commandSpec
       buildSpec
       constraintValidationSpec
       resolutionSpec

@@ -1,7 +1,7 @@
-module CLI.Parser.Command (commandParser) where
+module CLI.Parser.Command (commandOptionsParser, commandParser) where
 
 import CLI.Command (Command (..))
-
+import CLI.Options.Command (CommandOptions (CommandOptions))
 import CLI.Parser.AddCmd (addCmdParser)
 import CLI.Parser.CompileCmd (compileCmdParser)
 import CLI.Parser.InitCmd (initCmdParser)
@@ -54,3 +54,20 @@ commandParser =
               (progDesc "Re-resolve dependencies and rewrite the lockfile")
           )
     )
+
+-- The top-level command parser: an optional global '-C' / '--directory'
+-- override followed by the chosen subcommand. 'Main' applies the directory via
+-- 'setCurrentDirectory' before any command runs, so every project command
+-- reads coal.json / .coal / .build relative to the current directory.
+commandOptionsParser :: Parser CommandOptions
+commandOptionsParser =
+  CommandOptions
+    <$> dirOption
+    <*> commandParser
+ where
+  dirOption = optional (strOption opts)
+  opts =
+    long "directory"
+      <> short 'C'
+      <> metavar "DIR"
+      <> help "Run as if coal was started in DIR (applies to all subcommands)"
