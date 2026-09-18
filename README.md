@@ -137,7 +137,7 @@ Save this program as "Main.coal". Compile the program with the command:
 coal compile -I. Main.coal -o dist
 ```
 
-## Package management
+### Package management
 
 A project declares its dependencies in a `coal.json` manifest. Start a new project with `coal init`, then add packages:
 
