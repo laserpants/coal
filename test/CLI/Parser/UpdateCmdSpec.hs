@@ -13,7 +13,7 @@ parseUpdate args = case execParserPure defaultPrefs parserInfo args of
   Success r -> Right r
   Failure fr -> Left (show fr)
   CompletionInvoked _ -> Left "completion invoked"
-  where
+ where
   parserInfo = info updateCmdParser (progDesc "Update dependencies")
 
 updateCmdSpec :: Spec
