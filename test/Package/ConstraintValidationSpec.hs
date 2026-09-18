@@ -9,7 +9,8 @@ import CLI.Git.Repo (GitRepo (..))
 import Data.Aeson (eitherDecode, encode)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
-import Package.Error (PackageError (..), Requirement (..), prettyPackageError)
+import qualified Data.Text as Text
+import Package.Error (ConflictHint (..), PackageError (..), Requirement (..), prettyPackageError)
 import Package.Lock.Spec (LockSpec (..))
 import Package.Version (PackageConstraint, PackageVersion)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
@@ -76,7 +77,7 @@ constraintValidationSpec =
               ]
           lock = Map.fromList [("coal-micro-test", lockSpec "0.10.0" microTestRepo "aaa")]
       validateLockEntries reqs lock `shouldBe` Map.empty
-      violationsToErrors reqs lock (validateLockEntries reqs lock) `shouldBe` []
+      violationsToErrors HintEditManifests reqs lock (validateLockEntries reqs lock) `shouldBe` []
 
     it "accepts absent constraints" $ do
       let reqs =
@@ -104,8 +105,9 @@ constraintValidationSpec =
           expected =
             Map.fromList [("coal-micro-test", [toViolation (requirement "coal-json" (Just "0.10.0") microTestRepo)])]
       violations `shouldBe` expected
-      violationsToErrors reqs lock violations
+      violationsToErrors HintEditManifests reqs lock violations
         `shouldBe` [ EVersionConstraintConflict
+                       HintEditManifests
                        "coal-micro-test"
                        (parseVersion "0.9.0")
                        [requirement "coal-json" (Just "0.10.0") microTestRepo]
@@ -139,11 +141,12 @@ constraintValidationSpec =
               ]
           violations = validateLockEntries reqs lock
       Map.keys violations `shouldBe` ["a"]
-      violationsToErrors reqs lock violations `shouldSatisfy` ((== 1) . length)
+      violationsToErrors HintEditManifests reqs lock violations `shouldSatisfy` ((== 1) . length)
 
     it "renders both sides of the conflict and a compatibility hint" $ do
       prettyPackageError
         ( EVersionConstraintConflict
+            HintEditManifests
             "coal-micro-test"
             (parseVersion "0.9.0")
             [requirement "coal-json" (Just "0.10.0") microTestRepo]
@@ -158,4 +161,29 @@ constraintValidationSpec =
                        <> microTestRepo
                        <> " (satisfied)"
                        <> "\n\nNo lockfile was written. Update the conflicting dependency declarations or choose compatible package releases. Only relax a constraint after checking compatibility."
+                   )
+
+    it "points at coal update when the lockfile is the thing to refresh" $ do
+      prettyPackageError
+        ( EVersionConstraintConflict
+            HintRunUpdate
+            "coal-micro-test"
+            (parseVersion "0.9.0")
+            [requirement "coal-json" (Just "0.10.0") microTestRepo]
+            []
+        )
+        `shouldSatisfy` Text.isInfixOf "Run `coal update`"
+
+    it "renders a stale lockfile as a refresh problem" $ do
+      prettyPackageError
+        ( EStaleLock
+            "coal-micro-test"
+            (requirement "coal-json" (Just "0.10.0") microTestRepo)
+            (parseVersion "0.9.0")
+        )
+        `shouldBe` ( "The lockfile is out of date for package 'coal-micro-test':\n\n"
+                       <> "- 'coal-json' requires '0.10.0' from "
+                       <> microTestRepo
+                       <> "\n- coal.lock.json pins 0.9.0"
+                       <> "\n\nRun `coal update` to re-resolve the dependency graph."
                    )

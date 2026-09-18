@@ -24,6 +24,7 @@ import qualified Data.Text.IO as Text
 import Package.Dependency (PackageDependency (..))
 import Package.Error (PackageError (..))
 import Package.Manifest (PackageManifest (..), encodePrettyOrdered, loadManifestFrom, loadProjectManifest)
+import Package.Resolution (LockMode (..))
 import Package.Version (PackageConstraint (..))
 import System.IO.Temp (withSystemTempDirectory)
 
@@ -46,7 +47,9 @@ addCommand caps AddCmdOptions{..} = do
       newDeps = Map.insert pkgName dep deps
       newManifest = manifest{dependencies = Just newDeps}
   liftIO $ ByteString.writeFile "coal.json" (toStrict (encodePrettyOrdered newManifest))
-  installProject caps
+  -- The newly added dependency has no lockfile entry, so install re-resolves
+  -- it (and its subtree) while keeping every other package pinned.
+  _ <- installProject caps LockPreferred
   liftIO $ Text.putStrLn ("Added dependency: " <> pkgName)
 
 deriveNameFromRepo :: GitRepo -> ExceptT CLIError IO Text

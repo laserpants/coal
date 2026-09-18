@@ -136,24 +136,18 @@ Save this program as "Main.coal". Compile the program with the command:
 ```
 coal compile -I. Main.coal -o dist
 ```
-<!--
 
-## Project status and roadmap
+### Package management
 
-### Roadmap
+A project declares its dependencies in a `coal.json` manifest. Start a new project with `coal init`, then add packages:
 
-#### Next milestone: 1
+```
+coal add https://codeberg.org/laserpants/coal-containers.git
+```
 
-![](https://geps.dev/progress/75)
--->
+Each dependency is pinned by a [SemVer](https://semver.org/) constraint, e.g. `"0.5.1"` (exact), `">=0.5.0"`, or `"*"`.
 
-<!--
-| Milestone  | Feature/Fix                                           |                                                                                                                                                              
-| ---------- | ----------------------------------------------------- |                                                                                                                                                              
-| 1          | FFI                                                   |             
-
- - from_int32 -> from_integer
--->
+See the [CLI reference section](https://coal-lang.org/cli/) of the documentation for more details.
 
 ## How to contribute
 
@@ -170,4 +164,3 @@ The [documentation](https://coal-lang.org/) is built with Zensical. The source c
 ## License 
 
 This project is licensed under the terms of the MIT license. See the [`LICENSE`](LICENSE) file in this repository for details.
-

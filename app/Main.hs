@@ -18,6 +18,7 @@ import CLI.Command.Clean (cleanCommand)
 import CLI.Command.Compile (compileCommand)
 import CLI.Command.Init (initCommand)
 import CLI.Command.Install (installCommand)
+import CLI.Command.Update (updateCommand)
 import CLI.Command.Version (coalVersion)
 import CLI.Error (prettyCLIError)
 import CLI.Parser.Command (commandParser)
@@ -27,43 +28,31 @@ import Control.Monad.Except (runExceptT)
 import qualified Data.Text.IO as Text
 import GHC.IO.Encoding (setLocaleEncoding, utf8)
 import Options.Applicative
+import System.Exit (ExitCode (..), exitWith)
 import System.IO (hSetEncoding, stderr, stdout)
 
 runCommand :: TerminalCapabilities -> Command -> IO ()
-runCommand caps =
-  \case
-    CmdAdd opts -> do
-      r <- runExceptT (addCommand caps opts)
-      case r of
-        Left err ->
-          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
-        Right{} ->
-          pure ()
-    CmdCompile opts ->
+runCommand caps cmd = do
+  result <- case cmd of
+    CmdAdd opts -> runExceptT (addCommand caps opts)
+    CmdCompile opts -> do
       compileCommand caps opts
-    CmdBuild -> do
-      r <- runExceptT (buildCommand caps)
-      case r of
-        Left err ->
-          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
-        Right{} ->
-          pure ()
-    CmdClean ->
+      pure (Right ())
+    CmdBuild -> runExceptT (buildCommand caps)
+    CmdClean -> do
       cleanCommand
-    CmdInit opts -> do
-      r <- runExceptT (initCommand opts)
-      case r of
-        Left err ->
-          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
-        Right{} ->
-          pure ()
-    CmdInstall -> do
-      r <- runExceptT (installCommand caps)
-      case r of
-        Left err ->
-          Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
-        Right{} ->
-          pure ()
+      pure (Right ())
+    CmdInit opts -> runExceptT (initCommand opts)
+    CmdInstall -> runExceptT (installCommand caps)
+    CmdUpdate opts -> runExceptT (updateCommand caps opts)
+  case result of
+    Left err -> do
+      Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
+      -- Fail loudly so scripts and CI can tell a failed command from a
+      -- successful one.
+      exitWith (ExitFailure 1)
+    Right{} ->
+      pure ()
 
 versionOption :: Parser (a -> a)
 versionOption =
