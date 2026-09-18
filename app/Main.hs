@@ -57,8 +57,8 @@ runCommand caps =
           Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)
         Right{} ->
           pure ()
-    CmdInstall opts -> do
-      r <- runExceptT (installCommand caps opts)
+    CmdInstall -> do
+      r <- runExceptT (installCommand caps)
       case r of
         Left err ->
           Text.putStrLn (sanitizeForTerminal caps $ "• " <> prettyCLIError err)

@@ -6,6 +6,7 @@ module Package.Version (
   PackageVersion (..),
   PackageConstraint (..),
   AvailableVersion (..),
+  prettyPackageConstraint,
 ) where
 
 import CLI.Git.Commit (GitCommit (..))
@@ -40,6 +41,22 @@ instance FromJSON PackageVersion where
 instance ToJSON PackageConstraint where
   toJSON (PackageConstraint c) = String (constraintToText c)
 
+instance FromJSON PackageConstraint where
+  parseJSON =
+    withText "PackageConstraint" $
+      \t ->
+        case SemVerConstraint.fromText t of
+          Left e ->
+            fail ("Invalid constraint: " <> e)
+          Right v ->
+            pure (PackageConstraint v)
+
+{- | Render a 'PackageConstraint' in the same syntax accepted from
+@coal.json@, e.g. @* @, @>=1.2.0@ or @1.2.3@.
+-}
+prettyPackageConstraint :: PackageConstraint -> Text
+prettyPackageConstraint (PackageConstraint constraint) = constraintToText constraint
+
 constraintToText :: Constraint -> Text
 constraintToText = \case
   CAny -> "*"
@@ -50,16 +67,6 @@ constraintToText = \case
   CEq v -> SemVerVersion.toText v
   CAnd c1 c2 -> constraintToText c1 <> " " <> constraintToText c2
   COr c1 c2 -> constraintToText c1 <> " || " <> constraintToText c2
-
-instance FromJSON PackageConstraint where
-  parseJSON =
-    withText "PackageConstraint" $
-      \t ->
-        case SemVerConstraint.fromText t of
-          Left e ->
-            fail ("Invalid constraint: " <> e)
-          Right v ->
-            pure (PackageConstraint v)
 
 data AvailableVersion = AvailableVersion
   { availableVersion :: PackageVersion

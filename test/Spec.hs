@@ -2,13 +2,13 @@
 
 import CLI.Command.BuildSpec (buildSpec)
 import CLI.Parser.AddCmdSpec (addCmdSpec)
-import CLI.Parser.InstallCmdSpec (installCmdSpec)
 import Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec (expandLetBindingsSpec)
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
 import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Spec (e2eSpec)
+import Package.ConstraintValidationSpec (constraintValidationSpec)
 import Package.VersionSpec (versionSpec)
 import Test.Hspec (SpecWith, describe, hspec)
 
@@ -28,8 +28,8 @@ main =
     describe "CLI tests" $ do
       addCmdSpec
       buildSpec
+      constraintValidationSpec
       versionSpec
-      installCmdSpec
 
     describe "Kernel tests" kernelSpec
     describe "E2E tests" e2eSpec
