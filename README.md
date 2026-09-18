@@ -147,7 +147,7 @@ coal add https://codeberg.org/laserpants/coal-containers.git
 
 Each dependency is pinned by a [SemVer](https://semver.org/) constraint, e.g. `"0.5.1"` (exact), `">=0.5.0"`, or `"*"`.
 
-See the [documentation](https://coal-lang.org/) for more details.
+See the [CLI reference section](https://coal-lang.org/cli/) of the documentation for more details.
 
 ## How to contribute
 
