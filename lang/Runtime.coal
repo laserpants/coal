@@ -1,3 +1,6 @@
+/**
+ * Runtime support functions for event loops and blocking polls.
+ */
 module Runtime {
 
   /** 

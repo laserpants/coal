@@ -1,19 +1,76 @@
+/**
+ * Mealy machines: stateful processes that consume a sequence of inputs and
+ * produce a sequence of outputs, one at a time.
+ *
+ * A machine is parameterised by its input type `i` and output type `o`, and
+ * is built from an internal state together with a transition function of
+ * type `i -> s -> s`, which determines the next state, and a view function
+ * of type `s -> o`, which determines the output.
+ *
+ * The state type `s` is hidden (existentially quantified), so machines with
+ * different internal representations share the same `Machine<i, o>` type.
+ * `observe` returns the current output, and `receive` advances the machine
+ * to a new state, which is itself a machine. Machines are the basis of
+ * streams (`Stream<a> = Machine<unit, a>`), parsers and other stateful
+ * processes.
+ */
 module Codata.Machine {
 
   import Coal.Combinators(identity)
 
+  /**
+   * Return the current output of a machine.
+   *
+   * The output is computed by applying the machine's view function to its
+   * current state. Observing a machine does not advance it.
+   *
+   * **Type**: `observe : Machine<i, o> -> o`
+   */
   fun observe(Machine({ state, view | _ }) : Machine<i, o>) : o = 
     view(state)
 
+  /**
+   * Feed an input into a machine and return the resulting machine.
+   *
+   * The machine's step function is applied to the given input and its
+   * current state, giving a machine in a new state.
+   *
+   * **Type**: `receive : i -> Machine<i, o> -> Machine<i, o>`
+   */
   fun receive(input : i, Machine({ state, step, view }) : Machine<i, o>) : Machine<i, o> =
     step(input, state)
 
+  /**
+   * Construct a machine from an initial state, a transition function and a
+   * view function.
+   *
+   * The transition function determines the next state from an input and the
+   * current state, and the view function determines the output from the
+   * current state.
+   *
+   * **Type**: `machine : s -> (i -> s -> s) -> (s -> o) -> Machine<i, o>`
+   */
   fun machine(seed : s, transition: i -> s -> s, view : s -> o) : Machine<i, o> =
     machine$_machine(seed, transition, view)
 
+  /**
+   * Transform the output of a machine using the given function.
+   *
+   * The state and transition function are untouched; the function is
+   * applied to the result of the view for each state.
+   *
+   * **Type**: `map_machine : (o -> p) -> Machine<i, o> -> Machine<i, p>`
+   */
   fun map_machine(f : o -> p, machine : Machine<i, o>) : Machine<i, p> =
     machine$_map_machine(f, machine)
 
+  /**
+   * Combine the outputs of two machines using the given function.
+   *
+   * The same input is fed to both machines.
+   *
+   * **Type**: `map2_machine : (o -> p -> q) -> Machine<i, o> -> Machine<i, p> -> Machine<i, q>`
+   */
   fun map2_machine(f : o -> p -> q, m1 : Machine<i, o>, m2 : Machine<i, p>) : Machine<i, q> =
     machine(
       (m1, m2),
@@ -21,6 +78,13 @@ module Codata.Machine {
       fn((p, q)) => f(observe(p), observe(q))
     )
 
+  /**
+   * Combine the outputs of three machines using the given function.
+   *
+   * The same input is fed to all three machines.
+   *
+   * **Type**: `map3_machine : (o -> p -> q -> r) -> Machine<i, o> -> Machine<i, p> -> Machine<i, q> -> Machine<i, r>`
+   */
   fun map3_machine(f : o -> p -> q -> r, m1 : Machine<i, o>, m2 : Machine<i, p>, m3 : Machine<i, q>) : Machine<i, r> =
     machine(
       (m1, m2, m3),
@@ -28,6 +92,13 @@ module Codata.Machine {
       fn((p, q, r)) => f(observe(p), observe(q), observe(r))
     )
 
+  /**
+   * Combine the outputs of four machines using the given function.
+   *
+   * The same input is fed to all four machines.
+   *
+   * **Type**: `map4_machine : (o -> p -> q -> r -> s) -> Machine<i, o> -> Machine<i, p> -> Machine<i, q> -> Machine<i, r> -> Machine<i, s>`
+   */
   fun map4_machine(f : o -> p -> q -> r -> s, m1 : Machine<i, o>, m2 : Machine<i, p>, m3 : Machine<i, q>, m4 : Machine<i, r>) : Machine<i, s> =
     machine(
       (m1, m2, m3, m4),
@@ -35,9 +106,27 @@ module Codata.Machine {
       fn((p, q, r, s)) => f(observe(p), observe(q), observe(r), observe(s))
     )
 
+  /**
+   * Adapt the inputs of a machine using the given function.
+   *
+   * Each input is transformed before it is fed to the machine; the state
+   * and view function are untouched.
+   *
+   * **Type**: `contramap_input : (j -> i) -> Machine<i, o> -> Machine<j, o>`
+   */
   fun contramap_input(f : j -> i, machine : Machine<i, o>) : Machine<j, o> =
     machine$_contramap_input(f, machine)
 
+  /**
+   * Compose two machines, feeding the output of the first into the second.
+   *
+   * When an input arrives, the first machine is stepped, its new output is
+   * fed as input to the second, and the resulting pair of machines is
+   * returned. The output of the composition is the output of the second
+   * machine.
+   *
+   * **Type**: `compose : Machine<a, b> -> Machine<b, c> -> Machine<a, c>`
+   */
   fun compose(m1 : Machine<a, b>, m2 : Machine<b, c>) : Machine<a, c> =
     machine
       ( (m1, m2)
@@ -50,6 +139,14 @@ module Codata.Machine {
           observe(q)
       )
 
+  /**
+   * Return a machine whose output is the machine itself.
+   *
+   * Receiving an input steps the inner machine, so that the successive
+   * versions of the machine are observed in turn.
+   *
+   * **Type**: `duplicate : Machine<i, o> -> Machine<i, Machine<i, o>>`
+   */
   fun duplicate(m : Machine<i, o>) : Machine<i, Machine<i, o>> =
     machine(
       m, 
@@ -57,9 +154,23 @@ module Codata.Machine {
       identity
     )
 
+  /**
+   * Combine the outputs of two machines into a pair.
+   *
+   * Shorthand for `zip2`.
+   *
+   * **Type**: `zip : Machine<i, o1> -> Machine<i, o2> -> Machine<i, (o1, o2)>`
+   */
   fun zip(m1 : Machine<i, o1>, m2 : Machine<i, o2>) : Machine<i, (o1, o2)> =
     zip2(m1, m2)
 
+  /**
+   * Combine the outputs of two machines into a pair.
+   *
+   * The same input is fed to both machines.
+   *
+   * **Type**: `zip2 : Machine<i, o1> -> Machine<i, o2> -> Machine<i, (o1, o2)>`
+   */
   fun zip2(m1 : Machine<i, o1>, m2 : Machine<i, o2>) : Machine<i, (o1, o2)> =
     machine(
       (m1, m2),
@@ -67,6 +178,13 @@ module Codata.Machine {
       fn((p,q)) => (observe(p), observe(q))
     )
 
+  /**
+   * Combine the outputs of three machines into a triple.
+   *
+   * The same input is fed to all three machines.
+   *
+   * **Type**: `zip3 : Machine<i, o1> -> Machine<i, o2> -> Machine<i, o3> -> Machine<i, (o1, o2, o3)>`
+   */
   fun zip3(m1 : Machine<i, o1>, m2 : Machine<i, o2>, m3 : Machine<i, o3>) : Machine<i, (o1, o2, o3)> =
     machine(
       (m1, m2, m3),
@@ -74,6 +192,13 @@ module Codata.Machine {
       fn((p,q,r)) => (observe(p), observe(q), observe(r))
     )
 
+  /**
+   * Combine the outputs of four machines into a quadruple.
+   *
+   * The same input is fed to all four machines.
+   *
+   * **Type**: `zip4 : Machine<i, o1> -> Machine<i, o2> -> Machine<i, o3> -> Machine<i, o4> -> Machine<i, (o1, o2, o3, o4)>`
+   */
   fun zip4(m1 : Machine<i, o1>, m2 : Machine<i, o2>, m3 : Machine<i, o3>, m4 : Machine<i, o4>) : Machine<i, (o1, o2, o3, o4)> =
     machine(
       (m1, m2, m3, m4),
@@ -81,12 +206,37 @@ module Codata.Machine {
       fn((p,q,r,s)) => (observe(p), observe(q), observe(r), observe(s))
     )
 
+  /**
+   * Construct a machine whose state is also its output.
+   *
+   * Equivalent to `machine(seed, transition, identity)`.
+   *
+   * **Type**: `process : s -> (i -> s -> s) -> Machine<i, s>`
+   */
   fun process(seed, f) =
     machine(seed, f, identity)
 
+  /**
+   * Tie the recursive knot, constructing a machine from a function of the
+   * machine itself.
+   *
+   * The machine may use its argument to refer to itself; the unfolding is
+   * performed on demand, so recursive definitions need not be finitely
+   * constructed.
+   *
+   * **Type**: `cofix : (Machine<i, o> -> Machine<i, o>) -> Machine<i, o>`
+   */
   fun cofix(f : Machine<i, o> -> Machine<i, o>) : Machine<i, o> =
     machine$_cofix(f)
 
+  /**
+   * Repeatedly feed the unit input into a machine while the predicate
+   * holds, and return the output of the resulting machine.
+   *
+   * The predicate is checked before each step.
+   *
+   * **Type**: `run_while : (unit -> bool) -> Machine<unit, a> -> a`
+   */
   fun run_while(pred : unit -> bool, m : Machine<unit, a>) : a =
     machine$_run_while(pred, m)
 
