@@ -34,11 +34,11 @@ parseVersion txt =
     Left e -> error ("Invalid test version: " <> e)
 
 lockSpec :: Text -> Text -> Text -> LockSpec
-lockSpec versionTxt repo commit =
+lockSpec versionTxt repo commit_ =
   LockSpec
     { version = parseVersion versionTxt
     , source = GitRepo repo
-    , commit = GitCommit commit
+    , commit = GitCommit commit_
     }
 
 microTestRepo :: Text
