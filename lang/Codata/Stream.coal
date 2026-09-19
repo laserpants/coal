@@ -1,53 +1,150 @@
+/**
+ * Potentially infinite sequences of values, represented as
+ * `Machine<unit, a>`, i.e., machines whose input is the `unit` value.
+ *
+ * Elements are produced on demand: `head` returns the current element, and
+ * `tail` advances the stream to the next one.
+ */
 module Codata.Stream {
 
-  import Codata.Machine(receive, compose, observe, process, machine, map_machine, map2_machine, map3_machine, map4_machine)
+  import Codata.Machine(receive, observe, process, machine, map_machine, map2_machine, map3_machine, map4_machine)
   import Coal.Combinators(identity)
 
+  /**
+   * A stream is a machine whose input is the unit value, so that elements
+   * can be produced on demand.
+   *
+   * **Type**: `Stream<a> = Machine<unit, a>`
+   */
   type alias Stream<a> = Machine<unit, a>
 
+  /**
+   * Return a stream that repeats the given element indefinitely.
+   *
+   * **Type**: `repeat : a -> Stream<a>`
+   */
   fun repeat(state : a) : Stream<a> =
     process(state, fn(_, _) => state)
 
+  /**
+   * Return the stream of consecutive integers starting at `n`.
+   *
+   * **Type**: `enum_from : int32 -> Stream<int32>`
+   */
   fun enum_from(n : int32) : Stream<int32> =
     process(n, fn(_, m) => m + 1)
 
+  /**
+   * The stream of all natural numbers, starting at zero.
+   *
+   * Equivalently, `enum_from(0)`.
+   *
+   * **Type**: `nats : Stream<int32>`
+   */
   let nats : Stream<int32> = enum_from(0)
 
+  /**
+   * Return the stream without its first element.
+   *
+   * **Type**: `tail : Stream<a> -> Stream<a>`
+   */
   let tail = receive()
+
+  /**
+   * Return the first element of the stream.
+   *
+   * **Type**: `head : Stream<a> -> a`
+   */
   let head = observe
 
+  /**
+   * Return a stream whose first element is `state`, followed by the
+   * elements of the given stream.
+   *
+   * **Type**: `cons : a -> Stream<a> -> Stream<a>`
+   */
   fun cons(state : a, Machine(m) : Stream<a>) : Stream<a> =
-    Machine({ state = state, step = fn(_, _) => Machine(m), view = m.view })
+    Machine({ state = state, step = fn(_, _) => Machine(m), view = identity })
 
+  /**
+   * Transform each element of a stream using the given function.
+   *
+   * **Type**: `map_stream : (a -> b) -> Stream<a> -> Stream<b>`
+   */
   fun map_stream(f : a -> b, stream : Stream<a>) : Stream<b> =
     map_machine(f, stream)
 
+  /**
+   * Combine two streams elementwise using the given function.
+   *
+   * **Type**: `map2_stream : (a -> b -> c) -> Stream<a> -> Stream<b> -> Stream<c>`
+   */
   fun map2_stream(f : a -> b -> c, s1 : Stream<a>, s2 : Stream<b>) : Stream<c> =
     map2_machine(f, s1, s2)
 
+  /**
+   * Combine three streams elementwise using the given function.
+   *
+   * **Type**: `map3_stream : (a -> b -> c -> d) -> Stream<a> -> Stream<b> -> Stream<c> -> Stream<d>`
+   */
   fun map3_stream(f : a -> b -> c -> d, s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>) : Stream<d> =
     map3_machine(f, s1, s2, s3)
 
+  /**
+   * Combine four streams elementwise using the given function.
+   *
+   * **Type**: `map4_stream : (a -> b -> c -> d -> e) -> Stream<a> -> Stream<b> -> Stream<c> -> Stream<d> -> Stream<e>`
+   */
   fun map4_stream(f : a -> b -> c -> d -> e, s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>, s4 : Stream<d>) : Stream<e> =
     map4_machine(f, s1, s2, s3, s4)
 
+  /**
+   * Interleave two streams, applying `fa` to the elements of the first
+   * stream and `fb` to the elements of the second.
+   *
+   * The elements are drawn alternately from `s1` and `s2`, beginning with
+   * `s1`.
+   *
+   * **Type**: `merge_with : (a -> c) -> (b -> c) -> Stream<a> -> Stream<b> -> Stream<c>`
+   */
   fun merge_with(fa : a -> c, fb : b -> c, s1 : Stream<a>, s2 : Stream<b>) : Stream<c> =
     machine(
-      (s1, s2, false),
-      fn((), (sa, sb, last_stepped)) =>
-        if (last_stepped)
-          then (sa, receive((), sb), false)
-          else (receive((), sa), sb, true),
-      fn((sa, sb, last_stepped)) =>
-        if (last_stepped)
+      (s1, s2, true),
+      fn((), (sa, sb, from_first)) =>
+        if (from_first)
+          then (receive((), sa), sb, false)
+          else (sa, receive((), sb), true),
+      fn((sa, sb, from_first)) =>
+        if (from_first)
           then fa(observe(sa))
           else fb(observe(sb))
     )
 
+  /**
+   * Interleave two streams, alternating between their elements.
+   *
+   * Equivalent to `merge_with(identity, identity, s1, s2)`.
+   *
+   * **Type**: `merge : Stream<a> -> Stream<a> -> Stream<a>`
+   */
   fun merge(s1 : Stream<a>, s2 : Stream<a>) : Stream<a> =
     merge_with(identity, identity, s1, s2)
 
+  /**
+   * Fold over a stream, returning a stream of successive accumulator
+   * values.
+   *
+   * The first element of the result is the initial value `seed`; each
+   * subsequent element is obtained by applying `transition` to the next
+   * element of the stream and the previous accumulator.
+   *
+   * **Type**: `scan : (i -> o -> o) -> o -> Stream<i> -> Stream<o>`
+   */
   fun scan(transition : i -> o -> o, seed : o, stream : Stream<i>) : Stream<o> =
-    compose(stream, process(seed, transition))
+    machine(
+      (seed, stream),
+      fn((), (acc, s)) => (transition(observe(s), acc), receive((), s)),
+      fn((acc, _)) => acc
+    )
 
 }
