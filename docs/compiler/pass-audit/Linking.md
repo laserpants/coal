@@ -87,7 +87,10 @@ runtime source using the `runtime/scripts/combine.sh` script.
 
 - **Performs IO**: Runs `llc` and `gcc` subprocesses, creates temp files, writes executable
 - **Generates diagnostics**: Prints executable path on success; prints errors on failure
-- **Modifies compiler state**: No
+- **Modifies compiler state**: Yes — drops all accumulated state except the
+  active config and the source texts (needed by `compileWithCFiles` to render
+  errors on failure) before spawning `llc`/`gcc`, so the live heap is
+  trimmed to roughly the bitcode list when peak memory matters most
 
 ---
 

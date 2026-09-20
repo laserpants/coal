@@ -11,11 +11,11 @@ import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerFailureMode (CompilerError), CompilerT)
-import Coal.Compiler.State (CompilerState (compilerConfig))
+import Coal.Compiler.State (CompilerState (compilerConfig, compilerSources), initialCompilerState)
 import Control.Exception (SomeException, try)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.State (gets)
+import Control.Monad.State (gets, put)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.FileEmbed (embedFile)
@@ -34,7 +34,18 @@ passLinking = Pass{runPass = passImpl}
 
 passImpl :: (MonadIO m) => [(Name, ByteString)] -> CompilerT Metadata m ()
 passImpl bcode = do
+  -- The linking step consumes only the bitcode produced by codegen, so
+  -- release the accumulated compiler state (module builds, constraint
+  -- stores, name stores) before spawning the memory-hungry @llc@/@gcc@
+  -- subprocesses. The active configuration is preserved, since that is the
+  -- only part of the state the linker consults. The source texts are also
+  -- preserved: on failure, 'compileWithCFiles' renders the accumulated
+  -- error journal against the final 'compilerSources'. Everything else is
+  -- unreachable past this point, so dropping it trims the live heap down
+  -- to roughly the bitcode list when peak memory matters most.
   config <- gets compilerConfig
+  sources <- gets compilerSources
+  put initialCompilerState{compilerConfig = config, compilerSources = sources}
   err <- liftIO (compileBitcode config bcode)
   for_ err throwError
 
