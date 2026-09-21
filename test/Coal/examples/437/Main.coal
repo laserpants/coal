@@ -1,0 +1,61 @@
+/**
+ * Regression tests for Number.parse_int32 and Number.parse_int64.
+ *
+ * A parsed value of 0 used to be reported as None: int32/int64 are boxed as
+ * untagged words, so the box for 0 is bit-identical to the NULL that the FFI
+ * returned to signal failure. The parse shims now hand the value back in a
+ * heap-boxed bignum, which is a pointer and can never be NULL.
+ */
+module Main {
+
+  import IO(println_string)
+  import namespace Number
+  import namespace String
+
+  fun show_int32(o : Option<int32>) : string =
+    match(o) {
+      | Some(r) => "Some(" <> String.int32_to_string(r) <> ")"
+      | None    => "None"
+    }
+
+  fun show_int64(o : Option<int64>) : string =
+    match(o) {
+      | Some(r) => "Some(" <> String.int64_to_string(r) <> ")"
+      | None    => "None"
+    }
+
+  fun show_bignum(o : Option<bignum>) : string =
+    match(o) {
+      | Some(r) => "Some(" <> Number.bignum_to_string(r) <> ")"
+      | None    => "None"
+    }
+
+  // Reduce a decimal bignum modulo 256 and parse the resulting string back.
+  // This mirrors Data.UInt8.from_bignum, where a reduced value of exactly 0
+  // used to yield None and trip the caller's "Unreachable" panic branch.
+  fun parse_remainder(s : string) : Option<int32> =
+    match(Number.parse_bignum(s)) {
+      | Some(n) => Number.parse_int32(Number.bignum_to_string(n % 256))
+      | None    => None
+    }
+
+  fun main() =
+    println_string(
+      show_int32(Number.parse_int32("0"))
+        <> " " <> show_int32(Number.parse_int32("00"))
+        <> " " <> show_int32(Number.parse_int32("-0"))
+        <> " " <> show_int32(Number.parse_int32("007"))
+        <> " " <> show_int32(Number.parse_int32("-2147483648"))
+        <> " " <> show_int32(Number.parse_int32("2147483647"))
+        <> " " <> show_int32(Number.parse_int32("2147483648"))
+        <> " " <> show_int32(Number.parse_int32("abc"))
+        <> " | " <> show_int64(Number.parse_int64("0"))
+        <> " " <> show_int64(Number.parse_int64("4611686018427387904"))
+        <> " " <> show_int64(Number.parse_int64("9223372036854775807"))
+        <> " " <> show_int64(Number.parse_int64("9223372036854775808"))
+        <> " | " <> show_bignum(Number.parse_bignum("0"))
+        <> " " <> show_int32(parse_remainder("256"))
+        <> " " <> show_int32(parse_remainder("65536"))
+    )
+
+}

@@ -209,6 +209,12 @@ coal_bignum_init(rt_value_t v)
     return rt_bignum_box(rt_bignum_new(rt_string_data(rt_string_unbox(v))));
 }
 
+/* Success is reported as a heap-boxed bignum rather than a boxed int32/int64:
+ * boxed integers are untagged immediates, so a successful parse of 0 is
+ * bit-identical to the NULL failure sentinel and callers could not tell "0"
+ * from "not a number". A bignum box is a heap pointer and can never be NULL,
+ * so success and failure stay distinguishable for every input. */
+
 rt_value_t
 coal_parse_int32(rt_value_t v)
 {
@@ -217,12 +223,15 @@ coal_parse_int32(rt_value_t v)
     errno = 0;
     long val = strtol(str, &endptr, 10);
 
-    /* Check for conversion errors */
-    if (errno != 0 || *endptr != '\0' || val < INT32_MIN || val > INT32_MAX) {
+    /* Check for conversion errors, including inputs from which no digits could
+     * be consumed at all (strtol leaves endptr at the terminator then, which
+     * would otherwise parse "" or "+" as 0) */
+    if (endptr == str || errno != 0 || *endptr != '\0' || val < INT32_MIN ||
+        val > INT32_MAX) {
         return rt_ptr_box(NULL);
     }
 
-    return rt_int32_box((int32_t) val);
+    return rt_bignum_box(rt_bignum_from_i64((int64_t) (int32_t) val));
 }
 
 rt_value_t
@@ -233,12 +242,13 @@ coal_parse_int64(rt_value_t v)
     errno = 0;
     long long val = strtoll(str, &endptr, 10);
 
-    /* Check for conversion errors */
-    if (errno != 0 || *endptr != '\0') {
+    /* Check for conversion errors, including inputs from which no digits could
+     * be consumed at all (see coal_parse_int32) */
+    if (endptr == str || errno != 0 || *endptr != '\0') {
         return rt_ptr_box(NULL);
     }
 
-    return rt_int64_box((int64_t) val);
+    return rt_bignum_box(rt_bignum_from_i64((int64_t) val));
 }
 
 rt_value_t

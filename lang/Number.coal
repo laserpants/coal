@@ -117,9 +117,13 @@ module Number {
    * **Type**: `parse_int32 : string -> Option<int32>`
    */
   fun parse_int32(input : string) : Option<int32> =
-    #{coal_parse_int32 : string -> int32}(input)(fn(res) => 
-      #{rt_is_null : int32 -> bool}(res)(fn(is_null) => 
-        if (is_null) then None else Some(res)))
+    // The C side reports the parsed value as a bignum: boxed int32 values are
+    // untagged, so a successful parse of 0 would be bit-identical to the NULL
+    // failure sentinel. A bignum box is a heap pointer and is never NULL, which
+    // keeps success and failure distinguishable for every input.
+    #{coal_parse_int32 : string -> bignum}(input)(fn(res) => 
+      #{rt_is_null : bignum -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(from_bignum(res))))
 
   /**
    * Parse a decimal string into a 64-bit integer.
@@ -130,9 +134,9 @@ module Number {
    * **Type**: `parse_int64 : string -> Option<int64>`
    */
   fun parse_int64(input : string) : Option<int64> =
-    #{coal_parse_int64 : string -> int64}(input)(fn(res) => 
-      #{rt_is_null : int64 -> bool}(res)(fn(is_null) => 
-        if (is_null) then None else Some(res)))
+    #{coal_parse_int64 : string -> bignum}(input)(fn(res) => 
+      #{rt_is_null : bignum -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(from_bignum(res))))
 
   /**
    * Parse a decimal string into a float.

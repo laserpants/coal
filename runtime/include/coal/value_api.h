@@ -100,9 +100,20 @@ extern rt_value_t coal_readln(void);
  * ============================================================================
  */
 
-/** Parse boxed string to int32, returns boxed int32 or NULL on failure */
+/**
+ * Parse boxed string to a boxed bignum holding the parsed value, or NULL on
+ * failure.
+ *
+ * The value is carried in a bignum (a heap box) rather than a boxed int32
+ * because boxed integers are untagged immediates: a successful parse of 0
+ * would otherwise be bit-identical to the NULL failure sentinel. Callers
+ * convert with coal_bignum_to_int32 or rt_bignum_to_int32.
+ */
 extern rt_value_t coal_parse_int32(rt_value_t v);
-/** Parse boxed string to int64, returns boxed int64 or NULL on failure */
+/**
+ * Parse boxed string to a boxed bignum holding the parsed value, or NULL on
+ * failure. See coal_parse_int32 for why the result is a bignum.
+ */
 extern rt_value_t coal_parse_int64(rt_value_t v);
 /** Parse boxed string to float, returns boxed float or NULL on failure */
 extern rt_value_t coal_parse_float(rt_value_t v);

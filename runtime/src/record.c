@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include "coal/record.h"
 #include "coal/gc.h"
 #include "coal/panic.h"

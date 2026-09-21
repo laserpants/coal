@@ -61,6 +61,7 @@ set(TEST_SOURCES
     test_io
     test_value
     test_record
+    test_parse
 )
 
 foreach(test_name ${TEST_SOURCES})
