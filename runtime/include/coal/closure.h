@@ -47,4 +47,3 @@ rt_closure_t *rt_closure_extend(rt_closure_t *closure, int32_t argc,
                                 void **args);
 
 #endif
-

@@ -247,7 +247,8 @@ extern rt_value_t coal_double_random(void);
 
 /* ============================================================================
  * Panic
- * ============================================================================ */
+ * ============================================================================
+ */
 
 /** Terminate the program with a panic message from a boxed string */
 extern _Noreturn void coal_panic(rt_value_t v);

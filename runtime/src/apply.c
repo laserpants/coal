@@ -65,4 +65,3 @@ rt_apply(void *closure_ptr, int32_t argc, void **args)
         return result;
     }
 }
-
