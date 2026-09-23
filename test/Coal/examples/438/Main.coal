@@ -1,0 +1,27 @@
+module Main {
+  
+  import namespace IO
+  
+  trait Foo<a> {
+    foo: a -> a -> bool
+  }
+  
+  instance Foo<int32> {
+    fun foo(x, y) =
+      match((x, y)) {
+        | (0, 0) => true
+        | (_, _) => false
+      }
+  }
+
+  instance Foo<Option<a>> {
+    fun foo
+      | Some(x), Some(y) => true
+      | None, None => true
+      | _, _ => false
+  }
+
+  fun main() = 
+    IO.println_bool(foo(Some(5), Some(7)))
+
+}

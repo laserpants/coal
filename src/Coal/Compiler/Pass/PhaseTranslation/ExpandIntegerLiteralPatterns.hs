@@ -292,6 +292,49 @@ instance ExpandContext (LetDefinition Metadata Kind IndexedType) where
             , ..
             }
 
+instance ExpandContext (Clause Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      EClause{..} ->
+        EClause clauseMetadata clausePattern
+          <$> traverse expandIntegerLiteralPatterns clauseChoices
+
+instance ExpandContext (Choice Expression Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      CPlain{..} -> do
+        CPlain choiceMetadata
+          <$> expandIntegerLiteralPatterns choiceGuards
+          <*> expandIntegerLiteralPatterns choiceExpression
+
+instance ExpandContext (Guard Expression Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      CGuard{..} ->
+        CGuard <$> expandIntegerLiteralPatterns guardExpression
+
+instance ExpandContext (FoldDefinition Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      FoldDefinition{..} -> do
+        newFoldDefinitionClauses <- expandIntegerLiteralPatterns foldDefinitionClauses
+        return
+          FoldDefinition
+            { foldDefinitionClauses = newFoldDefinitionClauses
+            , ..
+            }
+
+instance ExpandContext (InstanceDefinition Metadata Kind IndexedType) where
+  expandIntegerLiteralPatterns =
+    \case
+      InstanceDefinition{..} -> do
+        newInstanceDefinitionImplementations <- traverse expandIntegerLiteralPatterns instanceDefinitionImplementations
+        return $
+          InstanceDefinition
+            { instanceDefinitionImplementations = newInstanceDefinitionImplementations
+            , ..
+            }
+
 instance ExpandContext (Definition Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
@@ -299,6 +342,10 @@ instance ExpandContext (Definition Metadata Kind IndexedType) where
         DFunction a name <$> expandIntegerLiteralPatterns def
       DLet a name def ->
         DLet a name <$> expandIntegerLiteralPatterns def
+      DFold a name def ->
+        DFold a name <$> expandIntegerLiteralPatterns def
+      DInstance a def ->
+        DInstance a <$> expandIntegerLiteralPatterns def
       d ->
         return d
 
