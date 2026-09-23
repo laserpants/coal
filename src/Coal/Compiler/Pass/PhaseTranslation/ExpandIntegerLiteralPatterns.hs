@@ -302,7 +302,7 @@ instance ExpandContext (Clause Metadata Kind IndexedType) where
 instance ExpandContext (Choice Expression Metadata Kind IndexedType) where
   expandIntegerLiteralPatterns =
     \case
-      CPlain{..} -> do
+      CPlain{..} ->
         CPlain choiceMetadata
           <$> expandIntegerLiteralPatterns choiceGuards
           <*> expandIntegerLiteralPatterns choiceExpression
