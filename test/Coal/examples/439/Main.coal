@@ -1,0 +1,27 @@
+module Main {
+
+  import namespace IO
+
+  trait Foo<a> {
+    foo : a -> bool
+  }
+
+  instance Foo<int32> {
+    fun foo(_) = false
+  }
+  
+  instance Foo<Option<a>> with (Foo<a>) {
+    fun foo(x) =
+      match(x) {
+        | Some(y) => foo(y)
+        | None => false
+      }
+  }
+
+  fun main() =
+    let
+      _ = IO.println_bool(Some(5 : int32) == Some(7 : int32))
+    in
+      IO.println_bool(foo(Some(5 : int32)))
+
+}

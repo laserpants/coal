@@ -220,20 +220,34 @@ prepareDefinitions defs = do
     -- import of the module that defines them.
     -- `importedBuild` returns emptyBuild for modules not yet compiled (safe for
     -- stdlib modules compiling themselves).
-    -- Only insertInstance is called here (not insertNameEntry or insertNameC): those
-    -- would contaminate buildNames/compilerNameStore with names from other stdlib
-    -- modules. replacePlaceholders (in passTypeInference) propagates compilerNameStore
-    -- into buildNames, so any insertNameC here would cause stdlibInstanceQNames to
-    -- emit wrong qualifications (e.g. List.id__$impl_Monoid instead of
-    -- Coal.Monoid.id__$impl_Monoid). Instance member type schemes come from
-    -- instanceEntryTypeSchemes directly and do not require compilerNameStore.
+    -- Instance member name schemes are copied alongside the instances
+    -- (mirroring the explicit import handling in step 8): dictionary insertion
+    -- resolves member implementations through the compiler name store
+    -- (collectTraits in InsertDictionaries), which is only populated in the
+    -- module that defines the instance. Without these entries, members of a
+    -- context-carrying instance (e.g. Comparable<Option<a>> with (Comparable<a>))
+    -- lose their context dictionaries when a dictionary is built from a module
+    -- that does not explicitly import the defining module. Qualified-name
+    -- generation stays correct: generateQualifiedInstanceNames only qualifies
+    -- names present in the defining module's export set, and instanceMemberQNames
+    -- attributes entries to instanceEntryModule.
     forM_ ((Path . pure) <$> builtinModulesPaths) $ \path -> do
-      Build{buildInstances} <- lift $ lift $ importedBuild path
+      Build{buildInstances, buildNames} <- lift $ lift $ importedBuild path
       forM_ (Environment.toList buildInstances) $
         \(traitName, instanceMap) ->
           forM_ (Map.toList instanceMap) $
-            \(t, InstanceEntry{..}) ->
+            \(t, InstanceEntry{..}) -> do
               insertInstance traitName t InstanceEntry{..}
+              forM_ (Map.keys instanceEntryTypeSchemes) $ \member -> do
+                let instanceName = instanceLabel (Trait traitName instanceEntryType) member
+                forM_ (Environment.lookupWithDefault mempty instanceName buildNames) $
+                  \case
+                    info@(NName n s) -> do
+                      insertNameEntry info
+                      _ <- lift $ lift $ insertNameC n s
+                      pure ()
+                    _ ->
+                      pure ()
 
     -- Step 8: Collect imports from other modules
     -- Depends on all prior phases completing in the imported modules

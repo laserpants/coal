@@ -121,10 +121,13 @@ instead of being decoded misaligned.
 
 History:
 
+  * @"3"@: step 7b now copies stdlib instance member name schemes into the
+    consuming module's name store; stale cached builds lack these entries and
+    would no longer resolve context-carrying member schemes.
   * @"2"@ — added @instanceEntryModule@ to @InstanceEntry@.
 -}
 buildCacheFormatVersion :: Text
-buildCacheFormatVersion = "2"
+buildCacheFormatVersion = "3"
 
 {- | Compute a hash of the configuration fields that affect compilation output.
 Used to invalidate cached builds when relevant config (e.g. package namespaces) changes.

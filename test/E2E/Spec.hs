@@ -2322,6 +2322,19 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- Regression: building a trait dictionary for an instance defined in a stdlib
+  -- module (imported globally by step 7b, without an explicit import) must
+  -- apply the context dictionaries each member expects. The member name schemes
+  -- live in the defining module's name store; step 7b used to copy only the
+  -- instances, so the (==) field was emitted without its Comparable<int32>
+  -- dictionary argument and the program crashed at runtime (BUG.txt).
+  describe "439" $
+    expectOutput
+      "false\nfalse"
+      "test/Coal/examples/439"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

@@ -4,7 +4,7 @@
  */
 module Option {
 
-  instance Comparable<Option<a>> {
+  instance Comparable<Option<a>> with (Comparable<a>) {
     fun `==`(lhs, rhs) =
       match((lhs, rhs)) {
         | (Some(x), Some(y)) => x == y
