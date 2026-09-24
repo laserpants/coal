@@ -1,5 +1,5 @@
 {- |
-Normalization pass 3: Lambda flattening.
+Normalization pass 2: Lambda flattening.
 
 Merges nested lambda abstractions into single lambdas with multiple parameters.
 This simplifies lambda lifting and code generation by eliminating the need to

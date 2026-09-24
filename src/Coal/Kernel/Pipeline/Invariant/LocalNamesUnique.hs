@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 {- |
-Invariant checker for local name canonicalization (pass 2).
+Invariant checker for local name canonicalization (pass 1).
 
 Verifies that every locally bound name in the expression tree is unique.
 

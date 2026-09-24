@@ -14,9 +14,6 @@ import Coal.Kernel.Language.Module (Module)
 import Coal.Kernel.Language.Type (Type)
 import Coal.Kernel.Pipeline (Pass)
 import Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (administrativeNormalForm)
-import Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalization (
-  caseExpressionCanonicalization,
- )
 import Coal.Kernel.Pipeline.Pass.ConstructorSaturation (constructorSaturation)
 import Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation (functionResultsSaturation)
 import Coal.Kernel.Pipeline.Pass.LambdaFlattening (lambdaFlattening)
@@ -26,25 +23,23 @@ import Coal.Kernel.Pipeline.Pass.LocalNameCanonicalization (localNameCanonicaliz
 import Coal.Kernel.Pipeline.Pass.LogicalOperatorTranslation (logicalOperatorTranslation)
 import Coal.Kernel.Pipeline.Pass.TopLevelFunctionNormalization (topLevelFunctionNormalization)
 
-{- | Passes 1–4: Structural normalization.
+{- | Passes 1–3: Structural normalization.
 
-1. 'caseExpressionCanonicalization' – sort case clauses lexicographically by constructor name.
-2. 'localNameCanonicalization'      – alpha-rename every locally-bound name @x@ to a unique @x.n@.
-3. 'lambdaFlattening'               – collapse nested @fn(a) => fn(b) => e@ into @fn(a, b) => e@.
-4. 'constructorSaturation'          – eta-expand partial constructor applications.
+1. 'localNameCanonicalization' – alpha-rename every locally-bound name @x@ to a unique @x.n@.
+2. 'lambdaFlattening'          – collapse nested @fn(a) => fn(b) => e@ into @fn(a, b) => e@.
+3. 'constructorSaturation'     – eta-expand partial constructor applications.
 -}
 structuralNorm :: (Monad m) => Pass m (Module Type) (Module Type)
 structuralNorm =
-  caseExpressionCanonicalization
-    >=> localNameCanonicalization
+  localNameCanonicalization
     >=> lambdaFlattening
     >=> constructorSaturation
 
-{- | Passes 5–7: Functional normalization
+{- | Passes 4–6: Functional normalization
 
-5. 'lambdaLifting'                 – lift lambda expressions to top-level definitions.
-6. 'topLevelFunctionNormalization' – merge function-body lambdas; promote constant lambdas.
-7. 'functionResultsSaturation'     – eta-expand functions whose result type is a function type.
+4. 'lambdaLifting'                 – lift lambda expressions to top-level definitions.
+5. 'topLevelFunctionNormalization' – merge function-body lambdas; promote constant lambdas.
+6. 'functionResultsSaturation'     – eta-expand functions whose result type is a function type.
 -}
 functionalNorm :: (Monad m) => Pass m (Module Type) (Module Type)
 functionalNorm =
@@ -52,11 +47,11 @@ functionalNorm =
     >=> topLevelFunctionNormalization
     >=> functionResultsSaturation
 
-{- | Passes 8–10: Control-flow normalization
+{- | Passes 7–9: Control-flow normalization
 
-8.  'logicalOperatorTranslation' – desugar @&&@ / @||@ into @if@ expressions.
-9.  'letBindingSimplification'   – eliminate pure-alias @let x = y@ bindings.
-10. 'administrativeNormalForm'   – extract every non-atomic sub-expression into a @let@.
+7. 'logicalOperatorTranslation' – desugar @&&@ / @||@ into @if@ expressions.
+8. 'letBindingSimplification'   – eliminate pure-alias @let x = y@ bindings.
+9. 'administrativeNormalForm'   – extract every non-atomic sub-expression into a @let@.
 -}
 controlFlowNorm :: (Monad m) => Pass m (Module Type) (Module Type)
 controlFlowNorm =

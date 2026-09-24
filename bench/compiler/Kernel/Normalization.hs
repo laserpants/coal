@@ -1,3 +1,8 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
+
 {- |
 Module: Kernel.Normalization
 Description: Benchmarks for kernel IR normalization passes.
@@ -5,19 +10,14 @@ Description: Benchmarks for kernel IR normalization passes.
 Each normalization pass is benchmarked in isolation on realistic kernel IR
 inputs, allowing detection of performance regressions in specific transforms.
 -}
-{-# OPTIONS_GHC -Wno-orphans #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE OverloadedStrings #-}
-
 module Kernel.Normalization (benchmarks) where
 
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (Object (..))
 import Coal.Kernel.Language.Type (Type (..))
+import qualified Coal.Kernel.Parser.Module as Parser
 import Coal.Kernel.Pipeline (Pass, evalPipeline, initialPipelineState)
 import Coal.Kernel.Pipeline.Pass.AdministrativeNormalForm (administrativeNormalForm)
-import Coal.Kernel.Pipeline.Pass.CaseExpressionCanonicalization (caseExpressionCanonicalization)
 import Coal.Kernel.Pipeline.Pass.ConstructorSaturation (constructorSaturation)
 import Coal.Kernel.Pipeline.Pass.FunctionResultsSaturation (functionResultsSaturation)
 import Coal.Kernel.Pipeline.Pass.LambdaFlattening (lambdaFlattening)
@@ -30,11 +30,10 @@ import Coal.Kernel.Pipeline.Passes (pipeline)
 import Control.DeepSeq (NFData (..))
 import Control.Monad.Identity (Identity)
 import Criterion.Main
-import System.IO.Unsafe (unsafePerformIO)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import System.IO.Unsafe (unsafePerformIO)
 import qualified Text.Megaparsec as MP
-import qualified Coal.Kernel.Parser.Module as Parser
 
 -- | All normalization benchmark groups.
 benchmarks :: [Benchmark]
@@ -43,8 +42,9 @@ benchmarks =
       concatMap benchmarksForModule (unsafeParseInputs exampleInputs)
   ]
 
--- | Benchmark inputs, labelled by size. Each entry pairs a size label with the
--- path of a kernel IR (`.corn`) module to benchmark.
+{- | Benchmark inputs, labelled by size. Each entry pairs a size label with the
+path of a kernel IR (`.corn`) module to benchmark.
+-}
 exampleInputs :: [(String, FilePath)]
 exampleInputs =
   [ ("small", "test/examples/034/Main.corn")
@@ -58,16 +58,17 @@ data Input = Input
   , inputMod :: Module Type
   }
 
--- | Parse inputs lazily (forced when benchmarks execute). Uses unsafePerformIO
--- to read files at benchmark definition time.
+{- | Parse inputs lazily (forced when benchmarks execute). Uses unsafePerformIO
+to read files at benchmark definition time.
+-}
 unsafeParseInputs :: [(String, FilePath)] -> [Input]
 unsafeParseInputs inputs =
   [ Input size (takeBaseName' f) (injectBuiltins m)
   | (size, f) <- inputs
   , let src = unsafeReadFile f
         m = case parseModule src of
-              Left _ -> error ("Failed to parse: " ++ f)
-              Right x -> x
+          Left _ -> error ("Failed to parse: " ++ f)
+          Right x -> x
   ]
 
 -- | Read a file lazily using unsafePerformIO.
@@ -101,7 +102,6 @@ benchmarksForModule :: Input -> [Benchmark]
 benchmarksForModule Input{inputSize, inputName, inputMod} =
   let label = inputSize ++ "/" ++ inputName
    in [ bench (label ++ "/pipeline") $ nf (runIdentPass pipeline) inputMod
-      , bench (label ++ "/case-canonicalization") $ nf (runIdentPass caseExpressionCanonicalization) inputMod
       , bench (label ++ "/name-canonicalization") $ nf (runIdentPass localNameCanonicalization) inputMod
       , bench (label ++ "/lambda-flattening") $ nf (runIdentPass lambdaFlattening) inputMod
       , bench (label ++ "/constructor-saturation") $ nf (runIdentPass constructorSaturation) inputMod
@@ -134,11 +134,10 @@ takeBaseName' = reverse . drop 1 . dropWhile (/= '.') . reverse . takeFileName
 takeFileName :: FilePath -> String
 takeFileName = reverse . takeWhile (/= '/') . reverse
 
--- | Orphan NFData instance for Module Type.
--- Uses 'show' to force full evaluation of the module tree. This is pragmatic
--- but approximate: serialization overhead scales with output size, so
--- cross-pass comparisons are not exact. See bench/compiler/README.md.
+{- | Orphan NFData instance for Module Type.
+Uses 'show' to force full evaluation of the module tree. This is pragmatic
+but approximate: serialization overhead scales with output size, so
+cross-pass comparisons are not exact. See bench/compiler/README.md.
+-}
 instance NFData (Module Type) where
   rnf m = rnf (show m)
-
-

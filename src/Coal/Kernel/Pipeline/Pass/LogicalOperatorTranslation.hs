@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 {- |
-Normalization pass 8: Logical operator translation.
+Normalization pass 7: Logical operator translation.
 
 Replaces logical operators with explicit @if@-expressions, preserving
 short-circuit semantics. This eliminates special-case handling of boolean

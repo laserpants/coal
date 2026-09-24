@@ -1,5 +1,5 @@
 {- |
-Invariant checker for logical operator translation (pass 8).
+Invariant checker for logical operator translation (pass 7).
 
 Verifies that no logical AND (@&&@) or OR (@||@) operator nodes remain anywhere
 in the expression tree.

@@ -1,5 +1,5 @@
 {- |
-Invariant checker for let-binding simplification (pass 9).
+Invariant checker for let-binding simplification (pass 8).
 
 Verifies that no trivial alias bindings remain in let-expressions.
 

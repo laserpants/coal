@@ -1,5 +1,5 @@
 {- |
-Normalization pass 2: Local name canonicalization.
+Normalization pass 1: Local name canonicalization.
 
 Alpha-renames every locally bound name to a globally unique @x.[n]@ identifier.
 This eliminates shadowing and simplifies later passes by ensuring every

@@ -1,6 +1,5 @@
 module Coal.Kernel.Pipeline.Invariant (
   InvariantError (..),
-  checkCaseExpressionsCanonical,
   checkConstructorsSaturated,
   checkLocalNamesUnique,
   checkLambdasFlattened,
@@ -13,7 +12,6 @@ module Coal.Kernel.Pipeline.Invariant (
 ) where
 
 import Coal.Kernel.Pipeline.Invariant.AdministrativeNormalForm (checkAdministrativeNormalForm)
-import Coal.Kernel.Pipeline.Invariant.CaseExpressionsCanonical (checkCaseExpressionsCanonical)
 import Coal.Kernel.Pipeline.Invariant.ConstructorsSaturated (checkConstructorsSaturated)
 import Coal.Kernel.Pipeline.Invariant.Error (InvariantError (..))
 import Coal.Kernel.Pipeline.Invariant.FunctionResultsSaturated (checkFunctionResultsSaturated)

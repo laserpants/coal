@@ -1,5 +1,5 @@
 {- |
-Normalization pass 6: Top-level function normalization.
+Normalization pass 5: Top-level function normalization.
 
 Normalizes all top-level definitions so that no callable object is represented
 as a lambda-valued constant or as a function whose body is a lambda
