@@ -230,10 +230,7 @@ module Number {
    * **Type**: `is_even : a -> bool with (Modulo<a>)`
    */
   fun is_even(n) = 
-    match(n % 2) {
-      | Some(r) => r == 0
-      | None    => false
-    }
+    n % 2 == Some(0)
 
   /**
    * Test whether a number is odd.
@@ -241,9 +238,6 @@ module Number {
    * **Type**: `is_odd : a -> bool with (Modulo<a>)`
    */
   fun is_odd(n) = 
-    match(n % 2) {
-      | Some(r) => r == 1
-      | None    => false
-    }
+    n % 2 == Some(1)
 
 }
