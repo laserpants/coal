@@ -1,5 +1,5 @@
 {- |
-Normalization pass 4: Constructor saturation.
+Normalization pass 3: Constructor saturation.
 
 Eta-expands every partially applied data constructor into a lambda, ensuring
 that all constructor applications are fully saturated. This simplifies code

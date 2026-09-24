@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
-Normalization pass 10: Administrative normal form (ANF).
+Normalization pass 9: Administrative normal form (ANF).
 
 Transforms every expression in the module into administrative normal form,
 where all operands are atomic. This simplifies code generation by eliminating

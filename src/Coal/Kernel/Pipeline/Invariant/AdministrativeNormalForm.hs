@@ -1,5 +1,5 @@
 {- |
-Invariant checker for administrative normal form (pass 10).
+Invariant checker for administrative normal form (pass 9).
 
 Verifies that all expressions are in administrative normal form (ANF).
 

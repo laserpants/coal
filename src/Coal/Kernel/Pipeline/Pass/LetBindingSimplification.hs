@@ -1,5 +1,5 @@
 {- |
-Normalization pass 9: Let-binding simplification and alias elimination.
+Normalization pass 8: Let-binding simplification and alias elimination.
 
 Removes trivial variable-alias bindings from @let@ expressions and relabels
 all variable references through the resulting substitution map. This simplifies
@@ -163,7 +163,7 @@ resolve subst name =
   case Map.lookup name subst of
     Nothing -> name
     Just target
-      | target == name -> name -- break cycles (shouldn't arise after pass 002)
+      | target == name -> name -- break cycles (shouldn't arise after pass 001)
       | otherwise -> resolve subst target
 
 simplifyClause :: Map Name Name -> Clause Type -> Clause Type

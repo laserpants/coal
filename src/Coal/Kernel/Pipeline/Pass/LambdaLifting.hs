@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
-Normalization pass 5: Lambda lifting.
+Normalization pass 4: Lambda lifting.
 
 Lifts all lambda expressions to top-level functions, parameterizing over free
 variables. This eliminates nested function definitions, making the program

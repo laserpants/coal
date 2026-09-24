@@ -1,5 +1,5 @@
 {- |
-Invariant checker for lambda flattening (pass 3).
+Invariant checker for lambda flattening (pass 2).
 
 Verifies that no lambda expression directly returns another lambda expression,
 i.e., that all lambdas have been flattened into multi-parameter form.

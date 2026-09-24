@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
 {- |
-Invariant checker for constructor saturation (pass 4).
+Invariant checker for constructor saturation (pass 3).
 
 Verifies that every data constructor application is fully saturated, i.e.,
 applied to exactly its declared arity.

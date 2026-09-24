@@ -119,12 +119,14 @@ irClause irTail op (Clause (Label _ con :| lls) body) = do
 Loads the constructor index (tag) from the scrutinee and dispatches to the
 appropriate clause.
 
-If the last clause is a wildcard (head label name is not an uppercase-initial
-constructor name), it is compiled as the @switch@ default arm. All other
-clauses are assigned switch values by their constructor tag, looked up from
-'codegenTagEnv'. The canonicalization pass guarantees that named constructor
-clauses are sorted in lexicographic order (matching the tag assignment order
-from the @data@ declaration), and wildcards always sort last.
+Clause order is irrelevant for dispatch: each named constructor clause is
+assigned its switch value by looking up the constructor's tag (its index within
+the @DData@ declaration) in 'codegenTagEnv', so tags never depend on clause
+position. If the last clause is a wildcard (head label name is not an
+uppercase-initial constructor name), it is compiled as the @switch@ default
+arm. Pattern-match compilation in the front end always appends the catch-all
+row last, so front-end-produced case expressions satisfy this requirement;
+hand-written kernel IR must likewise place the wildcard clause last.
 -}
 irCase :: (Expr Type -> IRCodegen IROperand) -> (Expr Type -> IRCodegen ()) -> Expr Type -> NonEmpty (Clause Type) -> IRCodegen ()
 irCase irValue irTail e1 cs = mdo

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 {- |
-Normalization pass 7: Function results saturation.
+Normalization pass 6: Function results saturation.
 
 Eta-expands every top-level function whose result type is itself a function
 type, adding fresh parameters until the result is non-functional. This ensures

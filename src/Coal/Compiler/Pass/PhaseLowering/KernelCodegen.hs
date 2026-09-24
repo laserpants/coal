@@ -237,9 +237,13 @@ function module): this list only provides the struct type declarations and
 @make_%@ constructor functions for built-in data constructors whose DData is
 never produced by normal @DType@ translation.
 
-Constructors are listed in lexicographic order because
-'CaseExpressionCanonicalization' sorts 'ECase' clauses lexicographically
-and the LLVM codegen assigns switch tags by clause position.
+Constructors are listed in lexicographic order so that the positional indices
+within each 'Kernel.DData' group match the lexicographic constructor ordering
+used everywhere else (front-end translation, the kernel IR parser, and cached
+builds all sort constructors by name). The LLVM codegen assigns each
+constructor its tag by its position within its 'Kernel.DData' group and
+dispatches case clauses by constructor name via 'codegenTagEnv', so case-clause
+order does not affect tag assignment.
 -}
 builtinDData :: [Kernel.Object Kernel.Type]
 builtinDData =

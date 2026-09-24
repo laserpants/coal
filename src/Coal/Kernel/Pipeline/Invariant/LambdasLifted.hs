@@ -1,5 +1,5 @@
 {- |
-Invariant checker for lambda lifting (pass 5).
+Invariant checker for lambda lifting (pass 4).
 
 Verifies that no lambda expression (@ELam@) nodes remain anywhere in the
 expression tree.

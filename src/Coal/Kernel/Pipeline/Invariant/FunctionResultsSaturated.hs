@@ -1,5 +1,5 @@
 {- |
-Invariant checker for function results saturation (pass 7).
+Invariant checker for function results saturation (pass 6).
 
 Verifies that no top-level function has a result type that is itself a function
 type.

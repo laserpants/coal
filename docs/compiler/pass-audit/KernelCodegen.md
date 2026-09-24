@@ -72,9 +72,11 @@ These constructors are injected because their `DData` is never produced by
 normal `DType` translation, but the LLVM codegen needs the struct type
 declarations and `make_%` functions for them.
 
-The lexicographic ordering is critical because `CaseExpressionCanonicalization`
-sorts `ECase` clauses lexicographically, and the LLVM codegen assigns switch
-tags by clause position.
+The lexicographic ordering keeps constructor tags consistent: a tag is the
+constructor's position within its `DData` group, and every stage that orders
+constructors (front-end translation, the kernel IR parser, cached builds) sorts
+them by name. The LLVM codegen dispatches case clauses by constructor name via
+`codegenTagEnv`, so case-clause order does not affect tag assignment.
 
 ---
 

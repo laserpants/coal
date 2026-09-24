@@ -447,25 +447,23 @@ The kernel normalization pipeline operates within the `PipelineT` monad
 The pipeline proceeds through three stages:
 
 ### 1. Structural normalization (`structuralNorm`)
-1. `caseExpressionCanonicalization` — sort case clauses lexicographically by
-   constructor
-2. `localNameCanonicalization` — alpha-rename locals to unique names (`x.n`)
-3. `lambdaFlattening` — collapse nested lambdas:
+1. `localNameCanonicalization` — alpha-rename locals to unique names (`x.n`)
+2. `lambdaFlattening` — collapse nested lambdas:
    `fn(a) => fn(b) => e` → `fn(a, b) => e`
-4. `constructorSaturation` — eta-expand partial constructor applications
+3. `constructorSaturation` — eta-expand partial constructor applications
 
 ### 2. Functional normalization (`functionalNorm`)
-5. `lambdaLifting` — lift lambda expressions to top-level definitions
-6. `topLevelFunctionNormalization` — merge function-body lambdas; promote
+4. `lambdaLifting` — lift lambda expressions to top-level definitions
+5. `topLevelFunctionNormalization` — merge function-body lambdas; promote
    constant lambdas
-7. `functionResultsSaturation` — eta-expand functions whose result type is a
+6. `functionResultsSaturation` — eta-expand functions whose result type is a
    function type
 
 ### 3. Control-flow normalization (`controlFlowNorm`)
-8. `logicalOperatorTranslation` — desugar `&&` / `||` into `if` expressions
-9. `letBindingSimplification` — eliminate pure-alias `let x = y` bindings
-10. `administrativeNormalForm` — extract every non-atomic sub-expression into
-    a `let`
+7. `logicalOperatorTranslation` — desugar `&&` / `||` into `if` expressions
+8. `letBindingSimplification` — eliminate pure-alias `let x = y` bindings
+9. `administrativeNormalForm` — extract every non-atomic sub-expression into
+   a `let`
 
 The full pipeline is `structuralNorm >=> functionalNorm >=> controlFlowNorm`.
 

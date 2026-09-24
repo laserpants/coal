@@ -1,5 +1,5 @@
 {- |
-Invariant checker for top-level function normalization (pass 6).
+Invariant checker for top-level function normalization (pass 5).
 
 Verifies that no top-level object is a constant containing a lambda expression,
 and no top-level function has a lambda expression as its direct body.
