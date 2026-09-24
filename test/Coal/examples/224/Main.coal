@@ -6,9 +6,9 @@ module Main {
     let 
       n = 11111119223372036854775807
     in
-      let
-        m = n % 11
-      in
-      println_bignum(m)
+      match(n % 11) {
+        | Some(m) => println_bignum(m)
+        | None    => println_bignum(0)
+      }
 
 }

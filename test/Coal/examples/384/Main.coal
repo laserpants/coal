@@ -30,21 +30,29 @@ module Main {
 
   fun shape_from_int(n : int32) : Shape =
     match(n % 6) {
-      | 0 => ShapeI
-      | 1 => ShapeO
-      | 2 => ShapeT
-      | 3 => ShapeS
-      | 4 => ShapeZ
-      | 5 => ShapeJ
-      | _ => ShapeL
+      | Some(r) =>
+          match(r) {
+            | 0 => ShapeI
+            | 1 => ShapeO
+            | 2 => ShapeT
+            | 3 => ShapeS
+            | 4 => ShapeZ
+            | 5 => ShapeJ
+            | _ => ShapeL
+          }
+      | None => ShapeL
     }
 
   fun rotation_from_int(n : int32) : Rotation =
     match(n % 4) {
-      | 0 => R0
-      | 1 => R90
-      | 2 => R180
-      | _ => R270
+      | Some(r) =>
+          match(r) {
+            | 0 => R0
+            | 1 => R90
+            | 2 => R180
+            | _ => R270
+          }
+      | None => R0
     }
 
   type Event

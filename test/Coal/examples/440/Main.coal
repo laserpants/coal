@@ -1,0 +1,62 @@
+module Main {
+
+  import IO(println_string)
+  import namespace Number
+  import namespace String
+
+  fun show_i32(o : Option<int32>) : string =
+    match(o) {
+      | Some(r) => "Some(" <> String.int32_to_string(r) <> ")"
+      | None    => "None"
+    }
+
+  fun show_i64(o : Option<int64>) : string =
+    match(o) {
+      | Some(r) => "Some(" <> String.int64_to_string(r) <> ")"
+      | None    => "None"
+    }
+
+  fun show_bn(o : Option<bignum>) : string =
+    match(o) {
+      | Some(r) => "Some(" <> Number.bignum_to_string(r) <> ")"
+      | None    => "None"
+    }
+
+  // `Comparable<Option<a>>` instance (polymorphic use).
+  fun eq_opt(x : Option<a>, y : Option<a>) : bool with (Comparable<a>) =
+    x == y
+
+  // `Comparable<Option<int32>>` instance (monomorphic use).
+  fun eq_none(x : Option<int32>, y : Option<int32>) : bool =
+    x == y
+
+  fun bool_str(b : bool) : string =
+    if (b) then "t" else "f"
+
+  fun main() =
+    println_string(
+      show_i32(17 % 5)
+        <> " "
+        <> show_i32(17 % 0)
+        <> " "
+        <> show_i32(0 % 5)
+        <> " | "
+        <> show_i64(10 % 3)
+        <> " "
+        <> show_i64(10 % 0)
+        <> " | "
+        <> show_bn(11111119223372036854775807 % 11)
+        <> " "
+        <> show_bn(11111119223372036854775807 % 0)
+        <> " | even="
+        <> (if (Number.is_even(4)) then "true" else "false")
+        <> " odd="
+        <> (if (Number.is_odd(5)) then "true" else "false")
+        <> " | opt="
+        <> bool_str(Some(1) == Some(1))
+        <> bool_str(Some(1) == Some(2))
+        <> bool_str(Some(1) == None)
+        <> bool_str(eq_none(None, None))
+        <> bool_str(eq_opt(Some(2), Some(3)))
+    )
+}

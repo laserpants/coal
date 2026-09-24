@@ -5,7 +5,14 @@ module Main {
 
   let foo = enum_from(0)
 
-  let baz = filter(fn(x) => x % 2 == 0, foo)
+  let baz = filter(
+    fn(x) =>
+      match(x % 2) {
+        | Some(r) => r == 0
+        | None    => false
+      },
+    foo
+  )
 
   fun main() = 
     IO.println_int32(foo |. tail |. tail |. tail |. tail |. head)

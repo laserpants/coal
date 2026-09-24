@@ -10,7 +10,10 @@ module Main {
           c = 1013904223;
           m = 2147483647  // 2^31 - 1
       in
-        (a * state + c) % m
+        match((a * state + c) % m) {
+          | Some(r) => r
+          | None    => 0
+        }
     )
 
   let rng = random_stream(42)

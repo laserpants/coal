@@ -2335,6 +2335,17 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- Regression: `%` (Modulo) returns `Option<a>` — `None` iff the divisor is
+  -- zero, `Some(result)` otherwise. A zero divisor used to crash at runtime.
+  -- Also covers the `Comparable<Option<a>>` instance (which needs its
+  -- `with (Comparable<a>)` context) at monomorphic and polymorphic types.
+  describe "440" $
+    expectOutput
+      "Some(2) None Some(0) | Some(1) None | Some(6) None | even=true odd=true | opt=tfftf"
+      "test/Coal/examples/440"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
