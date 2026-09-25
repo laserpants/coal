@@ -138,7 +138,8 @@ solve = go [] . fmap mkEntry
   recursive solver's @sub2 <> sub1@ nesting: with fragments stored most
   recent first (@sub1 : frags@ at each 'Equality' step), 'foldr' applies them
   oldest-first, rebuilding exactly that nesting. -}
-  go frags [] = pure (composeSubstitutions frags)
+  go frags [] =
+    pure (composeSubstitutions frags)
   go frags entries =
     case choice entries of
       ChoiceNotFound ->
