@@ -35,7 +35,11 @@ module Main {
   // used to yield None and trip the caller's "Unreachable" panic branch.
   fun parse_remainder(s : string) : Option<int32> =
     match(Number.parse_bignum(s)) {
-      | Some(n) => Number.parse_int32(Number.bignum_to_string(n % 256))
+      | Some(n) =>
+        match(n % 256) {
+          | Some(r) => Number.parse_int32(Number.bignum_to_string(r))
+          | None    => None
+        }
       | None    => None
     }
 

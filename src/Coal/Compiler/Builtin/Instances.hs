@@ -760,7 +760,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IInt32 `TArrow` TIntrinsic IInt32 `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt32 :| []))
               )
             ]
         )
@@ -775,7 +775,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` TIntrinsic IInt64)
+              , Forall mempty mempty (TIntrinsic IInt64 `TArrow` TIntrinsic IInt64 `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IInt64 :| []))
               )
             ]
         )
@@ -790,7 +790,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(%)"
-              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` TIntrinsic IBignum)
+              , Forall mempty mempty (TIntrinsic IBignum `TArrow` TIntrinsic IBignum `TArrow` applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (TIntrinsic IBignum :| []))
               )
             ]
         )

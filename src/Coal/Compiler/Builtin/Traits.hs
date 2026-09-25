@@ -143,7 +143,7 @@ builtinTraits =
           (Parameter () "a")
           [ TraitDefinitionInterfaceEntry
               "(%)"
-              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a"))
+              (Forall (Set.fromList [Parameter () "a"]) mempty $ TVariable (Parameter () "a") `TArrow` TVariable (Parameter () "a") `TArrow` TApplication () (TConstructor () "Option") (TVariable (Parameter () "a")))
           ]
       )
   , DTrait

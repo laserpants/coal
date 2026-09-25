@@ -2202,11 +2202,18 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<int32>
-                    ( coal_int32_mod : int32/int32/int32
-                    , q : int32
-                    , r : int32
-                    )
+                  if ([== int32](r : int32, 0))
+                    then
+                      None : Option(int32)
+                    else
+                      @<Option(int32)>
+                        ( Some : int32/Option(int32)
+                        , @<int32>
+                            ( coal_int32_mod : int32/int32/int32
+                            , q : int32
+                            , r : int32
+                            )
+                        )
         |]
       )
   , DFunction
@@ -2217,11 +2224,18 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<int64>
-                    ( coal_int64_mod : int64/int64/int64
-                    , q : int64
-                    , r : int64
-                    )
+                  if ([== int64](r : int64, %0))
+                    then
+                      None : Option(int64)
+                    else
+                      @<Option(int64)>
+                        ( Some : int64/Option(int64)
+                        , @<int64>
+                            ( coal_int64_mod : int64/int64/int64
+                            , q : int64
+                            , r : int64
+                            )
+                        )
         |]
       )
   , DFunction
@@ -2232,11 +2246,18 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_bignum_mod : bignum/bignum/bignum
-                    , q : bignum
-                    , r : bignum
-                    )
+                  if (@<bool>(coal_bignum_eq : bignum/bignum/bool, r : bignum, %%0))
+                    then
+                      None : Option(bignum)
+                    else
+                      @<Option(bignum)>
+                        ( Some : bignum/Option(bignum)
+                        , @<bignum>
+                            ( coal_bignum_mod : bignum/bignum/bignum
+                            , q : bignum
+                            , r : bignum
+                            )
+                        )
         |]
       )
   , DFunction
