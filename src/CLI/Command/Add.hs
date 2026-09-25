@@ -53,19 +53,20 @@ addCommand caps AddCmdOptions{..} = do
   liftIO $ Text.putStrLn ("Added dependency: " <> pkgName)
 
 deriveNameFromRepo :: GitRepo -> ExceptT CLIError IO Text
-deriveNameFromRepo repo = do
-  withSystemTempDirectory "coal-add" $ \tmpDir -> do
-    gitCloneRepo repo tmpDir
-    let manifestPath = tmpDir <> "/coal.json"
-    result <-
-      liftIO $
-        runExceptT $
-          loadManifestFrom
-            manifestPath
-            (\err -> EProjectInvalidManifestFormat ("invalid JSON: " <> err))
-            ( EProjectInvalidManifestFormat
-                ("cloned repository at " <> repoUrl repo <> " has no coal.json")
-            )
-    case result of
-      Left err -> throwError (EPackageError err)
-      Right PackageManifest{name} -> pure name
+deriveNameFromRepo repo =
+  withSystemTempDirectory "coal-add" $
+    \tmpDir -> do
+      gitCloneRepo repo tmpDir
+      let manifestPath = tmpDir <> "/coal.json"
+      result <-
+        liftIO $
+          runExceptT $
+            loadManifestFrom
+              manifestPath
+              (\err -> EProjectInvalidManifestFormat ("invalid JSON: " <> err))
+              ( EProjectInvalidManifestFormat
+                  ("cloned repository at " <> repoUrl repo <> " has no coal.json")
+              )
+      case result of
+        Left err -> throwError (EPackageError err)
+        Right PackageManifest{name} -> pure name
