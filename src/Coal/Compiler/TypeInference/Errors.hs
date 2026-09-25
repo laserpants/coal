@@ -3,7 +3,7 @@
 module Coal.Compiler.TypeInference.Errors (prettyErrorMessage) where
 
 import Coal.Compiler.HasMetadata (HasMetadata (..))
-import Coal.Compiler.Metadata (Metadata (..))
+import Coal.Compiler.Metadata (Metadata (..), isDefaultMetadata)
 import Data.Char (isSpace)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -11,29 +11,35 @@ import Text.Megaparsec (SourcePos (sourceColumn, sourceLine), mkPos, unPos)
 import TextShow (showt)
 
 prettyErrorMessage :: (HasMetadata a) => [Text] -> a -> Text -> Text
-prettyErrorMessage msg err src =
-  let spanLines = extractSpan src (locationStart meta) (locationEnd meta)
-      locationLine = showt (unPos $ sourceLine (locationStart meta))
-      locationCol = showt (unPos $ sourceColumn (locationStart meta))
-
-      rendered =
-        Text.unlines $
-          ["  |"]
-            <> concatMap
-              ( \(_, line, marker) ->
-                  [ "  | " <> line
-                  , "  | " <> marker
-                  ]
-              )
-              spanLines
-            <> msg
-   in locationLine
+prettyErrorMessage msg err src
+  -- Nodes synthesized by translation passes still carry the default ('mempty')
+  -- source position. Rendering it would show a bogus "1:1:" caret pointing at
+  -- an unrelated part of the file, so emit the message on its own instead.
+  | isDefaultMetadata meta =
+      Text.unlines msg
+  | otherwise =
+      locationLine
         <> ":"
         <> locationCol
         <> ":\n"
         <> rendered
  where
   meta = getMetadata err
+  spanLines = extractSpan src (locationStart meta) (locationEnd meta)
+  locationLine = showt (unPos $ sourceLine (locationStart meta))
+  locationCol = showt (unPos $ sourceColumn (locationStart meta))
+
+  rendered =
+    Text.unlines $
+      ["  |"]
+        <> concatMap
+          ( \(_, line, marker) ->
+              [ "  | " <> line
+              , "  | " <> marker
+              ]
+          )
+          spanLines
+        <> msg
 
 extractSpan :: Text -> SourcePos -> SourcePos -> [(Int, Text, Text)]
 extractSpan src start end0 =

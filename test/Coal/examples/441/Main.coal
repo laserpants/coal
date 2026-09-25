@@ -1,0 +1,14 @@
+module Main {
+
+  import namespace IO
+
+  fun hello(n : int32) : string =
+    match(n % 6) { 
+      | 5 => "a"
+      | _ => "a" 
+    }
+
+  fun main() =
+    IO.println_string("!")
+
+}

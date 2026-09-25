@@ -96,12 +96,12 @@ instance (Data k) => ExpandContext (Expression Metadata k IndexedType) where
             scrutName <- supplied (freshName "scrut")
             let scrutType = typeOf e'
                 scrutLabel = Label scrutType scrutName
-                scrutVar = EVariable mempty scrutLabel
+                scrutVar = EVariable a scrutLabel
             cs' <- expandClausesFallthrough scrutVar clauseList
             pure $
               ELet
-                mempty
-                (BPattern mempty (PVariable mempty scrutLabel) e' :| [])
+                a
+                (BPattern a (PVariable a scrutLabel) e' :| [])
                 (EMatch a t scrutVar (NonEmpty.fromList cs'))
           else do
             cs' <- NonEmpty.fromList <$> traverse (\c -> expandClause a e' (c, [])) clauseList
@@ -136,11 +136,11 @@ expandClause _ expr (EClause a p (CPlain a1 gs e1 :| []), ds) = do
       e2 <-
         expandIntegerLiteralPatterns $
           EIf
-            mempty
+            a
             (typeOf e1')
-            (foldr numericLiteral (ELiteral mempty (LBool True)) ints)
+            (foldr numericLiteral (ELiteral a (LBool True)) ints)
             e1'
-            (EMatch mempty (typeOf e1') expr (c :| cs))
+            (EMatch a (typeOf e1') expr (c :| cs))
       return (EClause a q (CPlain a1 gs e2 :| []))
 expandClause _ _ _ = error "expandClause: expected single plain clause body"
 
@@ -181,15 +181,15 @@ expandClausesFallthrough scrutVar (EClause a p (CPlain a1 gs e1 :| []) : cs) = d
     _ -> do
       let fallthrough =
             EMatch
-              mempty
+              a
               (typeOf e1')
               scrutVar
               (NonEmpty.fromList cs')
           e2 =
             EIf
-              mempty
+              a
               (typeOf e1')
-              (foldr numericLiteral (ELiteral mempty (LBool True)) ints)
+              (foldr numericLiteral (ELiteral a (LBool True)) ints)
               e1'
               fallthrough
           clause' = EClause a q (CPlain a1 gs e2 :| [])
@@ -201,27 +201,34 @@ expandClausesFallthrough scrutVar (EClause a p (CPlain a1 gs e1 :| []) : cs) = d
         _ -> pure (clause' : cs')
 expandClausesFallthrough _ _ = error "expandClausesFallthrough: expected single plain clause body"
 
--- | Create an equality check for a numeric literal variable
-numericLiteral :: (Label IndexedType, Integer) -> Expression Metadata k IndexedType -> Expression Metadata k IndexedType
-numericLiteral (ll@(Label t _), int) e1 =
+{- | Create an equality check for a numeric literal variable.
+
+All synthesized nodes carry the source location of the integer literal pattern
+(@loc@), so that a diagnostic about the generated guard (for example a missing
+trait instance for @from_int32@ or @(==)@) points at the offending pattern
+rather than at the default 1:1 position of 'mempty'.
+-}
+numericLiteral :: (Metadata, Label IndexedType, Integer) -> Expression Metadata k IndexedType -> Expression Metadata k IndexedType
+numericLiteral (loc, ll@(Label t _), int) e1 =
   EApplication
-    mempty
+    loc
     (TIntrinsic IBool)
-    (EOperator mempty (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
+    (EOperator loc (TIntrinsic IBool `TArrow` TIntrinsic IBool `TArrow` TIntrinsic IBool) OLogicalAnd)
     ( e1
         :| [ EApplication
-               mempty
+               loc
                (TIntrinsic IBool)
-               (EVariable mempty (Label (t `TArrow` t `TArrow` TIntrinsic IBool) "(==)"))
-               (EVariable mempty ll :| [fromLiteral t int])
+               (EVariable loc (Label (t `TArrow` t `TArrow` TIntrinsic IBool) "(==)"))
+               (EVariable loc ll :| [fromLiteral loc t int])
            ]
     )
 
 {- | Convert an integer literal to an expression using the appropriate constructor.
 Chooses between from_int32, from_int64, or from_bignum based on the value.
+The given source location is attached to every synthesized node.
 -}
-fromLiteral :: IndexedType -> Integer -> Expression Metadata k IndexedType
-fromLiteral t int
+fromLiteral :: Metadata -> IndexedType -> Integer -> Expression Metadata k IndexedType
+fromLiteral loc t int
   | int >= 0 && m <= fromIntegral (maxBound :: Int32) =
       fromInt "from_int32" (LInt32 (fromIntegral int))
   | int >= 0 && m <= fromIntegral (maxBound :: Int64) =
@@ -237,7 +244,7 @@ fromLiteral t int
  where
   m = abs int
   fromInt name lit =
-    EApplication mempty t (EVariable mempty (Label (argType lit `TArrow` t) name)) (ELiteral mempty lit :| [])
+    EApplication loc t (EVariable loc (Label (argType lit `TArrow` t) name)) (ELiteral loc lit :| [])
   argType =
     \case
       LInt32{} -> TIntrinsic IInt32
@@ -245,27 +252,29 @@ fromLiteral t int
       _ -> TIntrinsic IBignum
   fromBignum name v =
     EApplication
-      mempty
+      loc
       t
-      (EVariable mempty (Label (TIntrinsic IBignum `TArrow` t) name))
+      (EVariable loc (Label (TIntrinsic IBignum `TArrow` t) name))
       ( EApplication
-          mempty
+          loc
           (TIntrinsic IBignum)
-          (EVariable mempty (Label (TIntrinsic IString `TArrow` TIntrinsic IBignum) "number$_unsafe_parse_bignum"))
-          (ELiteral mempty (LString (ByteString.pack $ show v)) :| [])
+          (EVariable loc (Label (TIntrinsic IString `TArrow` TIntrinsic IBignum) "number$_unsafe_parse_bignum"))
+          (ELiteral loc (LString (ByteString.pack $ show v)) :| [])
           :| []
       )
 
 {- | Collect all integer literal patterns in a pattern, replacing them with fresh variables.
-Returns the transformed pattern and a list of (variable, integer) pairs.
+Returns the transformed pattern and a list of (literal location, variable, integer)
+triples, so that the synthesized equality guard can carry the location of the
+pattern it was derived from.
 -}
-collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata k IndexedType -> WriterT [(Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata k IndexedType)
+collectIntegerLiteralPatterns :: (Monad m) => Pattern Metadata k IndexedType -> WriterT [(Metadata, Label IndexedType, Integer)] (CompilerT Metadata m) (Pattern Metadata k IndexedType)
 collectIntegerLiteralPatterns =
   \case
     PInteger a t int -> do
       n <- lift (supplied id)
       let ll = Label t ("int" <> ".[" <> showt n <> "]")
-      tell [(ll, int)]
+      tell [(a, ll, int)]
       return (PVariable a ll)
     p ->
       return p

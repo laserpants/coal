@@ -2346,6 +2346,15 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- An integer literal pattern matched directly against a non-numeric
+  -- scrutinee: `%` returns `Option<int32>`, so the desugared guard
+  -- (`from_int32(5)`) needs `NumericBase<Option<int32>>`, which has no
+  -- instance. The reported location must point at the literal pattern.
+  describe "441" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/441" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
