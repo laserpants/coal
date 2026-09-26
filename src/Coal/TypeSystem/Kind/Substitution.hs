@@ -310,6 +310,8 @@ instance KindSubstitutable (Expression a Kind ()) where
         EIf a () (applyKinds sub e1) (applyKinds sub e2) (applyKinds sub e3)
       ERecord a () d e ->
         ERecord a () (applyKinds sub d) (applyKinds sub e)
+      ERecordUpdate a () e d ->
+        ERecordUpdate a () (applyKinds sub e) (applyKinds sub d)
       EListCons a () e1 e2 ->
         EListCons a () (applyKinds sub e1) (applyKinds sub e2)
       EListLiteral a () es ->
@@ -350,6 +352,8 @@ instance KindSubstitutable (Expression a Kind ()) where
         EIf a () (replaceVariables e1) (replaceVariables e2) (replaceVariables e3)
       ERecord a () d e ->
         ERecord a () (replaceVariables d) (replaceVariables e)
+      ERecordUpdate a () e d ->
+        ERecordUpdate a () (replaceVariables e) (replaceVariables d)
       EListCons a () e1 e2 ->
         EListCons a () (replaceVariables e1) (replaceVariables e2)
       EListLiteral a () es ->

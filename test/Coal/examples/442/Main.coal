@@ -1,0 +1,16 @@
+module Main {
+
+  import IO(println_string, println_int32, println_bool)
+
+  fun main() =
+    let
+      old_record =
+        { field_a = "a", field_b = "b", field_c = "old" }
+      in
+        let
+          new_record =
+            old_record{ field_c = "new value" }
+          in
+            println_string(new_record.field_a +++ "," +++ new_record.field_b +++ "," +++ new_record.field_c)
+
+}

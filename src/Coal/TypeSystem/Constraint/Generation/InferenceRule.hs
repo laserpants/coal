@@ -33,6 +33,7 @@ data InferenceRule k a
   | RuleDataConstructor a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | RuleSelectEquality a (Type TypeIndex k) (Type TypeIndex k)
   | RuleRecordEquality a (Type TypeIndex k) (Type TypeIndex k)
+  | RuleRecordUpdate a (Type TypeIndex k) (Type TypeIndex k)
   | RuleRecordField a Name (Type TypeIndex k)
   | RuleRecordLacks a Name (Type TypeIndex k)
   | RuleTailRow a (Type TypeIndex k) (Type TypeIndex k)

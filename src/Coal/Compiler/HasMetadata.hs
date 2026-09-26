@@ -31,6 +31,7 @@ instance HasMetadata (Expression Metadata () t) where
       EIf a _ _ _ _ -> a
       EOperator a _ _ -> a
       ERecord a _ _ _ -> a
+      ERecordUpdate a _ _ _ -> a
       EListCons a _ _ _ -> a
       EListLiteral a _ _ -> a
       ETuple a _ _ -> a
@@ -87,6 +88,7 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleListConstructor a _ _ -> a
       RuleSelectEquality a _ _ -> a
       RuleRecordEquality a _ _ -> a
+      RuleRecordUpdate a _ _ -> a
       RuleAssumption a _ _ -> a
       RuleAsConstraint a -> a
       RuleRecordField a _ _ -> a

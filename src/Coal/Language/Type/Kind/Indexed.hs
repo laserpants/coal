@@ -210,6 +210,8 @@ instance ToKindIndexed (Expression a k ()) (Expression a Kind ()) where
         EOperator a <$> toKindIndexed t <*> pure op
       ERecord a t d e ->
         ERecord a <$> toKindIndexed t <*> toKindIndexed d <*> toKindIndexed e
+      ERecordUpdate a t e d ->
+        ERecordUpdate a <$> toKindIndexed t <*> toKindIndexed e <*> toKindIndexed d
       EListCons a t e1 e2 ->
         EListCons a <$> toKindIndexed t <*> toKindIndexed e1 <*> toKindIndexed e2
       EListLiteral a t es ->

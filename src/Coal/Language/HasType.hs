@@ -95,6 +95,8 @@ instance (Data a, Data s, Data k, Data (o k), Typeable o, Ord k) => HasType o k 
         typeOf t
       ESelect _ t _ ->
         typeOf t
+      ERecordUpdate _ t _ _ ->
+        typeOf t
       EAnnotation _ _ t ->
         typeOf t
       EFFICall _ t _ _ _ ->

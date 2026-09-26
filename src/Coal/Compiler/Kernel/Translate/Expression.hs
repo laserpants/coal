@@ -69,6 +69,8 @@ translateExpression =
         <*> translateExpression e3
     ERecord _ t d me ->
       translateRecord translateExpression t d me
+    ERecordUpdate{} ->
+      error "record update expression was not expanded"
     EListCons _ _ e1 e2 ->
       consNK <$> translateExpression e1 <*> translateExpression e2
     EListLiteral _ t [] ->

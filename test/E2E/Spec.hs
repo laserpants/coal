@@ -2355,6 +2355,28 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/441" ["Main.coal"]
       res `shouldBe` Left TraitError
 
+  -- Partial record update: `record{ field = value }` preserves every other
+  -- field, following the `EFocus` row restriction only in the type system.
+  describe "442" $
+    expectOutput
+      "a,b,new value"
+      "test/Coal/examples/442"
+      ["Main.coal"]
+
+  -- Record updates compose: a polymorphic update, a multi-field update on its
+  -- result, and an update applied directly to a record literal.
+  describe "443" $
+    expectOutput
+      "Grace|hello|NYC|Grace"
+      "test/Coal/examples/443"
+      ["Main.coal"]
+
+  -- Updating a field the record lacks is a type error.
+  describe "444" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/444" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

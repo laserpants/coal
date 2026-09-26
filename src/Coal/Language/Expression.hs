@@ -58,6 +58,8 @@ data Expression a s t
     EOperator a t Operator
   | -- | Record
     ERecord a t (Dictionary (Expression a s t)) (Maybe (Expression a s t))
+  | -- | Record update: @base { field = value, ... }@
+    ERecordUpdate a t (Expression a s t) (Dictionary (Expression a s t))
   | -- | List cons-operator
     EListCons a t (Expression a s t) (Expression a s t)
   | -- | List literal
@@ -169,6 +171,8 @@ instance (Ord t, Data a, Data s, Data t) => FreeVars (Expression a s t) t where
         mempty
       ERecord _ _ fields rest ->
         freeIn fields <> freeIn rest
+      ERecordUpdate _ _ base fields ->
+        freeIn base <> freeIn fields
       EListCons _ _ x xs ->
         freeIn x <> freeIn xs
       EListLiteral _ _ xs ->

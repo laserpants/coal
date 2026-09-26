@@ -248,6 +248,11 @@ prettyRule =
      where
       u1 = normalizeTypeIndexes t1
       u2 = normalizeTypeIndexes t2
+    RuleRecordUpdate _ t1 t2 ->
+      "Record update type " <> prettyType u1 <> " doesn't match expected type " <> prettyType u2 <> "."
+     where
+      u1 = normalizeTypeIndexes t1
+      u2 = normalizeTypeIndexes t2
     RuleAssumption _ t1 t2 ->
       "Cannot unify " <> prettyType u1 <> " with " <> prettyType u2 <> "."
      where

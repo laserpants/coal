@@ -122,6 +122,7 @@ Assembles LLVM bitcode to object files via `llc`, compiles the runtime C library
   - [TypeVariables.md](TypeVariables.md)
   - [DebugOutput.md](DebugOutput.md)
 - [PhaseTranslation.md](PhaseTranslation.md) — overview of the translation phase
+  - [ExpandRecordUpdates.md](ExpandRecordUpdates.md)
   - [NormalizeAST.md](NormalizeAST.md)
   - [DesugarPatterns.md](DesugarPatterns.md)
   - [ExpandGuards.md](ExpandGuards.md)
