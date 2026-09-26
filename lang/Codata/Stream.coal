@@ -9,6 +9,7 @@ module Codata.Stream {
 
   import Codata.Machine(receive, observe, process, machine, map_machine, map2_machine, map3_machine, map4_machine)
   import Coal.Combinators(identity)
+  import IO(random, __eval_io)
 
   /**
    * A stream is a machine whose input is the unit value, so that elements
@@ -33,6 +34,16 @@ module Codata.Stream {
    */
   fun enum_from(n : int32) : Stream<int32> =
     process(n, fn(_, m) => m + 1)
+
+  fun randomize(pick_one : double -> a) : Stream<a> =
+    let
+      pick_next() = 
+        let r = __eval_io(random()) in pick_one(r)
+    in
+    process(
+      pick_next(), 
+      fn(_, _) => pick_next()
+    )
 
   /**
    * The stream of all natural numbers, starting at zero.
@@ -97,6 +108,15 @@ module Codata.Stream {
    */
   fun map4_stream(f : a -> b -> c -> d -> e, s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>, s4 : Stream<d>) : Stream<e> =
     map4_machine(f, s1, s2, s3, s4)
+
+  fun zip_streams(s1 : Stream<a>, s2 : Stream<b>) : Stream<(a, b)> =
+    map2_stream(fn(a, b) => (a, b), s1, s2)
+
+  fun zip3_streams(s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>) : Stream<(a, b, c)> =
+    map3_stream(fn(a, b, c) => (a, b, c), s1, s2, s3)
+
+  fun zip4_streams(s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>, s4 : Stream<d>) : Stream<(a, b, c, d)> =
+    map4_stream(fn(a, b, c, d) => (a, b, c, d), s1, s2, s3, s4)
 
   /**
    * Interleave two streams, applying `fa` to the elements of the first
