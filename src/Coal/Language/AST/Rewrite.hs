@@ -94,6 +94,10 @@ instance RewriteContext Expression where
         ERecord a t
           <$> traverse (rewrite name f) d
           <*> traverse (rewrite name f) e
+      ERecordUpdate a t e d ->
+        ERecordUpdate a t
+          <$> rewrite name f e
+          <*> traverse (rewrite name f) d
       ESelect a ll e ->
         ESelect a ll <$> rewrite name f e
       EFocus a field ll1 ll2 e1 e2 -> do

@@ -17,6 +17,7 @@ import Coal.Compiler.Pass.PhaseTranslation.ExpandGuards (passExpandGuards)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandIntegerLiteralPatterns (passExpandIntegerLiteralPatterns)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandOrPatterns (passExpandOrPatterns)
 import Coal.Compiler.Pass.PhaseTranslation.ExpandRecordPatterns (passExpandRecordPatterns)
+import Coal.Compiler.Pass.PhaseTranslation.ExpandRecordUpdates (passExpandRecordUpdates)
 import Coal.Compiler.Pass.PhaseTranslation.InsertDictionaries (passInsertDictionaries)
 import Coal.Compiler.Pass.PhaseTranslation.NormalizeAST (passNormalizeAST)
 import Coal.Language (IndexedType, Kind)
@@ -25,7 +26,9 @@ import Control.Monad.IO.Class (MonadIO)
 
 phaseTranslation :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 phaseTranslation =
-  passNormalizeAST
+  passExpandRecordUpdates
+    >-> generateDebugArtifacts "ExpandRecordUpdates"
+    >-> passNormalizeAST
     >-> generateDebugArtifacts "NormalizeAST"
     >-> passDesugarPatterns
     >-> generateDebugArtifacts "DesugarPatterns"

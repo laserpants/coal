@@ -1,0 +1,23 @@
+module Main {
+
+  import IO(println_string)
+
+  fun greet(person, greeting) =
+    person{ greeting = greeting }
+
+  fun main() =
+    let
+      person = { name = "Ada", greeting = "hi", city = "SF" }
+      in
+        let
+          p2 = greet(person, "hello")
+          in
+            let
+              p3 = p2{ city = "NYC", name = "Grace" }
+              in
+                let
+                  p4 = { inner = person }{ inner = p3 }
+                  in
+                    println_string(p3.name +++ "|" +++ p3.greeting +++ "|" +++ p3.city +++ "|" +++ p4.inner.name)
+
+}

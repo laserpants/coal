@@ -103,6 +103,8 @@ isExpansive =
       isExpansive e1 || isExpansive e2
     ERecord _ _ fields e ->
       any isExpansive fields || any isExpansive e
+    ERecordUpdate _ _ e fields ->
+      isExpansive e || any isExpansive fields
     _ ->
       True
 
@@ -345,6 +347,32 @@ emitERecordConstraints loc t fields expr = do
       pure ()
   pure (ms1 <> ms2)
 
+{- | Constraints for a record update @base { field = value, … }@.
+
+The update is typed by unifying the base record's type with a record whose
+updated fields cover the base's own field types, and whose remaining row is a
+fresh variable. Row unification then determines that variable as the base row
+minus the updated fields, and unifies each new value's type with the existing
+field type (so the update preserves the record's type). The expression's own
+annotation is unified with the same record type.
+-}
+emitERecordUpdateConstraints :: (Show a, Data a) => a -> IndexedType -> Expression a Kind IndexedType -> Dictionary (Expression a Kind IndexedType) -> ConstraintsGen a [Assumption a IndexedType]
+emitERecordUpdateConstraints loc t base fields = do
+  ms1 <- emitConstraints base
+  ms2 <- concatMapM emitConstraints fields
+  row <- supplied (RVariable . TypeIndex KRow)
+  let t1 = TRecord (TRow (fromDictionary (typeOf <$> fields) row))
+  tellRight [Equality (RuleRecordUpdate loc (typeOf base) t1) [typeOf base, t1]]
+  tellRight [Equality (RuleRecordUpdate loc t t1) [t, t1]]
+  case row of
+    r@RVariable{} ->
+      forM_ (Map.keys fields) $
+        \field ->
+          tellRight [Lacks (RuleRecordLacks loc field (TRow r)) (TRow r) field]
+    _ ->
+      pure ()
+  pure (ms1 <> ms2)
+
 tailRow :: (HasType TypeIndex Kind t) => a -> Maybe t -> ConstraintsGen a (Row TypeIndex Kind IndexedType)
 tailRow loc =
   \case
@@ -490,6 +518,8 @@ emitConstraints =
       emitESelectConstraints loc ll e
     ERecord loc t d me ->
       emitERecordConstraints loc t d me
+    ERecordUpdate loc t e d ->
+      emitERecordUpdateConstraints loc t e d
     ETuple loc t es ->
       emitETupleConstraints loc t es
     EFFICall loc t ll es e ->

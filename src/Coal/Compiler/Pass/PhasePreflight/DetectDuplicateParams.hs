@@ -177,6 +177,9 @@ instance DuplicateParamsContext (Expression Metadata () t) where
       ERecord _ _ d me -> do
         traverse_ detectDuplicateParams d
         detectDuplicateParams me
+      ERecordUpdate _ _ e d -> do
+        detectDuplicateParams e
+        traverse_ detectDuplicateParams d
       EListCons _ _ e1 e2 -> do
         detectDuplicateParams e1
         detectDuplicateParams e2

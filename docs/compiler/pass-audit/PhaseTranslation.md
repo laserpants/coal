@@ -8,7 +8,8 @@ after the type-checking phase.
 
 ## Passes Executed
 
-1. **NormalizeAST** — normalize types/expressions via `normalizeObject`
+1. **ExpandRecordUpdates** — desugar `record{ field = value }` into record pattern matches
+2. **NormalizeAST** — normalize types/expressions via `normalizeObject`
 2. **DesugarPatterns** — desugar complex patterns into simple variables with match
 3. **ExpandGuards** — expand guard expressions into if-then-else chains
 4. **ExpandOrPatterns** — expand or-patterns into separate clauses
@@ -26,7 +27,8 @@ after the type-checking phase.
 ## Execution Order
 
 ```
-NormalizeAST
+ExpandRecordUpdates
+  >-> NormalizeAST
   >-> DesugarPatterns
   >-> ExpandGuards
   >-> ExpandOrPatterns

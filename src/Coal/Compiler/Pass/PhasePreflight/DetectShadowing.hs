@@ -132,6 +132,9 @@ instance (Data t) => ShadowingContext (Expression Metadata () t) where
         traverse_ (detectShadowing names) es
       ETuple _ _ es ->
         traverse_ (detectShadowing names) es
+      ERecordUpdate _ _ e d -> do
+        detectShadowing names e
+        traverse_ (detectShadowing names) d
       _ ->
         pure ()
 

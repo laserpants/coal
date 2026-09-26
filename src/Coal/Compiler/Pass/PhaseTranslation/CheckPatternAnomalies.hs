@@ -129,6 +129,9 @@ instance PatternContext (Expression Metadata k t) where
       ERecord _ _ d me -> do
         traverse_ checkPatternAnomalies d
         traverse_ checkPatternAnomalies me
+      ERecordUpdate _ _ e d -> do
+        checkPatternAnomalies e
+        traverse_ checkPatternAnomalies d
       EListCons _ _ e1 e2 -> do
         checkPatternAnomalies e1
         checkPatternAnomalies e2

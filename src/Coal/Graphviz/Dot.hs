@@ -489,6 +489,11 @@ instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Expressio
         emitEdge id2 d
         emitEdge id2 me
         return id1
+      ERecordUpdate _ t e d -> do
+        (id1, id2) <- withTypeInfo t $ emitShape HouseShape "ERecordUpdate"
+        emitEdge id2 e
+        emitEdge id2 d
+        return id1
       EListCons _ t e1 e2 -> do
         (id1, id2) <- withTypeInfo t $ emitShape HouseShape "EListCons"
         emitEdge id2 e1

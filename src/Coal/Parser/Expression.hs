@@ -3,7 +3,7 @@
 module Coal.Parser.Expression (parseExpression, parseMatchClause) where
 
 import Coal.Common.Label (Label (..))
-import Coal.Compiler.HasMetadata (metadataSpan)
+import Coal.Compiler.HasMetadata (getMetadata, metadataSpan)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language
 import qualified Coal.Parser.BuiltinNames as Builtin
@@ -83,8 +83,15 @@ parseApplicationOp = do
   end <- getSourcePos
   pure (\expr -> EApplication (Metadata start end) () expr xs)
 
+parseRecordUpdateOp :: Parser (Expression Metadata () () -> Expression Metadata () ())
+parseRecordUpdateOp = do
+  start <- getSourcePos
+  fields <- braces (fieldList parseExpression "=")
+  end <- getSourcePos
+  pure (\expr -> ERecordUpdate (metadataSpan (getMetadata expr) (Metadata start end)) () expr (Map.fromList fields))
+
 selectorPostfix :: Combinators.Operator Parser (Expression Metadata () ())
-selectorPostfix = Combinators.Postfix (foldl (flip (.)) id <$> some (try parseSelectorOp <|> parseApplicationOp))
+selectorPostfix = Combinators.Postfix (foldl (flip (.)) id <$> some (try parseSelectorOp <|> parseApplicationOp <|> try parseRecordUpdateOp))
 
 parseExpression :: Parser (Expression Metadata () ())
 parseExpression = Combinators.makeExprParser parseAtom operator

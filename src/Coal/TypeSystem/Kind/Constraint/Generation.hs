@@ -235,6 +235,9 @@ instance EmitKinds (Expression a Kind ()) where
       ERecord _ () d e ->
         emitKindConstraints d
           <>^ emitKindConstraints e
+      ERecordUpdate _ () e d ->
+        emitKindConstraints e
+          <>^ emitKindConstraints d
       EListCons _ () e1 e2 ->
         emitKindConstraints e1
           <>^ emitKindConstraints e2
