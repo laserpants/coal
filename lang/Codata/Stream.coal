@@ -35,6 +35,14 @@ module Codata.Stream {
   fun enum_from(n : int32) : Stream<int32> =
     process(n, fn(_, m) => m + 1)
 
+  /**
+   * Return a stream of random elements derived from random doubles.
+   *
+   * Each element is obtained by drawing a pseudo-random `double` in the
+   * range `[0.0, 1.0)` and applying `pick_one` to it.
+   *
+   * **Type**: `randomize : (double -> a) -> Stream<a>`
+   */
   fun randomize(pick_one : double -> a) : Stream<a> =
     let
       pick_next() = 
@@ -109,12 +117,33 @@ module Codata.Stream {
   fun map4_stream(f : a -> b -> c -> d -> e, s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>, s4 : Stream<d>) : Stream<e> =
     map4_machine(f, s1, s2, s3, s4)
 
+  /**
+   * Combine the elements of two streams into a stream of pairs.
+   *
+   * Equivalent to `map2_stream(fn(a, b) => (a, b), s1, s2)`.
+   *
+   * **Type**: `zip_streams : Stream<a> -> Stream<b> -> Stream<(a, b)>`
+   */
   fun zip_streams(s1 : Stream<a>, s2 : Stream<b>) : Stream<(a, b)> =
     map2_stream(fn(a, b) => (a, b), s1, s2)
 
+  /**
+   * Combine the elements of three streams into a stream of triples.
+   *
+   * Equivalent to `map3_stream(fn(a, b, c) => (a, b, c), s1, s2, s3)`.
+   *
+   * **Type**: `zip3_streams : Stream<a> -> Stream<b> -> Stream<c> -> Stream<(a, b, c)>`
+   */
   fun zip3_streams(s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>) : Stream<(a, b, c)> =
     map3_stream(fn(a, b, c) => (a, b, c), s1, s2, s3)
 
+  /**
+   * Combine the elements of four streams into a stream of quadruples.
+   *
+   * Equivalent to `map4_stream(fn(a, b, c, d) => (a, b, c, d), s1, s2, s3, s4)`.
+   *
+   * **Type**: `zip4_streams : Stream<a> -> Stream<b> -> Stream<c> -> Stream<d> -> Stream<(a, b, c, d)>`
+   */
   fun zip4_streams(s1 : Stream<a>, s2 : Stream<b>, s3 : Stream<c>, s4 : Stream<d>) : Stream<(a, b, c, d)> =
     map4_stream(fn(a, b, c, d) => (a, b, c, d), s1, s2, s3, s4)
 
