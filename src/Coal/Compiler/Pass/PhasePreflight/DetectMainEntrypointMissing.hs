@@ -33,6 +33,7 @@ module Coal.Compiler.Pass.PhasePreflight.DetectMainEntrypointMissing (
 
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Config (configEntryPoint)
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), mapPass)
 import Coal.Compiler.Stack
@@ -64,7 +65,8 @@ passImpl m = do
   case m of
     Module path _ defs
       | path == requiredMod ->
-          unless (requiredFunc `elem` concatMap functionDefinitions defs) $
+          unless (requiredFunc `elem` concatMap functionDefinitions defs) $ do
+            tellErrors [MissingMainFunction requiredFunc (ErrorLocation (principalPath path) mempty)]
             throwError MissingMainEntryPoint
     _ -> pure ()
   return m

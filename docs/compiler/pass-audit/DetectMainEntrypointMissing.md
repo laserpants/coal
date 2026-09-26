@@ -17,7 +17,8 @@ src/Coal/Compiler/Pass/PhasePreflight/DetectMainEntrypointMissing.hs
 ## Summary
 
 Checks the `Main` module specifically. If no definition named `main` exists as a
-function, throws `MissingMainEntryPoint` (a fatal error that aborts compilation).
+function, records a `MissingMainFunction` diagnostic and throws
+`MissingMainEntryPoint` (a fatal error that aborts compilation).
 
 ---
 
@@ -41,7 +42,7 @@ function, throws `MissingMainEntryPoint` (a fatal error that aborts compilation)
 
 Only checks modules whose path is `Path ["Main"]`. Collects all function
 definition names via `functionDefinitions` and checks for `"main"`. If
-absent, throws `MissingMainEntryPoint`.
+absent, reports `MissingMainFunction` and throws `MissingMainEntryPoint`.
 
 ---
 
@@ -60,5 +61,5 @@ None. This is a purely diagnostic pass.
 
 ## Side Effects
 
-- **Generates diagnostics**: `MissingMainEntryPoint` (fatal)
+- **Generates diagnostics**: `MissingMainFunction` (fatal)
 - **Modifies compiler state**: No

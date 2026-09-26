@@ -25,6 +25,7 @@ data CompilerError a
   | BadModuleName FilePath Name
   | BadFilename FilePath String
   | NoModuleMain Name
+  | MissingMainFunction Name (ErrorLocation a)
   | ModuleCycle [Name]
   | MisplacedImportStatement (ErrorLocation a)
   | ModuleNotFound Name (ErrorLocation a)
@@ -82,6 +83,8 @@ errorLocation =
       Nothing
     NoModuleMain _ ->
       Nothing
+    MissingMainFunction _ erl ->
+      Just erl
     BadFilename{} ->
       Nothing
     MisplacedImportStatement erl ->

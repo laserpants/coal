@@ -48,6 +48,7 @@ import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Substitution (normalizeTypeIndexes)
+import Control.Monad (when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import Data.IORef (modifyIORef', newIORef)
@@ -169,32 +170,55 @@ updateTotal ref envelopes = do
 phaseMainPasses :: (MonadIO m) => Pass a m i o -> Pass a m [BuildEnvelope i] [BuildEnvelope o]
 phaseMainPasses = mapPass . liftPass
 
-compileWithCFiles :: TerminalCapabilities -> CompilerConfig -> [FilePath] -> [FilePath] -> IO ()
+compileWithCFiles :: TerminalCapabilities -> CompilerConfig -> [FilePath] -> [FilePath] -> IO (Either CompilerFailureMode ())
 compileWithCFiles caps config files cFiles = do
   ref <- newIORef (0, 0)
   let go = runCompilerT emptyCompilerEnvironment $ do
         setConfigC config{configCFiles = configCFiles config <> cFiles}
         runPass (pipelineWithProgress caps ref) files
-  res <- go
-  case res of
-    (e, CompilerState{compilerSources}, es) -> do
-      forM_ (nub es) $
-        \err -> do
-          case errorLocation err of
-            Just (ErrorLocation name _) ->
-              putStrLn ("\nIn module '" <> Text.unpack name <> "':\n")
-            Nothing ->
-              pure ()
-          Text.putStrLn (sanitizeForTerminal caps $ prettyError compilerSources err)
-      case e of
-        Left e1 ->
-          print e1
-        Right{} -> do
-          liftIO $ writeStatus config caps ref ("Executable written to: " <> configExecutableName config)
-          hPutStr stderr "\n"
+  (e, CompilerState{compilerSources}, es) <- go
+  let errs = nub es
+  forM_ errs $
+    \err -> do
+      case errorLocation err of
+        Just (ErrorLocation name _) ->
+          putStrLn ("\nIn module '" <> Text.unpack name <> "':\n")
+        Nothing ->
+          pure ()
+      Text.putStrLn (sanitizeForTerminal caps $ prettyError compilerSources err)
+  case e of
+    Left failure -> do
+      -- Not every aborted build records a diagnostic (for example a `Main`
+      -- module without a `main` function), so fall back to a readable summary
+      -- rather than failing silently.
+      when (null errs) $
+        Text.putStrLn (sanitizeForTerminal caps $ "Compilation failed: " <> prettyFailureMode failure <> ".")
+      pure (Left failure)
+    Right{} -> do
+      writeStatus config caps ref ("Executable written to: " <> configExecutableName config)
+      hPutStr stderr "\n"
+      pure (Right ())
 
-compile :: TerminalCapabilities -> CompilerConfig -> [FilePath] -> IO ()
+compile :: TerminalCapabilities -> CompilerConfig -> [FilePath] -> IO (Either CompilerFailureMode ())
 compile caps config files = compileWithCFiles caps config files []
+
+{- | Human-readable description of an aborted compilation. Used only when a pass
+failed without recording a diagnostic, so that a failed build is never
+completely silent.
+-}
+prettyFailureMode :: CompilerFailureMode -> Text
+prettyFailureMode =
+  \case
+    ParserFailure -> "the input could not be parsed"
+    PreflightFailure -> "a preflight check failed"
+    NoSuchIdentifier -> "a name could not be resolved"
+    MissingMainEntryPoint -> "no entry point (a `main` function) was found"
+    TraitError -> "a trait instance could not be resolved"
+    PatternAnomaly -> "a pattern match could not be compiled"
+    TypeError -> "type checking failed"
+    CallCycleError -> "the definition graph contains a cycle"
+    TraitAnnotationError -> "a trait annotation is missing or invalid"
+    CompilerError -> "an internal compilation step failed"
 
 prettyRule :: InferenceRule Kind a -> Text
 prettyRule =
@@ -328,6 +352,13 @@ prettyError env =
       Text.pack err
     NoModuleMain missing ->
       "No entry point module '" <> missing <> "'"
+    MissingMainFunction funcName erl ->
+      errorMessage
+        [ "No entry point function '" <> funcName <> "' was found."
+        , "Define a function named '" <> funcName <> "' in the entry point module."
+        ]
+        env
+        erl
     ModuleCycle names ->
       "Module imports form a cycle: " <> showt names
     MisplacedImportStatement erl -> do

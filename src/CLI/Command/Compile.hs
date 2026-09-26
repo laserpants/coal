@@ -9,10 +9,16 @@ import Coal.Compiler (compile)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Terminal (TerminalCapabilities)
 import Data.List (nub)
+import System.Exit (ExitCode (ExitFailure), exitWith)
 
 compileCommand :: TerminalCapabilities -> CompileCmdOptions -> IO ()
 compileCommand caps CompileCmdOptions{..} = do
-  compile caps config inputFiles
+  result <- compile caps config inputFiles
+  case result of
+    Left{} ->
+      exitWith (ExitFailure 1)
+    Right{} ->
+      pure ()
  where
   parsedEntryPoint = parseEntryPoint entryPoint
   config =

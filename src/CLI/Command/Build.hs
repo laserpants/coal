@@ -25,6 +25,7 @@ import Package.Error (PackageError (..))
 import Package.Manifest (BuildConfig (..), PackageManifest (..), filePaths, loadProjectManifest)
 import Package.Version (PackageVersion (..))
 import System.Directory (canonicalizePath)
+import System.Exit (ExitCode (ExitFailure), exitWith)
 
 buildCommand :: TerminalCapabilities -> ExceptT CLIError IO ()
 buildCommand caps = do
@@ -77,8 +78,13 @@ buildCommand caps = do
   case res of
     Left err ->
       throwError (EPackageError err)
-    Right (config, files) ->
-      liftIO $ compile caps config files
+    Right (config, files) -> do
+      result <- liftIO $ compile caps config files
+      case result of
+        Left{} ->
+          liftIO $ exitWith (ExitFailure 1)
+        Right{} ->
+          pure ()
 
 -- | True when the manifest declares no external dependencies.
 noDependencies :: Maybe (Map Text a) -> Bool
