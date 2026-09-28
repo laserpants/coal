@@ -9,7 +9,6 @@ module Codata.Stream {
 
   import Codata.Machine(receive, observe, process, machine, map_machine, map2_machine, map3_machine, map4_machine)
   import Coal.Combinators(identity)
-  import IO(random, __eval_io)
 
   /**
    * A stream is a machine whose input is the unit value, so that elements
@@ -34,24 +33,6 @@ module Codata.Stream {
    */
   fun enum_from(n : int32) : Stream<int32> =
     process(n, fn(_, m) => m + 1)
-
-  /**
-   * Return a stream of random elements derived from random doubles.
-   *
-   * Each element is obtained by drawing a pseudo-random `double` in the
-   * range `[0.0, 1.0)` and applying `pick_one` to it.
-   *
-   * **Type**: `randomize : (double -> a) -> Stream<a>`
-   */
-  fun randomize(pick_one : double -> a) : Stream<a> =
-    let
-      pick_next() = 
-        let r = __eval_io(random()) in pick_one(r)
-    in
-    process(
-      pick_next(), 
-      fn(_, _) => pick_next()
-    )
 
   /**
    * The stream of all natural numbers, starting at zero.
