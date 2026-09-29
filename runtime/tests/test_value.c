@@ -458,6 +458,39 @@ test_bignum_conversion_wrappers(void)
     rt_value_t d_large = coal_bignum_to_double(bn_large);
     assert(rt_double_unbox(d_large) == 123456789012345.0);
 
+    /* Boundary values: out-of-range bignums are truncated per coal/bignum.h.
+     * The previous mpz_get_si-based conversion masked positive values with
+     * LONG_MAX, which turned 2^63 into 0 instead of INT64_MIN. */
+    rt_value_t bn_int64_max =
+        rt_bignum_box(rt_bignum_new("9223372036854775807"));
+    assert(rt_int64_unbox(coal_bignum_to_int64(bn_int64_max)) == INT64_MAX);
+
+    rt_value_t bn_int64_min =
+        rt_bignum_box(rt_bignum_new("-9223372036854775808"));
+    assert(rt_int64_unbox(coal_bignum_to_int64(bn_int64_min)) == INT64_MIN);
+
+    /* 2^63 does not fit a signed 64-bit value: truncation yields INT64_MIN. */
+    rt_value_t bn_over_int64 =
+        rt_bignum_box(rt_bignum_new("9223372036854775808"));
+    assert(rt_int64_unbox(coal_bignum_to_int64(bn_over_int64)) == INT64_MIN);
+
+    rt_value_t bn_uint64_max =
+        rt_bignum_box(rt_bignum_new("18446744073709551615"));
+    assert(rt_int64_unbox(coal_bignum_to_int64(bn_uint64_max)) == -1);
+
+    rt_value_t bn_int32_max = rt_bignum_box(rt_bignum_new("2147483647"));
+    assert(rt_int32_unbox(coal_bignum_to_int32(bn_int32_max)) == INT32_MAX);
+
+    rt_value_t bn_int32_min = rt_bignum_box(rt_bignum_new("-2147483648"));
+    assert(rt_int32_unbox(coal_bignum_to_int32(bn_int32_min)) == INT32_MIN);
+
+    rt_value_t bn_over_int32 = rt_bignum_box(rt_bignum_new("4294967295"));
+    assert(rt_int32_unbox(coal_bignum_to_int32(bn_over_int32)) == -1);
+
+    rt_value_t bn_int32_zero = rt_bignum_box(rt_bignum_new("0"));
+    assert(rt_int32_unbox(coal_bignum_to_int32(bn_int32_zero)) == 0);
+    assert(rt_int64_unbox(coal_bignum_to_int64(bn_int32_zero)) == 0);
+
     /* Test int32 to bignum */
     rt_value_t i32_val = rt_int32_box(42);
     rt_value_t bn_from_i32 = coal_int32_to_bignum(i32_val);

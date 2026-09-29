@@ -17,6 +17,7 @@ import Coal.Parser.Primitive (parsePrimitive)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Coal.Parser.Utils (fieldList)
+import Control.Monad (void)
 import qualified Control.Monad.Combinators.Expr as Combinators
 import qualified Data.ByteString.Char8 as ByteString
 import Data.List.NonEmpty (NonEmpty (..))
@@ -25,7 +26,7 @@ import qualified Data.Text as Text
 import Extras (Name)
 import GHC.Int (Int32, Int64)
 import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, satisfy, some, try, (<|>))
-import Text.Megaparsec.Char (char, upperChar)
+import Text.Megaparsec.Char (char, digitChar, upperChar)
 
 parseAtom :: Parser (Expression Metadata () ())
 parseAtom =
@@ -286,9 +287,9 @@ fromLiteral loc n
       fromInt "from_int64" (LInt64 (fromIntegral n))
   | n >= 0 =
       fromBignum "from_bignum" n
-  | m <= fromIntegral (maxBound :: Int32) =
+  | n >= fromIntegral (minBound :: Int32) =
       fromInt "from_negative_int32" (LInt32 (fromIntegral n))
-  | m <= fromIntegral (maxBound :: Int64) =
+  | n >= fromIntegral (minBound :: Int64) =
       fromInt "from_negative_int64" (LInt64 (fromIntegral n))
   | otherwise =
       fromBignum "from_negative_bignum" n
@@ -341,7 +342,12 @@ fixity9 =
 negationOperator :: Parser (Expression Metadata () () -> Expression Metadata () ())
 negationOperator =
   withMetadata $ do
-    symbol_ "-"
+    -- A minus sign immediately followed by a digit starts a signed integer
+    -- literal ('integer' handles the sign), so leave it to the atom parsers
+    -- instead of desugaring it to 'negate'. Any other use of '-'
+    -- ('- x', '- 5', '-f(x)') keeps the prefix-negation meaning.
+    try $ void (char '-') *> notFollowedBy digitChar
+    spaces
     pure $
       \loc e ->
         EApplication

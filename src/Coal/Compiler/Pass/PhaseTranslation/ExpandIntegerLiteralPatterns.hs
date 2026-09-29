@@ -235,9 +235,9 @@ fromLiteral loc t int
       fromInt "from_int64" (LInt64 (fromIntegral int))
   | int >= 0 =
       fromBignum "from_bignum" int
-  | m <= fromIntegral (maxBound :: Int32) =
+  | int >= fromIntegral (minBound :: Int32) =
       fromInt "from_negative_int32" (LInt32 (fromIntegral int))
-  | m <= fromIntegral (maxBound :: Int64) =
+  | int >= fromIntegral (minBound :: Int64) =
       fromInt "from_negative_int64" (LInt64 (fromIntegral int))
   | otherwise =
       fromBignum "from_negative_bignum" int
