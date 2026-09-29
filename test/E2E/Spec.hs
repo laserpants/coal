@@ -2377,6 +2377,16 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/444" ["Main.coal"]
       res `shouldBe` Left TypeError
 
+  -- Hexadecimal integer literals: `0xbeef`/`0xBEEF`/`0Xbeef` parse to the
+  -- same values as their decimal spellings, including inside integer patterns
+  -- and across the int32/int64/bignum magnitude boundaries.
+  describe "445" $
+    expectOutput
+      "48879\n48879\n48879\n0\n15\n-16\n255\n16\n9223372036854775807\n18446744073709551616"
+      "test/Coal/examples/445"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

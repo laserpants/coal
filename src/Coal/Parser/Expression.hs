@@ -26,7 +26,6 @@ import Extras (Name)
 import GHC.Int (Int32, Int64)
 import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, satisfy, some, try, (<|>))
 import Text.Megaparsec.Char (char, upperChar)
-import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Expression Metadata () ())
 parseAtom =
@@ -276,7 +275,7 @@ parseTupleExpression = do
 parseInt :: Parser (Expression Metadata () ())
 parseInt = do
   withMetadata $ do
-    n <- Lexer.signed spaces (lexeme Lexer.decimal)
+    n <- integer
     pure (`fromLiteral` n)
 
 fromLiteral :: Metadata -> Integer -> Expression Metadata () ()

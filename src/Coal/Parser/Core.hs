@@ -16,6 +16,7 @@ module Coal.Parser.Core (
   word,
   lexeme,
   lexeme_,
+  integer,
   nonEmpty,
   nonEmptyOr,
 ) where
@@ -26,8 +27,8 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Void (Void)
 import Extras (Name)
-import Text.Megaparsec (MonadParsec (try), ParseErrorBundle, Parsec)
-import Text.Megaparsec.Char (space1)
+import Text.Megaparsec (MonadParsec (try), ParseErrorBundle, Parsec, (<|>))
+import Text.Megaparsec.Char (char, space1)
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 type Parser = Parsec Void Text
@@ -48,6 +49,17 @@ lexeme = Lexer.lexeme spaces
 {-# INLINE lexeme_ #-}
 lexeme_ :: Parser a -> Parser ()
 lexeme_ = void . lexeme
+
+{- | Parse an optionally signed integer literal.
+
+Hexadecimal literals use a @0x@ or @0X@ prefix (@0xbeef@, @0xBEEF@); all
+other integer literals are decimal.
+-}
+integer :: Parser Integer
+integer = Lexer.signed spaces (lexeme (hex <|> Lexer.decimal))
+ where
+  hex :: Parser Integer
+  hex = try (char '0' *> (char 'x' <|> char 'X')) *> Lexer.hexadecimal
 
 reserved :: [Name]
 reserved =
