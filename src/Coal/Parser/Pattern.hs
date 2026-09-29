@@ -15,7 +15,7 @@ import Coal.Compiler.HasMetadata (metadataSpan)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language (Pattern (..), Primitive (LUnit))
 import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)
-import Coal.Parser.Core (Parser, lexeme, lexeme_, spaces)
+import Coal.Parser.Core (Parser, integer, lexeme, lexeme_)
 import Coal.Parser.Identifier (name, validChar)
 import Coal.Parser.Metadata (withMetadata)
 import qualified Coal.Parser.Primitive as Primitive
@@ -28,7 +28,6 @@ import qualified Data.Map.Strict as Map
 import Extras (Name)
 import Text.Megaparsec (notFollowedBy, option, optional, some, try, (<|>))
 import Text.Megaparsec.Char (char)
-import qualified Text.Megaparsec.Char.Lexer as Lexer
 
 parseAtom :: Parser (Pattern Metadata () ())
 parseAtom =
@@ -100,7 +99,7 @@ parseLiteralPattern =
 parseIntegerLiteral :: Parser (Pattern Metadata () ())
 parseIntegerLiteral =
   withMetadata $ do
-    n <- Lexer.signed spaces (lexeme Lexer.decimal)
+    n <- integer
     pure (\loc -> PInteger loc () n)
 
 parseBasicLiteralPattern :: Parser (Pattern Metadata () ())
