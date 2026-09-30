@@ -4,6 +4,7 @@ import CLI.Command.BuildSpec (buildSpec)
 import CLI.Parser.AddCmdSpec (addCmdSpec)
 import CLI.Parser.CommandSpec (commandSpec)
 import CLI.Parser.UpdateCmdSpec (updateCmdSpec)
+import Coal.Compiler.ConfigSpec (configHashSpec)
 import Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec (expandLetBindingsSpec)
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
@@ -18,6 +19,7 @@ import Test.Hspec (SpecWith, describe, hspec)
 spec :: SpecWith ()
 spec =
   describe "Unit tests" $ do
+    configHashSpec
     typeSystemSpec
     typeArgsSpec
     typeApplicationSpec

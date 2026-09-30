@@ -424,6 +424,7 @@ test-suite coal-test
       CLI.Parser.AddCmdSpec
       CLI.Parser.CommandSpec
       CLI.Parser.UpdateCmdSpec
+      Coal.Compiler.ConfigSpec
       Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec
       Coal.Compiler.PatternMatching.AnomalyDetectionSpec
       Coal.Kernel.Eval.EvalSpec
