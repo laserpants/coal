@@ -37,7 +37,6 @@ data InferenceRule k a
   | RuleRecordField a Name (Type TypeIndex k)
   | RuleRecordLacks a Name (Type TypeIndex k)
   | RuleTailRow a (Type TypeIndex k) (Type TypeIndex k)
-  | RuleEntrypoint a (Type TypeIndex k)
   | RuleTraitInstance a (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))
   | RuleAssumption a (Type TypeIndex k) (Type TypeIndex k)
   | RuleAssumptionExplicit a Name (Type TypeIndex k) (Scheme TypeIndex k (Type TypeIndex k))

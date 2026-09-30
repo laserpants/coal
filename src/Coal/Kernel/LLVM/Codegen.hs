@@ -602,12 +602,13 @@ irMainModule m funcName = do
   declare "rt_runtime_init" TVoid []
   define i32 "main" [] LExternal [] $ do
     callVoid NoTail TVoid (OGlobal (TFun TVoid []) "rt_runtime_init") []
-    callVoid
-      NoTail
-      TPtr
-      (OGlobal entryFunTy fullName)
-      (O.nullPtr <$> entryParamTypes)
-    ret (O.i32 @Int 0)
+    result <-
+      call
+        NoTail
+        TPtr
+        (OGlobal entryFunTy fullName)
+        (O.nullPtr <$> entryParamTypes)
+    ret =<< exitCodeOf entryRetType result
  where
   fullName = moduleName m <> "." <> funcName
   -- The entry function's LLVM signature, reconstructed exactly as
@@ -617,13 +618,39 @@ irMainModule m funcName = do
   -- (e.g. unresolved dictionary parameters). Falls back to a single
   -- null-argument call if the entry object cannot be found (e.g. the
   -- entry point is a constant thunk).
-  (entryFunTy, entryParamTypes) =
+  --
+  -- 'entryRetType' is the entry function's declared return type, used to
+  -- decide whether it carries an exit status; 'Nothing' in the fallback
+  -- case, which yields exit code 0.
+  -- The object name in the kernel module is fully qualified (e.g.
+  -- @Main.main@), whereas 'funcName' is the bare function name from the
+  -- entry point configuration, so match on the qualified name.
+  (entryFunTy, entryParamTypes, entryRetType) =
     case listToMaybe
-      [ TFun (irTypeRep (typeOf expr)) ((irValueTypeRep . typeOf) <$> lls)
+      [ (TFun (irTypeRep (typeOf expr)) ((irValueTypeRep . typeOf) <$> lls), typeOf expr)
       | DFunction _ n lls expr <- moduleObjects m
-      , n == funcName
+      , n == fullName
       ] of
-      Just funTy@TFun{} -> (funTy, funTys funTy)
-      _ -> (TFun TPtr [TPtr], [TPtr])
+      Just (funTy@TFun{}, retTy) -> (funTy, funTys funTy, Just retTy)
+      _ -> (TFun TPtr [TPtr], [TPtr], Nothing)
   funTys (TFun _ tys) = tys
   funTys _ = []
+
+{- | Derive the process exit code from the entry function's return value.
+
+Only @IO<int32>@ carries a status: its contained value becomes the exit code.
+Every other return type (including @IO<unit>@) yields 0, so programs that
+report nothing to the operating system are unaffected.
+
+This works because @IO@ is a phantom type whose runtime representation is
+the identity ('io$_eval' and 'io$_return' are both identity functions), so
+an @IO<int32>@ value /is/ a boxed @int32@ at runtime and needs no
+unwrapping beyond the ordinary 'irUnbox'.
+
+Note the returned value is passed to C @main@ verbatim, so the operating
+system truncates it to the low 8 bits of the exit status, per POSIX. A
+program returning @256@ therefore exits 0, and @-1@ exits 255.
+-}
+exitCodeOf :: Maybe Type -> IROperand -> IRCodegen IROperand
+exitCodeOf (Just (TCon "IO" [TCon "int32" []])) op = irUnbox (TCon "int32" []) op
+exitCodeOf _ _ = return (O.i32 @Int 0)

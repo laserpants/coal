@@ -82,7 +82,6 @@ instance HasMetadata (InferenceRule k Metadata) where
       RuleTopLevelConstant a -> a
       RuleTypeConstraint a _ _ _ -> a
       RuleDataConstructor a _ _ _ -> a
-      RuleEntrypoint a _ -> a
       RuleTuple a _ _ -> a
       RuleListLiteral a _ -> a
       RuleListConstructor a _ _ -> a
