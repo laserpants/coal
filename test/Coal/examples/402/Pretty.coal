@@ -3,7 +3,7 @@ module Pretty {
   import Coal.Combinators(identity, always)
   import Coal.Functor(map)
   import String(intercalate, char_to_string, int32_to_string, int64_to_string, float_to_string, double_to_string)
-  import Number(bignum_to_string)
+  import Number(integer_to_string)
   import Nat(unpack)
 
   trait Pretty<p> {
@@ -35,8 +35,8 @@ module Pretty {
       int64_to_string(unpack(n))
   }
 
-  instance Pretty<bignum> {
-    let pretty = bignum_to_string
+  instance Pretty<integer> {
+    let pretty = integer_to_string
   }
 
   instance Pretty<bool> {

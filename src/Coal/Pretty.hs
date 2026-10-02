@@ -173,7 +173,7 @@ prettyIntrinsic =
     IFloat -> "float"
     IInt32 -> "int32"
     IInt64 -> "int64"
-    IBignum -> "bignum"
+    IBignum -> "integer"
     INat -> "nat"
     IString -> "string"
     IUnit -> "unit"

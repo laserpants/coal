@@ -286,13 +286,13 @@ fromLiteral loc n
   | n >= 0 && m <= fromIntegral (maxBound :: Int64) =
       fromInt "from_int64" (LInt64 (fromIntegral n))
   | n >= 0 =
-      fromBignum "from_bignum" n
+      fromBignum "from_integer" n
   | n >= fromIntegral (minBound :: Int32) =
       fromInt "from_negative_int32" (LInt32 (fromIntegral n))
   | n >= fromIntegral (minBound :: Int64) =
       fromInt "from_negative_int64" (LInt64 (fromIntegral n))
   | otherwise =
-      fromBignum "from_negative_bignum" n
+      fromBignum "from_negative_integer" n
  where
   m = abs n
   fromInt name_ lit =
@@ -305,7 +305,7 @@ fromLiteral loc n
       ( EApplication
           mempty
           ()
-          (EVariable mempty (Label () "number$_unsafe_parse_bignum"))
+          (EVariable mempty (Label () "number$_unsafe_parse_integer"))
           (ELiteral mempty (LString (ByteString.pack $ show v)) :| [])
           :| []
       )

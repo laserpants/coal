@@ -7,7 +7,7 @@ Parses primitive literals:
 
   * Unit (@()@)
   * Booleans (@true@, @false@)
-  * Integers (@int32@, @int64@, @bignum@)
+  * Integers (@int32@, @int64@, @integer@)
   * Floating-point numbers (@float@, @double@)
   * Characters (Unicode code points)
   * Strings (UTF-8 encoded, backtick-delimited)
@@ -88,7 +88,7 @@ pDouble = lexeme $ do
   P.notFollowedBy (C.char 'f' <|> C.char 'F')
   return $ PDouble sign
 
--- | Parse a bignum: %% followed by integer
+-- | Parse an arbitrary-precision integer: %% followed by digits
 pBignum :: Parser Prim
 pBignum = lexeme $ do
   void $ C.string "%%"

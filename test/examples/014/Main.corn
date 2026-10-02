@@ -2,14 +2,14 @@ module Main {
 
   Main.main(_ : *) =
     let
-      x : bignum =
+      x : integer =
         %%9999999999999999999999999999999999999998
       in
         let
           __call_tmp : * =
             @<*>
-              ( coal_print_bignum : bignum/*
-              , x : bignum
+              ( coal_print_bignum : integer/*
+              , x : integer
               )
           in
             @<int32>

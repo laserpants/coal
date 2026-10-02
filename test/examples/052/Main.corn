@@ -32,12 +32,12 @@ Main.from_int64($a : Numeric(*)) =
         get?_from_int64<int64/*>($r : { from_int64 : int64/* | * })
   }
 
-Main.from_bignum($a : Numeric(*)) =
-  case<bignum/*>($a : Numeric(*)) {
-    | ( $Record : { from_bignum : bignum/* | * }/record({ from_bignum : bignum/* | * })
-      , $r : { from_bignum : bignum/* | * }
+Main.from_integer($a : Numeric(*)) =
+  case<integer/*>($a : Numeric(*)) {
+    | ( $Record : { from_integer : integer/* | * }/record({ from_integer : integer/* | * })
+      , $r : { from_integer : integer/* | * }
       ) =>
-        get?_from_bignum<bignum/*>($r : { from_bignum : bignum/* | * })
+        get?_from_integer<integer/*>($r : { from_integer : integer/* | * })
   }
 
 Main.negate($a : Numeric(*)) =
@@ -161,15 +161,15 @@ Main.fib(p : $Nat) =
                                       ( @<$Nat/$Nat/$Nat>
                                           ( Main.(+) : Numeric($Nat)/$Nat/$Nat/$Nat
                                           , @<Numeric($Nat)>
-                                              ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                                              ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
                                               , { (*) =
                                                   Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                                                 | (+) =
                                                   Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                                                 | (-) =
                                                   Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
-                                                | from_bignum =
-                                                  Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                                                | from_integer =
+                                                  Builtin$.from_integer__$impl_Numeric(TIntrinsic(INat)) : integer/$Nat
                                                 | from_int32 =
                                                   Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
                                                 | from_int64 =
@@ -193,15 +193,15 @@ Main.fib(p : $Nat) =
                         ( @<int32/$Nat>
                             ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
                             , @<Numeric($Nat)>
-                                ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                                ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
                                 , { (*) =
                                     Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                                   | (+) =
                                     Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                                   | (-) =
                                     Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
-                                  | from_bignum =
-                                    Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                                  | from_integer =
+                                    Builtin$.from_integer__$impl_Numeric(TIntrinsic(INat)) : integer/$Nat
                                   | from_int32 =
                                     Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
                                   | from_int64 =
@@ -218,15 +218,15 @@ Main.fib(p : $Nat) =
                         ( @<int32/$Nat>
                             ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
                             , @<Numeric($Nat)>
-                                ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                                ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
                                 , { (*) =
                                     Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                                   | (+) =
                                     Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                                   | (-) =
                                     Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
-                                  | from_bignum =
-                                    Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                                  | from_integer =
+                                    Builtin$.from_integer__$impl_Numeric(TIntrinsic(INat)) : integer/$Nat
                                   | from_int32 =
                                     Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
                                   | from_int64 =
@@ -248,15 +248,15 @@ Main.fib(p : $Nat) =
                 ( @<$Nat/$Nat/$Nat>
                     ( Main.(-) : Numeric($Nat)/$Nat/$Nat/$Nat
                     , @<Numeric($Nat)>
-                        ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                        ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
                         , { (*) =
                             Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                           | (+) =
                             Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                           | (-) =
                             Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
-                          | from_bignum =
-                            Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                          | from_integer =
+                            Builtin$.from_integer__$impl_Numeric(TIntrinsic(INat)) : integer/$Nat
                           | from_int32 =
                             Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
                           | from_int64 =
@@ -272,15 +272,15 @@ Main.fib(p : $Nat) =
                     ( @<int32/$Nat>
                         ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
                         , @<Numeric($Nat)>
-                            ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                            ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
                             , { (*) =
                                 Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                               | (+) =
                                 Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                               | (-) =
                                 Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
-                              | from_bignum =
-                                Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                              | from_integer =
+                                Builtin$.from_integer__$impl_Numeric(TIntrinsic(INat)) : integer/$Nat
                               | from_int32 =
                                 Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
                               | from_int64 =
@@ -321,15 +321,15 @@ Main.main($v.6313 : unit) =
                 ( @<int32/$Nat>
                     ( Builtin$.from_int32 : Numeric($Nat)/int32/$Nat
                     , @<Numeric($Nat)>
-                        ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_bignum : bignum/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
+                        ( $Record : { (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} }/record({ (*) : $Nat/$Nat/$Nat | (+) : $Nat/$Nat/$Nat | (-) : $Nat/$Nat/$Nat | from_integer : integer/$Nat | from_int32 : int32/$Nat | from_int64 : int64/$Nat | negate : $Nat/$Nat | {} })
                         , { (*) =
                             Builtin$.(*)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                           | (+) =
                             Builtin$.(+)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
                           | (-) =
                             Builtin$.(-)__$impl_Numeric(TIntrinsic(INat)) : $Nat/$Nat/$Nat
-                          | from_bignum =
-                            Builtin$.from_bignum__$impl_Numeric(TIntrinsic(INat)) : bignum/$Nat
+                          | from_integer =
+                            Builtin$.from_integer__$impl_Numeric(TIntrinsic(INat)) : integer/$Nat
                           | from_int32 =
                             Builtin$.from_int32__$impl_Numeric(TIntrinsic(INat)) : int32/$Nat
                           | from_int64 =

@@ -5,7 +5,7 @@ Type constructor smart constructors.
 
 Provides named constructors for built-in types:
 
-  * Primitive types: 'unit', 'bool', 'int32', 'int64', 'bignum', 'float',
+  * Primitive types: 'unit', 'bool', 'int32', 'int64', 'integer', 'float',
     'double', 'char', 'string'
   * Function types: 'arrow'
 
@@ -62,7 +62,7 @@ int64 = tycon0 "int64"
 
 {-# INLINE bignum #-}
 bignum :: Type
-bignum = tycon0 "bignum"
+bignum = tycon0 "integer"
 
 {-# INLINE bool #-}
 bool :: Type

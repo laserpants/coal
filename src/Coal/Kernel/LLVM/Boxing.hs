@@ -69,7 +69,7 @@ typeToIRType =
       i32
     TCon "string" [] ->
       TPtr
-    TCon "bignum" [] ->
+    TCon "integer" [] ->
       TPtr
     _ ->
       TPtr
@@ -104,7 +104,7 @@ irBox t op =
       callRuntime rtDoubleBox [op]
     TCon "string" [] ->
       return op
-    TCon "bignum" [] ->
+    TCon "integer" [] ->
       return op
     _ ->
       return op
@@ -131,7 +131,7 @@ irUnbox t op =
       callRuntime rtDoubleUnbox [op]
     TCon "string" [] ->
       return op
-    TCon "bignum" [] ->
+    TCon "integer" [] ->
       return op
     _ ->
       return op

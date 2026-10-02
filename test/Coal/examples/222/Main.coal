@@ -1,12 +1,12 @@
 module Main {
 
-  import IO(println_string, println_bignum)
-  import Number(parse_bignum)
+  import IO(println_string, println_integer)
+  import Number(parse_integer)
 
   fun main() =
-    match(parse_bignum("xyz")) {
+    match(parse_integer("xyz")) {
       | None => println_string("no")
-      | Some(big) => println_bignum(big)
+      | Some(big) => println_integer(big)
     }
 
 }

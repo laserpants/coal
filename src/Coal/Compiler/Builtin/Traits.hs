@@ -59,7 +59,7 @@ builtinTraits =
               "from_int64"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
-              "from_bignum"
+              "from_integer"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
               "(+)"
@@ -84,7 +84,7 @@ builtinTraits =
               "from_negative_int64"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IInt64 `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
-              "from_negative_bignum"
+              "from_negative_integer"
               (Forall (Set.fromList [Parameter () "a"]) mempty $ TIntrinsic IBignum `TArrow` TVariable (Parameter () "a"))
           , TraitDefinitionInterfaceEntry
               "negate"

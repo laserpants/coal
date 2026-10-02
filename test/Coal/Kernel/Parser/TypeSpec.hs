@@ -37,8 +37,8 @@ spec = do
       it "parses 'double'" $
         parseType "double" `shouldBe` Right T.double
 
-      it "parses 'bignum'" $
-        parseType "bignum" `shouldBe` Right T.bignum
+      it "parses 'integer'" $
+        parseType "integer" `shouldBe` Right T.bignum
 
       it "parses 'string'" $
         parseType "string" `shouldBe` Right T.string

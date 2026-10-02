@@ -4,7 +4,7 @@
  * A parsed value of 0 used to be reported as None: int32/int64 are boxed as
  * untagged words, so the box for 0 is bit-identical to the NULL that the FFI
  * returned to signal failure. The parse shims now hand the value back in a
- * heap-boxed bignum, which is a pointer and can never be NULL.
+ * heap-boxed integer, which is a pointer and can never be NULL.
  */
 module Main {
 
@@ -24,20 +24,20 @@ module Main {
       | None    => "None"
     }
 
-  fun show_bignum(o : Option<bignum>) : string =
+  fun show_integer(o : Option<integer>) : string =
     match(o) {
-      | Some(r) => "Some(" <> Number.bignum_to_string(r) <> ")"
+      | Some(r) => "Some(" <> Number.integer_to_string(r) <> ")"
       | None    => "None"
     }
 
-  // Reduce a decimal bignum modulo 256 and parse the resulting string back.
-  // This mirrors Data.UInt8.from_bignum, where a reduced value of exactly 0
+  // Reduce a decimal integer modulo 256 and parse the resulting string back.
+  // This mirrors Data.UInt8.from_integer, where a reduced value of exactly 0
   // used to yield None and trip the caller's "Unreachable" panic branch.
   fun parse_remainder(s : string) : Option<int32> =
-    match(Number.parse_bignum(s)) {
+    match(Number.parse_integer(s)) {
       | Some(n) =>
         match(n % 256) {
-          | Some(r) => Number.parse_int32(Number.bignum_to_string(r))
+          | Some(r) => Number.parse_int32(Number.integer_to_string(r))
           | None    => None
         }
       | None    => None
@@ -57,7 +57,7 @@ module Main {
         <> " " <> show_int64(Number.parse_int64("4611686018427387904"))
         <> " " <> show_int64(Number.parse_int64("9223372036854775807"))
         <> " " <> show_int64(Number.parse_int64("9223372036854775808"))
-        <> " | " <> show_bignum(Number.parse_bignum("0"))
+        <> " | " <> show_integer(Number.parse_integer("0"))
         <> " " <> show_int32(parse_remainder("256"))
         <> " " <> show_int32(parse_remainder("65536"))
     )

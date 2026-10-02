@@ -22,7 +22,7 @@ parseIntrinsic =
     <|> parseChar
     <|> parseDouble
     <|> parseFloat
-    <|> parseBignum
+    <|> parseInteger
     <|> parseNat
     <|> parseString
     <|> parseUnit
@@ -46,8 +46,8 @@ parseDouble = lexeme "double" $> IDouble
 parseFloat :: Parser Intrinsic
 parseFloat = lexeme "float" $> IFloat
 
-parseBignum :: Parser Intrinsic
-parseBignum = lexeme "bignum" $> IBignum
+parseInteger :: Parser Intrinsic
+parseInteger = lexeme "integer" $> IBignum
 
 parseNat :: Parser Intrinsic
 parseNat = lexeme "nat" $> INat

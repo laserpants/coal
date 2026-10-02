@@ -20,7 +20,7 @@ src/Coal/Compiler/Pass/PhaseTranslation/ExpandIntegerLiteralPatterns.hs
 For each `PInteger` pattern in a match clause, replaces it with a fresh variable
 and generates an if-expression that checks equality against the literal value.
 Integer literals are converted to expressions using the appropriate `from_int32`,
-`from_int64`, or `from_bignum` constructor based on magnitude.
+`from_int64`, or `from_integer` constructor based on magnitude.
 
 ---
 
@@ -77,7 +77,7 @@ constructor.
 Chooses the integer constructor based on value bounds:
 - `≤ maxBound Int32` → `from_int32`
 - `≤ maxBound Int64` → `from_int64`
-- otherwise → `from_bignum` (via `unsafe_parse_bignum`)
+- otherwise → `from_integer` (via `unsafe_parse_integer`)
 
 ---
 

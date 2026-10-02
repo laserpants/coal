@@ -6,7 +6,7 @@ module Main {
   instance NumericBase<bool> {
     fun from_int32(n : int32) = is_even(n)
     fun from_int64(n : int64) = is_even(n)
-    fun from_bignum(n : bignum) = is_even(n)
+    fun from_integer(n : integer) = is_even(n)
     fun `+`
       | false, false => false  // 0 + 0 = 0
       | false, true  => true   // 0 + 1 = 1
@@ -20,7 +20,7 @@ module Main {
   instance Numeric<bool> {
     fun from_negative_int32(n : int32) = is_even(n)
     fun from_negative_int64(n : int64) = is_even(n)
-    fun from_negative_bignum(n : bignum) = is_even(n)
+    fun from_negative_integer(n : integer) = is_even(n)
     fun negate
       | false        => true
       | _            => false

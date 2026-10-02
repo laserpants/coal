@@ -105,13 +105,13 @@ objectList =
       )
   , DFunction
       Exported
-      "Builtin$.number$_unsafe_parse_bignum"
+      "Builtin$.number$_unsafe_parse_integer"
       [ Kernel.Label Kernel.string "input"
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_bignum_init : string/bignum
+                  @<integer>
+                    ( coal_bignum_init : string/integer
                     , input : string
                     )
         |]
@@ -247,14 +247,14 @@ objectList =
       )
   , DFunction
       Exported
-      "Builtin$.io$_print_bignum"
+      "Builtin$.io$_print_integer"
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<*>
-                    ( coal_print_bignum : bignum/*
-                    , n : bignum
+                    ( coal_print_bignum : integer/*
+                    , n : integer
                     )
         |]
       )
@@ -351,14 +351,14 @@ objectList =
       )
   , DFunction
       Exported
-      "Builtin$.io$_println_bignum"
+      "Builtin$.io$_println_integer"
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<*>
-                    ( coal_println_bignum : bignum/*
-                    , n : bignum
+                    ( coal_println_bignum : integer/*
+                    , n : integer
                     )
         |]
       )
@@ -522,14 +522,14 @@ objectList =
       )
   , DFunction
       Exported
-      "Builtin$.string$_bignum_to_string"
+      "Builtin$.string$_integer_to_string"
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<string>
-                    ( coal_bignum_to_string : bignum/string
-                    , n : bignum
+                    ( coal_bignum_to_string : integer/string
+                    , n : integer
                     )
         |]
       )
@@ -600,16 +600,16 @@ objectList =
       )
   , DFunction
       Exported
-      "Builtin$.from_bignum"
+      "Builtin$.from_integer"
       [ Kernel.Label (Kernel.TCon "NumericBase" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
-                  case<bignum/*>($a : NumericBase(*)) {
-                    | ( $Record : { from_bignum : bignum/* | * }/NumericBase(*)
-                      , $r : { from_bignum : bignum/* | * }
+                  case<integer/*>($a : NumericBase(*)) {
+                    | ( $Record : { from_integer : integer/* | * }/NumericBase(*)
+                      , $r : { from_integer : integer/* | * }
                       ) =>
-                        get?_from_bignum<bignum/*>($r : { from_bignum : bignum/* | * })
+                        get?_from_integer<integer/*>($r : { from_integer : integer/* | * })
                   }
         |]
       )
@@ -645,16 +645,16 @@ objectList =
       )
   , DFunction
       Exported
-      "Builtin$.from_negative_bignum"
+      "Builtin$.from_negative_integer"
       [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
       ]
       ( unsafeParseExpr
           [r|
-                  case<bignum/*>($a : Numeric(*)) {
-                    | ( $Record : { from_negative_bignum : bignum/* | * }/Numeric(*)
-                      , $r : { from_negative_bignum : bignum/* | * }
+                  case<integer/*>($a : Numeric(*)) {
+                    | ( $Record : { from_negative_integer : integer/* | * }/Numeric(*)
+                      , $r : { from_negative_integer : integer/* | * }
                       ) =>
-                        get?_from_negative_bignum<bignum/*>($r : { from_negative_bignum : bignum/* | * })
+                        get?_from_negative_integer<integer/*>($r : { from_negative_integer : integer/* | * })
                   }
         |]
       )
@@ -740,14 +740,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_bignum")
+      (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<int32>
-                    ( coal_bignum_to_int32 : bignum/int32
-                    , n : bignum
+                    ( coal_bignum_to_int32 : integer/int32
+                    , n : integer
                     )
         |]
       )
@@ -816,14 +816,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_bignum")
+      (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<int64>
-                    ( coal_bignum_to_int64 : bignum/int64
-                    , n : bignum
+                    ( coal_bignum_to_int64 : integer/int64
+                    , n : integer
                     )
         |]
       )
@@ -898,14 +898,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_bignum")
+      (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<float>
-                    ( coal_bignum_to_float : bignum/float
-                    , n : bignum 
+                    ( coal_bignum_to_float : integer/float
+                    , n : integer 
                     )
         |]
       )
@@ -980,14 +980,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_bignum")
+      (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<double>
-                    ( coal_bignum_to_double : bignum/double
-                    , n : bignum
+                    ( coal_bignum_to_double : integer/double
+                    , n : integer
                     )
         |]
       )
@@ -1065,7 +1065,7 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_bignum")
+      (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
@@ -1073,8 +1073,8 @@ objectList =
                   @<$Nat>
                     ( `Builtin$.nat$_pack` : int64/$Nat
                     , @<int64>
-                        ( coal_bignum_to_int64 : bignum/int64
-                        , n : bignum
+                        ( coal_bignum_to_int64 : integer/int64
+                        , n : integer
                         )
                     )
         |]
@@ -1132,8 +1132,8 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_int32_to_bignum : int32/bignum
+                  @<integer>
+                    ( coal_int32_to_bignum : int32/integer
                     , n : int32
                     )
         |]
@@ -1145,20 +1145,20 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_int64_to_bignum : int64/bignum
+                  @<integer>
+                    ( coal_int64_to_bignum : int64/integer
                     , n : int64
                     )
         |]
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_bignum")
+      (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
-                  n : bignum
+                  n : integer
         |]
       )
   , DFunction
@@ -1169,10 +1169,10 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_bignum_add : bignum/bignum/bignum
-                    , p : bignum
-                    , q : bignum
+                  @<integer>
+                    ( coal_bignum_add : integer/integer/integer
+                    , p : integer
+                    , q : integer
                     )
         |]
       )
@@ -1184,10 +1184,10 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_bignum_sub : bignum/bignum/bignum
-                    , p : bignum
-                    , q : bignum
+                  @<integer>
+                    ( coal_bignum_sub : integer/integer/integer
+                    , p : integer
+                    , q : integer
                     )
         |]
       )
@@ -1199,10 +1199,10 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_bignum_mul : bignum/bignum/bignum
-                    , p : bignum
-                    , q : bignum
+                  @<integer>
+                    ( coal_bignum_mul : integer/integer/integer
+                    , p : integer
+                    , q : integer
                     )
         |]
       )
@@ -1213,9 +1213,9 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_bignum_neg : bignum/bignum
-                    , p : bignum
+                  @<integer>
+                    ( coal_bignum_neg : integer/integer
+                    , p : integer
                     )
         |]
       )
@@ -1241,14 +1241,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_bignum")
+      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<int32>
-                    ( coal_bignum_to_int32 : bignum/int32
-                    , n : bignum
+                    ( coal_bignum_to_int32 : integer/int32
+                    , n : integer
                     )
         |]
       )
@@ -1274,14 +1274,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_bignum")
+      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<int64>
-                    ( coal_bignum_to_int64 : bignum/int64
-                    , n : bignum
+                    ( coal_bignum_to_int64 : integer/int64
+                    , n : integer
                     )
         |]
       )
@@ -1313,14 +1313,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_bignum")
+      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<float>
-                    ( coal_bignum_to_float : bignum/float
-                    , n : bignum
+                    ( coal_bignum_to_float : integer/float
+                    , n : integer
                     )
         |]
       )
@@ -1352,14 +1352,14 @@ objectList =
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_bignum")
+      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
                   @<double>
-                    ( coal_bignum_to_double : bignum/double
-                    , n : bignum
+                    ( coal_bignum_to_double : integer/double
+                    , n : integer
                     )
         |]
       )
@@ -1370,8 +1370,8 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_int32_to_bignum : int32/bignum
+                  @<integer>
+                    ( coal_int32_to_bignum : int32/integer
                     , n : int32
                     )
         |]
@@ -1383,20 +1383,20 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  @<bignum>
-                    ( coal_int64_to_bignum : int64/bignum
+                  @<integer>
+                    ( coal_int64_to_bignum : int64/integer
                     , n : int64
                     )
         |]
       )
   , DFunction
       Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_bignum")
+      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_integer")
       [ Kernel.Label Kernel.bignum "n"
       ]
       ( unsafeParseExpr
           [r|
-                  n : bignum
+                  n : integer
         |]
       )
   , DFunction
@@ -1822,9 +1822,9 @@ objectList =
                   let
                     is_lt : bool =
                       @<bool>
-                        ( coal_bignum_lt : bignum/bignum/bool
-                        , x : bignum
-                        , y : bignum
+                        ( coal_bignum_lt : integer/integer/bool
+                        , x : integer
+                        , y : integer
                         )
                     in
                       if (is_lt : bool)
@@ -1833,9 +1833,9 @@ objectList =
                           let
                             is_gt : bool =
                               @<bool>
-                                ( coal_bignum_gt : bignum/bignum/bool
-                                , x : bignum
-                                , y : bignum
+                                ( coal_bignum_gt : integer/integer/bool
+                                , x : integer
+                                , y : integer
                                 )
                             in
                               if (is_gt : bool)
@@ -2166,9 +2166,9 @@ objectList =
       ( unsafeParseExpr
           [r|
                   @<bool>
-                    ( coal_bignum_eq : bignum/bignum/bool
-                    , m : bignum
-                    , n : bignum
+                    ( coal_bignum_eq : integer/integer/bool
+                    , m : integer
+                    , n : integer
                     )
         |]
       )
@@ -2246,16 +2246,16 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  if (@<bool>(coal_bignum_eq : bignum/bignum/bool, r : bignum, %%0))
+                  if (@<bool>(coal_bignum_eq : integer/integer/bool, r : integer, %%0))
                     then
-                      None : Option(bignum)
+                      None : Option(integer)
                     else
-                      @<Option(bignum)>
-                        ( Some : bignum/Option(bignum)
-                        , @<bignum>
-                            ( coal_bignum_mod : bignum/bignum/bignum
-                            , q : bignum
-                            , r : bignum
+                      @<Option(integer)>
+                        ( Some : integer/Option(integer)
+                        , @<integer>
+                            ( coal_bignum_mod : integer/integer/integer
+                            , q : integer
+                            , r : integer
                             )
                         )
         |]

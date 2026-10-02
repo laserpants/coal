@@ -10,8 +10,8 @@ module Main {
       Complex(Number.int32_to_double(n), 0)
     fun from_int64(n : int64) = 
       Complex(Number.int64_to_double(n), 0)
-    fun from_bignum(n : bignum) = 
-      Complex(Number.bignum_to_double(n), 0)
+    fun from_integer(n : integer) = 
+      Complex(Number.integer_to_double(n), 0)
     fun `+`(Complex(r, i), Complex(q, j)) =
       Complex(r + q, i + j)
     fun `*`(Complex(r, i), Complex(q, j)) =
@@ -23,8 +23,8 @@ module Main {
       Complex(Number.int32_to_double(n), 0)
     fun from_negative_int64(n : int64) =
       Complex(Number.int64_to_double(n), 0)
-    fun from_negative_bignum(n : bignum) =
-      Complex(Number.bignum_to_double(n), 0)
+    fun from_negative_integer(n : integer) =
+      Complex(Number.integer_to_double(n), 0)
     fun negate(Complex(r, i)) =
       Complex(-r, -i)
     fun `-`(Complex(r, i), Complex(q, j)) =

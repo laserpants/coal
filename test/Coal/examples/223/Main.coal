@@ -1,6 +1,6 @@
 module Main {
   
-  import IO(println_bignum)
+  import IO(println_integer)
 
   fun main() =
     let 
@@ -9,6 +9,6 @@ module Main {
       let
         m = n + 1
       in
-      println_bignum(m)
+      println_integer(m)
 
 }

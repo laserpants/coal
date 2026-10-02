@@ -35,7 +35,7 @@ Key transformations:
    that variable rather than re-evaluating an effectful scrutinee expression.
 
 5. **Type-specific conversion**: Integers are converted using appropriate constructors
-   (`from_int32`, `from_int64`, or `from_bignum`) based on their magnitude.
+   (`from_int32`, `from_int64`, or `from_integer`) based on their magnitude.
 
 This pass runs during the translation phase after type checking and before
 further lowering transformations.
@@ -224,7 +224,7 @@ numericLiteral (loc, ll@(Label t _), int) e1 =
     )
 
 {- | Convert an integer literal to an expression using the appropriate constructor.
-Chooses between from_int32, from_int64, or from_bignum based on the value.
+Chooses between from_int32, from_int64, or from_integer based on the value.
 The given source location is attached to every synthesized node.
 -}
 fromLiteral :: Metadata -> IndexedType -> Integer -> Expression Metadata k IndexedType
@@ -234,13 +234,13 @@ fromLiteral loc t int
   | int >= 0 && m <= fromIntegral (maxBound :: Int64) =
       fromInt "from_int64" (LInt64 (fromIntegral int))
   | int >= 0 =
-      fromBignum "from_bignum" int
+      fromBignum "from_integer" int
   | int >= fromIntegral (minBound :: Int32) =
       fromInt "from_negative_int32" (LInt32 (fromIntegral int))
   | int >= fromIntegral (minBound :: Int64) =
       fromInt "from_negative_int64" (LInt64 (fromIntegral int))
   | otherwise =
-      fromBignum "from_negative_bignum" int
+      fromBignum "from_negative_integer" int
  where
   m = abs int
   fromInt name lit =
@@ -258,7 +258,7 @@ fromLiteral loc t int
       ( EApplication
           loc
           (TIntrinsic IBignum)
-          (EVariable loc (Label (TIntrinsic IString `TArrow` TIntrinsic IBignum) "number$_unsafe_parse_bignum"))
+          (EVariable loc (Label (TIntrinsic IString `TArrow` TIntrinsic IBignum) "number$_unsafe_parse_integer"))
           (ELiteral loc (LString (ByteString.pack $ show v)) :| [])
           :| []
       )
