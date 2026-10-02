@@ -2307,7 +2307,7 @@ e2eSpec = do
   -- Regression: int32/int64 values are boxed as untagged words, so a
   -- successful parse of 0 used to be indistinguishable from the NULL failure
   -- sentinel and was reported as None. The parse shims now hand the parsed
-  -- value back in a heap-boxed bignum, which is never NULL.
+  -- value back in a heap-boxed integer, which is never NULL.
   describe "437" $
     expectOutput
       "Some(0) Some(0) Some(0) Some(7) Some(-2147483648) Some(2147483647) None None | Some(0) Some(4611686018427387904) Some(9223372036854775807) None | Some(0) Some(0) Some(0)"
@@ -2379,7 +2379,7 @@ e2eSpec = do
 
   -- Hexadecimal integer literals: `0xbeef`/`0xBEEF`/`0Xbeef` parse to the
   -- same values as their decimal spellings, including inside integer patterns
-  -- and across the int32/int64/bignum magnitude boundaries.
+  -- and across the int32/int64/integer magnitude boundaries.
   describe "445" $
     expectOutput
       "48879\n48879\n48879\n0\n15\n-16\n255\n16\n9223372036854775807\n18446744073709551616"

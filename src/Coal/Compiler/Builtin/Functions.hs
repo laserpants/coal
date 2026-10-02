@@ -44,7 +44,7 @@ builtinFunctions =
     , forall0 (TIntrinsic IInt64 ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
-    ( "io$_println_bignum"
+    ( "io$_println_integer"
     , forall0 (TIntrinsic IBignum ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
@@ -76,7 +76,7 @@ builtinFunctions =
     , forall0 (TIntrinsic IInt64 ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
-    ( "io$_print_bignum"
+    ( "io$_print_integer"
     , forall0 (TIntrinsic IBignum ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
     )
   ,
@@ -184,7 +184,7 @@ builtinFunctions =
     , forall0 (TIntrinsic IInt32 ~> TIntrinsic IChar)
     )
   ,
-    ( "number$_unsafe_parse_bignum"
+    ( "number$_unsafe_parse_integer"
     , forall0 (TIntrinsic IString ~> TIntrinsic IBignum)
     )
   ,
@@ -196,7 +196,7 @@ builtinFunctions =
     , forall1' (\t0 -> ([Trait "NumericBase" t0], TIntrinsic IInt64 ~> t0))
     )
   ,
-    ( "from_bignum"
+    ( "from_integer"
     , forall1' (\t0 -> ([Trait "NumericBase" t0], TIntrinsic IBignum ~> t0))
     )
   ,
@@ -208,7 +208,7 @@ builtinFunctions =
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IInt64 ~> t0))
     )
   ,
-    ( "from_negative_bignum"
+    ( "from_negative_integer"
     , forall1' (\t0 -> ([Trait "Numeric" t0], TIntrinsic IBignum ~> t0))
     )
   ,

@@ -1,14 +1,14 @@
 module Main {
   
-  import IO(println_bignum)
+  import IO(println_integer)
 
   fun main() =
     let 
       n = 11111119223372036854775807
     in
       match(n % 11) {
-        | Some(m) => println_bignum(m)
-        | None    => println_bignum(0)
+        | Some(m) => println_integer(m)
+        | None    => println_integer(0)
       }
 
 }

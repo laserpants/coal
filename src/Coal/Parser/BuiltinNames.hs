@@ -56,8 +56,8 @@ builtinNames =
       , ("io$_print_int32", IO)
       , ("io$_println_int64", IO)
       , ("io$_print_int64", IO)
-      , ("io$_println_bignum", IO)
-      , ("io$_print_bignum", IO)
+      , ("io$_println_integer", IO)
+      , ("io$_print_integer", IO)
       , ("io$_println_bool", IO)
       , ("io$_print_bool", IO)
       , ("io$_println_char", IO)
@@ -87,7 +87,7 @@ builtinNames =
       ]
       <>
       -- Number operations
-      [ ("number$_unsafe_parse_bignum", Number)
+      [ ("number$_unsafe_parse_integer", Number)
       ]
       <>
       -- Char operations

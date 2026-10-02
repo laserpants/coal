@@ -52,7 +52,7 @@ This guide provides comprehensive reference for Coal language syntax, designed f
 ```
 alias       float       int64       true
 as          fn          let         type
-bignum      fold        match       unit
+integer     fold        match       unit
 bool        fun         module      when
 char        if          nat         where
 double      import      or          with
@@ -106,7 +106,7 @@ module Utils.Math { ... }                    // Export everything
 | `double` | Double precision float      | `3.141592653589793`       |
 | `int32`  | 32-bit integer              | `42`, `-100`              |
 | `int64`  | 64-bit integer              | `9000000000`              |
-| `bignum` | Arbitrary precision integer | `12345678901234567890`    |
+| `integer` | Arbitrary precision integer | `12345678901234567890`    |
 | `string` | UTF-8 text                  | `"Hello, world!"`         |
 | `unit`   | Singleton type              | `()`                      |
 | `void`   | Uninhabited type            | (no values)               |
@@ -140,7 +140,7 @@ Integer literals are polymorphic:
 
 ```coal
 let a : int32 = 100    // 100 inferred as int32
-let b : bignum = 100   // 100 inferred as bignum
+let b : integer = 100   // 100 inferred as integer
 let c : double = 100   // 100 inferred as double (becomes 100.0)
 ```
 

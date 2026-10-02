@@ -78,24 +78,24 @@ module IO {
   /**
    * Print an arbitrary-precision integer followed by a newline.
    *
-   * Convert the given `bignum` value to its decimal text representation
+   * Convert the given `integer` value to its decimal text representation
    * and output it to standard output, appending a newline.
    *
-   * **Type**: `println_bignum : bignum -> IO<unit>`
+   * **Type**: `println_integer : integer -> IO<unit>`
    */
-  fun println_bignum(b : bignum) : IO<unit> =
-    io$_println_bignum(b)
+  fun println_integer(b : integer) : IO<unit> =
+    io$_println_integer(b)
 
   /**
    * Print an arbitrary-precision integer without a trailing newline.
    *
-   * Convert the given `bignum` value to its decimal text representation
+   * Convert the given `integer` value to its decimal text representation
    * and output it to standard output.
    *
-   * **Type**: `print_bignum : bignum -> IO<unit>`
+   * **Type**: `print_integer : integer -> IO<unit>`
    */
-  fun print_bignum(b : bignum) : IO<unit> =
-    io$_print_bignum(b)
+  fun print_integer(b : integer) : IO<unit> =
+    io$_print_integer(b)
 
   /**
    * Print a boolean value followed by a newline.

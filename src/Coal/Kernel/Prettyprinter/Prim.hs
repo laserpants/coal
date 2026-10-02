@@ -7,7 +7,7 @@ Renders primitive literals with type-specific formatting:
 
   * Unit: @()@
   * Booleans: @true@, @false@
-  * Integers: @42@ (int32), @%42@ (int64), @%%42@ (bignum)
+  * Integers: @42@ (int32), @%42@ (int64), @%%42@ (integer)
   * Floats: @3.14f@ (float), @3.14@ (double)
   * Characters: Unicode escapes or direct characters
   * Strings: Backtick-delimited with Unicode escapes

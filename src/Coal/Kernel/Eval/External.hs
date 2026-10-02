@@ -13,7 +13,7 @@ language programs. External functions are declared in source code with
 Includes 'defaultExterns' with handlers for:
 
   * @coal_print_*@ and @coal_println_*@ for all eight primitive types:
-    @int32@, @int64@, @bool@, @string@, @char@, @float@, @double@, @bignum@
+    @int32@, @int64@, @bool@, @string@, @char@, @float@, @double@, @integer@
 
 All handlers run in 'IO' and can perform real side effects.
 -}

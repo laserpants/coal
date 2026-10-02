@@ -9,7 +9,7 @@ Defines the set of primitive values supported by the language:
   * Unit (@()@)
   * Booleans (@bool@)
   * Fixed-width integers (@int32@, @int64@)
-  * Arbitrary-precision integers (@bignum@)
+  * Arbitrary-precision integers (@integer@)
   * Floating-point numbers (@float@, @double@)
   * Characters (Unicode code points, @char@)
   * Strings (UTF-8 encoded, @string@)

@@ -16,9 +16,9 @@ module Main {
       | None    => "None"
     }
 
-  fun show_bn(o : Option<bignum>) : string =
+  fun show_bn(o : Option<integer>) : string =
     match(o) {
-      | Some(r) => "Some(" <> Number.bignum_to_string(r) <> ")"
+      | Some(r) => "Some(" <> Number.integer_to_string(r) <> ")"
       | None    => "None"
     }
 

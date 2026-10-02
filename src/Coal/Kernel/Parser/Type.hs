@@ -88,7 +88,7 @@ pPrimitiveType =
     , reserved "float" >> return T.float
     , reserved "int32" >> return T.int32
     , reserved "int64" >> return T.int64
-    , reserved "bignum" >> return T.bignum
+    , reserved "integer" >> return T.bignum
     , reserved "string" >> return T.string
     , reserved "unit" >> return T.unit
     ]

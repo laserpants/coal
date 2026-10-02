@@ -10,7 +10,7 @@ Handles code generation for:
   * Arithmetic operators (@+@, @-@, @*@, @/@)
   * Comparison operators (@==@, @!=@, @<@, @>@)
   * Logical operators (@!@)
-  * String and bignum literals
+  * String and arbitrary-precision integer literals
 
 Primitive literals are either compiled to IR constants or emitted as global
 variables with initializers (for strings).

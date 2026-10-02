@@ -90,7 +90,7 @@ reserved =
   , "bool"
   , "int32"
   , "int64"
-  , "bignum"
+  , "integer"
   , "float"
   , "double"
   , "char"

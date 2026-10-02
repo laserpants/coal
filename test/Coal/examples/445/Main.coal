@@ -4,7 +4,7 @@ module Main {
 
   // Hexadecimal literals are interchangeable with their decimal spellings:
   // `0xff` and `255` produce the same value and type. The literal payload is
-  // chosen by magnitude (int32, then int64, then bignum), so `0xbeef` becomes
+  // chosen by magnitude (int32, then int64, then integer), so `0xbeef` becomes
   // `from_int32(48879)` exactly as decimal `48879` would.
   fun classify(n : int32) : int32 =
     match(n) {
@@ -27,8 +27,8 @@ module Main {
     IO.println_int32(classify(0x10));
     // Magnitude selects the payload: int64 for values past int32 ...
     IO.println_int64(0x7fffffffffffffff);
-    // ... and bignum past int64.
-    IO.println_bignum(0x10000000000000000);
+    // ... and integer past int64.
+    IO.println_integer(0x10000000000000000);
   }
 
 }

@@ -121,9 +121,9 @@ module Number {
     // untagged, so a successful parse of 0 would be bit-identical to the NULL
     // failure sentinel. A bignum box is a heap pointer and is never NULL, which
     // keeps success and failure distinguishable for every input.
-    #{coal_parse_int32 : string -> bignum}(input)(fn(res) => 
-      #{rt_is_null : bignum -> bool}(res)(fn(is_null) => 
-        if (is_null) then None else Some(from_bignum(res))))
+    #{coal_parse_int32 : string -> integer}(input)(fn(res) => 
+      #{rt_is_null : integer -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(from_integer(res))))
 
   /**
    * Parse a decimal string into a 64-bit integer.
@@ -134,9 +134,9 @@ module Number {
    * **Type**: `parse_int64 : string -> Option<int64>`
    */
   fun parse_int64(input : string) : Option<int64> =
-    #{coal_parse_int64 : string -> bignum}(input)(fn(res) => 
-      #{rt_is_null : bignum -> bool}(res)(fn(is_null) => 
-        if (is_null) then None else Some(from_bignum(res))))
+    #{coal_parse_int64 : string -> integer}(input)(fn(res) => 
+      #{rt_is_null : integer -> bool}(res)(fn(is_null) => 
+        if (is_null) then None else Some(from_integer(res))))
 
   /**
    * Parse a decimal string into a float.
@@ -165,40 +165,40 @@ module Number {
         if (is_null) then None else Some(res)))
 
   /**
-   * Parse a decimal string into a bignum.
+   * Parse a decimal string into an arbitrary-precision integer.
    *
-   * Returns `None` if parsing fails, otherwise `Some(bignum)`.
+   * Returns `None` if parsing fails, otherwise `Some(integer)`.
    *
-   * **Type**: `parse_bignum : string -> Option<bignum>`
+   * **Type**: `parse_integer : string -> Option<integer>`
    */
-  fun parse_bignum(input : string) : Option<bignum> =
-    #{coal_bignum_init : string -> bignum}(input)(fn(res) => 
-      #{rt_is_null : bignum -> bool}(res)(fn(is_null) => 
+  fun parse_integer(input : string) : Option<integer> =
+    #{coal_bignum_init : string -> integer}(input)(fn(res) => 
+      #{rt_is_null : integer -> bool}(res)(fn(is_null) => 
         if (is_null) then None else Some(res)))
 
   /**
-   * Convert a bignum to a float.
+   * Convert an integer to a float.
    *
-   * **Type**: `bignum_to_float : bignum -> float`
+   * **Type**: `integer_to_float : integer -> float`
    */
-  fun bignum_to_float(n : bignum) : float =
-    #{coal_bignum_to_float : bignum -> float}(n)(fn(f) => f)
+  fun integer_to_float(n : integer) : float =
+    #{coal_bignum_to_float : integer -> float}(n)(fn(f) => f)
 
   /**
-   * Convert a bignum to a double.
+   * Convert an integer to a double.
    *
-   * **Type**: `bignum_to_double : bignum -> double`
+   * **Type**: `integer_to_double : integer -> double`
    */
-  fun bignum_to_double(n : bignum) : double =
-    #{coal_bignum_to_double : bignum -> double}(n)(fn(d) => d)
+  fun integer_to_double(n : integer) : double =
+    #{coal_bignum_to_double : integer -> double}(n)(fn(d) => d)
 
   /**
-   * Convert a bignum to its string representation.
+   * Convert an integer to its string representation.
    *
-   * **Type**: `bignum_to_string : bignum -> string`
+   * **Type**: `integer_to_string : integer -> string`
    */
-  fun bignum_to_string(n : bignum) : string =
-    #{coal_bignum_to_string : bignum -> string}(n)(fn(s) => s)
+  fun integer_to_string(n : integer) : string =
+    #{coal_bignum_to_string : integer -> string}(n)(fn(s) => s)
 
   /**
    * Return the greater of two comparable values.

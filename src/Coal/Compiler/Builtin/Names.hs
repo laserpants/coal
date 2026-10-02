@@ -38,9 +38,9 @@ builtinNames =
     , "compare"
     , "from_int32"
     , "from_int64"
-    , "from_bignum"
+    , "from_integer"
     , "from_negative_int32"
     , "from_negative_int64"
-    , "from_negative_bignum"
+    , "from_negative_integer"
     , "negate"
     ]
