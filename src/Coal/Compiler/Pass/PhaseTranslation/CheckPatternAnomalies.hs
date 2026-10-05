@@ -27,6 +27,7 @@ import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module (Module (moduleDefinitions, modulePath))
 import Coal.Language.Module.Path (principalPath)
+import Coal.Language.Primitive (Primitive (..))
 import Coal.Language.Type (IndexedType)
 import Coal.Language.Type.Kind (Kind (..))
 import Control.Monad (unless)
@@ -165,4 +166,19 @@ checkExhaustive loc cs = do
     lift $
       tellErrors [NonExhaustivePatterns (ErrorLocation name loc)]
  where
-  patterns = NonEmpty.toList (translatePattern . clausePattern <$> cs)
+  patterns = translatePattern . clausePattern <$> filter guaranteedTaken (NonEmpty.toList cs)
+
+{- | A clause contributes to exhaustiveness only if its guard chain is guaranteed
+to reach a body for any value matching its pattern: it is unguarded, or some
+choice is @otherwise@ (empty guard list) or carries a literal-@true@ guard. A
+clause whose guards can fail contributes nothing, so the values it would match
+must be covered by later clauses. This mirrors the coverage behaviour of
+guard-aware pattern-match checkers (e.g. GHC), and is what lets 'ExpandGuards'
+desugar guards without a totality fallback.
+-}
+guaranteedTaken :: Clause Metadata k t -> Bool
+guaranteedTaken (EClause _ _ cs) = any alwaysTaken cs
+ where
+  alwaysTaken (CPlain _ gs _) = null gs || any isTrueGuard gs
+  isTrueGuard (CGuard (ELiteral _ (LBool True))) = True
+  isTrueGuard _ = False

@@ -1,0 +1,14 @@
+module Main {
+
+  import IO(println_int32)
+
+  fun f(p : (int32, int32)) : int32 =
+    match(p) {
+      | (v, _) when (v == -1) => -1
+      | (v, w) => v + w
+    }
+
+  fun main() =
+    println_int32(f((2, 3)))
+
+}

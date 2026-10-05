@@ -19,7 +19,7 @@ clauses is ensured by placing the remaining match as the else-branch.
 ## Input
 
 - **AST representation**: `Module Metadata Kind IndexedType`
-- **Required invariants**: DesugarPatterns completed
+- **Required invariants**: DesugarPatterns, ExpandOrPatterns, and CheckPatternAnomalies completed
 
 ## Output
 
@@ -40,7 +40,12 @@ Only processes `EMatch` nodes that have non-trivial clauses (clauses with guards
 For a clause with multiple choices (guards):
 - Folds from the right: each `CPlain guards expr` becomes
   `if (guards_combined) then expr else <remaining_or_fallback>`
-- The final choice's guard becomes unreachable (it's the "otherwise" case)
+- The fallback is a match over the remaining clauses. A value that reaches it is
+  guaranteed to be matched by a later clause because `CheckPatternAnomalies`
+  (which runs before this pass) only counts a clause as covering its pattern
+  when its guards cannot fail
+- A final `otherwise` choice (empty guard list) is always taken, so the fallback
+  is unreachable and is discarded
 - Guards within a single choice are combined via `conjunction` (logical AND)
 
 ### `conjunction`
@@ -65,8 +70,8 @@ let scr = x in match(scr) {
 
 ## Compiler Interactions
 
-- **Earlier passes this relies on**: DesugarPatterns
-- **Later passes that rely on this pass**: ExpandOrPatterns
+- **Earlier passes this relies on**: DesugarPatterns, ExpandOrPatterns, CheckPatternAnomalies
+- **Later passes that rely on this pass**: ExpandRecordPatterns
 
 ## Side Effects
 
