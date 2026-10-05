@@ -144,29 +144,23 @@ expandClauseGuards :: (Monad m) => Metadata -> IndexedType -> Expression Metadat
 expandClauseGuards _ _ _ (trivialClause@EClause{clauseChoices = CPlain _ [] _ :| []} : _) =
   return trivialClause
 expandClauseGuards loc clauseType scrutinee (EClause{..} : remainingClauses) = do
-  -- Build the fallback expression. When there are no remaining clauses the
-  -- last guard must be `otherwise`, so nextExpr is placed in an unreachable
-  -- else-branch. Use the body of the last choice as a type-correct placeholder.
+  -- When every guard fails, fall through to the remaining clauses. When there
+  -- are no remaining clauses the last guard must be `otherwise`, so nextExpr is
+  -- placed in an unreachable else-branch; use the body of the last choice as a
+  -- type-correct placeholder. The remaining clauses are guaranteed to cover the
+  -- fall-through value: `passCheckPatternAnomalies`, which runs before this
+  -- pass, only counts a clause as covering its pattern when its guards cannot
+  -- fail, so any value that reaches here is matched by a later clause.
   nextExpr <- case NonEmpty.nonEmpty remainingClauses of
     Nothing ->
       pure $ case NonEmpty.last clauseChoices of
         CPlain _ _ body -> body
-    Just _ -> do
-      let fallbackClause = buildFallbackClause remainingClauses
-          fallbackMatch = EMatch loc clauseType scrutinee (NonEmpty.fromList $ remainingClauses <> [fallbackClause])
-      expandExpression fallbackMatch
+    Just _ ->
+      expandExpression (EMatch loc clauseType scrutinee (NonEmpty.fromList remainingClauses))
   expanded <- foldrM buildGuardedIf nextExpr clauseChoices
 
   return $ EClause clauseMetadata clausePattern (CPlain loc [] expanded :| [])
  where
-  buildFallbackClause clauses =
-    let EClause
-          { clauseMetadata = fallbackMeta
-          , clausePattern = fallbackPattern
-          , clauseChoices = fallbackChoices
-          } = last clauses
-     in EClause fallbackMeta (PAny fallbackMeta (typeOf fallbackPattern)) fallbackChoices
-
   -- `otherwise` desugars to an empty guard list — always taken, no condition.
   buildGuardedIf (CPlain _ [] expr) _ =
     return expr

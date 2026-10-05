@@ -32,12 +32,12 @@ phaseTranslation =
     >-> generateDebugArtifacts "NormalizeAST"
     >-> passDesugarPatterns
     >-> generateDebugArtifacts "DesugarPatterns"
-    >-> passExpandGuards
-    >-> generateDebugArtifacts "ExpandGuards"
     >-> passExpandOrPatterns
     >-> generateDebugArtifacts "ExpandOrPatterns"
     >-> passCheckPatternAnomalies
     >-> generateDebugArtifacts "CheckPatternAnomalies"
+    >-> passExpandGuards
+    >-> generateDebugArtifacts "ExpandGuards"
     >-> passExpandRecordPatterns
     >-> generateDebugArtifacts "ExpandRecordPatterns"
     >-> passExpandAsPatterns

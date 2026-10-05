@@ -10,19 +10,19 @@ after the type-checking phase.
 
 1. **ExpandRecordUpdates** — desugar `record{ field = value }` into record pattern matches
 2. **NormalizeAST** — normalize types/expressions via `normalizeObject`
-2. **DesugarPatterns** — desugar complex patterns into simple variables with match
-3. **ExpandGuards** — expand guard expressions into if-then-else chains
+3. **DesugarPatterns** — desugar complex patterns into simple variables with match
 4. **ExpandOrPatterns** — expand or-patterns into separate clauses
-5. **CheckPatternAnomalies** — exhaustiveness checking for match expressions
-6. **ExpandRecordPatterns** — desugar record patterns into field selects
-7. **ExpandAsPatterns** — expand `as` patterns into match+let bindings
-8. **ExpandIntegerLiteralPatterns** — expand integer literal patterns into equality guards
-9. **CompileMatchExpressions** — compile match expressions into decision trees
-10. **InsertDictionaries** — insert trait dictionaries (dictionary-passing style)
-11. **CompileNats** — compile nat types to int32-backed representation
-12. **DetectCallCycles** — detect call cycles (cycles containing ordinary calls are rejected; purely structural @-pattern cycles are allowed)
-13. **DenormalizeAST** — apply `denormalizeObject` reverse transformation
-14. **CheckTraitAnnotations** — verify trait annotations cover inferred constraints
+5. **CheckPatternAnomalies** — guard-aware exhaustiveness checking for match expressions
+6. **ExpandGuards** — expand guard expressions into if-then-else chains
+7. **ExpandRecordPatterns** — desugar record patterns into field selects
+8. **ExpandAsPatterns** — expand `as` patterns into match+let bindings
+9. **ExpandIntegerLiteralPatterns** — expand integer literal patterns into equality guards
+10. **CompileMatchExpressions** — compile match expressions into decision trees
+11. **InsertDictionaries** — insert trait dictionaries (dictionary-passing style)
+12. **CompileNats** — compile nat types to int32-backed representation
+13. **DetectCallCycles** — detect call cycles (cycles containing ordinary calls are rejected; purely structural @-pattern cycles are allowed)
+14. **DenormalizeAST** — apply `denormalizeObject` reverse transformation
+15. **CheckTraitAnnotations** — verify trait annotations cover inferred constraints
 
 ## Execution Order
 
@@ -30,9 +30,9 @@ after the type-checking phase.
 ExpandRecordUpdates
   >-> NormalizeAST
   >-> DesugarPatterns
-  >-> ExpandGuards
   >-> ExpandOrPatterns
   >-> CheckPatternAnomalies
+  >-> ExpandGuards
   >-> ExpandRecordPatterns
   >-> ExpandAsPatterns
   >-> ExpandIntegerLiteralPatterns
@@ -59,9 +59,12 @@ ExpandRecordUpdates
 ## Invariants Established by the Phase
 
 - Complex patterns are desugared to simple variables with explicit match
-- Guard expressions are expanded into if-then-else
 - Or-patterns are expanded into separate clauses
-- Pattern matching is proved exhaustive
+- Pattern matching is proved exhaustive, taking guards into account: a guarded
+  clause only counts toward coverage when it is unguarded or ends with
+  `otherwise`/`when(true)` (`CheckPatternAnomalies`)
+- Guard expressions are expanded into if-then-else, with guard failure falling
+  through to the remaining clauses (`ExpandGuards`)
 - Record patterns are desugared into field select operations
 - As-patterns are expanded into match+let bindings
 - Integer literal patterns are expanded into equality guards

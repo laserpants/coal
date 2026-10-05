@@ -1,0 +1,17 @@
+module Main {
+
+  import IO(println_int32)
+
+  // The guarded clause does not cover `Some(n)` when `n /= 3`, and `None`
+  // covers nothing else, so this match is not total and must be rejected at
+  // compile time rather than silently falling through at run time.
+  fun f(x : Option<int32>) : int32 =
+    match(x) {
+      | Some(n) when (n == 3) => 3
+      | None => 1
+    }
+
+  fun main() =
+    println_int32(f(Some(4)))
+
+}
