@@ -275,7 +275,6 @@ irValue =
       irApplyConstructor con (NonEmpty.toList es)
     expr@(EApp t (EVar (Label t1 name)) es) -> do
       o1 <- nameLookup t1 name
-      vs <- traverse irValue es
       case o1 of
         OGlobal (TFun _ ts) _
           | length ts == length es -> do
@@ -283,6 +282,13 @@ irValue =
               -- so that a function-typed result maps to @ptr@ rather than
               -- @TFun@ (which is not a valid LLVM value type), while still
               -- preserving primitive return types such as @i64@.
+              --
+              -- Evaluate the arguments exactly once, here. They must /not/ be
+              -- evaluated eagerly for every branch: the non-saturated branches
+              -- below consume the boxed argument vector built by 'irPackArgs',
+              -- so evaluating 'es' up front would emit each argument (including
+              -- a side-effecting 'ECall') twice and discard the first copy.
+              vs <- traverse irValue es
               call NoTail (Boxing.irValueTypeRep t) o1 (NonEmpty.toList vs)
           | null ts -> do
               -- Zero-argument thunk (a constant object): force it first, then

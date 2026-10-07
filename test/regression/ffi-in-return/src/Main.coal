@@ -1,0 +1,35 @@
+module Main {
+
+  import IO(return, println_string)
+  import String(int32_to_string)
+
+  // Apply a poll closure to unit. The closure is a genuine argument, so it is
+  // lambda-lifted rather than merged into a top-level function.
+  fun apply_poll(poll : unit -> IO<int32>) : IO<int32> =
+    poll(())
+
+  // Idempotent reads of the C counter, lifted into IO so they can be used with
+  // do-notation's `<-`.
+  fun reset() : IO<int32> =
+    return(#{counter_reset : unit -> int32}(())(fn(x) => x))
+
+  fun get() : IO<int32> =
+    return(#{counter_get : unit -> int32}(())(fn(x) => x))
+
+  fun main() =
+    do {
+      _ <- reset();
+
+      // The poll wraps a foreign call directly in `return(...)`. Because this
+      // lambda is passed as an argument it is lifted, and lambda lifting
+      // captures the imported `return` as a free variable -- so at codegen
+      // time the callee is a local closure, not a saturated global call. The
+      // codegen used to evaluate the arguments of such a call twice, running
+      // the foreign call once (discarded) and then again (used), so the
+      // counter ended at 2 instead of 1.
+      _ <- apply_poll(fn(_) => return(#{counter_mk : unit -> int32}(())(fn(x) => x)));
+
+      calls <- get();
+      _ <- println_string("calls=" <> int32_to_string(calls));
+    }
+}

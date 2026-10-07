@@ -18,3 +18,8 @@ test/regression/let-evaluation/let-evaluation-*
 # ...but keep its project manifest (root pattern above would exclude it)
 !test/regression/let-evaluation/coal.json
 
+# ffi-in-return regression fixture binary
+test/regression/ffi-in-return/ffi-in-return-*
+# ...but keep its project manifest (root pattern above would exclude it)
+!test/regression/ffi-in-return/coal.json
+
