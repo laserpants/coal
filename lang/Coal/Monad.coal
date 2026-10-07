@@ -7,7 +7,7 @@ module Coal.Monad {
 
   import Coal.Combinators(flip, always, identity)
   import Coal.Applicative(Applicative)
-  import IO(__eval_io, return)
+  import IO(__eval_io)
   import namespace List
 
   /**
@@ -68,7 +68,7 @@ module Coal.Monad {
    *
    * **Type**: `and_return : a -> m<b> -> m<a> with (Monad<m>)`
    */
-  let and_return = and_eval << return
+  let and_return = and_eval << pure
 
   /**
    * `join` flattens a nested monadic value by one level, transforming
