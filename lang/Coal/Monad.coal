@@ -63,8 +63,8 @@ module Coal.Monad {
   let and_eval = flip(then_do)
 
   /**
-   * `and_return` is `and_eval` composed with `return`: it runs the given
-   * monadic action, discarding its result, and returns the given pure value.
+   * `and_return` is `and_eval` composed with `pure`: it runs the given monadic
+   * action, discarding its result, and returns the given pure value.
    *
    * **Type**: `and_return : a -> m<b> -> m<a> with (Monad<m>)`
    */
