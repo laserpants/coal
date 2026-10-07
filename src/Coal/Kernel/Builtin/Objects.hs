@@ -2735,26 +2735,30 @@ objectList =
       Exported
       "Builtin$.event$_blocking_poll"
       [ Kernel.Label Kernel.TOpq "state"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TCon "Option" [Kernel.TOpq]) "try_fn"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "try_fn"
       , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "block_fn"
       ]
       ( unsafeParseExpr
           [r|
-                  case<*>(@<Option(*)>(try_fn : */Option(*), state : *)) {
+                  case<IO(*)>(
+                    @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
+                                 @<IO(Option(*))>(try_fn : */IO(Option(*)), state : *))
+                  ) {
                     | ( None : Option(*) ) =>
-                        let _ : unit = 
-                          @<unit>(block_fn : */unit, state : *)
-                        in 
-                          @<*>
-                            ( `Builtin$.event$_blocking_poll` : */(*/Option(*))/(*/unit)/*
+                        let _ : unit =
+                          @<unit>(`Builtin$.io$_eval` : IO(unit)/unit,
+                                  @<IO(unit)>(block_fn : */IO(unit), state : *))
+                        in
+                          @<IO(*)>
+                            ( `Builtin$.event$_blocking_poll` : */(*/IO(Option(*)))/(*/IO(unit))/IO(*)
                             , state : *
-                            , try_fn : */Option(*)
-                            , block_fn : */unit
+                            , try_fn : */IO(Option(*))
+                            , block_fn : */IO(unit)
                             )
                     | ( Some : */Option(*)
                       , result : *
                       ) =>
-                        result : *
+                        @<IO(*)>(`Builtin$.io$_return` : */IO(*), result : *)
                   }
         |]
       )

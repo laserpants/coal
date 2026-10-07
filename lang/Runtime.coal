@@ -27,11 +27,12 @@ module Runtime {
   /** 
    * Blocking poll loop.
    *
-   * Calls `try_fn(state)`. If it returns `Some(result)`, returns `result`.
-   * Otherwise calls `block_fn(state)` to wait for data, then retries
-   * `try_fn` with the same state.
+   * Runs the `IO` action `try_fn(state)`. If it yields `Some(result)`,
+   * returns `result` (wrapped in `IO`). Otherwise runs the `IO` action
+   * `block_fn(state)` to wait for data, then retries `try_fn` with the
+   * same state.
    */
-  fun blocking_poll(state : a, try_fn : a -> Option<b>, block_fn : a -> unit) : b =
+  fun blocking_poll(state : a, try_fn : a -> IO<Option<b>>, block_fn : a -> IO<unit>) : IO<b> =
     event$_blocking_poll(state, try_fn, block_fn)
 
 }

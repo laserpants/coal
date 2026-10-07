@@ -263,9 +263,9 @@ builtinFunctions =
     ( "event$_blocking_poll"
     , forall2 $ \state result ->
         state
-          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (result :| []))
-          ~> (state ~> TIntrinsic IUnit)
-          ~> result
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (result :| []) :| []))
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+          ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (result :| [])
     )
   ,
     ( "event$_loop"
