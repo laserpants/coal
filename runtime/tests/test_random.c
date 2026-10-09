@@ -140,13 +140,12 @@ test_float_random_wrapper(void)
 {
     /* Generate values using wrapper and verify range */
     for (int i = 0; i < 50; i++) {
-        rt_value_t r_boxed = coal_float_random();
-        float r = rt_float_unbox(r_boxed);
+        float r = coal_float_random();
         assert(r >= 0.0f);
         assert(r <= 1.0f);
     }
 
-    printf("test_float_random_wrapper: PASS (50 boxed values in range)\n");
+    printf("test_float_random_wrapper: PASS (50 unboxed values in range)\n");
 }
 
 /* Test wrapper function coal_double_random */
@@ -155,26 +154,23 @@ test_double_random_wrapper(void)
 {
     /* Generate values using wrapper and verify range */
     for (int i = 0; i < 50; i++) {
-        rt_value_t r_boxed = coal_double_random();
-        double r = rt_double_unbox(r_boxed);
+        double r = coal_double_random();
         assert(r >= 0.0);
         assert(r <= 1.0);
     }
 
-    printf("test_double_random_wrapper: PASS (50 boxed values in range)\n");
+    printf("test_double_random_wrapper: PASS (50 unboxed values in range)\n");
 }
 
 /* Test that wrapper produces different values */
 static void
 test_wrapper_variation(void)
 {
-    rt_value_t first_boxed = coal_float_random();
-    float first = rt_float_unbox(first_boxed);
+    float first = coal_float_random();
 
     int different_count = 0;
     for (int i = 0; i < 10; i++) {
-        rt_value_t r_boxed = coal_float_random();
-        float r = rt_float_unbox(r_boxed);
+        float r = coal_float_random();
         if (r != first) {
             different_count++;
         }

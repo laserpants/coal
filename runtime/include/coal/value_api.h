@@ -18,7 +18,15 @@
  *
  * These functions wrap the native runtime API, automatically handling
  * boxing and unboxing of values. All wrapper functions use the coal_ prefix
- * and take/return rt_value_t, making LLVM code generation simpler.
+ * and take rt_value_t arguments (boxed).
+ *
+ * Results are returned as rt_value_t for pointer-represented values (bignum,
+ * string, closure, record) and for the untagged primitive boxes (int32,
+ * int64, bool, char, whose rt_*_box is a no-op cast). Float and double
+ * results, however, are returned as the raw primitive: the LLVM code
+ * generator reads the declared return type directly out of the machine
+ * register, so wrapping them in rt_value_t (a heap pointer) would not be
+ * visible to the caller. See Coal.Kernel.LLVM.Codegen's ECall/irTailECall.
  */
 
 /* ============================================================================
@@ -34,18 +42,18 @@ extern rt_value_t coal_float_to_int64(rt_value_t v);
 extern rt_value_t coal_double_to_int32(rt_value_t v);
 /** Convert boxed double to int64 (truncates) */
 extern rt_value_t coal_double_to_int64(rt_value_t v);
-/** Convert boxed int32 to float */
-extern rt_value_t coal_int32_to_float(rt_value_t v);
-/** Convert boxed int32 to double */
-extern rt_value_t coal_int32_to_double(rt_value_t v);
-/** Convert boxed int64 to float */
-extern rt_value_t coal_int64_to_float(rt_value_t v);
-/** Convert boxed int64 to double */
-extern rt_value_t coal_int64_to_double(rt_value_t v);
-/** Convert boxed float to double */
-extern rt_value_t coal_float_to_double(rt_value_t v);
-/** Convert boxed double to float */
-extern rt_value_t coal_double_to_float(rt_value_t v);
+/** Convert boxed int32 to float (returns unboxed) */
+extern float coal_int32_to_float(rt_value_t v);
+/** Convert boxed int32 to double (returns unboxed) */
+extern double coal_int32_to_double(rt_value_t v);
+/** Convert boxed int64 to float (returns unboxed) */
+extern float coal_int64_to_float(rt_value_t v);
+/** Convert boxed int64 to double (returns unboxed) */
+extern double coal_int64_to_double(rt_value_t v);
+/** Convert boxed float to double (returns unboxed) */
+extern double coal_float_to_double(rt_value_t v);
+/** Convert boxed double to float (returns unboxed) */
+extern float coal_double_to_float(rt_value_t v);
 /** Convert boxed int32 to bignum */
 extern rt_value_t coal_int32_to_bignum(rt_value_t v);
 /** Convert boxed int64 to bignum */
@@ -153,10 +161,10 @@ extern rt_value_t coal_bignum_eq(rt_value_t a, rt_value_t b);
 extern rt_value_t coal_bignum_to_int32(rt_value_t v);
 /** Convert boxed bignum to int64 */
 extern rt_value_t coal_bignum_to_int64(rt_value_t v);
-/** Convert boxed bignum to float */
-extern rt_value_t coal_bignum_to_float(rt_value_t v);
-/** Convert boxed bignum to double */
-extern rt_value_t coal_bignum_to_double(rt_value_t v);
+/** Convert boxed bignum to float (returns unboxed) */
+extern float coal_bignum_to_float(rt_value_t v);
+/** Convert boxed bignum to double (returns unboxed) */
+extern double coal_bignum_to_double(rt_value_t v);
 
 /* ============================================================================
  * String operations
@@ -240,10 +248,10 @@ extern rt_value_t coal_int64_mod(rt_value_t m, rt_value_t n);
  * ============================================================================
  */
 
-/** Generate random boxed float in [0.0, 1.0) */
-extern rt_value_t coal_float_random(void);
-/** Generate random boxed double in [0.0, 1.0) */
-extern rt_value_t coal_double_random(void);
+/** Generate random float in [0.0, 1.0) (returns unboxed) */
+extern float coal_float_random(void);
+/** Generate random double in [0.0, 1.0) (returns unboxed) */
+extern double coal_double_random(void);
 
 /* ============================================================================
  * Panic

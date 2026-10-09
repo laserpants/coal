@@ -196,18 +196,18 @@ static void
 test_int_to_float_conversions(void)
 {
     rt_value_t i32 = rt_int32_box(100);
-    rt_value_t f = coal_int32_to_float(i32);
-    rt_value_t d = coal_int32_to_double(i32);
+    float f = coal_int32_to_float(i32);
+    double d = coal_int32_to_double(i32);
 
-    assert(rt_float_unbox(f) == 100.0f);
-    assert(rt_double_unbox(d) == 100.0);
+    assert(f == 100.0f);
+    assert(d == 100.0);
 
     rt_value_t i64 = rt_int64_box(999999);
     f = coal_int64_to_float(i64);
     d = coal_int64_to_double(i64);
 
-    assert(rt_float_unbox(f) == 999999.0f);
-    assert(rt_double_unbox(d) == 999999.0);
+    assert(f == 999999.0f);
+    assert(d == 999999.0);
 
     printf("test_int_to_float_conversions: PASS (promotion)\n");
 }
@@ -220,8 +220,8 @@ test_negative_conversions(void)
     assert(rt_int32_unbox(i32) == -42);
 
     rt_value_t i64 = rt_int64_box(-999);
-    rt_value_t d = coal_int64_to_double(i64);
-    assert(rt_double_unbox(d) == -999.0);
+    double d = coal_int64_to_double(i64);
+    assert(d == -999.0);
 
     printf("test_negative_conversions: PASS (negative values)\n");
 }
@@ -230,12 +230,12 @@ static void
 test_float_double_conversions(void)
 {
     rt_value_t f = rt_float_box(3.14159f);
-    rt_value_t d = coal_float_to_double(f);
-    assert(rt_double_unbox(d) > 3.14 && rt_double_unbox(d) < 3.15);
+    double d = coal_float_to_double(f);
+    assert(d > 3.14 && d < 3.15);
 
     rt_value_t d2 = rt_double_box(2.718281828459045);
-    rt_value_t f2 = coal_double_to_float(d2);
-    assert(rt_float_unbox(f2) > 2.71f && rt_float_unbox(f2) < 2.72f);
+    float f2 = coal_double_to_float(d2);
+    assert(f2 > 2.71f && f2 < 2.72f);
 
     printf("test_float_double_conversions: PASS (float <-> double)\n");
 }
@@ -437,26 +437,26 @@ test_bignum_conversion_wrappers(void)
 
     /* Test bignum to float */
     rt_value_t bn3 = rt_bignum_box(rt_bignum_from_i64(100));
-    rt_value_t f = coal_bignum_to_float(bn3);
-    assert(rt_float_unbox(f) == 100.0f);
+    float f = coal_bignum_to_float(bn3);
+    assert(f == 100.0f);
 
     /* Test bignum to double */
     rt_value_t bn4 = rt_bignum_box(rt_bignum_from_i64(999));
-    rt_value_t d = coal_bignum_to_double(bn4);
-    assert(rt_double_unbox(d) == 999.0);
+    double d = coal_bignum_to_double(bn4);
+    assert(d == 999.0);
 
     /* Test with negative values */
     rt_value_t bn5 = rt_bignum_box(rt_bignum_from_i64(-42));
     rt_value_t i32_neg = coal_bignum_to_int32(bn5);
     assert(rt_int32_unbox(i32_neg) == -42);
 
-    rt_value_t f_neg = coal_bignum_to_float(bn5);
-    assert(rt_float_unbox(f_neg) == -42.0f);
+    float f_neg = coal_bignum_to_float(bn5);
+    assert(f_neg == -42.0f);
 
     /* Test with large bignum */
     rt_value_t bn_large = rt_bignum_box(rt_bignum_new("123456789012345"));
-    rt_value_t d_large = coal_bignum_to_double(bn_large);
-    assert(rt_double_unbox(d_large) == 123456789012345.0);
+    double d_large = coal_bignum_to_double(bn_large);
+    assert(d_large == 123456789012345.0);
 
     /* Boundary values: out-of-range bignums are truncated per coal/bignum.h.
      * The previous mpz_get_si-based conversion masked positive values with

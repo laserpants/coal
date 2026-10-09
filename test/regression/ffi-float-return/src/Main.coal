@@ -1,0 +1,31 @@
+/**
+ * Regression test for the float/double foreign-call ABI.
+ *
+ * The code generator declares float/double-returning foreign functions with
+ * their raw (unboxed) return type and reads the result out of the machine
+ * register. The stdlib `coal_*` conversion wrappers in
+ * runtime/src/value_api.c used to return a boxed rt_value_t (a heap pointer)
+ * instead, so these conversions only produced correct values by accident, via
+ * a leftover xmm0. This program exercises every float/double-returning
+ * conversion, plus a user foreign function, so a regression to the
+ * boxed-return ABI is caught.
+ */
+module Main {
+
+  import namespace IO
+  import namespace Number
+
+  // A user foreign function that returns an unboxed double.
+  fun ffi_double(n : int32) : double =
+    #{ffi_double_clobber : int32 -> double}(n)(fn(d) => d)
+
+  fun main() =
+    do {
+      IO.println_double(Number.int32_to_double(42));
+      IO.println_float(Number.int32_to_float(42));
+      IO.println_double(Number.int64_to_double(Number.int32_to_int64(1234)));
+      IO.println_float(Number.int64_to_float(Number.int32_to_int64(1234)));
+      IO.println_double(ffi_double(7));
+    }
+
+}

@@ -31,40 +31,46 @@ coal_double_to_int64(rt_value_t v)
     return rt_int64_box((int64_t) rt_double_unbox(v));
 }
 
-rt_value_t
+/* Float/double results are returned unboxed (not wrapped in rt_value_t) to
+ * match the foreign-call ABI: codegen passes boxed arguments but reads the
+ * declared primitive return type directly (see Coal.Kernel.LLVM.Codegen's
+ * ECall / irTailECall). Integer-typed results below stay rt_value_t, which is
+ * a no-op cast to the value for the untagged int32/int64/bool/char boxes. */
+
+float
 coal_int32_to_float(rt_value_t v)
 {
-    return rt_float_box((float) rt_int32_unbox(v));
+    return (float) rt_int32_unbox(v);
 }
 
-rt_value_t
+double
 coal_int32_to_double(rt_value_t v)
 {
-    return rt_double_box((double) rt_int32_unbox(v));
+    return (double) rt_int32_unbox(v);
 }
 
-rt_value_t
+float
 coal_int64_to_float(rt_value_t v)
 {
-    return rt_float_box((float) rt_int64_unbox(v));
+    return (float) rt_int64_unbox(v);
 }
 
-rt_value_t
+double
 coal_int64_to_double(rt_value_t v)
 {
-    return rt_double_box((double) rt_int64_unbox(v));
+    return (double) rt_int64_unbox(v);
 }
 
-rt_value_t
+double
 coal_float_to_double(rt_value_t v)
 {
-    return rt_double_box((double) rt_float_unbox(v));
+    return (double) rt_float_unbox(v);
 }
 
-rt_value_t
+float
 coal_double_to_float(rt_value_t v)
 {
-    return rt_float_box((float) rt_double_unbox(v));
+    return (float) rt_double_unbox(v);
 }
 
 rt_value_t
@@ -374,16 +380,16 @@ coal_bignum_to_int64(rt_value_t v)
     return rt_int64_box(rt_bignum_to_int64(rt_bignum_unbox(v)));
 }
 
-rt_value_t
+float
 coal_bignum_to_float(rt_value_t v)
 {
-    return rt_float_box(rt_bignum_to_float(rt_bignum_unbox(v)));
+    return rt_bignum_to_float(rt_bignum_unbox(v));
 }
 
-rt_value_t
+double
 coal_bignum_to_double(rt_value_t v)
 {
-    return rt_double_box(rt_bignum_to_double(rt_bignum_unbox(v)));
+    return rt_bignum_to_double(rt_bignum_unbox(v));
 }
 
 /* ============================================================================
@@ -571,16 +577,16 @@ coal_int64_mod(rt_value_t m, rt_value_t n)
  * ============================================================================
  */
 
-rt_value_t
+float
 coal_float_random(void)
 {
-    return rt_float_box(rt_float_random());
+    return rt_float_random();
 }
 
-rt_value_t
+double
 coal_double_random(void)
 {
-    return rt_double_box(rt_double_random());
+    return rt_double_random();
 }
 
 /* ============================================================================
