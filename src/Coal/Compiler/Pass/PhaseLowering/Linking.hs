@@ -117,7 +117,7 @@ runGCC CompilerConfig{..} dir objFiles cFiles = do
       <> objFiles
       <> ["-o", "dist"]
       <> sanitizeFlags
-      <> ["-lgc", "-lgmp"]
+      <> ["-lgc", "-lgmp", "-lm"]
 
 execProcess :: CreateProcess -> IO ()
 execProcess p = do
