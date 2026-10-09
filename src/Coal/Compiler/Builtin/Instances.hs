@@ -730,7 +730,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(/)"
-              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IFloat `TArrow` TIntrinsic IFloat `TArrow` TIntrinsic IFloat)
               )
             ]
         )
@@ -745,7 +745,7 @@ builtinInstances =
         ( Map.fromList
             [
               ( "(/)"
-              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IInt32)
+              , Forall mempty mempty (TIntrinsic IDouble `TArrow` TIntrinsic IDouble `TArrow` TIntrinsic IDouble)
               )
             ]
         )
