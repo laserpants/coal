@@ -298,8 +298,8 @@ primToIRConstant =
     PFloat f ->
       Just (TFloat, CFloat f)
     PDouble d ->
-      Just (TDouble, CFloat (realToFrac d))
+      Just (TDouble, CDouble d)
     PUnit ->
-      Just (i1, CInt 1 0)
+      Just (TPtr, CNull TPtr)
     _ ->
       Nothing

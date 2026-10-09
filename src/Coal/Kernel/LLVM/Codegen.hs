@@ -123,6 +123,32 @@ forceThunk t op =
     _ ->
       return op
 
+{- | Adapt a call argument to the callee's declared parameter type.
+
+A callee whose declared parameter type is a boxed @ptr@ (a polymorphic function
+such as @a -> b@, or a trait accessor taking a dictionary) expects its argument
+boxed. When the argument is a native primitive value, box it; otherwise pass it
+through unchanged.
+-}
+irCallArgument :: Expr Type -> IRType -> IRCodegen IROperand
+irCallArgument e target = do
+  v <- irValue e
+  if target == TPtr && Boxing.irValueTypeRep (typeOf e) /= TPtr
+    then Boxing.irBox (typeOf e) v
+    else pure v
+
+{- | Whether a callee whose declared result type is @rty@ returns a /boxed/
+value that must be unboxed to the use-site type @t@.
+
+This holds when the callee's declared result is a boxed @ptr@ (a polymorphic
+function such as @a -> a@, or a trait accessor whose member type is the abstract
+@a@) while the use site expects a native primitive. A callee that legitimately
+returns a @ptr@ (record, string, closure) is unaffected, since the use-site
+value type is then also @ptr@.
+-}
+isBoxedResult :: Type -> IRType -> Bool
+isBoxedResult t rty = rty == TPtr && Boxing.irValueTypeRep t /= TPtr
+
 {- | Evaluate a sequence of let-binding expressions, extending the variable
 environment with each bound value, and finally evaluate the body.
 -}
@@ -161,12 +187,19 @@ irTail =
     expr@(EApp t (EVar (Label t1 name)) es) -> do
       r1 <- nameLookup t1 name
       r2 <- case r1 of
-        OGlobal (TFun _ ts) _ | length ts == length es -> do
-          -- Fully saturated call. Use 'irTypeRep t' so the call's return type
-          -- matches the enclosing function's declared return type, enabling a
-          -- true tail call.
-          rs <- traverse irValue es
-          call Tail (irTypeRep t) r1 (NonEmpty.toList rs)
+        OGlobal (TFun rty ts) _ | length ts == length es -> do
+          rs <- traverse (uncurry irCallArgument) (zip (NonEmpty.toList es) ts)
+          -- A true tail call is only possible when the result needs no unboxing;
+          -- otherwise the boxed result is unboxed after a non-tail call.
+          if isBoxedResult t rty
+            then do
+              boxed <- call NoTail TPtr r1 rs
+              irUnbox t boxed
+            else
+              -- Use 'irTypeRep t' so the call's return type matches the
+              -- enclosing function's declared return type, enabling a true
+              -- tail call.
+              call Tail (irTypeRep t) r1 rs
         _ -> do
           irValue expr
       ret r2
@@ -276,20 +309,25 @@ irValue =
     expr@(EApp t (EVar (Label t1 name)) es) -> do
       o1 <- nameLookup t1 name
       case o1 of
-        OGlobal (TFun _ ts) _
+        OGlobal (TFun rty ts) _
           | length ts == length es -> do
-              -- Fully saturated call. Use 'irValueTypeRep t' (not 'irTypeRep t')
-              -- so that a function-typed result maps to @ptr@ rather than
-              -- @TFun@ (which is not a valid LLVM value type), while still
-              -- preserving primitive return types such as @i64@.
+              -- Fully saturated call. Arguments are boxed to the callee's
+              -- declared parameter types and the result is unboxed to the use
+              -- site's value type, so that calls to polymorphic functions and to
+              -- trait accessors of abstract (non-function) members are
+              -- ABI-correct.
               --
               -- Evaluate the arguments exactly once, here. They must /not/ be
               -- evaluated eagerly for every branch: the non-saturated branches
               -- below consume the boxed argument vector built by 'irPackArgs',
               -- so evaluating 'es' up front would emit each argument (including
               -- a side-effecting 'ECall') twice and discard the first copy.
-              vs <- traverse irValue es
-              call NoTail (Boxing.irValueTypeRep t) o1 (NonEmpty.toList vs)
+              vs <- traverse (uncurry irCallArgument) (zip (NonEmpty.toList es) ts)
+              if isBoxedResult t rty
+                then do
+                  boxed <- call NoTail TPtr o1 vs
+                  irUnbox t boxed
+                else call NoTail (Boxing.irValueTypeRep t) o1 vs
           | null ts -> do
               -- Zero-argument thunk (a constant object): force it first, then
               -- apply the remaining arguments to the resulting closure. Such a
@@ -567,9 +605,12 @@ emitModuleObjects moduleObjects =
       let lnk = toIRLinkage scope
       irFunction lnk name lls expr
       irTrampoline lnk name lls (typeOf expr)
-    DConstant name (ELit prim)
-      | Just (irt, irc) <- primToIRConstant prim ->
-          emitGlobal (IRConstant LExternal name irt irc)
+    DConstant _ (ELit prim)
+      | Just _ <- primToIRConstant prim ->
+          -- Directly-representable literal constants are inlined at every use
+          -- site (see 'objectGlobalBinding' / 'collectImportedBindings'), so no
+          -- global symbol is emitted for them.
+          return ()
     DConstant name expr ->
       irThunk name expr
     DExternal name t ->

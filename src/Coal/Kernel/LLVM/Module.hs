@@ -22,7 +22,7 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 
-import LLVM.IR (IROperand (OGlobal), IRType (TFun, TPtr))
+import LLVM.IR (IROperand (OConstant, OGlobal), IRType (TFun, TPtr))
 
 import Coal.Common.Name (Name)
 import Coal.Kernel.FreeVars (freeVars)
@@ -40,6 +40,11 @@ import Coal.Kernel.Language.Type.HasType (HasType (typeOf))
 
 'DData' constructors are not bound here; they are referenced via @make_%@ in
 @irApplyConstructor@.
+
+A directly-representable literal constant is bound to its constant operand
+('OConstant') rather than to a named global variable: the value is inlined at
+every use site. This keeps the binding free of any symbol, so importing modules
+need no external declaration for it.
 -}
 objectGlobalBinding :: Object Type -> Maybe (Name, IROperand)
 objectGlobalBinding =
@@ -48,8 +53,8 @@ objectGlobalBinding =
       let tfun = TFun (irTypeRep (typeOf expr)) ((irValueTypeRep . typeOf) <$> lls)
        in Just (name, OGlobal tfun name)
     DConstant name (ELit prim)
-      | Just (irt, _) <- primToIRConstant prim ->
-          Just (name, OGlobal irt name)
+      | Just (_, irc) <- primToIRConstant prim ->
+          Just (name, OConstant irc)
     DConstant name _ ->
       Just (name, OGlobal (TFun TPtr []) ("force#_" <> name))
     DExternal name t ->
@@ -118,8 +123,8 @@ using a precomputed object interface index (built once per compilation by
 
 The reconstruction matches 'objectGlobalBinding' exactly: functions bind to
 @OGlobal (TFun resultIRType paramIRTypes) name@; directly-representable literal
-constants bind to their global IR type; every other constant is a thunk bound to
-@force#_name@.
+constants bind to their constant operand (inlined, no symbol); every other
+constant is a thunk bound to @force#_name@.
 -}
 collectImportedBindings ::
   Map Name ObjectInterface ->
@@ -136,8 +141,8 @@ collectImportedBindings objs = foldr step ([], [], [])
          in (consts, (name, op) : fns, (name, length params) : arities)
       Just (IConstant (Just prim)) ->
         case primToIRConstant prim of
-          Just (irt, _) ->
-            ((name, OGlobal irt name) : consts, fns, arities)
+          Just (_, irc) ->
+            ((name, OConstant irc) : consts, fns, arities)
           Nothing ->
             ((name, thunk name) : consts, fns, arities)
       Just (IConstant Nothing) ->

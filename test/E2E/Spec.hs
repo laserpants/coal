@@ -2405,6 +2405,18 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/448" ["Main.coal"]
       res `shouldBe` Left PatternAnomaly
 
+  -- Regression: a trait member of non-function type (`foo : a`) was compiled as
+  -- a cross-module primitive constant. The importing module referenced the
+  -- global without declaring it (llvm-as "use of undefined value"), and the
+  -- generic accessor returned a boxed value that the call site treated as a
+  -- native float (printing 0.0). Both are fixed: such constants are inlined,
+  -- and boxed trait-accessor results are unboxed at the call site.
+  describe "449" $
+    expectOutput
+      "5.000000"
+      "test/Coal/examples/449"
+      ["Main.coal", "Foo.coal"]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

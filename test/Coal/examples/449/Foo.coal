@@ -1,0 +1,11 @@
+module Foo {
+
+  trait Foo<a> {
+    foo : a
+  }
+
+  instance Foo<float> {
+    let foo = 5.0f
+  }
+
+}
