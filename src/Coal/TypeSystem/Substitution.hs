@@ -124,10 +124,17 @@ instance Substitutable (Constraint c TypeIndex Kind IndexedType) where
         Lacks c (apply sub t) name
 
 instance (Substitutable s) => Substitutable (Map k s) where
-  apply = fmap . apply
+  -- Force every rewritten value to WHNF. The global type substitution is
+  -- composed incrementally as the compiler proceeds (see the 'Semigroup'
+  -- instance below), and a lazy @fmap@ would build, for every binding, a chain
+  -- of unevaluated @apply sub value@ thunks — one link per composition — each
+  -- retaining its captured substitution. On a large multi-module build that
+  -- chain grows to gigabytes of live thunks (measured: ~2.5 GB) even though the
+  -- underlying types are only a few megabytes.
+  apply sub = Map.map (apply sub)
 
 instance (Substitutable s) => Substitutable [s] where
-  apply = fmap . apply
+  apply sub = foldr (\x acc -> let x' = apply sub x in x' `seq` (x' : acc)) []
 
 instance (Substitutable s) => Substitutable (NonEmpty s) where
   apply = fmap . apply
