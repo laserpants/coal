@@ -39,6 +39,9 @@ module Coal.Kernel.Compiler (
   compileModules,
   compileFiles,
 
+  -- * Normalization
+  normalizeModules,
+
   -- * Per-module code generation
   codegenContext,
   codeGenModule,
@@ -268,6 +271,20 @@ timingReport m t0 ir =
 -- Public entry points
 -- ---------------------------------------------------------------------------
 
+{- | Run all normalization passes on each module, returning the normalized
+modules without generating any LLVM IR.
+
+This is the entry point for callers that generate IR themselves, one module
+at a time (see 'Coal.Compiler.Pass.PhaseLowering.KernelCodegen'). It must be
+preferred over 'compileModules' in that situation: 'compileModules' runs the
+full normalization @and@ IR generation, and because 'traverse' is strict in
+the list spine, doing so builds every module's 'IRModule' up front and retains
+them all at once. That both duplicates the code generation work and drives the
+compiler's live heap to multiple gigabytes on large multi-module builds.
+-}
+normalizeModules :: (Monad m) => CompilerConfig -> [Module Type] -> CompilerT m [Module Type]
+normalizeModules config = traverse (normalizeModule config)
+
 {- | Compile a list of modules through the full normalization pipeline
 and LLVM IR code generator, producing the normalized modules and one
 'IRModule' per input module.
@@ -284,7 +301,7 @@ Example:
 -}
 compileModules :: (Monad m) => CompilerConfig -> Map Name Int -> Map Name Int -> Map Name ObjectInterface -> [Module Type] -> CompilerT m ([Module Type], [IRModule])
 compileModules config extraTags cachedDData cachedObjects mods = do
-  normalized <- traverse (normalizeModule config) mods
+  normalized <- normalizeModules config mods
   let context = codegenContext extraTags cachedDData cachedObjects normalized
   irs <- traverse (codeGenModule config context) normalized
   pure (normalized, irs)

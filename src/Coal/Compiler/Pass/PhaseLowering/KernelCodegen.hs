@@ -127,12 +127,14 @@ pass envelopes = do
           | BCached b <- envelopes
           ]
 
-  -- Run the new-kernel compiler purely on all source modules together
-  -- (cross-module context is required for LLVM codegen). The IR list
-  -- returned by 'compileModules' is deliberately left un-evaluated: the
-  -- IR for each module is generated one at a time in the loop below, so
-  -- that at most one 'IRModule' is resident at any point.
-  (normalized, _irs) <- case Kernel.runCompiler (Kernel.compileModules config cachedTagBindings cachedDDataInfo cachedObjects (builtinMod : augmented)) of
+  -- Run the new-kernel normalization passes purely on all source modules
+  -- together (cross-module context is required for LLVM codegen). Only the
+  -- normalized modules are produced here: the IR for each module is generated
+  -- one at a time in the loop below, so that at most one 'IRModule' is
+  -- resident at any point. (Using 'compileModules' here would instead build
+  -- every module's IR up front and retain them all, because 'traverse' is
+  -- strict in the list spine.)
+  normalized <- case Kernel.runCompiler (Kernel.normalizeModules config (builtinMod : augmented)) of
     Left err -> do
       liftIO $ putStrLn ("[KernelCodegen] compilation failed:\n" <> show err)
       throwError CompilerError
