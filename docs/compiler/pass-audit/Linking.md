@@ -21,7 +21,8 @@ The final pass in the compiler pipeline. Takes bitcode for all modules and produ
 a native executable. Uses `llc` to compile bitcode to object files, embeds the runtime
 C library (compiled from `runtime/dist/runtime-combined.c`), and links with Boehm GC
 (`-lgc`) and GMP (`-lgmp`). Additional C files can be passed on the command line via
-`configCFiles`.
+`configCFiles`, and additional native libraries via `configNativeLibraries`
+(rendered as `-l<name>` before the standard runtime libraries).
 
 ---
 
@@ -79,7 +80,9 @@ runtime source using the `runtime/scripts/combine.sh` script.
 
 - `ByteString` — LLVM bitcode for each module
 - `CompilerConfig` — controls output executable name (`configExecutableName`),
-  additional C files (`configCFiles`), and verbosity (`configSilent`)
+  additional C files (`configCFiles`), native libraries to link
+  (`configNativeLibraries`, rendered as `-l<name>`), and verbosity
+  (`configSilent`)
 
 ---
 

@@ -66,6 +66,8 @@ buildCommand caps = do
             , -- C sources contributed by the project itself and by installed packages
               -- (e.g. an EventSource library shipping its native primitives).
               configCFiles = localCFiles <> pkgCFiles
+            , -- Native libraries the project declares in coal.json, linked as -l<name>.
+              configNativeLibraries = nub (fromMaybe [] native_libraries)
             }
         config = applyBuildConfig build_config baseConfig
     localFiles <- filePaths modules EProjectInvalidModuleFormat

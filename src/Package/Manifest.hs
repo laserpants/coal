@@ -87,6 +87,7 @@ data PackageManifest = PackageManifest
   , build_config :: Maybe BuildConfig
   , dependencies :: Maybe (Map Text PackageDependency)
   , c_sources :: Maybe [FilePath]
+  , native_libraries :: Maybe [FilePath]
   }
   deriving (Generic, Show, Eq)
 
@@ -110,6 +111,7 @@ manifestFieldOrder =
   , "build_config"
   , "dependencies"
   , "c_sources"
+  , "native_libraries"
   , "generate_debug_artifacts"
   , "debug_llvm_ir"
   , "silent"

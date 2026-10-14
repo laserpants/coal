@@ -11,6 +11,7 @@ data CompileCmdOptions = CompileCmdOptions
   , generateDebugArtifacts :: Bool
   , debugLLVMOutput :: Bool
   , extraSourceFiles :: [FilePath]
+  , linkLibraries :: [FilePath]
   , silent :: Bool
   , showTiming :: Bool
   , noCache :: Bool

@@ -12,6 +12,7 @@ import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Spec (e2eSpec)
 import Package.ConstraintValidationSpec (constraintValidationSpec)
+import Package.ManifestSpec (manifestSpec)
 import Package.ResolutionSpec (resolutionSpec)
 import Package.VersionSpec (versionSpec)
 import Test.Hspec (SpecWith, describe, hspec)
@@ -35,6 +36,7 @@ main =
       commandSpec
       buildSpec
       constraintValidationSpec
+      manifestSpec
       resolutionSpec
       versionSpec
       updateCmdSpec
