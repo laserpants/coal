@@ -2,7 +2,7 @@
 
 module CLI.Command.BuildSpec (buildSpec) where
 
-import CLI.Command.Build (deriveExecutableName, resolveExecutableName)
+import CLI.Command.Build (deriveExecutableName, mergeNativeLibraries, resolveExecutableName)
 import Data.SemVer (fromText)
 import Data.Text (Text)
 import Package.Version (PackageVersion (..))
@@ -45,3 +45,28 @@ buildSpec = do
     it "falls back to bare project name when no version and no override" $
       resolveExecutableName "my-project" Nothing Nothing
         `shouldBe` "my-project"
+
+  describe "mergeNativeLibraries" $ do
+    it "returns package libraries when the project declares none" $
+      mergeNativeLibraries Nothing ["m"]
+        `shouldBe` ["m"]
+
+    it "returns project libraries when no packages contribute" $
+      mergeNativeLibraries (Just ["m"]) []
+        `shouldBe` ["m"]
+
+    it "puts project libraries before package libraries" $
+      mergeNativeLibraries (Just ["m"]) ["sqlite3"]
+        `shouldBe` ["m", "sqlite3"]
+
+    it "removes duplicates across project and package libraries" $
+      mergeNativeLibraries (Just ["m", "sqlite3"]) ["sqlite3", "m"]
+        `shouldBe` ["m", "sqlite3"]
+
+    it "removes duplicates within package libraries" $
+      mergeNativeLibraries Nothing ["m", "m"]
+        `shouldBe` ["m"]
+
+    it "preserves order for deterministic hashing" $
+      mergeNativeLibraries (Just ["b", "a"]) ["c"]
+        `shouldBe` ["b", "a", "c"]

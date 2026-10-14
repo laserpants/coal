@@ -13,6 +13,7 @@ module Package.Manifest (
   loadManifestFrom,
   filePaths,
   encodePrettyOrdered,
+  manifestNativeLibraries,
 ) where
 
 import CLI.Git.Commit (GitCommit (..))
@@ -26,6 +27,7 @@ import qualified Data.ByteString.Lazy as LazyByteString
 import Data.Either.Extra (eitherToMaybe)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (Name, forM)
@@ -96,6 +98,12 @@ instance ToJSON PackageManifest where
 
 instance FromJSON PackageManifest where
   parseJSON = genericParseJSON defaultOptions
+
+{- | The native libraries a manifest declares, defaulting to none. These are
+bare library names, passed to the linker as @-l<name>@.
+-}
+manifestNativeLibraries :: PackageManifest -> [FilePath]
+manifestNativeLibraries PackageManifest{..} = fromMaybe [] native_libraries
 
 {- | Desired field order for coal.json objects. Keys not in this list
  (e.g., dependency names) are placed at the end in their natural order.

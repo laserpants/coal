@@ -22,7 +22,10 @@ a native executable. Uses `llc` to compile bitcode to object files, embeds the r
 C library (compiled from `runtime/dist/runtime-combined.c`), and links with Boehm GC
 (`-lgc`) and GMP (`-lgmp`). Additional C files can be passed on the command line via
 `configCFiles`, and additional native libraries via `configNativeLibraries`
-(rendered as `-l<name>` before the standard runtime libraries).
+(rendered as `-l<name>` before the standard runtime libraries). Both are also
+populated from every package in `coal.lock.json` — including transitive
+dependencies — so a library can declare the native artifacts it needs without
+the consuming project having to repeat them.
 
 ---
 

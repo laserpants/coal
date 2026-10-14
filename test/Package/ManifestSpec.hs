@@ -12,7 +12,7 @@ module Package.ManifestSpec (manifestSpec) where
 import Data.Aeson (eitherDecode, encode)
 import qualified Data.ByteString.Char8 as ByteString.Char8
 import qualified Data.ByteString.Lazy as LazyByteString
-import Package.Manifest (PackageManifest (..), encodePrettyOrdered)
+import Package.Manifest (PackageManifest (..), encodePrettyOrdered, manifestNativeLibraries)
 import Test.Hspec (Spec, describe, expectationFailure, it, shouldBe, shouldSatisfy)
 
 decodeManifest :: LazyByteString.ByteString -> Either String PackageManifest
@@ -34,7 +34,7 @@ minimalManifest =
     }
 
 manifestSpec :: Spec
-manifestSpec =
+manifestSpec = do
   describe "PackageManifest JSON" $ do
     it "parses native_libraries" $
       case decodeManifest "{\"name\":\"demo\",\"modules\":[\"Main\"],\"native_libraries\":[\"sqlite3\",\"z\"]}" of
@@ -53,3 +53,12 @@ manifestSpec =
     it "includes native_libraries in pretty output when present" $
       LazyByteString.toStrict (encodePrettyOrdered minimalManifest{native_libraries = Just ["sqlite3"]})
         `shouldSatisfy` ByteString.Char8.isInfixOf "native_libraries"
+
+  describe "manifestNativeLibraries" $ do
+    it "returns the declared libraries" $
+      manifestNativeLibraries minimalManifest{native_libraries = Just ["sqlite3", "z"]}
+        `shouldBe` ["sqlite3", "z"]
+
+    it "returns an empty list when none are declared" $
+      manifestNativeLibraries minimalManifest
+        `shouldBe` []

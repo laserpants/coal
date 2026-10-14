@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module CLI.Command.Build (buildCommand, deriveExecutableName, resolveExecutableName) where
+module CLI.Command.Build (buildCommand, deriveExecutableName, mergeNativeLibraries, resolveExecutableName) where
 
 import CLI.Command.EntryPoint (parseEntryPoint)
 import CLI.Error (CLIError (..))
@@ -20,7 +20,7 @@ import Data.SemVer (toText)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Extras (forM)
-import Package (packageIncludes)
+import Package (PackageIncludes (..), emptyPackageIncludes, packageIncludes)
 import Package.Error (PackageError (..))
 import Package.Manifest (BuildConfig (..), PackageManifest (..), filePaths, loadProjectManifest)
 import Package.Version (PackageVersion (..))
@@ -35,14 +35,18 @@ buildCommand caps = do
     -- If there is no lock file but the project declares no dependencies,
     -- treat it as zero packages rather than requiring `coal install`.
     pkgResult <- lift $ runExceptT packageIncludes
-    (nsInfo, inputFiles, pkgCFiles) <- case pkgResult of
+    includes <- case pkgResult of
       Right result ->
         pure result
       Left ENoLockFile
         | noDependencies dependencies ->
-            pure ([], [], [])
+            pure emptyPackageIncludes
       Left err ->
         throwError err
+    let nsInfo = packageNamespaces includes
+        inputFiles = packageSourceFiles includes
+        pkgCFiles = packageCFiles includes
+        pkgLibs = packageNativeLibraries includes
     -- Canonicalize package source dirs so they match the canonical bestRoot
     -- returned by resolveModule inside the parsing pass.
     canonNsInfo <- forM nsInfo $
@@ -66,8 +70,9 @@ buildCommand caps = do
             , -- C sources contributed by the project itself and by installed packages
               -- (e.g. an EventSource library shipping its native primitives).
               configCFiles = localCFiles <> pkgCFiles
-            , -- Native libraries the project declares in coal.json, linked as -l<name>.
-              configNativeLibraries = nub (fromMaybe [] native_libraries)
+            , -- Native libraries declared by the project and by installed packages
+              -- (including transitive dependencies), linked as -l<name>.
+              configNativeLibraries = mergeNativeLibraries native_libraries pkgLibs
             }
         config = applyBuildConfig build_config baseConfig
     localFiles <- filePaths modules EProjectInvalidModuleFormat
@@ -121,3 +126,12 @@ applyBuildConfig (Just BuildConfig{..}) =
       , configNoCache = noCache
       , configSanitize = sanitize
       }
+
+{- | Combine the project's own @native_libraries@ with those contributed by
+installed packages (including transitive dependencies). Project-declared
+libraries come first; duplicates are removed. Order is preserved so that the
+resulting 'configNativeLibraries' — and therefore the build-cache hash — is
+deterministic.
+-}
+mergeNativeLibraries :: Maybe [FilePath] -> [FilePath] -> [FilePath]
+mergeNativeLibraries projectLibs pkgLibs = nub (fromMaybe [] projectLibs <> pkgLibs)
