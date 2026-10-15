@@ -117,6 +117,7 @@ runGCC CompilerConfig{..} dir objFiles cFiles = do
       <> objFiles
       <> ["-o", "dist"]
       <> sanitizeFlags
+      <> (("-l" <>) <$> configNativeLibraries)
       <> ["-lgc", "-lgmp", "-lm"]
 
 execProcess :: CreateProcess -> IO ()

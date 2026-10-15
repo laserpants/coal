@@ -4,7 +4,12 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Package (packageIncludes, toModuleNamespace) where
+module Package (
+  PackageIncludes (..),
+  emptyPackageIncludes,
+  packageIncludes,
+  toModuleNamespace,
+) where
 
 import Control.Monad.Except (ExceptT, MonadError (throwError))
 import Control.Monad.IO.Class (liftIO)
@@ -18,7 +23,7 @@ import Extras (Name, forM)
 import Package.Entry (PackageEntry (..))
 import Package.Error (PackageError (..))
 import Package.Lock (LockSpec (..), PackageLock (..), loadLockFile)
-import Package.Manifest (PackageManifest (..), basePath, filePaths, loadPackageLockManifests)
+import Package.Manifest (PackageManifest (..), basePath, filePaths, loadPackageLockManifests, manifestNativeLibraries)
 import System.Directory (doesFileExist, makeAbsolute)
 import System.FilePath ((</>))
 
@@ -34,7 +39,25 @@ toModuleNamespace t =
     Nothing -> ""
     Just (c, rest) -> Text.cons (toUpper c) rest
 
-packageIncludes :: ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath], [FilePath])
+{- | Native build inputs collected from a single package, or aggregated across
+every package in the lockfile (i.e. all direct and transitive dependencies).
+
+Unlike 'packageCFiles' — whose entries are resolved against the package base
+directory — 'packageNativeLibraries' holds bare library names that need no path
+resolution and are passed to the linker verbatim as @-l<name>@.
+-}
+data PackageIncludes = PackageIncludes
+  { packageNamespaces :: [(FilePath, Text, [Name])]
+  , packageSourceFiles :: [FilePath]
+  , packageCFiles :: [FilePath]
+  , packageNativeLibraries :: [FilePath]
+  }
+  deriving (Show, Eq)
+
+emptyPackageIncludes :: PackageIncludes
+emptyPackageIncludes = PackageIncludes [] [] [] []
+
+packageIncludes :: ExceptT PackageError IO PackageIncludes
 packageIncludes = do
   res <- loadLockFile
   case res of
@@ -43,18 +66,23 @@ packageIncludes = do
     Nothing ->
       throwError ENoLockFile
 
-lockIncludes :: PackageLock -> ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath], [FilePath])
+lockIncludes :: PackageLock -> ExceptT PackageError IO PackageIncludes
 lockIncludes lock = do
   manifests <- loadPackageLockManifests lock
   entries <- collectEntries lock manifests
   includes <- traverse entryIncludes entries
-  let (nss, files, cFiles) = unzip3 includes
-  pure (concat nss, concat files, concat cFiles)
+  pure
+    PackageIncludes
+      { packageNamespaces = concatMap packageNamespaces includes
+      , packageSourceFiles = concatMap packageSourceFiles includes
+      , packageCFiles = concatMap packageCFiles includes
+      , packageNativeLibraries = concatMap packageNativeLibraries includes
+      }
 
-entryIncludes :: PackageEntry -> ExceptT PackageError IO ([(FilePath, Text, [Name])], [FilePath], [FilePath])
+entryIncludes :: PackageEntry -> ExceptT PackageError IO PackageIncludes
 entryIncludes =
   \case
-    PackageEntry{packageManifest = PackageManifest{..}, ..} -> do
+    PackageEntry{packageManifest = manifest@PackageManifest{..}, ..} -> do
       relFiles <- filePaths modules (EDependencyInvalidModuleFormat name)
       -- Use absolute paths for package files so that resolveModule cannot
       -- accidentally match them against same-named project source files.
@@ -65,7 +93,13 @@ entryIncludes =
       absCFiles <- liftIO $ mapM resolveInBase cFiles
       let ns = toModuleNamespace packageName
           nsEntries = [(srcDir, ns, modules) | srcDir <- sourcePaths]
-      pure (nsEntries, absFiles, absCFiles)
+      pure
+        PackageIncludes
+          { packageNamespaces = nsEntries
+          , packageSourceFiles = absFiles
+          , packageCFiles = absCFiles
+          , packageNativeLibraries = manifestNativeLibraries manifest
+          }
      where
       sourcePaths = [base </> Text.unpack path | path <- fromMaybe ["src"] source_dirs]
       base = basePath packageName (commit packageSpec)

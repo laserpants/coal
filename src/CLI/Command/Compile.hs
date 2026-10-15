@@ -28,6 +28,7 @@ compileCommand caps CompileCmdOptions{..} = do
       , configGenerateLLVMOutput = debugLLVMOutput
       , configSourcePaths = nub ("src" : srcPaths)
       , configCFiles = extraSourceFiles
+      , configNativeLibraries = nub linkLibraries
       , configSilent = silent
       , configShowTiming = showTiming
       , configNoCache = noCache

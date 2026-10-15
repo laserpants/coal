@@ -466,6 +466,7 @@ test-suite coal-test
       Coal.TypeSystemSpec
       E2E.Spec
       Package.ConstraintValidationSpec
+      Package.ManifestSpec
       Package.ResolutionSpec
       Package.VersionSpec
       Paths_coal

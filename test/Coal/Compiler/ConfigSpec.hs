@@ -35,6 +35,14 @@ configHashSpec =
         configHash (defaultConfig{configCFiles = ["/tmp/proj/counter.c"]})
           `shouldNotBe` configHash defaultConfig
 
+      it "changes when a native library is added" $
+        configHash (defaultConfig{configNativeLibraries = ["sqlite3"]})
+          `shouldNotBe` configHash defaultConfig
+
+      it "distinguishes different native libraries" $
+        configHash (defaultConfig{configNativeLibraries = ["sqlite3"]})
+          `shouldNotBe` configHash (defaultConfig{configNativeLibraries = ["zlib"]})
+
       it "changes when package namespaces change" $
         configHash (defaultConfig{configPackageNamespaces = [("/tmp/pkg", "Pkg", ["MicroTest"])]})
           `shouldNotBe` configHash defaultConfig

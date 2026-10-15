@@ -49,6 +49,16 @@ compileCmdParser = do
           )
       )
 
+  linkLibraries <-
+    many
+      ( strOption
+          ( long "link-library"
+              <> short 'l'
+              <> metavar "NAME"
+              <> help "Link against a native library (can be passed multiple times)"
+          )
+      )
+
   silent <-
     switch
       ( long "silent"

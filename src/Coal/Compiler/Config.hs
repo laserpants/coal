@@ -35,6 +35,7 @@ data CompilerConfig = CompilerConfig
   , configGenerateLLVMOutput :: Bool
   , configSourcePaths :: [FilePath]
   , configCFiles :: [FilePath]
+  , configNativeLibraries :: [FilePath]
   , configSilent :: Bool
   , configShowTiming :: Bool
   , configNoCache :: Bool
@@ -56,6 +57,7 @@ defaultConfig =
     , configGenerateLLVMOutput = False
     , configSourcePaths = ["src"]
     , configCFiles = []
+    , configNativeLibraries = []
     , configSilent = False
     , configShowTiming = False
     , configNoCache = False
@@ -122,6 +124,9 @@ instead of being decoded misaligned.
 
 History:
 
+  * @"5"@: 'configHash' now also covers @configNativeLibraries@, the native
+    libraries linked into the binary. Omitting it would let a cached build be
+    reused across different link inputs.
   * @"4"@: 'configHash' now also covers @configEntryPoint@, @configCFiles@ and
     @configSanitize@, all of which affect generated code or linked output.
     Cached builds written under the old hash must not be reused, as they can
@@ -132,16 +137,18 @@ History:
   * @"2"@ — added @instanceEntryModule@ to @InstanceEntry@.
 -}
 buildCacheFormatVersion :: Text
-buildCacheFormatVersion = "4"
+buildCacheFormatVersion = "5"
 
 {- | Compute a hash of the configuration fields that affect compilation output.
 Used to invalidate cached builds when relevant config changes.
 
 Only fields that change generated code or linked output belong here. Note in
-particular that @configEntryPoint@ (which module receives the C @main@) and
-@configCFiles@ (extra objects linked into the binary) are not diagnostic
-settings: a cached build produced under different values is wrong, not merely
-stale, so omitting them yields silent miscompilation rather than a rebuild.
+particular that @configEntryPoint@ (which module receives the C @main@),
+@configCFiles@ (extra objects linked into the binary) and
+@configNativeLibraries@ (native libraries linked into the binary) are not
+diagnostic settings: a cached build produced under different values is wrong,
+not merely stale, so omitting them yields silent miscompilation rather than a
+rebuild.
 
 @configCFiles@ holds canonicalized absolute paths, so only the basenames are
 hashed; hashing the full paths would make the cache machine-specific and
@@ -166,5 +173,6 @@ configHash cfg =
     ( configPackageNamespaces
     , configEntryPoint
     , map takeFileName configCFiles
+    , configNativeLibraries
     , configSanitize
     )

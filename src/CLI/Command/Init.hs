@@ -44,6 +44,7 @@ initCommand InitCmdOptions{..} = do
           , source_dirs = Just ["src"]
           , modules = ["Main"]
           , c_sources = Nothing
+          , native_libraries = Nothing
           , dependencies = Nothing
           , entry_point = Just "Main.main"
           , executable_name = Nothing
