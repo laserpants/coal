@@ -350,6 +350,70 @@ test_write_file_overwrite(void)
     printf("test_write_file_overwrite: PASS\n");
 }
 
+/* Test removing an existing file */
+static void
+test_remove_file_success(void)
+{
+    const char *filename = "test_temp_remove.txt";
+
+    /* Create a file to remove */
+    FILE *f = fopen(filename, "w");
+    assert(f != NULL);
+    fputs("temporary", f);
+    fclose(f);
+
+    /* Remove it */
+    rt_result_t *result = rt_remove_file(filename);
+    assert(result != NULL);
+    assert(rt_result_status(result) == RT_REMOVE_STATUS_OK);
+    assert(rt_result_value(result) == NULL);
+
+    /* The file must be gone */
+    assert(access(filename, F_OK) != 0);
+
+    printf("test_remove_file_success: PASS\n");
+}
+
+/* Test removing a non-existent file */
+static void
+test_remove_file_not_found(void)
+{
+    const char *filename = "this_file_does_not_exist_xyz123.txt";
+
+    rt_result_t *result = rt_remove_file(filename);
+    assert(result != NULL);
+    assert(rt_result_status(result) == RT_REMOVE_STATUS_FILE_NOT_FOUND);
+    assert(rt_result_value(result) == NULL);
+
+    printf("test_remove_file_not_found: PASS\n");
+}
+
+/* Test removal via the wrapper functions */
+static void
+test_remove_file_wrapper(void)
+{
+    const char *filename = "test_temp_remove_wrapper.txt";
+    rt_value_t filename_v = rt_string_box(rt_string_new(filename));
+
+    /* Create the file through the write wrapper */
+    rt_value_t content_v = rt_string_box(rt_string_new("remove me"));
+    rt_value_t write_result = coal_write_file(filename_v, content_v);
+    assert(rt_int32_unbox(coal_result_status(write_result)) ==
+           RT_WRITE_STATUS_OK);
+
+    /* Remove it through the wrapper */
+    rt_value_t remove_result = coal_remove_file(filename_v);
+    assert(rt_int32_unbox(coal_result_status(remove_result)) ==
+           RT_REMOVE_STATUS_OK);
+
+    /* Reading it back must now fail */
+    rt_value_t read_result = coal_read_file(filename_v);
+    assert(rt_int32_unbox(coal_result_status(read_result)) ==
+           RT_READ_STATUS_FILE_NOT_FOUND);
+
+    printf("test_remove_file_wrapper: PASS\n");
+}
+
 int
 main(void)
 {
@@ -371,6 +435,11 @@ main(void)
     test_write_file_null_filename();
     test_write_file_null_data();
     test_write_file_overwrite();
+
+    /* Remove file tests */
+    test_remove_file_success();
+    test_remove_file_not_found();
+    test_remove_file_wrapper();
 
     /* Integration tests */
     test_write_read_roundtrip();

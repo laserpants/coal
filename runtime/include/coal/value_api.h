@@ -270,6 +270,8 @@ extern _Noreturn void coal_panic(rt_value_t v);
 extern rt_value_t coal_read_file(rt_value_t filename);
 /** Write file, returns boxed result */
 extern rt_value_t coal_write_file(rt_value_t filename, rt_value_t data);
+/** Remove file, returns boxed result */
+extern rt_value_t coal_remove_file(rt_value_t filename);
 /** Get status from boxed result */
 extern rt_value_t coal_result_status(rt_value_t result);
 /** Get value from boxed result */

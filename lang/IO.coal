@@ -3,8 +3,9 @@
  *
  * This module provides primitive I/O actions that interact with the
  * external environment, such as printing to standard output, reading
- * from standard input, and reading/writing files. All I/O operations
- * are wrapped in the `IO` type to maintain purity in the language.
+ * from standard input, and reading/writing/removing files. All I/O
+ * operations are wrapped in the `IO` type to maintain purity in the
+ * language.
  */
 module IO {
 
@@ -241,19 +242,21 @@ module IO {
   /**
    * Errors that can occur during file I/O operations.
    *
-   * | Constructor    | Description                         |
-   * |----------------|-------------------------------------|
-   * | `FileNotFound` | The specified file does not exist   |
-   * | `InvalidInput` | The input provided was invalid      |
-   * | `IOError`      | A generic I/O error occurred        |
-   * | `OutOfMemory`  | Insufficient memory for the operation |
-   * | `UnknownError` | An unrecognised error occurred      |
+   * | Constructor        | Description                           |
+   * |--------------------|---------------------------------------|
+   * | `FileNotFound`     | The specified file does not exist     |
+   * | `InvalidInput`     | The input provided was invalid        |
+   * | `IOError`          | A generic I/O error occurred          |
+   * | `OutOfMemory`      | Insufficient memory for the operation |
+   * | `PermissionDenied` | The operation was not permitted       |
+   * | `UnknownError`     | An unrecognised error occurred        |
    */
   type FileIOError 
     = FileNotFound
     | InvalidInput
     | IOError
     | OutOfMemory
+    | PermissionDenied
     | UnknownError
 
   /**
@@ -303,6 +306,30 @@ module IO {
     in
     #{coal_write_file : string -> string -> FileIOResult}(path, data)(
       fn(res) => __return_io(decode_write_result(res)))
+
+  /**
+   * Remove a file.
+   *
+   * Delete the file at the given path. Returns `None` on success, or
+   * `Some(FileIOError)` on failure.
+   *
+   * **Type**: `remove_file : string -> IO<Option<FileIOError>>`
+   */
+  fun remove_file(path : string) : IO<Option<FileIOError>> =
+    let
+      decode_remove_result(r : FileIOResult) =
+        #{coal_result_status : FileIOResult -> int32}(r)(
+          fn(status) => 
+            match(status) {
+              | 0 => None
+              | 1 => Some(FileNotFound)
+              | 2 => Some(PermissionDenied)
+              | 3 => Some(IOError)
+              | _ => Some(UnknownError)
+            })
+    in
+    #{coal_remove_file : string -> FileIOResult}(path)(
+      fn(res) => __return_io(decode_remove_result(res)))
 
   /**
    * Read a line of text from standard input.

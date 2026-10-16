@@ -2417,6 +2417,15 @@ e2eSpec = do
       "test/Coal/examples/449"
       ["Main.coal", "Foo.coal"]
 
+  -- `IO.remove_file` deletes a file (returning `None`), reports a missing
+  -- file as `Some(FileNotFound)`, and the deleted file is really gone.
+  describe "450" $
+    expectOutput
+      "ok\nnot found\ngone"
+      "test/Coal/examples/450"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

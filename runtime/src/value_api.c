@@ -619,6 +619,13 @@ coal_write_file(rt_value_t filename, rt_value_t data)
 }
 
 rt_value_t
+coal_remove_file(rt_value_t filename)
+{
+    return rt_ptr_box(
+        rt_remove_file(rt_string_data(rt_string_unbox(filename))));
+}
+
+rt_value_t
 coal_result_status(rt_value_t result)
 {
     return rt_int32_box(rt_result_status((rt_result_t *) rt_ptr_unbox(result)));

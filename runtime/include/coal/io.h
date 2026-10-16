@@ -106,6 +106,11 @@ char *rt_readln(void);
 #define RT_WRITE_STATUS_INVALID_INPUT 1
 #define RT_WRITE_STATUS_IO_ERROR 2
 
+#define RT_REMOVE_STATUS_OK 0
+#define RT_REMOVE_STATUS_FILE_NOT_FOUND 1
+#define RT_REMOVE_STATUS_PERMISSION_DENIED 2
+#define RT_REMOVE_STATUS_IO_ERROR 3
+
 /* Result type for file operations */
 typedef struct rt_result {
     int32_t status; /* 0 = OK, non-zero = error */
@@ -140,5 +145,16 @@ rt_result_t *rt_read_file(const char *filename);
  *   Result with status indicating success or failure
  */
 rt_result_t *rt_write_file(const char *filename, const char *data);
+
+/**
+ * Remove (delete) a file.
+ *
+ * Parameters:
+ *   filename - Path to file to remove
+ *
+ * Returns:
+ *   Result with status indicating success or failure
+ */
+rt_result_t *rt_remove_file(const char *filename);
 
 #endif

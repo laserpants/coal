@@ -1,0 +1,24 @@
+module Main {
+
+  import IO(write_file, read_file, remove_file, println_string, FileIOError)
+
+  fun main() = do {
+    _ <- write_file("./test/Coal/examples/450/tmp.txt", "hello");
+    r1 <- remove_file("./test/Coal/examples/450/tmp.txt");
+    r2 <- remove_file("./test/Coal/examples/450/tmp.txt");
+    s <- read_file("./test/Coal/examples/450/tmp.txt");
+    match(r1) {
+      | None => println_string("ok")
+      | Some(_) => println_string("error")
+    };
+    match(r2) {
+      | Some(FileNotFound) => println_string("not found")
+      | _ => println_string("unexpected")
+    };
+    match(s) {
+      | Ok(_) => println_string("still there")
+      | Err(_) => println_string("gone")
+    };
+  }
+
+}

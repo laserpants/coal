@@ -290,3 +290,30 @@ rt_write_file(const char *filename, const char *data)
     res->value = NULL; /* write operations don't return data */
     return res;
 }
+
+rt_result_t *
+rt_remove_file(const char *filename)
+{
+    rt_result_t *res = rt_alloc(sizeof(rt_result_t));
+    if (!res) {
+        /* Failure: runtime out of memory */
+        return NULL;
+    }
+
+    res->value = NULL; /* removal operations don't return data */
+
+    if (remove(filename) != 0) {
+        if (errno == ENOENT) {
+            res->status = RT_REMOVE_STATUS_FILE_NOT_FOUND;
+        } else if (errno == EACCES || errno == EPERM) {
+            res->status = RT_REMOVE_STATUS_PERMISSION_DENIED;
+        } else {
+            res->status = RT_REMOVE_STATUS_IO_ERROR;
+        }
+        return res;
+    }
+
+    /* Success */
+    res->status = RT_REMOVE_STATUS_OK;
+    return res;
+}
