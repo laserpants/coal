@@ -7,8 +7,8 @@ normalization passes**. Each pass is benchmarked in isolation, plus the full
 ## Running
 
 ```sh
-stack bench coal-bench-compiler                    # run all benchmarks
-stack bench coal-bench-compiler --ba='--list'      # list benchmark names
+stack bench coal-bench-compiler                       # run all benchmarks
+stack bench coal-bench-compiler --ba='--list'         # list benchmark names
 stack bench coal-bench-compiler --ba='--match "anf"'  # filter by regex
 stack bench coal-bench-compiler --ba='--output report.html'  # HTML report
 ```
