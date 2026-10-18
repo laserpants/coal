@@ -272,14 +272,13 @@ module IO {
     let
       decode_file_result(r : FileIOResult) =
         #{coal_result_status : FileIOResult -> int32}(r)(
-          fn(status) => 
-            match(status) {
-              | 0 => #{coal_result_value : FileIOResult -> string}(r)(Ok)
-              | 1 => Err(FileNotFound)
-              | 2 => Err(IOError)
-              | 3 => Err(OutOfMemory)
-              | _ => Err(UnknownError)
-            })
+          match{
+            | 0 => #{coal_result_value : FileIOResult -> string}(r)(Ok)
+            | 1 => Err(FileNotFound)
+            | 2 => Err(IOError)
+            | 3 => Err(OutOfMemory)
+            | _ => Err(UnknownError)
+          })
     in
     #{coal_read_file : string -> FileIOResult}(path)(
       fn(res) => __return_io(decode_file_result(res)))
@@ -296,13 +295,12 @@ module IO {
     let
       decode_write_result(r : FileIOResult) =
         #{coal_result_status : FileIOResult -> int32}(r)(
-          fn(status) => 
-            match(status) {
-              | 0 => None
-              | 1 => Some(InvalidInput)
-              | 2 => Some(IOError)
-              | _ => Some(UnknownError)
-            })
+          match{
+            | 0 => None
+            | 1 => Some(InvalidInput)
+            | 2 => Some(IOError)
+            | _ => Some(UnknownError)
+          })
     in
     #{coal_write_file : string -> string -> FileIOResult}(path, data)(
       fn(res) => __return_io(decode_write_result(res)))
@@ -319,14 +317,13 @@ module IO {
     let
       decode_remove_result(r : FileIOResult) =
         #{coal_result_status : FileIOResult -> int32}(r)(
-          fn(status) => 
-            match(status) {
-              | 0 => None
-              | 1 => Some(FileNotFound)
-              | 2 => Some(PermissionDenied)
-              | 3 => Some(IOError)
-              | _ => Some(UnknownError)
-            })
+          match{
+            | 0 => None
+            | 1 => Some(FileNotFound)
+            | 2 => Some(PermissionDenied)
+            | 3 => Some(IOError)
+            | _ => Some(UnknownError)
+          })
     in
     #{coal_remove_file : string -> FileIOResult}(path)(
       fn(res) => __return_io(decode_remove_result(res)))
