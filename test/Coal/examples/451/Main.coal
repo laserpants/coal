@@ -1,0 +1,47 @@
+module Main {
+
+  import IO(println_string)
+  import List(reduce, reduce_left, reverse, zip, map)
+  import String(int32_to_string, intercalate)
+
+  // Association probes for the two folds.
+  //
+  // `reduce` is a right fold: it applies `f(elem, acc)` with the *last*
+  // element adjacent to the initial accumulator, i.e.
+  //   reduce(f, init, [x1, x2, x3]) = f(x1, f(x2, f(x3, init)))
+  //
+  // `reduce_left` is a left fold: it applies `f(acc, elem)` starting from the
+  // *first* element, i.e.
+  //   reduce_left(f, init, [x1, x2, x3]) = f(f(f(init, x1), x2), x3)
+  //
+  // The parenthesised output makes the association explicit, so a regression
+  // (e.g. `reduce` behaving as a left fold) changes the printed text.
+
+  fun wrap_right(elem : int32, acc : string) : string =
+    "(" +++ int32_to_string(elem) +++ acc +++ ")"
+
+  fun wrap_left(acc : string, elem : int32) : string =
+    "(" +++ acc +++ int32_to_string(elem) +++ ")"
+
+  fun join_ints(xs : List<int32>) : string =
+    intercalate(",", map(fn(x) => int32_to_string(x), xs))
+
+  fun pair_to_string(p : (int32, string)) : string =
+    match(p) {
+      | (n, s) => int32_to_string(n) +++ ":" +++ s
+    }
+
+  fun join_pairs(xs : List<(int32, string)>) : string =
+    intercalate(",", map(pair_to_string, xs))
+
+  fun main() = do {
+    // Right fold: (1(2(3e))).
+    println_string(reduce(wrap_right, "e", [1, 2, 3]));
+    // Left fold: (((e1)2)3).
+    println_string(reduce_left(wrap_left, "e", [1, 2, 3]));
+    // Dependents whose result relies on the fold direction.
+    println_string(join_ints(reverse([1, 2, 3])));
+    println_string(join_pairs(zip([1, 2, 3], ["a", "b", "c"])));
+  }
+
+}

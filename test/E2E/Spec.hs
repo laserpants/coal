@@ -2426,6 +2426,24 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- `List.reduce` is a right fold (the last element is adjacent to the initial
+  -- accumulator) and `List.reduce_left` is a left fold. This regression pins
+  -- both associations with a non-commutative operation, and also guards
+  -- `List.reverse`/`List.zip`, which depend on the fold direction.
+  describe "451" $
+    expectOutput
+      "(1(2(3e)))\n(((e1)2)3)\n3,2,1\n1:a,2:b,3:c"
+      "test/Coal/examples/451"
+      [ "Main.coal"
+      ]
+
+  describe "452" $
+    expectOutput
+      "2\n-6"
+      "test/Coal/examples/452"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

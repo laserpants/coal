@@ -69,7 +69,7 @@ module List {
   fun reduce(f : a -> b -> b, init : b, list : List<a>) : b =
     fold(list, init) {
       | [] => identity
-      | x :: @go => go << f(x)
+      | x :: @go => f(x) << go
     }
 
   /**
@@ -78,6 +78,9 @@ module List {
    * **Type**: `reduce_left : (b -> a -> b) -> b -> List<a> -> b`
    */
   fun reduce_left(f : b -> a -> b, init : b, list : List<a>) : b =
+    // `reduce` is a right fold, so threading `f` on the inside of the
+    // continuation (`step(x, g, a) = g(f(a, x))`) associates to the
+    // left: reduce_left(f, init, [x1, ..., xn]) = f(f(...(f(init, x1))..., xn)
     let
       step(x, g, a) = g(f(a, x))
     in
@@ -229,7 +232,7 @@ module List {
   fun reverse(list : List<a>) : List<a> =
     match(list) {
       | [] => []
-      | x :: xs => reduce(fn(head, tail) => head :: tail, [x], xs)
+      | x :: xs => reduce_left(fn(acc, elem) => elem :: acc, [x], xs)
     }
 
   /**
@@ -258,13 +261,15 @@ module List {
    * **Type**: `zip : List<a> -> List<b> -> List<(a, b)>`
    */
   fun zip(xs : List<a>, ys : List<b>) : List<(a, b)> =
-    let step(f, x) =
-      match {
-        | [] => []
-        | y :: ys_ => (x, y) :: f(ys_)
-      }
-    in
-    reduce_left(step, always([]), xs, ys)
+    fold(xs, ys) {
+      | [] => always([])
+      | x :: @go =>
+          fn(rest) =>
+            match(rest) {
+              | [] => []
+              | y :: ys_ => (x, y) :: go(ys_)
+            }
+    }
 
   /**
    * Return `true` if and only if any element of the list satisfies the given 

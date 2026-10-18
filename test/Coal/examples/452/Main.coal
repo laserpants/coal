@@ -1,0 +1,15 @@
+module Main {
+
+  import List(reduce, reduce_left)
+  import namespace IO
+
+  fun main() = 
+    let a = reduce(fn(x, y) => x - y, 0, [1,2,3]);
+        b = reduce_left(fn(x, y) => x - y, 0, [1,2,3])
+    in
+    do {
+      IO.println_int32(a);
+      IO.println_int32(b);
+    }
+
+}

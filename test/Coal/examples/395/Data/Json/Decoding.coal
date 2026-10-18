@@ -39,7 +39,7 @@ module Data.Json.Decoding(decode) {
       }
     in
     let (final_brev, final_arev_opt) =
-      List.reduce(fn(c, pair) => step(pair, c), ([], None), chars)
+      List.reduce_left(step, ([], None), chars)
     in
       match(final_arev_opt) {
         | Some(final_arev) =>
@@ -64,7 +64,7 @@ module Data.Json.Decoding(decode) {
           | _                  => None
         }
     in
-      List.reduce(fn(c, acc_opt) => step(acc_opt, c), Some(0.0), digits)
+      List.reduce_left(step, Some(0.0), digits)
 
   // Parse fraction digits (chars after '.') into the fractional double value.
   // E.g. ['1','4'] → 0.14
@@ -76,7 +76,7 @@ module Data.Json.Decoding(decode) {
         | _                  => None
       }
     in
-    let num_opt = List.reduce(fn(c, acc_opt) => step(acc_opt, c), Some(0.0), digits) in
+    let num_opt = List.reduce_left(step, Some(0.0), digits) in
       match(num_opt) {
         | Some(num) => Some(num / denom)
         | None      => None
@@ -202,7 +202,7 @@ module Data.Json.Decoding(decode) {
     }
 
   fun parse_tokens(tokens : List<Token>) : Result<JsonValue, string> =
-    match(List.reduce(fn(tok, state) => step_parser(state, tok), Awaiting([]), tokens)) {
+    match(List.reduce_left(step_parser, Awaiting([]), tokens)) {
       | PsDone(v)   => Ok(v)
       | PsError(e)  => Err(e)
       | Awaiting(_) => Err("Unexpected end of input")
