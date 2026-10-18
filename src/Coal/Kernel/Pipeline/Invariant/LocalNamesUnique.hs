@@ -14,7 +14,7 @@ Local binders are:
   * Pattern-bound variable names in @case@ clauses (the non-constructor labels
     in each 'Clause', i.e., every label after the first)
 
-Top-level function names, data constructor names, and type names are not
+Top-level definition names, data constructor names, and type names are not
 considered local binders and are excluded from this check.
 
 = Error reporting
@@ -44,7 +44,7 @@ import Coal.Kernel.Pipeline.Invariant.Error (InvariantError (..))
   * Pattern-bound variable names in @case@ clauses (the non-constructor labels
     in each 'Clause', i.e., every label after the first)
 
-Top-level function names, data constructor names, and type names are not
+Top-level definition names, data constructor names, and type names are not
 considered local binders and are excluded from this check.
 
 Returns an empty list when all local binder names are distinct, or one

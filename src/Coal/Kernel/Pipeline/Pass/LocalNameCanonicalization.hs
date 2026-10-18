@@ -8,7 +8,7 @@ binding site has a distinct name.
 = Invariant established
 
 After this pass, every locally bound variable has a unique name across the
-entire program. Top-level function names, data constructor names, and type
+entire program. Top-level definition names, data constructor names, and type
 names are left untouched.
 
 = Implementation
@@ -41,7 +41,7 @@ import Coal.Kernel.Pipeline (Pass, PipelineT, freshName)
 identifier.
 
 Affected binders: @let@ bindings, lambda parameters, @case@ pattern variables.
-Top-level function names, data constructor names, and type names are left
+Top-level definition names, data constructor names, and type names are left
 untouched.
 -}
 localNameCanonicalization :: (Monad m) => Pass m (Module Type) (Module Type)
@@ -60,11 +60,9 @@ canonicalizeObject obj =
       -- Parameters at top level are NOT locally-bound in the "local name"
       -- sense; they belong to the top-level binding, so we do not rename them
       -- here. However we do rename everything inside the body.
-      body' <- canonicalizeExpr Map.empty body
-      pure (DFunction scope name params body')
+      DFunction scope name params <$> canonicalizeExpr Map.empty body
     DConstant name expr -> do
-      expr' <- canonicalizeExpr Map.empty expr
-      pure (DConstant name expr')
+      DConstant name <$> canonicalizeExpr Map.empty expr
     DExternal{} ->
       pure obj
     DData{} ->
