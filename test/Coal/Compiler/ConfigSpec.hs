@@ -47,6 +47,10 @@ configHashSpec =
         configHash (defaultConfig{configPackageNamespaces = [("/tmp/pkg", "Pkg", ["MicroTest"])]})
           `shouldNotBe` configHash defaultConfig
 
+      it "changes when the local module set changes" $
+        configHash (defaultConfig{configLocalModules = ["MyModule"]})
+          `shouldNotBe` configHash defaultConfig
+
     describe "configCFiles" $ do
       it "ignores the directory, hashing only the basename" $
         -- The linker canonicalizes these to absolute paths, so hashing the

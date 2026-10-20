@@ -33,15 +33,30 @@ isDirectoryPrefix root path =
   pathComps = comps path
   comps p = filter (not . null) $ splitDirectories (normalise p)
 
-resolveModule :: [FilePath] -> FilePath -> IO (Either String (FilePath, FilePath, Text))
-resolveModule roots fp =
+{- | Resolve a module file against a set of source roots.
+
+The first argument lists the roots that are searched for a /relative/ path —
+these are the project's own source directories, and deliberately exclude
+installed-package source roots so that a locally-declared module can never
+silently resolve to a same-named file inside a dependency. The second argument
+lists every known root (project and package); it is only used to classify the
+resolved file, i.e. to pick the longest matching root and derive the module name
+from the path relative to it. Absolute paths are never searched, but are still
+classified against the known roots.
+
+Returns the canonical file path, the best-matching root, and the derived
+(dot-separated) module name.
+-}
+resolveModule :: [FilePath] -> [FilePath] -> FilePath -> IO (Either String (FilePath, FilePath, Text))
+resolveModule searchRoots knownRoots fp =
   runExceptT $ do
-    roots' <- liftIO $ mapM canonicalizePath roots
+    searchRoots' <- liftIO $ mapM canonicalizePath searchRoots
+    knownRoots' <- liftIO $ mapM canonicalizePath knownRoots
 
     let candidates =
           if isAbsolute fp
             then [fp]
-            else [r </> fp | r <- roots']
+            else [r </> fp | r <- searchRoots']
 
     -- Find first existing candidate
     existing <- liftIO $ filterM doesFileExist candidates
@@ -55,8 +70,8 @@ resolveModule roots fp =
     -- Canonicalize the chosen file
     canFile <- liftIO $ canonicalizePath choice
 
-    -- Find all roots that are directory prefixes of the canonical file
-    let matching = filter (`isDirectoryPrefix` canFile) roots'
+    -- Find all known roots that are directory prefixes of the canonical file
+    let matching = filter (`isDirectoryPrefix` canFile) knownRoots'
     bestRoot <-
       case matching of
         [] ->

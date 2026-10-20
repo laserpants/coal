@@ -353,6 +353,14 @@ prettyError env =
       "The module name '" <> path <> "' doesn't match the file name '" <> Text.pack file <> "'."
     BadFilename _ err ->
       Text.pack err
+    AmbiguousModuleImport _ name providers ->
+      "The import '"
+        <> name
+        <> "' is ambiguous: a module with this name is provided by multiple dependencies as "
+        <> Text.intercalate ", " ((\p -> "'" <> p <> "'") <$> providers)
+        <> ". Import the intended module by its qualified name, or add a local module named '"
+        <> name
+        <> "' to shadow the package modules."
     NoModuleMain missing ->
       "No entry point module '" <> missing <> "'"
     MissingMainFunction funcName erl ->

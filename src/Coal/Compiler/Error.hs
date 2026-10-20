@@ -24,6 +24,7 @@ data CompilerError a
   = ParserError FilePath ParserError
   | BadModuleName FilePath Name
   | BadFilename FilePath String
+  | AmbiguousModuleImport FilePath Name [Name]
   | NoModuleMain Name
   | MissingMainFunction Name (ErrorLocation a)
   | ModuleCycle [Name]
@@ -86,6 +87,8 @@ errorLocation =
     MissingMainFunction _ erl ->
       Just erl
     BadFilename{} ->
+      Nothing
+    AmbiguousModuleImport{} ->
       Nothing
     MisplacedImportStatement erl ->
       Just erl

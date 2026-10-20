@@ -34,5 +34,6 @@ compileCommand caps CompileCmdOptions{..} = do
       , configNoCache = noCache
       , configEntryPoint = parsedEntryPoint
       , configPackageNamespaces = []
+      , configLocalModules = []
       , configSanitize = sanitize
       }

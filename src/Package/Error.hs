@@ -22,6 +22,7 @@ data PackageError
   | EProjectLockFileInvalid Text
   | EProjectInvalidManifestFormat Text
   | EProjectInvalidModuleFormat Name
+  | EProjectModuleNotFound Name [Name]
   | ENoLockFile
   | EDependencyManifestMissing Name (Maybe Text)
   | EDependencyInvalidManifestFormat Name Text
@@ -66,6 +67,18 @@ prettyPackageError = \case
     "Project manifest (coal.json) file format is invalid:\n\n" <> text
   EProjectInvalidModuleFormat name ->
     "'" <> name <> "' is not a valid module name."
+  EProjectModuleNotFound name providers ->
+    "The module '"
+      <> name
+      <> "' is listed in the project manifest (coal.json) but no source file for it was found in the project's source directories."
+      <> if null providers
+        then "\n\nEither add the file or remove the entry from \"modules\"."
+        else
+          "\n\nA module with this name is provided by a dependency as "
+            <> Text.intercalate ", " ((\p -> "'" <> p <> "'") <$> providers)
+            <> ".\n\nEither import the dependency's module by its qualified name, or remove '"
+            <> name
+            <> "' from \"modules\"."
   ENoLockFile ->
     "No project lock-file found.\n\nTry running `coal install`."
   EDependencyManifestMissing name text ->

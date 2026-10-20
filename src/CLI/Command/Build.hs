@@ -8,7 +8,9 @@ import CLI.Command.EntryPoint (parseEntryPoint)
 import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config
-import Coal.Compiler.Terminal (TerminalCapabilities)
+import Coal.Compiler.Path.Resolve (resolveModule)
+import Coal.Compiler.Terminal (TerminalCapabilities, sanitizeForTerminal)
+import Control.Monad (forM_, unless)
 import Control.Monad.Except
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
@@ -19,13 +21,14 @@ import Data.Maybe (fromMaybe, maybeToList)
 import Data.SemVer (toText)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import Extras (forM)
+import Extras (Name, forM)
 import Package (PackageIncludes (..), emptyPackageIncludes, packageIncludes)
 import Package.Error (PackageError (..))
 import Package.Manifest (BuildConfig (..), PackageManifest (..), filePaths, loadProjectManifest)
 import Package.Version (PackageVersion (..))
 import System.Directory (canonicalizePath)
 import System.Exit (ExitCode (ExitFailure), exitWith)
+import System.IO (hPutStrLn, stderr)
 
 buildCommand :: TerminalCapabilities -> ExceptT CLIError IO ()
 buildCommand caps = do
@@ -57,16 +60,24 @@ buildCommand caps = do
     -- the current directory so the linker can compile and link them.
     localCFiles <- liftIO $ mapM canonicalizePath (fromMaybe [] c_sources)
     let localSrcPaths = Text.unpack <$> fromMaybe ["src"] source_dirs
-        pkgSrcPaths = [d | (d, _, _) <- canonNsInfo]
+        -- Search roots for the project's own modules. Package source roots are
+        -- deliberately excluded: a module listed in the project manifest must
+        -- be found in the project itself, never in a dependency (see below).
+        localSearchPaths = nub ("src" : localSrcPaths)
         entryPoint = parseEntryPoint entry_point
+        entryModName = fst <$> entryPoint
+        -- Every module the project is responsible for compiling locally: those
+        -- listed in the manifest plus the (possibly implicit) entry-point module.
+        localModuleNames = nub (modules <> maybeToList entryModName)
         execName = resolveExecutableName name version executable_name
         baseConfig =
           defaultConfig
-            { -- Local source dirs first so project modules shadow same-named package modules.
-              configSourcePaths = nub ("src" : localSrcPaths <> pkgSrcPaths)
+            { configSourcePaths = localSearchPaths
             , configExecutableName = execName
             , configEntryPoint = entryPoint
             , configPackageNamespaces = canonNsInfo
+            , -- Locally-defined modules shadow same-named package modules.
+              configLocalModules = localModuleNames
             , -- C sources contributed by the project itself and by installed packages
               -- (e.g. an EventSource library shipping its native primitives).
               configCFiles = localCFiles <> pkgCFiles
@@ -75,12 +86,30 @@ buildCommand caps = do
               configNativeLibraries = mergeNativeLibraries native_libraries pkgLibs
             }
         config = applyBuildConfig build_config baseConfig
-    localFiles <- filePaths modules EProjectInvalidModuleFormat
-    -- If the entry-point module is not listed in `modules`, add its file
-    -- automatically so the user doesn't have to duplicate it there.
-    let extraModules = filter (`notElem` modules) (maybeToList (fst <$> entryPoint))
-    extraFiles <- filePaths extraModules EProjectInvalidModuleFormat
-    pure (config, inputFiles <> nub (localFiles <> extraFiles))
+    localFiles <- filePaths localModuleNames EProjectInvalidModuleFormat
+    -- Every locally-declared module must exist inside the project's own source
+    -- directories. Without this check a missing local module silently resolves
+    -- to a same-named file inside a dependency, which both shadows the intended
+    -- local module and compiles the dependency's file twice (producing duplicate
+    -- linker symbols). Report the misconfiguration instead.
+    forM_ (zip localModuleNames localFiles) $ \(modName, relFile) -> do
+      resolved <- liftIO $ resolveModule localSearchPaths localSearchPaths relFile
+      case resolved of
+        Right{} -> pure ()
+        Left{} ->
+          throwError (EProjectModuleNotFound modName (packageProvidersOf canonNsInfo modName))
+    -- Warn when a locally-defined module shares a short name with a module from
+    -- an installed package: the local module wins, so make that choice explicit.
+    unless (configSilent config) $
+      forM_ (moduleNameCollisions localModuleNames canonNsInfo) $ \(modName, providedAs) ->
+        liftIO $
+          hPutStrLn stderr . Text.unpack . sanitizeForTerminal caps $
+            "warning: module '"
+              <> modName
+              <> "' is defined locally and also provided by the dependency as "
+              <> Text.intercalate ", " ((\ns -> "'" <> ns <> "'") <$> providedAs)
+              <> "; the local definition takes precedence."
+    pure (config, inputFiles <> nub localFiles)
 
   case res of
     Left err ->
@@ -96,6 +125,31 @@ buildCommand caps = do
 -- | True when the manifest declares no external dependencies.
 noDependencies :: Maybe (Map Text a) -> Bool
 noDependencies = maybe True Map.null
+
+{- | Namespaced names (e.g. @CoalMicroTest.MicroTest@) of every installed package
+module whose unqualified name matches the given module name.
+-}
+packageProvidersOf :: [(FilePath, Text, [Name])] -> Name -> [Name]
+packageProvidersOf namespaces modName =
+  nub [ns <> "." <> modName | (_, ns, mods) <- namespaces, modName `elem` mods]
+
+{- | Locally-defined modules whose unqualified name is also provided by one or
+more installed packages, paired with the fully-qualified names (e.g.
+@MyPkg.Widget@) that provide them.
+-}
+moduleNameCollisions :: [Name] -> [(FilePath, Text, [Name])] -> [(Name, [Name])]
+moduleNameCollisions localModules namespaces =
+  let providers =
+        Map.fromListWith
+          (flip (<>))
+          [ (modName, [ns <> "." <> modName])
+          | (_, ns, mods) <- namespaces
+          , modName <- mods
+          ]
+   in [ (modName, nub qualified)
+      | modName <- localModules
+      , Just qualified <- [Map.lookup modName providers]
+      ]
 
 -- | Derive the executable name from the project name and optional version.
 deriveExecutableName :: Text -> Maybe PackageVersion -> FilePath

@@ -3,7 +3,14 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
-module Coal.Compiler.Pass.PhaseParsing.Parsing (passParsing, fromSource) where
+module Coal.Compiler.Pass.PhaseParsing.Parsing (
+  passParsing,
+  fromSource,
+  buildPackageNsMap,
+  packageModuleProviders,
+  ambiguousPackageModules,
+  localAwareNsMap,
+) where
 
 import Coal.Compiler.Build.Cache (cachedBuild)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
@@ -24,8 +31,11 @@ import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.State (gets)
 import qualified Data.ByteString as B
 import Data.Either (partitionEithers)
-import Data.List (find)
+import Data.List (find, nub)
 import qualified Data.Map.Strict as Map
+import Data.Maybe (listToMaybe, mapMaybe)
+import Data.Set (Set)
+import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.Encoding as E
@@ -79,29 +89,51 @@ parseEmbedded (p, src) = do
       let name = principalPath (modulePath m)
       Right <$> checkCacheAndRegister name encodedSrc m
 
-fromSource :: (MonadIO m) => Map.Map Name Name -> Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
-fromSource nsMap name file src = do
+{- | Parse and register a source file that belongs to the project itself.
+
+Imports are rewritten using @nsMap@, which maps short package module names to
+their namespaced form. Locally-defined modules take precedence over same-named
+package modules: @nsMap@ is expected to already have been filtered by
+'localAwareNsMap'. An import whose short name is provided by more than one
+package (and is not shadowed by a local module) is rejected as ambiguous via
+@ambiguous@.
+-}
+fromSource :: (MonadIO m) => Map.Map Name Name -> Map.Map Name [Name] -> Set Name -> Name -> FilePath -> Text -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
+fromSource nsMap ambiguous localModules name file src = do
   case runParser parseSourceFile "" src of
     Left err ->
       pure $ Left (ParserError file err)
     Right (Module path exportList defs) ->
       if principalPath path == name
-        then do
-          let m' = Module path exportList (rewriteImports nsMap defs)
-          Right <$> checkCacheAndRegister name src m'
+        then case firstAmbiguousImport ambiguous localModules defs of
+          Just (imported, providers) ->
+            pure $ Left (AmbiguousModuleImport file imported providers)
+          Nothing -> do
+            let m' = Module path exportList (rewriteImports nsMap defs)
+            Right <$> checkCacheAndRegister name src m'
         else pure $ Left (BadModuleName file (principalPath path))
 
 parseFile :: (MonadIO m) => FilePath -> CompilerT Metadata m (Either (CompilerError Metadata) (BuildEnvelope (Module Metadata () ())))
 parseFile file = do
   CompilerConfig{..} <- gets compilerConfig
   let nsMap = buildPackageNsMap configPackageNamespaces
-  res <- liftIO $ resolveModule configSourcePaths file
+      -- Locally-defined modules shadow same-named package modules, so the map
+      -- used for the project's own modules drops those short names.
+      localNsMap = localAwareNsMap configLocalModules nsMap
+      ambiguous = ambiguousPackageModules configPackageNamespaces
+      localModules = Set.fromList configLocalModules
+      -- Package source roots are used only to classify package files (which are
+      -- absolute). They are not searched for the project's own relative module
+      -- names, so a module listed in the manifest but missing from the project
+      -- can never silently resolve to a same-named file inside a dependency.
+      packageDirs = [dir | (dir, _, _) <- configPackageNamespaces]
+  res <- liftIO $ resolveModule configSourcePaths (configSourcePaths <> packageDirs) file
   case res of
     Right (fp, bestRoot, derivedName) -> do
       src <- liftIO (Text.readFile fp)
       case lookupPackageNamespace bestRoot configPackageNamespaces of
         Nothing ->
-          fromSource nsMap derivedName file src
+          fromSource localNsMap ambiguous localModules derivedName file src
         Just (ns, _modSet) ->
           fromSourceNamespaced ns nsMap derivedName file src
     Left err ->
@@ -112,16 +144,59 @@ lookupPackageNamespace :: FilePath -> [(FilePath, Text, [Name])] -> Maybe (Text,
 lookupPackageNamespace bestRoot namespaces =
   (\(_, ns, mods) -> (ns, mods)) <$> find (\(dir, _, _) -> dir == bestRoot) namespaces
 
-{- | Build a map from unqualified module name to fully-namespaced name
-covering every module from every installed package.
+{- | Map from an unqualified module name to every fully-namespaced name that
+provides it, across all installed packages. The list preserves the order of the
+supplied namespaces (which is deterministic) and has duplicates removed.
+-}
+packageModuleProviders :: [(FilePath, Text, [Name])] -> Map.Map Name [Name]
+packageModuleProviders namespaces =
+  Map.map nub $
+    Map.fromListWith
+      (flip (<>))
+      [ (modName, [ns <> "." <> modName])
+      | (_, ns, mods) <- namespaces
+      , modName <- mods
+      ]
+
+{- | Short module names that are provided by more than one installed package,
+mapped to every namespaced name that provides them. Importing such a name
+without a local module to disambiguate it is reported as an error.
+-}
+ambiguousPackageModules :: [(FilePath, Text, [Name])] -> Map.Map Name [Name]
+ambiguousPackageModules = Map.filter ((> 1) . length) . packageModuleProviders
+
+{- | Build a map from unqualified module name to its fully-namespaced name
+covering every module from every installed package. When several packages
+provide the same short name the first namespace in the supplied order wins;
+such names are also reported by 'ambiguousPackageModules'.
 -}
 buildPackageNsMap :: [(FilePath, Text, [Name])] -> Map.Map Name Name
-buildPackageNsMap namespaces =
-  Map.fromList
-    [ (modName, ns <> "." <> modName)
-    | (_, ns, mods) <- namespaces
-    , modName <- mods
-    ]
+buildPackageNsMap = Map.mapMaybe listToMaybe . packageModuleProviders
+
+{- | Restrict a package namespace map to the short names that are /not/ defined
+by the project itself, so that locally-defined modules shadow same-named package
+modules during import rewriting.
+-}
+localAwareNsMap :: [Name] -> Map.Map Name Name -> Map.Map Name Name
+localAwareNsMap localModules nsMap =
+  let local = Set.fromList localModules
+   in Map.filterWithKey (\k _ -> not (Set.member k local)) nsMap
+
+{- | Find the first import of a locally-defined module whose short module name
+is provided by more than one installed package. With no local module of the
+same name to shadow it, the compiler cannot tell which package module is meant.
+-}
+firstAmbiguousImport :: Map.Map Name [Name] -> Set Name -> [Definition Metadata () ()] -> Maybe (Name, [Name])
+firstAmbiguousImport ambiguous localModules = listToMaybe . mapMaybe check
+ where
+  check (DImport _ path _) = ambiguousImport path
+  check (DNamespaceImport _ path) = ambiguousImport path
+  check _ = Nothing
+  ambiguousImport path =
+    let short = principalPath path
+     in if Set.member short localModules
+          then Nothing
+          else (\providers -> (short, providers)) <$> Map.lookup short ambiguous
 
 {- | Parse a source file that belongs to an installed package, injecting
 the package namespace into the module path and rewriting all imports that

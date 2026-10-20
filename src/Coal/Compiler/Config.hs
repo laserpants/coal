@@ -44,6 +44,13 @@ data CompilerConfig = CompilerConfig
   {- ^ Each triple: (canonical source dir, namespace prefix, unqualified module names).
   Package modules from a given source dir are renamed as @namespace.ModuleName@.
   -}
+  , configLocalModules :: [Name]
+  {- ^ Names of the modules defined by the project itself (i.e. listed in the
+  project manifest, plus the entry-point module). A short-name import is only
+  rewritten to a package module when it does not collide with one of these:
+  locally-defined modules always take precedence over same-named package
+  modules, matching the source-directory search order.
+  -}
   , configSanitize :: Bool
   }
   deriving (Show, Eq, Ord, Read)
@@ -63,6 +70,7 @@ defaultConfig =
     , configNoCache = False
     , configEntryPoint = Nothing
     , configPackageNamespaces = []
+    , configLocalModules = []
     , configSanitize = False
     }
 
@@ -124,6 +132,10 @@ instead of being decoded misaligned.
 
 History:
 
+  * @"6"@: 'configHash' now also covers @configLocalModules@, the set of modules
+    defined by the project itself. That set decides which short-name imports are
+    rewritten to package modules, so changing it changes locally-defined
+    modules' parsed ASTs even when their source text is unchanged.
   * @"5"@: 'configHash' now also covers @configNativeLibraries@, the native
     libraries linked into the binary. Omitting it would let a cached build be
     reused across different link inputs.
@@ -137,7 +149,7 @@ History:
   * @"2"@ — added @instanceEntryModule@ to @InstanceEntry@.
 -}
 buildCacheFormatVersion :: Text
-buildCacheFormatVersion = "5"
+buildCacheFormatVersion = "6"
 
 {- | Compute a hash of the configuration fields that affect compilation output.
 Used to invalidate cached builds when relevant config changes.
@@ -171,6 +183,7 @@ configHash cfg =
   -- and configNoCache.
   hashedFields =
     ( configPackageNamespaces
+    , configLocalModules
     , configEntryPoint
     , map takeFileName configCFiles
     , configNativeLibraries
