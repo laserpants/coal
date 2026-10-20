@@ -9,8 +9,8 @@ import CLI.Error (CLIError (..))
 import Coal.Compiler (compile)
 import Coal.Compiler.Config
 import Coal.Compiler.Path.Resolve (resolveModule)
-import Coal.Compiler.Terminal (TerminalCapabilities, sanitizeForTerminal)
-import Control.Monad (forM_, unless)
+import Coal.Compiler.Terminal (TerminalCapabilities)
+import Control.Monad (forM_)
 import Control.Monad.Except
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Class (lift)
@@ -28,7 +28,6 @@ import Package.Manifest (BuildConfig (..), PackageManifest (..), filePaths, load
 import Package.Version (PackageVersion (..))
 import System.Directory (canonicalizePath)
 import System.Exit (ExitCode (ExitFailure), exitWith)
-import System.IO (hPutStrLn, stderr)
 
 buildCommand :: TerminalCapabilities -> ExceptT CLIError IO ()
 buildCommand caps = do
@@ -98,17 +97,6 @@ buildCommand caps = do
         Right{} -> pure ()
         Left{} ->
           throwError (EProjectModuleNotFound modName (packageProvidersOf canonNsInfo modName))
-    -- Warn when a locally-defined module shares a short name with a module from
-    -- an installed package: the local module wins, so make that choice explicit.
-    unless (configSilent config) $
-      forM_ (moduleNameCollisions localModuleNames canonNsInfo) $ \(modName, providedAs) ->
-        liftIO $
-          hPutStrLn stderr . Text.unpack . sanitizeForTerminal caps $
-            "warning: module '"
-              <> modName
-              <> "' is defined locally and also provided by the dependency as "
-              <> Text.intercalate ", " ((\ns -> "'" <> ns <> "'") <$> providedAs)
-              <> "; the local definition takes precedence."
     pure (config, inputFiles <> nub localFiles)
 
   case res of
@@ -132,24 +120,6 @@ module whose unqualified name matches the given module name.
 packageProvidersOf :: [(FilePath, Text, [Name])] -> Name -> [Name]
 packageProvidersOf namespaces modName =
   nub [ns <> "." <> modName | (_, ns, mods) <- namespaces, modName `elem` mods]
-
-{- | Locally-defined modules whose unqualified name is also provided by one or
-more installed packages, paired with the fully-qualified names (e.g.
-@MyPkg.Widget@) that provide them.
--}
-moduleNameCollisions :: [Name] -> [(FilePath, Text, [Name])] -> [(Name, [Name])]
-moduleNameCollisions localModules namespaces =
-  let providers =
-        Map.fromListWith
-          (flip (<>))
-          [ (modName, [ns <> "." <> modName])
-          | (_, ns, mods) <- namespaces
-          , modName <- mods
-          ]
-   in [ (modName, nub qualified)
-      | modName <- localModules
-      , Just qualified <- [Map.lookup modName providers]
-      ]
 
 -- | Derive the executable name from the project name and optional version.
 deriveExecutableName :: Text -> Maybe PackageVersion -> FilePath
