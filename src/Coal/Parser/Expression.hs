@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Expression (parseExpression, parseMatchClause) where
+module Coal.Parser.Expression 
+  ( parseExpression
+  , parseChoice
+  , parseMatchClause
+ ) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.HasMetadata (getMetadata, metadataSpan)

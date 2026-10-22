@@ -12,23 +12,24 @@ declarations, instances, imports, and top-level folds.
 -}
 module Coal.Parser.Module.Definition (parseDefinition) where
 
+import Coal.Language.AST.Builders (tupleP)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (Path))
 import Coal.Parser.Core (Parser, lexeme, lexeme_, nonEmpty, nonEmptyOr)
-import Coal.Parser.Expression (parseExpression)
+import Coal.Parser.Expression (parseChoice, parseExpression)
 import Coal.Parser.Identifier
 import Coal.Parser.Metadata (withMetadata)
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType, parseTypeParameter)
-import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name, (<$$>))
 import Text.Megaparsec
 import Text.Megaparsec.Char (upperChar)
+import qualified Data.List.NonEmpty as NonEmpty
 
 parseDefinition :: Parser (Definition Metadata () ())
 parseDefinition =
@@ -211,38 +212,63 @@ parseFunctionGroup parseName = do
   fn <- lexeme_ "fun" *> parseName
   ann <- optional parseAnnotation
   trs <- parseConstraints parseTypeParameter
-  fns <- some (void pipe *> parseGroupFunctionDefinition ann)
+  cs <- some parseClause
+  --fns <- some (void pipe *> parseGroupFunctionDefinition ann)
   end <- getSourcePos
-  case fns of
-    [] ->
-      fail "Empty list"
-    fs ->
-      pure
+  --case fns of
+  --  [] ->
+  --    fail "Empty list"
+  --  fs ->
+  --    pure
+  --      ( DFunctionGroup
+  --          (Metadata start end)
+  --          fn
+  --          FunctionGroupDefinition
+  --            { functionGroupDefinitionMetadata = Metadata start end
+  --            , functionGroupDefinitionAnnotation = With trs <$> ann
+  --            , functionGroupDefinitionBranches = fs
+  --            }
+  --      )
+  pure
         ( DFunctionGroup
             (Metadata start end)
             fn
             FunctionGroupDefinition
               { functionGroupDefinitionMetadata = Metadata start end
               , functionGroupDefinitionAnnotation = With trs <$> ann
-              , functionGroupDefinitionBranches = fs
+              , functionGroupDefinitionBranches = cs
               }
         )
 
-parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata () ())
-parseGroupFunctionDefinition ann = do
-  start <- getSourcePos
-  functionDefinitionPatterns <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
-  functionDefinitionExpression <- symbol_ "=>" *> parseExpression
-  end <- getSourcePos
-  pure
-    FunctionDefinition
-      { functionDefinitionMetadata = Metadata start end
-      , functionDefinitionAnnotation = ann
-      , functionDefinitionConstraints = []
-      , functionDefinitionType = With [] ()
-      , functionDefinitionPatterns
-      , functionDefinitionExpression
-      }
+parseClause :: Parser (Clause Metadata () ())
+parseClause =
+  withMetadata $ do
+    ps <- pipe *> nonEmpty (commaSep1 parsePattern)
+    cs <- nonEmpty (some parseChoice)
+    pure (\loc -> EClause loc (packPatterns ps) cs)
+
+packPatterns :: (Monoid a) => NonEmpty (Pattern a k ()) -> Pattern a k ()
+packPatterns ps
+  | length ps == 1 =
+      NonEmpty.head ps
+  | otherwise =
+      tupleP ps
+
+--parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata () ())
+--parseGroupFunctionDefinition ann = do
+--  start <- getSourcePos
+--  functionDefinitionPatterns <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
+--  functionDefinitionExpression <- symbol_ "=>" *> parseExpression
+--  end <- getSourcePos
+--  pure
+--    FunctionDefinition
+--      { functionDefinitionMetadata = Metadata start end
+--      , functionDefinitionAnnotation = ann
+--      , functionDefinitionConstraints = []
+--      , functionDefinitionType = With [] ()
+--      , functionDefinitionPatterns
+--      , functionDefinitionExpression
+--      }
 
 parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseFunctionDefinition parseName = do
@@ -311,7 +337,7 @@ parseTopLevelFoldClause :: Parser (Clause Metadata () ())
 parseTopLevelFoldClause =
   withMetadata $ do
     clausePattern <- symbol_ "|" *> parsePattern
-    clauseChoices <- nonEmpty (some parseChoice)
+    clauseChoices <- nonEmpty (some parseFoldChoice)
     pure
       ( \clauseMetadata ->
           EClause
@@ -321,7 +347,7 @@ parseTopLevelFoldClause =
             }
       )
  where
-  parseChoice =
+  parseFoldChoice =
     withMetadata $ do
       symbol_ "=>"
       choiceExpression <- parseExpression
