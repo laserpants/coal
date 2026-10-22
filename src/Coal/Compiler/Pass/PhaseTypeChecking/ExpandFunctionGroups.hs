@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
@@ -44,8 +45,8 @@ module Coal.Compiler.Pass.PhaseTypeChecking.ExpandFunctionGroups (
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, setCurrentModuleC)
-import Coal.Language (Choice (..), Clause (..), Expression (..), Kind (..), Pattern, Qualified (..))
-import Coal.Language.AST.Builders (matchE', tupleE, tupleP, varE, varP)
+import Coal.Language (Clause (..), Expression (..), Kind (..), Pattern (..), Qualified (..))
+import Coal.Language.AST.Builders (matchE', tupleE, varE, varP)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
 import Data.List.NonEmpty (NonEmpty (..))
@@ -102,16 +103,25 @@ expandGroups =
               , letDefinitionConstraints = foldMap extractConstraints functionGroupDefinitionAnnotation
               , letDefinitionType = With [] ()
               , letDefinitionExpression =
-                  ELambda loc (varP <$> args) (matchE' loc (packVariables args) (buildExpressionClauses functionGroupDefinitionBranches))
+                  ELambda loc (varP <$> args) (matchE' loc (packVariables args) (NonEmpty.fromList branches))
               }
         ]
      where
       extractType (With _ t) = t
       extractConstraints (With ts _) = ts
-      FunctionDefinition{..} = case functionGroupDefinitionBranches of
-        (firstDef : _) -> firstDef
-        [] -> error "Empty function group"
-      ns = NonEmpty.fromList [1 .. length functionDefinitionPatterns]
+      branches = normalizeClause <$> functionGroupDefinitionBranches
+
+      normalizeClause EClause{clausePattern = PTuple _ _ (p :| []), ..} =
+        EClause{clausePattern = p, ..}
+      normalizeClause e = e
+
+      EClause{clausePattern} =
+        case functionGroupDefinitionBranches of
+          (firstDef : _) -> firstDef
+          [] -> error "Empty function group"
+
+      p' = unpackPattern clausePattern
+      ns = NonEmpty.fromList [1 .. length p']
       args = (<>) "$arg_" . showt <$> ns
     DInstance loc InstanceDefinition{..} -> do
       newImplementations <- traverse expandGroups instanceDefinitionImplementations
@@ -126,22 +136,11 @@ expandGroups =
     o ->
       return [o]
 
-buildExpressionClauses :: (Monoid a) => [FunctionDefinition a k ()] -> NonEmpty (Clause a k ())
-buildExpressionClauses defs =
-  case [ EClause functionDefinitionMetadata (packPatterns functionDefinitionPatterns) (CPlain mempty [] functionDefinitionExpression :| [])
-       | FunctionDefinition{..} <- defs
-       ] of
-    c : cs ->
-      c :| cs
-    [] ->
-      error "Internal compiler error: buildExpressionClauses called with empty list of function definitions."
-
-packPatterns :: (Monoid a) => NonEmpty (Pattern a k ()) -> Pattern a k ()
-packPatterns ps
-  | length ps == 1 =
-      NonEmpty.head ps
-  | otherwise =
-      tupleP ps
+unpackPattern :: Pattern a k () -> NonEmpty (Pattern a k ())
+unpackPattern =
+  \case
+    (PTuple _ _ ps) -> ps
+    p -> NonEmpty.singleton p
 
 packVariables :: (Monoid a) => NonEmpty Name -> Expression a k ()
 packVariables qs

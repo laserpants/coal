@@ -64,7 +64,7 @@ instance (Binary a, Binary k, Binary t) => Binary (TypeDefinition a k t)
 data FunctionGroupDefinition a k t = FunctionGroupDefinition
   { functionGroupDefinitionMetadata :: a
   , functionGroupDefinitionAnnotation :: Maybe (Qualified (Type Parameter k))
-  , functionGroupDefinitionBranches :: [FunctionDefinition a k t]
+  , functionGroupDefinitionBranches :: [Clause a k t]
   }
   deriving
     ( Show

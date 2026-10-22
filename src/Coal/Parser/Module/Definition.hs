@@ -14,16 +14,16 @@ module Coal.Parser.Module.Definition (parseDefinition) where
 
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language
+import Coal.Language.AST.Builders (tupleP)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (Path))
 import Coal.Parser.Core (Parser, lexeme, lexeme_, nonEmpty, nonEmptyOr)
-import Coal.Parser.Expression (parseExpression)
+import Coal.Parser.Expression (parseChoice, parseExpression)
 import Coal.Parser.Identifier
 import Coal.Parser.Metadata (withMetadata)
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
 import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType, parseTypeParameter)
-import Control.Monad (void)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Set as Set
 import Extras (Name, (<$$>))
@@ -211,38 +211,24 @@ parseFunctionGroup parseName = do
   fn <- lexeme_ "fun" *> parseName
   ann <- optional parseAnnotation
   trs <- parseConstraints parseTypeParameter
-  fns <- some (void pipe *> parseGroupFunctionDefinition ann)
-  end <- getSourcePos
-  case fns of
-    [] ->
-      fail "Empty list"
-    fs ->
-      pure
-        ( DFunctionGroup
-            (Metadata start end)
-            fn
-            FunctionGroupDefinition
-              { functionGroupDefinitionMetadata = Metadata start end
-              , functionGroupDefinitionAnnotation = With trs <$> ann
-              , functionGroupDefinitionBranches = fs
-              }
-        )
-
-parseGroupFunctionDefinition :: Maybe ParameterizedType -> Parser (FunctionDefinition Metadata () ())
-parseGroupFunctionDefinition ann = do
-  start <- getSourcePos
-  functionDefinitionPatterns <- nonEmptyOr parseUnitPattern (commaSep parsePattern)
-  functionDefinitionExpression <- symbol_ "=>" *> parseExpression
+  cs <- some parseClause
   end <- getSourcePos
   pure
-    FunctionDefinition
-      { functionDefinitionMetadata = Metadata start end
-      , functionDefinitionAnnotation = ann
-      , functionDefinitionConstraints = []
-      , functionDefinitionType = With [] ()
-      , functionDefinitionPatterns
-      , functionDefinitionExpression
-      }
+    ( DFunctionGroup
+        (Metadata start end)
+        fn
+        FunctionGroupDefinition
+          { functionGroupDefinitionMetadata = Metadata start end
+          , functionGroupDefinitionAnnotation = With trs <$> ann
+          , functionGroupDefinitionBranches = cs
+          }
+    )
+ where
+  parseClause =
+    withMetadata $ do
+      ps <- pipe *> nonEmpty (commaSep1 parsePattern)
+      cs <- nonEmpty (some parseChoice)
+      pure (\loc -> EClause loc (tupleP ps) cs)
 
 parseFunctionDefinition :: Parser Name -> Parser (Definition Metadata () ())
 parseFunctionDefinition parseName = do
@@ -311,7 +297,7 @@ parseTopLevelFoldClause :: Parser (Clause Metadata () ())
 parseTopLevelFoldClause =
   withMetadata $ do
     clausePattern <- symbol_ "|" *> parsePattern
-    clauseChoices <- nonEmpty (some parseChoice)
+    clauseChoices <- nonEmpty (some parseFoldChoice)
     pure
       ( \clauseMetadata ->
           EClause
@@ -321,7 +307,7 @@ parseTopLevelFoldClause =
             }
       )
  where
-  parseChoice =
+  parseFoldChoice =
     withMetadata $ do
       symbol_ "=>"
       choiceExpression <- parseExpression

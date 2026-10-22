@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Parser.Expression (parseExpression, parseMatchClause) where
+module Coal.Parser.Expression (
+  parseExpression,
+  parseChoice,
+  parseMatchClause,
+) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.HasMetadata (getMetadata, metadataSpan)
@@ -183,7 +187,7 @@ parseGuard = do
 parseClause :: Parser (Clause Metadata () ())
 parseClause =
   withMetadata $ do
-    p <- symbol_ "|" *> parsePattern
+    p <- pipe *> parsePattern
     cs <- nonEmpty (some parseChoice)
     pure (\loc -> EClause loc p cs)
 
