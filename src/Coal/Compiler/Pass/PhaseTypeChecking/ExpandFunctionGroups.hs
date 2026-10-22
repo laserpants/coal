@@ -109,12 +109,11 @@ expandGroups =
      where
       extractType (With _ t) = t
       extractConstraints (With ts _) = ts
+      branches = normalizeClause <$> functionGroupDefinitionBranches
 
-      branches = knork <$> functionGroupDefinitionBranches
-
-      knork EClause{clausePattern = PTuple _ _ (p :| []), ..} =
+      normalizeClause EClause{clausePattern = PTuple _ _ (p :| []), ..} =
         EClause{clausePattern = p, ..}
-      knork e = e
+      normalizeClause e = e
 
       EClause{clausePattern} =
         case functionGroupDefinitionBranches of
