@@ -183,7 +183,7 @@ parseGuard = do
 parseClause :: Parser (Clause Metadata () ())
 parseClause =
   withMetadata $ do
-    p <- symbol_ "|" *> parsePattern
+    p <- pipe *> parsePattern
     cs <- nonEmpty (some parseChoice)
     pure (\loc -> EClause loc p cs)
 

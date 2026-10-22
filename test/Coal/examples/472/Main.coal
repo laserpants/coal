@@ -1,0 +1,21 @@
+module Main {
+
+  import namespace IO
+
+  fun foo(m) =
+    match(m) {
+      | 0 => true
+      | n when (n > 10) => true
+          otherwise => false
+    }
+
+//  fun baz : int32 -> bool
+//    | 0 => true
+//    | n 
+//      when (n > 10) => true
+//      otherwise => false
+
+  fun main() =
+    IO.println_bool(foo(2))
+
+}
