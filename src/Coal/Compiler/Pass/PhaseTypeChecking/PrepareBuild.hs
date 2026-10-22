@@ -16,8 +16,8 @@ foundation for type inference and later compilation stages.
 The pass operates in several strictly ordered steps:
 
 1. **Type constructor collection**: Gather all type definitions and their kinds
-2. **Data constructor collection**: Gather data constructors with their schemes
-3. **Export expansion**: Resolve wildcard exports (Type(*) -> Type(A, B, C))
+2. **Export expansion**: Resolve wildcard exports (Type(*) -> Type(A, B, C))
+3. **Data constructor collection**: Gather data constructors with their schemes
 4. **Trait collection**: Register trait definitions
 5. **Trait interface collection**: Register trait member signatures
 6. **Instance collection**: Register trait implementations
@@ -27,9 +27,11 @@ The pass operates in several strictly ordered steps:
 9. **Placeholder collection**: Register function/let names for type inference
 10. **Qualified name resolution**: Build mapping of local to qualified names
 
-The ordering is critical: data constructors depend on type constructors,
-instances depend on traits, and imports depend on all prior definitions being
-registered in the imported modules.
+The ordering is critical: export expansion depends on type constructors, data
+constructors depend on both the type constructors and the expanded export list
+(so the export list gates constructor visibility), instances depend on traits,
+and imports depend on all prior definitions being registered in the imported
+modules.
 
 Monad stack:
   @ReaderT (ExportList a) (StateT (Build a) (CompilerT a m))@
@@ -62,14 +64,14 @@ import Coal.Compiler.Pass.PhaseTypeChecking.TypeVariables (collectTypeConstructo
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
-import Coal.Language.Module.Export (Export (..), includesName)
+import Coal.Language.Module.Export (Export (..), includesMember, includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.TypeSystem.Kind.Error (KindError (..))
 import Coal.TypeSystem.Parameterized (Parameterized (instantiateTypeIndexes), ToIndexed (toIndexed))
 import Coal.TypeSystem.Substitution (apply, normalizeScheme)
 import qualified Coal.TypeSystem.Substitution as Substitution
-import Control.Monad (foldM_, unless)
+import Control.Monad (foldM_, unless, when)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (ReaderT, ask, local, runReaderT)
@@ -125,12 +127,36 @@ insertExportedName name
         ExportAll ->
           insertName
         Exports exports
-          | name `elem` (nameOf <$> exports) ->
+          | exports `includesName` name ->
               insertName
         _ ->
           pure ()
  where
   insertName = modify (Build.insertBuildExportedName name)
+
+{- | Record @member@ — a data constructor or trait interface member of @owner@ —
+as exported when the export list selects it.
+
+Members are matched against their owning type rather than by name alone, so a
+member that shares its name with the type is still only exported when it is
+actually listed.  See 'exportsMember'.
+-}
+insertExportedMember :: (Monad m) => Name -> Name -> ReaderT (ExportList a) (StateT (Build a) m) ()
+insertExportedMember owner member
+  | member `elem` builtinNames =
+      pure ()
+  | otherwise = do
+      exportList <- ask
+      case exportList of
+        ExportAll ->
+          insertName
+        Exports exports
+          | includesMember exports owner member ->
+              insertName
+        _ ->
+          pure ()
+ where
+  insertName = modify (Build.insertBuildExportedMember member)
 
 prepareBuild :: (Monad m, Monoid a, Data a) => Module a Kind () -> CompilerT a m ()
 prepareBuild Module{..} =
@@ -186,18 +212,21 @@ prepareDefinitions defs = do
   -- Track import sources to detect conflicts (same name from different modules)
   foldM_ collectTypeConstructors Map.empty defs
 
-  -- Step 2: Collect data constructors
-  -- Depends on type constructors being registered (Step 1)
-  traverse_ collectDataConstructors defs
+  -- Step 2: Expand wildcard exports
+  -- Converts wildcard exports (Type(*) -> Type(A, B, C)) to explicit member
+  -- lists. Must happen after type constructors are registered (Step 1) and
+  -- before data constructors are collected (Step 3), so that the export list
+  -- actually gates which constructors are exported.
+  exports <- expandExports (traitInterfaces defs)
 
-  traverse_ collectFolds defs
-
-  -- Step 3: Expand wildcard exports
-  -- Converts Type(*) exports to explicit constructor lists (Type(A, B, C))
-  -- Must happen after type/data collection to know what constructors exist
-  let traitNames = Set.fromList [name | DTrait _ name _ <- defs]
-  exports <- expandExports traitNames
   local (const exports) $ do
+    -- Step 3: Collect data constructors
+    -- Depends on type constructors being registered (Step 1); honours the
+    -- expanded export list produced by Step 2
+    traverse_ collectDataConstructors defs
+
+    traverse_ collectFolds defs
+
     -- Step 4: Collect trait definitions
     -- Must happen before trait interfaces and instances
     traverse_ collectTraits defs
@@ -437,7 +466,7 @@ qualifiedImports Build{..} =
                   _ ->
                     pure mempty
     DNamespaceImport _ path -> do
-      Build{buildExportedNames = exportedNames, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
+      Build{buildExportedNames = exportedNames, buildExportedMembers = exportedMembers, buildNames = importNames, buildInstances = importInstances} <- lift $ lift $ importedBuild path
       namespaces <- lift $ lift $ gets (configPackageNamespaces . compilerConfig)
       let fullPathName = principalPath path
           -- Reverse the package namespace map to recover the short (pre-prefix)
@@ -453,7 +482,7 @@ qualifiedImports Build{..} =
               , m <- mods
               ]
           shortPathMaybe = Map.lookup fullPathName reverseNsMap
-      n1 <- concatForM (Set.toList exportedNames) $ \name -> do
+      n1 <- concatForM (Set.toList (exportedNames <> exportedMembers)) $ \name -> do
         let fullEntry = qualified name path
             shortEntries =
               case shortPathMaybe of
@@ -468,8 +497,33 @@ qualifiedImports Build{..} =
 qualified :: Name -> Path -> Name
 qualified name path = principalPath path <> "." <> name
 
-expandExports :: (Monad m) => Set Name -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
-expandExports traitNames = do
+{- | Map each trait defined in a module to the names of its interface members.
+
+Used by 'expandExports' to resolve the wildcard member list of a trait export
+(@Trait@ -> @Trait(member1, member2, ...)@).
+-}
+traitInterfaces :: [Definition a Kind ()] -> Map.Map Name [Name]
+traitInterfaces defs =
+  Map.fromList
+    [ (name, traitDefinitionInterfaceEntryName <$> traitDefinitionInterface)
+    | DTrait _ name TraitDefinition{..} <- defs
+    ]
+
+{- | Resolve wildcard export member lists to explicit member lists.
+
+An export of the form @T@ parses as @TypeExport loc T ["*"]@ (mirroring a
+wildcard import); @T()@ parses as @TypeExport loc T []@ and an explicit list is
+left untouched.  This pass turns the wildcard into the concrete member set:
+
+- data types: all of their constructor names
+- traits: all of their interface member names
+- type aliases: no members
+
+Running this before data constructors are collected is what makes the export
+list gate constructor visibility.
+-}
+expandExports :: (Monad m) => Map.Map Name [Name] -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (ExportList a)
+expandExports traitInterfaces' = do
   exportList <- ask
   Build{buildTypeConstructors, buildAliases} <- get
   case exportList of
@@ -479,24 +533,22 @@ expandExports traitNames = do
       newExports <-
         forM exports $
           \case
-            TypeExport loc name [] -> do
+            TypeExport loc name ["*"] -> do
               case Environment.lookup name buildTypeConstructors of
-                -- Data types: also export their constructor names
+                -- Data types: export all of their constructor names
                 Just TypeConstructorEntry{..} ->
                   return (TypeExport loc name typeConstructorEntryDataConstructors)
                 Nothing ->
                   case Environment.lookup name buildAliases of
-                    -- Type aliases have no constructors of their own; keep the
-                    -- export unchanged so the alias name itself is exported
+                    -- Type aliases have no members of their own
                     Just _ ->
                       return (TypeExport loc name mempty)
                     Nothing ->
-                      if name `Set.member` traitNames
-                        then
-                          -- Traits have no constructors of their own; keep the
-                          -- export unchanged so the trait name itself is exported
-                          return (TypeExport loc name mempty)
-                        else do
+                      case Map.lookup name traitInterfaces' of
+                        -- Traits: export all of their interface member names
+                        Just members ->
+                          return (TypeExport loc name members)
+                        Nothing -> do
                           lift $ lift $ do
                             path <- gets compilerCurrentPath
                             tellErrors [MissingType name path (ErrorLocation (principalPath path) loc)]
@@ -505,6 +557,27 @@ expandExports traitNames = do
               return e
       return
         (Exports newExports)
+
+{- | The constructors an import's member list refers to.
+
+The wildcard @["*"]@ refers to every constructor of the type; an explicit list
+refers to exactly the constructors it names (whether or not they exist).
+-}
+requestedConstructors :: [Name] -> [Name] -> [Name]
+requestedConstructors ["*"] available = available
+requestedConstructors ctors _ = ctors
+
+{- | Constructors requested explicitly by an import that the exporting module
+does not export.
+
+A wildcard import requests nothing explicitly (it takes whatever is exported),
+so it yields no errors; only an explicit request for a non-exported constructor
+is a violation.
+-}
+unexportedConstructors :: [Name] -> [Name] -> Set Name -> [Name]
+unexportedConstructors ["*"] _ _ = []
+unexportedConstructors ctors available exported =
+  [ctor | ctor <- ctors, ctor `elem` available, not (ctor `Set.member` exported)]
 
 collectTypeConstructors :: (Monad m) => Map.Map Name Path -> Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) (Map.Map Name Path)
 collectTypeConstructors importSources = \case
@@ -676,7 +749,7 @@ insertTypeName Build{..} loc name =
 collectDataConstructors :: (Monad m) => Definition a Kind () -> ReaderT (ExportList a) (StateT (Build a) (CompilerT a m)) ()
 collectDataConstructors =
   \case
-    DType loc _ TypeDefinition{..} ->
+    DType loc typeName TypeDefinition{..} ->
       forM_ typeDefinitionConstructors $
         \ctor -> do
           -- Check for duplicate data constructor names
@@ -693,7 +766,7 @@ collectDataConstructors =
                   { dataConstructorEntryConstructor = DataConstructor{..}
                   } -> do
                     insertNameEntry (NName constructorName constructorScheme)
-                    insertExportedName constructorName
+                    insertExportedMember typeName constructorName
                     insertDataConstructor constructorName entry
                     lift $ lift $ insertNameC constructorName constructorScheme
      where
@@ -703,7 +776,7 @@ collectDataConstructors =
     DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
     DImport loc path imports -> do
-      Build{buildExportedNames = importedExportedNames, buildTypeConstructors = importedTypeConstructors, buildDataConstructors = importedDataConstructors} <- lift $ lift $ importedBuild path
+      Build{buildExportedNames = importedExportedNames, buildExportedMembers = importedExportedMembers, buildTypeConstructors = importedTypeConstructors, buildDataConstructors = importedDataConstructors} <- lift $ lift $ importedBuild path
       forM_ imports $
         \case
           TypeImport _ name ctors
@@ -711,25 +784,32 @@ collectDataConstructors =
                 case Environment.lookup name importedTypeConstructors of
                   Nothing ->
                     pure ()
-                  Just TypeConstructorEntry{..} ->
-                    forM_ dataConstructors $
+                  Just TypeConstructorEntry{..} -> do
+                    forM_ (requestedConstructors ctors typeConstructorEntryDataConstructors) $
                       \ctor ->
                         case Environment.lookup ctor importedDataConstructors of
                           Nothing ->
                             lift $ lift $ do
                               currentPath <- gets compilerCurrentPath
                               tellErrors [NoDataConstructorForType ctor name path (ErrorLocation (principalPath currentPath) loc)]
-                          Just entry@DataConstructorEntry{dataConstructorEntryMetaData, dataConstructorEntryConstructor = DataConstructor{..}} -> do
-                            -- Check if already inserted (happens with duplicate imports from same module)
-                            Build{buildDataConstructors = currentDataConstructors} <- get
-                            let alreadyExists = Environment.contains ctor currentDataConstructors
-                            unless alreadyExists $ do
-                              insertDataConstructor ctor entry
-                              lift $ lift $ insertNewName constructorName dataConstructorEntryMetaData constructorScheme
-                   where
-                    dataConstructors
-                      | ["*"] == ctors = typeConstructorEntryDataConstructors
-                      | otherwise = ctors
+                          Just entry@DataConstructorEntry{dataConstructorEntryMetaData, dataConstructorEntryConstructor = DataConstructor{..}} ->
+                            -- Only constructors the exporting module exports are
+                            -- brought into scope.
+                            when (ctor `Set.member` importedExportedMembers) $ do
+                              -- Check if already inserted (happens with duplicate imports from same module)
+                              Build{buildDataConstructors = currentDataConstructors} <- get
+                              let alreadyExists = Environment.contains ctor currentDataConstructors
+                              unless alreadyExists $ do
+                                insertDataConstructor ctor entry
+                                lift $ lift $ insertNewName constructorName dataConstructorEntryMetaData constructorScheme
+                    -- Explicitly requesting a constructor the exporting module does
+                    -- not export is an error; a wildcard import silently takes
+                    -- whatever is exported.
+                    forM_ (unexportedConstructors ctors typeConstructorEntryDataConstructors importedExportedMembers) $
+                      \ctor ->
+                        lift $ lift $ do
+                          currentPath <- gets compilerCurrentPath
+                          tellErrors [ImportNotInModule ctor path (ErrorLocation (principalPath currentPath) loc)]
             | otherwise -> do
                 lift $ lift $ do
                   currentPath <- gets compilerCurrentPath
@@ -891,18 +971,12 @@ collectTraitsInterface =
           insertNameEntry (NName traitDefinitionInterfaceEntryName normalizedScheme)
           _ <- lift $ lift $ insertNameC traitDefinitionInterfaceEntryName normalizedScheme
 
-          exportList <- ask
-          let exportName =
-                unless (traitDefinitionInterfaceEntryName `elem` builtinNames) $
-                  modify (Build.insertBuildExportedName traitDefinitionInterfaceEntryName)
-          case exportList of
-            ExportAll ->
-              exportName
-            Exports exports
-              | exports `includesName` traitDefinitionInterfaceEntryName || exports `includesName` name ->
-                  exportName
-            _ ->
-              pure ()
+          -- The wildcard member list is resolved to the concrete interface
+          -- member names by 'expandExports', so a bare trait export (@Trait@)
+          -- still exports every member while @Trait()@ exports none.  Matching is
+          -- scoped to the trait itself, so a member that shares its name with the
+          -- trait is not exported by @Trait()@.
+          insertExportedMember name traitDefinitionInterfaceEntryName
     -- Special case: Builtin$ module handling (see collectTypeConstructors)
     DImport _ (Path ["Builtin$"]) _ -> do
       pure ()
@@ -918,7 +992,7 @@ collectTraitsInterface =
                   Just TraitEntry{..} -> do
                     forM_ names $
                       \case
-                        member | member `elem` buildExportedNames -> do
+                        member | member `elem` buildExportedMembers -> do
                           forM_ (Environment.lookupWithDefault mempty member buildNames) $
                             \case
                               info@(NName _ s) -> do
@@ -1152,7 +1226,10 @@ collectImports =
       forM_ imports $
         \case
           NameImport iloc name
-            | name `elem` buildExportedNames -> do
+            -- A name import may refer to a plain value/type name or to an
+            -- exported member (a trait interface member such as @map@, or a
+            -- lower-case constructor such as @mempty@).
+            | name `elem` buildExportedNames || name `elem` buildExportedMembers -> do
                 forM_ (Environment.lookupWithDefault mempty name buildNames) $
                   \case
                     info@(NName _ s) -> do
@@ -1196,7 +1273,7 @@ collectImports =
               , m <- mods
               ]
           shortPrefix = Map.lookup fullPathName reverseNsMap
-      forM_ buildExportedNames $
+      forM_ (buildExportedNames <> buildExportedMembers) $
         \exportedName ->
           forM_ (Environment.lookupWithDefault mempty exportedName buildNames) $
             \case

@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+  import namespace Shapes
+
+  // NOTE: qualified *constructors* (`Shapes.Circle`) are not supported by the
+  // expression parser/type checker; qualified functions are. This exercises the
+  // namespace import against a module that has an explicit export list.
+  fun main() =
+    IO.println_int32(Shapes.area(Shapes.make(3)))
+
+}

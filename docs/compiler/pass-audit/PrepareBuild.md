@@ -19,10 +19,12 @@ src/Coal/Compiler/Pass/PhaseTypeChecking/PrepareBuild.hs
 ## Summary
 
 Runs in a `ReaderT (ExportList a) (StateT (Build a) (CompilerT a m))` monad stack,
-executing 10 strictly ordered steps: type constructors → data constructors → folds →
-export expansion → traits → trait interfaces → instances → builtin instances →
+executing 10 strictly ordered steps: type constructors → export expansion → data
+constructors → folds → traits → trait interfaces → instances → builtin instances →
 imports → placeholders → qualified name resolution. The ordering is critical:
-each step depends on data registered by previous steps.
+each step depends on data registered by previous steps, and export expansion must
+run before data constructors are collected so that the export list gates which
+constructors are exported.
 
 ---
 
@@ -46,12 +48,18 @@ The `prepareDefinitions` function runs 10 steps:
 
 1. **Builtin type/data constructors**: Inserts `List`, `Zero`, `Succ` as compiler-provided
 2. **Type constructors** (`collectTypeConstructors`): Gathers `DType` definitions with their kinds
-3. **Data constructors** (`collectDataConstructors`): Gathers data constructors with schemes
-4. **Folds** (`collectFolds`): Registers fold names and records their expression-level and
+3. **Export expansion** (`expandExports`): Resolves wildcard export member lists to explicit
+   ones — a data type `T` becomes `T(A, B, ...)`, a trait `Tr` becomes `Tr(m1, m2, ...)`,
+   and a type alias becomes `Alias()`. An empty member list (`T()`) is left untouched, so
+   `T` exports every member while `T()` exports none
+4. **Data constructors** (`collectDataConstructors`): Gathers data constructors with schemes,
+   honouring the expanded export list (a constructor is only exported if the export list
+   selects it). Exported members — data constructors and trait interface members — are
+   recorded in `buildExportedMembers`, which is kept separate from `buildExportedNames` so
+   that a member sharing its name with its owning type (`type Thing = Thing(int32)`) can be
+   exported or withheld independently of the type
+5. **Folds** (`collectFolds`): Registers fold names and records their expression-level and
    @-pattern (structural recursion) dependencies (`foldExprDeps` / `foldPatternDeps`)
-5. **Export expansion** (`expandExports`): Converts `Type(*)` to explicit constructor
-   lists; keeps `Type(Name)` exports for type aliases and traits unchanged
-   (neither aliases nor traits carry constructors of their own)
 6. **Traits** (`collectTraits`): Registers trait definitions and imported traits
 7. **Trait interfaces** (`collectTraitsInterface`): Registers trait member signatures
 8. **Instances** (`collectInstances`): Registers trait implementations with their methods

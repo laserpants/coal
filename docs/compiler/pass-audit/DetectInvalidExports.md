@@ -19,8 +19,10 @@ src/Coal/Compiler/Pass/PhasePreflight/DetectInvalidExports.hs
 
 For each export in the module's export list, checks whether the exported name
 is actually defined. For `NameExport`, checks that the name appears in any
-definition's names. For `TypeExport`, checks the type name and each constructor
-name.
+definition's names. For `TypeExport`, checks the type name and each member
+name (data constructors for a data type, interface members for a trait). The
+wildcard member list `["*"]` — written as a bare type name, `T` — has no
+individual members to validate and is skipped.
 
 ---
 
@@ -44,14 +46,16 @@ name.
 
 - `NameExport loc name`: Checks `name ∈ definedNames`; if not, reports `ExportNotInModule`
 - `TypeExport loc typeName memberNames`: Checks `typeName ∈ definedTypeNames`
-  (type, type-alias, or trait names); then for each memberName, checks it's a
-  constructor belonging to that type
+  (type, type-alias, or trait names); then, unless `memberNames` is the wildcard
+  `["*"]`, checks that each member is a data constructor of that type or an
+  interface member of that trait
 
 ### Helper functions
 
 - `definitionNames`: extracts all user-visible names from a definition
 - `typeNames`: extracts type, type-alias, and trait names
-- `typeConstructorMap`: builds `[(typeName, constructorName)]` mapping
+- `memberMap`: builds a `[(ownerName, memberName)]` mapping for data types
+  (their constructors) and traits (their interface members)
 
 ---
 

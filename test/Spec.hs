@@ -9,7 +9,9 @@ import Coal.Compiler.Pass.PhaseParsing.ParsingSpec (parsingSpec)
 import Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec (expandLetBindingsSpec)
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
+import Coal.Language.Module.ExportSpec (exportMatchingSpec)
 import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
+import Coal.Parser.ModuleSpec (moduleHeaderSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Spec (e2eSpec)
 import Package.ConstraintValidationSpec (constraintValidationSpec)
@@ -28,6 +30,8 @@ spec =
     typeApplicationSpec
     patternAnomaliesSpec
     expandLetBindingsSpec
+    moduleHeaderSpec
+    exportMatchingSpec
 
 main :: IO ()
 main =

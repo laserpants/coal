@@ -1,0 +1,11 @@
+module Main {
+
+  import Stuff(Thing)
+  import namespace IO
+
+  let x = Thing(123)
+
+  fun main() =
+    IO.println_string("hello")
+
+}

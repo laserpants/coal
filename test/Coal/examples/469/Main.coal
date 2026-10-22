@@ -1,0 +1,14 @@
+module Main {
+
+  import Stuff(Thing)
+  import namespace IO
+
+  fun unwrap(t : Thing) : int32 =
+    match(t) {
+      | Thing(n) => n
+    }
+
+  fun main() =
+    IO.println_int32(unwrap(Thing(123)))
+
+}

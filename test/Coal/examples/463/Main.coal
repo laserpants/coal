@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import Empty()
+
+  fun main() =
+    IO.println_int32(42)
+
+}

@@ -1,0 +1,8 @@
+module Al(MyAlias, add_one) {
+
+  type alias MyAlias = int32
+
+  fun add_one(x : MyAlias) : MyAlias =
+    x + 1
+
+}

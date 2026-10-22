@@ -44,6 +44,7 @@ module Coal.Compiler.Build (
 
   -- * Export operations
   insertBuildExportedName,
+  insertBuildExportedMember,
 
   -- * Data constructor operations
   overBuildDataConstructors,
@@ -107,6 +108,7 @@ information collected during compilation phases:
 - 'buildPath': Current module path being compiled
 - 'buildNames': Environment mapping names to their entries (values, types, traits, etc.)
 - 'buildExportedNames': Set of names exported from the module
+- 'buildExportedMembers': Set of exported data constructors and trait interface members
 - 'buildFolds': Set that contains the names of all fold definitions
 - 'buildFoldExprDeps': Map from fold name to expression-level dependencies
 - 'buildFoldPatternDeps': Map from fold name to @-pattern (structural recursion) dependencies
@@ -128,6 +130,7 @@ data Build a = Build
   { buildPath :: Path
   , buildNames :: Environment [NameEntry]
   , buildExportedNames :: Set Name
+  , buildExportedMembers :: Set Name
   , buildFolds :: Set Name
   , buildFoldExprDeps :: Map Name (Set Name)
   , buildFoldPatternDeps :: Map Name (Set Name)
@@ -158,6 +161,7 @@ emptyBuild =
     { buildPath = Path []
     , buildNames = mempty
     , buildExportedNames = mempty
+    , buildExportedMembers = mempty
     , buildFolds = mempty
     , buildFoldExprDeps = mempty
     , buildFoldPatternDeps = mempty
@@ -290,6 +294,25 @@ overBuildExportedNames f Build{..} =
 -- | Mark a name as exported from the module
 insertBuildExportedName :: Name -> Build a -> Build a
 insertBuildExportedName name = overBuildExportedNames (Set.insert name)
+
+-- | Apply a function to the exported members set
+overBuildExportedMembers :: (Set Name -> Set Name) -> Build a -> Build a
+overBuildExportedMembers f Build{..} =
+  Build
+    { buildExportedMembers = f buildExportedMembers
+    , ..
+    }
+
+{- | Mark @name@ as an exported /member/ of the module.
+
+Members are data constructors and trait interface members.  They are tracked
+separately from 'buildExportedNames' because a member can share its name with
+its owning type (@type Thing = Thing(int32)@): keeping the two sets apart lets
+an importer distinguish "the type @Thing@ is exported" from "the constructor
+@Thing@ is exported".
+-}
+insertBuildExportedMember :: Name -> Build a -> Build a
+insertBuildExportedMember name = overBuildExportedMembers (Set.insert name)
 
 -- -----------------------------------------------------------------------------
 

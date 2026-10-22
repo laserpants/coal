@@ -168,14 +168,13 @@ parseConstructor tn qs = do
 parseImportAtom :: Parser (Import Metadata)
 parseImportAtom =
   parseTypeImport
-    <|> parseTypeImport
     <|> parseNameImport
 
 parseTypeImport :: Parser (Import Metadata)
 parseTypeImport = do
   start <- getSourcePos
   name_ <- constructor
-  names <- option ["*"] (parens (commaSep1 (name <|> constructor)))
+  names <- option ["*"] (parens (commaSep (name <|> constructor)))
   end <- getSourcePos
   pure (TypeImport (Metadata start end) name_ names)
 

@@ -1,0 +1,5 @@
+module Stuff(Thing) {
+
+  type Thing = Thing(int32)
+
+}

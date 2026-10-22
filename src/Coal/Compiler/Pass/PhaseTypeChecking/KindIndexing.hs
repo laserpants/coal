@@ -46,6 +46,7 @@ import Coal.Compiler.State
 import Coal.Language (Kind (..), Parameter (..), Type (..), TypeIndex (..), constructors, forall2, (~>))
 import Coal.Language.Definition (AliasDefinition (..), Definition (..))
 import Coal.Language.Module (ExportList (..), Module (..))
+import Coal.Language.Module.Export (includesName)
 import Coal.Language.Module.Import (Import (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.Language.Type.Kind.Indexed (ToKindIndexed (..))
@@ -143,7 +144,7 @@ insertExportedName name
 
   isExported :: Name -> ExportList a -> Bool
   isExported _ ExportAll = True
-  isExported n (Exports exports) = n `elem` (nameOf <$> exports)
+  isExported n (Exports exports) = exports `includesName` n
 
 insertNameEntry :: (Monad m) => NameEntry -> ReaderT (ExportList a) (StateT (Build a) m) ()
 insertNameEntry entry = modify (Build.insertBuildNameEntry entry)

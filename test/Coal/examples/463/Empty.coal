@@ -1,0 +1,6 @@
+module Empty() {
+
+  fun unused() : int32 =
+    1
+
+}

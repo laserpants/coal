@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -91,8 +92,10 @@ checkExport Module{..} export =
       unless (typeName `elem` definedTypeNames) $ do
         currentPath <- gets compilerCurrentPath
         tellErrors [ExportNotInModule typeName modulePath (ErrorLocation (principalPath currentPath) loc)]
-      -- Check that each exported member (constructor) belongs to the type
-      traverse_ (checkTypeMember loc typeName) memberNames
+      -- A missing member list is the wildcard @["*"]@ (export every member), so
+      -- there are no individual members to validate.
+      unless (memberNames == ["*"]) $
+        traverse_ (checkTypeMember loc typeName) memberNames
  where
   -- All user-visible names defined at module level
   definedNames = concatMap definitionNames moduleDefinitions
@@ -100,18 +103,19 @@ checkExport Module{..} export =
   -- Names of types, type aliases, and traits
   definedTypeNames = concatMap typeNames moduleDefinitions
 
-  -- Type → its constructor names (from DType)
-  typeConstructors = concatMap typeConstructorMap moduleDefinitions
+  -- Type or trait → the names of its members (data constructors for a type,
+  -- interface members for a trait)
+  typeMembers = concatMap memberMap moduleDefinitions
 
   checkTypeMember :: (Monad m) => Metadata -> Name -> Name -> CompilerT Metadata m ()
   checkTypeMember loc typeName memberName = do
-    unless (memberName `elem` lookupConstructors typeName) $ do
+    unless (memberName `elem` lookupMembers typeName) $ do
       currentPath <- gets compilerCurrentPath
       tellErrors [ExportNotInModule memberName modulePath (ErrorLocation (principalPath currentPath) loc)]
 
-  lookupConstructors :: Name -> [Name]
-  lookupConstructors typeName' =
-    [c | (t, c) <- typeConstructors, t == typeName']
+  lookupMembers :: Name -> [Name]
+  lookupMembers typeName' =
+    [m | (t, m) <- typeMembers, t == typeName']
 
 definitionNames :: Definition Metadata () () -> [Name]
 definitionNames =
@@ -149,12 +153,16 @@ typeNames =
     _ ->
       []
 
-typeConstructorMap :: Definition Metadata () () -> [(Name, Name)]
-typeConstructorMap =
+memberMap :: Definition Metadata () () -> [(Name, Name)]
+memberMap =
   \case
     DType _ name def ->
       [ (name, constructorName c)
       | c <- typeDefinitionConstructors def
+      ]
+    DTrait _ name def ->
+      [ (name, traitDefinitionInterfaceEntryName e)
+      | e <- traitDefinitionInterface def
       ]
     _ ->
       []

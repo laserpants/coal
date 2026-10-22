@@ -2444,6 +2444,212 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- Export/import member-list matrix.  A bare type name in an export or import
+  -- list means "all members" (the wildcard `["*"]`), `T()` means "no members",
+  -- and `T(A, B)` selects a subset.  Exports and imports use the same
+  -- convention, and the exporting module's list gates what an importer may take.
+  --
+  -- 453: module exports `Shape` (all constructors); importer takes them all.
+  describe "453" $
+    expectOutput
+      "31"
+      "test/Coal/examples/453"
+      [ "Main.coal"
+      , "Shapes.coal"
+      ]
+
+  -- 454: `Shape()` imports the type without any constructors; the previously
+  -- broken case (`commaSep1` made an empty member list a parse error).
+  describe "454" $
+    expectOutput
+      "12"
+      "test/Coal/examples/454"
+      [ "Main.coal"
+      , "Shapes.coal"
+      ]
+
+  -- 455: module exports only `Shape(Circle)`; importer requests only `Circle`.
+  describe "455" $
+    expectOutput
+      "27"
+      "test/Coal/examples/455"
+      [ "Main.coal"
+      , "Shapes.coal"
+      ]
+
+  -- 456: module exports only `Shape(Circle)`; the importer's wildcard request
+  -- is intersected with the export set, so `Circle` is available.
+  describe "456" $
+    expectOutput
+      "27"
+      "test/Coal/examples/456"
+      [ "Main.coal"
+      , "Shapes.coal"
+      ]
+
+  -- 457: module exports `Shape()` (no constructors); a wildcard import still
+  -- brings in no constructors.
+  describe "457" $
+    expectOutput
+      "12"
+      "test/Coal/examples/457"
+      [ "Main.coal"
+      , "Shapes.coal"
+      ]
+
+  -- 458: module exports only `Shape(Circle)`; explicitly importing `Square` is
+  -- an error.
+  describe "458" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/458"
+          [ "Main.coal"
+          , "Shapes.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
+  -- 459: module exports `Shape()`; explicitly importing `Circle` is an error.
+  describe "459" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/459"
+          [ "Main.coal"
+          , "Shapes.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
+  -- 460: a bare trait export makes its interface members available.
+  describe "460" $
+    expectOutput
+      "5"
+      "test/Coal/examples/460"
+      [ "Main.coal"
+      , "Nums.coal"
+      ]
+
+  -- 461: `ToInt32()` exports the trait without its members, so calling the
+  -- member directly is an error (the member name is not in scope).
+  describe "461" $ do
+    it "is NoSuchIdentifier" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/461"
+          [ "Main.coal"
+          , "Nums.coal"
+          ]
+      res `shouldBe` Left NoSuchIdentifier
+
+  -- 462: exporting a type alias by name works and does not trigger a missing
+  -- type error.
+  describe "462" $
+    expectOutput
+      "7"
+      "test/Coal/examples/462"
+      [ "Main.coal"
+      , "Al.coal"
+      ]
+
+  -- 463: an empty export list (`module Empty()`) exports nothing, and an empty
+  -- import list (`import Empty()`) imports nothing.
+  describe "463" $
+    expectOutput
+      "42"
+      "test/Coal/examples/463"
+      [ "Main.coal"
+      , "Empty.coal"
+      ]
+
+  -- 464: exporting a constructor the type does not have is an error.
+  describe "464" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/464"
+          [ "Main.coal"
+          , "Shapes.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
+  -- 465: a namespace import qualifies the exported constructors as well, so
+  -- `Shapes.Circle` resolves.
+  describe "465" $
+    expectOutput
+      "27"
+      "test/Coal/examples/465"
+      [ "Main.coal"
+      , "Shapes.coal"
+      ]
+
+  -- 466: a constructor listed as a top-level export atom is treated as a type
+  -- export of a non-existent type, which is an error.
+  describe "466" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/466"
+          [ "Main.coal"
+          , "Shapes.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
+  -- 467: explicitly importing a constructor that does not exist on the type is
+  -- still reported (the export-set intersection must not swallow it).
+  describe "467" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/467"
+          [ "Main.coal"
+          , "Shapes.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
+  -- 468: a type and its single constructor share a name.  `Thing()` exports the
+  -- type without its constructor, so `Thing(123)` must not resolve.
+  describe "468" $ do
+    it "is TypeError" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/468"
+          [ "Main.coal"
+          , "Stuff.coal"
+          ]
+      res `shouldBe` Left TypeError
+
+  -- 469: the same same-named type/constructor pair, but exported with its
+  -- members, so the constructor is importable.
+  describe "469" $
+    expectOutput
+      "123"
+      "test/Coal/examples/469"
+      [ "Main.coal"
+      , "Stuff.coal"
+      ]
+
+  -- 470: a trait interface member can be imported by name from a module that
+  -- exports everything.
+  describe "470" $
+    expectOutput
+      "9"
+      "test/Coal/examples/470"
+      [ "Main.coal"
+      , "Nums.coal"
+      ]
+
+  -- 471: `ToInt32()` exports the trait without its members, so importing the
+  -- member by name is an error.
+  describe "471" $ do
+    it "is PreflightFailure" $ do
+      res <-
+        runSpec
+          "test/Coal/examples/471"
+          [ "Main.coal"
+          , "Nums.coal"
+          ]
+      res `shouldBe` Left PreflightFailure
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

@@ -149,7 +149,7 @@ History:
   * @"2"@ — added @instanceEntryModule@ to @InstanceEntry@.
 -}
 buildCacheFormatVersion :: Text
-buildCacheFormatVersion = "6"
+buildCacheFormatVersion = "8"
 
 {- | Compute a hash of the configuration fields that affect compilation output.
 Used to invalidate cached builds when relevant config changes.

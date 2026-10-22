@@ -41,7 +41,9 @@ parseTypeExport :: Parser (Export Metadata)
 parseTypeExport = do
   start <- getSourcePos
   name_ <- constructor
-  names <- option [] (parens (commaSep1 name))
+  -- Mirrors 'parseTypeImport': a missing member list is the wildcard @["*"]@,
+  -- an empty list selects no members, and an explicit list selects a subset.
+  names <- option ["*"] (parens (commaSep (name <|> constructor)))
   end <- getSourcePos
   pure (TypeExport (Metadata start end) name_ names)
 

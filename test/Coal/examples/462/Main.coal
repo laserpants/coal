@@ -1,0 +1,9 @@
+module Main {
+
+  import namespace IO
+  import Al(MyAlias, add_one)
+
+  fun main() =
+    IO.println_int32(add_one(6))
+
+}
