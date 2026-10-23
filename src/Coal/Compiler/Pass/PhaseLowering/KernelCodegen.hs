@@ -14,7 +14,7 @@ module Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..), setBuildKernelInterface)
-import Coal.Compiler.Build.Cache (buildCacheDir, writeBuildFile)
+import Coal.Compiler.Build.Cache (buildCacheDir, withBuildTempDirectory, writeBuildFile)
 import Coal.Compiler.Build.Envelope (BuildEnvelope (..))
 import Coal.Compiler.Build.NameEntry (DataConstructorEntry (..), TypeConstructorEntry (..))
 import Coal.Compiler.Config (CompilerConfig (..))
@@ -52,7 +52,6 @@ import LLVM.IRModule (IRModule)
 import LLVM.IRRenderer (renderModule)
 import System.Exit (ExitCode (..))
 import System.FilePath ((<.>), (</>))
-import System.IO.Temp (withSystemTempDirectory)
 import System.Process (proc)
 import qualified System.Process.ByteString as ProcessBS
 import TextShow (showt)
@@ -166,7 +165,7 @@ pass envelopes = do
   eAssembled <-
     liftIO $
       try @SomeException $
-        withSystemTempDirectory "coal-build-nk" $ \tmpDir ->
+        withBuildTempDirectory "coal-build-nk" $ \tmpDir ->
           Kernel.runCompilerT $
             forM targets $ \(name, moduleNormalized) -> do
               ir <- Kernel.codeGenModule config context moduleNormalized

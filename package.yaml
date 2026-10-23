@@ -88,13 +88,23 @@ executables:
     ghc-options:
       - -threaded
       - -rtsopts
-      # -N: parallel GC. -A32m: a large allocation area per capability; with
-      # the tiny default nursery the compiler performs tens of thousands of
-      # minor GCs on large builds, copying many GB of live data and inflating
-      # peak memory use to the point of heap exhaustion. GHC accepts only a
-      # single -with-rtsopts flag, so both options are passed in one
-      # (quoted) token.
-      - '"-with-rtsopts=-N -A32m"'
+      # -A: the allocation area (nursery) size. It is *per capability*, so it
+      # must be read together with -N. With the default 4MB nursery the compiler
+      # performs tens of thousands of minor GCs on large builds, copying many GB
+      # of live data and inflating peak memory use; a moderately larger nursery
+      # avoids that.
+      #
+      # -N is deliberately NOT set. Nothing in the compiler runs concurrently
+      # (every pass is sequential), so extra capabilities buy no parallelism,
+      # while multiplying the nursery by the core count and enabling the
+      # parallel GC. On a 16-core machine the old "-N -A32m" reserved 16 x 32MB
+      # = 512MB of nursery before any live data, and GHC only returns that
+      # memory during idle collections, which a build never has.
+      #
+      # GHC accepts only a single -with-rtsopts flag, so the options are passed
+      # in one (quoted) token. `-rtsopts` lets users override at runtime, e.g.
+      # `coal build +RTS -A32m -RTS` or `GHCRTS=-M2G`.
+      - '"-with-rtsopts=-A16m"'
     dependencies:
       - coal
 
@@ -105,7 +115,9 @@ tests:
     ghc-options:
       - -threaded
       - -rtsopts
-      - -with-rtsopts=-N
+      # Same nursery rationale as the `coal` executable above: the test suite
+      # compiles many programs in one process, all sequentially.
+      - -with-rtsopts=-A16m
     dependencies:
       - coal
       - hspec >= 2.10.10 && < 2.12
