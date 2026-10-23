@@ -1,0 +1,11 @@
+module Data.Shapes {
+
+  type Shape = Circle(int32) | Square(int32)
+
+  fun area(s : Shape) : int32 =
+    match(s) {
+      | Circle(r) => r * r
+      | Square(w) => w * w
+    }
+
+}
