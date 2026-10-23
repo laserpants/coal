@@ -1,0 +1,17 @@
+module Main {
+
+  import namespace IO
+  import namespace Shapes
+
+  // Qualified constructor in pattern position.
+  fun classify(s) =
+    match(s) {
+      | Shapes.Circle(r) => r
+      | Shapes.Square(w) => w + 1
+    }
+
+  fun main() =
+    IO.println_int32(
+      Shapes.area(Shapes.Square(4)) + classify(Shapes.Circle(3)))
+
+}

@@ -2657,6 +2657,18 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 473: a qualified data constructor reference (`Shapes.Square(4)`) must
+  -- resolve through `import namespace Shapes` end to end, in both expression
+  -- and pattern position, exercising the parser, the name store, the
+  -- qualified-name map, constructor resolution and codegen.
+  describe "473" $
+    expectOutput
+      "19"
+      "test/Coal/examples/473"
+      [ "Main.coal"
+      , "Shapes.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

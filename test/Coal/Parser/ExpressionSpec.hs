@@ -20,9 +20,17 @@ module Coal.Parser.ExpressionSpec (expressionSpec) where
 
 import Coal.Common.Label (Label (..))
 import Coal.Compiler.Metadata (Metadata)
-import Coal.Language (Definition (..), Expression (..), FunctionDefinition (..), Module (..), Operator (..))
+import Coal.Language (
+  Definition (..),
+  Expression (..),
+  FunctionDefinition (..),
+  Module (..),
+  Operator (..),
+  Pattern (..),
+ )
 import Coal.Parser (parseSourceFile)
 import Data.Either (isLeft)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Text (Text)
 import Extras (Name)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
@@ -65,6 +73,21 @@ binaryOperatorName = \case
   EApplication _ _ (EOperator _ _ op) _ -> Just op
   _ -> Nothing
 
+-- | The name of a constructor expression, or @Nothing@ for any other expression.
+constructorName :: Expression Metadata () () -> Maybe Name
+constructorName = \case
+  EConstructor _ (Label _ n) -> Just n
+  _ -> Nothing
+
+-- | @Just name@ for the constructor name of a lambda's first parameter pattern.
+lambdaParamConstructor :: Expression Metadata () () -> Maybe Name
+lambdaParamConstructor = \case
+  ELambda _ (p :| _) _ ->
+    case p of
+      PConstructor _ (Label _ n) _ -> Just n
+      _ -> Nothing
+  _ -> Nothing
+
 expressionSpec :: Spec
 expressionSpec = do
   describe "record field selection" $ do
@@ -86,6 +109,30 @@ expressionSpec = do
   describe "module-qualified names" $ do
     it "still parses a qualified variable" $
       fmap variableName (parseBody "List.map") `shouldBe` Right (Just "List.map")
+
+  describe "qualified constructor names" $ do
+    it "parses an unqualified constructor" $
+      fmap constructorName (parseBody "Foo") `shouldBe` Right (Just "Foo")
+
+    it "parses a two-segment qualified constructor" $
+      fmap constructorName (parseBody "Foo.Bar") `shouldBe` Right (Just "Foo.Bar")
+
+    it "parses a three-segment qualified constructor" $
+      fmap constructorName (parseBody "Data.Map.Empty") `shouldBe` Right (Just "Data.Map.Empty")
+
+    it "prefers a qualified variable when the last segment is lowercase" $
+      fmap variableName (parseBody "Data.map") `shouldBe` Right (Just "Data.map")
+
+    it "rejects a trailing dot" $
+      parseBody "Data.Map." `shouldSatisfy` isLeft
+
+    it "leaves the .| operator alone" $
+      fmap binaryOperatorName (parseBody "A.B .| f") `shouldBe` Right (Just OForwardApplication)
+
+  describe "qualified constructor patterns" $ do
+    it "parses a qualified constructor in a lambda parameter" $
+      fmap lambdaParamConstructor (parseBody "fn(Shapes.Circle(r)) => r")
+        `shouldBe` Right (Just "Shapes.Circle")
 
   describe "pipeline operators" $ do
     it "still parses forward application" $

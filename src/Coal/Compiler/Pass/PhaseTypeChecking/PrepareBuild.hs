@@ -1278,14 +1278,31 @@ collectImports =
           forM_ (Environment.lookupWithDefault mempty exportedName buildNames) $
             \case
               NName name s -> do
+                -- Data constructors are resolved by name from
+                -- 'buildDataConstructors' (see 'lookupDataConstructor'), and the
+                -- exhaustiveness checker compares the pattern names against the
+                -- entry's sibling set, so a qualified constructor reference needs
+                -- its own entry under the qualified name, with the sibling set
+                -- qualified the same way.
+                let registerConstructor qualifier qualifiedCtor =
+                      forM_ (Environment.lookup name buildDataConstructors) $ \entry ->
+                        insertDataConstructor
+                          qualifiedCtor
+                          entry
+                            { dataConstructorEntryName = qualifiedCtor
+                            , dataConstructorEntryConstructorSet =
+                                Set.map (qualifier <.>) (dataConstructorEntryConstructorSet entry)
+                            }
                 modify (insertBuildNameEntry (NName (qualifiedName name) s))
                 _ <- lift $ lift $ insertNameC (qualifiedName name) s
+                registerConstructor (principalPath buildPath) (qualifiedName name)
                 -- Also register the short-form name so that intra-package code
                 -- using the pre-prefix path (e.g. Containers.Map.insert) resolves.
                 forM_ shortPrefix $ \sp -> do
                   let sn = sp <.> name
                   modify (insertBuildNameEntry (NName sn s))
                   _ <- lift $ lift $ insertNameC sn s
+                  registerConstructor sp sn
                   pure ()
               NType name k ->
                 modify (insertBuildNameEntry (NType (qualifiedName name) k))
