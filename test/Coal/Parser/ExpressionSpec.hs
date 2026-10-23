@@ -92,13 +92,13 @@ expressionSpec :: Spec
 expressionSpec = do
   describe "record field selection" $ do
     it "accepts a lowercase field name" $
-      fmap selectChain (parseBody "x.foo") `shouldBe` Right (Just ("x", ["foo"]))
+      (selectChain <$> parseBody "x.foo") `shouldBe` Right (Just ("x", ["foo"]))
 
     it "accepts a chain of lowercase field names" $
-      fmap selectChain (parseBody "x.foo.bar") `shouldBe` Right (Just ("x", ["foo", "bar"]))
+      (selectChain <$> parseBody "x.foo.bar") `shouldBe` Right (Just ("x", ["foo", "bar"]))
 
     it "accepts an underscore-initial field name" $
-      fmap selectChain (parseBody "x._foo") `shouldBe` Right (Just ("x", ["_foo"]))
+      (selectChain <$> parseBody "x._foo") `shouldBe` Right (Just ("x", ["_foo"]))
 
     it "rejects an uppercase field name" $
       parseBody "x.Foo" `shouldSatisfy` isLeft
@@ -108,35 +108,35 @@ expressionSpec = do
 
   describe "module-qualified names" $ do
     it "still parses a qualified variable" $
-      fmap variableName (parseBody "List.map") `shouldBe` Right (Just "List.map")
+      (variableName <$> parseBody "List.map") `shouldBe` Right (Just "List.map")
 
   describe "qualified constructor names" $ do
     it "parses an unqualified constructor" $
-      fmap constructorName (parseBody "Foo") `shouldBe` Right (Just "Foo")
+      (constructorName <$> parseBody "Foo") `shouldBe` Right (Just "Foo")
 
     it "parses a two-segment qualified constructor" $
-      fmap constructorName (parseBody "Foo.Bar") `shouldBe` Right (Just "Foo.Bar")
+      (constructorName <$> parseBody "Foo.Bar") `shouldBe` Right (Just "Foo.Bar")
 
     it "parses a three-segment qualified constructor" $
-      fmap constructorName (parseBody "Data.Map.Empty") `shouldBe` Right (Just "Data.Map.Empty")
+      (constructorName <$> parseBody "Data.Map.Empty") `shouldBe` Right (Just "Data.Map.Empty")
 
     it "prefers a qualified variable when the last segment is lowercase" $
-      fmap variableName (parseBody "Data.map") `shouldBe` Right (Just "Data.map")
+      (variableName <$> parseBody "Data.map") `shouldBe` Right (Just "Data.map")
 
     it "rejects a trailing dot" $
       parseBody "Data.Map." `shouldSatisfy` isLeft
 
     it "leaves the .| operator alone" $
-      fmap binaryOperatorName (parseBody "A.B .| f") `shouldBe` Right (Just OForwardApplication)
+      (binaryOperatorName <$> parseBody "A.B .| f") `shouldBe` Right (Just OForwardApplication)
 
   describe "qualified constructor patterns" $ do
     it "parses a qualified constructor in a lambda parameter" $
-      fmap lambdaParamConstructor (parseBody "fn(Shapes.Circle(r)) => r")
+      (lambdaParamConstructor <$> parseBody "fn(Shapes.Circle(r)) => r")
         `shouldBe` Right (Just "Shapes.Circle")
 
   describe "pipeline operators" $ do
     it "still parses forward application" $
-      fmap binaryOperatorName (parseBody "x .| f") `shouldBe` Right (Just OForwardApplication)
+      (binaryOperatorName <$> parseBody "x .| f") `shouldBe` Right (Just OForwardApplication)
 
     it "still parses reverse application" $
-      fmap binaryOperatorName (parseBody "x |. f") `shouldBe` Right (Just OReverseApplication)
+      (binaryOperatorName <$> parseBody "x |. f") `shouldBe` Right (Just OReverseApplication)
