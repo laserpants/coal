@@ -13,7 +13,7 @@ import Coal.Language
 import qualified Coal.Parser.BuiltinNames as Builtin
 import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)
 import Coal.Parser.Core
-import Coal.Parser.Identifier (constructor, identifier, name)
+import Coal.Parser.Identifier (identifier, name)
 import Coal.Parser.Metadata (withMetadata)
 import qualified Coal.Parser.Operator as Op
 import Coal.Parser.Pattern (parsePattern, parseUnitPattern)
@@ -73,10 +73,19 @@ parseVoidDoExpression = do
   withMetadata $
     pure (\loc -> (PAny loc (), e))
 
+{- | Parse a record-field selector @.f@.
+
+The field must be a lowercase (or underscore-initial) name. An uppercase name
+after a dot is reserved for a module-qualified name (@List.map@,
+@Data.Map.Empty@), which the atom parsers consume before any selector is
+considered. Uppercase /fields/ were only ever produced by the removed
+@cotype@ / @unfold@ codata syntax, whose capitalized fields were selected with
+@x.Foo@; that syntax no longer exists, so @x.Foo@ is a parse error.
+-}
 parseSelectorOp :: Parser (Expression Metadata () () -> Expression Metadata () ())
 parseSelectorOp = do
   start <- getSourcePos
-  field <- try (symbol_ "." <* notFollowedBy (char '|')) *> (name <|> constructor)
+  field <- try (symbol_ "." <* notFollowedBy (char '|')) *> name
   end <- getSourcePos
   pure (\expr -> selector expr (Metadata start end) field)
 

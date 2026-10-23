@@ -11,6 +11,7 @@ import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
 import Coal.Language.Module.ExportSpec (exportMatchingSpec)
 import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
+import Coal.Parser.ExpressionSpec (expressionSpec)
 import Coal.Parser.ModuleSpec (moduleHeaderSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Spec (e2eSpec)
@@ -30,6 +31,7 @@ spec =
     typeApplicationSpec
     patternAnomaliesSpec
     expandLetBindingsSpec
+    expressionSpec
     moduleHeaderSpec
     exportMatchingSpec
 
