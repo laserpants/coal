@@ -63,7 +63,7 @@ jobs:
     runs-on: macos-15
 
     env:
-      STACK_ROOT: ~/.stack
+      STACK_ROOT: ${{ runner.temp }}/stack-root
 
     steps:
       - uses: actions/checkout@v4
