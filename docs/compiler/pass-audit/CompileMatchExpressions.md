@@ -39,6 +39,19 @@ translated into an internal envelope representation, then compiled.
 
 ## Detailed Behavior
 
+### `passImpl`
+
+Before doing any work, scans the module for a match expression with a pure, lazy
+check (`universeBi`, stopping at the first `EMatch`). A module with no match
+expressions is returned unchanged and the monadic whole-module traversal is
+skipped entirely.
+
+This is not only a fast path. `transformBiM` sequences one monadic action per AST
+node, so it builds an `O(nodes)` chain of `RWST` bind closures; that chain is not
+forced until the traversal completes, so it stays live for the whole traversal and
+dominated the compiler's live heap on large multi-module builds. Skipping the
+traversal where it would be the identity removes the chain.
+
 ### `compileMatchExprsE`
 
 For `EMatch _ _ e cs`:
@@ -111,3 +124,10 @@ tests the constructor tag of `value` and branches accordingly.
 
 - **Creates fresh names**: `match.N` via supply monad
 - **Generates diagnostics**: No
+
+## Notes
+
+- The pass is the identity on modules without match expressions; the `passImpl`
+  short-circuit above is what keeps it from costing memory on every module.
+- The short-circuit triggers on `EMatch` only, matching `compileMatchExprsE`, which
+  rewrites `EMatch` and returns every other expression unchanged.

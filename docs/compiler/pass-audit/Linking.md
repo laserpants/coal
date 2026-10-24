@@ -43,7 +43,10 @@ the consuming project having to repeat them.
 
 ### `compileBitcode`
 
-1. Creates a temporary working directory
+1. Creates a temporary working directory under the build cache (`.build/tmp`) and
+   removes it afterwards. Staging intermediates there rather than in the system
+   temporary directory matters on systems where `/tmp` is a RAM-backed tmpfs, which
+   would charge every `.bc`/`.o` file (and the linked binary) to memory.
 2. For each (name, bitcode) pair, calls `runLLC` to assemble to object file
 3. Writes the runtime C library (embedded via Template Haskell `embedFile`)
 4. Copies any additional C files into the temp directory
@@ -59,7 +62,7 @@ to produce an object file.
 
 Runs `gcc` with:
 - Debug flags: `-g`
-- AddressSanitizer: `-fsanitize=address`
+- AddressSanitizer: `-fsanitize=address`, only when `--sanitize` (`configSanitize`) is set
 - Libraries: `-lgc` (Boehm GC), `-lgmp` (GMP)
 - If `cc --version` indicates clang, also uses its flags; otherwise adds `-no-pie`
 - Links `runtime.c`, C files, and object files into a `dist` executable
@@ -102,6 +105,7 @@ runtime source using the `runtime/scripts/combine.sh` script.
 
 ## Notes
 
-AddressSanitizer (`-fsanitize=address`) is always enabled in the default build
-configuration. This helps catch memory errors during development but may need
-to be disabled for production builds.
+AddressSanitizer (`-fsanitize=address`) is **opt-in**: it is added only when
+`configSanitize` is set, i.e. when the compiler is invoked with `--sanitize` (or a
+manifest sets `build.sanitize`). It is useful for catching memory errors during
+development but slows compilation and linking noticeably, so it is off by default.

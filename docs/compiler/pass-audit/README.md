@@ -6,15 +6,22 @@ what each pass does, its inputs/outputs, invariants, and interactions with other
 ## Complete Compiler Pipeline
 
 The compiler pipeline is defined in `src/Coal/Compiler/Pipeline.hs` and consists of
-six sequential phases:
+five sequential stages:
 
 ```
-phaseParsing >-> phasePreflight >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation) >-> phaseLowering >-> passLinking
+phaseParsing >-> phasePreflight >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation >-> kernelTranslateModule) >-> passKernelCodegen >-> passLinking
 ```
 
-The type-checking and translation phases (`phaseMainPasses`) run **in parallel across
-modules** via `mapPass . liftPass`. All other phases operate on module collections
-sequentially.
+The type-checking, translation and kernel-translation passes (`phaseMainPasses`) are
+applied **module by module** via `mapPass . liftPass`, so each module's surface AST can
+be released as soon as its kernel module has been produced.
+
+All passes are **sequential**: `mapPass` is `traverse`, and the compiler starts no
+threads of its own (there is no `forkIO` or `par` anywhere in `src/`); its only
+concurrency is waiting on the `llc` and `gcc` subprocesses. This matters for RTS
+settings — extra capabilities buy no parallelism while multiplying the per-capability
+allocation area — so `-with-rtsopts` in `package.yaml` deliberately leaves the
+capability count at one (it does not set `-N`; see the comment there).
 
 ## Order of Execution
 
@@ -24,10 +31,13 @@ sequentially.
 | 2 | **PhasePreflight** | `[BuildEnvelope (Module Metadata () ())]` | `[BuildEnvelope (Module Metadata () ())]` |
 | 3 | **PhaseTypeChecking** | `Module Metadata () ()` | `Module Metadata Kind IndexedType` |
 | 4 | **PhaseTranslation** | `Module Metadata Kind IndexedType` | `Module Metadata Kind IndexedType` |
-| 5 | **PhaseLowering** | `[BuildEnvelope (Module Metadata Kind IndexedType)]` | `[(Name, ByteString)]` |
-| 6 | **Linking** | `[(Name, ByteString)]` | `()` |
+| 5 | **KernelTranslate** | `Module Metadata Kind IndexedType` | `Module Kernel.Type` |
+| 6 | **KernelCodegen** | `[BuildEnvelope (Module Kernel.Type)]` | `[(Name, ByteString)]` |
+| 7 | **Linking** | `[(Name, ByteString)]` | `()` |
 
-Phases 3 and 4 are run together as `phaseMainPasses`, mapping each module in parallel.
+Phases 3-5 are run together, per module, as `phaseMainPasses` (`mapPass . liftPass` over
+the module list). `passKernelCodegen` then processes all kernel modules together,
+because it needs the whole program to build the cross-module codegen context.
 
 ### Progress tracking
 
@@ -44,13 +54,16 @@ PhaseParsing
 PhasePreflight
     |
     v
-PhaseTypeChecking <-- runs per-module, in parallel
+PhaseTypeChecking <-- runs per module, in dependency order
     |
     v
 PhaseTranslation <-- depends on type-checked AST
     |
     v
-PhaseLowering
+KernelTranslate <-- fused into the same per-module stage
+    |
+    v
+KernelCodegen <-- all modules together
     |
     v
 Linking
@@ -79,14 +92,17 @@ prepare the build environment, expand folds, and run type inference. Transforms
 `Module Metadata () ()` to `Module Metadata Kind IndexedType`.
 
 ### PhaseTranslation
-Performs 14 passes that normalize, desugar, and compile patterns and expressions.
+Performs 15 passes that normalize, desugar, and compile patterns and expressions.
 Transforms the typed AST into a form suitable for kernel translation. Includes
 pattern match compilation, trait dictionary insertion, and nat compilation.
 
-### PhaseLowering
+### Kernel translation and codegen
 Translates surface language modules to kernel IR modules, then compiles kernel IR to
-LLVM bitcode. Consists of `passKernelTranslate` (per-module, via `mapPass`) and
-`passKernelCodegen` (all modules together).
+LLVM bitcode. Kernel translation is fused into the per-module stage
+(`kernelTranslateModule` inside `phaseMainPasses`); `passKernelCodegen` then runs over
+all modules together, normalizing each kernel module and emitting LLVM bitcode. (The
+standalone `phaseLowering` composition in `Coal.Compiler.Pass.PhaseLowering` is
+retained.)
 
 ### Linking
 Assembles LLVM bitcode to object files via `llc`, compiles the runtime C library with
@@ -125,9 +141,9 @@ Assembles LLVM bitcode to object files via `llc`, compiles the runtime C library
   - [ExpandRecordUpdates.md](ExpandRecordUpdates.md)
   - [NormalizeAST.md](NormalizeAST.md)
   - [DesugarPatterns.md](DesugarPatterns.md)
-  - [ExpandGuards.md](ExpandGuards.md)
   - [ExpandOrPatterns.md](ExpandOrPatterns.md)
   - [CheckPatternAnomalies.md](CheckPatternAnomalies.md)
+  - [ExpandGuards.md](ExpandGuards.md)
   - [ExpandRecordPatterns.md](ExpandRecordPatterns.md)
   - [ExpandAsPatterns.md](ExpandAsPatterns.md)
   - [ExpandIntegerLiteralPatterns.md](ExpandIntegerLiteralPatterns.md)

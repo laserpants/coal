@@ -32,7 +32,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..), liftPass, mapPass, (>->))
 import qualified Coal.Compiler.Pass.Counts as Counts
 import Coal.Compiler.Pass.PhaseLowering.KernelCodegen (passKernelCodegen)
-import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate)
+import Coal.Compiler.Pass.PhaseLowering.KernelTranslate (kernelTranslateModule)
 import Coal.Compiler.Pass.PhaseLowering.Linking (passLinking)
 import Coal.Compiler.Pass.PhaseParsing (phaseParsing)
 import Coal.Compiler.Pass.PhasePreflight (phasePreflight)
@@ -71,8 +71,7 @@ pipeline :: (MonadIO m) => Pass Metadata m [FilePath] ()
 pipeline =
   timed "Parsing" phaseParsing
     >-> timed "Preflight" phasePreflight
-    >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation)
-    >-> timed "Kernel translate" (mapPass passKernelTranslate)
+    >-> phaseMainPasses (phaseTypeChecking >-> phaseTranslation >-> kernelTranslateModule)
     >-> timed "Kernel codegen" passKernelCodegen
     >-> timed "Linking" passLinking
 
@@ -98,8 +97,7 @@ pipelineWithProgress caps ref =
   timedWeighted caps ref "Parsing" Counts.weightParsing phaseParsing
     >-> Pass{runPass = updateTotal ref}
     >-> timedWeighted caps ref "Preflight" Counts.weightPreflight phasePreflight
-    >-> perModulePasses caps ref phaseTypeChecking phaseTranslation
-    >-> timedWeighted caps ref "Kernel translate" Counts.weightKernelTranslate (mapPass passKernelTranslate)
+    >-> perModulePasses caps ref phaseTypeChecking phaseTranslation kernelTranslateModule
     >-> timedWeighted caps ref "Kernel codegen" Counts.weightKernelCodegen passKernelCodegen
     >-> timedWeighted caps ref "Linking" Counts.weightLinking passLinking
 
@@ -122,8 +120,8 @@ timedWeighted caps ref label weight p =
         pure result
     }
 
-perModulePasses :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> Pass Metadata m i o -> Pass Metadata m o p -> Pass Metadata m [BuildEnvelope i] [BuildEnvelope p]
-perModulePasses caps ref p1 p2 =
+perModulePasses :: (MonadIO m) => TerminalCapabilities -> ProgressRef -> Pass Metadata m i o -> Pass Metadata m o p -> Pass Metadata m p q -> Pass Metadata m [BuildEnvelope i] [BuildEnvelope q]
+perModulePasses caps ref p1 p2 p3 =
   Pass
     { runPass = traverse runOne
     }
@@ -132,8 +130,9 @@ perModulePasses caps ref p1 p2 =
     liftPass
       ( timedWeightedPerModule caps ref "Type checking" Counts.weightTypeChecking p1
           >-> timedWeightedPerModule caps ref "Translation" Counts.weightTranslation p2
+          >-> timedWeightedPerModule caps ref "Kernel translate" Counts.weightKernelTranslate p3
       )
-  cachedStage = liftPass (p1 >-> p2)
+  cachedStage = liftPass (p1 >-> p2 >-> p3)
   runOne env = case env of
     BSource _ -> runPass sourceStage env
     BCached _ -> runPass cachedStage env
@@ -160,8 +159,8 @@ timedWeightedPerModule caps ref label weight p =
 updateTotal :: (MonadIO m) => ProgressRef -> [BuildEnvelope a] -> CompilerT Metadata m [BuildEnvelope a]
 updateTotal ref envelopes = do
   let numSource = length [() | BSource _ <- envelopes]
-      moduleWeight = Counts.weightTypeChecking + Counts.weightTranslation
-      globalWeight = Counts.weightParsing + Counts.weightPreflight + Counts.weightKernelTranslate + Counts.weightKernelCodegen + Counts.weightLinking
+      moduleWeight = Counts.weightTypeChecking + Counts.weightTranslation + Counts.weightKernelTranslate
+      globalWeight = Counts.weightParsing + Counts.weightPreflight + Counts.weightKernelCodegen + Counts.weightLinking
       total = globalWeight + numSource * moduleWeight
   -- Reset both counters: parsing is already done, so done = parsing weight.
   liftIO $ modifyIORef' ref (\(_, _) -> (Counts.weightParsing, total))

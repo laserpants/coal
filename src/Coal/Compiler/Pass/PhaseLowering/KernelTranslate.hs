@@ -10,7 +10,7 @@ Translates surface language modules to new kernel language modules using
 This pass runs in parallel with 'passKernelTranslate' (the legacy pass)
 during the migration period.
 -}
-module Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate) where
+module Coal.Compiler.Pass.PhaseLowering.KernelTranslate (passKernelTranslate, kernelTranslateModule) where
 
 import qualified Coal.Common.Environment as Environment
 import Coal.Compiler.Build (Build (..))
@@ -36,6 +36,18 @@ passKernelTranslate ::
     (BuildEnvelope (SurfModule.Module Metadata Kind IndexedType))
     (BuildEnvelope (NKModule.Module Kernel.Type))
 passKernelTranslate = Pass{runPass = passImpl}
+
+{- | Per-module variant of 'passKernelTranslate'.
+
+Used inside a fused per-module stage so that a module's surface AST can be
+released as soon as its kernel module has been produced, instead of every
+module's translated AST being retained until the whole translation phase has
+finished.
+-}
+kernelTranslateModule ::
+  (MonadIO m) =>
+  Pass Metadata m (SurfModule.Module Metadata Kind IndexedType) (NKModule.Module Kernel.Type)
+kernelTranslateModule = Pass{runPass = pass}
 
 passImpl ::
   (MonadIO m, Traversable t) =>

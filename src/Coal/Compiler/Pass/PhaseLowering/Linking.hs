@@ -7,6 +7,7 @@ module Coal.Compiler.Pass.PhaseLowering.Linking (
   compileBitcode,
 ) where
 
+import Coal.Compiler.Build.Cache (withBuildTempDirectory)
 import Coal.Compiler.Config (CompilerConfig (..))
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
@@ -26,7 +27,6 @@ import Extras (Name, forM)
 import System.Directory (canonicalizePath, copyFile, createDirectoryIfMissing, getCurrentDirectory)
 import System.Exit (ExitCode (..))
 import System.FilePath (makeRelative, takeBaseName, takeDirectory, (<.>), (</>))
-import System.IO.Temp (withSystemTempDirectory)
 import System.Process
 
 passLinking :: (MonadIO m) => Pass Metadata m [(Name, ByteString)] ()
@@ -51,7 +51,7 @@ passImpl bcode = do
 
 compileBitcode :: CompilerConfig -> [(Name, ByteString)] -> IO (Maybe CompilerFailureMode)
 compileBitcode CompilerConfig{..} files =
-  withSystemTempDirectory "coal-build" $
+  withBuildTempDirectory "coal-build" $
     \tmpDir -> do
       res <- forM files $ uncurry (runLLC tmpDir)
       case sequence res of

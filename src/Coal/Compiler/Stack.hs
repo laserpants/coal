@@ -68,6 +68,7 @@ module Coal.Compiler.Stack (
 
   -- * Type substitution
   setSubstitutionC,
+  clearSubstitutionC,
 
   -- * Error reporting
   compilerReportConstraintsGenErrorsC,
@@ -311,6 +312,17 @@ clearTypeAnnotationParamsC = modify (overCompilerTypeAnnotationParams (const mem
 {-# INLINE setSubstitutionC #-}
 setSubstitutionC :: (Monad m) => Substitution -> CompilerT a m ()
 setSubstitutionC sub = modify (overCompilerSubstitution (const sub))
+
+{- | Drop the accumulated type substitution.
+
+Type indexes are globally unique within a compilation, so a substitution
+computed while inferring one module can never mention another module's indexes.
+Clearing it once a module is finished keeps the retained substitution bounded by
+the size of a single module instead of the whole program.
+-}
+{-# INLINE clearSubstitutionC #-}
+clearSubstitutionC :: (Monad m) => CompilerT a m ()
+clearSubstitutionC = modify (overCompilerSubstitution (const mempty))
 
 -- -----------------------------------------------------------------------------
 

@@ -26,7 +26,7 @@ import Coal.Compiler.Error
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
+import Coal.Compiler.Stack (CompilerT, clearSubstitutionC, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference (define, generateConstraints, generateKindConstraints, solveT)
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
@@ -61,6 +61,10 @@ runTypeInference m = do
   indexedM <- inferKinds m
   newM <- inferTypes indexedM
   replacePlaceholders
+  -- Nothing past this point consults the substitution (see 'clearSubstitutionC'),
+  -- so release it before the next module is inferred rather than letting every
+  -- module's substitution accumulate for the lifetime of the compilation.
+  clearSubstitutionC
   return newM
 
 replacePlaceholders :: (Monad m) => CompilerT Metadata m ()

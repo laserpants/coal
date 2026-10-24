@@ -17,13 +17,25 @@ Transforms clauses containing `p1 or p2` patterns into multiple clauses, one per
 ## Input
 
 - **AST representation**: `Module Metadata Kind IndexedType`
-- **Required invariants**: Guards expanded
+- **Required invariants**: Patterns desugared (`DesugarPatterns`)
 
 ## Output
 
 - Same type with all or-patterns expanded into separate clauses
 
 ## Detailed Behavior
+
+### `passImpl`
+
+Before doing any work, scans the module for an or-pattern with a pure, lazy check
+(`universeBi`, stopping at the first `POr`). A module with no or-patterns is
+returned unchanged and the monadic whole-module traversal is skipped entirely.
+
+This is not only a fast path. `transformBiM` sequences one monadic action per AST
+node, so it builds an `O(nodes)` chain of `RWST` bind closures; that chain is not
+forced until the traversal completes, so it stays live for the whole traversal and
+dominated the compiler's live heap on large multi-module builds. Skipping the
+traversal where it would be the identity removes the chain.
 
 ### `expandOrPatterns` (Clause instance)
 
@@ -54,9 +66,18 @@ match(x) {
 
 ## Compiler Interactions
 
-- **Earlier passes this relies on**: ExpandGuards
+- **Earlier passes this relies on**: DesugarPatterns
 - **Later passes that rely on this pass**: CheckPatternAnomalies
 
 ## Side Effects
 
 - **Generates diagnostics**: `OrPatternVariableMismatch`
+
+## Notes
+
+- The pass is the identity on modules without or-patterns, which is the common
+  case; the `passImpl` short-circuit above is what keeps it from costing memory on
+  every module.
+- Pass order: this pass runs *before* `ExpandGuards` (see `phaseTranslation` in
+  `Coal.Compiler.Pass.PhaseTranslation`), so it cannot rely on guards having been
+  expanded.
