@@ -1,0 +1,17 @@
+module Main {
+
+  import namespace IO
+  import namespace List
+
+  type alias User = { username : string, shoe_size : int32 }
+
+  let users : List<User> = [
+    { username = "bob", shoe_size = 5 },
+    { username = "alice", shoe_size = 7 }
+  ]
+
+  fun main() =
+    IO.println_int32(
+      List.reduce(fn(a, b) => a + b, 0, List.map(_.shoe_size, users)))
+
+}

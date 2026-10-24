@@ -30,7 +30,7 @@ import Coal.Language (
  )
 import Coal.Parser (parseSourceFile)
 import Data.Either (isLeft)
-import Data.List.NonEmpty (NonEmpty (..))
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import Data.Text (Text)
 import Extras (Name)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
@@ -88,6 +88,25 @@ lambdaParamConstructor = \case
       _ -> Nothing
   _ -> Nothing
 
+{- | A metadata-free view of an expression, so that expectations do not depend
+on source positions.
+-}
+data SimpleExpr
+  = SVar Name
+  | SSelect Name SimpleExpr
+  | SApp SimpleExpr [SimpleExpr]
+  | SLam Name SimpleExpr
+  | SOther
+  deriving (Eq, Show)
+
+simple :: Expression Metadata () () -> SimpleExpr
+simple = \case
+  EVariable _ (Label _ n) -> SVar n
+  ESelect _ (Label _ n) e -> SSelect n (simple e)
+  EApplication _ _ f as -> SApp (simple f) (simple <$> toList as)
+  ELambda _ (PVariable _ (Label _ n) :| []) e -> SLam n (simple e)
+  _ -> SOther
+
 expressionSpec :: Spec
 expressionSpec = do
   describe "record field selection" $ do
@@ -133,6 +152,49 @@ expressionSpec = do
     it "parses a qualified constructor in a lambda parameter" $
       (lambdaParamConstructor <$> parseBody "fn(Shapes.Circle(r)) => r")
         `shouldBe` Right (Just "Shapes.Circle")
+
+  describe "field sections" $ do
+    it "desugars _.f to a lambda selecting f" $
+      simple <$> parseBody "_.foo" `shouldBe` Right (SLam "$field" (SSelect "foo" (SVar "$field")))
+
+    it "extends the body over the whole postfix chain" $
+      simple <$> parseBody "_.foo.bar"
+        `shouldBe` Right (SLam "$field" (SSelect "bar" (SSelect "foo" (SVar "$field"))))
+
+    it "extends the body over a postfix application" $
+      simple <$> parseBody "_.foo(x)"
+        `shouldBe` Right (SLam "$field" (SApp (SSelect "foo" (SVar "$field")) [SVar "x"]))
+
+    it "leaves .| outside the section body" $
+      binaryOperatorName <$> parseBody "_.foo .| f" `shouldBe` Right (Just OForwardApplication)
+
+    it "accepts a section as the right operand of .|" $
+      binaryOperatorName <$> parseBody "xs .| _.foo" `shouldBe` Right (Just OForwardApplication)
+
+    it "nests a section inside a section body" $
+      simple <$> parseBody "_.foo(_.bar)"
+        `shouldBe` Right (SLam "$field" (SApp (SSelect "foo" (SVar "$field")) [SLam "$field" (SSelect "bar" (SVar "$field"))]))
+
+    it "requires the underscore and dot to be adjacent" $
+      simple <$> parseBody "_ .foo" `shouldBe` Right (SSelect "foo" (SVar "_"))
+
+    it "does not treat _foo.foo as a section" $
+      simple <$> parseBody "_foo.foo" `shouldBe` Right (SSelect "foo" (SVar "_foo"))
+
+    it "does not treat a dotted chain after _ as a section" $
+      simple <$> parseBody "x._.foo" `shouldBe` Right (SSelect "foo" (SSelect "_" (SVar "x")))
+
+    it "rejects a section with no field" $
+      parseBody "_." `shouldSatisfy` isLeft
+
+    it "rejects a section whose body starts with an application" $
+      parseBody "_.(x)" `shouldSatisfy` isLeft
+
+    it "rejects an uppercase field in a section" $
+      parseBody "_.Foo" `shouldSatisfy` isLeft
+
+    it "rejects a section in pattern position" $
+      parseBody "fn(_.foo) => 0" `shouldSatisfy` isLeft
 
   describe "pipeline operators" $ do
     it "still parses forward application" $

@@ -29,12 +29,13 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Text as Text
 import Extras (Name)
 import GHC.Int (Int32, Int64)
-import Text.Megaparsec (getSourcePos, notFollowedBy, option, optional, satisfy, some, try, (<|>))
+import Text.Megaparsec (getSourcePos, many, notFollowedBy, option, optional, satisfy, some, try, (<|>))
 import Text.Megaparsec.Char (char, digitChar, upperChar)
 
 parseAtom :: Parser (Expression Metadata () ())
 parseAtom =
   try parseDoBlock
+    <|> try parseFieldSection
     <|> try parseFunctionApplication
     <|> parseFFICall
     <|> parseVariableExpression
@@ -73,6 +74,45 @@ parseVoidDoExpression = do
   withMetadata $
     pure (\loc -> (PAny loc (), e))
 
+{- | Parse a field section, @_.f@.
+
+Desugars to a lambda abstracting over the section argument, so @_.f@ is
+@fn($field) => $field.f@ and @map(_.name, xs)@ is
+@map(fn($field) => $field.name, xs)@.
+
+The body extends over the whole postfix chain, which keeps the rule easy to
+state: everything after @_.@ up to the end of the operand belongs to the
+section. So @_.a.b@ is @fn($field) => $field.a.b@ and @_.a(x)@ is
+@fn($field) => $field.a(x)@. Applying a section to an argument therefore
+needs parentheses or the pipeline operator: @(_.a)(x)@ or @x .| _.a@.
+
+@_@ and @.@ must be adjacent and a field name must follow immediately. So
+@_ .a@ is not a section at all: it is an ordinary selection on a variable
+named @_@ (which fails to type-check, as @_@ can never be bound), while
+@_.@, @_.(x)@ and @_.Name@ are parse errors.
+-}
+parseFieldSection :: Parser (Expression Metadata () ())
+parseFieldSection = do
+  start <- getSourcePos
+  try (void (char '_') *> void (char '.'))
+  field <- name
+  mid <- getSourcePos
+  ops <- many postfixOp
+  end <- getSourcePos
+  pure (fieldSection (Metadata start end) (Metadata start mid) field ops)
+
+-- | Abstract over a field section's argument and apply the parsed operations.
+fieldSection :: Metadata -> Metadata -> Name -> [Expression Metadata () () -> Expression Metadata () ()] -> Expression Metadata () ()
+fieldSection loc firstLoc field ops =
+  ELambda
+    loc
+    (PVariable loc (Label () binder) :| [])
+    (foldl (\e f -> f e) (selector (EVariable loc (Label () binder)) firstLoc field) ops)
+ where
+  -- Unspellable in source, so the binder can neither capture nor be captured
+  -- by user code. 'DetectShadowing' ignores compiler-generated names.
+  binder = "$field"
+
 {- | Parse a record-field selector @.f@.
 
 The field must be a lowercase (or underscore-initial) name. An uppercase name
@@ -103,8 +143,17 @@ parseRecordUpdateOp = do
   end <- getSourcePos
   pure (\expr -> ERecordUpdate (metadataSpan (getMetadata expr) (Metadata start end)) () expr (Map.fromList fields))
 
+{- | One postfix operation: a field selector, an application, or a record
+update.
+
+Shared by the ordinary postfix chain and by the body of a @_.@ field section
+so that the two cannot drift apart.
+-}
+postfixOp :: Parser (Expression Metadata () () -> Expression Metadata () ())
+postfixOp = try parseSelectorOp <|> parseApplicationOp <|> try parseRecordUpdateOp
+
 selectorPostfix :: Combinators.Operator Parser (Expression Metadata () ())
-selectorPostfix = Combinators.Postfix (foldl (flip (.)) id <$> some (try parseSelectorOp <|> parseApplicationOp <|> try parseRecordUpdateOp))
+selectorPostfix = Combinators.Postfix (foldl (flip (.)) id <$> some postfixOp)
 
 parseExpression :: Parser (Expression Metadata () ())
 parseExpression = Combinators.makeExprParser parseAtom operator

@@ -2677,6 +2677,15 @@ e2eSpec = do
       , "Data/Shapes.coal"
       ]
 
+  -- 475: the @_.f@ field section desugars to @fn($field) => $field.f@, so it
+  -- can be handed straight to a higher-order function.
+  describe "475" $
+    expectOutput
+      "12"
+      "test/Coal/examples/475"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do
