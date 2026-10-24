@@ -72,7 +72,7 @@ import Control.Monad (when)
 import Control.Monad.Except (throwError)
 import Control.Monad.State (gets)
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transformBiM)
+import Data.Generics.Uniplate.Data (transformBiM, universeBi)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.List.NonEmpty as NonEmpty
 import Data.Semigroup (sconcat)
@@ -84,7 +84,23 @@ passExpandOrPatterns = Pass{runPass = passImpl}
 passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 passImpl m = do
   setCurrentModuleC m
-  transformBiM expandExpression m
+  -- This pass is the identity on modules without or-patterns, which is the
+  -- common case. Skipping the monadic whole-module traversal there matters:
+  -- 'transformBiM' sequences one monadic action per AST node, so it builds an
+  -- O(nodes) chain of @RWST@ bind closures that dominates the compiler's live
+  -- heap on large builds. The pure pre-scan below stops at the first 'POr'.
+  if anyOrPattern m
+    then transformBiM expandExpression m
+    else pure m
+
+{- | True when the module contains at least one or-pattern.
+
+Pure and lazy: 'null' only forces the search as far as the first match, so this
+is cheap for the (common) case of a module with no or-patterns at all.
+-}
+anyOrPattern :: (Data a) => a -> Bool
+anyOrPattern x =
+  not (null [() | POr{} <- universeBi x :: [Pattern Metadata Kind IndexedType]])
 
 expandExpression :: (Monad m) => Expression Metadata Kind IndexedType -> CompilerT Metadata m (Expression Metadata Kind IndexedType)
 expandExpression =

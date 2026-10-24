@@ -56,7 +56,7 @@ import Coal.Language (Binding (..), Choice (..), Clause (..), Expression (..), I
 import Coal.Language.AST.Rewrite (replaceWith)
 import Coal.Language.Module (Module (..))
 import Data.Data (Data)
-import Data.Generics.Uniplate.Data (transformBiM)
+import Data.Generics.Uniplate.Data (transformBiM, universeBi)
 import Data.List.NonEmpty (NonEmpty (..), toList)
 import Extras (Dictionary)
 import TextShow (TextShow (showt))
@@ -72,7 +72,21 @@ passCompileMatchExpressions :: (Monad m) => Pass Metadata m (Module Metadata Kin
 passCompileMatchExpressions = Pass{runPass = passImpl}
 
 passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT Metadata m (Module Metadata Kind IndexedType)
-passImpl = compileMatchExprs
+passImpl m
+  -- Only 'EMatch' nodes are rewritten, so a module with none is left untouched.
+  -- Skipping the monadic whole-module traversal in that (common) case avoids the
+  -- O(nodes) chain of @RWST@ bind closures that 'transformBiM' builds and that
+  -- otherwise dominates the compiler's live heap.
+  | anyMatchExpression m = compileMatchExprs m
+  | otherwise = pure m
+
+{- | True when the module contains at least one match expression.
+
+Pure and lazy: 'null' only forces the search as far as the first match.
+-}
+anyMatchExpression :: (Data a) => a -> Bool
+anyMatchExpression x =
+  not (null [() | EMatch{} <- universeBi x :: [Expression Metadata Kind IndexedType]])
 
 class MatchExpressionContext a c where
   compileMatchExprs :: (Monad m) => c -> CompilerT a m c

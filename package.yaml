@@ -105,14 +105,14 @@ executables:
       # in one (quoted) token. `-rtsopts` lets users override at runtime, e.g.
       # `coal build +RTS -A32m -RTS` or `GHCRTS=-M2G`.
       #
-      # For memory-constrained builds, `+RTS -c` (compacting collector for the
-      # oldest generation) trades wall time for peak RSS: on a 42-module cold
-      # build it measured 1.24GB -> 1.07GB peak RSS (-14%) for 10.5s -> 12.1s
-      # (+16%). It is deliberately not enabled here because compile time matters
-      # more in the common case; enable it per-invocation or via GHCRTS=-c.
+      # `-c` (compacting collector for the oldest generation) is enabled by
+      # default because *peak memory*, not compile time, is the binding
+      # constraint: an over-large heap sporadically aborts the compiler and can
+      # take the whole machine down with it. Measured on a 42-module cold build,
+      # `-c` costs ~10% wall time and buys ~30% peak RSS (1.00GB -> 0.71GB).
       # `+RTS -xn` (non-moving) is *worse* for memory (~+18% peak RSS) and
       # should not be used for this workload.
-      - '"-with-rtsopts=-A16m"'
+      - '"-with-rtsopts=-A16m -c"'
     dependencies:
       - coal
 
@@ -123,9 +123,9 @@ tests:
     ghc-options:
       - -threaded
       - -rtsopts
-      # Same nursery rationale as the `coal` executable above: the test suite
-      # compiles many programs in one process, all sequentially.
-      - -with-rtsopts=-A16m
+      # Same nursery/collector rationale as the `coal` executable above: the
+      # test suite compiles many programs in one process, all sequentially.
+      - '"-with-rtsopts=-A16m -c"'
     dependencies:
       - coal
       - hspec >= 2.10.10 && < 2.12
