@@ -58,3 +58,33 @@ jobs:
 
       - name: Test
         run: stack --allow-different-user test --ta '--match Unit' #  --match Kernel'
+
+  macos-build:
+    runs-on: macos-15
+
+    env:
+      STACK_ROOT: ~/.stack
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install native dependencies
+        run: brew install bdw-gc gmp
+
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.10.3'
+          enable-stack: true
+
+      - name: Prepare
+        run: bash runtime/scripts/combine.sh
+
+      - name: Build
+        run: stack build
+
+      - name: Check out hello-world project
+        run: git clone https://codeberg.org/laserpants/coal-hello-world.git coal-hello-world
+
+      - name: Build hello-world project
+        working-directory: coal-hello-world
+        run: coal build
