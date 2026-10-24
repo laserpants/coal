@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StrictData #-}
 
@@ -57,6 +58,7 @@ import Data.Data (Data)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.Set (Set)
 import qualified Data.Set as Set
+import qualified Data.Text as Text
 import Extras (Name, forM_, traverse_)
 
 {- | Variable shadowing detection pass.
@@ -209,4 +211,8 @@ addNames loc new names = do
         tellErrors [Shadowing name (ErrorLocation (principalPath path) loc)]
   pure (curated <> names)
  where
-  curated = Set.filter (not . isConstructor) new
+  -- Compiler-generated names begin with '$' (the @$field@ binder of a field
+  -- section, the @$lambda_match@ binder of a lambda-match). They cannot be
+  -- spelled in source, so they can never collide with a user-written name,
+  -- and a nested section such as @_.a(_.b)@ legitimately reuses the binder.
+  curated = Set.filter (\n -> not (isConstructor n) && not ("$" `Text.isPrefixOf` n)) new

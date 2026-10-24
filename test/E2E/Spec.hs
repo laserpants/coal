@@ -2677,6 +2677,34 @@ e2eSpec = do
       , "Data/Shapes.coal"
       ]
 
+  -- 475: the @_.f@ field section desugars to @fn($field) => $field.f@, so it
+  -- can be handed straight to a higher-order function.
+  describe "475" $
+    expectOutput
+      "12"
+      "test/Coal/examples/475"
+      [ "Main.coal"
+      ]
+
+  -- 476: non-trivial section bodies — a selector chain, a postfix
+  -- application, a record update and a nested section — all type-check and
+  -- compile end to end.
+  describe "476" $
+    expectOutput
+      "66"
+      "test/Coal/examples/476"
+      [ "Main.coal"
+      ]
+
+  -- 477: sections as record field values (with differing row variables)
+  -- and inside a match clause body.
+  describe "477" $
+    expectOutput
+      "bob\n11"
+      "test/Coal/examples/477"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

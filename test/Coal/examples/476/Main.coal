@@ -1,0 +1,23 @@
+module Main {
+
+  import namespace IO
+
+  type alias Inner = { value : int32 }
+  type alias Outer = { inner : Inner, other : int32 }
+
+  let outer : Outer = { inner = { value = 7 }, other = 1 }
+
+  let with_fn = { f = fn(n : int32) => n + 1 }
+
+  let nested = { point = { x = 1, y = 2 } }
+
+  // The last term nests a section inside another section's body, which reuses
+  // the compiler-generated binder and must not be reported as shadowing.
+  fun main() =
+    IO.println_int32(
+      (_.inner.value)(outer)
+        + (_.f(41))(with_fn)
+        + (_.point{x = 10})(nested).x
+        + (_.apply(_.value))({ apply = fn(g) => g(outer.inner) }))
+
+}
