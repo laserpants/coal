@@ -31,6 +31,7 @@ import Coal.Language (
 import Coal.Parser (parseSourceFile)
 import Data.Either (isLeft)
 import Data.List.NonEmpty (NonEmpty (..), toList)
+import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import Extras (Name)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
@@ -96,15 +97,19 @@ data SimpleExpr
   | SSelect Name SimpleExpr
   | SApp SimpleExpr [SimpleExpr]
   | SLam Name SimpleExpr
+  | SUpdate SimpleExpr [Name]
+  | SAnn SimpleExpr
   | SOther
   deriving (Eq, Show)
 
 simple :: Expression Metadata () () -> SimpleExpr
 simple = \case
+  EAnnotation _ _ e -> SAnn (simple e)
   EVariable _ (Label _ n) -> SVar n
   ESelect _ (Label _ n) e -> SSelect n (simple e)
   EApplication _ _ f as -> SApp (simple f) (simple <$> toList as)
   ELambda _ (PVariable _ (Label _ n) :| []) e -> SLam n (simple e)
+  ERecordUpdate _ _ base fields -> SUpdate (simple base) (Map.keys fields)
   _ -> SOther
 
 expressionSpec :: Spec
@@ -164,6 +169,30 @@ expressionSpec = do
     it "extends the body over a postfix application" $
       simple <$> parseBody "_.foo(x)"
         `shouldBe` Right (SLam "$field" (SApp (SSelect "foo" (SVar "$field")) [SVar "x"]))
+
+    it "extends the body over a record update" $
+      simple <$> parseBody "_.foo{x = 1}"
+        `shouldBe` Right (SLam "$field" (SUpdate (SSelect "foo" (SVar "$field")) ["x"]))
+
+    it "extends the body over a chain followed by an application" $
+      simple <$> parseBody "_.foo.bar(x)"
+        `shouldBe` Right (SLam "$field" (SApp (SSelect "bar" (SSelect "foo" (SVar "$field"))) [SVar "x"]))
+
+    it "extends the body over an application followed by a selection" $
+      simple <$> parseBody "_.foo(x).bar"
+        `shouldBe` Right (SLam "$field" (SSelect "bar" (SApp (SSelect "foo" (SVar "$field")) [SVar "x"])))
+
+    it "extends the body over a record update followed by a selection" $
+      simple <$> parseBody "_.foo{x = 1}.bar"
+        `shouldBe` Right (SLam "$field" (SSelect "bar" (SUpdate (SSelect "foo" (SVar "$field")) ["x"])))
+
+    it "extends the body over a three-deep chain" $
+      simple <$> parseBody "_.a.b.c"
+        `shouldBe` Right (SLam "$field" (SSelect "c" (SSelect "b" (SSelect "a" (SVar "$field")))))
+
+    it "annotates the section itself rather than its body" $
+      simple <$> parseBody "_.foo : int32"
+        `shouldBe` Right (SAnn (SLam "$field" (SSelect "foo" (SVar "$field"))))
 
     it "leaves .| outside the section body" $
       binaryOperatorName <$> parseBody "_.foo .| f" `shouldBe` Right (Just OForwardApplication)

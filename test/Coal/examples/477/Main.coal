@@ -1,0 +1,25 @@
+module Main {
+
+  import namespace IO
+
+  type alias User = { username : string, shoe_size : int32 }
+
+  let user : User = { username = "bob", shoe_size = 5 }
+
+  // Sections as record field values: a record of accessors whose row variables
+  // differ between the two fields.
+  let accessors = { name = _.username, size = _.shoe_size }
+
+  // A section inside a match clause body.
+  fun bump(u) =
+    match(u.shoe_size) {
+      | 5 => (_.shoe_size)(u) + 1
+      | n => n
+    }
+
+  fun main() = do {
+    IO.println_string(accessors.name(user));
+    IO.println_int32(accessors.size(user) + bump(user));
+  }
+
+}
