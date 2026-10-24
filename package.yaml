@@ -104,6 +104,14 @@ executables:
       # GHC accepts only a single -with-rtsopts flag, so the options are passed
       # in one (quoted) token. `-rtsopts` lets users override at runtime, e.g.
       # `coal build +RTS -A32m -RTS` or `GHCRTS=-M2G`.
+      #
+      # For memory-constrained builds, `+RTS -c` (compacting collector for the
+      # oldest generation) trades wall time for peak RSS: on a 42-module cold
+      # build it measured 1.24GB -> 1.07GB peak RSS (-14%) for 10.5s -> 12.1s
+      # (+16%). It is deliberately not enabled here because compile time matters
+      # more in the common case; enable it per-invocation or via GHCRTS=-c.
+      # `+RTS -xn` (non-moving) is *worse* for memory (~+18% peak RSS) and
+      # should not be used for this workload.
       - '"-with-rtsopts=-A16m"'
     dependencies:
       - coal
