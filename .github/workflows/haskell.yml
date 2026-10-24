@@ -79,9 +79,22 @@ jobs:
       - name: Build
         run: stack build
 
+      - name: Install Coal
+        run: |
+          stack install
+          echo "$(stack path --local-bin)" >> "$GITHUB_PATH"
+
       - name: Check out hello-world project
         run: git clone https://codeberg.org/laserpants/coal-hello-world.git coal-hello-world
 
       - name: Build hello-world project
         working-directory: coal-hello-world
         run: coal build
+
+      - name: Run hello-world program
+        working-directory: coal-hello-world
+        run: |
+          output=$(./hello-world-0.1.0)
+          echo "$output"
+          test "$output" = "Hello, world!" 
+
