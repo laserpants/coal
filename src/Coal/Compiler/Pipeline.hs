@@ -391,6 +391,18 @@ prettyError env =
       errorMessage ["Name shadowing: '" <> name <> "'"] env erl
     MissingInstance trait erl ->
       errorMessage ["Missing trait instance " <> prettyType trait] env erl
+    TraitDictionaryMismatch name actual expected erl ->
+      errorMessage
+        [ "Cannot determine the trait dictionaries required by `" <> name <> "`."
+        , "It is used at type `"
+            <> prettyType actual
+            <> "`, which does not match its own type `"
+            <> prettyType expected
+            <> "`."
+        , "This usually means that a trait instance does not implement the trait at the type it is declared for."
+        ]
+        env
+        erl
     NameAlreadyDefined name erl ->
       errorMessage ["Name already defined: '" <> name <> "'"] env erl
     DuplicateTypeName name kind erl ->

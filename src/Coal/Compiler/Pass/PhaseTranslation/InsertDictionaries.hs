@@ -65,7 +65,7 @@ import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Language
 import Coal.Language.Module.Path (Path (Path), principalPath)
-import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo)
+import Coal.TypeSystem.Substitution (Substitutable (apply), Substitution, mapsTo, normalizeTypeIndexes)
 import Coal.TypeSystem.Unification
 import Control.Monad (guard)
 import Control.Monad.Except (MonadError (throwError))
@@ -160,7 +160,7 @@ insertName _ _ = pure () -- Other definitions do not need name insertion
 {- | Collect all trait constraints required by a name at the given type.
 Unifies the name's type scheme with the given type and returns required traits.
 -}
-collectTraits :: (Monad m) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
+collectTraits :: (Monad m, Monoid a) => IndexedType -> Name -> CompilerT a m [Trait IndexedType]
 collectTraits u name = do
   env <- gets compilerNameStore
   case Environment.lookup name env of
@@ -174,9 +174,24 @@ collectTraits u name = do
       r <- tryMatch (apply sub1 t) u
       case r of
         Left{} -> do
-          -- Type mismatch during trait collection - this shouldn't happen in well-typed code
-          -- Return empty list and let type checker catch the error
-          pure mempty
+          -- The name's scheme declares trait constraints, but the type it
+          -- is used at does not match the scheme, so the dictionaries it
+          -- needs cannot be determined. This happens when an instance
+          -- implementation does not have the type its trait requires at the
+          -- instance's type, e.g.
+          --
+          -- > instance Functor<f> with (FreeMonad<f>) { let map = map_free }
+          --
+          -- Here the member needs a `FreeMonad<f>` dictionary, but its
+          -- recorded type is the trait interface's, so the dictionary is
+          -- never inserted: the code generator stores the member with the
+          -- interface's arity while its compiled definition takes the
+          -- dictionary as an extra parameter, and applying the dictionary
+          -- reads a non-existent argument. Report the mismatch rather than
+          -- silently dropping the constraints and emitting broken code.
+          path <- gets compilerCurrentPath
+          tellErrors [TraitDictionaryMismatch name (normalizeTypeIndexes u) (normalizeTypeIndexes (apply sub1 t)) (ErrorLocation (principalPath path) mempty)]
+          throwError TraitError
         Right sub2 ->
           -- Return the scheme's declared trait list as-is (preserving
           -- multiplicity and order). Supertrait constraints (e.g. Numeric

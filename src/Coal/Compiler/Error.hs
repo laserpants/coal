@@ -56,6 +56,7 @@ data CompilerError a
   | OrPatternVariableMismatch (Set Name) (Set Name) (ErrorLocation a)
   | CallCycle [[Name]] (ErrorLocation a)
   | MissingTraitAnnotation Name [Trait (Type Parameter Kind)] (ErrorLocation a)
+  | TraitDictionaryMismatch Name IndexedType IndexedType (ErrorLocation a)
   | UnboundTypeVariable Name Name [Name] (ErrorLocation a)
   | TupleTooLarge Int Int (ErrorLocation a)
   deriving (Show, Eq)
@@ -109,6 +110,8 @@ errorLocation =
     Shadowing _ erl ->
       Just erl
     MissingInstance _ erl ->
+      Just erl
+    TraitDictionaryMismatch _ _ _ erl ->
       Just erl
     NameAlreadyDefined _ erl ->
       Just erl
