@@ -28,7 +28,7 @@ import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, clearSubstitutionC, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
 import Coal.Compiler.State
-import Coal.Compiler.TypeInference (define, generateConstraints, generateKindConstraints, solveT)
+import Coal.Compiler.TypeInference (checkInstanceConformance, define, generateConstraints, generateKindConstraints, solveT)
 import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
@@ -110,6 +110,10 @@ inferTypes m = do
   -- Final solve and normalization
   sub <- solveT
   modify (overCompilerAssumptions (apply sub))
+
+  -- Reject instances whose implementations do not have the type the trait
+  -- interface requires at the instance's declared (rigid) type.
+  forM_ moduleDefinitions (checkInstanceConformance sub)
 
   let newDefinitions = fmap rowNormalize <$> apply sub moduleDefinitions
   return $

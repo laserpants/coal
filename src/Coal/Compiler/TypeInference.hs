@@ -46,6 +46,7 @@ module Coal.Compiler.TypeInference (
   generateConstraints,
   define,
   solveT,
+  checkInstanceConformance,
 ) where
 
 import qualified Coal.Common.Environment as Environment
@@ -67,6 +68,7 @@ import Coal.TypeSystem.Constraint.Solver (solveConstraints)
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
 import Coal.TypeSystem.Substitution
+import Coal.TypeSystem.Unification (runUnifier, unify)
 import Control.Arrow ((>>>))
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
@@ -78,6 +80,7 @@ import Data.Either.Extra (partitionEithers)
 import Data.List.Extra (groupSortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Extras (Dictionary, Name, concatMapM, forM_)
 
 generateKindConstraints :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
@@ -195,13 +198,83 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
         return ()
 
 toIndexedScheme :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> CompilerT a m (Scheme TypeIndex Kind IndexedType)
-toIndexedScheme Forall{..} = do
+toIndexedScheme = fmap fst . toIndexedSchemeWithEnv
+
+{- | Like 'toIndexedScheme', but also returns the type index that was
+assigned to each of the scheme's type variables.
+-}
+toIndexedSchemeWithEnv :: (Monad m) => Scheme Parameter Kind (Type Parameter Kind) -> CompilerT a m (Scheme TypeIndex Kind IndexedType, [(Name, TypeIndex Kind)])
+toIndexedSchemeWithEnv Forall{..} = do
   env <- instantiateTypeIndexes schemeTypeVariables
-  flip runReaderT (Environment.fromList env) $
-    Forall
-      <$> toIndexed schemeTypeVariables
-      <*> toIndexed schemeTraits
-      <*> toIndexed schemeTypeBody
+  s <-
+    flip runReaderT (Environment.fromList env) $
+      Forall
+        <$> toIndexed schemeTypeVariables
+        <*> toIndexed schemeTraits
+        <*> toIndexed schemeTypeBody
+  pure (s, env)
+
+{- | Verify that each trait-instance implementation has the type that the
+trait interface requires at the instance's declared type.
+
+The type variables of the instance head are rigid: an implementation may not
+unify them with a compound type in order to change what the instance is for.
+Without this check an instance such as
+
+> instance Functor<f> with (FreeMonad<f>) { let map = map_free }
+
+is accepted: its conformance constraint ('RuleTraitInstance') is solved by
+instantiating the head variable as a flexible unification variable, which
+unifies @f@ with @Free<f, ·>@. The member then needs a @FreeMonad<f>@
+dictionary that its recorded type does not mention, so no dictionary is
+inserted at use sites and the generated code is inconsistent: the member is
+stored with the interface's arity while its compiled definition takes the
+dictionary as an extra parameter.
+
+The check is a local unification whose substitution is discarded, so it cannot
+affect the inferred types. A mismatch is reported through the solver-rule
+machinery, which 'passReportTypeErrors' turns into a type error.
+-}
+checkInstanceConformance :: (Monad m, Data a) => Substitution -> Definition a Kind IndexedType -> CompilerT a m ()
+checkInstanceConformance sub =
+  \case
+    DInstance _ InstanceDefinition{..} -> do
+      Build{buildTraits} <- getCurrentBuildC
+      case Environment.lookup instanceDefinitionTraitName buildTraits of
+        Nothing ->
+          pure ()
+        Just TraitEntry{traitEntryParameter, traitEntryInterface} -> do
+          instanceVariables <- Set.fromList . fmap fst <$> instantiateTypeIndexes instanceDefinitionType
+          forM_ instanceDefinitionImplementations $ \def ->
+            forM_ (memberName def) $ \(loc, name) ->
+              forM_ (Environment.lookup name traitEntryInterface) $ \sig -> do
+                (expected, env) <- toIndexedSchemeWithEnv (replaceParamInScheme traitEntryParameter instanceDefinitionType sig)
+                let actual = apply sub (typeOf def)
+                    rigid = [index | (name_, index) <- env, name_ `Set.member` instanceVariables]
+                seed <- gets compilerSupply
+                let (result, seed_) = runUnifier seed (unify (schemeTypeBody expected) actual)
+                updateSupplyC seed_
+                case result of
+                  Left{} ->
+                    -- Already reported by the 'RuleTraitInstance' constraint.
+                    pure ()
+                  Right localSub ->
+                    forM_ rigid $ \index ->
+                      unless (isTypeVariable (apply localSub (TVariable index))) $
+                        compilerReportSolverRuleViolationsC [RuleTraitInstance loc actual expected]
+    _ ->
+      pure ()
+ where
+  memberName =
+    \case
+      DFunction loc name _ -> Just (loc, name)
+      DLet loc name _ -> Just (loc, name)
+      _ -> Nothing
+
+  isTypeVariable =
+    \case
+      TVariable{} -> True
+      _ -> False
 
 freshTypeVariable :: (Monad m) => CompilerT a m (Type TypeIndex Kind)
 freshTypeVariable = supplied (TVariable . TypeIndex KType)

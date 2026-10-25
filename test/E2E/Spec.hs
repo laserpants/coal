@@ -2708,12 +2708,21 @@ e2eSpec = do
   -- 478: an instance implementation that does not have the type its trait
   -- requires at the instance's type (here `instance Ftor<f> with (FM<f>)`,
   -- whose member only type-checks if the head were `Ftor<Free<f>>`) must be
-  -- rejected, rather than silently generating a dictionary whose member has
-  -- the wrong arity (which crashed at run time).
+  -- rejected by the type checker, rather than silently generating a dictionary
+  -- whose member has the wrong arity (which crashed at run time).
   describe "478" $ do
-    it "is TraitError" $ do
+    it "is TypeError" $ do
       res <- runSpec "test/Coal/examples/478" ["Main.coal"]
-      res `shouldBe` Left TraitError
+      res `shouldBe` Left TypeError
+
+  -- 479: the same program with the corrected instance head
+  -- (`instance Ftor<Free<f>> with (FM<f>)`) is well-typed and must compile.
+  describe "479" $
+    expectOutput
+      "free"
+      "test/Coal/examples/479"
+      [ "Main.coal"
+      ]
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

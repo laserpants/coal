@@ -1,0 +1,62 @@
+/**
+ * Counterpart to example 478: the same program with the corrected instance
+ * head.
+ *
+ * `instance Ftor<Free<f>> with (FM<f>) { let fmap = mf }` is well-typed: the
+ * instance's type variable `f` is rigid but only appears inside `Free<f, a>`,
+ * and `mf`'s type `(a -> b) -> Free<f, a> -> Free<f, b>` is exactly `Ftor`'s
+ * `fmap` at `Free<f>`. It must keep compiling and running.
+ */
+module Main {
+
+  import IO(println_string)
+
+  trait Ftor<f> {
+    fmap : (a -> b) -> f<a> -> f<b>
+  }
+
+  type Free<f, a>
+    = Pure(a)
+    | Free(f<Free<f, a>>)
+
+  fun pure_free(x : a) : Free<f, a> =
+    Pure(x)
+
+  fun lift_free(operation : f<a>) : Free<f, a> with (Ftor<f>) =
+    Free(fmap(pure_free, operation))
+
+  trait FM<f> {
+    mf : (a -> b) -> Free<f, a> -> Free<f, b>
+  }
+
+  instance Ftor<Free<f>> with (FM<f>) {
+    let fmap = mf
+  }
+
+  type Log<a> = Write(string, a)
+
+  instance Ftor<Log> {
+    fun fmap(f, instruction) =
+      match(instruction) {
+        | Write(message, result) => Write(message, f(result))
+      }
+  }
+
+  fold mf_log : Free<Log, a> -> ((a -> b) -> Free<Log, b>)
+    | Pure(x) => fn(g) => Pure(g(x))
+    | Free(Write(message, mf_log(@next))) => fn(g) => Free(Write(message, next(g)))
+
+  instance FM<Log> {
+    fun mf(g, program) = mf_log(program)(g)
+  }
+
+  fun main() =
+    let
+      p = lift_free(Write("hi", ()))
+    in
+      match(p) {
+        | Pure(_) => println_string("pure")
+        | Free(_) => println_string("free")
+      }
+
+}
