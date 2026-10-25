@@ -70,6 +70,11 @@ jobs:
           brew install bdw-gc gmp llvm
           echo "$(brew --prefix llvm)/bin" >> "$GITHUB_PATH"
 
+      - name: Configure native library paths
+        run: |
+          echo "CPATH=$(brew --prefix bdw-gc)/include:$(brew --prefix gmp)/include" >> "$GITHUB_ENV"
+          echo "LIBRARY_PATH=$(brew --prefix bdw-gc)/lib:$(brew --prefix gmp)/lib" >> "$GITHUB_ENV"
+
       - name: Verify LLVM tools
         run: |
           command -v llvm-as
