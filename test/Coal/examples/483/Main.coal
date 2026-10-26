@@ -1,0 +1,35 @@
+/**
+ * `bind_free` is implemented at the kernel level (`Builtin$.free$_bind_free`),
+ * because sequencing a continuation after a `Free<f, a>` recurses under the
+ * functor layer.
+ *
+ * The program here is headed by `Free`, so the recursive branch is exercised
+ * in addition to the `Pure` base case.
+ */
+module Main {
+
+  import IO(println_int32)
+  import Coal.Functor(Functor)
+  import Coal.Monad.Free(Free, pure_free, bind_free)
+
+  type Box<a> = Box(a)
+
+  instance Functor<Box> {
+    fun map(f, Box(x)) = Box(f(x))
+  }
+
+  // Collapse a free program to its result.
+  fold run_program : Free<Box, int32> -> int32
+    | Pure(x) => x
+    | Free(Box(run_program(@next))) => next
+
+  fun main() =
+    let
+      program : Free<Box, int32> = Free(Box(pure_free(10)))
+    in
+      let
+        twice : int32 -> Free<Box, int32> = fn(x) => pure_free(x * 2)
+      in
+        println_int32(run_program(bind_free(program, twice)))
+
+}

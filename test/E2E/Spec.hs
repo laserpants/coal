@@ -2740,6 +2740,36 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/481" ["Main.coal"]
       res `shouldBe` Left TypeError
 
+  -- 482: `Free.map_free` is implemented at the kernel level
+  -- (`Builtin$.free$_map_free`), because mapping over `Free<f, a>` recurses
+  -- under the functor layer. Both constructors are mapped over, so the
+  -- recursive (`Free`) branch is exercised as well as the `Pure` base case.
+  describe "482" $
+    expectOutput
+      "42"
+      "test/Coal/examples/482"
+      [ "Main.coal"
+      ]
+
+  -- 483: likewise for `Free.bind_free` (`Builtin$.free$_bind_free`). The
+  -- program is headed by `Free`, so the recursive branch is exercised.
+  describe "483" $
+    expectOutput
+      "20"
+      "test/Coal/examples/483"
+      [ "Main.coal"
+      ]
+
+  -- 484: `Free.ap_free` (`Builtin$.free$_ap_free`) is defined in the kernel in
+  -- terms of `bind_free` and `map_free`, so it too recurses under the functor
+  -- layer. The function part is headed by `Free`.
+  describe "484" $
+    expectOutput
+      "8"
+      "test/Coal/examples/484"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

@@ -1,0 +1,36 @@
+/**
+ * `ap_free` is implemented at the kernel level (`Builtin$.free$_ap_free`) in
+ * terms of `bind_free` and `map_free`, so it also recurses under the functor
+ * layer.
+ *
+ * The function part is headed by `Free`, so the recursive branch is exercised.
+ */
+module Main {
+
+  import IO(println_int32)
+  import Coal.Functor(Functor)
+  import Coal.Monad.Free(Free, pure_free, ap_free)
+
+  type Box<a> = Box(a)
+
+  instance Functor<Box> {
+    fun map(f, Box(x)) = Box(f(x))
+  }
+
+  fun increment(x : int32) : int32 = x + 1
+
+  // Collapse a free program to its result.
+  fold run_program : Free<Box, int32> -> int32
+    | Pure(x) => x
+    | Free(Box(run_program(@next))) => next
+
+  fun main() =
+    let
+      fs : Free<Box, int32 -> int32> = Free(Box(pure_free(increment)))
+    in
+      let
+        xs : Free<Box, int32> = pure_free(7)
+      in
+        println_int32(run_program(ap_free(fs, xs)))
+
+}

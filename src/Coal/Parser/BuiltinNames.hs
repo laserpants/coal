@@ -36,6 +36,8 @@ data BuiltinCategory
     Char
   | -- | Codata operations
     Codata
+  | -- | Free monad operations
+    Free
   | -- | Runtime support
     Runtime
   deriving (Eq, Ord, Show)
@@ -104,6 +106,12 @@ builtinNames =
       , ("event$_blocking_poll", Codata)
       , ("event$_loop", Codata)
       , ("event$_loop_io", Codata)
+      ]
+      <>
+      -- Free monad operations
+      [ ("free$_map_free", Free)
+      , ("free$_ap_free", Free)
+      , ("free$_bind_free", Free)
       ]
       <>
       -- Runtime support

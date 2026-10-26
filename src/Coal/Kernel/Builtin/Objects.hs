@@ -57,6 +57,15 @@ objectList =
       "Machine"
       [ ("Machine", Kernel.arrow Kernel.TOpq (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]))
       ]
+  , -- Free monad: two constructors, listed in lexicographic order so that the
+    -- positional tags match those of the surface `Free` type in
+    -- @Coal.Monad.Free@ (Free = 0, Pure = 1). Declared here so Builtin$ bodies
+    -- can use the unqualified names.
+    DData
+      "Free"
+      [ ("Free", Kernel.arrow Kernel.TOpq (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]))
+      , ("Pure", Kernel.arrow Kernel.TOpq (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]))
+      ]
   , DFunction
       Exported
       "Builtin$.operator$__not"
@@ -2817,6 +2826,126 @@ objectList =
                           ( coal_panic : string/*
                           , str : string
                           )
+        |]
+      )
+  , -- Free monad: map over the functor layer, recursing through the
+    -- continuation. The `Functor<f>` dictionary is threaded explicitly as the
+    -- first parameter, since `Free<f, a>` embeds `f<Free<f, a>>` and the
+    -- payload must be mapped over to reach the recursive occurrences.
+    DFunction
+      Exported
+      "Builtin$.free$_map_free"
+      [ Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
+      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "s"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<Free(*,*)>(s : Free(*,*)) {
+                    | ( Free : */Free(*,*)
+                      , ff : *
+                      ) =>
+                        let
+                          $map : */*/* =
+                            case<*/*/*>($d : Functor(*)) {
+                              | ( $Record : { map : */*/* | * }/Functor(*)
+                                , $r : { map : */*/* | * }
+                                ) =>
+                                  get?_map<*/*/*>($r : { map : */*/* | * })
+                            }
+                        in
+                          @<Free(*,*)>
+                            ( Free : */Free(*,*)
+                            , @<*>
+                                ( $map : */*/*
+                                , fn(x : *) =>
+                                    @<Free(*,*)>
+                                      ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
+                                      , $d : Functor(*)
+                                      , f : */*
+                                      , x : *
+                                      )
+                                , ff : *
+                                )
+                            )
+                    | ( Pure : */Free(*,*)
+                      , x : *
+                      ) =>
+                        @<Free(*,*)>
+                          ( Pure : */Free(*,*)
+                          , @<*>(f : */*, x : *)
+                          )
+                  }
+        |]
+      )
+  , -- Free monad: sequence a continuation after the free structure, again
+    -- recursing under the functor layer.
+    DFunction
+      Exported
+      "Builtin$.free$_bind_free"
+      [ Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d"
+      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "ma"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "k"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<Free(*,*)>(ma : Free(*,*)) {
+                    | ( Free : */Free(*,*)
+                      , ff : *
+                      ) =>
+                        let
+                          $map : */*/* =
+                            case<*/*/*>($d : Functor(*)) {
+                              | ( $Record : { map : */*/* | * }/Functor(*)
+                                , $r : { map : */*/* | * }
+                                ) =>
+                                  get?_map<*/*/*>($r : { map : */*/* | * })
+                            }
+                        in
+                          @<Free(*,*)>
+                            ( Free : */Free(*,*)
+                            , @<*>
+                                ( $map : */*/*
+                                , fn(x : *) =>
+                                    @<Free(*,*)>
+                                      ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
+                                      , $d : Functor(*)
+                                      , x : *
+                                      , k : */*
+                                      )
+                                , ff : *
+                                )
+                            )
+                    | ( Pure : */Free(*,*)
+                      , x : *
+                      ) =>
+                        @<Free(*,*)>(k : */*, x : *)
+                  }
+        |]
+      )
+  , -- Free monad: applicative application, defined as `bind` with the value
+    -- wrapped through `map`.
+    DFunction
+      Exported
+      "Builtin$.free$_ap_free"
+      [ Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d"
+      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "mf"
+      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "mx"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  @<Free(*,*)>
+                    ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
+                    , $d : Functor(*)
+                    , mf : Free(*,*)
+                    , fn(g : *) =>
+                        @<Free(*,*)>
+                          ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
+                          , $d : Functor(*)
+                          , g : */*
+                          , mx : Free(*,*)
+                          )
+                    )
         |]
       )
   ]

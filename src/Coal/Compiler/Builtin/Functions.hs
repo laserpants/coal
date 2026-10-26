@@ -1,13 +1,49 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Coal.Compiler.Builtin.Functions (machineType, builtinFunctions) where
+module Coal.Compiler.Builtin.Functions (machineType, freeType, builtinFunctions) where
 
 import Coal.Language
 import Data.List.NonEmpty (NonEmpty (..))
+import qualified Data.Set as Set
 import Extras (Name)
 
 machineType :: IndexedType -> IndexedType -> IndexedType
 machineType i o = applyTypeArgs KType (TConstructor (KArrow KType (KArrow KType KType)) "Machine") (i :| [o])
+
+{- | @Free<f, a>@, the free monad over a functor @f@.
+
+The type itself is declared in @Coal.Monad.Free@; its first parameter has kind
+@Type -> Type@, so the type constructor's kind is
+@(Type -> Type) -> Type -> Type@.
+-}
+freeType :: IndexedType -> IndexedType -> IndexedType
+freeType f a =
+  applyTypeArgs
+    KType
+    (TConstructor (KArrow (KArrow KType KType) (KArrow KType KType)) "Free")
+    (f :| [a])
+
+{- | Build the scheme of a Free operation.
+
+All three operations are quantified over a functor @f@ (kind @Type -> Type@)
+and two value types @a@ and @b@ (kind @Type@), and all of them carry a
+@Functor<f>@ constraint: @Free<f, a>@ embeds @f<Free<f, a>>@, so reaching the
+recursive occurrences requires mapping over the functor layer.
+
+The three variables must have distinct indices: substitutions are keyed by
+'typeIndexId' alone, so two quantified variables sharing an index would be
+collapsed into one.
+-}
+freeScheme :: (IndexedType -> IndexedType -> IndexedType -> IndexedType) -> IndexedScheme
+freeScheme body =
+  Forall
+    (Set.fromList [fVar, aVar, bVar])
+    [Trait "Functor" (TVariable fVar)]
+    (body (TVariable fVar) (TVariable aVar) (TVariable bVar))
+ where
+  fVar = TypeIndex (KArrow KType KType) 0
+  aVar = TypeIndex KType 1
+  bVar = TypeIndex KType 2
 
 builtinFunctions :: [(Name, IndexedScheme)]
 builtinFunctions =
@@ -284,5 +320,17 @@ builtinFunctions =
   ,
     ( "runtime$_panic"
     , forall1 $ \t1 -> TIntrinsic IString ~> t1
+    )
+  ,
+    ( "free$_map_free"
+    , freeScheme $ \f a b -> (a ~> b) ~> freeType f a ~> freeType f b
+    )
+  ,
+    ( "free$_ap_free"
+    , freeScheme $ \f a b -> freeType f (a ~> b) ~> freeType f a ~> freeType f b
+    )
+  ,
+    ( "free$_bind_free"
+    , freeScheme $ \f a b -> freeType f a ~> (a ~> freeType f b) ~> freeType f b
     )
   ]

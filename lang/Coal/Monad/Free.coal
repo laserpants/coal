@@ -12,24 +12,26 @@ module Coal.Monad.Free {
     Pure
 
   fun map_free(f : a -> b, s : Free<f, a>) : Free<f, b> =
-    // must be implemented at the Kernel level, due to recursion
-    
+    // The recursion is expressed in the kernel implementation, since the
+    // surface language only admits structural recursion.
+    free$_map_free(f, s)
+
   fun ap_free(f : Free<f, a -> b>, fa : Free<f, a>) : Free<f, b> =
-    // must be implemented at the Kernel level, due to recursion
-  
+    free$_ap_free(f, fa)
+
   fun bind_free(ma : Free<f, a>, f : a -> Free<f, b>) : Free<f, b> =
-    // must be implemented at the Kernel level, due to recursion
+    free$_bind_free(ma, f)
   
   instance Functor<Free<f>> with (Functor<f>) {
     let map = map_free
   }
 
-  instance Applicative<Free<f>> with (Functor<Free<f>>) {
+  instance Applicative<Free<f>> with (Functor<f>) {
     let ap = ap_free
     let pure = pure_free
   }
 
-  instance Monad<Free<f>> with (Applicative<Free<f>>) {
+  instance Monad<Free<f>> with (Functor<f>) {
     let bind = bind_free
   }
     

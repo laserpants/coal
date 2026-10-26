@@ -74,4 +74,8 @@ builtinModules =
     ( "Coal.Monad"
     , $(embedFile "lang/Coal/Monad.coal")
     )
+  ,
+    ( "Coal.Monad.Free"
+    , $(embedFile "lang/Coal/Monad/Free.coal")
+    )
   ]
