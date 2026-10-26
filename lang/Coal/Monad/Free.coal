@@ -1,0 +1,36 @@
+module Coal.Monad.Free {
+ 
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad)
+
+  type Free<f, a>
+    = Pure(a)
+    | Free(f<Free<f, a>>)
+
+  let pure_free : a -> Free<f, a> =
+    Pure
+
+  fun map_free(f : a -> b, s : Free<f, a>) : Free<f, b> =
+    // must be implemented at the Kernel level, due to recursion
+    
+  fun ap_free(f : Free<f, a -> b>, fa : Free<f, a>) : Free<f, b> =
+    // must be implemented at the Kernel level, due to recursion
+  
+  fun bind_free(ma : Free<f, a>, f : a -> Free<f, b>) : Free<f, b> =
+    // must be implemented at the Kernel level, due to recursion
+  
+  instance Functor<Free<f>> with (Functor<f>) {
+    let map = map_free
+  }
+
+  instance Applicative<Free<f>> with (Functor<Free<f>>) {
+    let ap = ap_free
+    let pure = pure_free
+  }
+
+  instance Monad<Free<f>> with (Applicative<Free<f>>) {
+    let bind = bind_free
+  }
+    
+}
