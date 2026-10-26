@@ -4,8 +4,9 @@
 Module: Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors
 
 Report type errors that occurred during constraint generation and solving.
-Collect errors from both the constraint generation phase and the solver phase,
-then report them to the user and abort compilation if any errors were found.
+Collect errors from the constraint generation phase, the solver phase, and
+kind-constraint generation, then report them to the user and abort compilation
+if any errors were found.
 -}
 module Coal.Compiler.Pass.PhaseTypeChecking.ReportTypeErrors (
   passReportTypeErrors,
@@ -25,9 +26,9 @@ import Control.Monad.IO.Class (MonadIO)
 
 {- | Type error pass.
 
-Gather constraint generation errors and solver rule violations from the
-compiler state, report them as type errors, and throw a TypeError exception
-if any errors were found.
+Gather constraint generation errors, solver rule violations, and
+kind-constraint-generation errors from the compiler state, report them as type
+errors, and throw a TypeError exception if any errors were found.
 -}
 passReportTypeErrors :: (MonadIO m) => Pass Metadata m (Module Metadata Kind IndexedType) (Module Metadata Kind IndexedType)
 passReportTypeErrors = Pass{runPass = passImpl}
@@ -44,7 +45,16 @@ passImpl Module{..} = do
     \err ->
       tellErrors [SolverError err (errorLocation err)]
 
-  unless (null constraintsGenErrors && null solverRuleViolations) (throwError TypeError)
+  -- Kind-constraint-generation errors (e.g. a type constructor or trait that is
+  -- not in scope) carry no source metadata of their own, so they are reported at
+  -- module granularity. Without this the errors collected by
+  -- 'generateKindConstraints' are silently dropped.
+  kindErrors <- compilerGetKindConstraintsGenErrorsC
+  forM_ kindErrors $
+    \err ->
+      tellErrors [KindError err (ErrorLocation (principalPath modulePath) mempty)]
+
+  unless (null constraintsGenErrors && null solverRuleViolations && null kindErrors) (throwError TypeError)
   return Module{..}
  where
   errorLocation err = ErrorLocation (principalPath modulePath) (getMetadata err)

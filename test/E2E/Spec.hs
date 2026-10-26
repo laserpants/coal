@@ -2724,6 +2724,22 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 480: a data type constructor whose signature mentions an undefined type
+  -- constructor (`type Foo = Baz(Banan)`) must be rejected by kind inference.
+  -- The error was previously collected but never reported, so the program
+  -- compiled despite `Banan` not being in scope.
+  describe "480" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/480" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  -- 481: the same situation in a type alias — `type alias Foo = Banan` with
+  -- `Banan` undefined — must likewise be rejected by kind inference.
+  describe "481" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/481" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

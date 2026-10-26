@@ -75,6 +75,7 @@ module Coal.Compiler.Stack (
   compilerReportKindConstraintsGenErrorsC,
   compilerReportSolverRuleViolationsC,
   compilerGetConstraintsGenErrorsC,
+  compilerGetKindConstraintsGenErrorsC,
   compilerGetSolverRuleViolationsC,
 
   -- * Configuration
@@ -335,6 +336,10 @@ compilerReportConstraintsGenErrorsC errors = modify (overCompilerConstraintsGenE
 {-# INLINE compilerReportKindConstraintsGenErrorsC #-}
 compilerReportKindConstraintsGenErrorsC :: (Monad m) => [KindError] -> CompilerT a m ()
 compilerReportKindConstraintsGenErrorsC errors = modify (overCompilerKindConstraintsGenErrors (<> errors))
+
+{-# INLINE compilerGetKindConstraintsGenErrorsC #-}
+compilerGetKindConstraintsGenErrorsC :: (Monad m) => CompilerT a m [KindError]
+compilerGetKindConstraintsGenErrorsC = gets (nub . compilerKindConstraintsGenErrors)
 
 {-# INLINE compilerReportSolverRuleViolationsC #-}
 compilerReportSolverRuleViolationsC :: (Monad m) => [InferenceRule Kind a] -> CompilerT a m ()

@@ -1,0 +1,10 @@
+module Main {
+
+  import namespace IO
+
+  type alias Foo = Banan
+
+  fun main() =
+    IO.println_string("test")
+
+}

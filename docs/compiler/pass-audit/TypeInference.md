@@ -49,7 +49,10 @@ Transforms `Module Metadata Kind ()` → `Module Metadata Kind IndexedType`.
 
 ### `inferKinds`
 
-- Calls `generateKindConstraints m` which traverses the module generating kind constraints
+- Calls `generateKindConstraints m` which traverses the module generating kind constraints.
+  The kind environment is `moduleKindEnvironment m` unioned with the current build's type
+  constructors, traits and aliases, so that type constructors which become visible through
+  an imported type alias (after `ExpandAliases` inlines it) are not reported as out of scope
 - Runs `solveKindConstraints` inside `kindUnifierMonad`
 - Applies the kind substitution to the name store and module
 

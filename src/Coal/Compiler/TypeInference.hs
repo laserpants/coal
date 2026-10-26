@@ -86,7 +86,23 @@ import Extras (Dictionary, Name, concatMapM, forM_)
 generateKindConstraints :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
 generateKindConstraints modul = do
   env <- moduleKindEnvironment modul
-  (_, result) <- runKindConstraintsGen env (emitKindConstraints modul)
+  -- Kind checking must see every type constructor that is actually in scope.
+  -- 'moduleKindEnvironment' derives its entries from the module's definitions
+  -- and imports, but an imported type alias is expanded (see
+  -- 'Coal.Compiler.Pass.PhaseTypeChecking.ExpandAliases') to a type that may
+  -- mention type constructors which travel with the alias rather than being
+  -- imported by name (mirroring the recursive insertion performed by
+  -- 'Coal.Compiler.Pass.PhaseTypeChecking.PrepareBuild.insertTypeName'). Those
+  -- constructors are recorded in the build, so fold the build's type
+  -- constructors, traits and aliases into the environment. The module-derived
+  -- entries win on conflict.
+  Build{..} <- getCurrentBuildC
+  let traitKindOf e = KArrow (kindOf (traitEntryParameter e)) KTrait
+      buildEnv =
+        Environment.mapEnvironment typeConstructorEntryKind buildTypeConstructors
+          <> Environment.mapEnvironment traitKindOf buildTraits
+          <> Environment.mapEnvironment (kindOf . aliasEntryType) buildAliases
+  (_, result) <- runKindConstraintsGen (env <> buildEnv) (emitKindConstraints modul)
   let (errors, constraints) = partitionEithers result
   insertKindConstraintsC constraints
   compilerReportKindConstraintsGenErrorsC errors
