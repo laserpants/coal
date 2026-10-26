@@ -9,7 +9,8 @@ module Main {
 
   import IO(println_int32)
   import Coal.Functor(Functor)
-  import Coal.Monad.Free(Free, pure_free, ap_free)
+  import Coal.Applicative(ap)
+  import Coal.Monad.Free(Free)
 
   type Box<a> = Box(a)
 
@@ -26,11 +27,11 @@ module Main {
 
   fun main() =
     let
-      fs : Free<Box, int32 -> int32> = Free(Box(pure_free(increment)))
+      fs : Free<Box, int32 -> int32> = Free(Box(pure(increment)))
     in
       let
-        xs : Free<Box, int32> = pure_free(7)
+        xs : Free<Box, int32> = pure(7)
       in
-        println_int32(run_program(ap_free(fs, xs)))
+        println_int32(run_program(ap(fs, xs)))
 
 }

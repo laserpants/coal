@@ -1,9 +1,27 @@
+/**
+ * The free monad.
+ *
+ * The free monad turns any functor `f` into a monad by describing computations
+ * as data: a computation is built as a tree of `f`-shaped instructions, which a
+ * separate interpreter can later give meaning to. This separates the
+ * description of an effectful computation from its interpretation.
+ */
 module Coal.Monad.Free(Free) {
  
   import Coal.Functor(Functor)
   import Coal.Applicative(Applicative)
   import Coal.Monad(Monad)
 
+  /**
+   * The free monad over a functor `f`.
+   *
+   * A `Free<f, a>` value is either a finished computation, `Pure(a)`, or a
+   * single layer of `f` whose continuations are themselves `Free<f, a>`
+   * computations, `Free(f<Free<f, a>>)`.
+   *
+   * `Free<f>` is a `Functor`, `Applicative` and `Monad` whenever `f` is a
+   * `Functor`.
+   */
   type Free<f, a>
     = Pure(a)
     | Free(f<Free<f, a>>)
