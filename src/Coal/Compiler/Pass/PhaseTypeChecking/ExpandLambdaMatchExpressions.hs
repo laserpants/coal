@@ -94,8 +94,21 @@ instance (Monoid a, Data a) => ExpandContext (Definition a Kind ()) where
         DFunction loc name <$> expandLambdaMatchExpressions def
       DLet loc name def ->
         DLet loc name <$> expandLambdaMatchExpressions def
+      DInstance a def ->
+        DInstance a <$> expandLambdaMatchExpressions def
       o ->
         return o
+
+instance (Monoid a, Data a) => ExpandContext (InstanceDefinition a Kind ()) where
+  expandLambdaMatchExpressions =
+    \case
+      InstanceDefinition{..} -> do
+        newInstanceDefinitionImplementations <- expandLambdaMatchExpressions instanceDefinitionImplementations
+        return $
+          InstanceDefinition
+            { instanceDefinitionImplementations = newInstanceDefinitionImplementations
+            , ..
+            }
 
 instance (Monoid a, Data a) => ExpandContext (LetDefinition a Kind ()) where
   expandLambdaMatchExpressions =
