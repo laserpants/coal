@@ -91,6 +91,8 @@ instance (Data a, Monoid a) => DoNotationContext (Definition a () ()) where
     \case
       DFunction loc name def ->
         DFunction loc name <$> desugarDoNotation def
+      DFunctionGroup loc name def ->
+        DFunctionGroup loc name <$> desugarDoNotation def
       DLet loc name def ->
         DLet loc name <$> desugarDoNotation def
       DInstance loc def ->
@@ -99,6 +101,17 @@ instance (Data a, Monoid a) => DoNotationContext (Definition a () ()) where
         DFold loc name <$> desugarDoNotation def
       o ->
         pure o
+
+instance (Data a, Monoid a) => DoNotationContext (FunctionGroupDefinition a () ()) where
+  desugarDoNotation =
+    \case
+      FunctionGroupDefinition{..} -> do
+        newFunctionGroupDefinitionBranches <- traverse desugarDoNotation functionGroupDefinitionBranches
+        return $
+          FunctionGroupDefinition
+            { functionGroupDefinitionBranches = newFunctionGroupDefinitionBranches
+            , ..
+            }
 
 instance (Data a, Monoid a) => DoNotationContext (InstanceDefinition a () ()) where
   desugarDoNotation =
