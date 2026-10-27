@@ -2740,6 +2740,19 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/481" ["Main.coal"]
       res `shouldBe` Left TypeError
 
+  -- 490: an instance implementation that is not polymorphic enough must be
+  -- rejected. `instance Functor<LangF>` has a closed head, so the member's own
+  -- `a` and `b` are the only signature variables that can be instantiated; the
+  -- body (`g(f(x))` with `f(x) : string`) forces both to `string`, so the
+  -- implementation is compiled at
+  -- `(string -> string) -> LangF<string> -> LangF<string>` while use sites type
+  -- `map` from the interface at `(a -> b) -> LangF<a> -> LangF<b>`. The
+  -- mismatch used to reach the generated code and crash at run time.
+  describe "490" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/490" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

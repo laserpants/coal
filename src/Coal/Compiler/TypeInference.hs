@@ -80,7 +80,6 @@ import Data.Either.Extra (partitionEithers)
 import Data.List.Extra (groupSortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
 import Extras (Dictionary, Name, concatMapM, forM_)
 
 generateKindConstraints :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
@@ -233,19 +232,38 @@ toIndexedSchemeWithEnv Forall{..} = do
 {- | Verify that each trait-instance implementation has the type that the
 trait interface requires at the instance's declared type.
 
-The type variables of the instance head are rigid: an implementation may not
-unify them with a compound type in order to change what the instance is for.
-Without this check an instance such as
+Every type variable that the substituted interface signature quantifies is
+rigid: the instance head's parameters, and the member's own type variables. The
+implementation may not instantiate any of them with a compound type, because
+that would make it /less/ polymorphic than the interface promises.
+
+The conformance constraint ('RuleTraitInstance') alone does not enforce this: it
+is solved by instantiating the signature with flexible unification variables, so
+it only requires the implementation to unify with /some/ instance of the
+signature — an implementation that is more specific is accepted. Two shapes of
+that error are rejected here.
+
+An instance head that is a bare variable, as in
 
 > instance Functor<f> with (FreeMonad<f>) { let map = map_free }
 
-is accepted: its conformance constraint ('RuleTraitInstance') is solved by
-instantiating the head variable as a flexible unification variable, which
-unifies @f@ with @Free<f, ·>@. The member then needs a @FreeMonad<f>@
-dictionary that its recorded type does not mention, so no dictionary is
-inserted at use sites and the generated code is inconsistent: the member is
-stored with the interface's arity while its compiled definition takes the
-dictionary as an extra parameter.
+is accepted by the flexible instantiation, which unifies @f@ with @Free<f, ·>@.
+The member then needs a @FreeMonad<f>@ dictionary that its recorded type does not
+mention, so no dictionary is inserted at use sites and the generated code is
+inconsistent: the member is stored with the interface's arity while its compiled
+definition takes the dictionary as an extra parameter.
+
+A closed instance head, as in
+
+> type LangF<a> = ReadLn(string -> a)
+> instance Functor<LangF> { fun map(f, v) = ... g(f(x)) ... }
+
+is accepted for the same reason, but the head contributes no variables, so only
+the member's own @a@ and @b@ can be instantiated: the body forces them to
+@string@, and the implementation is compiled at
+@(string -> string) -> LangF<string> -> LangF<string>@ while use sites type the
+member from the interface (@a -> b@ at any @a@ and @b@). The two disagree, and
+the mismatch reaches the generated code.
 
 The check is a local unification whose substitution is discarded, so it cannot
 affect the inferred types. A mismatch is reported through the solver-rule
@@ -260,13 +278,12 @@ checkInstanceConformance sub =
         Nothing ->
           pure ()
         Just TraitEntry{traitEntryParameter, traitEntryInterface} -> do
-          instanceVariables <- Set.fromList . fmap fst <$> instantiateTypeIndexes instanceDefinitionType
           forM_ instanceDefinitionImplementations $ \def ->
             forM_ (memberName def) $ \(loc, name) ->
               forM_ (Environment.lookup name traitEntryInterface) $ \sig -> do
                 (expected, env) <- toIndexedSchemeWithEnv (replaceParamInScheme traitEntryParameter instanceDefinitionType sig)
                 let actual = apply sub (typeOf def)
-                    rigid = [index | (name_, index) <- env, name_ `Set.member` instanceVariables]
+                    rigid = snd <$> env
                 seed <- gets compilerSupply
                 let (result, seed_) = runUnifier seed (unify (schemeTypeBody expected) actual)
                 updateSupplyC seed_
