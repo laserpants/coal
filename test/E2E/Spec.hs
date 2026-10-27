@@ -2753,6 +2753,25 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/490" ["Main.coal"]
       res `shouldBe` Left TypeError
 
+  -- 491: the entry point must produce an IO action, because the generated C
+  -- entry point runs it. A `main` returning a bare value is rejected during
+  -- type checking. The example uses a *ground* non-IO type (`bool`): an
+  -- unannotated numeric literal is inferred as an unresolved type variable,
+  -- which is accepted, so it would not exercise the check.
+  describe "491" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/491" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  -- 492: `IO.unsafe_perform` forces an action inside pure code. This is the
+  -- escape hatch for diagnostics that cannot be sequenced with `do`-notation.
+  describe "492" $
+    expectOutput
+      "adding\n5"
+      "test/Coal/examples/492"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

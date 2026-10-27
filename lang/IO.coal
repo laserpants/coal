@@ -231,6 +231,23 @@ module IO {
   let return = __return_io
 
   /**
+   * Run an IO action immediately, in the current evaluation context.
+   *
+   * This is the escape hatch for forcing an action where monadic sequencing
+   * is not available: for example a debug trace inside a pure function, or a
+   * `let _ = ...` binding that is used purely for its side effect.
+   *
+   * It is `unsafePerformIO`. It breaks referential transparency, so it must
+   * only ever be used for diagnostics, never for program logic, and it must
+   * carry a comment saying why proper sequencing is not possible. Prefer
+   * `do`-notation, `bind` or `and_then` whenever the enclosing computation is
+   * already in `IO`.
+   *
+   * **Type**: `unsafe_perform : IO<a> -> a`
+   */
+  let unsafe_perform = __eval_io
+
+  /**
    * Opaque type representing the result of a file I/O operation.
    *
    * This type is used internally by `read_file` and `write_file` to

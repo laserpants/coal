@@ -1,0 +1,17 @@
+module Main {
+
+  import namespace IO
+
+  // `pure_add` is pure, but traces its arguments. The trace cannot be
+  // sequenced with `do`-notation because there is no enclosing IO computation,
+  // so it is forced explicitly with `unsafe_perform` (`unsafePerformIO`).
+  fun pure_add(x : int32, y : int32) : int32 =
+    let
+      _ = IO.unsafe_perform(IO.println_string("adding"))
+    in
+    x + y
+
+  fun main() =
+    IO.println_int32(pure_add(2, 3))
+
+}

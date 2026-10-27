@@ -458,6 +458,18 @@ prettyError env =
         erl
     NamedFoldNotAllowed erl ->
       errorMessage ["Named fold pattern inside expression fold."] env erl
+    InvalidMainFunctionType name t erl ->
+      errorMessage
+        [ "The entry point function '"
+            <> name
+            <> "' has type '"
+            <> prettyType t
+            <> "', but it must be an IO action."
+        , "The value inside the IO action becomes the process exit status, so it should be `unit` (exit status 0) or `int32`."
+        , "Wrap the result in an IO action, e.g. `return(())` or `return(0 : int32)`."
+        ]
+        env
+        erl
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msgs env (ErrorLocation path loc) =

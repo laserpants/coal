@@ -1,0 +1,97 @@
+module Main {
+
+  import namespace IO
+  import IO(return)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad, and_then, and_eval)
+  import Coal.Monad.Free(Free)
+
+  type alias Thunk<a> = unit -> a
+
+  type IOEffect<a> = IOEffect(Thunk<IO<a>>)
+  
+  fun force(thunk) = thunk()
+
+  fun force_effect(IOEffect(thunk)) = force(thunk)
+
+  instance Functor<IOEffect> {
+    // map : (a -> b) -> IOEffect<a> -> IOEffect<b>
+    fun map(f, x) =
+      IOEffect(fn(_) => map(f, force_effect(x)))
+  }
+
+  instance Applicative<IOEffect> {
+    // ap : IOEffect<a -> b> IOEffect<a> -> IOEffect<b>
+    fun ap(f, fa) =
+      IOEffect(fn(_) => ap(force_effect(f), force_effect(fa)))
+    // pure : a -> IOEffect<a>
+    fun pure(x) = 
+      IOEffect(fn(_) => pure(x))
+  }
+
+  instance Monad<IOEffect> {
+    // bind : IOEffect<a> -> (a -> IOEffect<b>) -> IOEffect<b>
+    fun bind(IOEffect(ma), f) =
+      IOEffect(fn(_) => bind(force(ma), force_effect << f))
+  }
+
+  //
+
+  type LangF<a>
+    = WriteLn(string, a)
+    | ReadLn(string -> a)
+
+  instance Functor<LangF> {
+    fun map(f) = 
+      match{
+        | WriteLn(str, x) => WriteLn(str, f(x))
+        | ReadLn(g) => ReadLn(f << g)
+      }
+  }
+
+  fun lift_free(e : f<a>) : Free<f, a> with (Functor<f>) =
+    Free(map(pure, e))
+
+  let my_program : Free<LangF, int32> =
+    lift_free(WriteLn("Enter your name", ()))
+      |. and_eval(lift_free(ReadLn(fn(s) => s)))
+      |. and_then(fn(s) => lift_free(WriteLn("Hello " <> s, ())))
+      |. and_eval(pure(0))
+
+  type alias Handler<f, e, a> = f<e<a>> -> e<a>
+
+  fun io_lang_handler(h : LangF<IOEffect<a>>) : IOEffect<a> =
+    match(h) {
+      | WriteLn(str, a) => 
+          IOEffect(fn(_) => IO.println_string(str))
+            |. and_then(fn(_) => a)
+
+      | ReadLn(f) => 
+          IOEffect(fn(_) => IO.readln())
+            |. and_then(fn(s) => IOEffect(fn(_) => force_effect(f(s))))
+    }
+
+  fun interpret(handler : Handler<f, e, a>, prog : Free<f, a>) : e<a> with (Monad<e>) =
+    match(prog) {
+      | Pure(val) => pure(val)
+      | Free(ins) => handler(map(interpret(handler), ins))
+    }
+
+  fun main() =
+    force_effect(interpret(io_lang_handler, my_program))
+
+//  fun io_lang_handler(h : LangF<IO<a>>) : IO<a> =
+//    match(h) {
+//      | WriteLn(str, a) => do {
+//          IO.println_string(str);
+//          a;
+//        }
+//      | ReadLn(f) => do {
+//          s <- IO.readln();
+//          f(s);
+//        }
+//    }
+
+}
+

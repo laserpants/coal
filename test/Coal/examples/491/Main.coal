@@ -1,0 +1,13 @@
+module Main {
+
+  // The entry point must produce an IO action: the generated C entry point
+  // runs the action it returns. A `main` returning a bare value has no
+  // well-defined behaviour, so it is rejected during type checking.
+  //
+  // Note: this uses a *ground* non-IO type (`bool`). A bare numeric literal
+  // would be inferred as an unresolved type variable, which cannot be
+  // distinguished from a type that inference left unresolved for a
+  // well-behaved program, so it is accepted.
+  fun main() = true
+
+}
