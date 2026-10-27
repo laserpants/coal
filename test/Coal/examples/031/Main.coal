@@ -19,10 +19,8 @@ module Main {
 
   let a_test_user = { uid = 111 : int32 }
 
-  fun main() = 
-    let
-      a = 
-         println_string(to_json(a_test_user))
-       in
-         println_string(f(a_test_user))
+  fun main() = do {
+    println_string(to_json(a_test_user));
+    println_string(f(a_test_user));
+  }
 }

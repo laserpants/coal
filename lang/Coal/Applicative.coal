@@ -4,7 +4,7 @@
 module Coal.Applicative {
   
   import Coal.Functor(Functor)
-  import IO(return, __eval_io)
+  import IO(return, __defer, __eval_io)
   import namespace List
 
   /**
@@ -39,7 +39,9 @@ module Coal.Applicative {
   }
 
   instance Applicative<IO> {
-    fun ap(af, f) = map(__eval_io(af), f)
+    // Deferring the whole `map` call keeps `af`'s effects deferred too; it is
+    // only forced when the resulting action is.
+    fun ap(af, fa) = __defer(fn(_) => __eval_io(map(__eval_io(af), fa)))
     let pure = return
   }
 

@@ -2772,6 +2772,24 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 493: an IO action is a value; building one does not run it. The unused
+  -- action bound in `main` is never forced, so it prints nothing.
+  describe "493" $
+    expectOutput
+      "printed"
+      "test/Coal/examples/493"
+      [ "Main.coal"
+      ]
+
+  -- 494: forcing an action runs it, with no memoisation, so the same action
+  -- value forced twice prints twice.
+  describe "494" $
+    expectOutput
+      "once\nonce"
+      "test/Coal/examples/494"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

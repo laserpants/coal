@@ -1,0 +1,14 @@
+module Main {
+
+  import namespace IO
+  import Coal.Monad(and_then)
+
+  // Forcing an action runs it: there is no memoisation. `act` is a single
+  // action value that is forced twice, so "once" is printed twice.
+  fun main() =
+    let
+      act = IO.println_string("once")
+    in
+    act |. and_then(fn(_) => act)
+
+}

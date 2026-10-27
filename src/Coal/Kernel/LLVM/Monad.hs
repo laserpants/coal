@@ -62,18 +62,38 @@ data IRCodegenEnv = IRCodegenEnv
   'irModule' to reconstruct imported function/constant bindings that live
   in cached builds.
   -}
+  , codegenRunEntryIO :: Bool
+  {- ^ Whether the entry point's result is an IO action that the generated C
+  @main@ must run before deriving the exit status.
+
+  This is a property of the source language, not of kernel IR: Coal modules
+  return an action (see
+  'Coal.Compiler.Pass.PhaseLowering.KernelCodegen'), whereas raw kernel
+  modules return the exit status directly. Defaults to 'False' so that the
+  kernel compiler and the kernel tests keep the latter convention; applying a
+  non-closure as an action would crash.
+  -}
   }
 
 instance Semigroup IRCodegenEnv where
   e1 <> e2 =
     IRCodegenEnv
-      (codegenVarEnv e1 <> codegenVarEnv e2)
-      (codegenTagEnv e1 <> codegenTagEnv e2)
-      (codegenImportedDData e1 <> codegenImportedDData e2)
-      (codegenImportedObjects e1 <> codegenImportedObjects e2)
+      { codegenVarEnv = codegenVarEnv e1 <> codegenVarEnv e2
+      , codegenTagEnv = codegenTagEnv e1 <> codegenTagEnv e2
+      , codegenImportedDData = codegenImportedDData e1 <> codegenImportedDData e2
+      , codegenImportedObjects = codegenImportedObjects e1 <> codegenImportedObjects e2
+      , codegenRunEntryIO = codegenRunEntryIO e1 || codegenRunEntryIO e2
+      }
 
 instance Monoid IRCodegenEnv where
-  mempty = IRCodegenEnv mempty Map.empty Map.empty Map.empty
+  mempty =
+    IRCodegenEnv
+      { codegenVarEnv = mempty
+      , codegenTagEnv = Map.empty
+      , codegenImportedDData = Map.empty
+      , codegenImportedObjects = Map.empty
+      , codegenRunEntryIO = False
+      }
 
 newtype IRCodegenT m a = IRCodegen
   { getIRCodegen :: StateT (Set Name, Int, Map ByteString Name) (ExceptT IRCodegenError (ReaderT IRCodegenEnv m)) a
