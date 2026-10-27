@@ -1,0 +1,56 @@
+module Main {
+
+  import namespace IO
+  import IO(return)
+  import Coal.Functor(Functor)
+  import Coal.Monad(and_then, and_eval)
+  import Coal.Monad.Free(Free)
+
+  type Effect<e, a> = Effect // TODO
+
+  type Handler<e> = Handler  // TODO
+
+  //TODO
+//  fun run(handler : Handler<e>, effect : Effect<e, a>) : a =
+//    ?
+
+  type LangF<a>
+    = WriteLn(string, a)
+    | ReadLn(string -> a)
+
+  instance Functor<LangF> {
+    fun map(f) = 
+      match{
+        | WriteLn(str, x) => WriteLn(str, f(x))
+        | ReadLn(g) => ReadLn(f << g)
+      }
+  }
+
+  fun lift_free(e : f<a>) : Free<f, a> with (Functor<f>) =
+    Free(map(pure, e))
+
+  let my_program : Free<LangF, int32> =
+    lift_free(WriteLn("Enter your name", ()))
+      |. and_eval(lift_free(ReadLn(fn(s) => s)))
+      |. and_then(fn(s) => lift_free(WriteLn("Hello " <> s, ())))
+      |. and_eval(pure(0))
+
+  fun handler(lang : LangF<a>) : IO<a> =
+    match(lang) {
+      | WriteLn(str, a) => return(a)
+      | ReadLn(f) => return(f("Foo"))
+    }
+
+//  fold run_program : Free<LangF, a> -> a 
+//    | Pure(v) => v
+//    | Free(WriteLn(s, run_program(@next))) => 
+//        let _ = IO.println_string(s)
+//        in
+//        next
+//    | Free(ReadLn(f)) => 
+//        ???
+
+  fun main() =
+    IO.println_string("Ok")
+
+}
