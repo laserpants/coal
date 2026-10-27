@@ -1,0 +1,39 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+
+  type LangF<a> = ReadLn(string -> a)
+
+// Correct implementation:
+//
+//  instance Functor<LangF> {
+//    // map : (a -> b) -> LangF<a> -> LangF<b>
+//    fun map(f, v) = 
+//      match(v) {
+//        | ReadLn(g) => ReadLn(fn(x : string) => f(g(x)))
+//      }
+//  }
+
+  instance Functor<LangF> {
+    // map : (a -> b) -> LangF<a> -> LangF<b>
+    fun map(f, v) = 
+      match(v) {
+        // THIS SHOULDN'T TYPE CHECK:
+        | ReadLn(g) => ReadLn(fn(x : string) => g(f(x)))
+      }
+  }
+
+  let 
+    z : LangF<int32> = ReadLn(fn(s) => 5)
+
+  let
+    z2 : LangF<char> = map(fn(_) => 'c', z)
+
+  fun main() =
+    let
+      ReadLn(g) = z2
+    in
+    IO.println_char(g("hello"))
+
+}
