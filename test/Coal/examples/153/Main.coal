@@ -1,9 +1,0 @@
-module Main {
-
-  import IO(write_file)
-  import Coal.Functor(void)
-
-  fun main() = 
-    void(write_file("test.txt", "Hello"))
-
-}
