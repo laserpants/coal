@@ -41,8 +41,9 @@ import Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
-import Coal.Language (Kind)
+import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module.Path (principalPath)
+import Coal.Language.Type (Type (TVariable))
 import Coal.Pretty (CoalPretty (..))
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
@@ -458,6 +459,39 @@ prettyError env =
         erl
     NamedFoldNotAllowed erl ->
       errorMessage ["Named fold pattern inside expression fold."] env erl
+    InvalidMainFunctionType name t erl ->
+      errorMessage
+        ( [ "The entry point function '"
+              <> name
+              <> "' has type '"
+              <> prettyType t
+              <> "', but it must be an IO action."
+          ]
+            <> entryPointAdvice t
+        )
+        env
+        erl
+
+{- | Advice appended to an 'InvalidMainFunctionType' message.
+
+A concrete non-@IO@ type can simply be wrapped in an action, but an unresolved
+type variable needs different advice: nothing determined what the action is, so
+the fix is to say so explicitly. In practice a variable here comes either from a
+bare numeric literal (its type is a trait-constrained conversion that the
+surrounding context never pins down) or from a definition caught in a call
+cycle, which leaves the type unresolved too.
+-}
+entryPointAdvice :: IndexedType -> [Text]
+entryPointAdvice = \case
+  TVariable _ ->
+    [ "Nothing determined the entry point's type, so it does not say which action to run."
+    , "Return an action explicitly, e.g. `return(5 : int32)`, or annotate the entry point, e.g. `fun main() : IO<int32> = ...`."
+    , "A bare numeric literal leaves the type undetermined this way; a call cycle does too."
+    ]
+  _ ->
+    [ "The value inside the IO action becomes the process exit status, so it should be `unit` (exit status 0) or `int32`."
+    , "Wrap the result in an IO action, e.g. `return(())` or `return(0 : int32)`."
+    ]
 
 errorMessage :: [Text] -> Environment Text -> ErrorLocation Metadata -> Text
 errorMessage msgs env (ErrorLocation path loc) =

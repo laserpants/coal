@@ -70,6 +70,7 @@ builtinNames =
       , ("io$_print_double", IO)
       , ("io$_eval", IO)
       , ("io$_return", IO)
+      , ("io$_defer", IO)
       ]
       <>
       -- String operations

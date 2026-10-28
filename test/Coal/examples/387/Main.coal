@@ -112,19 +112,13 @@ module Main {
     let
       cleared = board_clear_full_rows(board)
     in
-    let
-      a = IO.println_int32(board_size(board))
-    in
-    let
-      b = IO.println_string(" cells before clear\n")
-    in
-    let 
-      c = IO.println_int32(board_size(cleared))
-    in
-    let
-      _ = IO.print_string(" cells after clear\n")
-    in
-    IO.__return_io(())
+    do {
+      IO.println_int32(board_size(board));
+      IO.println_string(" cells before clear\n");
+      IO.println_int32(board_size(cleared));
+      IO.print_string(" cells after clear\n");
+      IO.__return_io();
+    }
 
   fun main() =
     foo()

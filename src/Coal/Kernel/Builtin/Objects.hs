@@ -2313,11 +2313,11 @@ objectList =
   , DFunction
       Exported
       "Builtin$.io$_eval"
-      [ Kernel.Label Kernel.TOpq "v"
+      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "io"
       ]
       ( unsafeParseExpr
           [r|
-                  v : *
+                  @<*>(io : */*, ())
         |]
       )
   , DFunction
@@ -2327,7 +2327,17 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  v : IO(*)
+                  @<IO(*)>(`Builtin$.io$_defer` : (*/*)/IO(*), fn(_ : unit) => v : *)
+        |]
+      )
+  , DFunction
+      Exported
+      "Builtin$.io$_defer"
+      [ Kernel.Label Kernel.TOpq "f"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  f : IO(*)
         |]
       )
   , DFunction
@@ -2749,26 +2759,32 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  case<IO(*)>(
-                    @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
-                                 @<IO(Option(*))>(try_fn : */IO(Option(*)), state : *))
-                  ) {
-                    | ( None : Option(*) ) =>
-                        let _ : unit =
-                          @<unit>(`Builtin$.io$_eval` : IO(unit)/unit,
-                                  @<IO(unit)>(block_fn : */IO(unit), state : *))
-                        in
-                          @<IO(*)>
-                            ( `Builtin$.event$_blocking_poll` : */(*/IO(Option(*)))/(*/IO(unit))/IO(*)
-                            , state : *
-                            , try_fn : */IO(Option(*))
-                            , block_fn : */IO(unit)
-                            )
-                    | ( Some : */Option(*)
-                      , result : *
-                      ) =>
-                        @<IO(*)>(`Builtin$.io$_return` : */IO(*), result : *)
-                  }
+                  @<IO(*)>(
+                    `Builtin$.io$_defer` : (*/*)/IO(*),
+                    fn(_ : unit) =>
+                      case<*>(
+                        @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
+                                     @<IO(Option(*))>(try_fn : */IO(Option(*)), state : *))
+                      ) {
+                        | ( None : Option(*) ) =>
+                            let _ : unit =
+                              @<unit>(`Builtin$.io$_eval` : IO(unit)/unit,
+                                      @<IO(unit)>(block_fn : */IO(unit), state : *))
+                            in
+                              @<*>(`Builtin$.io$_eval` : IO(*)/*,
+                                   @<IO(*)>
+                                     ( `Builtin$.event$_blocking_poll` : */(*/IO(Option(*)))/(*/IO(unit))/IO(*)
+                                     , state : *
+                                     , try_fn : */IO(Option(*))
+                                     , block_fn : */IO(unit)
+                                     )
+                              )
+                        | ( Some : */Option(*)
+                          , result : *
+                          ) =>
+                            result : *
+                      }
+                  )
         |]
       )
   , DFunction
@@ -2801,18 +2817,27 @@ objectList =
       ]
       ( unsafeParseExpr
           [r|
-                  case<IO(*)>(@<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*), @<IO(Option(*))>(step_fn : */IO(Option(*)), state : *))) {
-                    | ( None : Option(*) ) =>
-                        @<IO(*)>(`Builtin$.io$_return` : */IO(*), state : *)
-                    | ( Some : */Option(*)
-                      , next : *
-                      ) =>
-                        @<IO(*)>
-                          ( `Builtin$.event$_loop_io` : */(*/IO(Option(*)))/IO(*)
+                  @<IO(*)>(
+                    `Builtin$.io$_defer` : (*/*)/IO(*),
+                    fn(_ : unit) =>
+                      case<*>(
+                        @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
+                                     @<IO(Option(*))>(step_fn : */IO(Option(*)), state : *))
+                      ) {
+                        | ( None : Option(*) ) =>
+                            state : *
+                        | ( Some : */Option(*)
                           , next : *
-                          , step_fn : */IO(Option(*))
-                          )
-                  }
+                          ) =>
+                            @<*>(`Builtin$.io$_eval` : IO(*)/*,
+                                 @<IO(*)>
+                                   ( `Builtin$.event$_loop_io` : */(*/IO(Option(*)))/IO(*)
+                                   , next : *
+                                   , step_fn : */IO(Option(*))
+                                   )
+                            )
+                      }
+                  )
         |]
       )
   , DFunction

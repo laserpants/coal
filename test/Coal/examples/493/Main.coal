@@ -1,0 +1,14 @@
+module Main {
+
+  import IO(println_string)
+
+  // An IO action is a value: building one does not run it. The action bound to
+  // `unused` is never forced, so it prints nothing, and only "printed" reaches
+  // standard output.
+  fun main() =
+    let
+      unused = println_string("not printed")
+    in
+    println_string("printed")
+
+}

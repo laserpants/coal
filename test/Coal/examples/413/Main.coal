@@ -8,7 +8,11 @@ module Main {
   // re-evaluated) at each use, printing "f called" twice.
   fun f(() : unit) =
     let
-      _ = IO.println_string("f called")
+      // `f` is pure (`unit -> int32`), so this trace cannot be sequenced with
+      // `do`-notation. Force it explicitly instead; `unsafe_perform` is
+      // `unsafePerformIO`, and is acceptable here only because this is a
+      // debug trace in a pure function.
+      _ = IO.unsafe_perform(IO.println_string("f called"))
     in
     5
 

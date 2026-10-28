@@ -1,0 +1,13 @@
+module Main {
+
+  // The entry point must produce an IO action: the generated C entry point
+  // runs the action it returns. A `main` returning a bare value has no
+  // well-defined behaviour, so it is rejected during type checking.
+  //
+  // Note: this uses a *ground* non-IO type (`bool`). A bare numeric literal is
+  // also rejected, but for a different reason: the literal is a
+  // trait-constrained conversion whose result type is never pinned down, so the
+  // entry point is inferred as `forall a. unit -> a` (see example 495).
+  fun main() = true
+
+}
