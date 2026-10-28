@@ -655,7 +655,19 @@ irMainModule m funcName = do
         TPtr
         (OGlobal entryFunTy fullName)
         (O.nullPtr <$> entryParamTypes)
-    ret =<< exitCodeOf entryRetType result
+    -- Coal entry points return an IO action, which must be run before the exit
+    -- status can be derived from the value it produces. That is a property of
+    -- the source language rather than of kernel IR, so it is requested
+    -- explicitly by the caller ('codegenRunEntryIO'); raw kernel modules
+    -- return the exit status directly. Once requested, running it is
+    -- unconditional: the source language guarantees that the entry point's type
+    -- is an IO action (see
+    -- 'Coal.Compiler.Pass.PhaseTypeChecking.CheckMainEntrypointType').
+    runEntryIO <- asks codegenRunEntryIO
+    forced <- case entryRetType of
+      Just _ | runEntryIO -> runIOAction result
+      _ -> pure result
+    ret =<< exitCodeOf entryRetType forced
  where
   fullName = moduleName m <> "." <> funcName
   -- The entry function's LLVM signature, reconstructed exactly as
@@ -683,16 +695,29 @@ irMainModule m funcName = do
   funTys (TFun _ tys) = tys
   funTys _ = []
 
-{- | Derive the process exit code from the entry function's return value.
+{- | Run an IO action and return the value it produces.
 
-Only @IO<int32>@ carries a status: its contained value becomes the exit code.
-Every other return type (including @IO<unit>@) yields 0, so programs that
-report nothing to the operating system are unaffected.
+@IO\<a\>@ is represented at runtime as an arity-1 closure (@unit -> a@), so
+running an action is an ordinary application of a one-element argument vector
+via 'rtApply'. The argument is the unit value, which is @null@.
+-}
+runIOAction :: IROperand -> IRCodegen IROperand
+runIOAction action = do
+  argSlot <- alloca TPtr (O.i32 @Int 1)
+  slot <- gep TPtr argSlot [O.i32 @Int 0]
+  store (O.nullPtr TPtr) slot
+  callRuntime rtApply [action, O.i32 @Int 1, argSlot]
 
-This works because @IO@ is a phantom type whose runtime representation is
-the identity ('io$_eval' and 'io$_return' are both identity functions), so
-an @IO<int32>@ value /is/ a boxed @int32@ at runtime and needs no
-unwrapping beyond the ordinary 'irUnbox'.
+{- | Derive the process exit code from the value produced by the entry point's
+IO action.
+
+Only @IO<int32>@ carries a status: the value inside the action becomes the exit
+code. Every other entry point type (including @IO<unit>@) yields 0, so programs
+that report nothing to the operating system are unaffected.
+
+The operand is the value /produced by/ the action (see 'runIOAction'), so an
+@IO<int32>@ value is a boxed @int32@ here and needs no unwrapping beyond the
+ordinary 'irUnbox'.
 
 Note the returned value is passed to C @main@ verbatim, so the operating
 system truncates it to the low 8 bits of the exit status, per POSIX. A

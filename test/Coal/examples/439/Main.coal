@@ -18,10 +18,9 @@ module Main {
       }
   }
 
-  fun main() =
-    let
-      _ = IO.println_bool(Some(5 : int32) == Some(7 : int32))
-    in
-      IO.println_bool(foo(Some(5 : int32)))
+  fun main() = do {
+    IO.println_bool(Some(5 : int32) == Some(7 : int32));
+    IO.println_bool(foo(Some(5 : int32)));
+  }
 
 }

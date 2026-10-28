@@ -26,6 +26,7 @@ import Coal.Compiler.State (CompilerState (compilerConfig))
 import Coal.Debug (writeDebugFile)
 import qualified Coal.Kernel.Builtin.Objects as Builtin
 import qualified Coal.Kernel.Compiler as Kernel
+import Coal.Kernel.LLVM.Monad (IRCodegenEnv (..))
 import Coal.Kernel.Language.Interface (moduleInterface)
 import Coal.Kernel.Language.Module (Module (..))
 import qualified Coal.Kernel.Language.Object as Kernel
@@ -150,7 +151,14 @@ pass envelopes = do
   -- field counts, and object interfaces) once, so each module's 'irModule'
   -- does not rescan every module (which would be quadratic in the module
   -- count for import-heavy multi-module builds).
-  let context = Kernel.codegenContext cachedTagBindings cachedDDataInfo cachedObjects normalized
+  -- Coal entry points return an IO action, so the generated C main must run it
+  -- before deriving the exit status. Kernel modules compiled directly (the
+  -- kernel compiler and the kernel tests) do not: there the entry point's
+  -- result is the exit status itself.
+  let context =
+        (Kernel.codegenContext cachedTagBindings cachedDDataInfo cachedObjects normalized)
+          { codegenRunEntryIO = True
+          }
 
   -- Generate, render, and assemble one module at a time. Each 'IRModule'
   -- becomes unreachable as soon as its bitcode has been forced to normal

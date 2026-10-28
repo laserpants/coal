@@ -1,9 +1,0 @@
-module Main {
-
-  import IO(println_string, println_int32, println_bool)
-  import Codata.Stream(head, tail, enum_from)
-
-  fun main() = 
-    println_int32(enum_from(0) |.tail |.tail |.head)
-
-}

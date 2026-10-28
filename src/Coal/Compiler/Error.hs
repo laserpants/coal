@@ -59,6 +59,7 @@ data CompilerError a
   | TraitDictionaryMismatch Name IndexedType IndexedType (ErrorLocation a)
   | UnboundTypeVariable Name Name [Name] (ErrorLocation a)
   | TupleTooLarge Int Int (ErrorLocation a)
+  | InvalidMainFunctionType Name IndexedType (ErrorLocation a)
   deriving (Show, Eq)
 
 data CompilerFailureMode
@@ -152,4 +153,6 @@ errorLocation =
     UnboundTypeVariable _ _ _ erl ->
       Just erl
     TupleTooLarge _ _ erl ->
+      Just erl
+    InvalidMainFunctionType _ _ erl ->
       Just erl

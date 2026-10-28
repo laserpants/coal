@@ -1,8 +1,0 @@
-module Main {
-
-  import IO(println_bool)
-
-  fun main() =
-    println_bool(["a", "b"] == ["b", "c"])
-
-}

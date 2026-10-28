@@ -1,5 +1,0 @@
-module Baz {
-
-  type Hello = One
-
-}

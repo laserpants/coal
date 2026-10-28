@@ -5,7 +5,7 @@ module Coal.Functor {
 
   import namespace List
   import Coal.Combinators(always)
-  import IO(return, __eval_io)
+  import IO(__defer, __eval_io)
 
   /**
    * Trait that supports mapping a function over a value in a structured 
@@ -22,7 +22,7 @@ module Coal.Functor {
   }
 
   instance Functor<IO> {
-    fun map(f, v) = return(f(__eval_io(v)))
+    fun map(f, v) = __defer(fn(_) => f(__eval_io(v)))
   }
 
   instance Functor<Option> {

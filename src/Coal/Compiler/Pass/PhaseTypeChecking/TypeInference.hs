@@ -20,6 +20,8 @@ The inference process:
 module Coal.Compiler.Pass.PhaseTypeChecking.TypeInference (passTypeInference) where
 
 import qualified Coal.Common.Environment as Environment
+import Coal.Common.FreeVars (freeIn, notConstructor)
+import Coal.Common.Label (Label, labelName)
 import Coal.Compiler.Build (replaceBuildNameEntry)
 import Coal.Compiler.Build.NameEntry (NameEntry (..))
 import Coal.Compiler.Error
@@ -29,7 +31,7 @@ import Coal.Compiler.Pass (Pass (..))
 import Coal.Compiler.Stack (CompilerT, clearSubstitutionC, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference (checkInstanceConformance, define, generateConstraints, generateKindConstraints, solveT)
-import Coal.Language (HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
+import Coal.Language (Expression, HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
 import Coal.Language.Definition
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
@@ -43,7 +45,10 @@ import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.State (execStateT, get, gets, modify, runState)
-import Extras (forM_)
+import Data.List (partition)
+import Data.Set (Set)
+import qualified Data.Set as Set
+import Extras (Name, forM_)
 
 {- | Type inference compiler pass
 
@@ -77,12 +82,99 @@ replacePlaceholders = do
           \(name, s) ->
             modify (replaceBuildNameEntry (NName name s))
 
+{- | Order module-level definitions so that each definition is inferred after the
+definitions it references.
+
+'inferTypes' infers definitions one at a time and stores each definition's type
+in the name store as soon as it has been solved. A reference to a definition
+that has not been solved yet becomes a /deferred/ assumption (see
+'assumptionConstraints'), which leaves the referencing definition's type only
+partially known; 'define' then generalizes over the still-free indices and
+caches the result, so every later reference to that definition instantiates a
+variable that nothing ever resolves. Inferring callees first means no reference
+is deferred, so each definition is inferred from complete information.
+
+References that form a cycle (mutual recursion) have no valid order. Those
+definitions keep their source order and fall back to the deferred-assumption
+path; such cycles are rejected later by
+'Coal.Compiler.Pass.PhaseTranslation.DetectCallCycles'.
+-}
+orderDefinitions :: [Definition Metadata Kind IndexedType] -> [Definition Metadata Kind IndexedType]
+orderDefinitions defs = go Set.empty defs
+ where
+  -- Names bound by a module-level definition. Instance members are bound under
+  -- their mangled instance label, mirroring 'storeDefinitionType'.
+  provides :: Definition Metadata Kind IndexedType -> [Name]
+  provides = \case
+    DFunction _ name _ ->
+      [name]
+    DLet _ name _ ->
+      [name]
+    DInstance _ InstanceDefinition{instanceDefinitionTraitName, instanceDefinitionType, instanceDefinitionImplementations} ->
+      [ instanceLabel trait name
+      | member <- instanceDefinitionImplementations
+      , name <- memberName member
+      ]
+     where
+      trait = Trait instanceDefinitionTraitName instanceDefinitionType
+    _ ->
+      []
+
+  boundNames :: Set Name
+  boundNames = Set.fromList (concatMap provides defs)
+
+  -- Names a definition references that are bound somewhere in this module.
+  -- Self-references are excluded, so a recursive definition does not depend on
+  -- itself.
+  references :: Definition Metadata Kind IndexedType -> Set Name
+  references def =
+    (freeNames def `Set.intersection` boundNames) `Set.difference` Set.fromList (provides def)
+
+  freeNames :: Definition Metadata Kind IndexedType -> Set Name
+  freeNames = \case
+    DFunction _ _ FunctionDefinition{functionDefinitionExpression} ->
+      expressionNames functionDefinitionExpression
+    DLet _ _ LetDefinition{letDefinitionExpression} ->
+      expressionNames letDefinitionExpression
+    DInstance _ InstanceDefinition{instanceDefinitionImplementations} ->
+      foldMap freeNames instanceDefinitionImplementations
+    _ ->
+      Set.empty
+
+  expressionNames :: Expression Metadata Kind IndexedType -> Set Name
+  expressionNames expr =
+    let freeVars :: Set (Label IndexedType)
+        freeVars = Set.filter notConstructor (freeIn expr)
+     in Set.map labelName freeVars
+
+  memberName :: Definition Metadata Kind IndexedType -> [Name]
+  memberName = \case
+    DFunction _ name _ ->
+      [name]
+    DLet _ name _ ->
+      [name]
+    _ ->
+      []
+
+  -- Emit, in source order, every definition whose references are already
+  -- available, then repeat. Definitions still pending when nothing is ready
+  -- form a cycle: emit them in source order.
+  go :: Set Name -> [Definition Metadata Kind IndexedType] -> [Definition Metadata Kind IndexedType]
+  go _ [] = []
+  go available pending =
+    case partition (\def -> references def `Set.isSubsetOf` available) pending of
+      (ready@(_ : _), rest) ->
+        ready <> go (available <> Set.fromList (concatMap provides ready)) rest
+      ([], _) ->
+        pending
+
 inferTypes :: (MonadIO m) => Module Metadata Kind () -> CompilerT Metadata m (Module Metadata Kind IndexedType)
 inferTypes m = do
   Module{modulePath, moduleExportList, moduleDefinitions} <- assignTypeIndices m
 
-  -- Generate and solve constraints for each definition
-  forM_ moduleDefinitions $
+  -- Generate and solve constraints for each definition, callees first (see
+  -- 'orderDefinitions').
+  forM_ (orderDefinitions moduleDefinitions) $
     \def -> do
       generateConstraints def
       sub <- solveT

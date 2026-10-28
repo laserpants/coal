@@ -1,9 +1,0 @@
-module Main {
-
-  import namespace IO
-  import Stuff(type Answer(Foo))
-
-  fun main() =
-    IO.println_string("X")
-
-}
