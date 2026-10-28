@@ -1654,10 +1654,15 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 316: `baz` and `foo` are mutually recursive with no base case and no IO,
+  -- so inference leaves `main`'s type unresolved (`forall b. unit -> b`). That
+  -- is not an IO action, so the entry-point check rejects it before call-cycle
+  -- detection runs. The program is still rejected; the `CallCycleError`
+  -- diagnostic for this class of cycle is covered by 049, 416, 427 and 429.
   describe "316" $ do
-    it "is CallCycleError" $ do
+    it "is TypeError" $ do
       res <- runSpec "test/Coal/examples/316" ["Main.coal"]
-      res `shouldBe` Left CallCycleError
+      res `shouldBe` Left TypeError
 
   describe "317" $ do
     expectOutput
@@ -2755,9 +2760,10 @@ e2eSpec = do
 
   -- 491: the entry point must produce an IO action, because the generated C
   -- entry point runs it. A `main` returning a bare value is rejected during
-  -- type checking. The example uses a *ground* non-IO type (`bool`): an
-  -- unannotated numeric literal is inferred as an unresolved type variable,
-  -- which is accepted, so it would not exercise the check.
+  -- type checking. This example uses a *ground* non-IO type (`bool`); 495 covers
+  -- the case where an unannotated numeric literal leaves the type unresolved,
+  -- and 496 covers an unresolved *element* type (`IO<a>` is accepted for any
+  -- `a`, since the element type only determines the exit status).
   describe "491" $ do
     it "is TypeError" $ do
       res <- runSpec "test/Coal/examples/491" ["Main.coal"]
@@ -2789,6 +2795,22 @@ e2eSpec = do
       "test/Coal/examples/494"
       [ "Main.coal"
       ]
+
+  -- 495: a bare numeric literal is not an IO action. The literal is parsed as a
+  -- trait-constrained conversion whose result type nothing pins down, so the
+  -- entry point is inferred as `forall a. unit -> a` rather than `IO<..>`.
+  describe "495" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/495" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  -- 496: the entry point's element type may stay unresolved. Only the head
+  -- constructor has to be `IO`, because the element type only determines the
+  -- process exit status, so the action still runs.
+  describe "496" $ do
+    it "produces no output" $ do
+      res <- runSpec "test/Coal/examples/496" ["Main.coal"]
+      res `shouldBe` Right ""
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

@@ -13,23 +13,29 @@ point, so a @main@ that returns anything else has no well-defined behaviour.
 
 The /element/ type of the action only affects the process exit status:
 @IO<int32>@ supplies it and @IO<unit>@ means zero. Any other element type
-(e.g. a domain-specific @IO<ExitCode>@) is accepted and yields exit status 0.
+(e.g. a domain-specific @IO<ExitCode>@, or a type variable) is accepted and
+yields exit status 0.
 
 = What is and is not rejected
 
-Only a type that is provably not an @IO@ action is rejected. In particular an
-unresolved type variable is accepted: type inference leaves the entry point's
-type unresolved for some programs (for example when the entry point reaches
-its result through a forward reference), so rejecting variables would reject
-well-behaved programs whose runtime value is in fact an @IO@ action. The
-practical consequence is that a bare numeric literal is not caught, because an
-unannotated literal is inferred as an unresolved type variable:
+The entry point's type must be an application of @IO@; every other type is
+rejected, including a type variable. Definitions are inferred callees-first
+(see 'Coal.Compiler.Pass.PhaseTypeChecking.TypeInference.orderDefinitions'), so
+by the time this pass runs the entry point's type is fully resolved and a
+variable here means the program genuinely does not produce an @IO@ action:
 
 @
-fun main() = 5        -- accepted (type is an unresolved variable)
-fun main() = true     -- rejected (type is `bool`)
-fun main() = foo()    -- accepted iff `foo` is inferred to return an IO action
+fun main() = 5             -- rejected: an integer literal is a trait-constrained
+                           -- conversion (`from_int32`), whose result type
+                           -- nothing pins down, so this is not an IO action
+fun main() = true          -- rejected: type is `bool`
+fun main() = foo()         -- rejected iff `foo` does not return an IO action
+fun main() = IO.return(5)  -- accepted: IO<a> is accepted for any `a`
 @
+
+Only the head constructor is required to be @IO@; the element type is
+unconstrained because it merely determines the process exit status (see
+'Coal.Kernel.LLVM.Codegen.exitCodeOf').
 -}
 module Coal.Compiler.Pass.PhaseTypeChecking.CheckMainEntrypointType (
   passCheckMainEntrypointType,
@@ -94,16 +100,16 @@ entryFunctionType name = listToMaybe . mapMaybe entry
     _ ->
       Nothing
 
-{- | True when the entry point's type is provably /not/ an @IO@ action.
+{- | True when the entry point's type is not an @IO@ action.
 
 @IO<a>@ is accepted for any @a@: the element type only determines the process
-exit status (see the module header). An unresolved type variable is accepted
-too, because inference leaves the entry point's type unresolved for some
-well-behaved programs. Only a type that can positively be identified as
-something other than an @IO@ action is rejected.
+exit status (see the module header). Everything else is rejected, including a
+type variable: inference resolves the entry point's type completely, so a
+variable means the entry point does not produce an @IO@ action. The usual cause
+is a bare numeric literal, whose type is a trait-constrained conversion that
+nothing pins down.
 -}
 isRejectedEntryType :: IndexedType -> Bool
 isRejectedEntryType = \case
   TApplication _ (TConstructor _ "IO") _ -> False
-  TVariable _ -> False
   _ -> True

@@ -1,0 +1,12 @@
+module Main {
+
+  import namespace IO
+
+  // Companion to example 495: the entry point's *element* type is deliberately
+  // left unresolved. Only the head constructor has to be `IO`, because the
+  // element type merely determines the process exit status (`exitCodeOf` maps
+  // everything but `int32` to 0), so this is accepted and runs the action.
+  fun main() =
+    IO.return(5)
+
+}

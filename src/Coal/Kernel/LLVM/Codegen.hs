@@ -660,8 +660,8 @@ irMainModule m funcName = do
     -- the source language rather than of kernel IR, so it is requested
     -- explicitly by the caller ('codegenRunEntryIO'); raw kernel modules
     -- return the exit status directly. Once requested, running it is
-    -- unconditional: the entry point's static type is left unresolved for some
-    -- programs even though its runtime value is an IO action (see
+    -- unconditional: the source language guarantees that the entry point's type
+    -- is an IO action (see
     -- 'Coal.Compiler.Pass.PhaseTypeChecking.CheckMainEntrypointType').
     runEntryIO <- asks codegenRunEntryIO
     forced <- case entryRetType of

@@ -1,0 +1,15 @@
+module Main {
+
+  // The entry point must produce an IO action (see example 491). A bare
+  // numeric literal does not: an integer literal is parsed as a
+  // trait-constrained conversion (`from_int32`/`from_integer`), so its result
+  // type is only pinned down by the surrounding context. Nothing here pins it,
+  // so `main` is inferred as `forall a. unit -> a`, which is not an IO action.
+  //
+  // Fixing this is a matter of saying what the action is:
+  //
+  //   fun main() = IO.return(5)              -- an IO<int32> action
+  //   fun main() : IO<int32> = IO.return(5)  -- or annotate it
+  fun main() = 5
+
+}
