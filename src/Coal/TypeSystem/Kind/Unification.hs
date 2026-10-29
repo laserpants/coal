@@ -34,7 +34,7 @@ unifyKinds k1 (KVariable k2) =
 unifyKinds k1 k2
   | k1 == k2 = pure mempty
   | otherwise =
-      throwError ECannotUnifyKinds
+      throwError (ECannotUnifyKinds k1 k2)
 
 bindKind :: Int -> Kind -> KindUnifier KindSubstitution
 bindKind n =

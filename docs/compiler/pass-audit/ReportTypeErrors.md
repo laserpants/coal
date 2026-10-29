@@ -49,10 +49,11 @@ if any errors exist.
 4. Reports each via `tellErrors [SolverError err (errorLocation err)]`
 5. Reads kind-constraint-generation errors from state (collected by
    `generateKindConstraints`) and reports each via
-   `tellErrors [KindError err (ErrorLocation …)]`. These carry no source metadata
-   of their own, so they are reported at module granularity. Without this step the
-   errors are silently dropped, and e.g. a data constructor mentioning an undefined
-   type constructor is accepted.
+   `tellErrors [KindError err (ErrorLocation …)]`, located at the definition that
+   produced it (`KindConstraintError`). `KindError` itself carries no source
+   metadata, so the location travels alongside it. Without this step the errors are
+   silently dropped, and e.g. a data constructor mentioning an undefined type
+   constructor is accepted.
 6. If any errors exist, throws `TypeError`
 
 ---
