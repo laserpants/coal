@@ -113,6 +113,7 @@ builtinNames =
       [ ("free$_map_free", Free)
       , ("free$_ap_free", Free)
       , ("free$_bind_free", Free)
+      , ("free$_interpret", Free)
       ]
       <>
       -- Runtime support

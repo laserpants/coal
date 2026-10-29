@@ -45,6 +45,39 @@ freeScheme body =
   aVar = TypeIndex KType 1
   bVar = TypeIndex KType 2
 
+{- | @(f<m<a>> -> m<a>) -> Free<f, a> -> m<a>@, the type of the Free monad's
+interpreter.
+
+The handler consumes one layer of instructions whose continuations are already
+@m@-computations; the program is then folded bottom-up.
+-}
+freeInterpretType :: IndexedType -> IndexedType -> IndexedType -> IndexedType
+freeInterpretType f m a = (f `appliedTo` (m `appliedTo` a) ~> m `appliedTo` a) ~> freeType f a ~> m `appliedTo` a
+ where
+  appliedTo t u = applyTypeArgs KType t (u :| [])
+
+{- | The scheme of the kernel-level Free interpreter
+(@Builtin$.free$_interpret@).
+
+Interpreting a program needs @Applicative\<m\>@ for the @pure@ of a finished
+computation and @Functor\<f\>@ to map the interpreter under the instruction
+layer. The trait list is also the dictionary parameter order of the kernel
+definition: both dictionaries come first, in the order listed here, followed by
+the handler and the program.
+
+The three variables must have distinct indices; see 'freeScheme'.
+-}
+freeInterpretScheme :: IndexedScheme
+freeInterpretScheme =
+  Forall
+    (Set.fromList [fVar, mVar, aVar])
+    [Trait "Applicative" (TVariable mVar), Trait "Functor" (TVariable fVar)]
+    (freeInterpretType (TVariable fVar) (TVariable mVar) (TVariable aVar))
+ where
+  fVar = TypeIndex (KArrow KType KType) 0
+  mVar = TypeIndex (KArrow KType KType) 1
+  aVar = TypeIndex KType 2
+
 builtinFunctions :: [(Name, IndexedScheme)]
 builtinFunctions =
   [
@@ -336,5 +369,9 @@ builtinFunctions =
   ,
     ( "free$_bind_free"
     , freeScheme $ \f a b -> freeType f a ~> (a ~> freeType f b) ~> freeType f b
+    )
+  ,
+    ( "free$_interpret"
+    , freeInterpretScheme
     )
   ]

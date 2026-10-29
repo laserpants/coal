@@ -2791,6 +2791,18 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 486: `interpret` is implemented at the kernel level
+  -- (`Builtin$.free$_interpret`), because interpreting a `Free<f, a>` recurses
+  -- under the functor layer. The first program is headed by `Free` (recursive
+  -- branch) and ends in `pure` (base case); the second is `Pure`-only, and its
+  -- result is printed.
+  describe "486" $
+    expectOutput
+      "first\nsecond\n7"
+      "test/Coal/examples/486"
+      [ "Main.coal"
+      ]
+
   -- 490: an instance implementation that is not polymorphic enough must be
   -- rejected. `instance Functor<LangF>` has a closed head, so the member's own
   -- `a` and `b` are the only signature variables that can be instantiated; the

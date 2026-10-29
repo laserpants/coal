@@ -2973,4 +2973,67 @@ objectList =
                     )
         |]
       )
+  , -- Free monad: interpret the program by handing each instruction layer to
+    -- the handler and recursing through the continuation. `pure` comes from
+    -- the `Applicative<m>` dictionary and `map` from the `Functor<f>`
+    -- dictionary; the two dictionaries come first, in the order the
+    -- `free$_interpret` scheme declares them (see
+    -- `Coal.Compiler.Builtin.Functions`).
+    DFunction
+      Exported
+      "Builtin$.free$_interpret"
+      [ Kernel.Label (Kernel.TCon "Applicative" [Kernel.TOpq]) "$d"
+      , Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d_f"
+      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "handler"
+      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "instructions"
+      ]
+      ( unsafeParseExpr
+          [r|
+                  case<*>(instructions : Free(*,*)) {
+                    | ( Free : */Free(*,*)
+                      , ins : *
+                      ) =>
+                        let
+                          $map : */*/* =
+                            case<*/*/*>($d_f : Functor(*)) {
+                              | ( $Record : { map : */*/* | * }/Functor(*)
+                                , $r : { map : */*/* | * }
+                                ) =>
+                                  get?_map<*/*/*>($r : { map : */*/* | * })
+                            }
+                        in
+                          @<*>
+                            ( handler : */*
+                            , @<*>
+                                ( $map : */*/*
+                                , fn(x : *) =>
+                                    @<*>
+                                      ( `Builtin$.free$_interpret` : Applicative(*)/Functor(*)/(*/*)/Free(*,*)/*
+                                      , $d : Applicative(*)
+                                      , $d_f : Functor(*)
+                                      , handler : */*
+                                      , x : *
+                                      )
+                                , ins : *
+                                )
+                            )
+                    | ( Pure : */Free(*,*)
+                      , val : *
+                      ) =>
+                        let
+                          $pure : */* =
+                            case<*/*>($d : Applicative(*)) {
+                              | ( $Record : { pure : */* | * }/Applicative(*)
+                                , $r2 : { pure : */* | * }
+                                ) =>
+                                  get?_pure<*/*>($r2 : { pure : */* | * })
+                            }
+                        in
+                          @<*>
+                            ( $pure : */*
+                            , val : *
+                            )
+                  }
+        |]
+      )
   ]
