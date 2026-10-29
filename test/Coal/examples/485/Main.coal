@@ -1,11 +1,10 @@
 module Main {
-
   import namespace IO
   import IO(return)
   import Coal.Functor(Functor)
   import Coal.Applicative(Applicative)
   import Coal.Monad(Monad, and_then, and_eval)
-  import Coal.Monad.Free(Free, lift_free)
+  import Coal.Monad.Free(Free, lift_free, interpret)
 
   // Two kinds of instruction appear below:
   //
@@ -39,12 +38,9 @@ module Main {
     lift_free(WriteLn("Enter your name", ()))
       |. and_eval(lift_free(WriteLn("---", ())))
       |. and_eval(lift_free(ReadLn(fn(s) => s)))
-      // `If` carries continuations, not values: the branch programs go to the
-      // `Free` constructor directly.
       |. and_then(fn(s) => Free(If(
            s == "exit", 
-           pure() 
-          , 
+           pure(), 
            lift_free(WriteLn("Hello " <> s, ()))
          )))
       |. and_eval(pure(0))
@@ -61,12 +57,6 @@ module Main {
         f(s);
       }
     | If(c, a, b) => if (c) then a else b
-
-  fun interpret(handler : Handler<f, e, a>, prog : Free<f, a>) : e<a> with (Monad<e>) =
-    match(prog) {
-      | Pure(val) => pure(val)
-      | Free(ins) => handler(map(interpret(handler), ins))
-    }
 
   fun main() =
     interpret(io_lang_handler, my_program)
