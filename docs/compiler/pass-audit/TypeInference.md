@@ -43,17 +43,22 @@ Transforms `Module Metadata Kind ()` → `Module Metadata Kind IndexedType`.
 
 ### `runTypeInference`
 
-1. `inferKinds` — generates kind constraints, solves them via `kindUnifierMonad . solveKindConstraints`, applies the substitution
+1. `inferKinds` — generates kind constraints, solves them via `solveKindConstraints`, applies the substitution
 2. `inferTypes` — see below
 3. `replacePlaceholders` — traverses the name store and replaces `NPlaceholder` entries with `NName` entries
 
 ### `inferKinds`
 
-- Calls `generateKindConstraints m` which traverses the module generating kind constraints.
-  The kind environment is `moduleKindEnvironment m` unioned with the current build's type
+- Clears constraints left over from an earlier module, then calls `generateKindConstraints m`,
+  which traverses the module generating kind constraints **one definition at a time**, so that
+  every constraint and generation error can be tagged with its definition's location
+  (`KindConstraint`, `KindConstraintError`). The kind environment is
+  `moduleKindEnvironment m` unioned with the current build's type
   constructors, traits and aliases, so that type constructors which become visible through
   an imported type alias (after `ExpandAliases` inlines it) are not reported as out of scope
-- Runs `solveKindConstraints` inside `kindUnifierMonad`
+- Runs `solveKindConstraints`, which pairs a failed unification with the metadata of the
+  constraint that demanded it, so the error can be reported against the offending definition
+  rather than at module granularity
 - Applies the kind substitution to the name store and module
 
 ### `inferTypes`

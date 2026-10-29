@@ -60,8 +60,7 @@ import Coal.TypeSystem.Constraint (Constraint)
 import Coal.TypeSystem.Constraint.Assumption (Assumption)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
-import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
-import Coal.TypeSystem.Kind.Error (KindError (..))
+import Coal.TypeSystem.Kind.Constraint (KindConstraint (..), KindConstraintError (..))
 import Coal.TypeSystem.Substitution (Substitution)
 import Data.Set (Set)
 import Data.Text (Text)
@@ -112,9 +111,9 @@ data CompilerState a = CompilerState
   , compilerConstraints :: [CompilerConstraint a]
   , compilerAssumptions :: [CompilerAssumption a]
   , compilerTypeAnnotationParams :: Dictionary (a, TypeIndex Kind)
-  , compilerKindConstraints :: [KindConstraint]
+  , compilerKindConstraints :: [KindConstraint a]
   , compilerConstraintsGenErrors :: [ConstraintsGenError a]
-  , compilerKindConstraintsGenErrors :: [KindError]
+  , compilerKindConstraintsGenErrors :: [KindConstraintError a]
   , compilerSolverRuleViolations :: [InferenceRule Kind a]
   }
   deriving (Show, Eq, Ord)
@@ -265,7 +264,7 @@ overCompilerConstraints fn CompilerState{..} =
 
 -- | Update the list of kind constraints for type-level inference
 {-# INLINE overCompilerKindConstraints #-}
-overCompilerKindConstraints :: Over (CompilerState a) [KindConstraint]
+overCompilerKindConstraints :: Over (CompilerState a) [KindConstraint a]
 overCompilerKindConstraints fn CompilerState{..} =
   CompilerState
     { compilerKindConstraints = fn compilerKindConstraints
@@ -305,7 +304,7 @@ overCompilerConstraintsGenErrors fn CompilerState{..} =
 
 -- | Update the list of errors from kind inference
 {-# INLINE overCompilerKindConstraintsGenErrors #-}
-overCompilerKindConstraintsGenErrors :: Over (CompilerState a) [KindError]
+overCompilerKindConstraintsGenErrors :: Over (CompilerState a) [KindConstraintError a]
 overCompilerKindConstraintsGenErrors fn CompilerState{..} =
   CompilerState
     { compilerKindConstraintsGenErrors = fn compilerKindConstraintsGenErrors

@@ -41,7 +41,11 @@ import qualified Data.Text as Text
 import Extras (Dictionary, Name, concatForM, forM_, second, traverse_, (<$$>), (<>^))
 import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
-type KindConstraintsGenOutput = Either KindError KindConstraint
+{- | Constraints and errors are emitted untagged; the driver
+('Coal.Compiler.TypeInference.generateKindConstraints') stamps them with the
+location of the definition being generated.
+-}
+type KindConstraintsGenOutput = Either KindError (KindConstraint ())
 
 newtype KindConstraintsGen m a = KindConstraintsGen
   { kindConstraintsGenMonad :: RWST (Environment Kind) [KindConstraintsGenOutput] () m a
@@ -66,7 +70,7 @@ parameterMap ps = Map.fromListWith (++) (second pure <$> ps)
 
 tellTransitive :: (Monad m) => [Kind] -> KindConstraintsGen m ()
 tellTransitive [] = pure ()
-tellTransitive (k : ks) = forM_ ks $ \ki -> tellRight [KEquality k ki]
+tellTransitive (k : ks) = forM_ ks $ \ki -> tellRight [KEquality () k ki]
 
 tellParameterConstraints :: (Monad m) => [(Name, Kind)] -> KindConstraintsGen m ()
 tellParameterConstraints = mapM_ tellTransitive . parameterMap
@@ -82,7 +86,7 @@ parameters) would be accepted as a type, its kind silently solved to
 @KType -> KType@.
 -}
 tellTypePosition :: (Monad m) => Type Parameter Kind -> KindConstraintsGen m ()
-tellTypePosition t = tellRight [KEquality (kindOf t) KType]
+tellTypePosition t = tellRight [KEquality () (kindOf t) KType]
 
 class EmitKinds k where
   emitKindConstraints :: (Monad m) => k -> KindConstraintsGen m [(Name, Kind)]
@@ -112,18 +116,18 @@ instance EmitKinds (Type Parameter Kind) where
   emitKindConstraints =
     \case
       TApplication k t1 t2 -> do
-        tellRight [KEquality (kindOf t1) (KArrow (kindOf t2) k)]
+        tellRight [KEquality () (kindOf t1) (KArrow (kindOf t2) k)]
         emitKindConstraints t1 <>^ emitKindConstraints t2
       TArrow t1 t2 -> do
         tellTypePosition t1
         tellTypePosition t2
         emitKindConstraints t1 <>^ emitKindConstraints t2
       TConstructor k "List" -> do
-        tellRight [KEquality k (KArrow KType KType)]
+        tellRight [KEquality () k (KArrow KType KType)]
         pure []
       TConstructor k con
         | "#Tuple" `Text.isPrefixOf` con -> do
-            tellRight [KEquality k (tupleConstructorKind con)]
+            tellRight [KEquality () k (tupleConstructorKind con)]
             pure []
       TConstructor k name -> do
         env <- ask
@@ -131,7 +135,7 @@ instance EmitKinds (Type Parameter Kind) where
           Nothing ->
             tellLeft [ENoTypeConstructor name]
           Just k1 ->
-            tellRight [KEquality k k1]
+            tellRight [KEquality () k k1]
         pure []
       TIntrinsic{} ->
         pure []
@@ -184,7 +188,7 @@ instance (EmitKinds t, HasKind t) => EmitKinds (Trait t) where
           Nothing ->
             tellLeft [ENoTrait traitName]
           Just k ->
-            tellRight [KEquality k (kindOf traitType `KArrow` KTrait)]
+            tellRight [KEquality () k (kindOf traitType `KArrow` KTrait)]
         emitKindConstraints traitType
 
 instance EmitKinds (Module a Kind ()) where

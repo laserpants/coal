@@ -102,8 +102,7 @@ import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (Path (..), principalPath)
 import Coal.TypeSystem.Constraint.Generation.Error (ConstraintsGenError (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule)
-import Coal.TypeSystem.Kind.Constraint (KindConstraint (..))
-import Coal.TypeSystem.Kind.Error (KindError (..))
+import Coal.TypeSystem.Kind.Constraint (KindConstraint (..), KindConstraintError (..))
 import Coal.TypeSystem.Substitution (Substitution)
 import Control.Monad.Catch (MonadCatch, MonadMask, MonadThrow)
 import Control.Monad.Except (ExceptT (..), MonadError, runExceptT, throwError)
@@ -252,7 +251,7 @@ clearConstraintsC :: (Monad m) => CompilerT a m ()
 clearConstraintsC = modify (overCompilerConstraints (const mempty))
 
 {-# INLINE insertKindConstraintsC #-}
-insertKindConstraintsC :: (Monad m) => [KindConstraint] -> CompilerT a m ()
+insertKindConstraintsC :: (Monad m) => [KindConstraint a] -> CompilerT a m ()
 insertKindConstraintsC constraints = modify (overCompilerKindConstraints (<> constraints))
 
 {-# INLINE clearKindConstraintsC #-}
@@ -334,11 +333,11 @@ compilerReportConstraintsGenErrorsC :: (Monad m) => [ConstraintsGenError a] -> C
 compilerReportConstraintsGenErrorsC errors = modify (overCompilerConstraintsGenErrors (<> errors))
 
 {-# INLINE compilerReportKindConstraintsGenErrorsC #-}
-compilerReportKindConstraintsGenErrorsC :: (Monad m) => [KindError] -> CompilerT a m ()
+compilerReportKindConstraintsGenErrorsC :: (Monad m) => [KindConstraintError a] -> CompilerT a m ()
 compilerReportKindConstraintsGenErrorsC errors = modify (overCompilerKindConstraintsGenErrors (<> errors))
 
 {-# INLINE compilerGetKindConstraintsGenErrorsC #-}
-compilerGetKindConstraintsGenErrorsC :: (Monad m) => CompilerT a m [KindError]
+compilerGetKindConstraintsGenErrorsC :: (Monad m, Eq a) => CompilerT a m [KindConstraintError a]
 compilerGetKindConstraintsGenErrorsC = gets (nub . compilerKindConstraintsGenErrors)
 
 {-# INLINE compilerReportSolverRuleViolationsC #-}

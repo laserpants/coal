@@ -28,7 +28,7 @@ import Coal.Compiler.Error
 import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT, clearSubstitutionC, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
+import Coal.Compiler.Stack (CompilerT, clearKindConstraintsC, clearSubstitutionC, insertConstraintsC, updateCurrentBuildC, updateSupplyC)
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference (checkInstanceConformance, define, generateConstraints, generateKindConstraints, solveT)
 import Coal.Language (Expression, HasType (..), IndexedType, Kind, Trait (..), indexed, instanceLabel, rowNormalize, typeOf)
@@ -40,7 +40,6 @@ import Coal.TypeSystem.Constraint.Assumption (Assumption (..))
 import Coal.TypeSystem.Constraint.Generation.InferenceRule (InferenceRule (..))
 import Coal.TypeSystem.Kind.Constraint.Solver (solveKindConstraints)
 import Coal.TypeSystem.Kind.Substitution (KindSubstitutable (applyKinds, replaceVariables))
-import Coal.TypeSystem.Kind.Unification (KindUnifier (kindUnifierMonad))
 import Coal.TypeSystem.Substitution (apply, normalizeTypeIndexes)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
@@ -216,16 +215,18 @@ inferTypes m = do
 
 inferKinds :: (MonadIO m, Monoid a) => Module a Kind () -> CompilerT a m (Module a Kind ())
 inferKinds m = do
+  -- Solve exactly the constraints generated for this module: 'generateKindConstraints'
+  -- appends to the state, so a constraint left over from an earlier module would
+  -- otherwise be re-solved here and reported against the wrong source location.
+  clearKindConstraintsC
   generateKindConstraints m
   constraints <- gets compilerKindConstraints
-  case kindUnifierMonad (solveKindConstraints constraints) of
-    Left err -> do
-      -- Kind inference failed. Report it as a 'KindError' and fail with
-      -- 'TypeError', matching how kind-constraint generation errors are
-      -- surfaced by 'ReportTypeErrors'. (This used to throw the catch-all
-      -- 'CompilerError', so a kind-unification failure was not reported as a
-      -- type error even though every other kind error is.)
-      tellErrors [KindError err (ErrorLocation (principalPath (modulePath m)) mempty)]
+  case solveKindConstraints constraints of
+    Left (err, loc) -> do
+      -- Kind inference failed. Report it as a 'KindError' against the definition
+      -- whose constraint could not be solved, and fail with 'TypeError', matching
+      -- how kind-constraint generation errors are surfaced by 'ReportTypeErrors'.
+      tellErrors [KindError err (ErrorLocation (principalPath (modulePath m)) loc)]
       throwError TypeError
     Right sub -> do
       modify (overCompilerNameStore (replaceVariables . applyKinds sub))
