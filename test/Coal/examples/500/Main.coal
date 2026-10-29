@@ -1,9 +1,10 @@
 module Main {
+
   import namespace IO
   import IO(return)
   import Coal.Functor(Functor)
   import Coal.Applicative(Applicative)
-  import Coal.Monad(Monad, and_then, and_eval, and_return)
+  import Coal.Monad(Monad, and_then, and_always, and_return)
   import Coal.Monad.Free(Free, lift_free, interpret)
 
   type LangF<a>

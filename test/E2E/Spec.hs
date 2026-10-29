@@ -2782,7 +2782,7 @@ e2eSpec = do
   -- passed to the `Free` constructor directly, since `lift_free` would insert a
   -- `Pure` layer, leaving the branch programs in the instruction's value
   -- position, where the interpreter returns them as values instead of running
-  -- them (and the following `and_eval` discards them). With empty stdin
+  -- them (and the following `and_always` discards them). With empty stdin
   -- `readln` yields the empty string.
   describe "485" $
     expectOutput

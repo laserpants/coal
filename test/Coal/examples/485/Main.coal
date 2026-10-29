@@ -1,9 +1,10 @@
 module Main {
+
   import namespace IO
   import IO(return)
   import Coal.Functor(Functor)
   import Coal.Applicative(Applicative)
-  import Coal.Monad(Monad, and_then, and_eval)
+  import Coal.Monad(Monad, and_then, and_always)
   import Coal.Monad.Free(Free, lift_free, interpret)
 
   // Two kinds of instruction appear below:
@@ -18,7 +19,7 @@ module Main {
   // `Free(If(c, Pure(b1), Pure(b2)))` rather than `Free(If(c, b1, b2))`. The
   // branches then sit in the instruction's *value* position, so `interpret`
   // returns them as values instead of running them and the following
-  // `and_eval` discards them: the branch prints nothing.
+  // `and_always` discards them: the branch prints nothing.
 
   type LangF<a>
     = WriteLn(string, a)
@@ -36,14 +37,14 @@ module Main {
 
   let my_program : Free<LangF, int32> =
     lift_free(WriteLn("Enter your name", ()))
-      |. and_eval(lift_free(WriteLn("---", ())))
-      |. and_eval(lift_free(ReadLn(fn(s) => s)))
+      |. and_always(lift_free(WriteLn("---", ())))
+      |. and_always(lift_free(ReadLn(fn(s) => s)))
       |. and_then(fn(s) => Free(If(
            s == "exit", 
            pure(), 
            lift_free(WriteLn("Hello " <> s, ()))
          )))
-      |. and_eval(pure(0))
+      |. and_always(pure(0))
 
   type alias Handler<f, e, a> = f<e<a>> -> e<a>
 
