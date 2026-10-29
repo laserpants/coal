@@ -42,8 +42,8 @@ module Main {
       // `If` carries continuations, not values: the branch programs go to the
       // `Free` constructor directly.
       |. and_then(fn(s) => Free(If(
-           true, 
-           lift_free(WriteLn("Hello " <> s, ())) 
+           s == "exit", 
+           pure() 
           , 
            lift_free(WriteLn("Hello " <> s, ()))
          )))
