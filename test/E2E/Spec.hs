@@ -2812,6 +2812,35 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/496" ["Main.coal"]
       res `shouldBe` Right ""
 
+  -- 497: a type constructor must be applied to exactly as many type arguments as
+  -- it declares parameters. `SomeType<a, b>` has kind `KType -> KType -> KType`,
+  -- so `hello2`'s `SomeType<int32>` is a partially applied type constructor and
+  -- not a type. Kind inference used to accept it -- the application's kind was
+  -- merely *determined* to be `KType -> KType` and nothing required a type
+  -- position to have kind `KType` -- after which the annotation was stamped
+  -- `KType` during type-annotation indexing, so the mistake reached codegen.
+  -- `hello` applies both parameters and stays valid (see 499).
+  describe "497" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/497" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  -- 498: over-application was already rejected, because the extra argument
+  -- forces `KType ~ KType -> k`. Kept as the companion case to 497.
+  describe "498" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/498" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  -- 499: the well-kinded `hello` from 497 on its own, so that the arity check
+  -- cannot silently over-reject a fully applied type constructor.
+  describe "499" $
+    expectOutput
+      "123"
+      "test/Coal/examples/499"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

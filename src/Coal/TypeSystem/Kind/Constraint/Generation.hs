@@ -38,7 +38,7 @@ import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as Text
-import Extras (Dictionary, Name, concatForM, forM_, second, (<$$>), (<>^))
+import Extras (Dictionary, Name, concatForM, forM_, second, traverse_, (<$$>), (<>^))
 import Extras.Control.Monad.Writer (tellLeft, tellRight)
 
 type KindConstraintsGenOutput = Either KindError KindConstraint
@@ -71,6 +71,19 @@ tellTransitive (k : ks) = forM_ ks $ \ki -> tellRight [KEquality k ki]
 tellParameterConstraints :: (Monad m) => [(Name, Kind)] -> KindConstraintsGen m ()
 tellParameterConstraints = mapM_ tellTransitive . parameterMap
 
+{- | Constrain a type that appears in a /type position/ — a value annotation, a
+data-constructor field or result, an alias right-hand side, and so on — to be a
+proper type, i.e. to have kind 'KType'.
+
+The 'TApplication' rule below only /determines/ the kind of an application; it
+never requires the result to be 'KType'. Without this constraint a partially
+applied type constructor (e.g. @SomeType<int32>@ where @SomeType@ declares two
+parameters) would be accepted as a type, its kind silently solved to
+@KType -> KType@.
+-}
+tellTypePosition :: (Monad m) => Type Parameter Kind -> KindConstraintsGen m ()
+tellTypePosition t = tellRight [KEquality (kindOf t) KType]
+
 class EmitKinds k where
   emitKindConstraints :: (Monad m) => k -> KindConstraintsGen m [(Name, Kind)]
 
@@ -101,7 +114,9 @@ instance EmitKinds (Type Parameter Kind) where
       TApplication k t1 t2 -> do
         tellRight [KEquality (kindOf t1) (KArrow (kindOf t2) k)]
         emitKindConstraints t1 <>^ emitKindConstraints t2
-      TArrow t1 t2 ->
+      TArrow t1 t2 -> do
+        tellTypePosition t1
+        tellTypePosition t2
         emitKindConstraints t1 <>^ emitKindConstraints t2
       TConstructor k "List" -> do
         tellRight [KEquality k (KArrow KType KType)]
@@ -146,6 +161,7 @@ instance EmitKinds (Scheme Parameter Kind (Type Parameter Kind)) where
   emitKindConstraints =
     \case
       Forall{..} -> do
+        tellTypePosition schemeTypeBody
         ps <-
           emitKindConstraints schemeTypeVariables
             <>^ emitKindConstraints schemeTraits
@@ -216,7 +232,8 @@ instance EmitKinds (Label (Type Parameter Kind)) where
 instance EmitKinds (Expression a Kind ()) where
   emitKindConstraints =
     \case
-      EAnnotation _ t e ->
+      EAnnotation _ t e -> do
+        tellTypePosition t
         emitKindConstraints t <>^ emitKindConstraints e
       EApplication _ () e es ->
         emitKindConstraints e <>^ emitKindConstraints es
@@ -261,7 +278,8 @@ instance EmitKinds (Expression a Kind ()) where
       EFocus _ _ _ _ e1 e2 ->
         emitKindConstraints e1
           <>^ emitKindConstraints e2
-      EFFICall _ _ t es e ->
+      EFFICall _ _ (Label t _) es e -> do
+        tellTypePosition t
         emitKindConstraints t
           <>^ emitKindConstraints es
           <>^ emitKindConstraints e
@@ -310,7 +328,8 @@ instance EmitKinds (Binding Expression a Kind ()) where
 instance EmitKinds (Pattern a Kind ()) where
   emitKindConstraints =
     \case
-      PAnnotation _ t p ->
+      PAnnotation _ t p -> do
+        tellTypePosition t
         emitKindConstraints t <>^ emitKindConstraints p
       PConstructor _ _ ps ->
         emitKindConstraints ps
@@ -340,6 +359,7 @@ instance EmitKinds (FunctionDefinition a Kind ()) where
   emitKindConstraints =
     \case
       FunctionDefinition{..} -> do
+        traverse_ tellTypePosition functionDefinitionAnnotation
         ps <-
           emitKindConstraints functionDefinitionAnnotation
             <>^ emitKindConstraints functionDefinitionConstraints
@@ -352,6 +372,7 @@ instance EmitKinds (LetDefinition a Kind ()) where
   emitKindConstraints =
     \case
       LetDefinition{..} -> do
+        traverse_ tellTypePosition letDefinitionAnnotation
         ps <-
           emitKindConstraints letDefinitionAnnotation
             <>^ emitKindConstraints letDefinitionConstraints
@@ -369,6 +390,7 @@ instance EmitKinds (TraitDefinition a Kind) where
             <>^ emitKindConstraints (Trait traitDefinitionTraitName traitDefinitionParameter)
         forM_ traitDefinitionInterface $
           \(TraitDefinitionInterfaceEntry _ Forall{..}) -> do
+            tellTypePosition schemeTypeBody
             ps2 <-
               emitKindConstraints schemeTypeVariables
                 <>^ emitKindConstraints schemeTraits
@@ -390,6 +412,7 @@ instance EmitKinds (FoldDefinition a Kind ()) where
   emitKindConstraints =
     \case
       FoldDefinition{..} -> do
+        traverse_ tellTypePosition foldDefinitionAnnotation
         ps <-
           emitKindConstraints foldDefinitionAnnotation
             <>^ emitKindConstraints foldDefinitionConstraints
@@ -401,6 +424,7 @@ instance EmitKinds (AliasDefinition a Kind) where
   emitKindConstraints =
     \case
       AliasDefinition{..} -> do
+        tellTypePosition aliasDefinitionType
         ps <-
           emitKindConstraints aliasDefinitionParameters
             <>^ emitKindConstraints aliasDefinitionType
