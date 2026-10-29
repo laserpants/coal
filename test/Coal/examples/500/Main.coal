@@ -1,0 +1,54 @@
+module Main {
+  import namespace IO
+  import IO(return)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad, and_then, and_eval, and_return)
+  import Coal.Monad.Free(Free, lift_free, interpret)
+
+  type LangF<a>
+    = WriteLn(string, a)
+    | ReadLn(string -> a)
+    | If(bool, a, a)
+
+  instance Functor<LangF> {
+    fun map(f) = 
+      match{
+        | WriteLn(str, x) => WriteLn(str, f(x))
+        | ReadLn(g) => ReadLn(f << g)
+        | If(c, a, b) => If(c, f(a), f(b))
+      }
+  }
+
+  fun print(s) = lift_free(WriteLn(s, ()))
+
+  let readln = lift_free(ReadLn(fn(s) => s))
+
+  fun if_(cond, t, f) = Free(If(cond, t, f))
+
+  let my_program : Free<LangF, int32> = do {
+    print("Enter your name");
+    print("----");
+    s <- readln;
+    if_(s == "exit", pure(), print("Hello " <> s));
+    pure(0);
+  }
+
+  type alias Handler<f, e, a> = f<e<a>> -> e<a>
+
+  fun io_lang_handler : Handler<LangF, IO, a>
+    | WriteLn(str, a) => do {
+        IO.println_string(str);
+        a;
+      }
+    | ReadLn(f) => do {
+        s <- IO.readln();
+        f(s);
+      }
+    | If(c, a, b) => if (c) then a else b
+
+  fun main() =
+    interpret(io_lang_handler, my_program)
+
+}
+
