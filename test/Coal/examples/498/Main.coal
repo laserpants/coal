@@ -1,0 +1,13 @@
+module Main {
+
+  import namespace IO
+
+  type SomeType<a, b> = A(a, b)
+
+  fun hello3(a : SomeType<int32, int32, int32>) : int32 =
+    123
+
+  fun main() =
+    IO.println_int32(hello(A(5, 5)))
+
+}

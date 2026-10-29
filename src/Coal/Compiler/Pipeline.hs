@@ -431,6 +431,18 @@ prettyError env =
         ]
         env
         erl
+    TypeArgumentCountMismatch name expected actual erl ->
+      errorMessage
+        [ "The type alias '"
+            <> name
+            <> "' takes "
+            <> showt expected
+            <> " type argument(s), but is applied to "
+            <> showt actual
+            <> "."
+        ]
+        env
+        erl
     MissingTraitDefinition name trait erl ->
       errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
     UnexpectedTraitDefinition name trait erl ->

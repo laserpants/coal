@@ -58,6 +58,7 @@ data CompilerError a
   | MissingTraitAnnotation Name [Trait (Type Parameter Kind)] (ErrorLocation a)
   | TraitDictionaryMismatch Name IndexedType IndexedType (ErrorLocation a)
   | UnboundTypeVariable Name Name [Name] (ErrorLocation a)
+  | TypeArgumentCountMismatch Name Int Int (ErrorLocation a)
   | TupleTooLarge Int Int (ErrorLocation a)
   | InvalidMainFunctionType Name IndexedType (ErrorLocation a)
   deriving (Show, Eq)
@@ -151,6 +152,8 @@ errorLocation =
     MissingTraitAnnotation _ _ erl ->
       Just erl
     UnboundTypeVariable _ _ _ erl ->
+      Just erl
+    TypeArgumentCountMismatch _ _ _ erl ->
       Just erl
     TupleTooLarge _ _ erl ->
       Just erl

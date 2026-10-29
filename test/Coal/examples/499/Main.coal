@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+
+  type SomeType<a, b> = A(a, b)
+
+  // Companion to example 497: `SomeType` is applied to both of the parameters it
+  // declares, so this is well-kinded and must stay accepted.
+  fun hello(a : SomeType<int32, a>) : int32 =
+    123
+
+  fun main() =
+    IO.println_int32(hello(A(5, 5)))
+
+}
