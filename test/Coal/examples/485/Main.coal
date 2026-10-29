@@ -5,7 +5,7 @@ module Main {
   import Coal.Functor(Functor)
   import Coal.Applicative(Applicative)
   import Coal.Monad(Monad, and_then, and_eval)
-  import Coal.Monad.Free(Free)
+  import Coal.Monad.Free(Free, lift_free)
 
   // Two kinds of instruction appear below:
   //

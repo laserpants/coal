@@ -37,6 +37,15 @@ module Coal.Monad.Free(Free, lift_free) {
   fun bind_free(ma : Free<f, a>, f : a -> Free<f, b>) : Free<f, b> =
     free$_bind_free(ma, f)
   
+  /**
+   * Lift a single instruction into the free monad.
+   *
+   * `lift_free(e)` is the one-step program that runs the instruction `e` and
+   * then finishes with `pure` of its payload: `lift_free(WriteLn("hi", ()))`
+   * is `Free(WriteLn("hi", Pure(())))`.
+   *
+   * **Type**: `lift_free : f<a> -> Free<f, a> with (Functor<f>)`
+   */
   fun lift_free(e : f<a>) : Free<f, a> with (Functor<f>) =
     Free(map(pure, e))
 
