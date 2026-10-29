@@ -57,20 +57,20 @@ module Coal.Monad {
     flip(bind)
 
   /**
-   * `and_eval` is `then_do` with its arguments flipped: the second action is
+   * `and_always` is `then_do` with its arguments flipped: the second action is
    * evaluated first, and the first is returned.
    *
-   * **Type**: `and_eval : m<b> -> m<a> -> m<a> with (Monad<m>)`
+   * **Type**: `and_always : m<b> -> m<a> -> m<a> with (Monad<m>)`
    */
-  let and_eval = flip(then_do)
+  let and_always = flip(then_do)
 
   /**
-   * `and_return` is `and_eval` composed with `pure`: it runs the given monadic
+   * `and_return` is `and_always` composed with `pure`: it runs the given monadic
    * action, discarding its result, and returns the given pure value.
    *
    * **Type**: `and_return : a -> m<b> -> m<a> with (Monad<m>)`
    */
-  let and_return = and_eval << pure
+  let and_return = and_always << pure
 
   /**
    * `join` flattens a nested monadic value by one level, transforming

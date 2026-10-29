@@ -2,7 +2,7 @@ module Main {
 
   import namespace IO
   import namespace List
-  import Coal.Monad(and_eval)
+  import Coal.Monad(and_always)
   import Coal.Monoid(Monoid)
   import Coal.Applicative(Applicative)
   // import Writer(Writer, run_writer, tell)
@@ -55,16 +55,16 @@ module Main {
 
   fun test_writer() : Writer<List<string>, int32> =
     tell(["one"])
-      |. and_eval(tell(["two"]))
-      |. and_eval(tell(["three"]))
-      |. and_eval(pure(100))
+      |. and_always(tell(["two"]))
+      |. and_always(tell(["three"]))
+      |. and_always(pure(100))
 
   fun print_msgs(msgs : List<string>) =
     fold(msgs) {
       | [] => 
           return()
       | m :: @next =>
-          IO.println_string(m) |. and_eval(next)
+          IO.println_string(m) |. and_always(next)
     }
 
   fun main() =
