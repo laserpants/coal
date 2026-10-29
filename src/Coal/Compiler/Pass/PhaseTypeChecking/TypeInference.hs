@@ -220,9 +220,13 @@ inferKinds m = do
   constraints <- gets compilerKindConstraints
   case kindUnifierMonad (solveKindConstraints constraints) of
     Left err -> do
-      -- Kind inference failed - report as KindError
+      -- Kind inference failed. Report it as a 'KindError' and fail with
+      -- 'TypeError', matching how kind-constraint generation errors are
+      -- surfaced by 'ReportTypeErrors'. (This used to throw the catch-all
+      -- 'CompilerError', so a kind-unification failure was not reported as a
+      -- type error even though every other kind error is.)
       tellErrors [KindError err (ErrorLocation (principalPath (modulePath m)) mempty)]
-      throwError CompilerError
+      throwError TypeError
     Right sub -> do
       modify (overCompilerNameStore (replaceVariables . applyKinds sub))
       modify (overCompilerModuleWithPath (modulePath m) (replaceVariables . applyKinds sub))

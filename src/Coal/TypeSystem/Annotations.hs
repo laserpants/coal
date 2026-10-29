@@ -12,9 +12,9 @@ import Coal.Utils (lexOrderRank)
 import Control.Monad.Except (ExceptT, MonadError, runExceptT, throwError, withExceptT)
 import Control.Monad.Reader (MonadReader, ReaderT, asks, runReaderT)
 import Control.Monad.State (MonadState, StateT, get, modify, runStateT)
-import Data.List.NonEmpty (NonEmpty (..))
+import Data.List.NonEmpty (NonEmpty (..), toList)
 import qualified Data.Map.Strict as Map
-import Extras (Dictionary, Name)
+import Extras (Dictionary, Name, fromMaybe)
 
 type TypeIndexMap = Dictionary (TypeIndex Kind)
 
@@ -81,8 +81,19 @@ indexTypeApplicationTypeAnnotations (TVariable (Parameter _ v)) ts = do
   us <- traverse indexTypeAnnotations ts
   u <- TVariable <$> typeIndex (foldKind KType (kindOf <$> us)) v
   pure (applyTypeArgs KType u us)
-indexTypeApplicationTypeAnnotations t ts =
-  applyTypeArgs KType <$> indexTypeAnnotations t <*> traverse indexTypeAnnotations ts
+indexTypeApplicationTypeAnnotations t ts = do
+  us <- traverse indexTypeAnnotations ts
+  applyTypeArgs (applicationKind t ts) <$> indexTypeAnnotations t <*> pure us
+
+{- | The kind of a type application, obtained by peeling the argument kinds off
+the head's kind. 'applyTypeArgs' uses the supplied kind for the outermost node
+only, so passing 'KType' unconditionally labels a partially applied type
+constructor (e.g. @SomeType<int32>@ where @SomeType@ declares two parameters) as
+a proper type, hiding the mistake from the unifier's kind check. Over-applied
+heads (and heads whose kind cannot be determined) keep the 'KType' fallback.
+-}
+applicationKind :: Type Parameter Kind -> NonEmpty (Type Parameter Kind) -> Kind
+applicationKind t ts = fromMaybe KType (applyKind (kindOf <$> toList ts) (kindOf t))
 
 typeIndex :: (Monad m) => Kind -> Name -> AnnotationsT m a (TypeIndex Kind)
 typeIndex kind name = do

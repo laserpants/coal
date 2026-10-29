@@ -40,15 +40,21 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Supply (supplied)
 import Coal.Compiler.Build
 import Coal.Compiler.Build.NameEntry
+import Coal.Compiler.Error (CompilerError (..), ErrorLocation (..))
+import Coal.Compiler.Journal (tellErrors)
 import Coal.Compiler.Pass (Pass (..))
-import Coal.Compiler.Stack (CompilerT, getCurrentBuildC, updateCurrentBuildC)
+import Coal.Compiler.Stack (CompilerFailureMode (..), CompilerT, getCurrentBuildC, updateCurrentBuildC)
+import Coal.Compiler.State (compilerCurrentPath)
 import Coal.Language
+import Coal.Language.Module.Path (principalPath)
 import Coal.TypeSystem.Parameterized (ToIndexed (toIndexed))
 import Coal.TypeSystem.Substitution (applyT)
 import qualified Coal.TypeSystem.Substitution as Substitution
+import Control.Monad (unless)
+import Control.Monad.Except (throwError)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Reader (runReaderT)
-import Control.Monad.State (execStateT, modify)
+import Control.Monad.State (execStateT, gets, modify)
 import Control.Monad.Trans (lift)
 import Data.Data (Data, Typeable)
 import Data.Generics.Uniplate.Data (descendM)
@@ -323,8 +329,30 @@ lookupAlias t ts name = do
         _ ->
           return t
     Just aliasEntry -> do
+      checkTypeArgumentCount name aliasEntry ts
       t1 <- transformAliasEntry ts aliasEntry
       TAlias name ts <$> aliasTransform t1
+
+{- | A type alias must be applied to exactly as many type arguments as it declares
+parameters.
+
+Aliases are inlined before type inference, so an under-applied alias would
+otherwise survive as a @TAlias@ whose kind is taken from its partially
+substituted body — which hides the arity mismatch — and whose unsubstituted
+parameters would remain as free type variables.
+-}
+checkTypeArgumentCount :: (MonadIO m) => Name -> AliasEntry a -> [Type o Kind] -> CompilerT a m ()
+checkTypeArgumentCount name AliasEntry{aliasEntryMetadata, aliasEntryParams} ts =
+  unless (length ts == length aliasEntryParams) $ do
+    currentPath <- gets compilerCurrentPath
+    tellErrors
+      [ TypeArgumentCountMismatch
+          name
+          (length aliasEntryParams)
+          (length ts)
+          (ErrorLocation (principalPath currentPath) aliasEntryMetadata)
+      ]
+    throwError TypeError
 
 class AliasEntryTransform o where
   transformAliasEntry :: (MonadIO m, Show a) => [Type o Kind] -> AliasEntry a -> CompilerT a m (Type o Kind)
