@@ -20,6 +20,7 @@ import Coal.Compiler.Stack
 import Coal.Language (IndexedType, Kind)
 import Coal.Language.Module (Module (..))
 import Coal.Language.Module.Path (principalPath)
+import Coal.TypeSystem.Kind.Constraint (KindConstraintError (..))
 import Control.Monad (forM_, unless)
 import Control.Monad.Except (MonadError (throwError))
 import Control.Monad.IO.Class (MonadIO)
@@ -45,14 +46,14 @@ passImpl Module{..} = do
     \err ->
       tellErrors [SolverError err (errorLocation err)]
 
-  -- Kind-constraint-generation errors (e.g. a type constructor or trait that is
-  -- not in scope) carry no source metadata of their own, so they are reported at
-  -- module granularity. Without this the errors collected by
-  -- 'generateKindConstraints' are silently dropped.
+  -- Kind errors (e.g. a type constructor or trait that is not in scope) are
+  -- reported against the definition that produced them; 'KindError' itself
+  -- carries no source metadata, so the location travels alongside it. Without
+  -- this the errors collected by 'generateKindConstraints' are silently dropped.
   kindErrors <- compilerGetKindConstraintsGenErrorsC
   forM_ kindErrors $
-    \err ->
-      tellErrors [KindError err (ErrorLocation (principalPath modulePath) mempty)]
+    \(KindConstraintError loc err) ->
+      tellErrors [KindError err (ErrorLocation (principalPath modulePath) loc)]
 
   unless (null constraintsGenErrors && null solverRuleViolations && null kindErrors) (throwError TypeError)
   return Module{..}

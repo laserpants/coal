@@ -65,6 +65,7 @@ import Coal.TypeSystem.Constraint.Assumption
 import Coal.TypeSystem.Constraint.Generation
 import Coal.TypeSystem.Constraint.Generation.Stack
 import Coal.TypeSystem.Constraint.Solver (solveConstraints)
+import Coal.TypeSystem.Kind.Constraint (KindConstraintError (..))
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
 import Coal.TypeSystem.Substitution
@@ -83,7 +84,7 @@ import qualified Data.Map.Strict as Map
 import Extras (Dictionary, Name, concatMapM, forM_)
 
 generateKindConstraints :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
-generateKindConstraints modul = do
+generateKindConstraints modul@Module{moduleDefinitions} = do
   env <- moduleKindEnvironment modul
   -- Kind checking must see every type constructor that is actually in scope.
   -- 'moduleKindEnvironment' derives its entries from the module's definitions
@@ -101,10 +102,47 @@ generateKindConstraints modul = do
         Environment.mapEnvironment typeConstructorEntryKind buildTypeConstructors
           <> Environment.mapEnvironment traitKindOf buildTraits
           <> Environment.mapEnvironment (kindOf . aliasEntryType) buildAliases
-  (_, result) <- runKindConstraintsGen (env <> buildEnv) (emitKindConstraints modul)
-  let (errors, constraints) = partitionEithers result
-  insertKindConstraintsC constraints
-  compilerReportKindConstraintsGenErrorsC errors
+      genEnv = env <> buildEnv
+  -- Generate one definition at a time, so that each constraint and error can be
+  -- tagged with its definition's location (see 'KindConstraint'): a failing
+  -- constraint is then reported against the definition that produced it, which
+  -- the kind-indexed type AST itself cannot supply. The constraints are still
+  -- solved together, in the order they are emitted here.
+  forM_ moduleDefinitions $ \def -> do
+    (_, result) <- runKindConstraintsGen genEnv (emitKindConstraints def)
+    let (errors, constraints) = partitionEithers result
+        loc = definitionMetadata def
+    insertKindConstraintsC (fmap (fmap (const loc)) constraints)
+    compilerReportKindConstraintsGenErrorsC (KindConstraintError loc <$> errors)
+
+{- | The source location of a definition.
+
+Every definition constructor stores its metadata first, so the function is total;
+imports carry a location too, even though they emit no kind constraints.
+-}
+definitionMetadata :: Definition a k () -> a
+definitionMetadata =
+  \case
+    DType a _ _ ->
+      a
+    DTypeAlias a _ _ ->
+      a
+    DFunction a _ _ ->
+      a
+    DFunctionGroup a _ _ ->
+      a
+    DFold a _ _ ->
+      a
+    DLet a _ _ ->
+      a
+    DImport a _ _ ->
+      a
+    DNamespaceImport a _ ->
+      a
+    DTrait a _ _ ->
+      a
+    DInstance a _ ->
+      a
 
 class GenerateConstraints a c where
   generateConstraints :: (Monad m) => c -> CompilerT a m ()

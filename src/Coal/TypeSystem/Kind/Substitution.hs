@@ -101,15 +101,15 @@ instance KindSubstitutable (Map Int Kind) where
   applyKinds = fmap . applyKinds
   replaceVariables = fmap replaceVariables
 
-instance KindSubstitutable KindConstraint where
+instance KindSubstitutable (KindConstraint a) where
   applyKinds sub =
     \case
-      KEquality k1 k2 ->
-        KEquality (applyKinds sub k1) (applyKinds sub k2)
+      KEquality loc k1 k2 ->
+        KEquality loc (applyKinds sub k1) (applyKinds sub k2)
   replaceVariables =
     \case
-      KEquality k1 k2 ->
-        KEquality (replaceVariables k1) (replaceVariables k2)
+      KEquality loc k1 k2 ->
+        KEquality loc (replaceVariables k1) (replaceVariables k2)
 
 instance KindSubstitutable Kind where
   applyKinds sub =

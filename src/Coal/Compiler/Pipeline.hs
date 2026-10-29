@@ -41,7 +41,7 @@ import Coal.Compiler.Pass.PhaseTypeChecking (phaseTypeChecking)
 import Coal.Compiler.Stack
 import Coal.Compiler.State
 import Coal.Compiler.TypeInference.Errors (prettyErrorMessage)
-import Coal.Language (IndexedType, Kind)
+import Coal.Language (IndexedType, Kind (..))
 import Coal.Language.Module.Path (principalPath)
 import Coal.Language.Type (Type (TVariable))
 import Coal.Pretty (CoalPretty (..))
@@ -332,6 +332,21 @@ prettyConstraintsGenError =
     EDataConstructorArityMismatch _ name expected actual ->
       "Data constructor '" <> name <> "' expects " <> Text.pack (show expected) <> " arguments, but got " <> Text.pack (show actual) <> "."
 
+-- | Render a kind the way the surface syntax spells types.
+prettyKind :: Kind -> Text
+prettyKind =
+  \case
+    KType ->
+      "type"
+    KRow ->
+      "row"
+    KTrait ->
+      "trait"
+    KArrow k1 k2 ->
+      "(" <> prettyKind k1 <> " -> " <> prettyKind k2 <> ")"
+    KVariable n ->
+      "k" <> Text.pack (show n)
+
 prettyKindInferenceError :: KindError -> Text
 prettyKindInferenceError =
   \case
@@ -339,8 +354,8 @@ prettyKindInferenceError =
       "No type constructor '" <> name <> "' in scope."
     ENoTrait name ->
       "No trait '" <> name <> "' in scope."
-    ECannotUnifyKinds ->
-      "Kind unification failed"
+    ECannotUnifyKinds k1 k2 ->
+      "Cannot unify kind `" <> prettyKind k1 <> "` with `" <> prettyKind k2 <> "`."
     EInfiniteKind ->
       "Infinite kind"
 
