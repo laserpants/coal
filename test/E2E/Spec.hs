@@ -2775,6 +2775,22 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 485: the free-monad encoding distinguishes instructions whose payload slot
+  -- holds a *result* (`WriteLn`, `ReadLn`) from instructions whose payload
+  -- slots *are* the continuations (`If`). The former are lifted with
+  -- `lift_free` (which fills the continuation with `pure`); the latter must be
+  -- passed to the `Free` constructor directly, since `lift_free` would insert a
+  -- `Pure` layer, leaving the branch programs in the instruction's value
+  -- position, where the interpreter returns them as values instead of running
+  -- them (and the following `and_eval` discards them). With empty stdin
+  -- `readln` yields the empty string.
+  describe "485" $
+    expectOutput
+      "Enter your name\n---\nHello "
+      "test/Coal/examples/485"
+      [ "Main.coal"
+      ]
+
   -- 490: an instance implementation that is not polymorphic enough must be
   -- rejected. `instance Functor<LangF>` has a closed head, so the member's own
   -- `a` and `b` are the only signature variables that can be instantiated; the

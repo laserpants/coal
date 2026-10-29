@@ -6,7 +6,7 @@
  * separate interpreter can later give meaning to. This separates the
  * description of an effectful computation from its interpretation.
  */
-module Coal.Monad.Free(Free) {
+module Coal.Monad.Free(Free, lift_free) {
  
   import Coal.Functor(Functor)
   import Coal.Applicative(Applicative)
@@ -37,6 +37,9 @@ module Coal.Monad.Free(Free) {
   fun bind_free(ma : Free<f, a>, f : a -> Free<f, b>) : Free<f, b> =
     free$_bind_free(ma, f)
   
+  fun lift_free(e : f<a>) : Free<f, a> with (Functor<f>) =
+    Free(map(pure, e))
+
   instance Functor<Free<f>> with (Functor<f>) {
     let map = map_free
   }
