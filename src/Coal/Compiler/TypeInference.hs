@@ -112,7 +112,7 @@ generateKindConstraints modul@Module{moduleDefinitions} = do
     (_, result) <- runKindConstraintsGen genEnv (emitKindConstraints def)
     let (errors, constraints) = partitionEithers result
         loc = definitionMetadata def
-    insertKindConstraintsC (fmap (fmap (const loc)) constraints)
+    insertKindConstraintsC (fmap (const loc) <$> constraints)
     compilerReportKindConstraintsGenErrorsC (KindConstraintError loc <$> errors)
 
 {- | The source location of a definition.
