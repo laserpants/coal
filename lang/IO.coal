@@ -219,18 +219,6 @@ module IO {
     __defer(fn(_) => io$_print_int64(unpack(n)))
 
   /**
-   * Suspend a computation as an IO action.
-   *
-   * Internal primitive that wraps a thunk as an `IO` action. The thunk is not
-   * run until the action is forced with `__eval_io`; every IO action in this
-   * module is built with it. This is the introduction form for the `IO` type.
-   *
-   * **Type**: `__defer : (unit -> v) -> IO<v>`
-   */
-  fun __defer(f : unit -> v) : IO<v> =
-    io$_defer(f)
-
-  /**
    * Evaluate an IO action and extract its result.
    *
    * Internal primitive that runs the given IO action, returning the
