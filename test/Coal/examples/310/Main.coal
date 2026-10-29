@@ -1,7 +1,7 @@
 module Main {
 
   import namespace IO
-  import Coal.Monad(Monad, and_eval)
+  import Coal.Monad(Monad, and_always)
   import IO(return)
 
   fun print_msgs(msgs : List<string>) =
@@ -9,7 +9,7 @@ module Main {
       | [] => 
           return()
       | m :: @next =>
-          IO.println_string(m) |. and_eval(next)
+          IO.println_string(m) |. and_always(next)
     }
 
   fun main() =
