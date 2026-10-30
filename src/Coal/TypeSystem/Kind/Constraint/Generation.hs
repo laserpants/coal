@@ -17,7 +17,7 @@ import qualified Coal.Common.Environment as Environment
 import Coal.Common.Label (Label (..))
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Definition
-import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
+import Coal.Language.Expression (Clause (..), CompiledClause (..), DoStatement (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.HasKind (HasKind (..))
@@ -287,11 +287,14 @@ instance EmitKinds (Expression a Kind ()) where
         emitKindConstraints t
           <>^ emitKindConstraints es
           <>^ emitKindConstraints e
-      EDoBlock _ is -> do
+      EDoBlock _ is ->
         concatForM is $
-          \(x, y) ->
-            emitKindConstraints x
-              <>^ emitKindConstraints y
+          \case
+            DoBind p e ->
+              emitKindConstraints p
+                <>^ emitKindConstraints e
+            DoLet b ->
+              emitKindConstraints b
       _ ->
         pure []
 

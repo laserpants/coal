@@ -1,0 +1,24 @@
+module Main {
+
+  import namespace IO
+
+  // A pure IO action that yields a value, so that the do-block below can bind
+  // a non-unit result.
+  fun fetch() : IO<int32> =
+    do {
+      pure(20);
+    }
+
+  // A do-block statement of the form `x = e;` is a pure let-binding: it
+  // desugars to `let x = e in <rest>` inside the monadic continuation, so the
+  // bound name is in scope for the following statements, and may refer to
+  // earlier bind and let results.
+  fun main() =
+    do {
+      n <- fetch();
+      m = n + 1;
+      k = m * 2;
+      IO.println_int32(k);
+    }
+
+}

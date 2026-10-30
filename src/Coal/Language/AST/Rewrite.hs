@@ -11,11 +11,10 @@ module Coal.Language.AST.Rewrite (
 
 import Coal.Common.FreeVars (BoundVars (..))
 import Coal.Common.Label (Label (..))
-import Coal.Language (Binding (..), Choice (..), Clause (..), CompiledClause (..), Expression (..), Guard (..))
+import Coal.Language (Binding (..), Choice (..), Clause (..), CompiledClause (..), DoStatement (..), Expression (..), Guard (..))
 import Control.Monad.Identity (runIdentity)
 import Data.Data (Data)
 import Data.Foldable (foldr')
-import Data.Tuple.Extra (secondM)
 import Extras (Name, const2, (<$$>))
 
 class RewriteContext e where
@@ -28,6 +27,14 @@ instance RewriteContext (Binding Expression) where
         BPattern a p <$> rewrite name f e
       BFunction a n ps e ->
         BFunction a name ps <$> rewrite n f e
+
+instance RewriteContext DoStatement where
+  rewrite name f =
+    \case
+      DoBind p e ->
+        DoBind p <$> rewrite name f e
+      DoLet b ->
+        DoLet <$> rewrite name f b
 
 instance RewriteContext (Guard Expression) where
   rewrite name f =
@@ -147,8 +154,8 @@ instance RewriteContext Expression where
         EFFICall a t ll
           <$> traverse (rewrite name f) es
           <*> rewrite name f e
-      EDoBlock a es ->
-        EDoBlock a <$> traverse (secondM (rewrite name f)) es
+      EDoBlock a is ->
+        EDoBlock a <$> traverse (rewrite name f) is
       expr@ETraitInstance{} ->
         pure expr
 
