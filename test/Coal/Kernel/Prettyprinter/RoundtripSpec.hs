@@ -2,6 +2,7 @@
 
 module Coal.Kernel.Prettyprinter.RoundtripSpec (spec) where
 
+import Coal.Kernel.Builtin.Objects (builtinObjects)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
 import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
@@ -9,20 +10,22 @@ import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Language.Type.Constructors as T
 import Coal.Kernel.Parser.Expr (expr)
-import Coal.Kernel.Parser.Module (module_)
+import Coal.Kernel.Parser.Module (module_, object_)
 import Coal.Kernel.Parser.Prim (prim)
 import Coal.Kernel.Parser.Type (type_)
 import Coal.Kernel.Prettyprinter (renderModule)
 import Coal.Kernel.Prettyprinter.Expr (prettyExpr)
+import Coal.Kernel.Prettyprinter.Object (prettyObject)
 import Coal.Kernel.Prettyprinter.Prim (prettyPrim)
 import Coal.Kernel.Prettyprinter.Type (prettyType)
+import Control.Monad (forM_)
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Text as Text
 import Data.Void (Void)
 import Prettyprinter (Doc, defaultLayoutOptions, layoutPretty)
 import Prettyprinter.Render.Text (renderStrict)
-import Test.Hspec (Spec, describe, it, shouldBe)
-import Text.Megaparsec (ParseErrorBundle, parse)
+import Test.Hspec (Spec, describe, expectationFailure, it, shouldBe)
+import Text.Megaparsec (ParseErrorBundle, errorBundlePretty, parse)
 
 -- | Helper to parse a module
 parseModule :: Text.Text -> Either (ParseErrorBundle Text.Text Void) (Module Type)
@@ -124,25 +127,41 @@ spec = do
         let rendered = renderModule original
         parseModule rendered `shouldBe` Right original
 
--- NOTE: File-based roundtrip tests are temporarily disabled. Some .corn
--- example files under test/examples have not yet been migrated to the current
--- grouped data syntax (e.g. @data Foo.Bar<0, Foo.Baz(*)>@), and one file
--- currently fails to reparse its own prettyprinted output. Re-enable once
--- these are resolved.
--- describe "File-based roundtrip tests" $ do
---   cornFiles <- runIO findCornFiles
---   forM_ cornFiles $ \filePath -> do
---     it ("roundtrips " ++ filePath) $ do
---       content <- TextIO.readFile filePath
---       case parseModule content of
---         Left err -> expectationFailure $ "Failed to parse original file:\n" ++ errorBundlePretty err
---         Right original -> do
---           let rendered = renderModule original
---           case parseModule rendered of
---             Left err ->
---               expectationFailure $
---                 "Failed to parse prettyprinted output:\n"
---                   ++ errorBundlePretty err
---                   ++ "\n\nPrettyprinted output:\n"
---                   ++ Text.unpack rendered
---             Right reparsed -> reparsed `shouldBe` original
+    -- NOTE: File-based roundtrip tests are temporarily disabled. Some .corn
+    -- example files under test/examples have not yet been migrated to the current
+    -- grouped data syntax (e.g. @data Foo.Bar<0, Foo.Baz(*)>@), and one file
+    -- currently fails to reparse its own prettyprinted output. Re-enable once
+    -- these are resolved.
+    -- describe "File-based roundtrip tests" $ do
+    --   cornFiles <- runIO findCornFiles
+    --   forM_ cornFiles $ \filePath -> do
+    --     it ("roundtrips " ++ filePath) $ do
+    --       content <- TextIO.readFile filePath
+    --       case parseModule content of
+    --         Left err -> expectationFailure $ "Failed to parse original file:\n" ++ errorBundlePretty err
+    --         Right original -> do
+    --           let rendered = renderModule original
+    --           case parseModule rendered of
+    --             Left err ->
+    --               expectationFailure $
+    --                 "Failed to parse prettyprinted output:\n"
+    --                   ++ errorBundlePretty err
+    --                   ++ "\n\nPrettyprinted output:\n"
+    --                   ++ Text.unpack rendered
+    --             Right reparsed -> reparsed `shouldBe` original
+
+    describe "Builtin objects roundtrip" $ do
+      it "reparses every pretty-printed builtin object" $ do
+        let objs = moduleObjects builtinObjects
+        forM_ (zip [0 :: Int ..] objs) $ \(i, obj) -> do
+          let rendered = render (prettyObject prettyType) obj
+          case parse object_ "" rendered of
+            Left err ->
+              expectationFailure $
+                "failed to reparse builtin object #"
+                  <> show i
+                  <> ":\n"
+                  <> errorBundlePretty err
+                  <> "\n"
+                  <> Text.unpack rendered
+            Right reparsed -> reparsed `shouldBe` obj

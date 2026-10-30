@@ -50,7 +50,7 @@ import Control.Monad ((<=<))
 import Data.Data (Data)
 import Data.Generics.Uniplate.Data (transformM)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
-import Extras (Dictionary, Name)
+import Extras (Dictionary)
 
 {- | Natural number compilation pass.
 
@@ -64,9 +64,6 @@ passCompileNats = Pass{runPass = passImpl}
 
 passImpl :: (Monad m) => Module Metadata Kind IndexedType -> CompilerT a m (Module Metadata Kind IndexedType)
 passImpl = compileNats
-
-builtinInstance :: (Serializable t) => Trait t -> Name -> Name
-builtinInstance trait name = instanceLabel trait ("Builtin$." <> name)
 
 class CompileNatsContext e where
   compileNats :: (Monad m) => e -> CompilerT a m e

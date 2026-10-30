@@ -28,8 +28,11 @@ module Coal.Kernel.Parser (
   backtickString,
   constructor,
   field,
+  operatorName,
+  parenGroup,
   qualifiedName,
   qualifiedConstructor,
+  qualifiedObjectName,
 ) where
 
 import Control.Monad (void)
@@ -125,13 +128,35 @@ constructor =
     rest <- P.many (C.alphaNumChar <|> C.char '_')
     return $ T.pack (first : rest)
 
--- | Parse a field name (identifier or backtick-quoted string)
+{- | Parse a field name: a parenthesized operator, an identifier, or a
+backtick-quoted string.  Operator fields (e.g. @(+)@, @(==)@) are spelled with
+the enclosing parentheses, as produced by the pretty-printer for record rows
+and field projections.
+-}
 field :: Parser Text
 field =
   P.choice
-    [ P.try backtickString
+    [ P.try operatorName
+    , P.try backtickString
     , word
     ]
+
+-- | Characters that may occur in an operator name, e.g. @+@, @==@, @<>@.
+operatorChar :: Parser Char
+operatorChar = P.satisfy (`elem` ("+-*/%^<>=!&|~?:" :: String))
+
+{- | Parse a parenthesized operator name: @(+)@, @(==)@, @(<>)@.
+
+The result includes the enclosing parentheses, matching how operator-named
+functions and record fields are spelled throughout the kernel language.
+-}
+operatorName :: Parser Text
+operatorName =
+  lexeme $ do
+    void $ C.char '('
+    sym <- P.some operatorChar
+    void $ C.char ')'
+    return $ "(" <> T.pack sym <> ")"
 
 {-# INLINE validChar #-}
 validChar :: Parser Char
@@ -157,6 +182,45 @@ qualifiedName initial =
       return $ T.pack (segFirst : segRest)
     -- Combine all parts
     return $ prefix <> T.intercalate "." (firstSegment : segments)
+
+{- | Parse a balanced parenthesised group, returning its text verbatim:
+@(+)@, @(TIntrinsic(IInt32))@, @(n : int32)@.  Nested parentheses are allowed.
+-}
+parenGroup :: Parser Text
+parenGroup = lexeme pParenGroupRaw
+
+pParenGroupRaw :: Parser Text
+pParenGroupRaw = do
+  void $ C.char '('
+  body <- P.manyTill parenChar (C.char ')')
+  return $ "(" <> T.concat body <> ")"
+
+-- | One character of a parenthesised group, recursing into nested groups.
+parenChar :: Parser Text
+parenChar = pParenGroupRaw <|> (T.singleton <$> P.anySingle)
+
+{- | Parse an object name: a qualified identifier with optional embedded
+parenthesised groups, e.g. @Builtin$.(+)@, @Main.(==)@ or
+@Builtin$.(+)__$impl_NumericBase(TIntrinsic(IInt32))@.
+
+A group is treated as part of the name only when it is /not/ directly followed
+by @=@.  That keeps @Main.from_int32(x : int32) = ...@ parsing as the name
+@Main.from_int32@ followed by a parameter list, while a serialised type
+argument such as @(TIntrinsic(IInt32))@ is absorbed into the name.
+-}
+qualifiedObjectName :: Parser Char -> Parser Text
+qualifiedObjectName initial = do
+  prefix <- P.option "" (T.pack <$> P.some (C.char '$'))
+  firstChar <- initial
+  rest <- P.many namePart
+  spaces
+  return $ prefix <> T.singleton firstChar <> T.concat rest
+ where
+  namePart = (T.singleton <$> validChar) <|> P.try nameSuffixGroup
+  nameSuffixGroup = do
+    group <- parenGroup
+    P.notFollowedBy (P.try (spaces *> C.char '='))
+    return group
 
 {- | Parse a qualified constructor: last dot-separated component must start with uppercase.
 Examples: Maybe, $Cons, My.Data.Maybe, Main.Node

@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE StrictData #-}
 
 {- |
@@ -23,6 +24,7 @@ import Data.Binary (Binary)
 import Data.ByteString (ByteString)
 import Data.Int (Int32, Int64)
 import GHC.Generics (Generic)
+import Language.Haskell.TH.Syntax (Lift)
 
 {- | Core language primitive literals.
 
@@ -49,6 +51,6 @@ data Prim
     PChar Int32
   | -- | UTF-8 encoded strings
     PString ByteString
-  deriving (Show, Eq, Ord, Read, Generic)
+  deriving (Show, Eq, Ord, Read, Generic, Lift)
 
 instance Binary Prim

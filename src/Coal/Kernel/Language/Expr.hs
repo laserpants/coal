@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
@@ -20,19 +21,20 @@ module Coal.Kernel.Language.Expr (
 ) where
 
 import Data.List.NonEmpty (NonEmpty)
+import Language.Haskell.TH.Syntax (Lift)
 
 import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Op (Op)
 import Coal.Kernel.Language.Prim (Prim)
 
 data Label t = Label t Name
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Lift)
 
 data Binding t = Binding (Label t) (Expr t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Lift)
 
 data Clause t = Clause (NonEmpty (Label t)) (Expr t)
-  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable)
+  deriving (Show, Eq, Ord, Read, Functor, Foldable, Traversable, Lift)
 
 {- | Core language expression grammar.
 
@@ -82,4 +84,5 @@ data Expr t
     , Functor
     , Foldable
     , Traversable
+    , Lift
     )
