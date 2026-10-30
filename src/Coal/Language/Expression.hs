@@ -16,6 +16,7 @@ module Coal.Language.Expression (
   Expression (..),
   Clause (..),
   CompiledClause (..),
+  DoStatement (..),
 ) where
 
 import Coal.Common.FreeVars
@@ -83,7 +84,7 @@ data Expression a s t
   | -- | FFI function call
     EFFICall a t (Label (Type Parameter s)) [Expression a s t] (Expression a s t)
   | -- | Do-notation block
-    EDoBlock a (NonEmpty (Pattern a s t, Expression a s t))
+    EDoBlock a (NonEmpty (DoStatement a s t))
   deriving
     ( Show
     , Eq
@@ -98,6 +99,33 @@ data Expression a s t
     )
 
 instance (Binary a, Binary s, Binary t) => Binary (Expression a s t)
+
+{- | A single statement in a @do@ block.
+
+A do-block is a non-empty sequence of statements. Each statement is either a
+monadic bind (@pat <- expr;@) or a pure @let@ binding (@pat = expr;@, or
+@f(pat, ...) = expr;@). A bare expression statement (@expr;@) is represented as
+a bind whose pattern is a wildcard, which keeps the desugaring uniform.
+-}
+data DoStatement a s t
+  = -- | @pat <- expr;@ — monadic bind
+    DoBind (Pattern a s t) (Expression a s t)
+  | -- | @pat = expr;@ / @f(pat, ...) = expr;@ — pure let binding
+    DoLet (Binding Expression a s t)
+  deriving
+    ( Show
+    , Eq
+    , Ord
+    , Read
+    , Functor
+    , Foldable
+    , Traversable
+    , Data
+    , Typeable
+    , Generic
+    )
+
+instance (Binary a, Binary s, Binary t) => Binary (DoStatement a s t)
 
 data Clause a s t = EClause
   { clauseMetadata :: a

@@ -10,7 +10,7 @@
 {- |
 Module: Coal.Compiler.Pass.PhasePreflight.DesugarDoNotation
 
-Desugar do-notation into explicit bind operations.
+Desugar do-notation into explicit bind operations and let-bindings.
 
 This pass transforms do-notation syntax into explicit monadic bind (>>=)
 operations. Do-notation is a convenient imperative-style syntax for monadic
@@ -32,6 +32,25 @@ desugars into:
 action1() >>= fn(x) =>
   action2(x) >>= fn(y) =>
     pure(x + y)
+@
+
+A @let@ statement (@x = 5;@) binds purely, so it desugars into an @ELet@ in
+the continuation rather than a bind:
+
+@
+do {
+  a <- action1();
+  b = a + 5;
+  pure(b)
+}
+@
+
+desugars into:
+
+@
+action1() >>= fn(a) =>
+  let b = a + 5 in
+    pure(b)
 @
 
 This transformation converts the syntactic sugar into the explicit monadic
@@ -166,10 +185,11 @@ instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
         foldrM go e'' es'
        where
         bind e1 e2 = applicationE (varE "bind") (e1 :| [e2])
-        go (p, e) e2 = do
+        go (DoBind p e) rest = do
           e' <- desugarDoNotation e
-          e2' <- desugarDoNotation e2
-          pure (bind e' (lambdaE (p :| []) e2'))
+          pure (bind e' (lambdaE (p :| []) rest))
+        go (DoLet b) rest =
+          pure (ELet (bindingLocation b) (b :| []) rest)
       e ->
         descendM desugarDoNotation e
 
@@ -194,10 +214,19 @@ instance (Data a, Monoid a) => DoNotationContext (Guard Expression a () ()) wher
       CGuard{guardExpression} ->
         CGuard <$> desugarDoNotation guardExpression
 
-normalize :: (Monoid a) => NonEmpty (Pattern a () (), Expression a () ()) -> (Expression a () (), [(Pattern a () (), Expression a () ())])
+normalize :: (Monoid a) => NonEmpty (DoStatement a () ()) -> (Expression a () (), [DoStatement a () ()])
 normalize es =
   case NonEmpty.last es of
-    (PAny _ (), e) ->
+    DoBind (PAny _ ()) e ->
       (e, NonEmpty.init es)
     _ ->
       (applicationE (varE "pure") (literalE LUnit :| []), NonEmpty.toList es)
+
+{- | The source location carried by a let binding.
+
+Used to give the 'ELet' generated for a @let@ statement a real source span,
+instead of the metadata-free nodes the rest of the desugaring builds.
+-}
+bindingLocation :: Binding e a s t -> a
+bindingLocation (BPattern loc _ _) = loc
+bindingLocation (BFunction loc _ _ _) = loc

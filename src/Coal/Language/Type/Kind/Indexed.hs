@@ -14,7 +14,7 @@ import Coal.Common.Label (Label (..))
 import Coal.Common.Supply (Supply (..), supplied)
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Definition
-import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
+import Coal.Language.Expression (Clause (..), CompiledClause (..), DoStatement (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module (Module (..))
@@ -29,7 +29,6 @@ import Data.List.NonEmpty (NonEmpty)
 import Data.Map.Strict (Map)
 import Data.Set (Set)
 import qualified Data.Set as Set
-import Extras (forM)
 
 class ToKindIndexed t u where
   toKindIndexed :: (MonadState s m, Supply s) => t -> m u
@@ -235,7 +234,7 @@ instance ToKindIndexed (Expression a k ()) (Expression a Kind ()) where
       EFFICall a t ll es e ->
         EFFICall a <$> toKindIndexed t <*> toKindIndexed ll <*> toKindIndexed es <*> toKindIndexed e
       EDoBlock a is ->
-        EDoBlock a <$> forM is (\(x, y) -> (,) <$> toKindIndexed x <*> toKindIndexed y)
+        EDoBlock a <$> traverse toKindIndexed is
 
 instance ToKindIndexed (Clause a k ()) (Clause a Kind ()) where
   toKindIndexed =
@@ -268,6 +267,14 @@ instance ToKindIndexed (Binding Expression a k ()) (Binding Expression a Kind ()
         BPattern a <$> toKindIndexed p <*> toKindIndexed e
       BFunction a name ps e ->
         BFunction a name <$> toKindIndexed ps <*> toKindIndexed e
+
+instance ToKindIndexed (DoStatement a k ()) (DoStatement a Kind ()) where
+  toKindIndexed =
+    \case
+      DoBind p e ->
+        DoBind <$> toKindIndexed p <*> toKindIndexed e
+      DoLet b ->
+        DoLet <$> toKindIndexed b
 
 instance ToKindIndexed (Pattern a k ()) (Pattern a Kind ()) where
   toKindIndexed =
