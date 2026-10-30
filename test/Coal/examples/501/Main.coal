@@ -4,8 +4,8 @@ module Main {
 
   import IO(return)
   import Coal.Functor(Functor)
-  import List(concat_map)
-  import Coal.Applicative(Applicative)
+  import List(concat_map, concat, is_empty)
+  import Coal.Applicative(Applicative, traverse_list)
   import Coal.Monad(Monad, and_then, and_always, and_return) 
   import Coal.Monad.Free(Free, lift_free, interpret)
 
@@ -50,22 +50,17 @@ module Main {
 
   fun check_item_availability(item : OrderItem) : Free<OrderWorkflow, List<OrderItem>> = do {
     available <- check_inventory(item.product.id, item.quantity);
-    if (! available) 
-      then pure([item])
-      else pure([]);
+    pure(if (! available) then [item] else []);
   }
 
   let my_program : Free<OrderWorkflow, Order> = do {
     order <- get_order(OrderId(5));
+    items <- traverse_list(check_item_availability, order.items);
+    unavailable = concat(items);
 
-//    let xs = concat_map(check_item_availability, order.items)
-//    in
-//    pure(());
-    
-
-//    available <- check_inventory(order.product.id, 4);
-
-    pure(order);
+    if (is_empty(unavailable)) 
+      then pure(order)
+      else pure(order);
   }
 
 //  type BasicIO<a>
