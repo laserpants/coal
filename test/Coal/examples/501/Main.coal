@@ -1,0 +1,129 @@
+module Main {
+
+  import namespace IO
+
+  import IO(return)
+  import Coal.Functor(Functor)
+  import List(concat_map)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad, and_then, and_always, and_return) 
+  import Coal.Monad.Free(Free, lift_free, interpret)
+
+  type ProductId = ProductId(int32)
+
+  type alias Product = { id : ProductId }
+
+  type OrderId = OrderId(int32)
+
+  type alias Quantity = nat
+
+  type alias OrderItem = { product : Product, quantity : Quantity }
+
+  type alias Order = { id : OrderId, items: List<OrderItem> }
+
+  type CustomerId = CustomerId(int32)
+
+  type Message = Message(string)
+
+  type OrderWorkflow<a>
+    = GetOrder(OrderId, Order -> a)
+    | CheckInventory(ProductId, Quantity, bool -> a)
+    | NotifyCustomer(CustomerId, Message, a)
+
+  instance Functor<OrderWorkflow> {
+    fun map(f) =
+      match{
+        | GetOrder(order_id, g) => 
+            GetOrder(order_id, f << g)
+        | CheckInventory(product_id, qty, g) => 
+            CheckInventory(product_id, qty, f << g)
+        | NotifyCustomer(customer_id, message, a) => 
+            NotifyCustomer(customer_id, message, f(a))
+      }
+  }
+
+  fun get_order(order_id) = lift_free(GetOrder(order_id, fn(o) => o))
+
+  fun check_inventory(product_id, qty) = lift_free(CheckInventory(product_id, qty, fn(b) => b))
+
+  //
+
+  fun check_item_availability(item : OrderItem) : Free<OrderWorkflow, List<OrderItem>> = do {
+    available <- check_inventory(item.product.id, item.quantity);
+    if (! available) 
+      then pure([item])
+      else pure([]);
+  }
+
+  let my_program : Free<OrderWorkflow, Order> = do {
+    order <- get_order(OrderId(5));
+
+//    let xs = concat_map(check_item_availability, order.items)
+//    in
+//    pure(());
+    
+
+//    available <- check_inventory(order.product.id, 4);
+
+    pure(order);
+  }
+
+//  type BasicIO<a>
+//    = WriteLn(string, a)
+//    | ReadLn(string -> a)
+//
+//  instance Functor<BasicIO> {
+//    fun map(f) = 
+//      match{
+//        | WriteLn(str, x) => WriteLn(str, f(x))
+//        | ReadLn(g) => ReadLn(f << g)
+//      }
+//  }
+//
+//  fun writeln(s) = lift_free(WriteLn(s, ()))
+//
+//  let readln = lift_free(ReadLn(fn(s) => s))
+//
+//  type alias Effect<f, e> = Free<f, e>
+//
+//  type Logging<a> = Log(string, a)
+//
+//  instance Functor<Logging> {
+//    fun map(f) = 
+//      match{
+//        | Log(str, x) => Log(str, f(x))
+//      }
+//  }
+//
+//  fun log(s) = lift_free(Log(s, ()))
+//
+//  type MyGrammar<a> 
+//    = MyGrammarBasicIO(BasicIO<a>)
+//    | MyGrammarLogging(Logging<a>)
+//
+//  let my_program : Effect<BasicIO, int32> = do {
+//    writeln("Enter your name");
+//    writeln("----");
+//    s <- readln;
+//    writeln("Hello " <> s);
+//    pure(0);
+//  }
+//
+//  fun io_lang_handler : BasicIO<IO<a>> -> IO<a>
+//    | WriteLn(str, a) => do {
+//        IO.println_string(str);
+//        a;
+//      }
+//    | ReadLn(f) => do {
+//        s <- IO.readln();
+//        f(s);
+//      }
+//
+//  fun main() =
+//    my_program |. interpret(io_lang_handler)
+
+  fun main() =
+    IO.println_string("ok")
+
+}
+
