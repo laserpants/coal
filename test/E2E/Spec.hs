@@ -2841,13 +2841,13 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
-  -- 500: a do-block let statement (`x = e;`) binds purely, desugaring to a
+  -- 502: a do-block let statement (`x = e;`) binds purely, desugaring to a
   -- `let` inside the monadic continuation. The bound names are in scope for
   -- the following statements and may refer to earlier bind/let results.
-  describe "500" $
+  describe "502" $
     expectOutput
       "42"
-      "test/Coal/examples/500"
+      "test/Coal/examples/502"
       [ "Main.coal"
       ]
 
