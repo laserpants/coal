@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE StrictData #-}
 
 {- |
@@ -25,6 +26,7 @@ module Coal.Kernel.Language.Type (Type (..)) where
 import Coal.Common.Name (Name)
 import Data.Binary (Binary)
 import GHC.Generics (Generic)
+import Language.Haskell.TH.Syntax (Lift)
 
 {- | Core language types.
 
@@ -46,6 +48,6 @@ data Type
     RExt Name Type Type
   | -- | Empty row
     RNil
-  deriving (Show, Eq, Ord, Read, Generic)
+  deriving (Show, Eq, Ord, Read, Generic, Lift)
 
 instance Binary Type

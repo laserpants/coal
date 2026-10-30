@@ -9,7 +9,7 @@ import Coal.Kernel.Language.Op (Op (..))
 import Coal.Kernel.Language.Prim (Prim (..))
 import Coal.Kernel.Language.Type (Type (..))
 import qualified Coal.Kernel.Language.Type.Constructors as T
-import Coal.Kernel.Parser.Module (module_)
+import Coal.Kernel.Parser.Module (module_, object_)
 import qualified Data.Text as Text
 import Data.Void (Void)
 import Test.Hspec (Spec, describe, it, shouldBe, shouldSatisfy)
@@ -18,6 +18,10 @@ import Text.Megaparsec (ParseErrorBundle, parse)
 -- | Helper to parse a module
 parseModule :: Text.Text -> Either (ParseErrorBundle Text.Text Void) (Module Type)
 parseModule = parse module_ ""
+
+-- | Helper to parse a single object
+parseObject :: Text.Text -> Either (ParseErrorBundle Text.Text Void) (Object Type)
+parseObject = parse object_ ""
 
 -- | Helper to check if result is Right
 isRight :: Either a b -> Bool
@@ -417,3 +421,97 @@ spec = do
                 ["Ordering.LessThan", "Tree.flatten", "Tree.from_list"]
                 [DConstant "X" (ELit (PInt32 1))]
             )
+
+  describe "object_ parser" $ do
+    it "parses an operator-named function" $
+      parseObject "Main.(+)(x : int32, y : int32) = x : int32"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.(+)"
+              [Label T.int32 "x", Label T.int32 "y"]
+              (EVar (Label T.int32 "x"))
+          )
+
+    it "parses a function name carrying a serialised type argument" $
+      parseObject "Main.f__$impl_NumericBase(TIntrinsic(IInt32))(n : int32) = n : int32"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.f__$impl_NumericBase(TIntrinsic(IInt32))"
+              [Label T.int32 "n"]
+              (EVar (Label T.int32 "n"))
+          )
+
+    it "parses an operator-named function carrying a serialised type argument" $
+      parseObject "Builtin$.(+)__$impl_NumericBase(TIntrinsic(IInt32))(lhs : int32) = lhs : int32"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Builtin$.(+)__$impl_NumericBase(TIntrinsic(IInt32))"
+              [Label T.int32 "lhs"]
+              (EVar (Label T.int32 "lhs"))
+          )
+
+    it "parses the lowercase kernel type constructor nat" $
+      parseObject "Main.f(n : nat) = n : nat"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.f"
+              [Label (TCon "nat" []) "n"]
+              (EVar (Label (TCon "nat" []) "n"))
+          )
+
+    it "parses the un-suffixed tuple type constructor" $
+      parseObject "Main.f(t : tuple(*, *)) = t : tuple(*, *)"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.f"
+              [Label (TCon "tuple" [TOpq, TOpq]) "t"]
+              (EVar (Label (TCon "tuple" [TOpq, TOpq]) "t"))
+          )
+
+    it "parses an operator-named record field and projection" $
+      parseObject "Main.f(r : { (+) : int32 | * }) = get?_(+)<int32>(r : { (+) : int32 | * })"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.f"
+              [Label (RExt "(+)" T.int32 TOpq) "r"]
+              (EGet (Label T.int32 "(+)") (EVar (Label (RExt "(+)" T.int32 TOpq) "r")))
+          )
+
+    it "parses negation in operator form" $
+      parseObject "Main.f(x : float) = [- float](x : float)"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.f"
+              [Label T.float "x"]
+              (EOp (ONegFloat (EVar (Label T.float "x"))))
+          )
+
+    it "parses negation in neg form" $
+      parseObject "Main.f(x : float) = [neg float](x : float)"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.f"
+              [Label T.float "x"]
+              (EOp (ONegFloat (EVar (Label T.float "x"))))
+          )
+
+    it "still parses binary subtraction as a binary operator" $
+      parseObject "Main.f(a : int32, b : int32) = [- int32](a : int32, b : int32)"
+        `shouldBe` Right
+          ( DFunction
+              Exported
+              "Main.f"
+              [Label T.int32 "a", Label T.int32 "b"]
+              (EOp (OSubInt32 (EVar (Label T.int32 "a")) (EVar (Label T.int32 "b"))))
+          )
+
+    it "rejects trailing input" $
+      parseObject "Main.f(x : int32) = x : int32 junk" `shouldSatisfy` isLeft

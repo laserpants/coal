@@ -13,6 +13,7 @@ Entry point: 'module_'
 -}
 module Coal.Kernel.Parser.Module (
   module_,
+  object_,
 ) where
 
 import Control.Monad (void)
@@ -29,7 +30,13 @@ import Coal.Kernel.Language.Module (Module (..))
 import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
 import Coal.Kernel.Language.Type (Type (..))
 import Coal.Kernel.Language.Type.HasType (foldType)
-import Coal.Kernel.Parser (Parser, lexeme, qualifiedConstructor, qualifiedName, spaces)
+import Coal.Kernel.Parser (
+  Parser,
+  lexeme,
+  qualifiedConstructor,
+  qualifiedObjectName,
+  spaces,
+ )
 import Coal.Kernel.Parser.Expr (expr, label)
 import Coal.Kernel.Parser.Symbol (braces, commaSep1, equals, pipe)
 import Coal.Kernel.Parser.Type (type_)
@@ -37,6 +44,13 @@ import Coal.Kernel.Parser.Type (type_)
 -- | Parse a module
 module_ :: Parser (Module Type)
 module_ = spaces *> pModule
+
+{- | Parse a single top-level object (data declaration, constant, or function)
+and require that it consumes the whole input.  Used to embed kernel objects in
+Haskell source, e.g. via the @corn@ quasi-quoter.
+-}
+object_ :: Parser (Object Type)
+object_ = spaces *> pObject <* P.eof
 
 -- | Internal module parser
 pModule :: Parser (Module Type)
@@ -59,7 +73,7 @@ pName = qualifiedConstructor
 
 -- | Parse an object name: starts with uppercase first component, last component may be any case
 pObjectName :: Parser Name
-pObjectName = qualifiedName C.upperChar <|> qualifiedName (C.char '_')
+pObjectName = qualifiedObjectName C.upperChar <|> qualifiedObjectName (C.char '_')
 
 -- | Parse an import declaration: import Name
 pImport :: Parser Name

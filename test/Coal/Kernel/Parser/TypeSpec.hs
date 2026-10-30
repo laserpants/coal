@@ -280,8 +280,14 @@ spec = do
       it "fails on row without tail '{x: int32}'" $
         parseType "{x: int32}" `shouldSatisfy` isLeft
 
-      it "fails on tuple without size 'tuple (int32, bool)'" $
-        parseType "tuple (int32, bool)" `shouldSatisfy` isLeft
+      it "parses the un-suffixed tuple type constructor 'tuple(int32, bool)'" $
+        parseType "tuple(int32, bool)" `shouldBe` Right (TCon "tuple" [T.int32, T.bool])
+
+      it "parses the kernel natural-number type constructor 'nat'" $
+        parseType "nat" `shouldBe` Right (TCon "nat" [])
+
+      it "still fails on an unknown lowercase type constructor 'tuplefoo'" $
+        parseType "tuplefoo" `shouldSatisfy` isLeft
 
       it "fails on unclosed parenthesis '(int32'" $
         parseType "(int32" `shouldSatisfy` isLeft

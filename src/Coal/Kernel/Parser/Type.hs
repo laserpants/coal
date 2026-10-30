@@ -67,6 +67,7 @@ pAtomType =
     , pTuple
     , pRecord
     , pRowType
+    , pKernelTypeCon
     , pTypeCon
     ]
 
@@ -133,12 +134,34 @@ pRowType :: Parser Type
 pRowType = pRow
 
 {- | Parse a type constructor: Name or Name(type1, type2, ...)
-Only uppercase, $-prefixed, or underscore-prefixed constructors are allowed.
-Lowercase type names are reserved for primitives and special syntax.
+
+Only uppercase, @$@-prefixed, or underscore-prefixed constructors are allowed;
+lowercase names are reserved for primitives and special syntax, which keeps
+typos such as @maybe@ for @Maybe@ from parsing.  The two lowercase kernel type
+constructors that are neither — @nat@ and @tuple@ — are handled by
+'pKernelTypeCon'.
 -}
 pTypeCon :: Parser Type
 pTypeCon = do
   name <- P.try qualifiedConstructor <|> qualifiedName (C.char '_')
+  args <- P.optional (parens (commaSep pType))
+  case args of
+    Nothing -> return $ TCon name []
+    Just ts -> return $ TCon name ts
+
+{- | Parse the lowercase kernel type constructors that are neither primitives nor
+special syntax:
+
+  * @nat@ — the un-suffixed natural-number type constructor
+  * @tuple@ — the un-suffixed tuple type constructor, which takes the same type
+    arguments as @tupleN@ but keeps the name the kernel translation emits
+
+@tupleN@ (@tuple2@, @tuple3@, ...) is handled by 'pTuple'.  The un-suffixed form
+appears in label annotations produced by the translator and must round-trip.
+-}
+pKernelTypeCon :: Parser Type
+pKernelTypeCon = do
+  name <- P.choice [reserved "nat" >> return "nat", reserved "tuple" >> return "tuple"]
   args <- P.optional (parens (commaSep pType))
   case args of
     Nothing -> return $ TCon name []

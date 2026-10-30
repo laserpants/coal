@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
@@ -18,6 +19,8 @@ All operators are represented as constructors in the 'Op' type, parameterized
 over their operand type @a@.
 -}
 module Coal.Kernel.Language.Op (Op (..)) where
+
+import Language.Haskell.TH.Syntax (Lift)
 
 {- | Primitive operators.
 
@@ -99,4 +102,5 @@ data Op a
     , Functor
     , Foldable
     , Traversable
+    , Lift
     )

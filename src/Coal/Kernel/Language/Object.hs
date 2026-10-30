@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE StrictData #-}
 
@@ -21,6 +22,7 @@ module Coal.Kernel.Language.Object (Object (..), FunctionScope (..)) where
 
 import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Expr (..), Label (..))
+import Language.Haskell.TH.Syntax (Lift)
 
 {- | Visibility scope of a top-level function.
 
@@ -32,7 +34,7 @@ internal linkage.
 data FunctionScope
   = Exported
   | Local
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Lift)
 
 data Object t
   = DFunction FunctionScope Name [Label t] (Expr t)
@@ -46,4 +48,5 @@ data Object t
     , Functor
     , Foldable
     , Traversable
+    , Lift
     )
