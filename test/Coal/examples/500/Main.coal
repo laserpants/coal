@@ -1,6 +1,7 @@
 module Main {
 
   import namespace IO
+
   import IO(return)
   import Coal.Functor(Functor)
   import Coal.Applicative(Applicative)
@@ -23,14 +24,14 @@ module Main {
 
   fun print(s) = lift_free(WriteLn(s, ()))
 
-  let readln = lift_free(ReadLn(fn(s) => s))
+  let readln = fn() => lift_free(ReadLn(fn(s) => s))
 
   fun if_(cond, t, f) = Free(If(cond, t, f))
 
   let my_program : Free<LangF, int32> = do {
     print("Enter your name");
     print("----");
-    s <- readln;
+    s <- readln();
     if_(s == "exit", pure(), print("Hello " <> s));
     pure(0);
   }
