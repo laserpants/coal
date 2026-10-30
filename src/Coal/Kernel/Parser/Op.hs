@@ -134,10 +134,20 @@ pNotOp = do
   void $ lexeme (C.char '!')
   return ONot
 
--- | Parse negation: neg <type>
+{- | Parse negation: @[neg <type>]@ or @[- <type>]@.
+
+The pretty-printer emits the operator form (@[- float]@) while hand-written
+kernel source traditionally spells it @neg@; both are accepted.  Ambiguity with
+the binary subtraction form @[- int32](a, b)@ is resolved by the caller, which
+tries the unary form first under 'P.try'.
+-}
 pNegOp :: Parser (a -> Op a)
 pNegOp = do
-  void $ lexeme (C.string "neg")
+  void $
+    P.choice
+      [ void (lexeme (C.string "neg"))
+      , void (lexeme (C.char '-'))
+      ]
   t <- word
   case t of
     "int32" -> return ONegInt32

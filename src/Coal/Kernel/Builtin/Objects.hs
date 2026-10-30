@@ -1,34 +1,28 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 {- HLINT ignore -}
 
 module Coal.Kernel.Builtin.Objects (builtinObjects, builtinInstance) where
 
 import qualified Coal.Compiler.Builtin.Traits as Trait
-import qualified Coal.Kernel.Language.Expr as Kernel
 import Coal.Kernel.Language.Module (Module (..))
-import Coal.Kernel.Language.Object (FunctionScope (..), Object (..))
+import Coal.Kernel.Language.Object (Object (..))
 import qualified Coal.Kernel.Language.Type as Kernel
 import qualified Coal.Kernel.Language.Type.Constructors as Kernel
-import Coal.Kernel.Parser.Unsafe (unsafeParseExpr)
+import Coal.Kernel.Parser.Corn (corn, cornObject)
 import Coal.Language (
   Intrinsic (..),
   Parameter (..),
-  Serializable,
-  Trait (..),
   Type (TApplication, TConstructor, TIntrinsic, TVariable),
-  instanceLabel,
+  builtinInstance,
  )
 import qualified Data.Text as Text
-import Extras (Name)
 import Text.RawString.QQ (r)
 
 builtinObjects :: Module Kernel.Type
 builtinObjects = objects
-
-builtinInstance :: (Serializable t) => Trait t -> Name -> Name
-builtinInstance trait name = instanceLabel trait ("Builtin$." <> name)
 
 objects :: Module Kernel.Type
 objects =
@@ -66,1734 +60,1179 @@ objectList =
       [ ("Free", Kernel.arrow Kernel.TOpq (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]))
       , ("Pure", Kernel.arrow Kernel.TOpq (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]))
       ]
-  , DFunction
-      Exported
-      "Builtin$.operator$__not"
-      [ Kernel.Label Kernel.bool "a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if (a : bool) then false else true
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.not"
-      [ Kernel.Label Kernel.bool "a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if (a : bool) then false else true
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.char$_ord"
-      [ Kernel.Label Kernel.char "c"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<char>
-                    ( rt_char_unbox : char/int32
-                    , c : char
+  , [corn|
+      Builtin$.operator$__not(a : bool) =
+        if (a : bool) then false else true
+    |]
+  , [corn|
+      Builtin$.not(a : bool) =
+        if (a : bool) then false else true
+    |]
+  , [corn|
+      Builtin$.char$_ord(c : char) =
+        @<char>
+          ( rt_char_unbox : char/int32
+          , c : char
+          )
+    |]
+  , [corn|
+      Builtin$.char$_chr(n : int32) =
+        @<char>
+          ( rt_char_box : int32/char
+          , n : int32
+          )
+    |]
+  , [corn|
+      Builtin$.number$_unsafe_parse_integer(input : string) =
+        @<integer>
+          ( coal_bignum_init : string/integer
+          , input : string
+          )
+    |]
+  , [corn|
+      Builtin$.operator$__reverse_composition(f : */*, g : */*, x : *) =
+        @<*>
+          ( f : */*
+          , @<*>
+              ( g : */*
+              , x : *
+              )
+          )
+    |]
+  , [corn|
+      Builtin$.operator$__forward_composition(g : */*, f : */*, x : *) =
+        @<*>
+          ( f : */*
+          , @<*>
+              ( g : */*
+              , x : *
+              )
+          )
+    |]
+  , [corn|
+      Builtin$.operator$__reverse_application(x : *, f : */*) =
+        @<*>
+          ( f : */*
+          , x : *
+          )
+    |]
+  , [corn|
+      Builtin$.operator$__forward_application(f : */*, x : *) =
+        @<*>
+          ( f : */*
+          , x : *
+          )
+    |]
+  , [corn|
+      Builtin$.always(a : *, _ : *) =
+        a : *
+    |]
+  , [corn|
+      Builtin$.operator$__list_concatenation(xs : list(*), ys : list(*)) =
+        case<list(*)>(xs : list(*)) {
+          | ( $Cons : */list(*)/list(*)
+            , z : *
+            , zs : list(*)
+            ) =>
+              @<list(*)>
+                ( $Cons : */list(*)/list(*)
+                , z : *
+                , @<list(*)>
+                    ( `Builtin$.operator$__list_concatenation` : list(*)/list(*)/list(*)
+                    , zs : list(*)
+                    , ys : list(*)
                     )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.char$_chr"
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<char>
-                    ( rt_char_box : int32/char
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.number$_unsafe_parse_integer"
-      [ Kernel.Label Kernel.string "input"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_bignum_init : string/integer
-                    , input : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.operator$__reverse_composition"
-      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "g"
-      , Kernel.Label Kernel.TOpq "x"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( f : */*
-                    , @<*>
-                        ( g : */*
-                        , x : *
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.operator$__forward_composition"
-      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "g"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
-      , Kernel.Label Kernel.TOpq "x"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( f : */*
-                    , @<*>
-                        ( g : */*
-                        , x : *
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.operator$__reverse_application"
-      [ Kernel.Label Kernel.TOpq "x"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( f : */*
-                    , x : *
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.operator$__forward_application"
-      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
-      , Kernel.Label Kernel.TOpq "x"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( f : */*
-                    , x : *
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.always"
-      [ Kernel.Label Kernel.TOpq "a"
-      , Kernel.Label Kernel.TOpq "_"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  a : *
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.operator$__list_concatenation"
-      [ Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "xs"
-      , Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "ys"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<list(*)>(xs : list(*)) {
-                    | ( $Cons : */list(*)/list(*)
-                      , z : *
-                      , zs : list(*)
-                      ) =>
-                        @<list(*)>
-                          ( $Cons : */list(*)/list(*)
-                          , z : *
-                          , @<list(*)>
-                              ( `Builtin$.operator$__list_concatenation` : list(*)/list(*)/list(*)
-                              , zs : list(*)
-                              , ys : list(*)
-                              )
-                          )
-                    | ( $Nil : list(*)
-                      ) =>
-                        ys : list(*)
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_int32"
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_int32 : int32/*
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_int64"
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_int64 : int64/*
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_integer"
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_bignum : integer/*
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_string"
-      [ Kernel.Label Kernel.string "s"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_string : string/*
-                    , s : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_bool"
-      [ Kernel.Label Kernel.bool "b"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_bool : bool/*
-                    , b : bool
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_char"
-      [ Kernel.Label Kernel.char "c"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_char : char/*
-                    , c : char
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_float"
-      [ Kernel.Label Kernel.float "f"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_float : float/*
-                    , f : float
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_print_double"
-      [ Kernel.Label Kernel.double "d"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_print_double : double/*
-                    , d : double
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_int32"
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_println_int32 : int32/*
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_int64"
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_println_int64 : int64/*
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_integer"
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_println_bignum : integer/*
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_string"
-      [ Kernel.Label Kernel.string "s"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_println_string : string/*
-                    , s : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_bool"
-      [ Kernel.Label Kernel.bool "b"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_println_bool : bool/*
-                    , b : bool
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_char"
-      [ Kernel.Label Kernel.char "c"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( coal_println_char : char/*
-                    , c : char
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_float"
-      [ Kernel.Label Kernel.float "f"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( rt_println_float : float/*
-                    , f : float
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_println_double"
-      [ Kernel.Label Kernel.double "d"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>
-                    ( rt_println_double : double/*
-                    , d : double
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.operator$__string_concatenation"
-      [ Kernel.Label Kernel.string "s"
-      , Kernel.Label Kernel.string "t"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_string_concat : string/string/string
-                    , s : string
-                    , t : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_int32_to_string"
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_int32_to_string : int32/string
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_int64_to_string"
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_int64_to_string : int64/string
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_float_to_string"
-      [ Kernel.Label Kernel.float "f"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( rt_float_to_string : float/string
-                    , f : float
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_double_to_string"
-      [ Kernel.Label Kernel.double "d"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( rt_double_to_string : double/string
-                    , d : double
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_char_to_string"
-      [ Kernel.Label Kernel.char "c"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_char_to_string : char/string
-                    , c : char
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_bool_to_string"
-      [ Kernel.Label Kernel.bool "b"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_bool_to_string : bool/string
-                    , b : bool
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_integer_to_string"
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_bignum_to_string : integer/string
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.nat$_unpack"
-      [ Kernel.Label (Kernel.TCon "nat" []) "nat"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<int64>(nat: $Nat) {
-                    | ( $Succ : int64/$Nat
-                      , succ : int64
-                      ) =>
-                        [+ int64](succ : int64, %1)
-                    | ( $Zero : $Nat
-                      ) =>
-                        %0
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.nat$_pack"
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([<= int64](n : int64, %0))
-                    then
-                      $Zero : $Nat
-                    else
-                      @<$Nat>
-                        ( $Succ : int64/$Nat
-                        , [- int64](n : int64, %1)
-                        )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.from_int32"
-      [ Kernel.Label (Kernel.TCon "NumericBase" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<int32/*>($a : NumericBase(*)) {
-                    | ( $Record : { from_int32 : int32/* | * }/NumericBase(*)
-                      , $r : { from_int32 : int32/* | * }
-                      ) =>
+                )
+          | ( $Nil : list(*)
+            ) =>
+              ys : list(*)
+        }
+    |]
+  , [corn|
+      Builtin$.io$_print_int32(n : int32) =
+        @<*>
+          ( coal_print_int32 : int32/*
+          , n : int32
+          )
+    |]
+  , [corn|
+      Builtin$.io$_print_int64(n : int64) =
+        @<*>
+          ( coal_print_int64 : int64/*
+          , n : int64
+          )
+    |]
+  , [corn|
+      Builtin$.io$_print_integer(n : integer) =
+        @<*>
+          ( coal_print_bignum : integer/*
+          , n : integer
+          )
+    |]
+  , [corn|
+      Builtin$.io$_print_string(s : string) =
+        @<*>
+          ( coal_print_string : string/*
+          , s : string
+          )
+    |]
+  , [corn|
+      Builtin$.io$_print_bool(b : bool) =
+        @<*>
+          ( coal_print_bool : bool/*
+          , b : bool
+          )
+    |]
+  , [corn|
+      Builtin$.io$_print_char(c : char) =
+        @<*>
+          ( coal_print_char : char/*
+          , c : char
+          )
+    |]
+  , [corn|
+      Builtin$.io$_print_float(f : float) =
+        @<*>
+          ( coal_print_float : float/*
+          , f : float
+          )
+    |]
+  , [corn|
+      Builtin$.io$_print_double(d : double) =
+        @<*>
+          ( coal_print_double : double/*
+          , d : double
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_int32(n : int32) =
+        @<*>
+          ( coal_println_int32 : int32/*
+          , n : int32
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_int64(n : int64) =
+        @<*>
+          ( coal_println_int64 : int64/*
+          , n : int64
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_integer(n : integer) =
+        @<*>
+          ( coal_println_bignum : integer/*
+          , n : integer
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_string(s : string) =
+        @<*>
+          ( coal_println_string : string/*
+          , s : string
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_bool(b : bool) =
+        @<*>
+          ( coal_println_bool : bool/*
+          , b : bool
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_char(c : char) =
+        @<*>
+          ( coal_println_char : char/*
+          , c : char
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_float(f : float) =
+        @<*>
+          ( rt_println_float : float/*
+          , f : float
+          )
+    |]
+  , [corn|
+      Builtin$.io$_println_double(d : double) =
+        @<*>
+          ( rt_println_double : double/*
+          , d : double
+          )
+    |]
+  , [corn|
+      Builtin$.operator$__string_concatenation(s : string, t : string) =
+        @<string>
+          ( coal_string_concat : string/string/string
+          , s : string
+          , t : string
+          )
+    |]
+  , [corn|
+      Builtin$.string$_int32_to_string(n : int32) =
+        @<string>
+          ( coal_int32_to_string : int32/string
+          , n : int32
+          )
+    |]
+  , [corn|
+      Builtin$.string$_int64_to_string(n : int64) =
+        @<string>
+          ( coal_int64_to_string : int64/string
+          , n : int64
+          )
+    |]
+  , [corn|
+      Builtin$.string$_float_to_string(f : float) =
+        @<string>
+          ( rt_float_to_string : float/string
+          , f : float
+          )
+    |]
+  , [corn|
+      Builtin$.string$_double_to_string(d : double) =
+        @<string>
+          ( rt_double_to_string : double/string
+          , d : double
+          )
+    |]
+  , [corn|
+      Builtin$.string$_char_to_string(c : char) =
+        @<string>
+          ( coal_char_to_string : char/string
+          , c : char
+          )
+    |]
+  , [corn|
+      Builtin$.string$_bool_to_string(b : bool) =
+        @<string>
+          ( coal_bool_to_string : bool/string
+          , b : bool
+          )
+    |]
+  , [corn|
+      Builtin$.string$_integer_to_string(n : integer) =
+        @<string>
+          ( coal_bignum_to_string : integer/string
+          , n : integer
+          )
+    |]
+  , [corn|
+      Builtin$.nat$_unpack(nat : nat) =
+        case<int64>(nat: $Nat) {
+          | ( $Succ : int64/$Nat
+            , succ : int64
+            ) =>
+              [+ int64](succ : int64, %1)
+          | ( $Zero : $Nat
+            ) =>
+              %0
+        }
+    |]
+  , [corn|
+      Builtin$.nat$_pack(n : int64) =
+        if ([<= int64](n : int64, %0))
+          then
+            $Zero : $Nat
+          else
+            @<$Nat>
+              ( $Succ : int64/$Nat
+              , [- int64](n : int64, %1)
+              )
+    |]
+  , [corn|
+      Builtin$.from_int32($a : NumericBase(*)) =
+        case<int32/*>($a : NumericBase(*)) {
+          | ( $Record : { from_int32 : int32/* | * }/NumericBase(*)
+            , $r : { from_int32 : int32/* | * }
+            ) =>
+              get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.from_int64($a : NumericBase(*)) =
+        case<int64/*>($a : NumericBase(*)) {
+          | ( $Record : { from_int64 : int64/* | * }/NumericBase(*)
+            , $r : { from_int64 : int64/* | * }
+            ) =>
+              get?_from_int64<int64/*>($r : { from_int64 : int64/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.from_integer($a : NumericBase(*)) =
+        case<integer/*>($a : NumericBase(*)) {
+          | ( $Record : { from_integer : integer/* | * }/NumericBase(*)
+            , $r : { from_integer : integer/* | * }
+            ) =>
+              get?_from_integer<integer/*>($r : { from_integer : integer/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.from_negative_int32($a : Numeric(*)) =
+        case<int32/*>($a : Numeric(*)) {
+          | ( $Record : { from_negative_int32 : int32/* | * }/Numeric(*)
+            , $r : { from_negative_int32 : int32/* | * }
+            ) =>
+              get?_from_negative_int32<int32/*>($r : { from_negative_int32 : int32/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.from_negative_int64($a : Numeric(*)) =
+        case<int64/*>($a : Numeric(*)) {
+          | ( $Record : { from_negative_int64 : int64/* | * }/Numeric(*)
+            , $r : { from_negative_int64 : int64/* | * }
+            ) =>
+              get?_from_negative_int64<int64/*>($r : { from_negative_int64 : int64/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.from_negative_integer($a : Numeric(*)) =
+        case<integer/*>($a : Numeric(*)) {
+          | ( $Record : { from_negative_integer : integer/* | * }/Numeric(*)
+            , $r : { from_negative_integer : integer/* | * }
+            ) =>
+              get?_from_negative_integer<integer/*>($r : { from_negative_integer : integer/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.negate($a : Numeric(*)) =
+        case<*/*>($a : Numeric(*)) {
+          | ( $Record : { negate : */* | * }/Numeric(*)
+            , $r : { negate : */* | * }
+            ) =>
+              get?_negate<*/*>($r : { negate : */* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.(+)($a : NumericBase(*)) =
+        case<*/*/*>($a : NumericBase(*)) {
+          | ( $Record : { `(+)` : */*/* | * }/NumericBase(*)
+            , $r : { `(+)` : */*/* | * }
+            ) =>
+              get?_`(+)`<*/*/*>($r : { `(+)` : */*/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.(-)($a : Numeric(*)) =
+        case<*/*/*>($a : Numeric(*)) {
+          | ( $Record : { `(-)` : */*/* | * }/Numeric(*)
+            , $r : { `(-)` : */*/* | * }
+            ) =>
+              get?_`(-)`<*/*/*>($r : { `(-)` : */*/* | * })
+        }
+    |]
+  , [corn|
+      Builtin$.(*)($a : NumericBase(*)) =
+        case<*/*/*>($a : NumericBase(*)) {
+          | ( $Record : { `(*)` : */*/* | * }/NumericBase(*)
+            , $r : { `(*)` : */*/* | * }
+            ) =>
+              get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
+        }
+    |]
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_int32")
+             <> [r|
+          (n : int32) =
+            n : int32|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_int64")
+             <> [r|
+          (n : int64) =
+            n : int64|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_integer")
+             <> [r|
+          (n : integer) =
+            @<int32>
+              ( coal_bignum_to_int32 : integer/int32
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "(+)")
+             <> [r|
+          (lhs : int32, rhs : int32) =
+            [+ int32](lhs : int32, rhs : int32)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")
+             <> [r|
+          (lhs : int32, rhs : int32) =
+            [- int32](lhs : int32, rhs : int32)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "(*)")
+             <> [r|
+          (lhs : int32, rhs : int32) =
+            [* int32](lhs : int32, rhs : int32)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "negate")
+             <> [r|
+          (n : int32) =
+            [- int32](0, n : int32)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_int32")
+             <> [r|
+          (n : int32) =
+            n : int32|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_int64")
+             <> [r|
+          (n : int64) =
+            n : int64|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_integer")
+             <> [r|
+          (n : integer) =
+            @<int64>
+              ( coal_bignum_to_int64 : integer/int64
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "(+)")
+             <> [r|
+          (lhs : int64, rhs : int64) =
+            [+ int64](lhs : int64, rhs : int64)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(-)")
+             <> [r|
+          (lhs : int64, rhs : int64) =
+            [- int64](lhs : int64, rhs : int64)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "(*)")
+             <> [r|
+          (lhs : int64, rhs : int64) =
+            [* int64](lhs : int64, rhs : int64)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "negate")
+             <> [r|
+          (n : int64) =
+            [- int64](0, n : int64)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_int32")
+             <> [r|
+          (n : int32) =
+            @<float>
+              ( coal_int32_to_float : int32/float
+              , n : int32
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_int64")
+             <> [r|
+          (n : int64) =
+            @<float>
+              ( coal_int64_to_float : int64/float
+              , n : int64
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_integer")
+             <> [r|
+          (n : integer) =
+            @<float>
+              ( coal_bignum_to_float : integer/float
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "(+)")
+             <> [r|
+          (lhs : float, rhs : float) =
+            [+ float](lhs : float, rhs : float)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(-)")
+             <> [r|
+          (lhs : float, rhs : float) =
+            [- float](lhs : float, rhs : float)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "(*)")
+             <> [r|
+          (lhs : float, rhs : float) =
+            [* float](lhs : float, rhs : float)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "negate")
+             <> [r|
+          (f : float) =
+            [neg float](f : float)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_int32")
+             <> [r|
+          (n : int32) =
+            @<double>
+              ( coal_int32_to_double : int32/double
+              , n : int32
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_int64")
+             <> [r|
+          (n : int64) =
+            @<double>
+              ( coal_int64_to_double : int64/double
+              , n : int64
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_integer")
+             <> [r|
+          (n : integer) =
+            @<double>
+              ( coal_bignum_to_double : integer/double
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "(+)")
+             <> [r|
+          (lhs : double, rhs : double) =
+            [+ double](lhs : double, rhs : double)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(-)")
+             <> [r|
+          (lhs : double, rhs : double) =
+            [- double](lhs : double, rhs : double)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "(*)")
+             <> [r|
+          (lhs : double, rhs : double) =
+            [* double](lhs : double, rhs : double)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "negate")
+             <> [r|
+          (d : double) =
+            [neg double](d : double)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_int32")
+             <> [r|
+          (m : int32) =
+            @<$Nat>
+              ( `Builtin$.nat$_pack` : int64/$Nat
+              , @<int64>
+                  ( coal_int32_to_int64 : int32/int64
+                  , m : int32
+                  )
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_int64")
+             <> [r|
+          (m : int64) =
+            @<$Nat>
+              ( `Builtin$.nat$_pack` : int64/$Nat
+              , m : int64
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_integer")
+             <> [r|
+          (n : integer) =
+            @<$Nat>
+              ( `Builtin$.nat$_pack` : int64/$Nat
+              , @<int64>
+                  ( coal_bignum_to_int64 : integer/int64
+                  , n : integer
+                  )
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic INat)) "(+)")
+             <> [r|
+          (lhs : nat, rhs : nat) =
+            @<$Nat>
+              ( `Builtin$.nat$_pack` : int64/$Nat
+              , [+ int64]
+                  ( @<int64>
+                      ( `Builtin$.nat$_unpack` : $Nat/int64
+                      , lhs : $Nat
+                      )
+                  , @<int64>
+                      ( `Builtin$.nat$_unpack` : $Nat/int64
+                      , rhs : $Nat
+                      )
+                  )
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic INat)) "(*)")
+             <> [r|
+          (lhs : nat, rhs : nat) =
+            @<$Nat>
+              ( `Builtin$.nat$_pack` : int64/$Nat
+              , [* int64]
+                  ( @<int64>
+                      ( `Builtin$.nat$_unpack` : $Nat/int64
+                      , lhs : $Nat
+                      )
+                  , @<int64>
+                      ( `Builtin$.nat$_unpack` : $Nat/int64
+                      , rhs : $Nat
+                      )
+                  )
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_int32")
+             <> [r|
+          (n : int32) =
+            @<integer>
+              ( coal_int32_to_bignum : int32/integer
+              , n : int32
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_int64")
+             <> [r|
+          (n : int64) =
+            @<integer>
+              ( coal_int64_to_bignum : int64/integer
+              , n : int64
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_integer")
+             <> [r|
+          (n : integer) =
+            n : integer|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "(+)")
+             <> [r|
+          (p : integer, q : integer) =
+            @<integer>
+              ( coal_bignum_add : integer/integer/integer
+              , p : integer
+              , q : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(-)")
+             <> [r|
+          (p : integer, q : integer) =
+            @<integer>
+              ( coal_bignum_sub : integer/integer/integer
+              , p : integer
+              , q : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "(*)")
+             <> [r|
+          (p : integer, q : integer) =
+            @<integer>
+              ( coal_bignum_mul : integer/integer/integer
+              , p : integer
+              , q : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "negate")
+             <> [r|
+          (p : integer) =
+            @<integer>
+              ( coal_bignum_neg : integer/integer
+              , p : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_int32")
+             <> [r|
+          (n : int32) =
+            n : int32|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_int64")
+             <> [r|
+          (n : int64) =
+            n : int64|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_integer")
+             <> [r|
+          (n : integer) =
+            @<int32>
+              ( coal_bignum_to_int32 : integer/int32
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_int32")
+             <> [r|
+          (n : int32) =
+            n : int32|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_int64")
+             <> [r|
+          (n : int64) =
+            n : int64|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_integer")
+             <> [r|
+          (n : integer) =
+            @<int64>
+              ( coal_bignum_to_int64 : integer/int64
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_int32")
+             <> [r|
+          (n : int32) =
+            @<float>
+              ( coal_int32_to_float : int32/float
+              , n : int32
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_int64")
+             <> [r|
+          (n : int64) =
+            @<float>
+              ( coal_int64_to_float : int64/float
+              , n : int64
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_integer")
+             <> [r|
+          (n : integer) =
+            @<float>
+              ( coal_bignum_to_float : integer/float
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_int32")
+             <> [r|
+          (n : int32) =
+            @<double>
+              ( coal_int32_to_double : int32/double
+              , n : int32
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_int64")
+             <> [r|
+          (n : int64) =
+            @<double>
+              ( coal_int64_to_double : int64/double
+              , n : int64
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_integer")
+             <> [r|
+          (n : integer) =
+            @<double>
+              ( coal_bignum_to_double : integer/double
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_int32")
+             <> [r|
+          (n : int32) =
+            @<integer>
+              ( coal_int32_to_bignum : int32/integer
+              , n : int32
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_int64")
+             <> [r|
+          (n : int64) =
+            @<integer>
+              ( coal_int64_to_bignum : int64/integer
+              , n : int64
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_integer")
+             <> [r|
+          (n : integer) =
+            n : integer|]
+         )
+     )
+  , [corn|
+      Builtin$.compare($a : Ordered(*)) =
+        case<*/*/Ordering>($a : Ordered(*)) {
+          | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
+            , $r : { compare : */*/Ordering | * }
+            ) =>
+              get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+        }
+    |]
+  , [corn|
+      Builtin$.(^)($a : NumericBase(*), m : *, n : nat) =
+          case<*>($a : NumericBase(*)) {
+            | ( $Record : { `(*)` : */*/* | from_int32 : int32/* | * }/NumericBase(*)
+              , $r : { `(*)` : */*/* | from_int32 : int32/* | * }
+              ) =>
+                let
+                  $f : */*/* =
+                    get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
+                  in
+                    let
+                      $g : int32/* =
                         get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.from_int64"
-      [ Kernel.Label (Kernel.TCon "NumericBase" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<int64/*>($a : NumericBase(*)) {
-                    | ( $Record : { from_int64 : int64/* | * }/NumericBase(*)
-                      , $r : { from_int64 : int64/* | * }
-                      ) =>
-                        get?_from_int64<int64/*>($r : { from_int64 : int64/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.from_integer"
-      [ Kernel.Label (Kernel.TCon "NumericBase" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<integer/*>($a : NumericBase(*)) {
-                    | ( $Record : { from_integer : integer/* | * }/NumericBase(*)
-                      , $r : { from_integer : integer/* | * }
-                      ) =>
-                        get?_from_integer<integer/*>($r : { from_integer : integer/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.from_negative_int32"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<int32/*>($a : Numeric(*)) {
-                    | ( $Record : { from_negative_int32 : int32/* | * }/Numeric(*)
-                      , $r : { from_negative_int32 : int32/* | * }
-                      ) =>
-                        get?_from_negative_int32<int32/*>($r : { from_negative_int32 : int32/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.from_negative_int64"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<int64/*>($a : Numeric(*)) {
-                    | ( $Record : { from_negative_int64 : int64/* | * }/Numeric(*)
-                      , $r : { from_negative_int64 : int64/* | * }
-                      ) =>
-                        get?_from_negative_int64<int64/*>($r : { from_negative_int64 : int64/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.from_negative_integer"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<integer/*>($a : Numeric(*)) {
-                    | ( $Record : { from_negative_integer : integer/* | * }/Numeric(*)
-                      , $r : { from_negative_integer : integer/* | * }
-                      ) =>
-                        get?_from_negative_integer<integer/*>($r : { from_negative_integer : integer/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.negate"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*/*>($a : Numeric(*)) {
-                    | ( $Record : { negate : */* | * }/Numeric(*)
-                      , $r : { negate : */* | * }
-                      ) =>
-                        get?_negate<*/*>($r : { negate : */* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(+)"
-      [ Kernel.Label (Kernel.TCon "NumericBase" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*/*/*>($a : NumericBase(*)) {
-                    | ( $Record : { `(+)` : */*/* | * }/NumericBase(*)
-                      , $r : { `(+)` : */*/* | * }
-                      ) =>
-                        get?_`(+)`<*/*/*>($r : { `(+)` : */*/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(-)"
-      [ Kernel.Label (Kernel.TCon "Numeric" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*/*/*>($a : Numeric(*)) {
-                    | ( $Record : { `(-)` : */*/* | * }/Numeric(*)
-                      , $r : { `(-)` : */*/* | * }
-                      ) =>
-                        get?_`(-)`<*/*/*>($r : { `(-)` : */*/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(*)"
-      [ Kernel.Label (Kernel.TCon "NumericBase" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*/*/*>($a : NumericBase(*)) {
-                    | ( $Record : { `(*)` : */*/* | * }/NumericBase(*)
-                      , $r : { `(*)` : */*/* | * }
-                      ) =>
-                        get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int32
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int64
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "from_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<int32>
-                    ( coal_bignum_to_int32 : integer/int32
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "(+)")
-      [ Kernel.Label Kernel.int32 "lhs"
-      , Kernel.Label Kernel.int32 "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [+ int32](lhs : int32, rhs : int32)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "(-)")
-      [ Kernel.Label Kernel.int32 "lhs"
-      , Kernel.Label Kernel.int32 "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [- int32](lhs : int32, rhs : int32)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt32)) "(*)")
-      [ Kernel.Label Kernel.int32 "lhs"
-      , Kernel.Label Kernel.int32 "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [* int32](lhs : int32, rhs : int32)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "negate")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [- int32](0, n : int32)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int32
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int64
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "from_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<int64>
-                    ( coal_bignum_to_int64 : integer/int64
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "(+)")
-      [ Kernel.Label Kernel.int64 "lhs"
-      , Kernel.Label Kernel.int64 "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [+ int64](lhs : int64, rhs : int64)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "(-)")
-      [ Kernel.Label Kernel.int64 "lhs"
-      , Kernel.Label Kernel.int64 "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [- int64](lhs : int64, rhs : int64)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IInt64)) "(*)")
-      [ Kernel.Label Kernel.int64 "lhs"
-      , Kernel.Label Kernel.int64 "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [* int64](lhs : int64, rhs : int64)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "negate")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [- int64](0, n : int64)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<float>
-                    ( coal_int32_to_float : int32/float
-                    , n : int32 
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<float>
-                    ( coal_int64_to_float : int64/float
-                    , n : int64 
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "from_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<float>
-                    ( coal_bignum_to_float : integer/float
-                    , n : integer 
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "(+)")
-      [ Kernel.Label Kernel.float "lhs"
-      , Kernel.Label Kernel.float "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [+ float](lhs : float, rhs : float)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "(-)")
-      [ Kernel.Label Kernel.float "lhs"
-      , Kernel.Label Kernel.float "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [- float](lhs : float, rhs : float)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IFloat)) "(*)")
-      [ Kernel.Label Kernel.float "lhs"
-      , Kernel.Label Kernel.float "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [* float](lhs : float, rhs : float)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "negate")
-      [ Kernel.Label Kernel.float "f"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [neg float](f : float)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<double>
-                    ( coal_int32_to_double : int32/double
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<double>
-                    ( coal_int64_to_double : int64/double
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "from_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<double>
-                    ( coal_bignum_to_double : integer/double
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "(+)")
-      [ Kernel.Label Kernel.double "lhs"
-      , Kernel.Label Kernel.double "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [+ double](lhs : double, rhs : double)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "(-)")
-      [ Kernel.Label Kernel.double "lhs"
-      , Kernel.Label Kernel.double "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [- double](lhs : double, rhs : double)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IDouble)) "(*)")
-      [ Kernel.Label Kernel.double "lhs"
-      , Kernel.Label Kernel.double "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [* double](lhs : double, rhs : double)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "negate")
-      [ Kernel.Label Kernel.double "d"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [neg double](d : double)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_int32")
-      [ Kernel.Label Kernel.int32 "m"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<$Nat>
-                    ( `Builtin$.nat$_pack` : int64/$Nat
-                    , @<int64>
-                        ( coal_int32_to_int64 : int32/int64
-                        , m : int32
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_int64")
-      [ Kernel.Label Kernel.int64 "m"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<$Nat>
-                    ( `Builtin$.nat$_pack` : int64/$Nat
-                    , m : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic INat)) "from_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<$Nat>
-                    ( `Builtin$.nat$_pack` : int64/$Nat
-                    , @<int64>
-                        ( coal_bignum_to_int64 : integer/int64
-                        , n : integer
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic INat)) "(+)")
-      [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
-      , Kernel.Label (Kernel.TCon "nat" []) "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<$Nat>
-                    ( `Builtin$.nat$_pack` : int64/$Nat
-                    , [+ int64]
-                        ( @<int64>
-                            ( `Builtin$.nat$_unpack` : $Nat/int64
-                            , lhs : $Nat
+                    in
+                      let
+                        one : * =
+                          @<*>
+                            ( $g : int32/*
+                            , 1
                             )
-                        , @<int64>
-                            ( `Builtin$.nat$_unpack` : $Nat/int64
-                            , rhs : $Nat
-                            )
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic INat)) "(*)")
-      [ Kernel.Label (Kernel.TCon "nat" []) "lhs"
-      , Kernel.Label (Kernel.TCon "nat" []) "rhs"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<$Nat>
-                    ( `Builtin$.nat$_pack` : int64/$Nat
-                    , [* int64]
-                        ( @<int64>
-                            ( `Builtin$.nat$_unpack` : $Nat/int64
-                            , lhs : $Nat
-                            )
-                        , @<int64>
-                            ( `Builtin$.nat$_unpack` : $Nat/int64
-                            , rhs : $Nat
-                            )
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_int32_to_bignum : int32/integer
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_int64_to_bignum : int64/integer
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "from_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : integer
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "(+)")
-      [ Kernel.Label Kernel.bignum "p"
-      , Kernel.Label Kernel.bignum "q"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_bignum_add : integer/integer/integer
-                    , p : integer
-                    , q : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "(-)")
-      [ Kernel.Label Kernel.bignum "p"
-      , Kernel.Label Kernel.bignum "q"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_bignum_sub : integer/integer/integer
-                    , p : integer
-                    , q : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numericBase (TIntrinsic IBignum)) "(*)")
-      [ Kernel.Label Kernel.bignum "p"
-      , Kernel.Label Kernel.bignum "q"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_bignum_mul : integer/integer/integer
-                    , p : integer
-                    , q : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "negate")
-      [ Kernel.Label Kernel.bignum "p"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_bignum_neg : integer/integer
-                    , p : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int32
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int64
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt32)) "from_negative_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<int32>
-                    ( coal_bignum_to_int32 : integer/int32
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int32
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : int64
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IInt64)) "from_negative_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<int64>
-                    ( coal_bignum_to_int64 : integer/int64
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<float>
-                    ( coal_int32_to_float : int32/float
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<float>
-                    ( coal_int64_to_float : int64/float
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IFloat)) "from_negative_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<float>
-                    ( coal_bignum_to_float : integer/float
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<double>
-                    ( coal_int32_to_double : int32/double
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<double>
-                    ( coal_int64_to_double : int64/double
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IDouble)) "from_negative_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<double>
-                    ( coal_bignum_to_double : integer/double
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_int32")
-      [ Kernel.Label Kernel.int32 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_int32_to_bignum : int32/integer
-                    , n : int32
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_int64")
-      [ Kernel.Label Kernel.int64 "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<integer>
-                    ( coal_int64_to_bignum : int64/integer
-                    , n : int64
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.numeric (TIntrinsic IBignum)) "from_negative_integer")
-      [ Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  n : integer
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.compare"
-      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*/*/Ordering>($a : Ordered(*)) {
-                    | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
-                      , $r : { compare : */*/Ordering | * }
-                      ) =>
-                        get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(^)"
-      [ Kernel.Label (Kernel.TCon "NumericBase" [Kernel.TOpq]) "$a"
-      , Kernel.Label Kernel.TOpq "m"
-      , Kernel.Label (Kernel.TCon "nat" []) "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*>($a : NumericBase(*)) {
-                    | ( $Record : { `(*)` : */*/* | from_int32 : int32/* | * }/NumericBase(*)
-                      , $r : { `(*)` : */*/* | from_int32 : int32/* | * }
-                      ) =>
-                        let
-                          $f : */*/* =
-                            get?_`(*)`<*/*/*>($r : { `(*)` : */*/* | * })
-                          in
-                            let
-                              $g : int32/* =
-                                get?_from_int32<int32/*>($r : { from_int32 : int32/* | * })
+                        in
+                          let
+                            z : int64 =
+                              @<int64>
+                                ( `Builtin$.nat$_unpack` : $Nat/int64
+                                , n : $Nat
+                                )
                             in
-                              let 
-                                one : * =
-                                  @<*>
-                                    ( $g : int32/*
-                                    , 1 
-                                    )
+                              let
+                                h : int64/*/* =
+                                  fn(q : int64, r : *) =>
+                                    if ([== int64](q : int64, %0))
+                                      then
+                                        r : *
+                                      else
+                                        @<*>
+                                          ( h : int64/*/*
+                                          , [- int64](q : int64, %1)
+                                          , @<*>
+                                              ( $f : */*/*
+                                              , m : *
+                                              , r : *
+                                              )
+                                          )
                                 in
-                                  let
-                                    z : int64 =
-                                      @<int64>
-                                        ( `Builtin$.nat$_unpack` : $Nat/int64
-                                        , n : $Nat 
-                                        )
-                                    in
-                                      let
-                                        h : int64/*/* =
-                                          fn(q : int64, r : *) =>
-                                            if ([== int64](q : int64, %0))
-                                              then
-                                                r : *
-                                              else
-                                                @<*>
-                                                  ( h : int64/*/*
-                                                  , [- int64](q : int64, %1)
-                                                  , @<*>
-                                                      ( $f : */*/*
-                                                      , m : *
-                                                      , r : *
-                                                      )
-                                                  )
-                                        in
-                                          @<*>
-                                            ( h : int64/*/*
-                                            , z : int64
-                                            , one : *
-                                            )
-                }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(<)"
-      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
-      , Kernel.Label Kernel.TOpq "x"
-      , Kernel.Label Kernel.TOpq "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<bool>($a : Ordered(*)) {
-                    | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
-                      , $r : { compare : */*/Ordering | * }
-                      ) =>
-                        let
-                          $f : */*/Ordering =
-                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
-                          in
-                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
-                              | ( EqualTo : Ordering ) => false
-                              | ( GreaterThan : Ordering ) => false
-                              | ( LessThan : Ordering ) => true
-                            }
+                                  @<*>
+                                    ( h : int64/*/*
+                                    , z : int64
+                                    , one : *
+                                    )
+        }
+    |]
+  , [corn|
+      Builtin$.(<)($a : Ordered(*), x : *, y : *) =
+        case<bool>($a : Ordered(*)) {
+          | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
+            , $r : { compare : */*/Ordering | * }
+            ) =>
+              let
+                $f : */*/Ordering =
+                  get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                in
+                  case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                    | ( EqualTo : Ordering ) => false
+                    | ( GreaterThan : Ordering ) => false
+                    | ( LessThan : Ordering ) => true
                   }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(<=)"
-      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
-      , Kernel.Label Kernel.TOpq "x"
-      , Kernel.Label Kernel.TOpq "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<bool>($a : Ordered(*)) {
-                    | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
-                      , $r : { compare : */*/Ordering | * }
-                      ) =>
-                        let
-                          $f : */*/Ordering =
-                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
-                          in
-                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
-                              | ( EqualTo : Ordering ) => true
-                              | ( GreaterThan : Ordering ) => false
-                              | ( LessThan : Ordering ) => true
-                            }
+        }
+    |]
+  , [corn|
+      Builtin$.(<=)($a : Ordered(*), x : *, y : *) =
+        case<bool>($a : Ordered(*)) {
+          | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
+            , $r : { compare : */*/Ordering | * }
+            ) =>
+              let
+                $f : */*/Ordering =
+                  get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                in
+                  case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                    | ( EqualTo : Ordering ) => true
+                    | ( GreaterThan : Ordering ) => false
+                    | ( LessThan : Ordering ) => true
                   }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(>)"
-      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
-      , Kernel.Label Kernel.TOpq "x"
-      , Kernel.Label Kernel.TOpq "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<bool>($a : Ordered(*)) {
-                    | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
-                      , $r : { compare : */*/Ordering | * }
-                      ) =>
-                        let
-                          $f : */*/Ordering =
-                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
-                          in
-                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
-                              | ( EqualTo : Ordering ) => false
-                              | ( GreaterThan : Ordering ) => true
-                              | ( LessThan : Ordering ) => false
-                            }
+        }
+    |]
+  , [corn|
+      Builtin$.(>)($a : Ordered(*), x : *, y : *) =
+        case<bool>($a : Ordered(*)) {
+          | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
+            , $r : { compare : */*/Ordering | * }
+            ) =>
+              let
+                $f : */*/Ordering =
+                  get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                in
+                  case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                    | ( EqualTo : Ordering ) => false
+                    | ( GreaterThan : Ordering ) => true
+                    | ( LessThan : Ordering ) => false
                   }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(>=)"
-      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
-      , Kernel.Label Kernel.TOpq "x"
-      , Kernel.Label Kernel.TOpq "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<bool>($a : Ordered(*)) {
-                    | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
-                      , $r : { compare : */*/Ordering | * }
-                      ) =>
-                        let
-                          $f : */*/Ordering =
-                            get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
-                          in
-                            case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
-                              | ( EqualTo : Ordering ) => true
-                              | ( GreaterThan : Ordering ) => true
-                              | ( LessThan : Ordering ) => false
-                            }
+        }
+    |]
+  , [corn|
+      Builtin$.(>=)($a : Ordered(*), x : *, y : *) =
+        case<bool>($a : Ordered(*)) {
+          | ( $Record : { compare : */*/Ordering | * }/Ordered(*)
+            , $r : { compare : */*/Ordering | * }
+            ) =>
+              let
+                $f : */*/Ordering =
+                  get?_compare<*/*/Ordering>($r : { compare : */*/Ordering | * })
+                in
+                  case<bool>(@<Ordering>($f : */*/Ordering, x : *, y : *)) {
+                    | ( EqualTo : Ordering ) => true
+                    | ( GreaterThan : Ordering ) => true
+                    | ( LessThan : Ordering ) => false
                   }
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IUnit)) "compare")
-      [ Kernel.Label Kernel.unit "x"
-      , Kernel.Label Kernel.unit "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  EqualTo : Ordering 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
-      [ Kernel.Label Kernel.int32 "x"
-      , Kernel.Label Kernel.int32 "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([< int32](x : int32, y : int32))
-                    then
-                      LessThan : Ordering
-                    else
-                      if ([> int32](x : int32, y : int32))
-                        then
-                          GreaterThan : Ordering
-                        else
-                          EqualTo : Ordering
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
-      [ Kernel.Label Kernel.int64 "x"
-      , Kernel.Label Kernel.int64 "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([< int64](x : int64, y : int64))
-                    then
-                      LessThan : Ordering
-                    else
-                      if ([> int64](x : int64, y : int64))
-                        then
-                          GreaterThan : Ordering
-                        else
-                          EqualTo : Ordering
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IFloat)) "compare")
-      [ Kernel.Label Kernel.float "x"
-      , Kernel.Label Kernel.float "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([< float](x : float, y : float))
-                    then
-                      LessThan : Ordering
-                    else
-                      if ([> float](x : float, y : float))
-                        then
-                          GreaterThan : Ordering
-                        else
-                          EqualTo : Ordering
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IDouble)) "compare")
-      [ Kernel.Label Kernel.double "x"
-      , Kernel.Label Kernel.double "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([< double](x : double, y : double))
-                    then
-                      LessThan : Ordering
-                    else
-                      if ([> double](x : double, y : double))
-                        then
-                          GreaterThan : Ordering
-                        else
-                          EqualTo : Ordering
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic INat)) "compare")
-      [ Kernel.Label (Kernel.TCon "nat" []) "x"
-      , Kernel.Label (Kernel.TCon "nat" []) "y"
-      ]
-      ( unsafeParseExpr
-          ( [r|
-                  let 
-                    a : int64 = 
+        }
+    |]
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IUnit)) "compare")
+             <> [r|
+          (x : unit, y : unit) =
+            EqualTo : Ordering|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
+             <> [r|
+          (x : int32, y : int32) =
+            if ([< int32](x : int32, y : int32))
+              then
+                LessThan : Ordering
+              else
+                if ([> int32](x : int32, y : int32))
+                  then
+                    GreaterThan : Ordering
+                  else
+                    EqualTo : Ordering|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
+             <> [r|
+          (x : int64, y : int64) =
+            if ([< int64](x : int64, y : int64))
+              then
+                LessThan : Ordering
+              else
+                if ([> int64](x : int64, y : int64))
+                  then
+                    GreaterThan : Ordering
+                  else
+                    EqualTo : Ordering|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IFloat)) "compare")
+             <> [r|
+          (x : float, y : float) =
+            if ([< float](x : float, y : float))
+              then
+                LessThan : Ordering
+              else
+                if ([> float](x : float, y : float))
+                  then
+                    GreaterThan : Ordering
+                  else
+                    EqualTo : Ordering|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IDouble)) "compare")
+             <> [r|
+          (x : double, y : double) =
+            if ([< double](x : double, y : double))
+              then
+                LessThan : Ordering
+              else
+                if ([> double](x : double, y : double))
+                  then
+                    GreaterThan : Ordering
+                  else
+                    EqualTo : Ordering|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic INat)) "compare")
+             <> [r|
+          (x : nat, y : nat) =
+            let
+              a : int64 =
+                @<int64>
+                  ( `Builtin$.nat$_unpack` : $Nat/int64
+                  , x : $Nat )
+                in
+                  let
+                    b : int64 =
                       @<int64>
                         ( `Builtin$.nat$_unpack` : $Nat/int64
-                        , x : $Nat )
-                      in
-                        let
-                          b : int64 =
-                            @<int64>
-                              ( `Builtin$.nat$_unpack` : $Nat/int64
-                              , y : $Nat )
-                          in
-                            @<Ordering>
-                              ( `|]
-              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
-              <> [r|` : int64/int64/Ordering
+                        , y : $Nat )
+                    in
+                      @<Ordering>
+                        ( `|]
+             <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt64)) "compare")
+             <> [r|` : int64/int64/Ordering
                               , a : int64
                               , b : int64 
                               )
         |]
-          )
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IBool)) "compare")
-      [ Kernel.Label Kernel.bool "x"
-      , Kernel.Label Kernel.bool "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if 
-                    ([&&]
-                      ( @<bool>(`Builtin$.not` : bool/bool, x : bool )
-                      , y : bool )
-                    )
-                    then LessThan : Ordering
-                    else
-                     if 
-                       ([&&]
-                         ( x : bool
-                         , @<bool>(`Builtin$.not` : bool/bool, y : bool )
-                         )
-                       )
-                       then GreaterThan : Ordering
-                       else EqualTo : Ordering
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
-      [ Kernel.Label Kernel.char "x"
-      , Kernel.Label Kernel.char "y"
-      ]
-      ( unsafeParseExpr
-          ( [r|
-                  @<Ordering>
-                    ( `|]
-              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
-              <> [r|` : int32/int32/Ordering
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IBool)) "compare")
+             <> [r|
+          (x : bool, y : bool) =
+            if
+              ([&&]
+                ( @<bool>(`Builtin$.not` : bool/bool, x : bool )
+                , y : bool )
+              )
+              then LessThan : Ordering
+              else
+               if
+                 ([&&]
+                   ( x : bool
+                   , @<bool>(`Builtin$.not` : bool/bool, y : bool )
+                   )
+                 )
+                 then GreaterThan : Ordering
+                 else EqualTo : Ordering|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
+             <> [r|
+          (x : char, y : char) =
+            @<Ordering>
+              ( `|]
+             <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IInt32)) "compare")
+             <> [r|` : int32/int32/Ordering
                     , @<int32>(`Builtin$.char$_ord` : char/int32, x : char) 
                     , @<int32>(`Builtin$.char$_ord` : char/int32, y : char)
                     )
         |]
-          )
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IString)) "compare")
-      [ Kernel.Label Kernel.string "s1"
-      , Kernel.Label Kernel.string "s2"
-      ]
-      ( unsafeParseExpr
-          ( [r|
-                  let
-                    fst : list(char) = 
-                      @<list(char)>
-                        ( `Builtin$.string$_to_list` : string/list(char)
-                        , s1 : string )
-                  in let
-                    snd : list(char) = 
-                      @<list(char)>
-                        ( `Builtin$.string$_to_list` : string/list(char)
-                        , s2 : string )
-                  in let
-                    f : list(char)/list(char)/Ordering =
-                      fn(xs : list(char), ys : list(char)) =>
-                        case<Ordering>(xs : list(char)) {
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IString)) "compare")
+             <> [r|
+          (s1 : string, s2 : string) =
+            let
+              fst : list(char) =
+                @<list(char)>
+                  ( `Builtin$.string$_to_list` : string/list(char)
+                  , s1 : string )
+            in let
+              snd : list(char) =
+                @<list(char)>
+                  ( `Builtin$.string$_to_list` : string/list(char)
+                  , s2 : string )
+            in let
+              f : list(char)/list(char)/Ordering =
+                fn(xs : list(char), ys : list(char)) =>
+                  case<Ordering>(xs : list(char)) {
+                    | ( $Nil : list(char)
+                      ) =>
+                        case<Ordering>(ys : list(char)) {
                           | ( $Nil : list(char)
                             ) =>
-                              case<Ordering>(ys : list(char)) {
-                                | ( $Nil : list(char)
-                                  ) =>
-                                    EqualTo : Ordering
-                                | ( $Cons : char/list(char)/list(char)
-                                  , _ : char
-                                  , _ : list(char)
-                                  ) =>
-                                    LessThan : Ordering
-                              }
+                              EqualTo : Ordering
                           | ( $Cons : char/list(char)/list(char)
-                            , x : char
-                            , xs1 : list(char)
+                            , _ : char
+                            , _ : list(char)
                             ) =>
-                              case<Ordering>(ys : list(char)) {
-                                | ( $Nil : list(char)
-                                  ) =>
-                                    GreaterThan : Ordering
-                                | ( $Cons : char/list(char)/list(char)
-                                  , y : char
-                                  , ys1 : list(char)
-                                  ) =>
-                                    case<Ordering>(
-                                      @<Ordering>
-                                        ( `|]
-              <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
-              <> [r|` : char/char/Ordering
+                              LessThan : Ordering
+                        }
+                    | ( $Cons : char/list(char)/list(char)
+                      , x : char
+                      , xs1 : list(char)
+                      ) =>
+                        case<Ordering>(ys : list(char)) {
+                          | ( $Nil : list(char)
+                            ) =>
+                              GreaterThan : Ordering
+                          | ( $Cons : char/list(char)/list(char)
+                            , y : char
+                            , ys1 : list(char)
+                            ) =>
+                              case<Ordering>(
+                                @<Ordering>
+                                  ( `|]
+             <> Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IChar)) "compare")
+             <> [r|` : char/char/Ordering
                                         , x : char
                                         , y : char
                                         )
@@ -1818,1222 +1257,960 @@ objectList =
                       , snd : list(char)
                       )
         |]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
+             <> [r|
+          (x : integer, y : integer) =
+            let
+              is_lt : bool =
+                @<bool>
+                  ( coal_bignum_lt : integer/integer/bool
+                  , x : integer
+                  , y : integer
+                  )
+              in
+                if (is_lt : bool)
+                  then LessThan : Ordering
+                  else
+                    let
+                      is_gt : bool =
+                        @<bool>
+                          ( coal_bignum_gt : integer/integer/bool
+                          , x : integer
+                          , y : integer
+                          )
+                      in
+                        if (is_gt : bool)
+                          then GreaterThan : Ordering
+                          else EqualTo : Ordering|]
+         )
+     )
+  , [corn|
+      Builtin$.string$_length(str : string) =
+        @<int64>
+          ( coal_string_length : string/int64
+          , str : string
           )
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TIntrinsic IBignum)) "compare")
-      [ Kernel.Label Kernel.bignum "x"
-      , Kernel.Label Kernel.bignum "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  let
-                    is_lt : bool =
-                      @<bool>
-                        ( coal_bignum_lt : integer/integer/bool
-                        , x : integer
-                        , y : integer
-                        )
-                    in
-                      if (is_lt : bool)
-                        then LessThan : Ordering
-                        else 
-                          let
-                            is_gt : bool =
-                              @<bool>
-                                ( coal_bignum_gt : integer/integer/bool
-                                , x : integer
-                                , y : integer
-                                )
-                            in
-                              if (is_gt : bool)
-                                then GreaterThan : Ordering
-                                else EqualTo : Ordering
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_length"
-      [ Kernel.Label Kernel.string "str"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<int64>
-                    ( coal_string_length : string/int64
-                    , str : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_head_unsafe"
-      [ Kernel.Label Kernel.string "str"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<char>
-                    ( coal_string_head : string/char
-                    , str : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_tail"
-      [ Kernel.Label Kernel.string "str"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_string_tail : string/string
-                    , str : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_reverse"
-      [ Kernel.Label Kernel.string "str"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_string_reverse : string/string
-                    , str : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_remove_whitespace"
-      [ Kernel.Label Kernel.string "str"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( coal_string_remove_whitespace : string/string
-                    , str : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_from_list"
-      [ Kernel.Label (Kernel.TCon "list" [Kernel.char]) "chars"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  let
-                    f : list(char)/string/string =
-                      fn(chars : list(char), result : string) =>
-                        case<string>(chars : list(char)) {
-                          | ( $Nil : list(char)
-                            ) =>  
-                              result : string
-                          | ( $Cons : char/list(char)/list(char)
-                            , c : char
-                            , cs : list(char)
-                            ) => 
-                              @<string>
-                                ( f : list(char)/string/string
-                                , cs : list(char)
-                                , @<string>
-                                    ( `Builtin$.operator$__string_concatenation` : string/string/string
-                                    , result : string 
-                                    , @<string>
-                                        ( `Builtin$.string$_char_to_string` : char/string
-                                        , c : char
-                                        )
-                                    )
-                                )
-                        }
-                  in
+    |]
+  , [corn|
+      Builtin$.string$_head_unsafe(str : string) =
+        @<char>
+          ( coal_string_head : string/char
+          , str : string
+          )
+    |]
+  , [corn|
+      Builtin$.string$_tail(str : string) =
+        @<string>
+          ( coal_string_tail : string/string
+          , str : string
+          )
+    |]
+  , [corn|
+      Builtin$.string$_reverse(str : string) =
+        @<string>
+          ( coal_string_reverse : string/string
+          , str : string
+          )
+    |]
+  , [corn|
+      Builtin$.string$_remove_whitespace(str : string) =
+        @<string>
+          ( coal_string_remove_whitespace : string/string
+          , str : string
+          )
+    |]
+  , [corn|
+      Builtin$.string$_from_list(chars : list(char)) =
+        let
+          f : list(char)/string/string =
+            fn(chars : list(char), result : string) =>
+              case<string>(chars : list(char)) {
+                | ( $Nil : list(char)
+                  ) =>
+                    result : string
+                | ( $Cons : char/list(char)/list(char)
+                  , c : char
+                  , cs : list(char)
+                  ) =>
                     @<string>
                       ( f : list(char)/string/string
-                      , chars : list(char)
-                      , "" 
-                      )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.string$_to_list"
-      [ Kernel.Label Kernel.string "str"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  let
-                    f : string/list(char)/list(char) =
-                      fn(input : string, result : list(char)) => 
-                        if ( [== int32]
-                               ( @<int32>
-                                   ( `Builtin$.string$_length` : string/int32 
-                                   , input : string
-                                   )
-                               , 0 
-                               ) )
-                          then
-                            result : list(char)
-                          else 
-                            @<list(char)>
-                              ( f : string/list(char)/list(char)
-                              , @<string>
-                                  ( `Builtin$.string$_tail` : string/string
-                                  , input : string
-                                  )
-                              , @<list(char)>
-                                  ( $Cons : char/list(char)/list(char)
-                                  , @<char>
-                                      ( `Builtin$.string$_head_unsafe` : string/char
-                                      , input : string
-                                      )
-                                  , result : list(char)
-                                  )
+                      , cs : list(char)
+                      , @<string>
+                          ( `Builtin$.operator$__string_concatenation` : string/string/string
+                          , result : string
+                          , @<string>
+                              ( `Builtin$.string$_char_to_string` : char/string
+                              , c : char
                               )
-                    in
-                      @<list(char)>
-                        ( f : string/list(char)/list(char)
-                        , @<string>
-                            ( `Builtin$.string$_reverse` : string/string 
-                            , str : string
-                            )
-                        , $Nil : list(char)
+                          )
+                      )
+              }
+        in
+          @<string>
+            ( f : list(char)/string/string
+            , chars : list(char)
+            , ""
+            )
+    |]
+  , [corn|
+      Builtin$.string$_to_list(str : string) =
+        let
+          f : string/list(char)/list(char) =
+            fn(input : string, result : list(char)) =>
+              if ( [== int32]
+                     ( @<int32>
+                         ( `Builtin$.string$_length` : string/int32
+                         , input : string
+                         )
+                     , 0
+                     ) )
+                then
+                  result : list(char)
+                else
+                  @<list(char)>
+                    ( f : string/list(char)/list(char)
+                    , @<string>
+                        ( `Builtin$.string$_tail` : string/string
+                        , input : string
                         )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(==)"
-      [ Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$a"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*/*/bool>($a : Comparable(*)) {
-                    | ( $Record : { `(==)` : */*/bool | * }/Comparable(*)
-                      , $r : { `(==)` : */*/bool | * }
-                      ) =>
-                        get?_`(==)`<*/*/bool>($r : { `(==)` : */*/bool | * })
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IUnit)) "(==)")
-      [ Kernel.Label Kernel.unit "x"
-      , Kernel.Label Kernel.unit "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  true
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")
-      [ Kernel.Label Kernel.int32 "x"
-      , Kernel.Label Kernel.int32 "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== int32](x : int32, y : int32)) then true else false 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IInt64)) "(==)")
-      [ Kernel.Label Kernel.int64 "x"
-      , Kernel.Label Kernel.int64 "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== int64](x : int64, y : int64)) then true else false 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IFloat)) "(==)")
-      [ Kernel.Label Kernel.float "x"
-      , Kernel.Label Kernel.float "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== float](x : float, y : float)) then true else false 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IDouble)) "(==)")
-      [ Kernel.Label Kernel.double "x"
-      , Kernel.Label Kernel.double "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== double](x : double, y : double)) then true else false 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IBool)) "(==)")
-      [ Kernel.Label Kernel.bool "x"
-      , Kernel.Label Kernel.bool "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== bool](x : bool, y : bool)) then true else false 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IChar)) "(==)")
-      [ Kernel.Label Kernel.char "x"
-      , Kernel.Label Kernel.char "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== char](x : char, y : char)) then true else false 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic INat)) "(==)")
-      [ Kernel.Label (Kernel.TCon "nat" []) "x"
-      , Kernel.Label (Kernel.TCon "nat" []) "y"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  let 
-                    a : int64 = 
+                    , @<list(char)>
+                        ( $Cons : char/list(char)/list(char)
+                        , @<char>
+                            ( `Builtin$.string$_head_unsafe` : string/char
+                            , input : string
+                            )
+                        , result : list(char)
+                        )
+                    )
+          in
+            @<list(char)>
+              ( f : string/list(char)/list(char)
+              , @<string>
+                  ( `Builtin$.string$_reverse` : string/string
+                  , str : string
+                  )
+              , $Nil : list(char)
+              )
+    |]
+  , [corn|
+      Builtin$.(==)($a : Comparable(*)) =
+        case<*/*/bool>($a : Comparable(*)) {
+          | ( $Record : { `(==)` : */*/bool | * }/Comparable(*)
+            , $r : { `(==)` : */*/bool | * }
+            ) =>
+              get?_`(==)`<*/*/bool>($r : { `(==)` : */*/bool | * })
+        }
+    |]
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IUnit)) "(==)")
+             <> [r|
+          (x : unit, y : unit) =
+            true|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IInt32)) "(==)")
+             <> [r|
+          (x : int32, y : int32) =
+            if ([== int32](x : int32, y : int32)) then true else false|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IInt64)) "(==)")
+             <> [r|
+          (x : int64, y : int64) =
+            if ([== int64](x : int64, y : int64)) then true else false|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IFloat)) "(==)")
+             <> [r|
+          (x : float, y : float) =
+            if ([== float](x : float, y : float)) then true else false|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IDouble)) "(==)")
+             <> [r|
+          (x : double, y : double) =
+            if ([== double](x : double, y : double)) then true else false|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IBool)) "(==)")
+             <> [r|
+          (x : bool, y : bool) =
+            if ([== bool](x : bool, y : bool)) then true else false|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IChar)) "(==)")
+             <> [r|
+          (x : char, y : char) =
+            if ([== char](x : char, y : char)) then true else false|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic INat)) "(==)")
+             <> [r|
+          (x : nat, y : nat) =
+            let
+              a : int64 =
+                @<int64>
+                  ( `Builtin$.nat$_unpack` : $Nat/int64
+                  , x : $Nat
+                  )
+                in
+                  let
+                    b : int64 =
                       @<int64>
                         ( `Builtin$.nat$_unpack` : $Nat/int64
-                        , x : $Nat 
+                        , y : $Nat
                         )
+                    in
+                      if ([== int64](a : int64, b : int64))
+                        then true
+                        else false|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TConstructor () "Ordering")) "(==)")
+             <> [r|
+          (ord1 : Ordering, ord2 : Ordering) =
+            case<bool>(ord1 : Ordering) {
+              | ( EqualTo : Ordering ) =>
+                  case<bool>(ord2 : Ordering) {
+                    | ( EqualTo     : Ordering ) => true
+                    | ( LessThan    : Ordering ) => false
+                    | ( GreaterThan : Ordering ) => false
+                  }
+              | ( LessThan : Ordering ) =>
+                  case<bool>(ord2 : Ordering) {
+                    | ( EqualTo     : Ordering ) => false
+                    | ( LessThan    : Ordering ) => true
+                    | ( GreaterThan : Ordering ) => false
+                  }
+              | ( GreaterThan : Ordering ) =>
+                  case<bool>(ord2 : Ordering) {
+                    | ( EqualTo     : Ordering ) => false
+                    | ( LessThan    : Ordering ) => false
+                    | ( GreaterThan : Ordering ) => true
+                  }
+            }|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IString)) "(==)")
+             <> [r|
+          (str1 : string, str2 : string) =
+            @<bool>
+              ( coal_string_compare : string/string/bool
+              , str1 : string
+              , str2 : string
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TIntrinsic IBignum)) "(==)")
+             <> [r|
+          (m : integer, n : integer) =
+            @<bool>
+              ( coal_bignum_eq : integer/integer/bool
+              , m : integer
+              , n : integer
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.divisible (TIntrinsic IFloat)) "(/)")
+             <> [r|
+          (q : float, r : float) =
+            [/ float](q : float, r : float)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.divisible (TIntrinsic IDouble)) "(/)")
+             <> [r|
+          (q : double, r : double) =
+            [/ double](q : double, r : double)|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.modulo (TIntrinsic IInt32)) "(%)")
+             <> [r|
+          (q : int32, r : int32) =
+            if ([== int32](r : int32, 0))
+              then
+                None : Option(int32)
+              else
+                @<Option(int32)>
+                  ( Some : int32/Option(int32)
+                  , @<int32>
+                      ( coal_int32_mod : int32/int32/int32
+                      , q : int32
+                      , r : int32
+                      )
+                  )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.modulo (TIntrinsic IInt64)) "(%)")
+             <> [r|
+          (q : int64, r : int64) =
+            if ([== int64](r : int64, %0))
+              then
+                None : Option(int64)
+              else
+                @<Option(int64)>
+                  ( Some : int64/Option(int64)
+                  , @<int64>
+                      ( coal_int64_mod : int64/int64/int64
+                      , q : int64
+                      , r : int64
+                      )
+                  )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.modulo (TIntrinsic IBignum)) "(%)")
+             <> [r|
+          (q : integer, r : integer) =
+            if (@<bool>(coal_bignum_eq : integer/integer/bool, r : integer, %%0))
+              then
+                None : Option(integer)
+              else
+                @<Option(integer)>
+                  ( Some : integer/Option(integer)
+                  , @<integer>
+                      ( coal_bignum_mod : integer/integer/integer
+                      , q : integer
+                      , r : integer
+                      )
+                  )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.semigroup (TIntrinsic IUnit)) "(<>)")
+             <> [r|
+          (a : unit, b : unit) =
+            ()|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.semigroup (TIntrinsic IString)) "(<>)")
+             <> [r|
+          (s : string, t : string) =
+            @<string>
+              ( `Builtin$.operator$__string_concatenation` : string/string/string
+              , s : string
+              , t : string
+              )|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)")
+             <> [r|
+          (xs : list(*), ys : list(*)) =
+            @<list(*)>
+              ( `Builtin$.operator$__list_concatenation` : list(*)/list(*)/list(*)
+              , xs : list(*)
+              , ys : list(*)
+              )|]
+         )
+     )
+  , [corn|
+      Builtin$.io$_eval(io : */*) =
+        @<*>(io : */*, ())
+    |]
+  , [corn|
+      Builtin$.io$_return(v : *) =
+        @<IO(*)>(`Builtin$.io$_defer` : (*/*)/IO(*), fn(_ : unit) => v : *)
+    |]
+  , [corn|
+      Builtin$.io$_defer(f : *) =
+        f : IO(*)
+    |]
+  , [corn|
+      Builtin$.(!=)($c : Comparable(*), a : *, b : *) =
+        @<bool>
+          ( `Builtin$.operator$__not` : bool/bool
+          , @<bool>
+              ( `Builtin$.(==)` : Comparable(*)/*/*/bool
+              , $c : Comparable(*)
+              , a : *
+              , b : *
+              )
+          )
+    |]
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)")
+             <> [r|
+          ($a : Comparable(*), $b : Comparable(*), t1 : tuple(*, *), t2 : tuple(*, *)) =
+            case<bool>(t1 : tuple2(*,*)) {
+              | ( $Tuple2 : */*/tuple2(*,*)
+                , a1 : *
+                , b1 : *
+                ) =>
+                  case<bool>(t2 : tuple2(*,*)) {
+                    | ( $Tuple2 : */*/tuple2(*,*)
+                      , a2 : *
+                      , b2 : *
+                      ) =>
+                        ([&&]
+                          ( @<bool>
+                              ( `Builtin$.(==)` : Comparable(*)/*/*/bool
+                              , $a : Comparable(*)
+                              , a1 : *
+                              , a2 : *
+                              )
+                          , @<bool>
+                              ( `Builtin$.(==)` : Comparable(*)/*/*/bool
+                              , $b : Comparable(*)
+                              , b1 : *
+                              , b2 : *
+                              )
+                          )
+                        )
+                  }
+            }|]
+         )
+     )
+  , $( cornObject
+         ( Text.unpack (builtinInstance (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare")
+             <> [r|
+          ($a : Ordered(*), $b : Ordered(*), t1 : tuple(*, *), t2 : tuple(*, *)) =
+            case<Ordering>(t1 : tuple2(*,*)) {
+              | ( $Tuple2 : */*/tuple2(*,*)
+                , a1 : *
+                , b1 : *
+                ) =>
+                  case<Ordering>(t2 : tuple2(*,*)) {
+                    | ( $Tuple2 : */*/tuple2(*,*)
+                      , a2 : *
+                      , b2 : *
+                      ) =>
+                        case<Ordering>(
+                          @<Ordering>
+                            ( Builtin$.compare : Ordered(*)/*/*/Ordering
+                            , $a : Ordered(*)
+                            , a1 : *
+                            , a2 : *
+                            )
+                        ) {
+                          | ( LessThan : Ordering ) => LessThan : Ordering
+                          | ( GreaterThan : Ordering ) => GreaterThan : Ordering
+                          | ( EqualTo : Ordering ) =>
+                              @<Ordering>
+                                ( Builtin$.compare : Ordered(*)/*/*/Ordering
+                                , $b : Ordered(*)
+                                , b1 : *
+                                , b2 : *
+                                )
+                        }
+                  }
+            }|]
+         )
+     )
+  , [corn|
+      Builtin$.machine$_machine(seed : *, transition : */*/*, view : */*) =
+        let
+          step : */*/Machine(*,*) =
+            fn(input : *, current_state : *) =>
+              @<Machine(*,*)>
+                ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                    ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                    , { state =
+                          @<*>
+                            ( transition : */*/*
+                            , input : *
+                            , current_state : *
+                            )
+                      | step = step : */*/Machine(*,*)
+                      | view = view : */*
+                      | {}
+                      }
+                    )
+                )
+        in
+        @<Machine(*,*)>
+          ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+          , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+              ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+              , { state = seed : *
+                | step = step : */*/Machine(*,*)
+                | view = view : */*
+                | {}
+                }
+              )
+          )
+    |]
+  , [corn|
+      Builtin$.machine$_map_machine(f : */*, m : Machine(*, *)) =
+        case<Machine(*,*)>(m : Machine(*,*)) {
+          | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+            , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+            ) =>
+              case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                  , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                  ) =>
+                    let
+                      $state : * =
+                        get?_state<*>($row : { state : * | * })
                       in
                         let
-                          b : int64 =
-                            @<int64>
-                              ( `Builtin$.nat$_unpack` : $Nat/int64
-                              , y : $Nat 
-                              )
+                          $step : */*/Machine(*,*) =
+                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
                           in
-                            if ([== int64](a : int64, b : int64)) 
-                              then true 
-                              else false 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TConstructor () "Ordering")) "(==)")
-      [ Kernel.Label (Kernel.TCon "Ordering" []) "ord1"
-      , Kernel.Label (Kernel.TCon "Ordering" []) "ord2"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<bool>(ord1 : Ordering) {
-                    | ( EqualTo : Ordering ) => 
-                        case<bool>(ord2 : Ordering) {
-                          | ( EqualTo     : Ordering ) => true
-                          | ( LessThan    : Ordering ) => false
-                          | ( GreaterThan : Ordering ) => false
-                        }
-                    | ( LessThan : Ordering ) => 
-                        case<bool>(ord2 : Ordering) {
-                          | ( EqualTo     : Ordering ) => false
-                          | ( LessThan    : Ordering ) => true
-                          | ( GreaterThan : Ordering ) => false
-                        }
-                    | ( GreaterThan : Ordering ) =>
-                        case<bool>(ord2 : Ordering) {
-                          | ( EqualTo     : Ordering ) => false
-                          | ( LessThan    : Ordering ) => false
-                          | ( GreaterThan : Ordering ) => true
-                        }
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IString)) "(==)")
-      [ Kernel.Label Kernel.string "str1"
-      , Kernel.Label Kernel.string "str2"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<bool>
-                    ( coal_string_compare : string/string/bool
-                    , str1 : string
-                    , str2 : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TIntrinsic IBignum)) "(==)")
-      [ Kernel.Label Kernel.bignum "m"
-      , Kernel.Label Kernel.bignum "n"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<bool>
-                    ( coal_bignum_eq : integer/integer/bool
-                    , m : integer
-                    , n : integer
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.divisible (TIntrinsic IFloat)) "(/)")
-      [ Kernel.Label Kernel.float "q"
-      , Kernel.Label Kernel.float "r"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [/ float](q : float, r : float)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.divisible (TIntrinsic IDouble)) "(/)")
-      [ Kernel.Label Kernel.double "q"
-      , Kernel.Label Kernel.double "r"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  [/ double](q : double, r : double)
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.modulo (TIntrinsic IInt32)) "(%)")
-      [ Kernel.Label Kernel.int32 "q"
-      , Kernel.Label Kernel.int32 "r"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== int32](r : int32, 0))
-                    then
-                      None : Option(int32)
-                    else
-                      @<Option(int32)>
-                        ( Some : int32/Option(int32)
-                        , @<int32>
-                            ( coal_int32_mod : int32/int32/int32
-                            , q : int32
-                            , r : int32
-                            )
-                        )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.modulo (TIntrinsic IInt64)) "(%)")
-      [ Kernel.Label Kernel.int64 "q"
-      , Kernel.Label Kernel.int64 "r"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if ([== int64](r : int64, %0))
-                    then
-                      None : Option(int64)
-                    else
-                      @<Option(int64)>
-                        ( Some : int64/Option(int64)
-                        , @<int64>
-                            ( coal_int64_mod : int64/int64/int64
-                            , q : int64
-                            , r : int64
-                            )
-                        )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.modulo (TIntrinsic IBignum)) "(%)")
-      [ Kernel.Label Kernel.bignum "q"
-      , Kernel.Label Kernel.bignum "r"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if (@<bool>(coal_bignum_eq : integer/integer/bool, r : integer, %%0))
-                    then
-                      None : Option(integer)
-                    else
-                      @<Option(integer)>
-                        ( Some : integer/Option(integer)
-                        , @<integer>
-                            ( coal_bignum_mod : integer/integer/integer
-                            , q : integer
-                            , r : integer
-                            )
-                        )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.semigroup (TIntrinsic IUnit)) "(<>)")
-      [ Kernel.Label Kernel.unit "a"
-      , Kernel.Label Kernel.unit "b"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  () 
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.semigroup (TIntrinsic IString)) "(<>)")
-      [ Kernel.Label Kernel.string "s"
-      , Kernel.Label Kernel.string "t"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<string>
-                    ( `Builtin$.operator$__string_concatenation` : string/string/string
-                    , s : string
-                    , t : string
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.semigroup (TApplication () (TConstructor () "List") (TVariable (Parameter () "a")))) "(<>)")
-      [ Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "xs"
-      , Kernel.Label (Kernel.TCon "list" [Kernel.TOpq]) "ys"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<list(*)>
-                    ( `Builtin$.operator$__list_concatenation` : list(*)/list(*)/list(*)
-                    , xs : list(*)
-                    , ys : list(*)
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_eval"
-      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "io"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<*>(io : */*, ())
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_return"
-      [ Kernel.Label Kernel.TOpq "v"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<IO(*)>(`Builtin$.io$_defer` : (*/*)/IO(*), fn(_ : unit) => v : *)
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.io$_defer"
-      [ Kernel.Label Kernel.TOpq "f"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  f : IO(*)
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.(!=)"
-      [ Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$c"
-      , Kernel.Label Kernel.TOpq "a"
-      , Kernel.Label Kernel.TOpq "b"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<bool>
-                    ( `Builtin$.operator$__not` : bool/bool
-                    , @<bool>
-                        ( `Builtin$.(==)` : Comparable(*)/*/*/bool
-                        , $c : Comparable(*)
-                        , a : *
-                        , b : *
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.comparable (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "(==)")
-      [ Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$a"
-      , Kernel.Label (Kernel.TCon "Comparable" [Kernel.TOpq]) "$b"
-      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t1"
-      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t2"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<bool>(t1 : tuple2(*,*)) {
-                    | ( $Tuple2 : */*/tuple2(*,*)
-                      , a1 : *
-                      , b1 : *
-                      ) =>
-                        case<bool>(t2 : tuple2(*,*)) {
-                          | ( $Tuple2 : */*/tuple2(*,*)
-                            , a2 : *
-                            , b2 : *
-                            ) =>
-                              ([&&]
-                                ( @<bool>
-                                    ( `Builtin$.(==)` : Comparable(*)/*/*/bool
-                                    , $a : Comparable(*)
-                                    , a1 : *
-                                    , a2 : * 
-                                    )
-                                , @<bool>
-                                    ( `Builtin$.(==)` : Comparable(*)/*/*/bool
-                                    , $b : Comparable(*)
-                                    , b1 : *
-                                    , b2 : * 
-                                    )
-                                )
-                              )
-                        }
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      (builtinInstance (Trait.ordered (TApplication () (TApplication () (TConstructor () "#Tuple2") (TVariable (Parameter () "a"))) (TVariable (Parameter () "b")))) "compare")
-      [ Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$a"
-      , Kernel.Label (Kernel.TCon "Ordered" [Kernel.TOpq]) "$b"
-      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t1"
-      , Kernel.Label (Kernel.TCon "tuple" [Kernel.TOpq, Kernel.TOpq]) "t2"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<Ordering>(t1 : tuple2(*,*)) {
-                    | ( $Tuple2 : */*/tuple2(*,*)
-                      , a1 : *
-                      , b1 : *
-                      ) =>
-                        case<Ordering>(t2 : tuple2(*,*)) {
-                          | ( $Tuple2 : */*/tuple2(*,*)
-                            , a2 : *
-                            , b2 : *
-                            ) =>
-                              case<Ordering>(
-                                @<Ordering>
-                                  ( Builtin$.compare : Ordered(*)/*/*/Ordering
-                                  , $a : Ordered(*)
-                                  , a1 : *
-                                  , a2 : *
+                            let
+                              $view : */* =
+                                get?_view<*/*>($row : { view : */* | * })
+                              in
+                                @<Machine(*,*)>
+                                  ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                  , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                                      ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                      , { state = $state : *
+                                        | step =
+                                            fn(inp : *, s : *) =>
+                                              @<Machine(*,*)>
+                                                ( `Builtin$.machine$_map_machine` : (*/*)/Machine(*,*)/Machine(*,*)
+                                                , f : */*
+                                                , @<Machine(*,*)>
+                                                    ( $step : */*/Machine(*,*)
+                                                    , inp : *
+                                                    , s : *
+                                                    )
+                                                )
+                                        | view =
+                                            fn(s : *) =>
+                                              @<*>
+                                                ( f : */*
+                                                , @<*>
+                                                    ( $view : */*
+                                                    , s : *
+                                                    )
+                                                )
+                                        | {}
+                                        }
+                                      )
                                   )
-                              ) {
-                                | ( LessThan : Ordering ) => LessThan : Ordering
-                                | ( GreaterThan : Ordering ) => GreaterThan : Ordering
-                                | ( EqualTo : Ordering ) =>
-                                    @<Ordering>
-                                      ( Builtin$.compare : Ordered(*)/*/*/Ordering
-                                      , $b : Ordered(*)
-                                      , b1 : *
-                                      , b2 : *
+              }
+        }
+    |]
+  , [corn|
+      Builtin$.machine$_contramap_input(f : */*, m : Machine(*, *)) =
+        case<Machine(*,*)>(m : Machine(*,*)) {
+          | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+            , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+            ) =>
+              case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                  , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                  ) =>
+                    let
+                      $state : * =
+                        get?_state<*>($row : { state : * | * })
+                      in
+                        let
+                          $step : */*/Machine(*,*) =
+                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                          in
+                            let
+                              $view : */* =
+                                get?_view<*/*>($row : { view : */* | * })
+                              in
+                                @<Machine(*,*)>
+                                  ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                                  , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+                                      ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                      , { state = $state : *
+                                        | step =
+                                           fn(inp : *, s : *) =>
+                                             @<Machine(*,*)>
+                                               ( $step : */*/Machine(*,*)
+                                               , @<*>
+                                                   ( f : */*
+                                                   , inp : *
+                                                   )
+                                               , s : *
+                                               )
+                                        | view = $view : */*
+                                        | {}
+                                        }
                                       )
-                              }
-                        }
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.machine$_machine"
-      [ Kernel.Label Kernel.TOpq "seed"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "transition"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "view"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  let
-                    step : */*/Machine(*,*) =
-                      fn(input : *, current_state : *) =>
-                        @<Machine(*,*)>
-                          ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                          , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
-                              ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                              , { state =
-                                    @<*>
-                                      ( transition : */*/*
-                                      , input : *
-                                      , current_state : *
-                                      )
-                                | step = step : */*/Machine(*,*)
-                                | view = view : */*
-                                | {}
-                                }
-                              )
-                          )
-                  in
-                  @<Machine(*,*)>
-                    ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                    , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
-                        ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                        , { state = seed : *
-                          | step = step : */*/Machine(*,*)
-                          | view = view : */*
-                          | {}
-                          }
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.machine$_map_machine"
-      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
-      , Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "m"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<Machine(*,*)>(m : Machine(*,*)) {
-                    | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                      , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                      ) =>
-                        case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
-                          | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                            , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
-                            ) =>
-                              let 
-                                $state : * =
-                                  get?_state<*>($row : { state : * | * })
-                                in
-                                  let
-                                    $step : */*/Machine(*,*) =
-                                      get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
-                                    in
-                                      let
-                                        $view : */* =
-                                          get?_view<*/*>($row : { view : */* | * })
-                                        in
-                                          @<Machine(*,*)>
-                                            ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                                            , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
-                                                ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                                , { state = $state : *
-                                                  | step = 
-                                                      fn(inp : *, s : *) =>
-                                                        @<Machine(*,*)>
-                                                          ( `Builtin$.machine$_map_machine` : (*/*)/Machine(*,*)/Machine(*,*)
-                                                          , f : */*
-                                                          , @<Machine(*,*)>
-                                                              ( $step : */*/Machine(*,*)
-                                                              , inp : *
-                                                              , s : *
-                                                              )
-                                                          )
-                                                  | view = 
-                                                      fn(s : *) =>
-                                                        @<*>
-                                                          ( f : */*
-                                                          , @<*>
-                                                              ( $view : */*
-                                                              , s : *
-                                                              )
-                                                          )
-                                                  | {}
-                                                  }
-                                                )
-                                            )
-                        }
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.machine$_contramap_input"
-      [ Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
-      , Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "m"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<Machine(*,*)>(m : Machine(*,*)) {
-                    | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                      , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                      ) =>
-                        case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
-                          | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                            , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
-                            ) =>
-                              let 
-                                $state : * =
-                                  get?_state<*>($row : { state : * | * })
-                                in
-                                  let
-                                    $step : */*/Machine(*,*) =
-                                      get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
-                                    in
-                                      let
-                                        $view : */* =
-                                          get?_view<*/*>($row : { view : */* | * })
-                                        in
-                                          @<Machine(*,*)>
-                                            ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                                            , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
-                                                ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                                , { state = $state : *
-                                                  | step = 
-                                                     fn(inp : *, s : *) =>
-                                                       @<Machine(*,*)>
-                                                         ( $step : */*/Machine(*,*)
-                                                         , @<*>
-                                                             ( f : */*
-                                                             , inp : *
-                                                             )
-                                                         , s : *
-                                                         )
-                                                  | view = $view : */*
-                                                  | {}
-                                                  }
-                                                )
-                                            )
-                        }
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.machine$_cofix"
-      [ Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq] `Kernel.arrow` Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "f"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<Machine(*,*)>
-                    ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                    , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
-                        ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                        , { state = f : Machine(*,*)/Machine(*,*)
-                          | step =
-                              fn(input : *, $unused_state : *) =>
-                                let
-                                  $unfolded : Machine(*,*) =
-                                    @<Machine(*,*)>
-                                      ( f : Machine(*,*)/Machine(*,*)
-                                      , @<Machine(*,*)>
-                                          ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
-                                          , f : Machine(*,*)/Machine(*,*)
-                                          )
-                                      )
-                                  in
-                                    case<Machine(*,*)>($unfolded : Machine(*,*)) {
-                                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                                        , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                        ) =>
-                                            case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
-                                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                                , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
-                                                ) =>
-                                                    let
-                                                      $inner_state : * =
-                                                        get?_state<*>($row : { state : * | * })
-                                                      in
-                                                        let
-                                                          $inner_step : */*/Machine(*,*) =
-                                                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
-                                                          in
-                                                            @<Machine(*,*)>
-                                                              ( $inner_step : */*/Machine(*,*)
-                                                              , input : *
-                                                              , $inner_state : *
-                                                              )
-                                            }
-                                    }
-                          | view =
-                              fn($unused_state2 : *) =>
-                                let
-                                  $unfolded2 : Machine(*,*) =
-                                    @<Machine(*,*)>
-                                      ( f : Machine(*,*)/Machine(*,*)
-                                      , @<Machine(*,*)>
-                                          ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
-                                          , f : Machine(*,*)/Machine(*,*)
-                                          )
-                                      )
-                                  in
-                                    case<Machine(*,*)>($unfolded2 : Machine(*,*)) {
-                                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                                        , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                        ) =>
-                                            case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
-                                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                                , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
-                                                ) =>
-                                                    let
-                                                      $inner_state2 : * =
-                                                        get?_state<*>($row2 : { state : * | * })
-                                                      in
-                                                        let
-                                                          $inner_view : */* =
-                                                            get?_view<*/*>($row2 : { view : */* | * })
-                                                          in
-                                                            @<*>
-                                                              ( $inner_view : */*
-                                                              , $inner_state2 : *
-                                                              )
-                                            }
-                                    }
-                          | {}
-                          }
-                        )
-                    )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.machine$_run_while"
-      [ Kernel.Label (Kernel.unit `Kernel.arrow` Kernel.bool) "pred"
-      , Kernel.Label (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]) "m"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  if
-                    ( @<bool>
-                        ( pred : unit/bool
-                        , ()
-                        )
-                    )
-                  then
-                    case<Machine(*,*)>(m : Machine(*,*)) {
-                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                        , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                        ) =>
-                            case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
-                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
-                                ) =>
-                                    let
-                                      $cur_state : * =
-                                        get?_state<*>($row : { state : * | * })
-                                      in
-                                        let
-                                          $cur_step : */*/Machine(*,*) =
-                                            get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
-                                          in
-                                            @<*>
-                                              ( `Builtin$.machine$_run_while` : (unit/bool)/Machine(*,*)/*
-                                              , pred : unit/bool
-                                              , @<Machine(*,*)>
-                                                  ( $cur_step : */*/Machine(*,*)
-                                                  , ()
-                                                  , $cur_state : *
-                                                  )
-                                              )
-                            }
-                    }
-                  else
-                    case<Machine(*,*)>(m : Machine(*,*)) {
-                      | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
-                        , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                        ) =>
-                            case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
-                              | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
-                                , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
-                                ) =>
-                                    let
-                                      $fin_state : * =
-                                        get?_state<*>($row2 : { state : * | * })
-                                      in
-                                        let
-                                          $fin_view : */* =
-                                            get?_view<*/*>($row2 : { view : */* | * })
-                                          in
-                                            @<*>
-                                              ( $fin_view : */*
-                                              , $fin_state : *
-                                              )
-                            }
-                    }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.event$_blocking_poll"
-      [ Kernel.Label Kernel.TOpq "state"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "try_fn"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "block_fn"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<IO(*)>(
-                    `Builtin$.io$_defer` : (*/*)/IO(*),
-                    fn(_ : unit) =>
-                      case<*>(
-                        @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
-                                     @<IO(Option(*))>(try_fn : */IO(Option(*)), state : *))
-                      ) {
-                        | ( None : Option(*) ) =>
-                            let _ : unit =
-                              @<unit>(`Builtin$.io$_eval` : IO(unit)/unit,
-                                      @<IO(unit)>(block_fn : */IO(unit), state : *))
-                            in
-                              @<*>(`Builtin$.io$_eval` : IO(*)/*,
-                                   @<IO(*)>
-                                     ( `Builtin$.event$_blocking_poll` : */(*/IO(Option(*)))/(*/IO(unit))/IO(*)
-                                     , state : *
-                                     , try_fn : */IO(Option(*))
-                                     , block_fn : */IO(unit)
-                                     )
-                              )
-                        | ( Some : */Option(*)
-                          , result : *
-                          ) =>
-                            result : *
-                      }
-                  )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.event$_loop"
-      [ Kernel.Label Kernel.TOpq "state"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TCon "Option" [Kernel.TOpq]) "step_fn"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*>(@<Option(*)>(step_fn : */Option(*), state : *)) {
-                    | ( None : Option(*) ) =>
-                        state : *
-                    | ( Some : */Option(*)
-                      , next : *
-                      ) =>
-                        @<*>
-                          ( `Builtin$.event$_loop` : */(*/Option(*))/*
-                          , next : *
-                          , step_fn : */Option(*)
-                          )
-                  }
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.event$_loop_io"
-      [ Kernel.Label Kernel.TOpq "state"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "step_fn"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<IO(*)>(
-                    `Builtin$.io$_defer` : (*/*)/IO(*),
-                    fn(_ : unit) =>
-                      case<*>(
-                        @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
-                                     @<IO(Option(*))>(step_fn : */IO(Option(*)), state : *))
-                      ) {
-                        | ( None : Option(*) ) =>
-                            state : *
-                        | ( Some : */Option(*)
-                          , next : *
-                          ) =>
-                            @<*>(`Builtin$.io$_eval` : IO(*)/*,
-                                 @<IO(*)>
-                                   ( `Builtin$.event$_loop_io` : */(*/IO(Option(*)))/IO(*)
-                                   , next : *
-                                   , step_fn : */IO(Option(*))
-                                   )
+                                  )
+              }
+        }
+    |]
+  , [corn|
+      Builtin$.machine$_cofix(f : Machine(*, *)/Machine(*, *)) =
+        @<Machine(*,*)>
+          ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+          , @<record({ state : * | step : */*/Machine(*,*) | view : */* | {} })>
+              ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+              , { state = f : Machine(*,*)/Machine(*,*)
+                | step =
+                    fn(input : *, $unused_state : *) =>
+                      let
+                        $unfolded : Machine(*,*) =
+                          @<Machine(*,*)>
+                            ( f : Machine(*,*)/Machine(*,*)
+                            , @<Machine(*,*)>
+                                ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
+                                , f : Machine(*,*)/Machine(*,*)
+                                )
                             )
-                      }
+                        in
+                          case<Machine(*,*)>($unfolded : Machine(*,*)) {
+                            | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                              , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                              ) =>
+                                  case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                                    | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                      , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                      ) =>
+                                          let
+                                            $inner_state : * =
+                                              get?_state<*>($row : { state : * | * })
+                                            in
+                                              let
+                                                $inner_step : */*/Machine(*,*) =
+                                                  get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                                in
+                                                  @<Machine(*,*)>
+                                                    ( $inner_step : */*/Machine(*,*)
+                                                    , input : *
+                                                    , $inner_state : *
+                                                    )
+                                  }
+                          }
+                | view =
+                    fn($unused_state2 : *) =>
+                      let
+                        $unfolded2 : Machine(*,*) =
+                          @<Machine(*,*)>
+                            ( f : Machine(*,*)/Machine(*,*)
+                            , @<Machine(*,*)>
+                                ( `Builtin$.machine$_cofix` : (Machine(*,*)/Machine(*,*))/Machine(*,*)
+                                , f : Machine(*,*)/Machine(*,*)
+                                )
+                            )
+                        in
+                          case<Machine(*,*)>($unfolded2 : Machine(*,*)) {
+                            | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+                              , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                              ) =>
+                                  case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                                    | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                                      , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                                      ) =>
+                                          let
+                                            $inner_state2 : * =
+                                              get?_state<*>($row2 : { state : * | * })
+                                            in
+                                              let
+                                                $inner_view : */* =
+                                                  get?_view<*/*>($row2 : { view : */* | * })
+                                                in
+                                                  @<*>
+                                                    ( $inner_view : */*
+                                                    , $inner_state2 : *
+                                                    )
+                                  }
+                          }
+                | {}
+                }
+              )
+          )
+    |]
+  , [corn|
+      Builtin$.machine$_run_while(pred : unit/bool, m : Machine(*, *)) =
+        if
+          ( @<bool>
+              ( pred : unit/bool
+              , ()
+              )
+          )
+        then
+          case<Machine(*,*)>(m : Machine(*,*)) {
+            | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+              , $r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+              ) =>
+                  case<Machine(*,*)>($r : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                    | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                      , $row : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                      ) =>
+                          let
+                            $cur_state : * =
+                              get?_state<*>($row : { state : * | * })
+                            in
+                              let
+                                $cur_step : */*/Machine(*,*) =
+                                  get?_step<*/*/Machine(*,*)>($row : { step : */*/Machine(*,*) | * })
+                                in
+                                  @<*>
+                                    ( `Builtin$.machine$_run_while` : (unit/bool)/Machine(*,*)/*
+                                    , pred : unit/bool
+                                    , @<Machine(*,*)>
+                                        ( $cur_step : */*/Machine(*,*)
+                                        , ()
+                                        , $cur_state : *
+                                        )
+                                    )
+                  }
+          }
+        else
+          case<Machine(*,*)>(m : Machine(*,*)) {
+            | ( Machine : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })/Machine(*,*)
+              , $r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+              ) =>
+                  case<Machine(*,*)>($r2 : record({ state : * | step : */*/Machine(*,*) | view : */* | {} })) {
+                    | ( $Record : { state : * | step : */*/Machine(*,*) | view : */* | {} }/record({ state : * | step : */*/Machine(*,*) | view : */* | {} })
+                      , $row2 : { state : * | step : */*/Machine(*,*) | view : */* | {} }
+                      ) =>
+                          let
+                            $fin_state : * =
+                              get?_state<*>($row2 : { state : * | * })
+                            in
+                              let
+                                $fin_view : */* =
+                                  get?_view<*/*>($row2 : { view : */* | * })
+                                in
+                                  @<*>
+                                    ( $fin_view : */*
+                                    , $fin_state : *
+                                    )
+                  }
+          }
+    |]
+  , [corn|
+      Builtin$.event$_blocking_poll(state : *, try_fn : */*, block_fn : */*) =
+        @<IO(*)>(
+          `Builtin$.io$_defer` : (*/*)/IO(*),
+          fn(_ : unit) =>
+            case<*>(
+              @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
+                           @<IO(Option(*))>(try_fn : */IO(Option(*)), state : *))
+            ) {
+              | ( None : Option(*) ) =>
+                  let _ : unit =
+                    @<unit>(`Builtin$.io$_eval` : IO(unit)/unit,
+                            @<IO(unit)>(block_fn : */IO(unit), state : *))
+                  in
+                    @<*>(`Builtin$.io$_eval` : IO(*)/*,
+                         @<IO(*)>
+                           ( `Builtin$.event$_blocking_poll` : */(*/IO(Option(*)))/(*/IO(unit))/IO(*)
+                           , state : *
+                           , try_fn : */IO(Option(*))
+                           , block_fn : */IO(unit)
+                           )
+                    )
+              | ( Some : */Option(*)
+                , result : *
+                ) =>
+                  result : *
+            }
+        )
+    |]
+  , [corn|
+      Builtin$.event$_loop(state : *, step_fn : */Option(*)) =
+        case<*>(@<Option(*)>(step_fn : */Option(*), state : *)) {
+          | ( None : Option(*) ) =>
+              state : *
+          | ( Some : */Option(*)
+            , next : *
+            ) =>
+              @<*>
+                ( `Builtin$.event$_loop` : */(*/Option(*))/*
+                , next : *
+                , step_fn : */Option(*)
+                )
+        }
+    |]
+  , [corn|
+      Builtin$.event$_loop_io(state : *, step_fn : */*) =
+        @<IO(*)>(
+          `Builtin$.io$_defer` : (*/*)/IO(*),
+          fn(_ : unit) =>
+            case<*>(
+              @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
+                           @<IO(Option(*))>(step_fn : */IO(Option(*)), state : *))
+            ) {
+              | ( None : Option(*) ) =>
+                  state : *
+              | ( Some : */Option(*)
+                , next : *
+                ) =>
+                  @<*>(`Builtin$.io$_eval` : IO(*)/*,
+                       @<IO(*)>
+                         ( `Builtin$.event$_loop_io` : */(*/IO(Option(*)))/IO(*)
+                         , next : *
+                         , step_fn : */IO(Option(*))
+                         )
                   )
-        |]
-      )
-  , DFunction
-      Exported
-      "Builtin$.runtime$_panic"
-      [ Kernel.Label Kernel.string "str"
-      ]
-      ( unsafeParseExpr
-          [r|
-                        @<*>
-                          ( coal_panic : string/*
-                          , str : string
-                          )
-        |]
-      )
+            }
+        )
+    |]
+  , [corn|
+      Builtin$.runtime$_panic(str : string) =
+        @<*>
+          ( coal_panic : string/*
+          , str : string
+          )
+    |]
   , -- Free monad: map over the functor layer, recursing through the
     -- continuation. The `Functor<f>` dictionary is threaded explicitly as the
     -- first parameter, since `Free<f, a>` embeds `f<Free<f, a>>` and the
     -- payload must be mapped over to reach the recursive occurrences.
-    DFunction
-      Exported
-      "Builtin$.free$_map_free"
-      [ Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "f"
-      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "s"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<Free(*,*)>(s : Free(*,*)) {
-                    | ( Free : */Free(*,*)
-                      , ff : *
+    [corn|
+      Builtin$.free$_map_free($d : Functor(*), f : */*, s : Free(*,*)) =
+        case<Free(*,*)>(s : Free(*,*)) {
+          | ( Free : */Free(*,*)
+            , ff : *
+            ) =>
+              let
+                $map : */*/* =
+                  case<*/*/*>($d : Functor(*)) {
+                    | ( $Record : { map : */*/* | * }/Functor(*)
+                      , $r : { map : */*/* | * }
                       ) =>
-                        let
-                          $map : */*/* =
-                            case<*/*/*>($d : Functor(*)) {
-                              | ( $Record : { map : */*/* | * }/Functor(*)
-                                , $r : { map : */*/* | * }
-                                ) =>
-                                  get?_map<*/*/*>($r : { map : */*/* | * })
-                            }
-                        in
-                          @<Free(*,*)>
-                            ( Free : */Free(*,*)
-                            , @<*>
-                                ( $map : */*/*
-                                , fn(x : *) =>
-                                    @<Free(*,*)>
-                                      ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
-                                      , $d : Functor(*)
-                                      , f : */*
-                                      , x : *
-                                      )
-                                , ff : *
-                                )
-                            )
-                    | ( Pure : */Free(*,*)
-                      , x : *
-                      ) =>
-                        @<Free(*,*)>
-                          ( Pure : */Free(*,*)
-                          , @<*>(f : */*, x : *)
-                          )
+                        get?_map<*/*/*>($r : { map : */*/* | * })
                   }
-        |]
-      )
+              in
+                @<Free(*,*)>
+                  ( Free : */Free(*,*)
+                  , @<*>
+                      ( $map : */*/*
+                      , fn(x : *) =>
+                          @<Free(*,*)>
+                            ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
+                            , $d : Functor(*)
+                            , f : */*
+                            , x : *
+                            )
+                      , ff : *
+                      )
+                  )
+          | ( Pure : */Free(*,*)
+            , x : *
+            ) =>
+              @<Free(*,*)>
+                ( Pure : */Free(*,*)
+                , @<*>(f : */*, x : *)
+                )
+        }
+    |]
   , -- Free monad: sequence a continuation after the free structure, again
     -- recursing under the functor layer.
-    DFunction
-      Exported
-      "Builtin$.free$_bind_free"
-      [ Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d"
-      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "ma"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "k"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<Free(*,*)>(ma : Free(*,*)) {
-                    | ( Free : */Free(*,*)
-                      , ff : *
+    [corn|
+      Builtin$.free$_bind_free($d : Functor(*), ma : Free(*,*), k :  */*) =
+        case<Free(*,*)>(ma : Free(*,*)) {
+          | ( Free : */Free(*,*)
+            , ff : *
+            ) =>
+              let
+                $map : */*/* =
+                  case<*/*/*>($d : Functor(*)) {
+                    | ( $Record : { map : */*/* | * }/Functor(*)
+                      , $r : { map : */*/* | * }
                       ) =>
-                        let
-                          $map : */*/* =
-                            case<*/*/*>($d : Functor(*)) {
-                              | ( $Record : { map : */*/* | * }/Functor(*)
-                                , $r : { map : */*/* | * }
-                                ) =>
-                                  get?_map<*/*/*>($r : { map : */*/* | * })
-                            }
-                        in
-                          @<Free(*,*)>
-                            ( Free : */Free(*,*)
-                            , @<*>
-                                ( $map : */*/*
-                                , fn(x : *) =>
-                                    @<Free(*,*)>
-                                      ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
-                                      , $d : Functor(*)
-                                      , x : *
-                                      , k : */*
-                                      )
-                                , ff : *
-                                )
-                            )
-                    | ( Pure : */Free(*,*)
-                      , x : *
-                      ) =>
-                        @<Free(*,*)>(k : */*, x : *)
+                        get?_map<*/*/*>($r : { map : */*/* | * })
                   }
-        |]
-      )
+              in
+                @<Free(*,*)>
+                  ( Free : */Free(*,*)
+                  , @<*>
+                      ( $map : */*/*
+                      , fn(x : *) =>
+                          @<Free(*,*)>
+                            ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
+                            , $d : Functor(*)
+                            , x : *
+                            , k : */*
+                            )
+                      , ff : *
+                      )
+                  )
+          | ( Pure : */Free(*,*)
+            , x : *
+            ) =>
+              @<Free(*,*)>(k : */*, x : *)
+        }
+    |]
   , -- Free monad: applicative application, defined as `bind` with the value
     -- wrapped through `map`.
-    DFunction
-      Exported
-      "Builtin$.free$_ap_free"
-      [ Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d"
-      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "mf"
-      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "mx"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  @<Free(*,*)>
-                    ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
-                    , $d : Functor(*)
-                    , mf : Free(*,*)
-                    , fn(g : *) =>
-                        @<Free(*,*)>
-                          ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
-                          , $d : Functor(*)
-                          , g : */*
-                          , mx : Free(*,*)
-                          )
-                    )
-        |]
-      )
+    [corn|
+      Builtin$.free$_ap_free($d : Functor(*), mf : Free(*,*), mx : Free(*,*)) =
+        @<Free(*,*)>
+          ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
+          , $d : Functor(*)
+          , mf : Free(*,*)
+          , fn(g : *) =>
+              @<Free(*,*)>
+                ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
+                , $d : Functor(*)
+                , g : */*
+                , mx : Free(*,*)
+                )
+          )
+    |]
   , -- Free monad: interpret the program by handing each instruction layer to
     -- the handler and recursing through the continuation. `pure` comes from
     -- the `Applicative<m>` dictionary and `map` from the `Functor<f>`
     -- dictionary; the two dictionaries come first, in the order the
     -- `free$_interpret` scheme declares them (see
     -- `Coal.Compiler.Builtin.Functions`).
-    DFunction
-      Exported
-      "Builtin$.free$_interpret"
-      [ Kernel.Label (Kernel.TCon "Applicative" [Kernel.TOpq]) "$d"
-      , Kernel.Label (Kernel.TCon "Functor" [Kernel.TOpq]) "$d_f"
-      , Kernel.Label (Kernel.TOpq `Kernel.arrow` Kernel.TOpq) "handler"
-      , Kernel.Label (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]) "instructions"
-      ]
-      ( unsafeParseExpr
-          [r|
-                  case<*>(instructions : Free(*,*)) {
-                    | ( Free : */Free(*,*)
-                      , ins : *
+    [corn|
+      Builtin$.free$_interpret($d : Applicative(*), $d_f : Functor(*), handler : */*, instructions : Free(*,*)) =
+        case<*>(instructions : Free(*,*)) {
+          | ( Free : */Free(*,*)
+            , ins : *
+            ) =>
+              let
+                $map : */*/* =
+                  case<*/*/*>($d_f : Functor(*)) {
+                    | ( $Record : { map : */*/* | * }/Functor(*)
+                      , $r : { map : */*/* | * }
                       ) =>
-                        let
-                          $map : */*/* =
-                            case<*/*/*>($d_f : Functor(*)) {
-                              | ( $Record : { map : */*/* | * }/Functor(*)
-                                , $r : { map : */*/* | * }
-                                ) =>
-                                  get?_map<*/*/*>($r : { map : */*/* | * })
-                            }
-                        in
-                          @<*>
-                            ( handler : */*
-                            , @<*>
-                                ( $map : */*/*
-                                , fn(x : *) =>
-                                    @<*>
-                                      ( `Builtin$.free$_interpret` : Applicative(*)/Functor(*)/(*/*)/Free(*,*)/*
-                                      , $d : Applicative(*)
-                                      , $d_f : Functor(*)
-                                      , handler : */*
-                                      , x : *
-                                      )
-                                , ins : *
-                                )
-                            )
-                    | ( Pure : */Free(*,*)
-                      , val : *
-                      ) =>
-                        let
-                          $pure : */* =
-                            case<*/*>($d : Applicative(*)) {
-                              | ( $Record : { pure : */* | * }/Applicative(*)
-                                , $r2 : { pure : */* | * }
-                                ) =>
-                                  get?_pure<*/*>($r2 : { pure : */* | * })
-                            }
-                        in
-                          @<*>
-                            ( $pure : */*
-                            , val : *
-                            )
+                        get?_map<*/*/*>($r : { map : */*/* | * })
                   }
-        |]
-      )
+              in
+                @<*>
+                  ( handler : */*
+                  , @<*>
+                      ( $map : */*/*
+                      , fn(x : *) =>
+                          @<*>
+                            ( `Builtin$.free$_interpret` : Applicative(*)/Functor(*)/(*/*)/Free(*,*)/*
+                            , $d : Applicative(*)
+                            , $d_f : Functor(*)
+                            , handler : */*
+                            , x : *
+                            )
+                      , ins : *
+                      )
+                  )
+          | ( Pure : */Free(*,*)
+            , val : *
+            ) =>
+              let
+                $pure : */* =
+                  case<*/*>($d : Applicative(*)) {
+                    | ( $Record : { pure : */* | * }/Applicative(*)
+                      , $r2 : { pure : */* | * }
+                      ) =>
+                        get?_pure<*/*>($r2 : { pure : */* | * })
+                  }
+              in
+                @<*>
+                  ( $pure : */*
+                  , val : *
+                  )
+        }
+    |]
   ]

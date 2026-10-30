@@ -26,8 +26,6 @@ import Control.Monad (void)
 import Control.Monad.Combinators.Expr (makeExprParser)
 import qualified Data.List.NonEmpty as NonEmpty
 
-import Text.Megaparsec ((<|>))
-
 import Coal.Common.Name (Name)
 import Coal.Kernel.Language.Expr (Binding (..), Clause (..), Expr (..), Label (..))
 import Coal.Kernel.Language.Type (Type)
@@ -38,7 +36,7 @@ import Coal.Kernel.Parser (
   lexeme,
   parens,
   qualifiedConstructor,
-  qualifiedName,
+  qualifiedObjectName,
   reserved,
   spaces,
  )
@@ -103,14 +101,17 @@ label = do
   return $ Label t name
 
 {- | Parse a label name (identifier, constructor, or backtick string)
-Supports qualified names like My.Utilities.find_min and $Cons
+Supports qualified names like My.Utilities.find_min, $Cons, operator names like
+@Builtin$.(==)@, and names with embedded serialised type arguments such as
+@Builtin$.(==)__$impl_Comparable(TApplication(TConstructor(#Tuple2)))@.
 -}
 pLabelName :: Parser Name
 pLabelName =
   P.choice
     [ P.try backtickString
-    , P.try qualifiedConstructor
-    , qualifiedName C.letterChar <|> qualifiedName (C.char '_')
+    , P.try (qualifiedObjectName C.upperChar)
+    , qualifiedObjectName C.letterChar
+    , qualifiedObjectName (C.char '_')
     ]
 
 -- | Parse a variable: name : type

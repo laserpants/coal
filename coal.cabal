@@ -184,13 +184,13 @@ library
       Coal.Kernel.LLVM.RuntimeDefs
       Coal.Kernel.Module.DependencyGraph
       Coal.Kernel.Parser
+      Coal.Kernel.Parser.Corn
       Coal.Kernel.Parser.Expr
       Coal.Kernel.Parser.Module
       Coal.Kernel.Parser.Op
       Coal.Kernel.Parser.Prim
       Coal.Kernel.Parser.Symbol
       Coal.Kernel.Parser.Type
-      Coal.Kernel.Parser.Unsafe
       Coal.Kernel.Pipeline
       Coal.Kernel.Pipeline.Invariant
       Coal.Kernel.Pipeline.Invariant.AdministrativeNormalForm

@@ -11,6 +11,7 @@ module Coal.Language.Serializable (
   Serializable (..),
   instanceLabel,
   dictionaryLabel,
+  builtinInstance,
 ) where
 
 import Coal.Language.Trait (Trait (..), traitName)
@@ -129,6 +130,15 @@ instance (Serializable s) => Serializable (Trait s) where
 
 instanceLabel :: (Serializable t) => Trait t -> Name -> Name
 instanceLabel trait name = name <> "__$impl_" <> serialize trait
+
+{- | Name of a builtin trait-instance implementation.
+
+Builtin instance members live in the @Builtin$@ module and are named after the
+trait and its type argument, e.g.
+@Builtin$.from_int32__$impl_NumericBase(TIntrinsic(IInt32))@.
+-}
+builtinInstance :: (Serializable t) => Trait t -> Name -> Name
+builtinInstance trait name = instanceLabel trait ("Builtin$." <> name)
 
 dictionaryLabel :: (Serializable t) => Trait t -> Name
 dictionaryLabel trait = "$d_" <> instanceLabel trait (traitName trait)
