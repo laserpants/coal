@@ -2899,6 +2899,16 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 502: a do-block let statement (`x = e;`) binds purely, desugaring to a
+  -- `let` inside the monadic continuation. The bound names are in scope for
+  -- the following statements and may refer to earlier bind/let results.
+  describe "502" $
+    expectOutput
+      "42"
+      "test/Coal/examples/502"
+      [ "Main.coal"
+      ]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

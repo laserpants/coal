@@ -553,11 +553,14 @@ instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Expressio
         return id1
       EDoBlock _ is -> do
         dotId <- emitShape HouseShape "EDoBlock"
-        forM_ is $
-          \(p, e) -> do
+        forM_ is $ \case
+          DoBind p e -> do
             id1 <- toDot p
             emitEdge dotId id1
             emitEdge id1 e
+          DoLet b -> do
+            id1 <- toDot b
+            emitEdge dotId id1
         return dotId
 
 instance (Dot t, Dot (Type Parameter k), Show k, CoalPretty k) => Dot (Pattern a k t) where

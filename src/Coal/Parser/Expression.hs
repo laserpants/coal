@@ -55,24 +55,50 @@ parseDoBlock :: Parser (Expression Metadata () ())
 parseDoBlock = do
   withMetadata $ do
     lexeme_ "do"
-    exprs <- braces $ do
-      nonEmpty $ some (try parseDoExpression <|> parseVoidDoExpression)
-    pure (`EDoBlock` exprs)
+    stmts <- braces $ nonEmpty $ some parseDoStatement
+    pure (`EDoBlock` stmts)
 
-parseDoExpression :: Parser (Pattern Metadata () (), Expression Metadata () ())
-parseDoExpression = do
+{- | A single statement of a @do@ block.
+
+Three forms are accepted, in this order:
+
+@
+pat <- expr;   -- monadic bind
+pat = expr;    -- pure let binding (also @f(pat, ...) = expr;@)
+expr;          -- bare expression statement
+@
+
+A bare expression statement is represented as a bind whose pattern is a
+wildcard, so that the desugaring stays uniform. The first two alternatives
+are wrapped in 'try' because the pattern / binding parsers may consume input
+before the distinguishing token (@<-@ or @=@) is seen.
+-}
+parseDoStatement :: Parser (DoStatement Metadata () ())
+parseDoStatement =
+  try parseDoBindStatement
+    <|> try parseDoLetStatement
+    <|> parseDoVoidStatement
+
+parseDoBindStatement :: Parser (DoStatement Metadata () ())
+parseDoBindStatement = do
   p <- parsePattern
   symbol_ "<-"
   e <- parseExpression
   symbol_ ";"
-  pure (p, e)
+  pure (DoBind p e)
 
-parseVoidDoExpression :: Parser (Pattern Metadata () (), Expression Metadata () ())
-parseVoidDoExpression = do
+parseDoLetStatement :: Parser (DoStatement Metadata () ())
+parseDoLetStatement = do
+  b <- parseBinding
+  symbol_ ";"
+  pure (DoLet b)
+
+parseDoVoidStatement :: Parser (DoStatement Metadata () ())
+parseDoVoidStatement = do
   e <- parseExpression
   symbol_ ";"
   withMetadata $
-    pure (\loc -> (PAny loc (), e))
+    pure (\loc -> DoBind (PAny loc ()) e)
 
 {- | Parse a field section, @_.f@.
 

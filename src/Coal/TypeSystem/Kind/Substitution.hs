@@ -12,7 +12,7 @@ import Coal.Compiler.Build (Build (..), InstanceMap)
 import Coal.Compiler.Build.NameEntry
 import Coal.Language.Data.Constructor (DataConstructor (..))
 import Coal.Language.Definition
-import Coal.Language.Expression (Clause (..), CompiledClause (..), Expression (..))
+import Coal.Language.Expression (Clause (..), CompiledClause (..), DoStatement (..), Expression (..))
 import Coal.Language.Expression.Binding (Binding (..))
 import Coal.Language.Expression.Choice (Choice (..), Guard (..))
 import Coal.Language.Module (Module (..))
@@ -392,6 +392,20 @@ instance KindSubstitutable (Binding Expression a Kind ()) where
         BPattern a (replaceVariables p) (replaceVariables e)
       BFunction a name ps e ->
         BFunction a name (replaceVariables ps) (replaceVariables e)
+
+instance KindSubstitutable (DoStatement a Kind ()) where
+  applyKinds sub =
+    \case
+      DoBind p e ->
+        DoBind (applyKinds sub p) (applyKinds sub e)
+      DoLet b ->
+        DoLet (applyKinds sub b)
+  replaceVariables =
+    \case
+      DoBind p e ->
+        DoBind (replaceVariables p) (replaceVariables e)
+      DoLet b ->
+        DoLet (replaceVariables b)
 
 instance KindSubstitutable (Pattern a Kind ()) where
   applyKinds sub =
