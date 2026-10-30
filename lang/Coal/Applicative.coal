@@ -54,4 +54,16 @@ module Coal.Applicative {
   fun map2(f : p -> q -> r, a1 : f<p>, a2 : f<q>) : f<r> with (Applicative<f>, Functor<f>) =                 
     ap(map(f, a1), a2)
 
+  /**
+   * `traverse_list` applies an applicative-producing function to every element
+   * of a list and combines the results into a single wrapped list.
+   *
+   * **Type**: `traverse_list : (a -> f<b>) -> List<a> -> f<List<b>> with (Applicative<f>)`
+   */
+  fun traverse_list(f : a -> f<b>, list : List<a>) : f<List<b>> with (Applicative<f>) =
+    fold(list) {
+      | [] => pure([])
+      | x :: @rest => ap(map(fn(y, ys) => y :: ys, f(x)), rest)
+    }
+
 }
