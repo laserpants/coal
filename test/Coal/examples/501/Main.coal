@@ -6,7 +6,7 @@ module Main {
   import Coal.Functor(Functor)
   import List(concat_map, concat, is_empty)
   import Coal.Applicative(Applicative, traverse_list)
-  import Coal.Monad(Monad, and_then, and_always, and_return) 
+  import Coal.Monad(Monad, and_then, and_always, and_return, unless) 
   import Coal.Monad.Free(Free, lift_free, interpret)
 
   type ProductId = ProductId(int32)
@@ -17,17 +17,25 @@ module Main {
 
   type alias Quantity = nat
 
-  type alias OrderItem = { product : Product, quantity : Quantity }
+  type alias OrderItem = { product_id : ProductId, quantity : Quantity }
 
   type alias Order = { id : OrderId, items: List<OrderItem> }
 
   type CustomerId = CustomerId(int32)
+
+  type Address = Address
+
+  type PaymentDetails = PaymentDetails
 
   type Message = Message(string)
 
   type OrderWorkflow<a>
     = GetOrder(OrderId, Order -> a)
     | CheckInventory(ProductId, Quantity, bool -> a)
+    | RejectOrder(OrderId, a)
+    | ReserveStock(ProductId, Quantity, a)
+    | ChargePayment(PaymentDetails, bool ->  a)
+    | ArrangeShipping(OrderId, Address, a)
     | NotifyCustomer(CustomerId, Message, a)
 
   instance Functor<OrderWorkflow> {
@@ -37,6 +45,14 @@ module Main {
             GetOrder(order_id, f << g)
         | CheckInventory(product_id, qty, g) => 
             CheckInventory(product_id, qty, f << g)
+        | RejectOrder(order_id, a) =>
+            RejectOrder(order_id, f(a))
+        | ReserveStock(product_id, qty, a) =>
+            ReserveStock(product_id, qty, f(a))
+        | ChargePayment(details, g) =>
+            ChargePayment(details, f << g)
+        | ArrangeShipping(order_id, address, a) =>
+            ArrangeShipping(order_id, address, f(a))
         | NotifyCustomer(customer_id, message, a) => 
             NotifyCustomer(customer_id, message, f(a))
       }
@@ -46,21 +62,34 @@ module Main {
 
   fun check_inventory(product_id, qty) = lift_free(CheckInventory(product_id, qty, fn(b) => b))
 
+  fun reject_order(order_id) = lift_free(RejectOrder(order_id, ()))
+
+  fun reserve_stock(product_id, qty) = lift_free(ReserveStock(product_id, qty, ()))
+
   //
 
   fun check_item_availability(item : OrderItem) : Free<OrderWorkflow, List<OrderItem>> = do {
-    available <- check_inventory(item.product.id, item.quantity);
-    pure(if (! available) then [item] else []);
+    available <- check_inventory(item.product_id, item.quantity);
+    if (! available) 
+      then pure([item]) 
+      else pure([]);
   }
 
-  let my_program : Free<OrderWorkflow, Order> = do {
+  fun reserve_item_stock(item : OrderItem) : Free<OrderWorkflow, unit> = do {
+    reserve_stock(item.product_id, item.quantity);
+  }
+
+  let my_program : Free<OrderWorkflow, unit> = do {
     order <- get_order(OrderId(5));
     items <- traverse_list(check_item_availability, order.items);
     unavailable = concat(items);
 
-    if (is_empty(unavailable)) 
-      then pure(order)
-      else pure(order);
+    if (is_empty(unavailable))
+      then do {
+        _ <- traverse_list(reserve_item_stock, order.items);
+        pure();
+      }
+      else reject_order(order.id);
   }
 
 //  type BasicIO<a>
