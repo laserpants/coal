@@ -29,6 +29,12 @@ module Main {
 
   type Message = Message(string)
 
+//  grammar OrderWorkflow {
+//    get_order(OrderId, Order -> *)
+//    check_inventory(ProductId, Quantity, bool -> *)
+//    reject_order(OrderId)
+//  }
+
   type OrderWorkflow<a>
     = GetOrder(OrderId, Order -> a)
     | CheckInventory(ProductId, Quantity, bool -> a)
