@@ -1,0 +1,66 @@
+module Main {
+
+  import namespace IO
+  import IO(return)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad, and_then, and_always)
+  import Coal.Monad.Free(Free, lift_free, interpret)
+
+  // Two kinds of instruction appear below:
+  //
+  //   * value-payload instructions (`WriteLn`, `ReadLn`), whose payload slot
+  //     holds the *result*. `lift_free` fills the continuation with `pure`,
+  //   * continuation-payload instructions (`If`), whose payload slots *are*
+  //     the continuations. Those programs are handed to the `Free`
+  //     constructor directly.
+  //
+  // Passing an `If` through `lift_free` inserts a `Pure` layer, i.e.
+  // `Free(If(c, Pure(b1), Pure(b2)))` rather than `Free(If(c, b1, b2))`. The
+  // branches then sit in the instruction's *value* position, so `interpret`
+  // returns them as values instead of running them and the following
+  // `and_always` discards them: the branch prints nothing.
+
+  type LangF<a>
+    = WriteLn(string, a)
+    | ReadLn(string -> a)
+    | If(bool, a, a)
+
+  instance Functor<LangF> {
+    fun map(f) = 
+      match{
+        | WriteLn(str, x) => WriteLn(str, f(x))
+        | ReadLn(g) => ReadLn(f << g)
+        | If(c, a, b) => If(c, f(a), f(b))
+      }
+  }
+
+  let my_program : Free<LangF, int32> =
+    lift_free(WriteLn("Enter your name", ()))
+      |. and_always(lift_free(WriteLn("---", ())))
+      |. and_always(lift_free(ReadLn(fn(s) => s)))
+      |. and_then(fn(s) => Free(If(
+           s == "exit", 
+           pure(), 
+           lift_free(WriteLn("Hello " <> s, ()))
+         )))
+      |. and_always(pure(0))
+
+  type alias Handler<f, e, a> = f<e<a>> -> e<a>
+
+  fun io_lang_handler : Handler<LangF, IO, a>
+    | WriteLn(str, a) => do {
+        IO.println_string(str);
+        a;
+      }
+    | ReadLn(f) => do {
+        s <- IO.readln();
+        f(s);
+      }
+    | If(c, a, b) => if (c) then a else b
+
+  fun main() =
+    interpret(io_lang_handler, my_program)
+
+}
+

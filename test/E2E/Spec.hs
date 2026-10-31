@@ -2745,6 +2745,64 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/481" ["Main.coal"]
       res `shouldBe` Left TypeError
 
+  -- 482: `Free.map_free` is implemented at the kernel level
+  -- (`Builtin$.free$_map_free`), because mapping over `Free<f, a>` recurses
+  -- under the functor layer. Both constructors are mapped over, so the
+  -- recursive (`Free`) branch is exercised as well as the `Pure` base case.
+  describe "482" $
+    expectOutput
+      "42"
+      "test/Coal/examples/482"
+      [ "Main.coal"
+      ]
+
+  -- 483: likewise for `Free.bind_free` (`Builtin$.free$_bind_free`). The
+  -- program is headed by `Free`, so the recursive branch is exercised.
+  describe "483" $
+    expectOutput
+      "20"
+      "test/Coal/examples/483"
+      [ "Main.coal"
+      ]
+
+  -- 484: `Free.ap_free` (`Builtin$.free$_ap_free`) is defined in the kernel in
+  -- terms of `bind_free` and `map_free`, so it too recurses under the functor
+  -- layer. The function part is headed by `Free`.
+  describe "484" $
+    expectOutput
+      "8"
+      "test/Coal/examples/484"
+      [ "Main.coal"
+      ]
+
+  -- 485: the free-monad encoding distinguishes instructions whose payload slot
+  -- holds a *result* (`WriteLn`, `ReadLn`) from instructions whose payload
+  -- slots *are* the continuations (`If`). The former are lifted with
+  -- `lift_free` (which fills the continuation with `pure`); the latter must be
+  -- passed to the `Free` constructor directly, since `lift_free` would insert a
+  -- `Pure` layer, leaving the branch programs in the instruction's value
+  -- position, where the interpreter returns them as values instead of running
+  -- them (and the following `and_always` discards them). With empty stdin
+  -- `readln` yields the empty string.
+  describe "485" $
+    expectOutput
+      "Enter your name\n---\nHello "
+      "test/Coal/examples/485"
+      [ "Main.coal"
+      ]
+
+  -- 486: `interpret` is implemented at the kernel level
+  -- (`Builtin$.free$_interpret`), because interpreting a `Free<f, a>` recurses
+  -- under the functor layer. The first program is headed by `Free` (recursive
+  -- branch) and ends in `pure` (base case); the second is `Pure`-only, and its
+  -- result is printed.
+  describe "486" $
+    expectOutput
+      "first\nsecond\n7"
+      "test/Coal/examples/486"
+      [ "Main.coal"
+      ]
+
   -- 490: an instance implementation that is not polymorphic enough must be
   -- rejected. `instance Functor<LangF>` has a closed head, so the member's own
   -- `a` and `b` are the only signature variables that can be instantiated; the

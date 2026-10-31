@@ -1,0 +1,54 @@
+/**
+ * `interpret` is implemented at the kernel level (`Builtin$.free$_interpret`),
+ * because interpreting a `Free<f, a>` recurses under the functor layer: the
+ * continuation of an instruction is itself a `Free<f, a>` program, which the
+ * surface language's structural recursion cannot express.
+ *
+ * The program below is headed by `Free` and ends in `pure`, so the recursive
+ * branch is exercised as well as the `Pure` base case. A second, `Pure`-only
+ * program is interpreted on its own and its result printed, so the base case
+ * is covered directly too.
+ */
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad)
+  import Coal.Monad.Free(Free, lift_free, interpret)
+
+  // A single instruction: print a line, then carry on with the payload.
+  type LangF<a> = WriteLn(string, a)
+
+  instance Functor<LangF> {
+    fun map(f, WriteLn(str, x)) = WriteLn(str, f(x))
+  }
+
+  type alias Handler<f, e, a> = f<e<a>> -> e<a>
+
+  fun io_lang_handler : Handler<LangF, IO, a>
+    | WriteLn(str, a) => do {
+        IO.println_string(str);
+        a;
+      }
+
+  fun write(s) = lift_free(WriteLn(s, ()))
+
+  // Headed by `Free`: interpreting it recurses into the continuation, which
+  // finishes with `pure`.
+  let my_program : Free<LangF, int32> = do {
+    write("first");
+    write("second");
+    pure(0);
+  }
+
+  // Headed by `Pure`: interpreting it only takes the base case.
+  let pure_program : Free<LangF, int32> = pure(7)
+
+  fun main() = do {
+    interpret(io_lang_handler, my_program);
+    r <- interpret(io_lang_handler, pure_program);
+    IO.println_int32(r);
+  }
+
+}

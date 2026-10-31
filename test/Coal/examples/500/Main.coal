@@ -1,0 +1,66 @@
+module Main {
+
+  import namespace IO
+
+  import IO(return)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad, and_then, and_always, and_return) 
+  import Coal.Monad.Free(Free, lift_free, interpret)
+
+  type BasicIO<a>
+    = WriteLn(string, a)
+    | ReadLn(string -> a)
+
+  instance Functor<BasicIO> {
+    fun map(f) = 
+      match{
+        | WriteLn(str, x) => WriteLn(str, f(x))
+        | ReadLn(g) => ReadLn(f << g)
+      }
+  }
+
+  fun writeln(s) = lift_free(WriteLn(s, ()))
+
+  let readln = lift_free(ReadLn(fn(s) => s))
+
+  type alias Effect<f, e> = Free<f, e>
+
+  type Logging<a> = Log(string, a)
+
+  instance Functor<Logging> {
+    fun map(f) = 
+      match{
+        | Log(str, x) => Log(str, f(x))
+      }
+  }
+
+  fun log(s) = lift_free(Log(s, ()))
+
+  type MyGrammar<a> 
+    = MyGrammarBasicIO(BasicIO<a>)
+    | MyGrammarLogging(Logging<a>)
+
+  let my_program : Effect<BasicIO, int32> = do {
+    writeln("Enter your name");
+    writeln("----");
+    s <- readln;
+    writeln("Hello " <> s);
+    pure(0);
+  }
+
+  fun io_lang_handler : BasicIO<IO<a>> -> IO<a>
+    | WriteLn(str, a) => do {
+        IO.println_string(str);
+        a;
+      }
+    | ReadLn(f) => do {
+        s <- IO.readln();
+        f(s);
+      }
+
+  fun main() =
+    my_program |. interpret(io_lang_handler)
+
+}
+

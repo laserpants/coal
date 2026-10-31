@@ -51,6 +51,15 @@ objectList =
       "Machine"
       [ ("Machine", Kernel.arrow Kernel.TOpq (Kernel.TCon "Machine" [Kernel.TOpq, Kernel.TOpq]))
       ]
+  , -- Free monad: two constructors, listed in lexicographic order so that the
+    -- positional tags match those of the surface `Free` type in
+    -- @Coal.Monad.Free@ (Free = 0, Pure = 1). Declared here so Builtin$ bodies
+    -- can use the unqualified names.
+    DData
+      "Free"
+      [ ("Free", Kernel.arrow Kernel.TOpq (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]))
+      , ("Pure", Kernel.arrow Kernel.TOpq (Kernel.TCon "Free" [Kernel.TOpq, Kernel.TOpq]))
+      ]
   , [corn|
       Builtin$.operator$__not(a : bool) =
         if (a : bool) then false else true
@@ -2053,5 +2062,155 @@ objectList =
           ( coal_panic : string/*
           , str : string
           )
+    |]
+  , -- Free monad: map over the functor layer, recursing through the
+    -- continuation. The `Functor<f>` dictionary is threaded explicitly as the
+    -- first parameter, since `Free<f, a>` embeds `f<Free<f, a>>` and the
+    -- payload must be mapped over to reach the recursive occurrences.
+    [corn|
+      Builtin$.free$_map_free($d : Functor(*), f : */*, s : Free(*,*)) =
+        case<Free(*,*)>(s : Free(*,*)) {
+          | ( Free : */Free(*,*)
+            , ff : *
+            ) =>
+              let
+                $map : */*/* =
+                  case<*/*/*>($d : Functor(*)) {
+                    | ( $Record : { map : */*/* | * }/Functor(*)
+                      , $r : { map : */*/* | * }
+                      ) =>
+                        get?_map<*/*/*>($r : { map : */*/* | * })
+                  }
+              in
+                @<Free(*,*)>
+                  ( Free : */Free(*,*)
+                  , @<*>
+                      ( $map : */*/*
+                      , fn(x : *) =>
+                          @<Free(*,*)>
+                            ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
+                            , $d : Functor(*)
+                            , f : */*
+                            , x : *
+                            )
+                      , ff : *
+                      )
+                  )
+          | ( Pure : */Free(*,*)
+            , x : *
+            ) =>
+              @<Free(*,*)>
+                ( Pure : */Free(*,*)
+                , @<*>(f : */*, x : *)
+                )
+        }
+    |]
+  , -- Free monad: sequence a continuation after the free structure, again
+    -- recursing under the functor layer.
+    [corn|
+      Builtin$.free$_bind_free($d : Functor(*), ma : Free(*,*), k :  */*) =
+        case<Free(*,*)>(ma : Free(*,*)) {
+          | ( Free : */Free(*,*)
+            , ff : *
+            ) =>
+              let
+                $map : */*/* =
+                  case<*/*/*>($d : Functor(*)) {
+                    | ( $Record : { map : */*/* | * }/Functor(*)
+                      , $r : { map : */*/* | * }
+                      ) =>
+                        get?_map<*/*/*>($r : { map : */*/* | * })
+                  }
+              in
+                @<Free(*,*)>
+                  ( Free : */Free(*,*)
+                  , @<*>
+                      ( $map : */*/*
+                      , fn(x : *) =>
+                          @<Free(*,*)>
+                            ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
+                            , $d : Functor(*)
+                            , x : *
+                            , k : */*
+                            )
+                      , ff : *
+                      )
+                  )
+          | ( Pure : */Free(*,*)
+            , x : *
+            ) =>
+              @<Free(*,*)>(k : */*, x : *)
+        }
+    |]
+  , -- Free monad: applicative application, defined as `bind` with the value
+    -- wrapped through `map`.
+    [corn|
+      Builtin$.free$_ap_free($d : Functor(*), mf : Free(*,*), mx : Free(*,*)) =
+        @<Free(*,*)>
+          ( `Builtin$.free$_bind_free` : Functor(*)/Free(*,*)/(*/*)/Free(*,*)
+          , $d : Functor(*)
+          , mf : Free(*,*)
+          , fn(g : *) =>
+              @<Free(*,*)>
+                ( `Builtin$.free$_map_free` : Functor(*)/(*/*)/Free(*,*)/Free(*,*)
+                , $d : Functor(*)
+                , g : */*
+                , mx : Free(*,*)
+                )
+          )
+    |]
+  , -- Free monad: interpret the program by handing each instruction layer to
+    -- the handler and recursing through the continuation. `pure` comes from
+    -- the `Applicative<m>` dictionary and `map` from the `Functor<f>`
+    -- dictionary; the two dictionaries come first, in the order the
+    -- `free$_interpret` scheme declares them (see
+    -- `Coal.Compiler.Builtin.Functions`).
+    [corn|
+      Builtin$.free$_interpret($d : Applicative(*), $d_f : Functor(*), handler : */*, instructions : Free(*,*)) =
+        case<*>(instructions : Free(*,*)) {
+          | ( Free : */Free(*,*)
+            , ins : *
+            ) =>
+              let
+                $map : */*/* =
+                  case<*/*/*>($d_f : Functor(*)) {
+                    | ( $Record : { map : */*/* | * }/Functor(*)
+                      , $r : { map : */*/* | * }
+                      ) =>
+                        get?_map<*/*/*>($r : { map : */*/* | * })
+                  }
+              in
+                @<*>
+                  ( handler : */*
+                  , @<*>
+                      ( $map : */*/*
+                      , fn(x : *) =>
+                          @<*>
+                            ( `Builtin$.free$_interpret` : Applicative(*)/Functor(*)/(*/*)/Free(*,*)/*
+                            , $d : Applicative(*)
+                            , $d_f : Functor(*)
+                            , handler : */*
+                            , x : *
+                            )
+                      , ins : *
+                      )
+                  )
+          | ( Pure : */Free(*,*)
+            , val : *
+            ) =>
+              let
+                $pure : */* =
+                  case<*/*>($d : Applicative(*)) {
+                    | ( $Record : { pure : */* | * }/Applicative(*)
+                      , $r2 : { pure : */* | * }
+                      ) =>
+                        get?_pure<*/*>($r2 : { pure : */* | * })
+                  }
+              in
+                @<*>
+                  ( $pure : */*
+                  , val : *
+                  )
+        }
     |]
   ]

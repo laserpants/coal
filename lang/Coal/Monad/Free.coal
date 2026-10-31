@@ -1,0 +1,81 @@
+/**
+ * The free monad.
+ *
+ * The free monad turns any functor `f` into a monad by describing computations
+ * as data: a computation is built as a tree of `f`-shaped instructions, which a
+ * separate interpreter can later give meaning to. This separates the
+ * description of an effectful computation from its interpretation.
+ */
+module Coal.Monad.Free(Free, lift_free, interpret) {
+ 
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monad(Monad)
+
+  /**
+   * The free monad over a functor `f`.
+   *
+   * A `Free<f, a>` value is either a finished computation, `Pure(a)`, or a
+   * single layer of `f` whose continuations are themselves `Free<f, a>`
+   * computations, `Free(f<Free<f, a>>)`.
+   *
+   * `Free<f>` is a `Functor`, `Applicative` and `Monad` whenever `f` is a
+   * `Functor`.
+   */
+  type Free<f, a>
+    = Pure(a)
+    | Free(f<Free<f, a>>)
+
+  fun map_free(f : a -> b, s : Free<f, a>) : Free<f, b> =
+    // The recursion is expressed in the kernel implementation, since the
+    // surface language only admits structural recursion.
+    free$_map_free(f, s)
+
+  fun ap_free(f : Free<f, a -> b>, fa : Free<f, a>) : Free<f, b> =
+    free$_ap_free(f, fa)
+
+  fun bind_free(ma : Free<f, a>, f : a -> Free<f, b>) : Free<f, b> =
+    free$_bind_free(ma, f)
+  
+  /**
+   * Lift a single instruction into the free monad.
+   *
+   * `lift_free(e)` is the one-step program that runs the instruction `e` and
+   * then finishes with `pure` of its payload: `lift_free(WriteLn("hi", ()))`
+   * is `Free(WriteLn("hi", Pure(())))`.
+   *
+   * **Type**: `lift_free : f<a> -> Free<f, a> with (Functor<f>)`
+   */
+  fun lift_free(e : f<a>) : Free<f, a> with (Functor<f>) =
+    Free(map(pure, e))
+
+  instance Functor<Free<f>> with (Functor<f>) {
+    let map = map_free
+  }
+
+  instance Applicative<Free<f>> with (Functor<f>) {
+    let ap = ap_free
+    let pure = Pure
+  }
+
+  instance Monad<Free<f>> with (Functor<f>) {
+    let bind = bind_free
+  }
+
+  /**
+   * Interpret a free program by running each instruction layer through the
+   * handler.
+   *
+   * `interpret(handler, instructions)` folds `instructions` bottom-up: the
+   * handler turns one layer of instructions whose continuations have already
+   * been interpreted into an `m`-computation, and `pure` finishes a program
+   * that has run out of instructions.
+   *
+   * **Type**: `interpret : (f<m<a>> -> m<a>) -> Free<f, a> -> m<a> with (Monad<m>)`
+   */
+  fun interpret(handler : f<m<a>> -> m<a>, instructions : Free<f, a>) : m<a> with (Monad<m>) =
+    // The recursion is expressed in the kernel implementation, since the
+    // surface language only admits structural recursion.
+    free$_interpret(handler, instructions)
+
+}
