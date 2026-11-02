@@ -173,7 +173,7 @@ type alias Dictionary<val> = Map<string, val>
 type Shape = Circle(float) | Rectangle(float, float)
 type Tree<a> = Leaf | Node(a, Tree<a>, Tree<a>)
 type Option<a> = Some(a) | None
-type Result<r, e> = Ok(r) | Err(e)
+type Result<e, r> = Ok(r) | Err(e)
 ```
 
 ### Records
@@ -643,7 +643,7 @@ println_string : string -> IO<unit>
 print_string   : string -> IO<unit>
 println_int32  : int32 -> IO<unit>
 readln         : unit -> IO<string>
-read_file      : string -> IO<Result<string, FileError>>
+read_file      : string -> IO<Result<FileError, string>>
 write_file     : string -> string -> IO<unit>
 random         : unit -> IO<double>
 ```

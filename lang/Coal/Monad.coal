@@ -32,6 +32,13 @@ module Coal.Monad {
       | Some(x), f => f(x) 
   }
 
+  instance Monad<Result<e>> {
+    // bind : Result<e, a> -> (a -> Result<e, b>) -> Result<e, b>
+    fun bind
+      | Err(err), _ => Err(err)
+      | Ok(x), f    => f(x)
+  }
+
   instance Monad<IO> {
     // Defer the whole chain: forcing the resulting action runs `v`, then `f`
     // on its result, and finally the action `f` produces.

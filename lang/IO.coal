@@ -295,9 +295,9 @@ module IO {
    * and return the result wrapped in `IO`. On success the result is
    * `Ok(string)`; on failure it is `Err(FileIOError)`.
    *
-   * **Type**: `read_file : string -> IO<Result<string, FileIOError>>`
+   * **Type**: `read_file : string -> IO<Result<FileIOError, string>>`
    */
-  fun read_file(path : string) : IO<Result<string, FileIOError>> =
+  fun read_file(path : string) : IO<Result<FileIOError, string>> =
     let
       decode_file_result(r : FileIOResult) =
         #{coal_result_status : FileIOResult -> int32}(r)(

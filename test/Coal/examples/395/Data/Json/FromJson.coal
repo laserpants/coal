@@ -9,7 +9,7 @@ module Data.Json.FromJson {
   )
 
   trait FromJson<a> {
-    from_json : JsonValue -> Result<a, string>
+    from_json : JsonValue -> Result<string, a>
   }
 
   instance FromJson<bool> {

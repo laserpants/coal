@@ -2,7 +2,7 @@ module Main {
 
   import IO(println_int32, println_string)
 
-  let res : Result<int32, string> = Ok(5)
+  let res : Result<string, int32> = Ok(5)
 
   fun main() =
     match(res) {

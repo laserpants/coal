@@ -268,9 +268,9 @@ prettyRule =
     RuleIfCondition _ t1 ->
       "Condition must have type `bool`, but got type " <> prettyType (normalizeTypeIndexes t1)
     RuleIfBranches _ t1 t2 ->
-      "If branches must have the same type, but got " <> prettyType (normalizeTypeIndexes t1) <> " and " <> prettyType (normalizeTypeIndexes t2)
+      "If-branches must have the same type, but got " <> prettyType (normalizeTypeIndexes t1) <> " and " <> prettyType (normalizeTypeIndexes t2)
     RuleLetBindingPattern _ t1 t2 ->
-      "Let binding pattern type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expression type " <> prettyType (normalizeTypeIndexes t2)
+      "Let-binding pattern type " <> prettyType (normalizeTypeIndexes t1) <> " doesn't match expression type " <> prettyType (normalizeTypeIndexes t2)
     RuleMatchClauseGuard _ ->
       "Match clause guard must have type `bool`."
     RuleMatchClauseExpressions _ ->

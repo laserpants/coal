@@ -69,7 +69,7 @@ module Main {
       }
   }
 
-  instance Pretty<Result<r, e>> with (Pretty<r>, Pretty<e>) {
+  instance Pretty<Result<e, r>> with (Pretty<e>, Pretty<r>) {
     fun pretty(res) =
       match(res) {
         | Ok(r) => 

@@ -169,9 +169,9 @@ builtinDefinitions =
       mempty
       "Result"
       ( TypeDefinition
-          [Parameter () "a", Parameter () "b"]
-          [ DataConstructor "Ok" 1 (Forall (Set.fromList [Parameter () "a", Parameter () "b"]) mempty (TVariable (Parameter () "a") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
-          , DataConstructor "Err" 1 (Forall (Set.fromList [Parameter () "a", Parameter () "b"]) mempty (TVariable (Parameter () "b") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "a") :| [TVariable (Parameter () "b")])))
+          [Parameter () "e", Parameter () "r"]
+          [ DataConstructor "Ok" 1 (Forall (Set.fromList [Parameter () "e", Parameter () "r"]) mempty (TVariable (Parameter () "r") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "e") :| [TVariable (Parameter () "r")])))
+          , DataConstructor "Err" 1 (Forall (Set.fromList [Parameter () "e", Parameter () "r"]) mempty (TVariable (Parameter () "e") `TArrow` applyTypeArgs () (TConstructor () "Result") (TVariable (Parameter () "e") :| [TVariable (Parameter () "r")])))
           ]
       )
   , DType

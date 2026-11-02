@@ -35,6 +35,16 @@ module Coal.Functor {
       }
   }
 
+  instance Functor<Result<e>> {
+    fun map(f, res) =
+      match(res) {
+        | Ok(x) =>
+            Ok(f(x))
+        | Err(err) =>
+            Err(err)
+      }
+  }
+
   /**
    * `void` discards the value inside a functor, replacing it with the 
    * unit value.

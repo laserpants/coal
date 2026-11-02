@@ -201,7 +201,7 @@ module Data.Json.Decoding(decode) {
       | _ => PsError("Unexpected token")
     }
 
-  fun parse_tokens(tokens : List<Token>) : Result<JsonValue, string> =
+  fun parse_tokens(tokens : List<Token>) : Result<string, JsonValue> =
     match(List.reduce_left(step_parser, Awaiting([]), tokens)) {
       | PsDone(v)   => Ok(v)
       | PsError(e)  => Err(e)
@@ -209,13 +209,13 @@ module Data.Json.Decoding(decode) {
       | HaveValue(_, _) => Err("Unexpected end of input after value")
     }
 
-  fun parse_result(token_result : Result<List<Token>, string>) : Result<JsonValue, string> =
+  fun parse_result(token_result : Result<string, List<Token>>) : Result<string, JsonValue> =
     match(token_result) {
       | Ok(tokens) => parse_tokens(tokens)
       | Err(e)     => Err(e)
     }
 
-  fun decode(input : string) : Result<JsonValue, string> =
+  fun decode(input : string) : Result<string, JsonValue> =
     parse_result(tokenize(input))
 
 }

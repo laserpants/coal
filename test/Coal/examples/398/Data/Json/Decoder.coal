@@ -3,21 +3,21 @@ module Data.Json.Decoder {
   import Data.Json.Value(JsonValue)
   import namespace List
 
-  type alias Decoder<a> = JsonValue -> Result<a, string>
+  type alias Decoder<a> = JsonValue -> Result<string, a>
 
-  fun null_decoder(json : JsonValue) : Result<unit, string> =
+  fun null_decoder(json : JsonValue) : Result<string, unit> =
     match(json) {
       | JsonNull => Ok(())
       | _        => Err("Expected null")
     }
 
-  fun bool_decoder(json : JsonValue) : Result<bool, string> =
+  fun bool_decoder(json : JsonValue) : Result<string, bool> =
     match(json) {
       | JsonBool(b) => Ok(b)
       | _           => Err("Expected bool")
     }
 
-  fun number_decoder(json : JsonValue) : Result<double, string> =
+  fun number_decoder(json : JsonValue) : Result<string, double> =
     match(json) {
       | JsonNumber(d) => Ok(d)
       | _             => Err("Expected number")
@@ -29,7 +29,7 @@ module Data.Json.Decoder {
       | _             => Err("Expected string")
     }
 
-  fun field(key : string, decoder : JsonValue -> Result<a, string>, json : JsonValue) : Result<a, string> =
+  fun field(key : string, decoder : JsonValue -> Result<string, a>, json : JsonValue) : Result<string, a> =
     match(json) {
       | JsonObject(pairs) =>
           match(List.find(fn((k, _)) => k == key, pairs)) {
@@ -40,7 +40,7 @@ module Data.Json.Decoder {
     }
 
 
-  fun array_decoder(elem : JsonValue -> Result<a, string>, json : JsonValue) : Result<List<a>, string> =
+  fun array_decoder(elem : JsonValue -> Result<string, a>, json : JsonValue) : Result<string, List<a>> =
     match(json) {
       | JsonArray(elements) =>
           fold(elements) {

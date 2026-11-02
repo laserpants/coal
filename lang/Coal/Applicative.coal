@@ -38,6 +38,16 @@ module Coal.Applicative {
     let pure = Some
   }
 
+  instance Applicative<Result<e>> {
+    // ap : Result<e, a -> b> -> Result<e, a> -> Result<e, b>
+    fun ap
+      | Err(err), _ => Err(err)
+      | _, Err(err) => Err(err)
+      | Ok(f), Ok(x) => Ok(f(x))
+
+    let pure = Ok
+  }
+
   instance Applicative<IO> {
     // Deferring the whole `map` call keeps `af`'s effects deferred too; it is
     // only forced when the resulting action is.

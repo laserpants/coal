@@ -7,31 +7,31 @@ module Data.Json.DecodingSpec(decodingSpec) {
 
   // Structural matchers — avoid needing Comparable<JsonValue>
 
-  fun is_ok_null(r : Result<JsonValue, string>) : bool =
+  fun is_ok_null(r : Result<string, JsonValue>) : bool =
     match(r) {
       | Ok(JsonNull) => true
       | _            => false
     }
 
-  fun is_ok_bool(expected : bool, r : Result<JsonValue, string>) : bool =
+  fun is_ok_bool(expected : bool, r : Result<string, JsonValue>) : bool =
     match(r) {
       | Ok(JsonBool(v)) => v == expected
       | _               => false
     }
 
-  fun is_ok_number(expected : double, r : Result<JsonValue, string>) : bool =
+  fun is_ok_number(expected : double, r : Result<string, JsonValue>) : bool =
     match(r) {
       | Ok(JsonNumber(v)) => v == expected
       | _                 => false
     }
 
-  fun is_ok_string(expected : string, r : Result<JsonValue, string>) : bool =
+  fun is_ok_string(expected : string, r : Result<string, JsonValue>) : bool =
     match(r) {
       | Ok(JsonString(v)) => v == expected
       | _                 => false
     }
 
-  fun is_err(r : Result<JsonValue, string>) : bool =
+  fun is_err(r : Result<string, JsonValue>) : bool =
     match(r) {
       | Err(_) => true
       | Ok(_)  => false
