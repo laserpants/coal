@@ -3,7 +3,7 @@ module BankingGrammar {
   import Coal.Functor(Functor)
   import Coal.Monad.Free(Free, lift_free)
   import Coal.Combinators(always)
-  import FreeResult(FreeResultT)
+  import FreeResult(FreeResultT, lift_result)
 
   type AccountId = AccountId(string)
   type Amount = Amount(int32)
@@ -65,5 +65,7 @@ module BankingGrammar {
 
   fun record_transaction(transaction) =
     FreeResultT(map(always(Ok()), f_record_transaction(transaction)))
+
+  fun throw_error(err) = lift_result(Err(err))
 
 }

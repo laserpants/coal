@@ -6,7 +6,7 @@ module Main {
   import String(int32_to_string)
   import Monad.State(State, run_state, get, put, modify)
   import Coal.Monad.Free(interpret)
-  import FreeResult(in_FreeResultT, lift_result)
+  import FreeResult(in_FreeResultT)
   import BankingGrammar(
     AccountId, 
     Amount, 
@@ -20,7 +20,8 @@ module Main {
     get_balance, 
     debit,
     credit, 
-    record_transaction
+    record_transaction,
+    throw_error
   ) 
 
   fun bank_transfer({ from, to, amount }) : Banking<unit> = do {
@@ -30,7 +31,7 @@ module Main {
       credit(to, amount);
       record_transaction(Transaction(from, to, amount));
     } else do {
-      lift_result(Err(InsufficientFunds));
+      throw_error(InsufficientFunds);
     };
   }
   
