@@ -1,0 +1,11 @@
+module Main {
+
+  import namespace IO
+  import Traits(Derived)
+
+  // The `Base<int32>` instance that `Derived<int32>` requires lives in the
+  // imported module; instances are imported regardless of the import list.
+  fun main() =
+    IO.println_int32(derived(5 : int32))
+
+}

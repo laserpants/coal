@@ -1,0 +1,23 @@
+module Main {
+
+  import namespace IO
+
+  trait Base<a> {
+    base : a -> int32
+  }
+
+  trait Derived<a> with (Base<a>) {
+    derived : a -> int32
+  }
+
+  type T = T(int32)
+
+  instance Derived<T> {
+    fun derived(T(n)) = n
+    // No `instance Base<T>`: the supertrait requirement is unsatisfied.
+  }
+
+  fun main() =
+    IO.println_string("!")
+
+}

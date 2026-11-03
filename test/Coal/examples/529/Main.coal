@@ -1,0 +1,23 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+
+  type Baz<a> = Baz(a)
+
+  instance Functor<Baz> {
+    fun map(f, Baz(x)) = Baz(f(x))
+  }
+
+  // A complete instance whose parameterized supertrait (`Functor<Baz>`) is
+  // satisfied must be accepted.
+  instance Applicative<Baz> {
+    fun pure(x) = Baz(x)
+    fun ap(Baz(f), Baz(x)) = Baz(f(x))
+  }
+
+  fun main() =
+    IO.println_string("!")
+
+}

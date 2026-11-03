@@ -312,7 +312,13 @@ prettyRule =
       u1 = normalizeTypeIndexes t1
 
 prettyType :: (CoalPretty t) => t -> Text
-prettyType p = "`" <> (renderStrict . layoutPretty defaultLayoutOptions $ prettyCoal p) <> "`"
+prettyType p = "`" <> prettyTypeRaw p <> "`"
+
+{- | Like 'prettyType', but without the surrounding code-span backticks. Used by
+messages that place the rendered type inside their own delimiters.
+-}
+prettyTypeRaw :: (CoalPretty t) => t -> Text
+prettyTypeRaw = renderStrict . layoutPretty defaultLayoutOptions . prettyCoal
 
 prettyConstraintsGenError :: ConstraintsGenError a -> Text
 prettyConstraintsGenError =
@@ -459,11 +465,11 @@ prettyError env =
         env
         erl
     MissingTraitDefinition name trait erl ->
-      errorMessage ["A defintion for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
+      errorMessage ["A definition for '" <> name <> "' is missing from the instance for trait '" <> trait <> "'"] env erl
     UnexpectedTraitDefinition name trait erl ->
       errorMessage ["The trait '" <> trait <> "' doesn't have a method '" <> name <> "'"] env erl
     MissingRequiredInstance name t erl ->
-      errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyType t <> ">'"] env erl
+      errorMessage ["Missing required instance for trait '" <> name <> "<" <> prettyTypeRaw t <> ">'"] env erl
     KindError err erl ->
       errorMessage ["Kind error: " <> prettyKindInferenceError err] env erl
     OrPatternVariableMismatch _ _ erl ->

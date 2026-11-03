@@ -1,0 +1,22 @@
+module Main {
+
+  import namespace IO
+
+  trait Unpack<a> {
+    open : a -> int32
+    close : int32 -> a
+  }
+
+  type User = User(int32)
+
+  instance Unpack<User> {
+    fun open(User(id)) = id
+    // `close` is not implemented. The dictionary is forced by `open` below, so
+    // this used to reference a `close__$impl_Unpack(User)` symbol that was never
+    // generated and failed at link time.
+  }
+
+  fun main() =
+    IO.println_int32(open(User(5)))
+
+}

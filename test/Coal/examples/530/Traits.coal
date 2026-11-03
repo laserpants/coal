@@ -1,0 +1,19 @@
+module Traits(Base, Derived) {
+
+  trait Base<a> {
+    base : a -> int32
+  }
+
+  trait Derived<a> with (Base<a>) {
+    derived : a -> int32
+  }
+
+  instance Base<int32> {
+    fun base(x) = x
+  }
+
+  instance Derived<int32> {
+    fun derived(x) = x + 1
+  }
+
+}

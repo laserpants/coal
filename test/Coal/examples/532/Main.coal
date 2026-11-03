@@ -1,0 +1,23 @@
+module Main {
+
+  import namespace IO
+
+  trait Base<f> {
+    base : f<int32>
+  }
+
+  trait Derived<f> with (Base<f>) {
+    derived : f<int32>
+  }
+
+  type Wrap<a> = Wrap(a)
+
+  instance Derived<Wrap> {
+    let derived = Wrap(1)
+    // No `instance Base<Wrap>`: the parameterized supertrait is unsatisfied.
+  }
+
+  fun main() =
+    IO.println_string("!")
+
+}

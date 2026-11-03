@@ -921,12 +921,14 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- 184: `instance Group<int32>` requires `Monoidal<int32>` (via
+  -- `trait Group<a> with (Monoidal<a>)`), but that instance is missing, so the
+  -- instance must be rejected. The supertrait check was lost and this
+  -- expectation was changed to the (incorrect) output "-5".
   describe "184" $ do
-    expectOutput
-      "-5"
-      "test/Coal/examples/184"
-      [ "Main.coal"
-      ]
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/184" ["Main.coal"]
+      res `shouldBe` Left TraitError
 
   describe "185" $ do
     it "is ParserFailure" $ do
@@ -2908,6 +2910,128 @@ e2eSpec = do
       "test/Coal/examples/502"
       [ "Main.coal"
       ]
+
+  -- 517: an instance that omits a trait method (`Applicative<Baz>` without
+  -- `ap`) must be rejected even though nothing forces the dictionary, so the
+  -- omission would otherwise be accepted silently.
+  describe "517" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/517" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 518: the same omission where the dictionary *is* used. The generated
+  -- dictionary referenced the missing member, producing
+  -- `undefined reference to close__$impl_Unpack(...)` at link time.
+  describe "518" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/518" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 519: a complete instance whose trait requires a supertrait
+  -- (`Applicative<f> with (Functor<f>)`) but for which no `Functor<Baz>`
+  -- instance exists must be rejected.
+  describe "519" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/519" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 520: an instance that omits a method must be rejected even when the omitted
+  -- member is the one the program uses (user trait; used to be a link error).
+  describe "520" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/520" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 521: the omission must be rejected structurally, even though `main` never
+  -- forces the dictionary.
+  describe "521" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/521" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 522: a missing `let`-style (value) member is rejected too.
+  describe "522" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/522" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 523: a complete instance mixing a `let` member and a `fun` member compiles
+  -- and runs.
+  describe "523" $
+    expectOutput
+      "7"
+      "test/Coal/examples/523"
+      [ "Main.coal"
+      ]
+
+  -- 524: a member that the trait does not declare is rejected.
+  describe "524" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/524" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 525: an instance whose trait requires a supertrait instance that does not
+  -- exist is rejected.
+  describe "525" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/525" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 526: a supertrait chain broken in the middle (`C with (B)`, `B with (A)`,
+  -- but no `B`) is rejected at the dependent instance.
+  describe "526" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/526" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 527: a fully satisfied supertrait chain compiles and runs.
+  describe "527" $
+    expectOutput
+      "8"
+      "test/Coal/examples/527"
+      [ "Main.coal"
+      ]
+
+  -- 528: the required supertrait instance may be defined after the instance
+  -- that requires it; the check sees the whole module's instances.
+  describe "528" $
+    expectOutput
+      "6"
+      "test/Coal/examples/528"
+      [ "Main.coal"
+      ]
+
+  -- 529: a complete instance whose parameterized supertrait (`Functor<Baz>`) is
+  -- satisfied compiles (the corrected form of 517/519).
+  describe "529" $
+    expectOutput
+      "!"
+      "test/Coal/examples/529"
+      [ "Main.coal"
+      ]
+
+  -- 530: the required supertrait instance may live in an imported module;
+  -- instances are imported regardless of the import list.
+  describe "530" $
+    expectOutput
+      "6"
+      "test/Coal/examples/530"
+      [ "Main.coal"
+      , "Traits.coal"
+      ]
+
+  -- 531: a missing member in a parameterized instance is rejected even though
+  -- the dictionary is forced by another member.
+  describe "531" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/531" ["Main.coal"]
+      res `shouldBe` Left TraitError
+
+  -- 532: a missing parameterized supertrait instance is rejected.
+  describe "532" $ do
+    it "is TraitError" $ do
+      res <- runSpec "test/Coal/examples/532" ["Main.coal"]
+      res `shouldBe` Left TraitError
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

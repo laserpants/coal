@@ -1,0 +1,18 @@
+module Main {
+
+  import namespace IO
+
+  trait Single<a> {
+    one : a -> int32
+  }
+
+  instance Single<int32> {
+    fun one(x) = x
+    // `two` is not a member of `Single`.
+    fun two(x) = x
+  }
+
+  fun main() =
+    IO.println_int32(one(5))
+
+}

@@ -1,0 +1,26 @@
+module Main {
+
+  import namespace IO
+
+  trait Base<a> {
+    base : a -> int32
+  }
+
+  trait Derived<a> with (Base<a>) {
+    derived : a -> int32
+  }
+
+  // `Derived`'s required `Base<int32>` instance is defined *after* it. The check
+  // runs after the whole module's instances are collected, so this must compile.
+  instance Derived<int32> {
+    fun derived(x) = x + 1
+  }
+
+  instance Base<int32> {
+    fun base(x) = x
+  }
+
+  fun main() =
+    IO.println_int32(derived(5 : int32))
+
+}

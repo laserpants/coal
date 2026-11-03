@@ -1,0 +1,34 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+
+//  trait Unpack<a> {
+//    open : a -> { name : string, id : int32 }
+//    close : int32 -> a
+//  }
+//
+//  type User = User({ name : string, id : int32 })
+//
+//  instance Unpack<User> {
+//    fun open(User(user)) = user
+//  }
+
+  type Baz<a> = Baz(a)
+
+  instance Functor<Baz> {
+    fun map(f, Baz(x)) = Baz(f(x))
+  }
+
+  instance Applicative<Baz> {
+    fun pure(x) = Baz(x)
+  }
+
+//  fun banan(user : User) : string = 
+//    open(user).name
+
+  fun main() =
+    IO.println_string("!")
+
+}

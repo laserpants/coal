@@ -1,0 +1,32 @@
+module Main {
+
+  import namespace IO
+
+  trait A<a> {
+    a : a -> int32
+  }
+
+  trait B<a> with (A<a>) {
+    b : a -> int32
+  }
+
+  trait C<a> with (B<a>) {
+    c : a -> int32
+  }
+
+  instance A<int32> {
+    fun a(x) = x + 1
+  }
+
+  instance B<int32> {
+    fun b(x) = x + 2
+  }
+
+  instance C<int32> {
+    fun c(x) = x + 3
+  }
+
+  fun main() =
+    IO.println_int32(c(5 : int32))
+
+}

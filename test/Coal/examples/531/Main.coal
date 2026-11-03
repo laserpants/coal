@@ -1,0 +1,20 @@
+module Main {
+
+  import namespace IO
+
+  trait Mapper<f> {
+    apply : f<int32> -> int32
+    lift : int32 -> f<int32>
+  }
+
+  type Wrap<a> = Wrap(a)
+
+  instance Mapper<Wrap> {
+    fun apply(Wrap(n)) = n
+    // `lift` is not implemented; `apply` below forces the dictionary.
+  }
+
+  fun main() =
+    IO.println_int32(apply(Wrap(5)))
+
+}

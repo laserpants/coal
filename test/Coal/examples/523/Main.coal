@@ -1,0 +1,20 @@
+module Main {
+
+  import namespace IO
+
+  trait Combine<a> {
+    combine : a -> a -> a
+    identity : a
+  }
+
+  // A complete instance mixing a `let` member and a `fun` member must be
+  // accepted.
+  instance Combine<int32> {
+    let identity = 0
+    fun combine(x, y) = x + y
+  }
+
+  fun main() =
+    IO.println_int32(combine(identity, 7))
+
+}

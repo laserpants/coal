@@ -11,6 +11,9 @@ module Stuff {
         | (No, No)   => true
         | _          => false
       }
+
+    fun banan(x) =
+      true
   }
 
   fun stuff() = 123

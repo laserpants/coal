@@ -1,0 +1,21 @@
+module Main {
+
+  import namespace IO
+
+  trait Unpack<a> {
+    open : a -> int32
+    close : int32 -> a
+  }
+
+  type User = User(int32)
+
+  instance Unpack<User> {
+    fun open(User(id)) = id
+  }
+
+  // `main` never forces the dictionary, yet the missing `close` must still be
+  // rejected: the check is structural, not use-site driven.
+  fun main() =
+    IO.println_string("!")
+
+}

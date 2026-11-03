@@ -14,6 +14,9 @@ module Eq {
         | (No, No)   => true
         | _          => false
       }
+
+    fun banan(x) =
+      true
   }
 
 }

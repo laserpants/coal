@@ -69,7 +69,7 @@ import Coal.TypeSystem.Kind.Constraint (KindConstraintError (..))
 import Coal.TypeSystem.Kind.Constraint.Generation (EmitKinds (..), runKindConstraintsGen)
 import Coal.TypeSystem.Parameterized (Parameterized (..), ToIndexed (..), replaceParamInScheme)
 import Coal.TypeSystem.Substitution
-import Coal.TypeSystem.Unification (runUnifier, unify)
+import Coal.TypeSystem.Unification (evalUnifier, match, runUnifier, unify)
 import Control.Arrow ((>>>))
 import Control.Monad (unless)
 import Control.Monad.Except (throwError)
@@ -222,7 +222,27 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
           Nothing -> do
             tellErrors [TraitNotInScope instanceDefinitionTraitName (ErrorLocation (principalPath path) instanceDefinitionMetadata)]
             throwError TraitError
-          Just TraitEntry{..} ->
+          Just TraitEntry{..} -> do
+            let implemented = [name | def <- instanceDefinitionImplementations, name <- memberName def]
+            -- Every method the trait declares must be implemented. A missing
+            -- member would otherwise yield a dictionary that references a member
+            -- that is never generated (a link error at best), or be accepted
+            -- silently when the dictionary is never forced.
+            forM_ (filter (`notElem` implemented) (Environment.names traitEntryInterface)) $
+              \name -> do
+                tellErrors [MissingTraitDefinition name instanceDefinitionTraitName (ErrorLocation (principalPath path) instanceDefinitionMetadata)]
+                throwError TraitError
+            -- Every supertrait constraint the trait declares must be satisfied by
+            -- an existing instance at the instance's type.
+            forM_ traitEntryConstraints $ \(Trait superName superParam) -> do
+              (requiredScheme, _) <-
+                toIndexedSchemeWithEnv
+                  (replaceParamInScheme traitEntryParameter instanceDefinitionType (Forall mempty mempty (TVariable superParam)))
+              let required = schemeTypeBody requiredScheme
+              satisfied <- instanceExists required superName
+              unless satisfied $ do
+                tellErrors [MissingRequiredInstance superName required (ErrorLocation (principalPath path) instanceDefinitionMetadata)]
+                throwError TraitError
             forM_ instanceDefinitionImplementations $
               \case
                 d@(DFunction loc name def) ->
@@ -247,6 +267,10 @@ instance (Show a, Data a) => GenerateConstraints a (Definition a Kind IndexedTyp
                   return ()
            where
             trait = Trait instanceDefinitionTraitName instanceDefinitionType
+            memberName = \case
+              DFunction _ name _ -> [name]
+              DLet _ name _ -> [name]
+              _ -> []
       _ ->
         return ()
 
@@ -266,6 +290,23 @@ toIndexedSchemeWithEnv Forall{..} = do
         <*> toIndexed schemeTraits
         <*> toIndexed schemeTypeBody
   pure (s, env)
+
+{- | Whether some instance of the named trait matches the required type.
+
+Used to check that an instance satisfies the supertrait constraints declared by
+its trait: for each @Trait superName superType@, the required type is the
+supertrait's argument with the trait parameter replaced by the instance type,
+and some instance of @superName@ must have a head that matches it.
+-}
+instanceExists :: (Monad m) => IndexedType -> Name -> CompilerT a m Bool
+instanceExists required name = do
+  Build{buildInstances} <- getCurrentBuildC
+  seed <- gets compilerSupply
+  pure $ case Environment.lookup name buildInstances of
+    Nothing ->
+      False
+    Just instances ->
+      any (\key -> either (const False) (const True) (evalUnifier seed (match required key))) (Map.keys instances)
 
 {- | Verify that each trait-instance implementation has the type that the
 trait interface requires at the instance's declared type.
