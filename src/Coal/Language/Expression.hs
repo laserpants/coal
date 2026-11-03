@@ -167,6 +167,14 @@ data CompiledClause a s t = ECompiledClause
 
 instance (Binary a, Binary s, Binary t) => Binary (CompiledClause a s t)
 
+instance (Ord t, Data a, Data s, Data t) => FreeVars (DoStatement a s t) t where
+  freeIn =
+    \case
+      DoBind _ e ->
+        freeIn e
+      DoLet b ->
+        freeIn b
+
 instance (Ord t, Data a, Data s, Data t) => FreeVars (Expression a s t) t where
   freeIn =
     \case
@@ -223,8 +231,8 @@ instance (Ord t, Data a, Data s, Data t) => FreeVars (Expression a s t) t where
         mempty
       EFFICall _ _ _ args k ->
         freeIn args <> freeIn k
-      _ ->
-        error "Not implemented"
+      EDoBlock _ dos ->
+        freeIn dos
 
 freeClause ::
   (Ord t, Data a, Data s, Data t) =>

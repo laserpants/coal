@@ -3033,6 +3033,12 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/532" ["Main.coal"]
       res `shouldBe` Left TraitError
 
+  describe "538" $
+    expectOutput
+      "X"
+      "test/Coal/examples/538"
+      ["Main.coal"]
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

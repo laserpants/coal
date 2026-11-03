@@ -176,6 +176,21 @@ instance (Data a, Monoid a) => DoNotationContext (LetDefinition a () ()) where
             , ..
             }
 
+{- | Desugar the right-hand side of a binding.
+
+The binding's own pattern is left untouched — a complex left-hand-side pattern
+or an @f(pat, ...) = expr@ binding is handled by the later @DesugarPatterns@
+pass — but any nested do-block in the right-hand side must be eliminated here,
+or it would reach the later passes that cannot handle 'EDoBlock'.
+-}
+instance (Data a, Monoid a) => DoNotationContext (Binding Expression a () ()) where
+  desugarDoNotation =
+    \case
+      BPattern loc p e ->
+        BPattern loc p <$> desugarDoNotation e
+      BFunction loc name ps e ->
+        BFunction loc name ps <$> desugarDoNotation e
+
 instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
   desugarDoNotation =
     \case
@@ -188,8 +203,9 @@ instance (Data a, Monoid a) => DoNotationContext (Expression a () ()) where
         go (DoBind p e) rest = do
           e' <- desugarDoNotation e
           pure (bind e' (lambdaE (p :| []) rest))
-        go (DoLet b) rest =
-          pure (ELet (bindingLocation b) (b :| []) rest)
+        go (DoLet b) rest = do
+          b' <- desugarDoNotation b
+          pure (ELet (bindingLocation b') (b' :| []) rest)
       e ->
         descendM desugarDoNotation e
 

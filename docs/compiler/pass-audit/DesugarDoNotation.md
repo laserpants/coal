@@ -54,7 +54,8 @@ For `EDoBlock`:
 1. Calls `normalize` to separate the final expression from preceding statements
 2. Folds from the right, dispatching on the statement kind:
    - `DoBind p e` becomes `bind(e, fn(p) => rest)`
-   - `DoLet b` becomes `let b in rest`, i.e. an `ELet` node
+   - `DoLet b` becomes `let b in rest`, i.e. an `ELet` node, with the
+     binding's right-hand side recursively desugared
 3. Uses `varE "bind"` and `varE "pure"` — the actual resolution of these names
    to trait methods happens during trait dictionary insertion
 
@@ -118,3 +119,7 @@ A `DoLet` desugars into the same `ELet` node the surface `let ... in` syntax
 produces, so it inherits that construct's semantics unchanged — in particular
 the binding is *not* recursive, and a complex left-hand-side pattern or an
 `f(pat, ...) = expr` binding is handled by the later `DesugarPatterns` pass.
+The binding's right-hand side is recursively desugared, so a nested do-block
+(e.g. `x(a) = do { ... };`) is eliminated here too. This matters because
+`EDoBlock` carries no type annotation, so it cannot survive past this pass: the
+later constraint-generation passes cannot assign it a type.

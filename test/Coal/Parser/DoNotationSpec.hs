@@ -59,10 +59,11 @@ The right-hand side of the statements the tests use is either a bare variable
 (@b = a@) or a nullary application (@a <- f()@).
 -}
 headName :: Expression Metadata () () -> Maybe Name
-headName = \case
-  EVariable _ (Label _ n) -> Just n
-  EApplication _ _ e _ -> headName e
-  _ -> Nothing
+headName =
+  \case
+    EVariable _ (Label _ n) -> Just n
+    EApplication _ _ e _ -> headName e
+    _ -> Nothing
 
 {- | A metadata-free view of a statement, so expectations do not depend on
 source positions. Only the shapes the tests care about are recognised.
@@ -81,20 +82,22 @@ data SimpleStmt
   deriving (Eq, Show)
 
 simpleStmt :: DoStatement Metadata () () -> Maybe SimpleStmt
-simpleStmt = \case
-  DoBind (PVariable _ (Label _ n)) e -> SBind n <$> headName e
-  DoBind (PAny _ ()) e -> SVoid <$> headName e
-  DoBind _ _ -> Nothing
-  DoLet (BPattern _ (PVariable _ (Label _ n)) e) -> SLet n <$> headName e
-  DoLet (BPattern _ (PTuple _ _ ps) e) -> SLetTuple (length (toList ps)) <$> headName e
-  DoLet (BFunction _ n ps _) -> Just (SLetFunction n (length (toList ps)))
-  DoLet _ -> Nothing
+simpleStmt =
+  \case
+    DoBind (PVariable _ (Label _ n)) e -> SBind n <$> headName e
+    DoBind (PAny _ ()) e -> SVoid <$> headName e
+    DoBind _ _ -> Nothing
+    DoLet (BPattern _ (PVariable _ (Label _ n)) e) -> SLet n <$> headName e
+    DoLet (BPattern _ (PTuple _ _ ps) e) -> SLetTuple (length (toList ps)) <$> headName e
+    DoLet (BFunction _ n ps _) -> Just (SLetFunction n (length (toList ps)))
+    DoLet _ -> Nothing
 
 -- | The statements of a do-block, or @Nothing@ for any other expression.
 doStatements :: Expression Metadata () () -> Maybe [DoStatement Metadata () ()]
-doStatements = \case
-  EDoBlock _ stmts -> Just (toList stmts)
-  _ -> Nothing
+doStatements =
+  \case
+    EDoBlock _ stmts -> Just (toList stmts)
+    _ -> Nothing
 
 -- | Parse a do-block and view its statements without metadata.
 parseStatements :: Text -> Either String [Maybe SimpleStmt]
