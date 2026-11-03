@@ -4,7 +4,7 @@ module Main {
 
   import IO(println_string)
   import String(int32_to_string)
-  import Monad.State(State, run_state, get, put, modify)
+  import Monad.State(State, run_state, get, modify)
   import Coal.Monad.Free(interpret)
   import FreeResult(in_FreeResultT)
   import BankingGrammar(
@@ -35,7 +35,7 @@ module Main {
     };
   }
   
-  //
+  // Interpreter
 
   type alias Bank = { 
     account_a : { balance : Amount },
