@@ -1,0 +1,50 @@
+module FreeResult {
+
+  import Coal.Monad.Free(Free)
+  import Coal.Functor(Functor)
+
+  type FreeResultT<f, e, a> = FreeResultT(Free<f, Result<e, a>>)
+
+  fun in_FreeResultT(FreeResultT(r)) = r
+
+  let lift_result = FreeResultT << Pure
+
+  instance Functor<FreeResultT<f, e>> {
+    // map : (a -> b) -> FreeResultT<f, e, a> -> FreeResultT<f, e, b>
+    fun map(f, FreeResultT(r)) = FreeResultT(map(map(f), r))
+  }
+
+  instance Applicative<FreeResultT<f, e>> {
+    // pure : a -> FreeResultT<f, e, a>
+    fun pure(r) = FreeResultT(Pure(Ok(r)))
+    // ap : FreeResultT<f, e, a -> b> -> FreeResultT<f, e, a> -> FreeResultT<f, e, b>
+    fun ap(FreeResultT(ff), FreeResultT(fa)) =
+      FreeResultT(
+        bind(ff, match{
+          | Err(err) =>
+              pure(Err(err))
+          | Ok(f) =>
+              bind(fa, match{
+                | Err(err) =>
+                    pure(Err(err))
+                | Ok(a) =>
+                    pure(Ok(f(a)))
+              }
+            )
+          }
+        )
+      )
+    }
+
+  instance Monad<FreeResultT<f, e>> {
+    // bind : FreeResultT<f, e, a> -> (a -> FreeResultT<f, e, b>) -> FreeResultT<f, e, b>
+    fun bind(FreeResultT(program), f) =
+      FreeResultT(
+        bind(program, match{
+          | Ok(value) => in_FreeResultT(f(value))
+          | Err(err)  => pure(Err(err))
+        })
+      )
+  }
+
+}

@@ -1,0 +1,74 @@
+/**
+ * A monad for read-only environment-dependent computations.
+ * 
+ * Wraps a function r -> a that depends on a shared environment 'r'.
+ */
+module Monad.Reader {
+
+  import Coal.Combinators(identity, always)
+  import Coal.Monad(Monad, and_then)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+
+  /**
+   * A reader computation: wraps a function r -> a that depends on an environment 'r'.
+   */
+  type Reader<r, a> = Reader(r -> a)
+
+  /** 
+   * Run a Reader computation with the given environment, producing a result.
+   */
+  fun run_reader(Reader(f), env) =
+    f(env)
+
+  /**
+   * Retrieve the current environment (ask returns the environment as its value).
+   */
+  fun ask() =
+    Reader(identity)
+
+  /** 
+   * Map a function over the result of a reader, threading the environment through unchanged.
+   */
+  instance Functor<Reader<r>> {
+    fun map(f, Reader(g)) =
+      Reader(fn(r) => f(g(r)))
+  }
+
+  /**
+   * Sequence reader computations, providing a shared environment to each step.
+   */
+  instance Applicative<Reader<r>> {
+    fun pure(r) =
+      Reader(always(r))
+
+    fun ap(Reader(f), Reader(g)) =
+      Reader(fn(r) =>
+        let func = f(r) ;
+            a = g(r) 
+        in func(a)
+      )
+  }
+
+  /**
+   * Chain reader computations, threading the shared environment through each step.
+   */
+  instance Monad<Reader<r>> {
+    fun bind(Reader(f) : Reader<r, a>, next : a -> Reader<r, b>) : Reader<r, b> =
+      Reader(fn(env) =>
+        let a =
+          f(env)
+        in
+        match(next(a)) {
+          | Reader(g) => g(env)
+        }
+      )
+  }
+
+  /**
+   * Run a reader computation with a transformed environment.
+   */
+  fun local(transform, Reader(f)) =
+    Reader(f << transform)
+
+}

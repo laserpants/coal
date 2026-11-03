@@ -1,0 +1,128 @@
+module Main {
+
+  import namespace IO
+  import Coal.Combinators(always)
+  import String(int32_to_string)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative, traverse_list)
+  import Monad.State(State, run_state, get, put, modify)
+  import Coal.Monad(Monad, and_then, and_always, and_return, unless) 
+  import Coal.Monad.Free(Free, lift_free, interpret)
+  import BankingGrammar(
+    AccountId, 
+    Amount, 
+    Transaction, 
+    BankingError, 
+    BankingF, 
+    in_AccountId, 
+    in_Amount, 
+    error_to_string, 
+    get_balance, 
+    debit, 
+    credit, 
+    record_transaction
+  ) 
+  import FreeResult(
+    FreeResultT, 
+    in_FreeResultT, 
+    lift_result
+  )
+
+  fun get_balance_result(account_id) =
+    FreeResultT(get_balance(account_id))
+
+  fun debit_result(account_id, amount) =
+    FreeResultT(debit(account_id, amount))
+
+  fun credit_result(account_id, amount) =
+    FreeResultT(credit(account_id, amount))
+
+  fun record_transaction_result(transaction) =
+    FreeResultT(map(always(Ok()), record_transaction(transaction)))
+
+  fun bank_transfer({ from, to, amount }) : FreeResultT<BankingF, BankingError, unit> = do {
+    balance <- get_balance_result(from);
+    if (balance >= amount) then do {
+      debit_result(from, amount);
+      credit_result(to, amount);
+      record_transaction_result(Transaction(from, to, amount));
+    } else do {
+      lift_result(Err(InsufficientFunds));
+    };
+  }
+  
+  //
+
+  type alias Bank = { 
+    account_a : { balance : Amount },
+    account_b : { balance : Amount },
+    log : List<Transaction>
+  }
+
+  fun get_account_balance(account_id : AccountId) : State<Bank, Result<BankingError, Amount>> = do {
+    bank <- get();
+    match(in_AccountId(account_id)) {
+      | "a" => pure(Ok(bank.account_a.balance))
+      | "b" => pure(Ok(bank.account_b.balance))
+      | _   => pure(Err(NoSuchAccount))
+    };
+  }
+
+  fun update_account(account_id : AccountId, f : { balance : Amount } -> { balance : Amount }) : State<Bank, Result<BankingError, unit>> = do {
+    update_bank(g) = do { modify(g); pure(Ok()); };
+    match(in_AccountId(account_id)) {
+      | "a" => update_bank(fn(bank) => bank{ account_a = f(bank.account_a) })
+      | "b" => update_bank(fn(bank) => bank{ account_b = f(bank.account_b) })
+      | _   => pure(Err(NoSuchAccount))
+    };
+  }
+
+  fun state_banking_handler : BankingF<State<Bank, a>> -> State<Bank, a>   
+    | GetBalance(account_id, g) => do {
+        res_account_balance <- get_account_balance(account_id);
+        g(res_account_balance);
+      }
+    | Debit(account_id, Amount(amount), g) => do {
+        res <- update_account(account_id, fn({ balance = Amount(account_balance) }) => { 
+          balance = Amount(account_balance - amount) 
+        });
+        g(res);
+      }
+    | Credit(account_id, Amount(amount), g) => do {
+        res <- update_account(account_id, fn({ balance = Amount(account_balance) }) => { 
+          balance = Amount(account_balance + amount) 
+        });
+        g(res);
+      }
+    | RecordTransaction(transaction, a) => do {
+        modify(fn(bank) => bank{ log = bank.log <> [ transaction ] });
+        a;
+      }
+
+  fun main() = do {
+    program = 
+      bank_transfer({ from = AccountId("a"), to = AccountId("b"), amount = Amount(10000) }) 
+        |. in_FreeResultT
+        |. interpret(state_banking_handler);
+
+    res : (Result<BankingError, unit>, Bank) = run_state(program, {
+      account_a = { balance = Amount(10000) },
+      account_b = { balance = Amount(10000) },
+      log = []
+    });
+
+    match(res) {
+      | (Ok(_), bank) => do {
+          IO.println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
+          IO.println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
+        } 
+      | (Err(err), bank) => do {
+          IO.println_string(error_to_string(err));
+          IO.println_string("---");
+          IO.println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
+          IO.println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
+        } 
+    };
+  }
+
+}
