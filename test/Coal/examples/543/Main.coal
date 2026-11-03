@@ -17,18 +17,18 @@ module Main {
     in_AccountId, 
     in_Amount, 
     error_to_string, 
-    get_balance_result, 
-    debit_result,
-    credit_result, 
-    record_transaction_result
+    get_balance, 
+    debit,
+    credit, 
+    record_transaction
   ) 
 
   fun bank_transfer({ from, to, amount }) : Banking<unit> = do {
-    balance <- get_balance_result(from);
+    balance <- get_balance(from);
     if (balance >= amount) then do {
-      debit_result(from, amount);
-      credit_result(to, amount);
-      record_transaction_result(Transaction(from, to, amount));
+      debit(from, amount);
+      credit(to, amount);
+      record_transaction(Transaction(from, to, amount));
     } else do {
       lift_result(Err(InsufficientFunds));
     };

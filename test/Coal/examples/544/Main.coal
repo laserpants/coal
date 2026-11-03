@@ -1,0 +1,18 @@
+module Main {
+
+  import namespace IO
+
+  // A single-field data type whose field is `unit`.
+  type Wrap = Wrap(unit)
+
+  // `Wrap()` is shorthand for `Wrap(())`: an empty argument list means a
+  // single `unit` argument, exactly as in expressions.
+  fun classify(w : Wrap) : int32 =
+    match(w) {
+      | Wrap() => 123
+    }
+
+  fun main() =
+    IO.println_int32(classify(Wrap(())))
+
+}

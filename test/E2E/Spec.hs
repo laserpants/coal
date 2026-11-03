@@ -3062,6 +3062,24 @@ e2eSpec = do
       , "Monad/State.coal"
       ]
 
+  describe "543" $
+    expectOutput
+      "account_a = 0\naccount_b = 20000"
+      "test/Coal/examples/543"
+      [ "Main.coal"
+      , "Monad/State.coal"
+      , "BankingGrammar.coal"
+      , "FreeResult.coal"
+      ]
+
+  -- 544: an empty constructor argument list in a pattern (`Wrap()`) is
+  -- shorthand for `Wrap(())`, mirroring the expression-level shorthand.
+  describe "544" $
+    expectOutput
+      "123"
+      "test/Coal/examples/544"
+      [ "Main.coal"
+      ]
 
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =

@@ -463,6 +463,7 @@ test-suite coal-test
       Coal.Parser.DoNotationSpec
       Coal.Parser.ExpressionSpec
       Coal.Parser.ModuleSpec
+      Coal.Parser.PatternSpec
       Coal.TypeSystem.Constraint.Generation.EAnnotationConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.EConstructorConstraintsSpec
       Coal.TypeSystem.Constraint.Generation.ELambdaConstraintsSpec

@@ -47,23 +47,23 @@ module BankingGrammar {
     }
   }
 
-  fun get_balance(account_id) = lift_free(GetBalance(account_id, fn(b) => b))
-  fun debit(account_id, amount) = lift_free(Debit(account_id, amount, fn(b) => b))
-  fun credit(account_id, amount) = lift_free(Credit(account_id, amount, fn(b) => b))
-  fun record_transaction(transaction) = lift_free(RecordTransaction(transaction, ()))
-
-  fun get_balance_result(account_id) =
-    FreeResultT(get_balance(account_id))
-
-  fun debit_result(account_id, amount) =
-    FreeResultT(debit(account_id, amount))
-
-  fun credit_result(account_id, amount) =
-    FreeResultT(credit(account_id, amount))
-
-  fun record_transaction_result(transaction) =
-    FreeResultT(map(always(Ok()), record_transaction(transaction)))
+  fun f_get_balance(account_id) = lift_free(GetBalance(account_id, fn(b) => b))
+  fun f_debit(account_id, amount) = lift_free(Debit(account_id, amount, fn(b) => b))
+  fun f_credit(account_id, amount) = lift_free(Credit(account_id, amount, fn(b) => b))
+  fun f_record_transaction(transaction) = lift_free(RecordTransaction(transaction, ()))
 
   type alias Banking<a> = FreeResultT<BankingF, BankingError, a>
+
+  fun get_balance(account_id) =
+    FreeResultT(f_get_balance(account_id))
+
+  fun debit(account_id, amount) =
+    FreeResultT(f_debit(account_id, amount))
+
+  fun credit(account_id, amount) =
+    FreeResultT(f_credit(account_id, amount))
+
+  fun record_transaction(transaction) =
+    FreeResultT(map(always(Ok()), f_record_transaction(transaction)))
 
 }

@@ -14,6 +14,7 @@ import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
 import Coal.Parser.DoNotationSpec (doNotationSpec)
 import Coal.Parser.ExpressionSpec (expressionSpec)
 import Coal.Parser.ModuleSpec (moduleHeaderSpec)
+import Coal.Parser.PatternSpec (patternSpec)
 import Coal.TypeSystemSpec (typeSystemSpec)
 import E2E.Spec (e2eSpec)
 import Package.ConstraintValidationSpec (constraintValidationSpec)
@@ -35,6 +36,7 @@ spec =
     doNotationSpec
     expressionSpec
     moduleHeaderSpec
+    patternSpec
     exportMatchingSpec
 
 main :: IO ()

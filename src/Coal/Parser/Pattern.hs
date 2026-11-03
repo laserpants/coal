@@ -15,7 +15,7 @@ import Coal.Compiler.HasMetadata (metadataSpan)
 import Coal.Compiler.Metadata (Metadata (..))
 import Coal.Language (Pattern (..), Primitive (LUnit))
 import Coal.Parser.Common (parseQualifiedConstructor, parseSimpleConstructor)
-import Coal.Parser.Core (Parser, integer, lexeme, lexeme_)
+import Coal.Parser.Core (Parser, integer, lexeme, lexeme_, nonEmptyOr)
 import Coal.Parser.Identifier (name, validChar)
 import Coal.Parser.Metadata (withMetadata)
 import qualified Coal.Parser.Primitive as Primitive
@@ -23,6 +23,7 @@ import Coal.Parser.Symbol
 import Coal.Parser.Type (parseType)
 import Control.Monad (void)
 import Control.Monad.Combinators.Expr
+import Data.Foldable (toList)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
 import Extras (Name)
@@ -134,11 +135,16 @@ parseAtVar = do
   void (char '@')
   Label () <$> name
 
+{- | A data-constructor pattern, @Foo@, @Foo(p, ...)@ or @Foo()@.
+
+An empty argument list (@Foo()@) is shorthand for a single @unit@ argument,
+exactly as in expressions: @Foo()@ is identical to @Foo(())@.
+-}
 parseConstructorPattern :: Parser (Pattern Metadata () ())
 parseConstructorPattern =
   withMetadata $ do
     ll <- try parseQualifiedConstructor <|> parseSimpleConstructor
-    ps <- option [] (parens (commaSep1 parsePattern))
+    ps <- option [] (toList <$> parens (nonEmptyOr parseUnitPattern (commaSep parsePattern)))
     pure (\loc -> PConstructor loc ll ps)
 
 recordFields :: Parser [(Name, Pattern Metadata () ())]

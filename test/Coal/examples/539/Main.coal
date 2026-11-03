@@ -1,0 +1,73 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative, traverse_list)
+  import Coal.Monad(Monad, and_then, and_always, and_return, unless) 
+  import Coal.Monad.Free(Free, lift_free, interpret)
+
+  //
+
+  type AccountId = AccountId(string)
+  type Amount = Amount(int32)
+  type Transaction = Transaction(AccountId, AccountId, Amount)
+
+  instance Ordered<Amount> {
+    fun compare(Amount(a), Amount(b)) = compare(a, b)
+  }
+
+  type BankingError
+    = InsufficientFunds
+
+  type BankingF<a>
+    = GetBalance(AccountId, Amount -> a)
+    | Debit(AccountId, Amount, a)
+    | Credit(AccountId, Amount, a)
+    | RecordTransaction(Transaction, a)
+
+  instance Functor<BankingF> {
+    fun map(f) = match{
+      | GetBalance(account_id, g) => 
+          GetBalance(account_id, f << g)
+      | Debit(account_id, amount, a) =>
+          Debit(account_id, amount, f(a))
+      | Credit(account_id, amount, a) => 
+          Credit(account_id, amount, f(a))
+      | RecordTransaction(transaction, a) => 
+          RecordTransaction(transaction, f(a))
+    }
+  }
+
+  fun get_balance(account_id) = lift_free(GetBalance(account_id, fn(b) => b))
+  fun debit(account_id, amount) = lift_free(Debit(account_id, amount, ()))
+  fun credit(account_id, amount) = lift_free(Credit(account_id, amount, ()))
+  fun record_transaction(transaction) = lift_free(RecordTransaction(transaction, ()))
+
+  type alias Banking<a> = Free<BankingF, a>
+
+  fun io_banking_handler : BankingF<IO<a>> -> IO<a>   
+    | GetBalance(account_id, g) => 
+        g(Amount(10000))
+    | Debit(account_id, amount, a) => 
+        a
+    | Credit(account_id, amount, a) => 
+        a
+    | RecordTransaction(transaction, a) => 
+        a
+
+  fun bank_transfer(from : AccountId, to : AccountId, amount : Amount) : Banking<Result<BankingError, unit>> = do {
+    balance <- get_balance(from);
+    if (balance >= amount) then do {
+      debit(from, amount);
+      credit(to, amount);
+      record_transaction(Transaction(from, to, amount));
+      pure(Ok());
+    } else do {
+      pure(Err(InsufficientFunds));
+    };
+  }
+
+  fun main() =
+    IO.println_string("A")
+
+}
