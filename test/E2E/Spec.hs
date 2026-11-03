@@ -3039,6 +3039,30 @@ e2eSpec = do
       "test/Coal/examples/538"
       ["Main.coal"]
 
+  describe "539" $
+    expectOutput
+      "A"
+      "test/Coal/examples/539"
+      [ "Main.coal"
+      ]
+
+  describe "540" $
+    expectOutput
+      "InsufficientFunds\n---\naccount_a = 5000\naccount_b = 10000"
+      "test/Coal/examples/540"
+      [ "Main.coal"
+      , "Monad/State.coal"
+      ]
+
+  describe "541" $
+    expectOutput
+      "account_a = 0\naccount_b = 20000"
+      "test/Coal/examples/541"
+      [ "Main.coal"
+      , "Monad/State.coal"
+      ]
+
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

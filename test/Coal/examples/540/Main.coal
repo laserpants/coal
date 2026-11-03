@@ -1,0 +1,151 @@
+module Main {
+
+  import namespace IO
+  import String(int32_to_string)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative, traverse_list)
+  import Monad.State(State, run_state, get, put, modify)
+  import Coal.Monad(Monad, and_then, and_always, and_return, unless) 
+  import Coal.Monad.Free(Free, lift_free, interpret)
+
+  //
+
+  type AccountId = AccountId(string)
+  type Amount = Amount(int32)
+  type Transaction = Transaction(AccountId, AccountId, Amount)
+
+  fun in_AccountId(AccountId(str)) = str
+  fun in_Amount(Amount(a)) = a
+
+  instance Ordered<Amount> {
+    fun compare(Amount(a), Amount(b)) = compare(a, b)
+  }
+
+  instance Comparable<Amount> {
+    fun `==`(Amount(a), Amount(b)) = a == b
+  }
+
+  type BankingError
+    = InsufficientFunds
+    | NoSuchAccount
+
+  fun error_to_string 
+    | InsufficientFunds => "InsufficientFunds"
+    | NoSuchAccount => "NoSuchAccount"
+
+  type BankingF<a>
+    = GetBalance(AccountId, Result<BankingError, Amount> -> a)
+    | Debit(AccountId, Amount, Result<BankingError, unit> -> a)
+    | Credit(AccountId, Amount, Result<BankingError, unit> -> a)
+    | RecordTransaction(Transaction, a)
+
+  instance Functor<BankingF> {
+    fun map(f) = match{
+      | GetBalance(account_id, g) => 
+          GetBalance(account_id, f << g)
+      | Debit(account_id, amount, g) =>
+          Debit(account_id, amount, f << g)
+      | Credit(account_id, amount, g) => 
+          Credit(account_id, amount, f << g)
+      | RecordTransaction(transaction, a) => 
+          RecordTransaction(transaction, f(a))
+    }
+  }
+
+  fun get_balance(account_id) = lift_free(GetBalance(account_id, fn(b) => b))
+  fun debit(account_id, amount) = lift_free(Debit(account_id, amount, fn(b) => b))
+  fun credit(account_id, amount) = lift_free(Credit(account_id, amount, fn(b) => b))
+  fun record_transaction(transaction) = lift_free(RecordTransaction(transaction, ()))
+
+  type alias Banking<a> = Free<BankingF, a>
+
+  fun bank_transfer({ from, to, amount }) : Banking<Result<BankingError, unit>> = do {
+    res_balance <- get_balance(from);
+    match(res_balance) {
+      | Ok(balance) => do {
+          if (balance >= amount) then do {
+            _ <- debit(from, amount);
+            _ <- credit(to, amount);
+            record_transaction(Transaction(from, to, amount));
+            pure(Ok());
+          } else do {
+            pure(Err(InsufficientFunds));
+          };
+        }
+      | Err(err) =>
+          pure(Err(err))
+    };
+  }
+
+  type alias Bank = { 
+    account_a : { balance : Amount },
+    account_b : { balance : Amount },
+    log : List<Transaction>
+  }
+
+  fun get_account_balance(account_id : AccountId) : State<Bank, Result<BankingError, Amount>> = do {
+    bank <- get();
+    match(in_AccountId(account_id)) {
+      | "a" => pure(Ok(bank.account_a.balance))
+      | "b" => pure(Ok(bank.account_b.balance))
+      | _   => pure(Err(NoSuchAccount))
+    };
+  }
+
+  fun update_account(AccountId(str) : AccountId, f : { balance : Amount } -> { balance : Amount }) : State<Bank, Result<BankingError, unit>> = do {
+    update_bank(g) = do { modify(g); pure(Ok()); };
+    match(str) {
+      | "a" => update_bank(fn(bank) => bank{ account_a = f(bank.account_a) })
+      | "b" => update_bank(fn(bank) => bank{ account_b = f(bank.account_b) })
+      | _   => pure(Err(NoSuchAccount))
+    };
+  }
+
+  fun state_banking_handler : BankingF<State<Bank, a>> -> State<Bank, a>   
+    | GetBalance(account_id, g) => do {
+        res_account_balance <- get_account_balance(account_id);
+        g(res_account_balance);
+      }
+    | Debit(account_id, Amount(amount), g) => do {
+        res <- update_account(account_id, fn({ balance = Amount(account_balance) }) => { 
+          balance = Amount(account_balance - amount) 
+        });
+        g(res);
+      }
+    | Credit(account_id, Amount(amount), g) => do {
+        res <- update_account(account_id, fn({ balance = Amount(account_balance) }) => { 
+          balance = Amount(account_balance + amount) 
+        });
+        g(res);
+      }
+    | RecordTransaction(transaction, a) => do {
+        modify(fn(bank) => bank{ log = bank.log <> [ transaction ] });
+        a;
+      }
+
+  fun main() = do {
+    program = 
+      bank_transfer({ from = AccountId("a"), to = AccountId("b"), amount = Amount(10000) }) 
+        |. interpret(state_banking_handler);
+
+    res : (Result<BankingError, unit>, Bank) = run_state(program, {
+      account_a = { balance = Amount(5000) },
+      account_b = { balance = Amount(10000) },
+      log = []
+    });
+
+    match(res) {
+      | (Ok(_), bank) => do {
+          IO.println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
+          IO.println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
+        } 
+      | (Err(err), bank) => do {
+          IO.println_string(error_to_string(err));
+          IO.println_string("---");
+          IO.println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
+          IO.println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
+        } 
+    };
+  }
+
+}
