@@ -96,7 +96,7 @@ module Main {
       });
 
     match(res) {
-      | (Ok(_), bank) => do {
+      | (Ok(), bank) => do {
           println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
           println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
         } 
