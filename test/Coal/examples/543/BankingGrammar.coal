@@ -2,6 +2,8 @@ module BankingGrammar {
 
   import Coal.Functor(Functor)
   import Coal.Monad.Free(Free, lift_free)
+  import Coal.Combinators(always)
+  import FreeResult(FreeResultT)
 
   type AccountId = AccountId(string)
   type Amount = Amount(int32)
@@ -45,11 +47,23 @@ module BankingGrammar {
     }
   }
 
-  type alias Banking<a> = Free<BankingF, a>
-
   fun get_balance(account_id) = lift_free(GetBalance(account_id, fn(b) => b))
   fun debit(account_id, amount) = lift_free(Debit(account_id, amount, fn(b) => b))
   fun credit(account_id, amount) = lift_free(Credit(account_id, amount, fn(b) => b))
   fun record_transaction(transaction) = lift_free(RecordTransaction(transaction, ()))
+
+  fun get_balance_result(account_id) =
+    FreeResultT(get_balance(account_id))
+
+  fun debit_result(account_id, amount) =
+    FreeResultT(debit(account_id, amount))
+
+  fun credit_result(account_id, amount) =
+    FreeResultT(credit(account_id, amount))
+
+  fun record_transaction_result(transaction) =
+    FreeResultT(map(always(Ok()), record_transaction(transaction)))
+
+  type alias Banking<a> = FreeResultT<BankingF, BankingError, a>
 
 }

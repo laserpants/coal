@@ -1,46 +1,29 @@
 module Main {
 
   import namespace IO
-  import Coal.Combinators(always)
+
+  import IO(println_string)
   import String(int32_to_string)
-  import Coal.Functor(Functor)
-  import Coal.Applicative(Applicative, traverse_list)
   import Monad.State(State, run_state, get, put, modify)
-  import Coal.Monad(Monad, and_then, and_always, and_return, unless) 
-  import Coal.Monad.Free(Free, lift_free, interpret)
+  import Coal.Monad.Free(interpret)
+  import FreeResult(in_FreeResultT, lift_result)
   import BankingGrammar(
     AccountId, 
     Amount, 
     Transaction, 
     BankingError, 
     BankingF, 
+    Banking,
     in_AccountId, 
     in_Amount, 
     error_to_string, 
-    get_balance, 
-    debit, 
-    credit, 
-    record_transaction
+    get_balance_result, 
+    debit_result,
+    credit_result, 
+    record_transaction_result
   ) 
-  import FreeResult(
-    FreeResultT, 
-    in_FreeResultT, 
-    lift_result
-  )
 
-  fun get_balance_result(account_id) =
-    FreeResultT(get_balance(account_id))
-
-  fun debit_result(account_id, amount) =
-    FreeResultT(debit(account_id, amount))
-
-  fun credit_result(account_id, amount) =
-    FreeResultT(credit(account_id, amount))
-
-  fun record_transaction_result(transaction) =
-    FreeResultT(map(always(Ok()), record_transaction(transaction)))
-
-  fun bank_transfer({ from, to, amount }) : FreeResultT<BankingF, BankingError, unit> = do {
+  fun bank_transfer({ from, to, amount }) : Banking<unit> = do {
     balance <- get_balance_result(from);
     if (balance >= amount) then do {
       debit_result(from, amount);
@@ -105,22 +88,23 @@ module Main {
         |. in_FreeResultT
         |. interpret(state_banking_handler);
 
-    res : (Result<BankingError, unit>, Bank) = run_state(program, {
-      account_a = { balance = Amount(10000) },
-      account_b = { balance = Amount(10000) },
-      log = []
-    });
+    res : (Result<BankingError, unit>, Bank) = 
+      run_state(program, {
+        account_a = { balance = Amount(10000) },
+        account_b = { balance = Amount(10000) },
+        log = []
+      });
 
     match(res) {
       | (Ok(_), bank) => do {
-          IO.println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
-          IO.println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
+          println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
+          println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
         } 
       | (Err(err), bank) => do {
-          IO.println_string(error_to_string(err));
-          IO.println_string("---");
-          IO.println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
-          IO.println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
+          println_string(error_to_string(err));
+          println_string("---");
+          println_string("account_a = " <> int32_to_string(in_Amount(bank.account_a.balance)));
+          println_string("account_b = " <> int32_to_string(in_Amount(bank.account_b.balance)));
         } 
     };
   }
