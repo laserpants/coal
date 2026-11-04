@@ -54,6 +54,8 @@ module BankingGrammar {
 
   type alias Banking<a> = FreeResultT<BankingF, BankingError, a>
 
+  type alias BankingHandler<m, a> = BankingF<m<a>> -> m<a>
+
   fun get_balance(account_id) =
     FreeResultT(f_get_balance(account_id))
 

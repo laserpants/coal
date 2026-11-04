@@ -14,6 +14,7 @@ module Main {
     BankingError, 
     BankingF, 
     Banking,
+    BankingHandler,
     in_AccountId, 
     in_Amount, 
     error_to_string, 
@@ -61,7 +62,7 @@ module Main {
     };
   }
 
-  fun state_banking_handler : BankingF<State<Bank, a>> -> State<Bank, a>   
+  fun state_banking_handler : BankingHandler<State<Bank>, a>  
     | GetBalance(account_id, g) => do {
         res_account_balance <- get_account_balance(account_id);
         g(res_account_balance);
