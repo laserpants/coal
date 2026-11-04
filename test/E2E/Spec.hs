@@ -3072,6 +3072,21 @@ e2eSpec = do
       , "FreeResult.coal"
       ]
 
+  -- 545: importing a `Functor`-constrained name (`lift_free`) from a module
+  -- that is not the trait's defining module (`Coal.Monad.Free`) must still
+  -- qualify the `map` trait member to its defining module (`Coal.Functor.map`).
+  -- It used to resolve to a nonexistent `Coal.Monad.Free.map`, producing an
+  -- `undefined reference` at link time.
+  describe "545" $
+    expectOutput
+      "---"
+      "test/Coal/examples/545"
+      [ "Main.coal"
+      , "Monad/Writer.coal"
+      , "BankingGrammar.coal"
+      , "FreeResult.coal"
+      ]
+
   -- 544: an empty constructor argument list in a pattern (`Wrap()`) is
   -- shorthand for `Wrap(())`, mirroring the expression-level shorthand.
   describe "544" $

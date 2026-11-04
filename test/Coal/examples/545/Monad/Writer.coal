@@ -1,0 +1,69 @@
+/**
+ * A monad for computations that produce a log or side output.
+ *
+ * Wraps a value paired with a monoid-typed output that accumulates alongside the result.
+ */
+module Monad.Writer {
+
+  import Coal.Monad(Monad, and_then, and_always)
+  import Coal.Functor(Functor)
+  import Coal.Applicative(Applicative)
+  import Coal.Monoid(Monoid)
+
+  /**
+   * A writer computation: pairs a value 'a' with an output 'w'.
+   */ 
+  type Writer<w, a> = Writer(a, w)
+
+  /**
+   * Extract the value and accumulated output from a Writer computation.
+   */ 
+  fun run_writer(Writer(a, w)) =
+    (a, w)
+
+  /**
+   * Map a function over the result of a writer, keeping the output unchanged.
+   */
+  instance Functor<Writer<w>> {
+    fun map(f, Writer(a, w)) =
+      Writer(f(a), w)
+    }
+
+  /**
+   * Sequence writer computations, combining their outputs using the monoid's append.
+   */
+  instance Applicative<Writer<w>> {
+    fun pure(w) = 
+      Writer(w, id)
+
+    fun ap(Writer(f, w1), Writer(a, w2)) =
+      Writer(f(a), w1 <> w2)
+    }
+
+  /**
+   * Chain writer computations, combining their outputs using the monoid's append.
+   */
+  instance Monad<Writer<w>> {
+    fun bind(writer, k) : Writer<w, b> =
+      match(writer) {
+        | Writer(a, w1) =>
+            match(k(a)) {
+              | Writer(b, w2) => 
+                  Writer(b, w1 <> w2)
+            }
+      }
+    }
+
+  /**
+   * Emit a value 'w' to the output monoid (tell returns unit as its result).
+   */
+  fun tell(w) : Writer<w, unit> =
+    Writer((), w)
+
+  /**
+   * Run a writer computation and pair its accumulated output alongside the result.
+   */
+  fun listen(Writer(a, w)) : Writer<w, (a, w)> =
+    Writer((a, w), w)
+
+}

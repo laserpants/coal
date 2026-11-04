@@ -1,0 +1,162 @@
+module Main {
+
+  import namespace IO
+
+  import IO(println_string)
+  import String(int32_to_string)
+  import Number(int32_to_int64)
+  import Monad.Writer(Writer, tell)
+  import Coal.Combinators(always)
+  import Coal.Monad.Free(Free, interpret, lift_free)
+  import Coal.Functor(Functor)
+  import FreeResult(FreeResultT, in_FreeResultT)
+  import BankingGrammar(
+    AccountId, 
+    Amount, 
+    Transaction, 
+    BankingError, 
+    BankingF, 
+    Banking,
+    BankingHandler,
+    in_AccountId, 
+    in_Amount, 
+    error_to_string, 
+    get_balance, 
+    debit,
+    credit, 
+    record_transaction,
+    throw_error
+  ) 
+
+  fun bank_transfer({ from, to, amount }) : Banking<unit> = do {
+    balance <- get_balance(from);
+    if (balance >= amount) then do {
+      debit(from, amount);
+      credit(to, amount);
+      record_transaction(Transaction(from, to, amount));
+    } else do {
+      throw_error(InsufficientFunds);
+    };
+  }
+  
+  // Interpreter
+
+  type Sql = Sql(string)
+
+  type SqlValue
+    = SqlNull
+    | SqlInt(int64)
+    | SqlFloat(double)
+    | SqlText(string)
+    | SqlBool(bool)
+    // | SqlBlob(List<uint8>)
+
+  type Params = Params(List<SqlValue>)
+
+  type Column = Column(string)
+
+  type Row = Row(List<(Column, SqlValue)>)
+
+  type SqlError = SqlError // TODO
+
+  type DatabaseF<a>
+    = Execute(Sql, Params, Result<SqlError, unit> -> a)
+    | QueryOne(Sql, Params, Result<SqlError, Row> -> a)
+    | BeginTransaction(a)
+    | Commit(a)
+    | Rollback(a)
+
+  instance Functor<DatabaseF> {
+    fun map(f) = match{
+      | Execute(sql, params, g) =>
+          Execute(sql, params, f << g)
+      | QueryOne(sql, params, g) =>
+          QueryOne(sql, params, f << g) 
+      | BeginTransaction(a) =>
+          BeginTransaction(f(a))
+      | Commit(a) =>
+          Commit(f(a))
+      | Rollback(a) =>
+          Rollback(f(a))
+    }
+  }
+
+  fun f_execute(sql, params) = lift_free(Execute(sql, params, fn(b) => b))
+  fun f_query_one(sql, params) = lift_free(QueryOne(sql, params, fn(b) => b))
+  let f_begin_transaction = lift_free(BeginTransaction())
+  let f_commit = lift_free(Commit())
+  let f_rollback = lift_free(Rollback())
+
+  fun execute(sql, params) = FreeResultT(f_execute(sql, params))
+  fun query_one(sql, params) = FreeResultT(f_query_one(sql, params))
+  let begin_transaction = FreeResultT(map(always(Ok()), f_begin_transaction))
+  let commit = FreeResultT(map(always(Ok()), f_commit))
+  let rollback = FreeResultT(map(always(Ok()), f_rollback))
+
+  type alias Database<a> = FreeResultT<DatabaseF, SqlError, a>
+
+  fun db_banking_handler : BankingF<Database<a>> -> Database<a> 
+    | GetBalance(account_id, g) => do {
+        row <- query_one(Sql(
+          "SELECT balance FROM accounts WHERE account_id = '?'"), 
+          Params([SqlText(in_AccountId(account_id))])
+        );
+        res = match(row) {
+          | Row([(Column("balance"), SqlInt(balance))]) => 
+              Ok(Amount(balance))
+          | _ => 
+              Err(ApplicationError("Database query returned an unexpected result."))
+        };
+        g(res);
+      }
+    | Debit(account_id, Amount(amount), g) => do {
+        execute(Sql(
+          "UPDATE accounts SET balance = balance - ? WHERE account_id = '?'"), 
+          Params([
+            SqlInt(amount),
+            SqlText(in_AccountId(account_id))
+          ])
+        );
+        g(Ok());
+      }
+    | Credit(account_id, Amount(amount), g) => do {
+        execute(Sql(
+          "UPDATE accounts SET balance = balance + ? WHERE account_id = '?'"), 
+          Params([
+            SqlInt(amount),
+            SqlText(in_AccountId(account_id))
+          ])
+        );
+        g(Ok());
+      }
+    | RecordTransaction(transaction, a) => do {
+        a;
+      }
+
+  fun test_db_handler(prog : DatabaseF<IO<a>>) : IO<a> =
+    match(prog) {
+      | Execute(sql, params, g) =>
+          // TODO
+          g(Ok())
+      | QueryOne(sql, params, g) =>
+          // TODO
+          g(Err(SqlError))
+      | BeginTransaction(a) => do {
+          // TODO
+          a;
+        }
+      | Commit(a) => do {
+          // TODO
+          a;
+        }
+      | Rollback(a) => do {
+          // TODO
+          a;
+        }
+    }
+
+  fun main() = do {
+    println_string("---");
+  }
+
+}

@@ -400,11 +400,20 @@ qualifiedImports Build{..} =
                       if Path ["Builtin$"] == path
                         then pure []
                         else do
-                          Build{buildTraits = importTraits, buildNames = importNames, buildInstances = importInstances, buildExportedNames = importExportedNames} <- lift $ lift $ importedBuild path
+                          Build{buildTraits = importTraits, buildNames = importNames, buildInstances = importInstances, buildExportedNames = importExportedNames, buildQualifiedNames = importQualifiedNames} <- lift $ lift $ importedBuild path
                           case Environment.lookup traitName importTraits of
                             Just TraitEntry{..} -> do
+                              -- Trait member accessors (e.g. @Coal.Functor.map@) are
+                              -- defined in the module that declares the trait, which is
+                              -- not necessarily the module the constrained name was
+                              -- imported from (e.g. @lift_free : f<a> -> Free<f, a> with
+                              -- (Functor<f>)@ is imported from @Coal.Monad.Free@). Resolve
+                              -- each member through the imported module's
+                              -- @buildQualifiedNames@, which carries the correct
+                              -- defining-module prefix; fall back to the import path
+                              -- when the imported module has no entry.
                               let entries = Environment.names traitEntryInterface
-                                  ns1 = [(n, principalPath path <.> n) | n <- entries]
+                                  ns1 = [(n, Environment.lookupWithDefault (principalPath path <.> n) n importQualifiedNames) | n <- entries]
 
                               ns2 <- generateQualifiedInstanceNames path importNames importExportedNames (traitInstances traitName importInstances)
 
@@ -455,12 +464,14 @@ qualifiedImports Build{..} =
               _ ->
                 case Environment.lookup name buildTraits of
                   Just TraitEntry{..} -> do
+                    Build{buildInstances = importInstances, buildExportedNames = buildExportedNames', buildQualifiedNames = importQualifiedNames} <- lift $ lift $ importedBuild path
+                    -- As above for 'NameImport': qualify trait member accessors via
+                    -- the imported module's 'buildQualifiedNames' so that members of a
+                    -- re-exported (but not locally declared) trait resolve to the
+                    -- defining module rather than to this import path.
                     let entries = Environment.names traitEntryInterface
-                        ns1 =
-                          [ (n, principalPath path <.> n)
-                          | n <- if ["*"] == names then entries else names `intersect` entries
-                          ]
-                    Build{buildInstances = importInstances, buildExportedNames = buildExportedNames'} <- lift $ lift $ importedBuild path
+                        members = if ["*"] == names then entries else names `intersect` entries
+                        ns1 = [(n, Environment.lookupWithDefault (principalPath path <.> n) n importQualifiedNames) | n <- members]
                     ns2 <- generateQualifiedInstanceNames path buildNames buildExportedNames' (traitInstances name importInstances)
                     pure (ns1 <> ns2)
                   _ ->

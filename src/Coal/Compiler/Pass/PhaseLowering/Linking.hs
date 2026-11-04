@@ -125,7 +125,11 @@ execProcess p = do
   (exitCode, _, stderr) <- readCreateProcessWithExitCode p ""
   case exitCode of
     ExitSuccess -> pure ()
-    ExitFailure code -> error $ "Process failed with exit code " <> show code <> ":\n" <> stderr
+    -- Report a failed subprocess as an ordinary 'IOError' rather than via
+    -- 'error'. The caller catches it and turns it into a 'CompilerError'; an
+    -- 'ErrorCall' would additionally attach a 'HasCallStack' trace to the
+    -- diagnostic, which is misleading for an external-tool failure.
+    ExitFailure code -> ioError . userError $ "Process failed with exit code " <> show code <> ":\n" <> stderr
 
 runtimeLib :: ByteString
 runtimeLib = $(embedFile "runtime/dist/runtime-combined.c")
