@@ -1,0 +1,89 @@
+/**
+ * A monad for stateful computations.
+ * 
+ * Wraps a state-carrying function s -> (a, s) and provides Functor, 
+ * Applicative, and Monad instances.
+ */
+module Monad.State {
+
+  import Coal.Functor(Functor)
+  import Coal.Monad(Monad, and_then)
+  import Coal.Applicative(Applicative)
+  import Coal.Combinators(fst, always)
+
+  /**
+   * A stateful computation: wraps a function s -> (a, s) that
+   * produces a value of type 'a' and a new state of type 's'.
+   */
+  type State<s, a> = State(s -> (a, s))
+
+  /**
+   * Run a State computation with an initial state, returning (value, new state).
+   */
+  fun run_state(State(f), s) =
+    f(s)
+
+  /**
+   * Run a State computation and returns only the produced value (discards final state).
+   */
+  fun eval_state(st, s0) =
+    fst(run_state(st, s0))
+
+  /**
+   * Apply a function to the produced value, threading the state through unchanged.
+   */
+  instance Functor<State<s>> {
+    fun map(f, State(g)) =
+      State(fn(s) =>
+        let (a, s1) = g(s)
+        in
+        (f(a), s1)
+      )
+  }
+
+  /**
+   * Sequence state-bearing computations, combining their state changes left to right.
+   */
+  instance Applicative<State<s>> {
+    fun pure(x) =
+      State(fn(s) => (x, s))
+
+    fun ap(State(sf), State(sa)) =
+      State(fn(s0) =>
+        let (f, s1) = sf(s0) ;
+            (a, s2) = sa(s1) 
+        in (f(a), s2)
+      )
+  }
+
+  /**
+   * Chain stateful computations, passing the threaded state from one step to the next.
+   */
+  instance Monad<State<s>> {
+    fun bind(m, k) =
+      State(fn(s0) =>
+        let (a, s1) = run_state(m, s0)
+        in
+        run_state(k(a), s1)
+      )
+  }
+
+  /**
+   * Retrieve the current state (get returns the state as its value).
+   */
+  fun get() =
+    State(fn(s) => (s, s))
+
+  /**
+   * Replace the current state with 's' (put returns unit).
+   */
+  fun put(s) =
+    State(always(((), s)))
+
+  /**
+   * Apply 'f' to the current state, storing the result as the new state.
+   */
+  fun modify(f) =
+    State(fn(s) => ((), f(s)))
+
+}

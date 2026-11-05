@@ -1,0 +1,75 @@
+module BankingGrammar {
+
+  import Coal.Functor(Functor)
+  import Coal.Monad.Free(Free, lift_free)
+  import Coal.Combinators(always)
+  import FreeResult(FreeResultT, lift_result)
+
+  type AccountId = AccountId(string)
+  type Amount = Amount(int64)
+  type Transaction = Transaction(AccountId, AccountId, Amount)
+
+  fun in_AccountId(AccountId(str)) = str
+  fun in_Amount(Amount(a)) = a
+
+  instance Ordered<Amount> {
+    fun compare(Amount(a), Amount(b)) = compare(a, b)
+  }
+
+  instance Comparable<Amount> {
+    fun `==`(Amount(a), Amount(b)) = a == b
+  }
+
+  type BankingError
+    = InsufficientFunds
+    | NoSuchAccount
+    | ApplicationError(string)
+
+  fun error_to_string 
+    | InsufficientFunds => "InsufficientFunds"
+    | NoSuchAccount => "NoSuchAccount"
+    | ApplicationError(str) => "ApplicationError: " <> str
+
+  type BankingF<a>
+    = GetBalance(AccountId, Result<BankingError, Amount> -> a)
+    | Debit(AccountId, Amount, Result<BankingError, unit> -> a)
+    | Credit(AccountId, Amount, Result<BankingError, unit> -> a)
+    | RecordTransaction(Transaction, a)
+
+  instance Functor<BankingF> {
+    fun map(f) = match{
+      | GetBalance(account_id, g) => 
+          GetBalance(account_id, f << g)
+      | Debit(account_id, amount, g) =>
+          Debit(account_id, amount, f << g)
+      | Credit(account_id, amount, g) => 
+          Credit(account_id, amount, f << g)
+      | RecordTransaction(transaction, a) => 
+          RecordTransaction(transaction, f(a))
+    }
+  }
+
+  fun f_get_balance(account_id) = lift_free(GetBalance(account_id, fn(b) => b))
+  fun f_debit(account_id, amount) = lift_free(Debit(account_id, amount, fn(b) => b))
+  fun f_credit(account_id, amount) = lift_free(Credit(account_id, amount, fn(b) => b))
+  fun f_record_transaction(transaction) = lift_free(RecordTransaction(transaction, ()))
+
+  type alias Banking<a> = FreeResultT<BankingF, BankingError, a>
+
+  type alias BankingHandler<m, a> = BankingF<m<a>> -> m<a>
+
+  fun get_balance(account_id) =
+    FreeResultT(f_get_balance(account_id))
+
+  fun debit(account_id, amount) =
+    FreeResultT(f_debit(account_id, amount))
+
+  fun credit(account_id, amount) =
+    FreeResultT(f_credit(account_id, amount))
+
+  fun record_transaction(transaction) =
+    FreeResultT(map(always(Ok()), f_record_transaction(transaction)))
+
+  fun throw_error(err) = lift_result(Err(err))
+
+}
