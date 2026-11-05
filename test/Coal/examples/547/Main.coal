@@ -1,0 +1,9 @@
+module Main {
+
+  import Result(is_ok)
+  import namespace IO
+
+  fun main() =
+    IO.println_bool(Ok(5) > Ok(4))
+
+}

@@ -1,0 +1,63 @@
+/**
+ * Utilities for working with the built-in `Result` type, which represents the
+ * outcome of a computation that may fail — a success value wrapped in `Ok`, or
+ * an error value wrapped in `Err`.
+ */
+module Result {
+
+  instance Comparable<Result<e, r>> with (Comparable<e>, Comparable<r>) {
+    fun `==`
+      | Ok(x), Ok(y)   => x == y
+      | Err(e), Err(f) => e == f
+      | _, _           => false
+  }
+
+  instance Ordered<Result<e, r>> with (Ordered<e>, Ordered<r>) {
+    fun compare
+      | Ok(x), Ok(y)   => compare(x, y)
+      | Err(e), Err(f) => compare(e, f)
+      | Err(_), Ok(_)  => LessThan
+      | Ok(_), Err(_)  => GreaterThan
+  }
+
+  /**
+   * Return `true` if the given value is constructed with `Ok`, and `false`
+   * otherwise.
+   *
+   * **Type**: `is_ok : Result<e, a> -> bool`
+   */
+  fun is_ok
+    | Ok(_)  => true
+    | Err(_) => false
+
+  /**
+   * Return `true` if the given value is constructed with `Err`, and `false`
+   * otherwise.
+   *
+   * **Type**: `is_err : Result<e, a> -> bool`
+   */
+  fun is_err
+    | Err(_) => true
+    | Ok(_)  => false
+
+  /**
+   * Extract a value of type `a` from a `Result<e, a>` by providing a default
+   * value for the case when the input is `Err`.
+   *
+   * **Type**: `ok_with_default : a -> Result<e, a> -> a`
+   */
+  fun ok_with_default
+    | _, Ok(value) => value
+    | value, _     => value
+
+  /**
+   * Extract an error of type `e` from a `Result<e, a>` by providing a default
+   * value for the case when the input is `Ok`.
+   *
+   * **Type**: `err_with_default : e -> Result<e, a> -> e`
+   */
+  fun err_with_default
+    | _, Err(err)  => err
+    | err, _       => err
+
+}
