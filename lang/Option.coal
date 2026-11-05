@@ -5,12 +5,18 @@
 module Option {
 
   instance Comparable<Option<a>> with (Comparable<a>) {
-    fun `==`(lhs, rhs) =
-      match((lhs, rhs)) {
-        | (Some(x), Some(y)) => x == y
-        | (None, None) => true
-        | (_, _) => false
-      }
+    fun `==`
+      | Some(x), Some(y) => x == y
+      | None, None       => true
+      | _, _             => false
+  }
+
+  instance Ordered<Option<a>> with (Ordered<a>) {
+    fun compare
+      | Some(x), Some(y) => compare(x, y)
+      | None, None       => EqualTo
+      | Some(_), None    => GreaterThan
+      | None, _          => LessThan
   }
 
   /**
