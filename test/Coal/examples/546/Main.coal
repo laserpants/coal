@@ -9,9 +9,8 @@ module Main {
   import Monad.Writer(Writer, tell)
   import Coal.Combinators(always)
   import Coal.Monad.Free(Free, interpret, lift_free)
-  import Result(is_err)
   import Coal.Functor(Functor)
-  import FreeResult(FreeResultT, in_FreeResultT)
+  import FreeResult(FreeResultT, in_FreeResultT, lift_result)
   import BankingGrammar(
     AccountId, 
     Amount, 
@@ -141,8 +140,7 @@ module Main {
   fun test_db_handler : DatabaseF<IO<a>> -> IO<a>
     | Execute(sql, params, g) => do {
         println_string(in_Sql(sql));
-//        g(Ok());
-        g(Err(SqlError));
+        g(Ok());
       }
     | QueryOne(sql, params, g) => do {
         println_string(in_Sql(sql));
@@ -161,11 +159,42 @@ module Main {
         a;
       }
 
+  // `attempt` runs a `FreeResultT` computation and reifies its error into the
+  // value position: a computation that would have failed with `Err(err)`
+  // instead yields `Err(err)` as an ordinary value, so the caller can inspect
+  // it (e.g. to decide whether to roll back) rather than have it short-circuit
+  // the surrounding `do` block. Mapping `Ok` over the underlying free program
+  // reaches every `Pure` node, since errors are always represented there.
+  //
+  // **Type**: `attempt : FreeResultT<f, e, a> -> FreeResultT<f, e', Result<e, a>> with (Functor<f>)`
+  fun attempt(p : FreeResultT<f, e, a>) : FreeResultT<f, e, Result<e, a>> with (Functor<f>) =
+    FreeResultT(map(Ok, in_FreeResultT(p)))
+
+  // Throw a `SqlError` into the `Database` error channel.
+  //
+  // **Type**: `throw_sql_error : SqlError -> Database<a>`
+  fun throw_sql_error(err : SqlError) : Database<a> =
+    lift_result(Err(err))
+
   fun make_transaction(p : Database<Result<BankingError, a>>) : Database<Result<BankingError, a>> = do {
     begin_transaction;
-    r <- p;
-    if (is_err(r)) then rollback else commit;
-    pure(r);
+    r <- attempt(p);
+    match(r) {
+      | Err(sql_err) => do {
+          rollback;
+          throw_sql_error(sql_err);
+        }
+
+      | Ok(Err(banking_err)) => do {
+          rollback;
+          pure(Err(banking_err));
+        }
+
+      | Ok(Ok(value)) => do {
+          commit;
+          pure(Ok(value));
+        }
+    };
   }
 
   fun main() = do {
