@@ -3,7 +3,7 @@ module Main {
   import namespace IO
 
   import IO(println_string)
-  import String(int32_to_string)
+  import String(int64_to_string, double_to_string)
   import Number(int32_to_int64)
   import Coal.Monad(unless)
   import Monad.Writer(Writer, tell)
@@ -54,6 +54,13 @@ module Main {
     | SqlBool(bool)
     // | SqlBlob(List<uint8>)
 
+  fun sql_value_to_string
+    | SqlNull      => ""
+    | SqlInt(n)    => int64_to_string(n)
+    | SqlFloat(d)  => double_to_string(d)
+    | SqlText(str) => "'" <> str <> "'"
+    | SqlBool(b)   => if (b) then "1" else "0"
+
   type alias Params = List<SqlValue>
 
   type Column = Column(string)
@@ -61,6 +68,9 @@ module Main {
   type Row = Row(List<(Column, SqlValue)>)
 
   type SqlError = SqlError // TODO
+
+  fun build_query(sql : Sql, params : Params) : string =
+    ""
 
   type DatabaseF<a>
     = Execute(Sql, Params, Result<SqlError, unit> -> a)
@@ -101,7 +111,7 @@ module Main {
   fun db_banking_handler : BankingF<Database<a>> -> Database<a> 
     | GetBalance(account_id, g) => do {
         row <- query_one(Sql(
-          "SELECT balance FROM accounts WHERE account_id = '?'"), 
+          "SELECT balance FROM accounts WHERE account_id = ?"), 
           [SqlText(in_AccountId(account_id))]
         );
         res = match(row) {
@@ -115,7 +125,7 @@ module Main {
       }
     | Debit(account_id, Amount(amount), g) => do {
         execute(Sql(
-          "UPDATE accounts SET balance = balance - ? WHERE account_id = '?'"), 
+          "UPDATE accounts SET balance = balance - ? WHERE account_id = ?"), 
           [
             SqlInt(amount),
             SqlText(in_AccountId(account_id))
@@ -125,7 +135,7 @@ module Main {
       }
     | Credit(account_id, Amount(amount), g) => do {
         execute(Sql(
-          "UPDATE accounts SET balance = balance + ? WHERE account_id = '?'"), 
+          "UPDATE accounts SET balance = balance + ? WHERE account_id = ?"), 
           [
             SqlInt(amount),
             SqlText(in_AccountId(account_id))
@@ -178,18 +188,16 @@ module Main {
 
   fun make_transaction(p : Database<Result<BankingError, a>>) : Database<Result<BankingError, a>> = do {
     begin_transaction;
-    r <- attempt(p);
-    match(r) {
+    result <- attempt(p);
+    match(result) {
       | Err(sql_err) => do {
           rollback;
           throw_sql_error(sql_err);
         }
-
       | Ok(Err(banking_err)) => do {
           rollback;
           pure(Err(banking_err));
         }
-
       | Ok(Ok(value)) => do {
           commit;
           pure(Ok(value));
