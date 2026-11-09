@@ -3,32 +3,41 @@ module Main {
   import namespace IO
 
   import IO(println_string)
-  import String(int64_to_string, double_to_string)
-  import Number(int32_to_int64)
-  import Coal.Monad(unless)
-  import Monad.Writer(Writer, tell)
-  import Coal.Combinators(always)
-  import Coal.Monad.Free(Free, interpret, lift_free)
-  import Coal.Functor(Functor)
-  import FreeResult(FreeResultT, in_FreeResultT, lift_result)
+  import Coal.Monad.Free(interpret)
+  import FreeResult(in_FreeResultT)
+  import Sql(Sql, in_Sql, SqlValue, Column, Row, SqlError, sql_error_to_string)
+  import SqlCodec(account_id_to_value, decode_amount)
+  import DbError(DbError)
+  import Database(
+    Database,
+    DatabaseF,
+    execute,
+    query_one,
+    begin_transaction,
+    commit,
+    rollback,
+    throw_db_error,
+    with_transaction
+  )
   import BankingGrammar(
-    AccountId, 
-    Amount, 
-    Transaction, 
-    BankingError, 
-    BankingF, 
+    AccountId,
+    Amount,
+    Transaction,
+    BankingError,
+    BankingF,
     Banking,
-    BankingHandler,
-    in_AccountId, 
-    in_Amount, 
-    error_to_string, 
-    get_balance, 
+    error_to_string,
+    get_balance,
     debit,
-    credit, 
+    credit,
     record_transaction,
     throw_error
-  ) 
+  )
 
+  /**
+   * The banking program: the domain grammar. It describes the business rule
+   * for a transfer without mentioning SQL, transactions or IO.
+   */
   fun bank_transfer({ from, to, amount }) : Banking<unit> = do {
     balance <- get_balance(from);
     if (balance >= amount) then do {
@@ -39,107 +48,38 @@ module Main {
       throw_error(InsufficientFunds);
     };
   }
-  
-  // Interpreter
 
-  type Sql = Sql(string)
+  // --- Banking -> Database translation -------------------------------------
 
-  fun in_Sql(Sql(str)) = str
-
-  type SqlValue
-    = SqlNull
-    | SqlInt(int64)
-    | SqlFloat(double)
-    | SqlText(string)
-    | SqlBool(bool)
-    // | SqlBlob(List<uint8>)
-
-  fun sql_value_to_string
-    | SqlNull      => ""
-    | SqlInt(n)    => int64_to_string(n)
-    | SqlFloat(d)  => double_to_string(d)
-    | SqlText(str) => "'" <> str <> "'"
-    | SqlBool(b)   => if (b) then "1" else "0"
-
-  type alias Params = List<SqlValue>
-
-  type Column = Column(string)
-
-  type Row = Row(List<(Column, SqlValue)>)
-
-  type SqlError = SqlError // TODO
-
-  fun build_query(sql : Sql, params : Params) : string =
-    ""
-
-  type DatabaseF<a>
-    = Execute(Sql, Params, Result<SqlError, unit> -> a)
-    | QueryOne(Sql, Params, Result<SqlError, Row> -> a)
-    | BeginTransaction(a)
-    | Commit(a)
-    | Rollback(a)
-
-  instance Functor<DatabaseF> {
-    fun map(f) = match{
-      | Execute(sql, params, g) =>
-          Execute(sql, params, f << g)
-      | QueryOne(sql, params, g) =>
-          QueryOne(sql, params, f << g) 
-      | BeginTransaction(a) =>
-          BeginTransaction(f(a))
-      | Commit(a) =>
-          Commit(f(a))
-      | Rollback(a) =>
-          Rollback(f(a))
-    }
-  }
-
-  fun f_execute(sql, params) = lift_free(Execute(sql, params, fn(b) => b))
-  fun f_query_one(sql, params) = lift_free(QueryOne(sql, params, fn(b) => b))
-  let f_begin_transaction = lift_free(BeginTransaction())
-  let f_commit = lift_free(Commit())
-  let f_rollback = lift_free(Rollback())
-
-  fun execute(sql, params) = FreeResultT(f_execute(sql, params))
-  fun query_one(sql, params) = FreeResultT(f_query_one(sql, params))
-  let begin_transaction = FreeResultT(map(always(Ok()), f_begin_transaction))
-  let commit = FreeResultT(map(always(Ok()), f_commit))
-  let rollback = FreeResultT(map(always(Ok()), f_rollback))
-
-  type alias Database<a> = FreeResultT<DatabaseF, SqlError, a>
-
-  fun db_banking_handler : BankingF<Database<a>> -> Database<a> 
+  /**
+   * Translate each banking instruction into SQL operations.
+   *
+   * This handler never constructs a `BankingError`: a failed row decode is a
+   * `DecodeFailure` (a database concern), and the domain's own errors are
+   * carried separately (see `run_banking`).
+   */
+  fun db_banking_handler : BankingF<Database<a>> -> Database<a>
     | GetBalance(account_id, g) => do {
-        row <- query_one(Sql(
-          "SELECT balance FROM accounts WHERE account_id = ?"), 
-          [SqlText(in_AccountId(account_id))]
+        row <- query_one(
+          Sql("SELECT balance FROM accounts WHERE account_id = ?"),
+          [account_id_to_value(account_id)]
         );
-        res = match(row) {
-          | Row([(Column("balance"), SqlInt(balance))]) => 
-              Ok(Amount(balance))
-//              Err(ApplicationError("Database query returned an unexpected result."))
-          | _ => 
-              Err(ApplicationError("Database query returned an unexpected result."))
+        match(decode_amount(row)) {
+          | Ok(amount) => g(Ok(amount))
+          | Err(msg)   => throw_db_error(DecodeFailure(msg))
         };
-        g(res);
       }
     | Debit(account_id, Amount(amount), g) => do {
-        execute(Sql(
-          "UPDATE accounts SET balance = balance - ? WHERE account_id = ?"), 
-          [
-            SqlInt(amount),
-            SqlText(in_AccountId(account_id))
-          ]
+        execute(
+          Sql("UPDATE accounts SET balance = balance - ? WHERE account_id = ?"),
+          [SqlInt(amount), account_id_to_value(account_id)]
         );
         g(Ok());
       }
     | Credit(account_id, Amount(amount), g) => do {
-        execute(Sql(
-          "UPDATE accounts SET balance = balance + ? WHERE account_id = ?"), 
-          [
-            SqlInt(amount),
-            SqlText(in_AccountId(account_id))
-          ]
+        execute(
+          Sql("UPDATE accounts SET balance = balance + ? WHERE account_id = ?"),
+          [SqlInt(amount), account_id_to_value(account_id)]
         );
         g(Ok());
       }
@@ -147,7 +87,27 @@ module Main {
         a;
       }
 
-  fun test_db_handler : DatabaseF<IO<a>> -> IO<a>
+  /**
+   * Run a banking program, merging its (value-position) banking error into the
+   * database error channel. Afterwards the whole application has a single
+   * error type, `DbError`.
+   */
+  fun run_banking(program : Banking<a>) : Database<a> = do {
+    r <- interpret(db_banking_handler, in_FreeResultT(program));
+    match(r) {
+      | Ok(value)        => pure(value)
+      | Err(banking_err) => throw_db_error(DomainFailure(banking_err))
+    };
+  }
+
+  // --- Database -> IO interpreter ------------------------------------------
+
+  /**
+   * A stand-in for a real database driver: it prints the statements it is
+   * asked to run and returns canned rows. A production interpreter would call
+   * into the SQL runtime instead.
+   */
+  fun io_db_handler : DatabaseF<IO<a>> -> IO<a>
     | Execute(sql, params, g) => do {
         println_string(in_Sql(sql));
         g(Ok());
@@ -156,65 +116,30 @@ module Main {
         println_string(in_Sql(sql));
         g(Ok(Row([(Column("balance"), SqlInt(20000))])));
       }
-    | BeginTransaction(a) => do {
+    | BeginTransaction(g) => do {
         println_string("BeginTransaction");
-        a;
+        g(Ok());
       }
-    | Commit(a) => do {
+    | Commit(g) => do {
         println_string("Commit");
-        a;
+        g(Ok());
       }
-    | Rollback(a) => do {
+    | Rollback(g) => do {
         println_string("Rollback");
-        a;
+        g(Ok());
       }
-
-  // `attempt` runs a `FreeResultT` computation and reifies its error into the
-  // value position: a computation that would have failed with `Err(err)`
-  // instead yields `Err(err)` as an ordinary value, so the caller can inspect
-  // it (e.g. to decide whether to roll back) rather than have it short-circuit
-  // the surrounding `do` block. Mapping `Ok` over the underlying free program
-  // reaches every `Pure` node, since errors are always represented there.
-  //
-  // **Type**: `attempt : FreeResultT<f, e, a> -> FreeResultT<f, e', Result<e, a>> with (Functor<f>)`
-  fun attempt(p : FreeResultT<f, e, a>) : FreeResultT<f, e, Result<e, a>> with (Functor<f>) =
-    FreeResultT(map(Ok, in_FreeResultT(p)))
-
-  // Throw a `SqlError` into the `Database` error channel.
-  //
-  // **Type**: `throw_sql_error : SqlError -> Database<a>`
-  fun throw_sql_error(err : SqlError) : Database<a> =
-    lift_result(Err(err))
-
-  fun make_transaction(p : Database<Result<BankingError, a>>) : Database<Result<BankingError, a>> = do {
-    begin_transaction;
-    result <- attempt(p);
-    match(result) {
-      | Err(sql_err) => do {
-          rollback;
-          throw_sql_error(sql_err);
-        }
-      | Ok(Err(banking_err)) => do {
-          rollback;
-          pure(Err(banking_err));
-        }
-      | Ok(Ok(value)) => do {
-          commit;
-          pure(Ok(value));
-        }
-    };
-  }
 
   fun main() = do {
-    res <- bank_transfer({ from = AccountId("a"), to = AccountId("b"), amount = Amount(10000) }) 
-      |. in_FreeResultT |. interpret(db_banking_handler)
-      |. make_transaction 
-      |. in_FreeResultT |. interpret(test_db_handler);
+    res <- bank_transfer({ from = AccountId("a"), to = AccountId("b"), amount = Amount(10000) })
+      |. run_banking
+      |. with_transaction
+      |. in_FreeResultT |. interpret(io_db_handler);
 
     match(res) {
-      | Err(sql_err)         => IO.println_string("sql_err")
-      | Ok(Err(banking_err)) => IO.println_string(error_to_string(banking_err))
-      | Ok(_)                => IO.println_string("ok")
+      | Ok(_)                           => println_string("ok")
+      | Err(DomainFailure(banking_err)) => println_string(error_to_string(banking_err))
+      | Err(SqlFailure(sql_err))        => println_string(sql_error_to_string(sql_err))
+      | Err(DecodeFailure(msg))         => println_string(msg)
     };
   }
 

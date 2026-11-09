@@ -1,0 +1,38 @@
+module Sql {
+
+  import String(int32_to_string, int64_to_string, double_to_string)
+
+  /** A SQL statement text. Parameters are supplied separately via `Params`. */
+  type Sql = Sql(string)
+
+  fun in_Sql(Sql(str)) = str
+
+  /** A value that can be bound to a query parameter. */
+  type SqlValue
+    = SqlNull
+    | SqlInt(int64)
+    | SqlFloat(double)
+    | SqlText(string)
+    | SqlBool(bool)
+    // | SqlBlob(List<uint8>)
+
+  fun sql_value_to_string
+    | SqlNull      => "NULL"
+    | SqlInt(n)    => int64_to_string(n)
+    | SqlFloat(d)  => double_to_string(d)
+    | SqlText(str) => "'" <> str <> "'"
+    | SqlBool(b)   => if (b) then "1" else "0"
+
+  type alias Params = List<SqlValue>
+
+  type Column = Column(string)
+
+  type Row = Row(List<(Column, SqlValue)>)
+
+  /** A low-level database failure: a (driver-specific) code and a message. */
+  type SqlError = SqlError(int32, string)
+
+  fun sql_error_to_string(SqlError(code, message)) =
+    "SQL error " <> int32_to_string(code) <> ": " <> message
+
+}

@@ -1,0 +1,76 @@
+module Database {
+
+  import Coal.Functor(Functor)
+  import Coal.Monad.Free(Free, lift_free)
+  import FreeResult(FreeResultT, in_FreeResultT, lift_result, try)
+  import Sql(Sql, Params, Row)
+  import DbError(DbError)
+
+  /**
+   * The SQL instruction set.
+   *
+   * Each constructor describes one database action and carries a continuation
+   * that consumes the action's result. Transaction control is expressed as
+   * instructions too, so that the interpreter (not the domain code) decides
+   * how to run them; and each of them can fail, so a failing `commit` is
+   * representable.
+   */
+  type DatabaseF<a>
+    = Execute(Sql, Params, Result<DbError, unit> -> a)
+    | QueryOne(Sql, Params, Result<DbError, Row> -> a)
+    | BeginTransaction(Result<DbError, unit> -> a)
+    | Commit(Result<DbError, unit> -> a)
+    | Rollback(Result<DbError, unit> -> a)
+
+  instance Functor<DatabaseF> {
+    fun map(f) = match{
+      | Execute(sql, params, g)  => Execute(sql, params, f << g)
+      | QueryOne(sql, params, g) => QueryOne(sql, params, f << g)
+      | BeginTransaction(g)      => BeginTransaction(f << g)
+      | Commit(g)                => Commit(f << g)
+      | Rollback(g)              => Rollback(f << g)
+    }
+  }
+
+  /** A program in the database monad: one error channel, `DbError`. */
+  type alias Database<a> = FreeResultT<DatabaseF, DbError, a>
+
+  fun execute(sql, params)   = FreeResultT(lift_free(Execute(sql, params, fn(b) => b)))
+  fun query_one(sql, params) = FreeResultT(lift_free(QueryOne(sql, params, fn(b) => b)))
+
+  let begin_transaction = FreeResultT(lift_free(BeginTransaction(fn(b) => b)))
+  let commit            = FreeResultT(lift_free(Commit(fn(b) => b)))
+  let rollback          = FreeResultT(lift_free(Rollback(fn(b) => b)))
+
+  /**
+   * Abort the surrounding program with `err`.
+   *
+   * **Type**: `throw_db_error : DbError -> Database<a>`
+   */
+  fun throw_db_error(err : DbError) : Database<a> =
+    lift_result(Err(err))
+
+  /**
+   * Run `p` inside a transaction: commit on success, roll back on failure.
+   *
+   * This is the single place where the error channel is reified into the value
+   * position (`try`), so that the transaction bracket can observe the outcome.
+   *
+   * **Type**: `with_transaction : Database<a> -> Database<a>`
+   */
+  fun with_transaction(p : Database<a>) : Database<a> = do {
+    begin_transaction;
+    outcome <- try(p);
+    match(outcome) {
+      | Ok(value) => do {
+          commit;
+          pure(value);
+        }
+      | Err(err) => do {
+          rollback;
+          throw_db_error(err);
+        }
+    };
+  }
+
+}

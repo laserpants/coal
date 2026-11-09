@@ -47,4 +47,18 @@ module FreeResult {
       )
   }
 
+  /**
+   * Reify the error channel into the value position.
+   *
+   * A computation that would have failed with `Err(err)` instead yields
+   * `Err(err)` as an ordinary value, so the caller can inspect it (e.g. to
+   * decide whether to roll back) rather than have it short-circuit the
+   * surrounding `do` block. Mapping `Ok` over the underlying free program
+   * reaches every `Pure` node, since errors are always represented there.
+   *
+   * **Type**: `try : FreeResultT<f, e, a> -> FreeResultT<f, e, Result<e, a>> with (Functor<f>)`
+   */
+  fun try(p : FreeResultT<f, e, a>) : FreeResultT<f, e, Result<e, a>> with (Functor<f>) =
+    FreeResultT(map(Ok, in_FreeResultT(p)))
+
 }

@@ -1,0 +1,21 @@
+module DbError {
+
+  import Sql(SqlError)
+  import BankingGrammar(BankingError)
+
+  /**
+   * The unified error algebra of the application.
+   *
+   * There is a single error channel for the whole program; the two grammars
+   * that meet here (banking and SQL) contribute their own constructors:
+   *
+   * - `SqlFailure`    -- a low-level database failure,
+   * - `DecodeFailure` -- a result row did not match the expected shape,
+   * - `DomainFailure` -- a business-rule failure from the banking grammar.
+   */
+  type DbError
+    = SqlFailure(SqlError)
+    | DecodeFailure(string)
+    | DomainFailure(BankingError)
+
+}

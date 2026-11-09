@@ -1,0 +1,25 @@
+module SqlCodec {
+
+  import Sql(SqlValue, Column, Row)
+  import BankingGrammar(AccountId, Amount, in_AccountId)
+
+  /**
+   * The marshalling boundary between the banking vocabulary and SQL values.
+   *
+   * Keeping the encoding/decoding here (rather than inline in the translation)
+   * means the banking-to-SQL handler only has to talk about query *structure*,
+   * not about how individual values are represented.
+   */
+
+  fun account_id_to_value(account_id : AccountId) : SqlValue =
+    SqlText(in_AccountId(account_id))
+
+  fun decode_amount(row : Row) : Result<string, Amount> =
+    match(row) {
+      | Row([(Column("balance"), SqlInt(balance))]) =>
+          Ok(Amount(balance))
+      | _ =>
+          Err("Database query returned an unexpected result.")
+    }
+
+}

@@ -23,12 +23,10 @@ module BankingGrammar {
   type BankingError
     = InsufficientFunds
     | NoSuchAccount
-    | ApplicationError(string)
 
   fun error_to_string 
     | InsufficientFunds => "InsufficientFunds"
     | NoSuchAccount => "NoSuchAccount"
-    | ApplicationError(str) => "ApplicationError: " <> str
 
   type BankingF<a>
     = GetBalance(AccountId, Result<BankingError, Amount> -> a)
