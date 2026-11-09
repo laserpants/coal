@@ -63,11 +63,11 @@ module Main {
    */
   fun db_banking_handler : BankingF<Db<a>> -> Db<a>
     | GetBalance(account_id, g) => do {
-        row <- query_one(
+        r <- query_one(
           Sql("SELECT balance FROM accounts WHERE account_id = ?"),
           [account_id_to_value(account_id)]
         );
-        match(row) {
+        match(r) {
           | None => g(Err(NoSuchAccount))
           | Some(row) =>
               match(decode_amount(row)) {
@@ -138,7 +138,7 @@ module Main {
   }
 
   fun main() = do {
-    _ <- remove_file(db_path);
+    remove_file(db_path);
     outcome <- run_database(
       db_path,
       setup_sqls,
