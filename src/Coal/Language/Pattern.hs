@@ -99,8 +99,8 @@ instance (Data a, Data s, Data t) => BoundVars (Pattern a s t) where
         boundIn ll
       PAtVariable _ ll ->
         boundIn ll
-      -- A fold pattern @f(@x)@ is a structural-recursion call to the fold
-      -- @f@ whose result is bound to the @-variable @x@; the fold name is a
+      -- A fold pattern @f(\@x)@ is a structural-recursion call to the fold
+      -- @f@ whose result is bound to the \@-variable @\@x@; the fold name is a
       -- reference, not a binder, so it must not be collected here.
       PNamedFold _ _ ll ->
         boundIn ll
