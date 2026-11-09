@@ -59,12 +59,11 @@ module DbSqlite {
       | (i, SqlBool(b))  => bind_int64(stmt, i, if (b) then 1 else 0)
     }
 
-  fun bind_params(stmt : Statement, params : Params) : IO<Result<SqliteError, unit>> =
-    let
-      pairs = zip(range(1, length(params)), params) ;
-      bind_step(acc, pair) = and_then(fn(_) => bind_one(stmt, pair), acc)
-    in
-      reduce_left(bind_step, return(Ok(())), pairs)
+  fun bind_params(stmt : Statement, params : Params) : IO<Result<SqliteError, unit>> = do {
+    pairs = zip(range(1, length(params)), params);
+    bind_step(acc, pair) = and_then(fn(_) => bind_one(stmt, pair), acc);
+    reduce_left(bind_step, return(Ok(())), pairs);
+  }
 
   // --- Statement execution -------------------------------------------------
 
