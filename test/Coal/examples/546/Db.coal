@@ -17,7 +17,7 @@ module Db {
    */
   type DbF<a>
     = Execute(Sql, Params, Result<DbError, unit> -> a)
-    | QueryOne(Sql, Params, Result<DbError, SqlRow> -> a)
+    | QueryOne(Sql, Params, Result<DbError, Option<SqlRow>> -> a)
     | BeginTransaction(Result<DbError, unit> -> a)
     | Commit(Result<DbError, unit> -> a)
     | Rollback(Result<DbError, unit> -> a)

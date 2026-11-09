@@ -9,7 +9,7 @@ module Main {
   import Sql(Sql, SqlValue, SqlRow, sql_error_to_string)
   import SqlCodec(account_id_to_value, decode_amount)
   import DbError(DbError)
-  import Db(Db, DbF, execute, query_one, throw_db_error, with_transaction)
+  import Db(Db, DbF, query_one, throw_db_error, with_transaction)
   import DbSqlite(run_database)
   import BankingGrammar(
     AccountId,
@@ -66,24 +66,34 @@ module Main {
           Sql("SELECT balance FROM accounts WHERE account_id = ?"),
           [account_id_to_value(account_id)]
         );
-        match(decode_amount(row)) {
-          | Ok(amount) => g(Ok(amount))
-          | Err(msg)   => throw_db_error(DecodeFailure(msg))
+        match(row) {
+          | None => g(Err(NoSuchAccount))
+          | Some(row) =>
+              match(decode_amount(row)) {
+                | Ok(amount) => g(Ok(amount))
+                | Err(msg)   => throw_db_error(DecodeFailure(msg))
+              }
         };
       }
     | Debit(account_id, Amount(amount), g) => do {
-        execute(
-          Sql("UPDATE accounts SET balance = balance - ? WHERE account_id = ?"),
+        updated <- query_one(
+          Sql("UPDATE accounts SET balance = balance - ? WHERE account_id = ? RETURNING account_id"),
           [SqlInt(amount), account_id_to_value(account_id)]
         );
-        g(Ok());
+        match(updated) {
+          | None    => g(Err(NoSuchAccount))
+          | Some(_) => g(Ok())
+        };
       }
     | Credit(account_id, Amount(amount), g) => do {
-        execute(
-          Sql("UPDATE accounts SET balance = balance + ? WHERE account_id = ?"),
+        updated <- query_one(
+          Sql("UPDATE accounts SET balance = balance + ? WHERE account_id = ? RETURNING account_id"),
           [SqlInt(amount), account_id_to_value(account_id)]
         );
-        g(Ok());
+        match(updated) {
+          | None    => g(Err(NoSuchAccount))
+          | Some(_) => g(Ok())
+        };
       }
     | RecordTransaction(transaction, a) => do {
         a;
@@ -115,9 +125,10 @@ module Main {
       )
     );
     match(r) {
-      | Ok(SqlRow([(_, SqlInt(n))])) => println_string(label <> " = " <> int64_to_string(n))
-      | Ok(_)                        => println_string(label <> " = ?")
-      | Err(_)                       => println_string(label <> " = error")
+      | Ok(Some(SqlRow([(_, SqlInt(n))]))) => println_string(label <> " = " <> int64_to_string(n))
+      | Ok(None)                           => println_string(label <> " = not found")
+      | Ok(_)                              => println_string(label <> " = ?")
+      | Err(_)                             => println_string(label <> " = error")
     };
   }
 

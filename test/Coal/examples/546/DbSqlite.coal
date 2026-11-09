@@ -42,10 +42,10 @@ module DbSqlite {
       | Err(e) => Err(SqlFailure(sqlite_error_to_sql(e)))
     }
 
-  fun as_db_row(r : Result<SqliteError, SqlRow>) : Result<DbError, SqlRow> =
+  fun as_db_opt(r : Result<SqliteError, Option<SqlRow>>) : Result<DbError, Option<SqlRow>> =
     match(r) {
-      | Ok(row) => Ok(row)
-      | Err(e)  => Err(SqlFailure(sqlite_error_to_sql(e)))
+      | Ok(v)  => Ok(v)
+      | Err(e) => Err(SqlFailure(sqlite_error_to_sql(e)))
     }
 
   // --- Parameter binding (1-based, matching SQLite) ------------------------
@@ -124,15 +124,15 @@ module DbSqlite {
       and_then(fn(_) => step_done(stmt), bind_params(stmt, params)))
 
   // Prepare `template`, bind `params`, read the first row, finalize.
-  fun query_raw(db : Database, template : string, params : Params) : IO<Result<SqliteError, SqlRow>> =
+  fun query_raw(db : Database, template : string, params : Params) : IO<Result<SqliteError, Option<SqlRow>>> =
     with_statement(db, template, fn(stmt) =>
       and_then(
         fn(_) =>
           bind(
             step(stmt),
             match{
-              | Ok(Row)  => do { row <- read_row(stmt); return(Ok(row)); }
-              | Ok(Done) => return(Ok(SqlRow([])))
+              | Ok(Row)  => do { row <- read_row(stmt); return(Ok(Some(row))); }
+              | Ok(Done) => return(Ok(None))
               | Err(e)   => return(Err(e))
             }
           ),
@@ -159,7 +159,7 @@ module DbSqlite {
               | Ok(text) => do {
                   println_string(text);
                   r <- query_raw(db, in_Sql(sql), params);
-                  g(as_db_row(r));
+                  g(as_db_opt(r));
                 }
             }
         | BeginTransaction(g) => do { r <- exec_raw(db, "BEGIN", []);    g(as_db_unit(r)); }
