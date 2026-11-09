@@ -355,6 +355,21 @@ builtinFunctions =
           ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (state :| [])
     )
   ,
+    ( "event$_blocking_poll_loop"
+    , forall2 $ \state result ->
+        state
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (result :| []) :| []))
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (TIntrinsic IUnit :| []))
+          ~> result
+    )
+  ,
+    ( "event$_loop_io_loop"
+    , forall1 $ \state ->
+        state
+          ~> (state ~> applyTypeArgs KType (TConstructor (KArrow KType KType) "IO") (applyTypeArgs KType (TConstructor (KArrow KType KType) "Option") (state :| []) :| []))
+          ~> state
+    )
+  ,
     ( "runtime$_panic"
     , forall1 $ \t1 -> TIntrinsic IString ~> t1
     )

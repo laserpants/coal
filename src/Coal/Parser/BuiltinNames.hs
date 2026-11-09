@@ -105,8 +105,10 @@ builtinNames =
       , ("machine$_cofix", Codata)
       , ("machine$_run_while", Codata)
       , ("event$_blocking_poll", Codata)
+      , ("event$_blocking_poll_loop", Codata)
       , ("event$_loop", Codata)
       , ("event$_loop_io", Codata)
+      , ("event$_loop_io_loop", Codata)
       ]
       <>
       -- Free monad operations

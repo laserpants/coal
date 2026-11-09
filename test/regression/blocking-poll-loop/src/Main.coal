@@ -1,0 +1,23 @@
+module Main(main) {
+
+  import IO(return, println_string)
+  import Runtime(blocking_poll)
+  import String(int32_to_string)
+
+  // Adversarial feeder for blocking_poll: yields None until the C counter
+  // reaches its limit, then Some(n). It never blocks, which is exactly the
+  // situation that used to drive blocking_poll into an unbounded, stack-
+  // consuming recursion instead of a constant-stack loop.
+  fun try_fn(_ : unit) : IO<Option<int32>> =
+    let n = #{counter_bump : unit -> int32}(())(fn(x) => x) in
+    return(if (n != 0) then Some(n) else None)
+
+  fun block_fn(_ : unit) : IO<unit> =
+    return(())
+
+  fun main() = do {
+    r <- blocking_poll((), try_fn, block_fn);
+    println_string("loop=" <> int32_to_string(r));
+  }
+
+}

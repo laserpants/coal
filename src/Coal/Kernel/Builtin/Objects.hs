@@ -1989,32 +1989,37 @@ objectList =
           }
     |]
   , [corn|
+      Builtin$.event$_blocking_poll_loop(state : *, try_fn : */*, block_fn : */*) =
+        case<*>(
+          @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
+                       @<IO(Option(*))>(try_fn : */IO(Option(*)), state : *))
+        ) {
+          | ( None : Option(*) ) =>
+              let _ : unit =
+                @<unit>(`Builtin$.io$_eval` : IO(unit)/unit,
+                        @<IO(unit)>(block_fn : */IO(unit), state : *))
+              in
+                @<*>(`Builtin$.event$_blocking_poll_loop` : */(*/IO(Option(*)))/(*/IO(unit))/*,
+                     state : *,
+                     try_fn : */IO(Option(*)),
+                     block_fn : */IO(unit)
+                     )
+          | ( Some : */Option(*)
+            , result : *
+            ) =>
+              result : *
+        }
+    |]
+  , [corn|
       Builtin$.event$_blocking_poll(state : *, try_fn : */*, block_fn : */*) =
         @<IO(*)>(
           `Builtin$.io$_defer` : (*/*)/IO(*),
           fn(_ : unit) =>
-            case<*>(
-              @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
-                           @<IO(Option(*))>(try_fn : */IO(Option(*)), state : *))
-            ) {
-              | ( None : Option(*) ) =>
-                  let _ : unit =
-                    @<unit>(`Builtin$.io$_eval` : IO(unit)/unit,
-                            @<IO(unit)>(block_fn : */IO(unit), state : *))
-                  in
-                    @<*>(`Builtin$.io$_eval` : IO(*)/*,
-                         @<IO(*)>
-                           ( `Builtin$.event$_blocking_poll` : */(*/IO(Option(*)))/(*/IO(unit))/IO(*)
-                           , state : *
-                           , try_fn : */IO(Option(*))
-                           , block_fn : */IO(unit)
-                           )
-                    )
-              | ( Some : */Option(*)
-                , result : *
-                ) =>
-                  result : *
-            }
+            @<*>(`Builtin$.event$_blocking_poll_loop` : */(*/IO(Option(*)))/(*/IO(unit))/*,
+                 state : *,
+                 try_fn : */IO(Option(*)),
+                 block_fn : */IO(unit)
+                 )
         )
     |]
   , [corn|
@@ -2033,27 +2038,33 @@ objectList =
         }
     |]
   , [corn|
+      Builtin$.event$_loop_io_loop(state : *, step_fn : */*) =
+        case<*>(
+          @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
+                       @<IO(Option(*))>(step_fn : */IO(Option(*)), state : *))
+        ) {
+          | ( None : Option(*) ) =>
+              state : *
+          | ( Some : */Option(*)
+            , next : *
+            ) =>
+              @<*>
+                ( `Builtin$.event$_loop_io_loop` : */(*/IO(Option(*)))/*
+                , next : *
+                , step_fn : */IO(Option(*))
+                )
+        }
+    |]
+  , [corn|
       Builtin$.event$_loop_io(state : *, step_fn : */*) =
         @<IO(*)>(
           `Builtin$.io$_defer` : (*/*)/IO(*),
           fn(_ : unit) =>
-            case<*>(
-              @<Option(*)>(`Builtin$.io$_eval` : IO(Option(*))/Option(*),
-                           @<IO(Option(*))>(step_fn : */IO(Option(*)), state : *))
-            ) {
-              | ( None : Option(*) ) =>
-                  state : *
-              | ( Some : */Option(*)
-                , next : *
-                ) =>
-                  @<*>(`Builtin$.io$_eval` : IO(*)/*,
-                       @<IO(*)>
-                         ( `Builtin$.event$_loop_io` : */(*/IO(Option(*)))/IO(*)
-                         , next : *
-                         , step_fn : */IO(Option(*))
-                         )
-                  )
-            }
+            @<*>
+              ( `Builtin$.event$_loop_io_loop` : */(*/IO(Option(*)))/*
+              , state : *
+              , step_fn : */IO(Option(*))
+              )
         )
     |]
   , [corn|
