@@ -5,7 +5,7 @@ module Main {
   import IO(println_string)
   import Coal.Monad.Free(interpret)
   import FreeResult(in_FreeResultT)
-  import Sql(Sql, in_Sql, SqlValue, Column, Row, SqlError, sql_error_to_string)
+  import Sql(Sql, SqlValue, Column, Row, SqlError, sql_error_to_string, build_query)
   import SqlCodec(account_id_to_value, decode_amount)
   import DbError(DbError)
   import Database(
@@ -108,14 +108,22 @@ module Main {
    * into the SQL runtime instead.
    */
   fun io_db_handler : DatabaseF<IO<a>> -> IO<a>
-    | Execute(sql, params, g) => do {
-        println_string(in_Sql(sql));
-        g(Ok());
-      }
-    | QueryOne(sql, params, g) => do {
-        println_string(in_Sql(sql));
-        g(Ok(Row([(Column("balance"), SqlInt(20000))])));
-      }
+    | Execute(sql, params, g) =>
+        match(build_query(sql, params)) {
+          | Ok(text) => do {
+              println_string(text);
+              g(Ok());
+            }
+          | Err(msg) => g(Err(ParameterError(msg)))
+        }
+    | QueryOne(sql, params, g) =>
+        match(build_query(sql, params)) {
+          | Ok(text) => do {
+              println_string(text);
+              g(Ok(Row([(Column("balance"), SqlInt(20000))])));
+            }
+          | Err(msg) => g(Err(ParameterError(msg)))
+        }
     | BeginTransaction(g) => do {
         println_string("BeginTransaction");
         g(Ok());
@@ -140,6 +148,7 @@ module Main {
       | Err(DomainFailure(banking_err)) => println_string(error_to_string(banking_err))
       | Err(SqlFailure(sql_err))        => println_string(sql_error_to_string(sql_err))
       | Err(DecodeFailure(msg))         => println_string(msg)
+      | Err(ParameterError(msg))        => println_string(msg)
     };
   }
 

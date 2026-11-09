@@ -1,6 +1,15 @@
 module Sql {
 
-  import String(int32_to_string, int64_to_string, double_to_string)
+  import String(
+    int32_to_string,
+    int64_to_string,
+    double_to_string,
+    to_list,
+    from_list,
+    char_to_string,
+    intercalate
+  )
+  import List(reduce_left, reverse, is_empty)
 
   /** A SQL statement text. Parameters are supplied separately via `Params`. */
   type Sql = Sql(string)
@@ -16,11 +25,35 @@ module Sql {
     | SqlBool(bool)
     // | SqlBlob(List<uint8>)
 
+  /**
+   * Split a string on a separator character.
+   *
+   * Implemented as a left fold over the characters (no explicit recursion).
+   * E.g., `split_on('?', "a?b")` returns `["a", "b"]`.
+   */
+  fun split_on(sep : char, s : string) : List<string> =
+    let
+      step((parts_rev, cur_rev), c) =
+        if (c == sep)
+          then (from_list(reverse(cur_rev)) :: parts_rev, [])
+          else (parts_rev, c :: cur_rev)
+    in
+    let (parts_rev, cur_rev) = reduce_left(step, ([], []), to_list(s)) in
+      reverse(from_list(reverse(cur_rev)) :: parts_rev)
+
+  /**
+   * Escape a string so it can be embedded in a single-quoted SQLite string
+   * literal. A literal single quote is written `''`; splitting on `'` and
+   * rejoining the parts with `''` performs exactly that doubling.
+   */
+  fun escape_sql_string(str : string) : string =
+    intercalate("''", split_on('\'', str))
+
   fun sql_value_to_string
     | SqlNull      => "NULL"
     | SqlInt(n)    => int64_to_string(n)
     | SqlFloat(d)  => double_to_string(d)
-    | SqlText(str) => "'" <> str <> "'"
+    | SqlText(str) => "'" <> escape_sql_string(str) <> "'"
     | SqlBool(b)   => if (b) then "1" else "0"
 
   type alias Params = List<SqlValue>
@@ -34,5 +67,35 @@ module Sql {
 
   fun sql_error_to_string(SqlError(code, message)) =
     "SQL error " <> int32_to_string(code) <> ": " <> message
+
+  /**
+   * Apply a SQL template to a list of parameter values.
+   *
+   * Each `?` in the template is replaced, in order, by the rendering of the
+   * corresponding value; the other characters are copied through unchanged.
+   * The whole template is rendered in a single left fold, and the accumulator
+   * tracks the values not yet consumed together with a flag recording whether
+   * every placeholder found a value. A mismatch in either direction is
+   * rejected, so a template can never be rendered with the wrong number of
+   * arguments (which would otherwise silently drop trailing SQL text).
+   *
+   * **Type**: `build_query : Sql -> Params -> Result<string, string>`
+   */
+  fun build_query(sql : Sql, params : Params) : Result<string, string> =
+    let
+      step((remaining, out, ok), c) =
+        if (c == '?')
+          then
+            match(remaining) {
+              | []      => ([], out <> "?", false)
+              | v :: vs => (vs, out <> sql_value_to_string(v), ok)
+            }
+          else
+            (remaining, out <> char_to_string(c), ok)
+    in
+    let (remaining, out, ok) = reduce_left(step, (params, "", true), to_list(in_Sql(sql))) in
+      if (ok && is_empty(remaining))
+        then Ok(out)
+        else Err("SQL template / parameter count mismatch")
 
 }

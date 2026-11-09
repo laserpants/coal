@@ -1,0 +1,410 @@
+/**
+ * A small, low-level binding to the SQLite 3 C API.
+ *
+ * This module wraps a subset of SQLite's public C interface. Every operation
+ * that opens, mutates, or reads a database or statement is an effect, so it is
+ * expressed in Coal's `IO` type. `IO` is a strict, type-level effect marker: it
+ * does not defer or lazily evaluate anything. Fallible operations report their
+ * outcome with the `Result` type nested inside `IO`, giving types such as
+ * `IO<Result<SqliteError, Database>>`.
+ *
+ * The only pure functions are `error_code` and `error_message`, which project
+ * fields out of an already-constructed `SqliteError`.
+ *
+ * ## Ownership and cleanup
+ *
+ * - `open_database` returns a `Database` owned by the caller.
+ * - `prepare` returns a `Statement` owned by the caller.
+ * - Every prepared statement must be released with `finalize`.
+ * - A database must be closed with `close_database` after all of its
+ *   statements have been finalized.
+ * - A statement must not be used after it has been finalized, and a database
+ *   must not be used after it has been closed. Such misuse is caught at run
+ *   time and reported as `SQLITE_MISUSE` (21) rather than dereferencing freed
+ *   memory; the `column_*` accessors, which have no error channel, return
+ *   neutral values instead.
+ *
+ * There is no automatic cleanup: the caller is responsible for pairing every
+ * successful `open_database` with `close_database` and every successful
+ * `prepare` with `finalize`.
+ *
+ * ## Indexing
+ *
+ * - Parameter indices passed to `bind_*` are **1-based**, matching SQLite.
+ * - Column indices passed to `column_*` are **0-based**, matching SQLite.
+ *
+ * ## Statement state
+ *
+ * A prepared statement is executed by repeatedly calling `step`:
+ *
+ * - `Ok(Row)` means a row is available; read it with the `column_*` functions.
+ * - `Ok(Done)` means execution finished with no further row.
+ * - `Err(...)` reports a failure.
+ *
+ * The column accessors are only meaningful after `step` has returned `Row`
+ * for the current statement; calls made when no row is available, with an
+ * out-of-range index, or on a finalized statement return neutral values
+ * (0, 0.0, "", false, or `Null`) rather than reading invalid memory. `step`
+ * does not finalize the statement.
+ */
+module FFI.Sqlite(
+  Database,
+  Statement,
+  SqliteError,
+  error_code,
+  error_message,
+  StepResult,
+  ColumnType,
+  open_database,
+  close_database,
+  prepare,
+  finalize,
+  bind_int64,
+  bind_double,
+  bind_text,
+  bind_null,
+  step,
+  column_count,
+  column_name,
+  column_type,
+  column_int64,
+  column_double,
+  column_text,
+  column_is_null
+) {
+
+  import IO(__defer)
+
+  /**
+   * An open SQLite database connection.
+   *
+   * The representation is opaque; the underlying C handle is a `sqlite3 *`.
+   */
+  type Database
+
+  /**
+   * A prepared SQLite statement.
+   *
+   * The representation is opaque; the underlying C handle is a
+   * `sqlite3_stmt *`. Each statement belongs to the database connection from
+   * which it was prepared.
+   */
+  type Statement
+
+  /**
+   * A description of a failed SQLite operation.
+   *
+   * | Field   | Description                                  |
+   * |---------|----------------------------------------------|
+   * | code    | The SQLite result/error code.                |
+   * | message | A human-readable description of the failure. |
+   */
+  type SqliteError = SqliteError(int32, string)
+
+  /**
+   * The two normal outcomes of stepping through a statement.
+   *
+   * | Constructor | Description                                |
+   * |-------------|--------------------------------------------|
+   * | `Row`       | A row of results is available.             |
+   * | `Done`      | The statement completed; no more rows.     |
+   */
+  type StepResult = Row | Done
+
+  /**
+   * SQLite's runtime column types.
+   *
+   * | Constructor | SQLite constant  |
+   * |-------------|------------------|
+   * | `Integer`   | `SQLITE_INTEGER` |
+   * | `Float`     | `SQLITE_FLOAT`   |
+   * | `Text`      | `SQLITE_TEXT`    |
+   * | `Blob`      | `SQLITE_BLOB`    |
+   * | `Null`      | `SQLITE_NULL`    |
+   */
+  type ColumnType
+    = Integer
+    | Float
+    | Text
+    | Blob
+    | Null
+
+  instance Comparable<ColumnType> {
+    fun `==`
+      | Integer, Integer => true
+      | Float, Float => true
+      | Text, Text => true
+      | Blob, Blob => true
+      | Null, Null => true
+      | _, _ => false
+  }
+
+  /**
+   * Opaque transport value used internally by the C layer.
+   *
+   * It carries the outcome of a native operation (success or failure, an
+   * optional handle, an error code and an error message) across the FFI
+   * boundary. It is not part of the public API.
+   */
+  type SqliteResult
+
+  // --- Internal result-envelope accessors (pure) ---------------------------
+
+  fun result_status(r : SqliteResult) : int32 =
+    #{sqlite_result_status : SqliteResult -> int32}(r)(fn(status) => status)
+
+  fun result_code(r : SqliteResult) : int32 =
+    #{sqlite_result_code : SqliteResult -> int32}(r)(fn(code) => code)
+
+  fun result_message(r : SqliteResult) : string =
+    #{sqlite_result_message : SqliteResult -> string}(r)(fn(message) => message)
+
+  fun database_of(r : SqliteResult) : Database =
+    #{sqlite_result_value : SqliteResult -> Database}(r)(fn(db) => db)
+
+  fun statement_of(r : SqliteResult) : Statement =
+    #{sqlite_result_value : SqliteResult -> Statement}(r)(fn(stmt) => stmt)
+
+  fun to_error(r : SqliteResult) : SqliteError =
+    SqliteError(result_code(r), result_message(r))
+
+  // Pure decoders turning a C result envelope into a `Result`.
+  fun decode_database(r : SqliteResult) : Result<SqliteError, Database> =
+    if (result_status(r) == 0) then Ok(database_of(r)) else Err(to_error(r))
+
+  fun decode_statement(r : SqliteResult) : Result<SqliteError, Statement> =
+    if (result_status(r) == 0) then Ok(statement_of(r)) else Err(to_error(r))
+
+  fun decode_unit(r : SqliteResult) : Result<SqliteError, unit> =
+    if (result_status(r) == 0) then Ok(()) else Err(to_error(r))
+
+  // The C wrapper reports success (`status == 0`) only for SQLITE_ROW (100)
+  // and SQLITE_DONE (101). Both are matched explicitly so that any other
+  // successful code is surfaced as an error rather than being silently
+  // treated as `Done`.
+  fun decode_step(r : SqliteResult) : Result<SqliteError, StepResult> =
+    if (result_status(r) == 0)
+      then
+        match(result_code(r)) {
+          | 100 => Ok(Row)
+          | 101 => Ok(Done)
+          | other => Err(SqliteError(other, "unexpected SQLite step result code"))
+        }
+      else Err(to_error(r))
+
+  // SQLite's sqlite3_column_type returns exactly one of the five constants
+  // below (1..5); the C wrapper returns SQLITE_NULL for an out-of-range index,
+  // which is the documented neutral value for an invalid column access. Any
+  // other code is therefore unreachable.
+  fun decode_column_type : int32 -> ColumnType 
+    | 1 => Integer
+    | 2 => Float
+    | 3 => Text
+    | 4 => Blob
+    | _ => Null
+
+  /**
+   * The SQLite error code carried by an error value.
+   *
+   * **Type**: `error_code : SqliteError -> int32`
+   */
+  fun error_code(SqliteError(code, _) : SqliteError) : int32 =
+    code
+
+  /**
+   * The human-readable message carried by an error value.
+   *
+   * **Type**: `error_message : SqliteError -> string`
+   */
+  fun error_message(SqliteError(_, message) : SqliteError) : string =
+    message
+
+  // --- Database operations -------------------------------------------------
+
+  /**
+   * Open or create the database at the given filesystem path.
+   *
+   * Uses SQLite's standard read-write/create behavior. On success the caller
+   * owns the returned `Database` and must eventually close it.
+   *
+   * **Type**: `open_database : string -> IO<Result<SqliteError, Database>>`
+   */
+  fun open_database(path : string) : IO<Result<SqliteError, Database>> =
+    __defer(fn(_) => 
+      #{sqlite_open : string -> SqliteResult}(path)(fn(r) => decode_database(r)))
+
+  /**
+   * Close a database connection.
+   *
+   * Uses SQLite's normal close semantics: if outstanding statements prevent
+   * the connection from closing, the error is reported rather than silently
+   * invalidating those statements. The caller must finalize every prepared
+   * statement before closing the database.
+   *
+   * **Type**: `close_database : Database -> IO<Result<SqliteError, unit>>`
+   */
+  fun close_database(db : Database) : IO<Result<SqliteError, unit>> =
+    __defer(fn(_) => 
+      #{sqlite_close : Database -> SqliteResult}(db)(fn(r) => decode_unit(r)))
+
+  // --- Prepared statements -------------------------------------------------
+
+  /**
+   * Prepare the first SQL statement in the supplied string.
+   *
+   * Any text following the first statement is ignored; this is not a
+   * multi-statement script executor. On success the caller owns the returned
+   * `Statement` and must release it with `finalize`.
+   *
+   * **Type**: `prepare : Database -> string -> IO<Result<SqliteError, Statement>>`
+   */
+  fun prepare(db : Database, sql : string) : IO<Result<SqliteError, Statement>> =
+    __defer(fn(_) => 
+      #{sqlite_prepare : Database -> string -> SqliteResult}(db, sql)(fn(r) => decode_statement(r)))
+
+  /**
+   * Finalize a prepared statement and release its native resources.
+   *
+   * Any error reported by SQLite is preserved. The statement must not be used
+   * after finalization.
+   *
+   * **Type**: `finalize : Statement -> IO<Result<SqliteError, unit>>`
+   */
+  fun finalize(stmt : Statement) : IO<Result<SqliteError, unit>> =
+    __defer(fn(_) => 
+      #{sqlite_finalize : Statement -> SqliteResult}(stmt)(fn(r) => decode_unit(r)))
+
+  // --- Parameter binding (1-based indices) ---------------------------------
+
+  /**
+   * Bind a 64-bit integer to parameter `index` (1-based).
+   *
+   * **Type**: `bind_int64 : Statement -> int32 -> int64 -> IO<Result<SqliteError, unit>>`
+   */
+  fun bind_int64(stmt : Statement, index : int32, value : int64) : IO<Result<SqliteError, unit>> =
+    __defer(fn(_) => 
+      #{sqlite_bind_int64 : Statement -> int32 -> int64 -> SqliteResult}(stmt, index, value)(fn(r) => decode_unit(r)))
+
+  /**
+   * Bind a double-precision floating-point value to parameter `index` (1-based).
+   *
+   * **Type**: `bind_double : Statement -> int32 -> double -> IO<Result<SqliteError, unit>>`
+   */
+  fun bind_double(stmt : Statement, index : int32, value : double) : IO<Result<SqliteError, unit>> =
+    __defer(fn(_) => 
+      #{sqlite_bind_double : Statement -> int32 -> double -> SqliteResult}(stmt, index, value)(fn(r) => decode_unit(r)))
+
+  /**
+   * Bind a UTF-8 string to parameter `index` (1-based).
+   *
+   * The text is copied by SQLite, so it does not retain a pointer into
+   * Coal-managed storage.
+   *
+   * **Type**: `bind_text : Statement -> int32 -> string -> IO<Result<SqliteError, unit>>`
+   */
+  fun bind_text(stmt : Statement, index : int32, value : string) : IO<Result<SqliteError, unit>> =
+    __defer(fn(_) => 
+      #{sqlite_bind_text : Statement -> int32 -> string -> SqliteResult}(stmt, index, value)(fn(r) => decode_unit(r)))
+
+  /**
+   * Bind SQL `NULL` to parameter `index` (1-based).
+   *
+   * **Type**: `bind_null : Statement -> int32 -> IO<Result<SqliteError, unit>>`
+   */
+  fun bind_null(stmt : Statement, index : int32) : IO<Result<SqliteError, unit>> =
+    __defer(fn(_) => 
+      #{sqlite_bind_null : Statement -> int32 -> SqliteResult}(stmt, index)(fn(r) => decode_unit(r)))
+
+  // --- Statement execution -------------------------------------------------
+
+  /**
+   * Advance a prepared statement.
+   *
+   * - `SQLITE_ROW` becomes `Ok(Row)`.
+   * - `SQLITE_DONE` becomes `Ok(Done)`.
+   * - Any other outcome becomes `Err`.
+   *
+   * A successful step carries exactly one of those two codes: the C wrapper
+   * reports success only for them, so any other successful code is treated as
+   * an error rather than as `Done`.
+   *
+   * For statements that do not return rows, a successful execution normally
+   * produces `Done`. The statement is not finalized automatically.
+   *
+   * **Type**: `step : Statement -> IO<Result<SqliteError, StepResult>>`
+   */
+  fun step(stmt : Statement) : IO<Result<SqliteError, StepResult>> =
+    __defer(fn(_) => 
+      #{sqlite_step : Statement -> SqliteResult}(stmt)(fn(r) => decode_step(r)))
+
+  // --- Column inspection (0-based indices) ---------------------------------
+
+  /**
+   * Return the number of result columns of a statement.
+   *
+   * **Type**: `column_count : Statement -> IO<int32>`
+   */
+  fun column_count(stmt : Statement) : IO<int32> =
+    __defer(fn(_) => 
+      #{sqlite_column_count : Statement -> int32}(stmt)(fn(n) => n))
+
+  /**
+   * Return the name of the specified result column (0-based).
+   *
+   * **Type**: `column_name : Statement -> int32 -> IO<string>`
+   */
+  fun column_name(stmt : Statement, index : int32) : IO<string> =
+    __defer(fn(_) => 
+      #{sqlite_column_name : Statement -> int32 -> string}(stmt, index)(fn(name) => name))
+
+  /**
+   * Return the SQLite runtime type of the specified column (0-based) in the
+   * current row.
+   *
+   * **Type**: `column_type : Statement -> int32 -> IO<ColumnType>`
+   */
+  fun column_type(stmt : Statement, index : int32) : IO<ColumnType> =
+    __defer(fn(_) => 
+      #{sqlite_column_type : Statement -> int32 -> int32}(stmt, index)(fn(code) => decode_column_type(code)))
+
+  /**
+   * Read a column (0-based) as a 64-bit integer.
+   *
+   * **Type**: `column_int64 : Statement -> int32 -> IO<int64>`
+   */
+  fun column_int64(stmt : Statement, index : int32) : IO<int64> =
+    __defer(fn(_) => 
+      #{sqlite_column_int64 : Statement -> int32 -> int64}(stmt, index)(fn(v) => v))
+
+  /**
+   * Read a column (0-based) as a double-precision floating-point number.
+   *
+   * **Type**: `column_double : Statement -> int32 -> IO<double>`
+   */
+  fun column_double(stmt : Statement, index : int32) : IO<double> =
+    __defer(fn(_) => 
+      #{sqlite_column_double : Statement -> int32 -> double}(stmt, index)(fn(v) => v))
+
+  /**
+   * Read a column (0-based) as a Coal string.
+   *
+   * The bytes are copied into Coal-managed storage, so no SQLite-owned column
+   * pointer is retained beyond its valid lifetime.
+   *
+   * **Type**: `column_text : Statement -> int32 -> IO<string>`
+   */
+  fun column_text(stmt : Statement, index : int32) : IO<string> =
+    __defer(fn(_) => 
+      #{sqlite_column_text : Statement -> int32 -> string}(stmt, index)(fn(v) => v))
+
+  /**
+   * Return whether the current row's specified column (0-based) is SQL `NULL`.
+   *
+   * **Type**: `column_is_null : Statement -> int32 -> IO<bool>`
+   */
+  fun column_is_null(stmt : Statement, index : int32) : IO<bool> =
+    __defer(fn(_) => 
+      #{sqlite_column_is_null : Statement -> int32 -> bool}(stmt, index)(fn(v) => v))
+
+}
+

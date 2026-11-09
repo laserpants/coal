@@ -3094,7 +3094,7 @@ e2eSpec = do
   -- never unwraps a nested `Result`.
   describe "546" $
     expectOutput
-      "BeginTransaction\nSELECT balance FROM accounts WHERE account_id = ?\nUPDATE accounts SET balance = balance - ? WHERE account_id = ?\nUPDATE accounts SET balance = balance + ? WHERE account_id = ?\nCommit\nok"
+      "BeginTransaction\nSELECT balance FROM accounts WHERE account_id = 'a'\nUPDATE accounts SET balance = balance - 10000 WHERE account_id = 'a'\nUPDATE accounts SET balance = balance + 10000 WHERE account_id = 'b'\nCommit\nok"
       "test/Coal/examples/546"
       [ "Main.coal"
       , "BankingGrammar.coal"

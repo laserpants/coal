@@ -1,0 +1,166 @@
+/**
+ * High-level, resource-safe helpers built on top of `FFI.Sqlite`.
+ *
+ * This module adds two scoped helpers that guarantee native resources are
+ * released on both the success and the failure path:
+ *
+ * - `with_database` opens a database, runs a callback, and closes it.
+ * - `with_statement` prepares a statement, runs a callback, and finalizes it.
+ *
+ * The low-level operations themselves live in `FFI.Sqlite`; this module does
+ * not duplicate them. In particular, `Database`, `Statement`, `SqliteError`,
+ * `StepResult` and `ColumnType` are defined by `FFI.Sqlite`. Coal cannot
+ * re-export types through a facade module, so callers import those names from
+ * `FFI.Sqlite` directly.
+ *
+ * ## Error policy
+ *
+ * A callback and its cleanup can each fail. Because `Result<SqliteError, a>`
+ * cannot carry two errors at once, the callback's error is primary:
+ *
+ * | Callback | Cleanup  | Result                     |
+ * |----------|----------|----------------------------|
+ * | `Ok(v)`  | `Ok`     | `Ok(v)`                    |
+ * | `Err(e)` | `Ok`     | `Err(e)`                   |
+ * | `Ok(v)`  | `Err(c)` | `Err(c)`                   |
+ * | `Err(e)` | `Err(c)` | `Err(e)` (callback error)  |
+ *
+ * Cleanup errors are never silently discarded: a cleanup failure is reported
+ * whenever the callback succeeded.
+ *
+ * ## Ownership
+ *
+ * The handle passed to a callback is owned by the helper for the duration of
+ * the callback only. The callback must not retain the handle for use after it
+ * returns: the database is closed, or the statement is finalized, as soon as
+ * the callback's `IO` action has produced its result. Retaining it and then
+ * using it is a bug; the low-level layer detects it and reports
+ * `SQLITE_MISUSE` rather than crashing.
+ *
+ * ## Chaining operations
+ *
+ * Coal's `do`-notation sequences `IO` actions only: the desugared `bind` is
+ * `Monad<IO>`, so binding an `IO<Result<...>>` value with `<-` yields the whole
+ * `Result`, and a `_ <-` silently discards it. To thread errors across a
+ * sequence of operations, use `and_then`, which runs the next action only when
+ * the previous one returned `Ok`:
+ *
+ * ```coal
+ * bind_int64(stmt, 1, id)
+ *   |. and_then(fn(_) => bind_text(stmt, 2, name))
+ *   |. and_then(fn(_) => step(stmt))
+ *   |. and_then(fn(_) => ok(()))
+ * ```
+ *
+ * `and_then` short-circuits on the first error, so it is not suitable for
+ * cleanup, which must run on both paths; `with_database` and `with_statement`
+ * handle that separately.
+ */
+module Sqlite(
+  with_database,
+  with_statement,
+  and_then,
+  ok
+) {
+
+  import FFI.Sqlite(Database, Statement, SqliteError, open_database, close_database, prepare, finalize)
+  import IO(return)
+
+  /**
+   * Combine a callback result with the result of its cleanup.
+   *
+   * The callback error is primary: it is preserved when cleanup also fails. A
+   * cleanup failure is reported only when the callback succeeded.
+   */
+  fun combine : Result<SqliteError, a> -> Result<SqliteError, unit> -> Result<SqliteError, a>
+    | Ok(value), Ok(_)   => Ok(value)
+    | Err(error), Ok(_)  => Err(error)
+    | Ok(_), Err(error)  => Err(error)
+    | Err(error), Err(_) => Err(error)
+
+  /**
+   * Run `action`, and if it returns `Ok(value)`, continue with `f(value)`.
+   *
+   * If `action` returns `Err(error)`, the error is propagated unchanged and
+   * `f` is not run. This is what makes a linear sequence of operations
+   * short-circuit on the first failure:
+   *
+   * ```coal
+   * bind_int64(stmt, 1, id)
+   *   |. and_then(fn(_) => bind_text(stmt, 2, name))
+   *   |. and_then(fn(_) => step(stmt))
+   *   |. and_then(fn(_) => ok(()))
+   * ```
+   *
+   * Because it short-circuits, `and_then` must not be used for cleanup:
+   * releasing a resource has to happen even when the body failed (which is why
+   * `with_database` and `with_statement` do not use it).
+   *
+   * **Type**: `and_then : (a -> IO<Result<SqliteError, b>>) -> IO<Result<SqliteError, a>> -> IO<Result<SqliteError, b>>`
+   */
+  fun and_then(f : a -> IO<Result<SqliteError, b>>, action : IO<Result<SqliteError, a>>) : IO<Result<SqliteError, b>> =
+    bind(action, match{
+      | Ok(value) => f(value)
+      | Err(error) => return(Err(error))
+    })
+
+  /**
+   * Lift a value into a successful action, for use as the last step of an
+   * `and_then` pipeline.
+   *
+   * **Type**: `ok : a -> IO<Result<SqliteError, a>>`
+   */
+  fun ok(value : a) : IO<Result<SqliteError, a>> =
+    return(Ok(value))
+
+  /**
+   * Open the database at `path`, run `k`, then close the database.
+   *
+   * The callback runs at most once and only if opening succeeds. The database
+   * is closed after the callback's `IO` action has completed, regardless of
+   * whether the callback produced `Ok` or `Err`. The callback must not retain
+   * the database handle after it returns.
+   *
+   * **Type**: `with_database : string -> (Database -> IO<Result<SqliteError, a>>) -> IO<Result<SqliteError, a>>`
+   */
+  fun with_database(path : string, k : Database -> IO<Result<SqliteError, a>>) : IO<Result<SqliteError, a>> =
+    do {
+      open_res <- open_database(path);
+      match(open_res) {
+        | Err(error) => return(Err(error))
+        | Ok(db) =>
+            do {
+              cb_res <- k(db);
+              close_res <- close_database(db);
+              return(combine(cb_res, close_res));
+            }
+      };
+    }
+
+  /**
+   * Prepare the first statement in `sql` against `db`, run `k`, then finalize
+   * the statement.
+   *
+   * The callback runs at most once and only if preparation succeeds. The
+   * statement is finalized after the callback's `IO` action has completed,
+   * regardless of whether the callback produced `Ok` or `Err`. The database
+   * `db` remains owned by its caller; `with_statement` never closes it. The
+   * callback must not retain the statement handle after it returns.
+   *
+   * **Type**: `with_statement : Database -> string -> (Statement -> IO<Result<SqliteError, a>>) -> IO<Result<SqliteError, a>>`
+   */
+  fun with_statement(db : Database, sql : string, k : Statement -> IO<Result<SqliteError, a>>) : IO<Result<SqliteError, a>> =
+    do {
+      prep_res <- prepare(db, sql);
+      match(prep_res) {
+        | Err(error) => return(Err(error))
+        | Ok(stmt) =>
+            do {
+              cb_res <- k(stmt);
+              fin_res <- finalize(stmt);
+              return(combine(cb_res, fin_res));
+            }
+      };
+    }
+
+}
