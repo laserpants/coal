@@ -459,6 +459,7 @@ test-suite coal-test
       Coal.Kernel.Spec
       Coal.Kernel.TypeCheckSpec
       Coal.Language.Module.ExportSpec
+      Coal.Language.PatternSpec
       Coal.Language.TypeSpec
       Coal.Parser.DoNotationSpec
       Coal.Parser.ExpressionSpec

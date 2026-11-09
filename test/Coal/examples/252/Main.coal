@@ -5,7 +5,7 @@ module Main {
   fold example : List<int32> -> int32 
      | x :: xs =>
          fold(xs) {
-           | x :: example(@foo) => 0
+           | _ :: example(@foo) => 0
            | [] => 0
          }
      | [] => 0

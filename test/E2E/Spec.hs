@@ -3103,6 +3103,13 @@ e2eSpec = do
       [ "Main.coal"
       ]
 
+  -- A binding inside a clause-style function group is checked for shadowing
+  -- just like one inside an ordinary function.
+  describe "548" $ do
+    it "is PreflightFailure" $ do
+      res <- runSpec "test/Coal/examples/548" ["Main.coal"]
+      res `shouldBe` Left PreflightFailure
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

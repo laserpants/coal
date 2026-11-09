@@ -183,9 +183,17 @@ instance ShadowingContext (Definition Metadata () ()) where
       DFunction loc name def -> do
         newNames <- addNames loc (Set.singleton name) names
         detectShadowing newNames def
+      DFunctionGroup loc name def -> do
+        newNames <- addNames loc (Set.singleton name) names
+        detectShadowing newNames def
       DLet loc name def -> do
         newNames <- addNames loc (Set.singleton name) names
         detectShadowing newNames def
+      DFold loc name def -> do
+        newNames <- addNames loc (Set.singleton name) names
+        detectShadowing newNames def
+      DInstance _ def ->
+        detectShadowing names def
       _ ->
         pure ()
 
@@ -201,6 +209,24 @@ instance ShadowingContext (FunctionDefinition Metadata () ()) where
       FunctionDefinition{..} -> do
         newNames <- addNames functionDefinitionMetadata (boundIn functionDefinitionPatterns) names
         detectShadowing newNames functionDefinitionExpression
+
+instance ShadowingContext (FunctionGroupDefinition Metadata () ()) where
+  detectShadowing names =
+    \case
+      FunctionGroupDefinition{..} ->
+        detectShadowing names functionGroupDefinitionBranches
+
+instance ShadowingContext (FoldDefinition Metadata () ()) where
+  detectShadowing names =
+    \case
+      FoldDefinition{..} ->
+        detectShadowing names foldDefinitionClauses
+
+instance ShadowingContext (InstanceDefinition Metadata () ()) where
+  detectShadowing names =
+    \case
+      InstanceDefinition{..} ->
+        detectShadowing names instanceDefinitionImplementations
 
 addNames :: (Monad m) => Metadata -> Set Name -> Set Name -> CompilerT Metadata m (Set Name)
 addNames loc new names = do

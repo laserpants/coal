@@ -10,6 +10,7 @@ import Coal.Compiler.Pass.PhasePreflight.ExpandLetBindingsSpec (expandLetBinding
 import Coal.Compiler.PatternMatching.AnomalyDetectionSpec (patternAnomaliesSpec)
 import Coal.Kernel.Spec (kernelSpec)
 import Coal.Language.Module.ExportSpec (exportMatchingSpec)
+import Coal.Language.PatternSpec (patternBoundVarsSpec)
 import Coal.Language.TypeSpec (typeApplicationSpec, typeArgsSpec)
 import Coal.Parser.DoNotationSpec (doNotationSpec)
 import Coal.Parser.ExpressionSpec (expressionSpec)
@@ -37,6 +38,7 @@ spec =
     expressionSpec
     moduleHeaderSpec
     patternSpec
+    patternBoundVarsSpec
     exportMatchingSpec
 
 main :: IO ()

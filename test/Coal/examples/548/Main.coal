@@ -1,0 +1,13 @@
+// This program, when compiled, should yield an error:
+// "Name shadowing: 'x'"
+// A binding inside a clause-style function group (`fun f | pat => ...`)
+// must be checked for shadowing just like one inside an ordinary function.
+
+module Main {
+
+  fun f
+    | x => let x = 1 in x
+
+  fun main() = ()
+
+}

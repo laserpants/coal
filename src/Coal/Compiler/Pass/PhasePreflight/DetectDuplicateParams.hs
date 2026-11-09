@@ -98,6 +98,8 @@ instance (Data t) => DuplicateParamsContext (Definition Metadata () t) where
         checkTypeParameters loc (aliasDefinitionParameters def)
       DFunction _ _ def ->
         detectDuplicateParams def
+      DFunctionGroup _ _ def ->
+        detectDuplicateParams def
       DLet _ _ def ->
         detectDuplicateParams def
       DInstance _ def ->
@@ -131,6 +133,12 @@ instance DuplicateParamsContext (FoldDefinition Metadata () t) where
     \case
       FoldDefinition{..} ->
         detectDuplicateParams foldDefinitionClauses
+
+instance DuplicateParamsContext (FunctionGroupDefinition Metadata () t) where
+  detectDuplicateParams =
+    \case
+      FunctionGroupDefinition{..} ->
+        detectDuplicateParams functionGroupDefinitionBranches
 
 instance DuplicateParamsContext (Clause Metadata () t) where
   detectDuplicateParams =
