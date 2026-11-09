@@ -9,7 +9,7 @@ module Main {
   import Sql(Sql, SqlValue, SqlRow, sql_error_to_string)
   import SqlCodec(account_id_to_value, decode_amount)
   import DbError(DbError)
-  import Db(Db, DbF, query_one, throw_db_error, with_transaction)
+  import Db(Db, DbF, execute, query_one, throw_db_error, with_transaction)
   import DbSqlite(run_database)
   import BankingGrammar(
     AccountId,
@@ -33,7 +33,8 @@ module Main {
   let setup_sqls = [
     "CREATE TABLE accounts (account_id TEXT PRIMARY KEY, balance INTEGER)",
     "INSERT INTO accounts VALUES ('a', 20000)",
-    "INSERT INTO accounts VALUES ('b', 20000)"
+    "INSERT INTO accounts VALUES ('b', 20000)",
+    "CREATE TABLE transaction_log (from_account TEXT, to_account TEXT, amount INTEGER)"
   ]
 
   /**
@@ -95,8 +96,12 @@ module Main {
           | Some(_) => g(Ok())
         };
       }
-    | RecordTransaction(transaction, a) => do {
-        a;
+    | RecordTransaction(Transaction(from, to, Amount(amount)), rest) => do {
+        execute(
+          Sql("INSERT INTO transaction_log (from_account, to_account, amount) VALUES (?, ?, ?)"),
+          [account_id_to_value(from), account_id_to_value(to), SqlInt(amount)]
+        );
+        rest;
       }
 
   /**
