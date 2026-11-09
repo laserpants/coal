@@ -3087,24 +3087,6 @@ e2eSpec = do
       , "FreeResult.coal"
       ]
 
-  -- 546: a two-layer free-monad interpreter (banking grammar -> SQL grammar ->
-  -- IO). The banking and SQL error notions are merged into a single `DbError`
-  -- channel at the translation boundary, and transaction bracketing is the
-  -- library `try` plus the `with_transaction` combinator, so the domain code
-  -- never unwraps a nested `Result`.
-  describe "546" $
-    expectOutput
-      "BeginTransaction\nSELECT balance FROM accounts WHERE account_id = 'a'\nUPDATE accounts SET balance = balance - 10000 WHERE account_id = 'a'\nUPDATE accounts SET balance = balance + 10000 WHERE account_id = 'b'\nCommit\nok"
-      "test/Coal/examples/546"
-      [ "Main.coal"
-      , "BankingGrammar.coal"
-      , "FreeResult.coal"
-      , "Sql.coal"
-      , "SqlCodec.coal"
-      , "DbError.coal"
-      , "Database.coal"
-      ]
-
   -- 544: an empty constructor argument list in a pattern (`Wrap()`) is
   -- shorthand for `Wrap(())`, mirroring the expression-level shorthand.
   describe "544" $

@@ -1,9 +1,9 @@
-module Database {
+module Db {
 
   import Coal.Functor(Functor)
   import Coal.Monad.Free(Free, lift_free)
   import FreeResult(FreeResultT, in_FreeResultT, lift_result, try)
-  import Sql(Sql, Params, Row)
+  import Sql(Sql, Params, SqlRow)
   import DbError(DbError)
 
   /**
@@ -15,14 +15,14 @@ module Database {
    * how to run them; and each of them can fail, so a failing `commit` is
    * representable.
    */
-  type DatabaseF<a>
+  type DbF<a>
     = Execute(Sql, Params, Result<DbError, unit> -> a)
-    | QueryOne(Sql, Params, Result<DbError, Row> -> a)
+    | QueryOne(Sql, Params, Result<DbError, SqlRow> -> a)
     | BeginTransaction(Result<DbError, unit> -> a)
     | Commit(Result<DbError, unit> -> a)
     | Rollback(Result<DbError, unit> -> a)
 
-  instance Functor<DatabaseF> {
+  instance Functor<DbF> {
     fun map(f) = match{
       | Execute(sql, params, g)  => Execute(sql, params, f << g)
       | QueryOne(sql, params, g) => QueryOne(sql, params, f << g)
@@ -33,7 +33,7 @@ module Database {
   }
 
   /** A program in the database monad: one error channel, `DbError`. */
-  type alias Database<a> = FreeResultT<DatabaseF, DbError, a>
+  type alias Db<a> = FreeResultT<DbF, DbError, a>
 
   fun execute(sql, params)   = FreeResultT(lift_free(Execute(sql, params, fn(b) => b)))
   fun query_one(sql, params) = FreeResultT(lift_free(QueryOne(sql, params, fn(b) => b)))
@@ -45,9 +45,9 @@ module Database {
   /**
    * Abort the surrounding program with `err`.
    *
-   * **Type**: `throw_db_error : DbError -> Database<a>`
+   * **Type**: `throw_db_error : DbError -> Db<a>`
    */
-  fun throw_db_error(err : DbError) : Database<a> =
+  fun throw_db_error(err : DbError) : Db<a> =
     lift_result(Err(err))
 
   /**
@@ -56,9 +56,9 @@ module Database {
    * This is the single place where the error channel is reified into the value
    * position (`try`), so that the transaction bracket can observe the outcome.
    *
-   * **Type**: `with_transaction : Database<a> -> Database<a>`
+   * **Type**: `with_transaction : Db<a> -> Db<a>`
    */
-  fun with_transaction(p : Database<a>) : Database<a> = do {
+  fun with_transaction(p : Db<a>) : Db<a> = do {
     begin_transaction;
     outcome <- try(p);
     match(outcome) {

@@ -1,0 +1,206 @@
+module DbSqlite {
+
+  import Coal.Functor(Functor)
+  import Coal.Monad.Free(interpret)
+  import FreeResult(in_FreeResultT)
+  import IO(println_string, return)
+  import List(zip, length, reduce_left, range)
+  import Nat(to_nat)
+  import Sql(Sql, in_Sql, Params, Column, SqlValue, SqlRow, SqlError, build_query)
+  import DbError(DbError)
+  import Db(Db, DbF)
+  import FFI.Sqlite(
+    Database,
+    Statement,
+    SqliteError,
+    StepResult,
+    ColumnType,
+    bind_int64,
+    bind_double,
+    bind_text,
+    bind_null,
+    step,
+    column_count,
+    column_name,
+    column_type,
+    column_int64,
+    column_double,
+    column_text,
+    column_is_null
+  )
+  import Sqlite(with_database, with_statement, and_then)
+
+  // --- Error mapping -------------------------------------------------------
+
+  // `SqliteError` and `SqlError` are both a `(int32, string)` pair.
+  fun sqlite_error_to_sql(SqliteError(code, msg) : SqliteError) : SqlError =
+    SqlError(code, msg)
+
+  fun as_db_unit(r : Result<SqliteError, unit>) : Result<DbError, unit> =
+    match(r) {
+      | Ok(u)  => Ok(u)
+      | Err(e) => Err(SqlFailure(sqlite_error_to_sql(e)))
+    }
+
+  fun as_db_row(r : Result<SqliteError, SqlRow>) : Result<DbError, SqlRow> =
+    match(r) {
+      | Ok(row) => Ok(row)
+      | Err(e)  => Err(SqlFailure(sqlite_error_to_sql(e)))
+    }
+
+  // --- Parameter binding (1-based, matching SQLite) ------------------------
+
+  fun bind_one(stmt : Statement, pair : (int32, SqlValue)) : IO<Result<SqliteError, unit>> =
+    match(pair) {
+      | (i, SqlNull)     => bind_null(stmt, i)
+      | (i, SqlInt(n))   => bind_int64(stmt, i, n)
+      | (i, SqlFloat(d)) => bind_double(stmt, i, d)
+      | (i, SqlText(s))  => bind_text(stmt, i, s)
+      | (i, SqlBool(b))  => bind_int64(stmt, i, if (b) then 1 else 0)
+    }
+
+  fun bind_params(stmt : Statement, params : Params) : IO<Result<SqliteError, unit>> =
+    let
+      pairs = zip(range(1, length(params)), params) ;
+      bind_step(acc, pair) = and_then(fn(_) => bind_one(stmt, pair), acc)
+    in
+      reduce_left(bind_step, return(Ok(())), pairs)
+
+  // --- Statement execution -------------------------------------------------
+
+  fun step_done(stmt : Statement) : IO<Result<SqliteError, unit>> =
+    bind(
+      step(stmt),
+      match{
+        | Ok(Done) => return(Ok(()))
+        | Ok(Row)  => return(Err(SqliteError(21, "statement returned an unexpected row")))
+        | Err(e)   => return(Err(e))
+      }
+    )
+
+  // --- Row reading (0-based columns) ---------------------------------------
+
+  fun read_column(stmt : Statement, i : int32) : IO<(Column, SqlValue)> = do {
+    name <- column_name(stmt, i);
+    is_null <- column_is_null(stmt, i);
+    v <- if (is_null)
+      then
+        return(SqlNull)
+      else
+        do {
+          ty <- column_type(stmt, i);
+          match(ty) {
+            | Integer => map(SqlInt, column_int64(stmt, i))
+            | Float   => map(SqlFloat, column_double(stmt, i))
+            | Text    => map(SqlText, column_text(stmt, i))
+            | Blob    => return(SqlNull)
+            | Null    => return(SqlNull)
+          };
+        };
+    return((Column(name), v));
+  }
+
+  fun read_row(stmt : Statement) : IO<SqlRow> =
+    bind(column_count(stmt), fn(n : int32) =>
+      map(
+        SqlRow,
+        reduce_left(
+          fn(acc, i) => do {
+            cols <- acc;
+            col <- read_column(stmt, i);
+            return(cols <> [col]);
+          },
+          return([]),
+          range(0, to_nat(n))
+        )
+      )
+    )
+
+  // --- Prepared-statement execution ----------------------------------------
+
+  // Prepare `template`, bind `params`, run to completion, finalize.
+  fun exec_raw(db : Database, template : string, params : Params) : IO<Result<SqliteError, unit>> =
+    with_statement(db, template, fn(stmt) =>
+      and_then(fn(_) => step_done(stmt), bind_params(stmt, params)))
+
+  // Prepare `template`, bind `params`, read the first row, finalize.
+  fun query_raw(db : Database, template : string, params : Params) : IO<Result<SqliteError, SqlRow>> =
+    with_statement(db, template, fn(stmt) =>
+      and_then(
+        fn(_) =>
+          bind(
+            step(stmt),
+            match{
+              | Ok(Row)  => do { row <- read_row(stmt); return(Ok(row)); }
+              | Ok(Done) => return(Ok(SqlRow([])))
+              | Err(e)   => return(Err(e))
+            }
+          ),
+        bind_params(stmt, params)
+      ))
+
+  // --- The Database -> IO interpreter --------------------------------------
+
+  fun db_handler(db : Database) : DbF<IO<a>> -> IO<a> =
+    fn(instr) =>
+      match(instr) {
+        | Execute(sql, params, g) =>
+            match(build_query(sql, params)) {
+              | Err(msg) => g(Err(ParameterError(msg)))
+              | Ok(text) => do {
+                  println_string(text);
+                  r <- exec_raw(db, in_Sql(sql), params);
+                  g(as_db_unit(r));
+                }
+            }
+        | QueryOne(sql, params, g) =>
+            match(build_query(sql, params)) {
+              | Err(msg) => g(Err(ParameterError(msg)))
+              | Ok(text) => do {
+                  println_string(text);
+                  r <- query_raw(db, in_Sql(sql), params);
+                  g(as_db_row(r));
+                }
+            }
+        | BeginTransaction(g) => do { r <- exec_raw(db, "BEGIN", []);    g(as_db_unit(r)); }
+        | Commit(g)           => do { r <- exec_raw(db, "COMMIT", []);   g(as_db_unit(r)); }
+        | Rollback(g)         => do { r <- exec_raw(db, "ROLLBACK", []); g(as_db_unit(r)); }
+      }
+
+  // --- Entry point ---------------------------------------------------------
+
+  fun run_setup(db : Database, setup : List<string>) : IO<Result<SqliteError, unit>> = do {
+    setup_step(acc, sql) = and_then(fn(_) => exec_raw(db, sql, []), acc);
+    reduce_left(setup_step, return(Ok(())), setup);
+  }
+
+  // Collapse the two error layers (`with_database` and the program) into one.
+  fun flatten(r : Result<SqliteError, Result<DbError, a>>) : Result<DbError, a> =
+    match(r) {
+      | Ok(Ok(v))  => Ok(v)
+      | Ok(Err(e)) => Err(e)
+      | Err(se)    => Err(SqlFailure(sqlite_error_to_sql(se)))
+    }
+
+  /**
+   * Open `path`, run the `setup` statements, interpret `program`, then close.
+   *
+   * **Type**: `run_database : string -> List<string> -> Db<a> -> IO<Result<DbError, a>>`
+   */
+  fun run_database(path : string, setup : List<string>, program : Db<a>) : IO<Result<DbError, a>> =
+    do {
+      r <- with_database(path, fn(db) => do {
+             s <- run_setup(db, setup);
+             match(s) {
+               | Err(e) => return(Err(e))
+               | Ok(_)  => do {
+                   prog_res <- interpret(db_handler(db), in_FreeResultT(program));
+                   return(Ok(prog_res));
+                 }
+             };
+           });
+      return(flatten(r));
+    }
+
+}
+

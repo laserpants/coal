@@ -2,23 +2,15 @@ module Main {
 
   import namespace IO
 
-  import IO(println_string)
+  import IO(println_string, remove_file)
+  import String(int64_to_string)
   import Coal.Monad.Free(interpret)
   import FreeResult(in_FreeResultT)
-  import Sql(Sql, SqlValue, Column, Row, SqlError, sql_error_to_string, build_query)
+  import Sql(Sql, SqlValue, SqlRow, sql_error_to_string)
   import SqlCodec(account_id_to_value, decode_amount)
   import DbError(DbError)
-  import Database(
-    Database,
-    DatabaseF,
-    execute,
-    query_one,
-    begin_transaction,
-    commit,
-    rollback,
-    throw_db_error,
-    with_transaction
-  )
+  import Db(Db, DbF, execute, query_one, throw_db_error, with_transaction)
+  import DbSqlite(run_database)
   import BankingGrammar(
     AccountId,
     Amount,
@@ -33,6 +25,16 @@ module Main {
     record_transaction,
     throw_error
   )
+
+  /** Where the example's scratch database lives. */
+  let db_path = "/tmp/coal_546.db"
+
+  /** Schema and seed data, applied once before the transfer runs. */
+  let setup_sqls = [
+    "CREATE TABLE accounts (account_id TEXT PRIMARY KEY, balance INTEGER)",
+    "INSERT INTO accounts VALUES ('a', 20000)",
+    "INSERT INTO accounts VALUES ('b', 20000)"
+  ]
 
   /**
    * The banking program: the domain grammar. It describes the business rule
@@ -58,7 +60,7 @@ module Main {
    * `DecodeFailure` (a database concern), and the domain's own errors are
    * carried separately (see `run_banking`).
    */
-  fun db_banking_handler : BankingF<Database<a>> -> Database<a>
+  fun db_banking_handler : BankingF<Db<a>> -> Db<a>
     | GetBalance(account_id, g) => do {
         row <- query_one(
           Sql("SELECT balance FROM accounts WHERE account_id = ?"),
@@ -92,7 +94,7 @@ module Main {
    * database error channel. Afterwards the whole application has a single
    * error type, `DbError`.
    */
-  fun run_banking(program : Banking<a>) : Database<a> = do {
+  fun run_banking(program : Banking<a>) : Db<a> = do {
     r <- interpret(db_banking_handler, in_FreeResultT(program));
     match(r) {
       | Ok(value)        => pure(value)
@@ -100,56 +102,43 @@ module Main {
     };
   }
 
-  // --- Database -> IO interpreter ------------------------------------------
+  // --- Application ---------------------------------------------------------
 
-  /**
-   * A stand-in for a real database driver: it prints the statements it is
-   * asked to run and returns canned rows. A production interpreter would call
-   * into the SQL runtime instead.
-   */
-  fun io_db_handler : DatabaseF<IO<a>> -> IO<a>
-    | Execute(sql, params, g) =>
-        match(build_query(sql, params)) {
-          | Ok(text) => do {
-              println_string(text);
-              g(Ok());
-            }
-          | Err(msg) => g(Err(ParameterError(msg)))
-        }
-    | QueryOne(sql, params, g) =>
-        match(build_query(sql, params)) {
-          | Ok(text) => do {
-              println_string(text);
-              g(Ok(Row([(Column("balance"), SqlInt(20000))])));
-            }
-          | Err(msg) => g(Err(ParameterError(msg)))
-        }
-    | BeginTransaction(g) => do {
-        println_string("BeginTransaction");
-        g(Ok());
-      }
-    | Commit(g) => do {
-        println_string("Commit");
-        g(Ok());
-      }
-    | Rollback(g) => do {
-        println_string("Rollback");
-        g(Ok());
-      }
+  /** Read a single balance back and print it, to show the write persisted. */
+  fun print_balance(label : string, account : AccountId) : IO<unit> = do {
+    r <- run_database(
+      db_path,
+      [],
+      query_one(
+        Sql("SELECT balance FROM accounts WHERE account_id = ?"),
+        [account_id_to_value(account)]
+      )
+    );
+    match(r) {
+      | Ok(SqlRow([(_, SqlInt(n))])) => println_string(label <> " = " <> int64_to_string(n))
+      | Ok(_)                        => println_string(label <> " = ?")
+      | Err(_)                       => println_string(label <> " = error")
+    };
+  }
 
   fun main() = do {
-    res <- bank_transfer({ from = AccountId("a"), to = AccountId("b"), amount = Amount(10000) })
-      |. run_banking
-      |. with_transaction
-      |. in_FreeResultT |. interpret(io_db_handler);
-
-    match(res) {
+    _ <- remove_file(db_path);
+    outcome <- run_database(
+      db_path,
+      setup_sqls,
+      bank_transfer({ from = AccountId("a"), to = AccountId("b"), amount = Amount(10000) })
+        |. run_banking
+        |. with_transaction
+    );
+    match(outcome) {
       | Ok(_)                           => println_string("ok")
       | Err(DomainFailure(banking_err)) => println_string(error_to_string(banking_err))
       | Err(SqlFailure(sql_err))        => println_string(sql_error_to_string(sql_err))
       | Err(DecodeFailure(msg))         => println_string(msg)
       | Err(ParameterError(msg))        => println_string(msg)
     };
+    print_balance("a", AccountId("a"));
+    print_balance("b", AccountId("b"));
   }
 
 }

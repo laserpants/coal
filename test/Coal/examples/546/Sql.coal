@@ -60,7 +60,7 @@ module Sql {
 
   type Column = Column(string)
 
-  type Row = Row(List<(Column, SqlValue)>)
+  type SqlRow = SqlRow(List<(Column, SqlValue)>)
 
   /** A low-level database failure: a (driver-specific) code and a message. */
   type SqlError = SqlError(int32, string)

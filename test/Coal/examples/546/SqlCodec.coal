@@ -1,6 +1,6 @@
 module SqlCodec {
 
-  import Sql(SqlValue, Column, Row)
+  import Sql(SqlValue, Column, SqlRow)
   import BankingGrammar(AccountId, Amount, in_AccountId)
 
   /**
@@ -14,9 +14,9 @@ module SqlCodec {
   fun account_id_to_value(account_id : AccountId) : SqlValue =
     SqlText(in_AccountId(account_id))
 
-  fun decode_amount(row : Row) : Result<string, Amount> =
+  fun decode_amount(row : SqlRow) : Result<string, Amount> =
     match(row) {
-      | Row([(Column("balance"), SqlInt(balance))]) =>
+      | SqlRow([(Column("balance"), SqlInt(balance))]) =>
           Ok(Amount(balance))
       | _ =>
           Err("Database query returned an unexpected result.")
