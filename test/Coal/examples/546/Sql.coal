@@ -23,7 +23,6 @@ module Sql {
     | SqlFloat(double)
     | SqlText(string)
     | SqlBool(bool)
-    // | SqlBlob(List<uint8>)
 
   /**
    * Split a string on a separator character.
@@ -31,15 +30,14 @@ module Sql {
    * Implemented as a left fold over the characters (no explicit recursion).
    * E.g., `split_on('?', "a?b")` returns `["a", "b"]`.
    */
-  fun split_on(sep : char, s : string) : List<string> =
-    let
-      step((parts_rev, cur_rev), c) =
-        if (c == sep)
-          then (from_list(reverse(cur_rev)) :: parts_rev, [])
-          else (parts_rev, c :: cur_rev)
-    in
-    let (parts_rev, cur_rev) = reduce_left(step, ([], []), to_list(s)) in
-      reverse(from_list(reverse(cur_rev)) :: parts_rev)
+  fun split_on(sep : char, s : string) : List<string> = do {
+    step((parts_rev, cur_rev), c) =
+      if (c == sep)
+        then (from_list(reverse(cur_rev)) :: parts_rev, [])
+        else (parts_rev, c :: cur_rev);
+    (parts_rev, cur_rev) = reduce_left(step, ([], []), to_list(s));
+    reverse(from_list(reverse(cur_rev)) :: parts_rev);
+  }
 
   /**
    * Escape a string so it can be embedded in a single-quoted SQLite string
@@ -81,21 +79,20 @@ module Sql {
    *
    * **Type**: `build_query : Sql -> Params -> Result<string, string>`
    */
-  fun build_query(sql : Sql, params : Params) : Result<string, string> =
-    let
-      step((remaining, out, ok), c) =
-        if (c == '?')
-          then
-            match(remaining) {
-              | []      => ([], out <> "?", false)
-              | v :: vs => (vs, out <> sql_value_to_string(v), ok)
-            }
-          else
-            (remaining, out <> char_to_string(c), ok)
-    in
-    let (remaining, out, ok) = reduce_left(step, (params, "", true), to_list(in_Sql(sql))) in
-      if (ok && is_empty(remaining))
-        then Ok(out)
-        else Err("SQL template / parameter count mismatch")
+  fun build_query(sql : Sql, params : Params) : Result<string, string> = do {
+    step((remaining, out, ok), c) =
+      if (c == '?')
+        then
+          match(remaining) {
+            | []      => ([], out <> "?", false)
+            | v :: vs => (vs, out <> sql_value_to_string(v), ok)
+          }
+        else
+          (remaining, out <> char_to_string(c), ok);
+    (remaining, out, ok) = reduce_left(step, (params, "", true), to_list(in_Sql(sql)));
+    if (ok && is_empty(remaining))
+      then Ok(out)
+      else Err("SQL template / parameter count mismatch");
+  }
 
 }

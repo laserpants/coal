@@ -189,15 +189,15 @@ module DbSqlite {
   fun run_database(path : string, setup : List<string>, program : Db<a>) : IO<Result<DbError, a>> =
     do {
       r <- with_database(path, fn(db) => do {
-             s <- run_setup(db, setup);
-             match(s) {
-               | Err(e) => return(Err(e))
-               | Ok(_)  => do {
-                   prog_res <- interpret(db_handler(db), in_FreeResultT(program));
-                   return(Ok(prog_res));
-                 }
-             };
-           });
+        s <- run_setup(db, setup);
+        match(s) {
+          | Err(e) => return(Err(e))
+          | Ok(_)  => do {
+              prog_res <- interpret(db_handler(db), in_FreeResultT(program));
+              return(Ok(prog_res));
+            }
+        };
+      });
       return(flatten(r));
     }
 

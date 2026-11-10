@@ -63,11 +63,11 @@ module Main {
    */
   fun db_banking_handler : BankingF<Db<a>> -> Db<a>
     | GetBalance(account_id, g) => do {
-        r <- query_one(
+        balance <- query_one(
           Sql("SELECT balance FROM accounts WHERE account_id = ?"),
           [account_id_to_value(account_id)]
         );
-        match(r) {
+        match(balance) {
           | None => g(Err(NoSuchAccount))
           | Some(row) =>
               match(decode_amount(row)) {
@@ -119,7 +119,10 @@ module Main {
 
   // --- Application ---------------------------------------------------------
 
-  /** Read a single balance back and print it, to show the write persisted. */
+  /** 
+   * Read a single balance back and print it, to verify that the write 
+   * persisted. 
+   */
   fun print_balance(label : string, account : AccountId) : IO<unit> = do {
     r <- run_database(
       db_path,
@@ -147,7 +150,7 @@ module Main {
         |. with_transaction
     );
     match(outcome) {
-      | Ok(_)                           => println_string("ok")
+      | Ok(_)                           => println_string("Ok")
       | Err(DomainFailure(banking_err)) => println_string(error_to_string(banking_err))
       | Err(SqlFailure(sql_err))        => println_string(sql_error_to_string(sql_err))
       | Err(DecodeFailure(msg))         => println_string(msg)
