@@ -1,0 +1,18 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+
+  // `map : (a -> b) -> Baz<a> -> Baz<b>` requires the element type to change
+  // from `a` to `b`, but this body returns the container unchanged, so both
+  // argument positions share one type variable. It must be rejected, like 549.
+  type Baz<a> = Baz(a)
+
+  instance Functor<Baz> {
+    fun map(f, x) = x
+  }
+
+  fun main() =
+    IO.println_string("x")
+
+}

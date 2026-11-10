@@ -82,6 +82,19 @@ For `DFunction` and `DLet`: stores the type via `define`. For `DInstance`: uses 
 - **Kind solving**: Via `solveKindConstraints` from `Coal.TypeSystem.Kind.Constraint.Solver`
 - **Substitutions**: Applied via `apply` from `Coal.TypeSystem.Substitution`
 - **Environment handling**: Reads/writes `compilerNameStore`, `compilerAssumptions`, `compilerKindConstraints`, `compilerSubstitution`, `compilerSupply`
+- **Instance conformance**: After the final solve, `checkInstanceConformance`
+  re-unifies each trait-instance member against the trait interface at the
+  instance's declared type. The signature's variables — the instance head's
+  parameters and the member's own variables — are treated as rigid: each must
+  resolve to a *distinct*, non-rigid (flexible) variable. An implementation that
+  is less polymorphic than the interface is rejected, either because a variable
+  was instantiated with a compound type or because the body forced the
+  implementation to merge two distinct interface variables (e.g.
+  `fun map(f, Baz(a)) = Baz(a)`, where `a` and `b` coincide). This backstop is
+  needed because the `RuleTraitInstance` conformance constraint instantiates the
+  signature flexibly and would otherwise accept a more specific implementation.
+  The check is a local unification whose substitution is discarded, so it cannot
+  affect the inferred types.
 
 ---
 

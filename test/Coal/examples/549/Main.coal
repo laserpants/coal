@@ -1,0 +1,15 @@
+module Main {
+
+  import namespace IO
+  import Coal.Functor(Functor)
+
+  type Baz<a> = Baz(a)
+
+  instance Functor<Baz> {
+    fun map(f, Baz(a)) = Baz(a)
+  }
+
+  fun main() =
+    IO.println_string("x")
+
+}

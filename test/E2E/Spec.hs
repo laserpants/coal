@@ -3110,6 +3110,27 @@ e2eSpec = do
       res <- runSpec "test/Coal/examples/548" ["Main.coal"]
       res `shouldBe` Left PreflightFailure
 
+  -- 549: an instance whose member is not polymorphic enough in the member's
+  -- \*own* type variables must be rejected. `map : (a -> b) -> Baz<a> -> Baz<b>`
+  -- requires the result to be `Baz<b>`, but `fun map(f, Baz(a)) = Baz(a)`
+  -- returns the matched element unchanged, forcing `a = b`. The rigid backstop
+  -- used to accept this, because both rigid variables merely resolved to the
+  -- same flexible variable; it only rejected a rigid variable instantiated with
+  -- a *compound* type. The closed instance head contributes no variables, so the
+  -- flexible conformance constraint silently collapsed `a` and `b`.
+  describe "549" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/549" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
+  -- 550: the same bug reached through the container itself — `fun map(f, x) = x`
+  -- returns the argument unchanged, so it can never change the element type.
+  -- This exercises the merge through the second argument rather than a payload.
+  describe "550" $ do
+    it "is TypeError" $ do
+      res <- runSpec "test/Coal/examples/550" ["Main.coal"]
+      res `shouldBe` Left TypeError
+
 expectOutput :: String -> String -> [FilePath] -> Spec
 expectOutput expt srcPath files =
   it ("\"" <> expt <> "\"") $ do

@@ -27,8 +27,10 @@ module Main {
       match(result) {
         | ResultOk(r) =>
             ResultOk(f(r))
-        | res =>
-            res
+        | Error(pe) =>
+            Error(pe)
+        | NeedMoreInput =>
+            NeedMoreInput
       }
   }
 

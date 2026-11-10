@@ -81,6 +81,7 @@ import Data.Either.Extra (partitionEithers)
 import Data.List.Extra (groupSortOn)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Extras (Dictionary, Name, concatMapM, forM_)
 
 generateKindConstraints :: (Monad m, Monoid a) => Module a Kind () -> CompilerT a m ()
@@ -313,13 +314,14 @@ trait interface requires at the instance's declared type.
 
 Every type variable that the substituted interface signature quantifies is
 rigid: the instance head's parameters, and the member's own type variables. The
-implementation may not instantiate any of them with a compound type, because
-that would make it /less/ polymorphic than the interface promises.
+implementation may not instantiate any of them, because that would make it
+/less/ polymorphic than the interface promises: each rigid variable must resolve
+to a /distinct/ flexible variable that is not itself rigid.
 
 The conformance constraint ('RuleTraitInstance') alone does not enforce this: it
 is solved by instantiating the signature with flexible unification variables, so
 it only requires the implementation to unify with /some/ instance of the
-signature — an implementation that is more specific is accepted. Two shapes of
+signature — an implementation that is more specific is accepted. Three shapes of
 that error are rejected here.
 
 An instance head that is a bare variable, as in
@@ -343,6 +345,16 @@ the member's own @a@ and @b@ can be instantiated: the body forces them to
 @(string -> string) -> LangF<string> -> LangF<string>@ while use sites type the
 member from the interface (@a -> b@ at any @a@ and @b@). The two disagree, and
 the mismatch reaches the generated code.
+
+A closed instance head can also merge the member's own variables. For
+
+> instance Functor<Baz> { fun map(f, Baz(a)) = Baz(a) }
+
+the head contributes no variables, and the body returns the matched element
+unchanged, so the member's type is @(a -> b) -> Baz<a> -> Baz<a>@: the flexible
+instantiation forces @a@ and @b@ to be the same type variable. Both rigid
+variables then resolve to a single flexible variable, which is rejected here
+because the implementation cannot produce @Baz<b>@ for @a /= b@.
 
 The check is a local unification whose substitution is discarded, so it cannot
 affect the inferred types. A mismatch is reported through the solver-rule
@@ -371,9 +383,21 @@ checkInstanceConformance sub =
                     -- Already reported by the 'RuleTraitInstance' constraint.
                     pure ()
                   Right localSub ->
-                    forM_ rigid $ \index ->
-                      unless (isTypeVariable (apply localSub (TVariable index))) $
-                        compilerReportSolverRuleViolationsC [RuleTraitInstance loc actual expected]
+                    let resolved = apply localSub . TVariable <$> rigid
+                        flexibleImages = [v | TVariable v <- resolved]
+                        rigidVariables = Set.fromList rigid
+                        -- Every rigid variable must resolve to a *distinct*,
+                        -- non-rigid variable. A compound image makes the member
+                        -- less polymorphic; a rigid image, or two rigid
+                        -- variables sharing one image, means the body forced two
+                        -- interface variables equal (e.g. `map` returning the
+                        -- matched element unchanged, so `a` and `b` coincide).
+                        conforms =
+                          length flexibleImages == length rigid
+                            && length (Set.fromList flexibleImages) == length flexibleImages
+                            && all (`Set.notMember` rigidVariables) flexibleImages
+                     in unless conforms $
+                          compilerReportSolverRuleViolationsC [RuleTraitInstance loc actual expected]
     _ ->
       pure ()
  where
@@ -382,11 +406,6 @@ checkInstanceConformance sub =
       DFunction loc name _ -> Just (loc, name)
       DLet loc name _ -> Just (loc, name)
       _ -> Nothing
-
-  isTypeVariable =
-    \case
-      TVariable{} -> True
-      _ -> False
 
 freshTypeVariable :: (Monad m) => CompilerT a m (Type TypeIndex Kind)
 freshTypeVariable = supplied (TVariable . TypeIndex KType)
