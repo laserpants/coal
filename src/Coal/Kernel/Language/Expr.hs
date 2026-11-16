@@ -42,7 +42,7 @@ The expression grammar supports:
 
   * Variables and constructors
   * Function abstraction (@fn@) and application
-  * Let-bindings (non-recursive)
+  * Let-bindings
   * Conditional expressions (@if@)
   * Pattern matching (@case@)
   * Primitive literals and operators
