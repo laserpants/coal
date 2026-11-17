@@ -2,7 +2,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE StrictData #-}
 
-{- | Serializable interface of a translated kernel module
+{- | 
+Serializable interface of a translated kernel module
 
 A compact, serializable interface of a translated kernel module's exported
 objects. It is stored in the incremental-compilation cache so that, when a
