@@ -184,6 +184,9 @@ prog = do
   x <- liftF (Add 5 3 id)
   liftF (Add x 3 id)
 
+prog2 :: Arithm Int
+prog2 = Pure 5
+
 run3 =
   walk 
     freeScheme
