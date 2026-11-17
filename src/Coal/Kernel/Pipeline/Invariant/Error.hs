@@ -60,11 +60,11 @@ data InvariantError
     -}
     TrivialAliasBinding Name
   | {- | A control-flow expression (@EIf@ or @ECase@) appears in a non-tail
-    position (operand position); it should have been lifted by pass 009.
+    position (operand position); it should have been lifted by pass 9.
     -}
     ControlFlowInOperandPosition
   | {- | A non-atomic expression appears where only atomic expressions are
-    allowed; it should have been normalized by pass 009.
+    allowed; it should have been normalized by pass 9.
     -}
     NonAtomicOperand
   deriving (Show, Eq, Ord)

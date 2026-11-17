@@ -2,6 +2,8 @@
 
 This directory documents every compiler pass in `src/Coal/Compiler/Pass/`, describing
 what each pass does, its inputs/outputs, invariants, and interactions with other passes.
+The kernel normalization passes in `src/Coal/Kernel/Pipeline/Pass/` are documented here
+as well (see [Kernel normalization](#kernel-normalization) below).
 
 ## Complete Compiler Pipeline
 
@@ -157,3 +159,12 @@ Assembles LLVM bitcode to object files via `llc`, compiles the runtime C library
   - [KernelTranslate.md](KernelTranslate.md)
   - [KernelCodegen.md](KernelCodegen.md)
   - [Linking.md](Linking.md)
+
+## Kernel normalization
+
+The nine passes of the kernel IR normalization pipeline (`pipeline` in
+`Coal.Kernel.Pipeline.Passes`) run inside `KernelCodegen`, after the kernel has
+been translated from the surface language and before LLVM IR is emitted.
+
+- [AdministrativeNormalForm.md](AdministrativeNormalForm.md) — administrative
+  normal form (ANF); pass 9

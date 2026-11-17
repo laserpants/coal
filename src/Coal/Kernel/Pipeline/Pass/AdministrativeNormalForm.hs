@@ -13,7 +13,8 @@ nested complex expressions.
 After this pass:
 
   1. Every operand (function, argument, operator input, record field/row,
-     scrutinee, condition) is __atomic__ (@EVar@, @ECon@, @ELit@, @ENil@).
+     scrutinee, condition) is __atomic__ (@EVar@, @ECon@, @ELit@, @ENil@),
+     with the single exception of @ECall@ (see 'anfExpr').
   2. @EIf@ and @ECase@ in operand (value) position are bound to fresh
      @let@-variables at their point of use, so the surrounding continuation is
      applied exactly once. They may also appear in __tail position__.
@@ -56,58 +57,8 @@ import Coal.Kernel.Pipeline (Pass, PipelineT, freshName)
 import Coal.Kernel.Pipeline.Pass.Utils (opOperands, rebuildOp)
 
 {- | Transform every expression in the module into administrative normal form
-(ANF).
-
-= Invariants
-
-After this pass:
-
-  1. Every operand (function, argument, operator input, record field/row,
-     scrutinee, condition) is __atomic__ (@EVar@, @ECon@, @ELit@, @ENil@).
-  2. @EIf@ and @ECase@ in operand (value) position are bound to fresh
-     @let@-variables at their point of use, so the surrounding continuation is
-     applied exactly once. They may also appear in __tail position__.
-  3. Non-atomic subexpressions are extracted into fresh @let@-bindings.
-
-= Examples
-
-__Example 1: control flow in operand position.__
-
-@
-f(if c then a else b)
-@
-
-becomes:
-
-@
-let anf.N = if c then a else b
-in f(anf.N)
-@
-
-The @if@ is in operand position, so it is bound to a fresh @let@-variable at
-its point of use; the continuation @f(__)@ is applied exactly once.
-
-__Example 2: control flow in binding position.__
-
-@
-let x = if c then a else b
-in body
-@
-
-stays as:
-
-@
-let x = if c then a else b
-in body
-@
-
-Here the @if@ is already the RHS of a @let@-binding, so no rewrite is needed.
-In particular the pass does /not/ float it outward into the branches: control
-flow is kept bound at its point of use, applying the surrounding continuation
-exactly once and keeping the size of the output linear in the size of the
-input.
-
-In both examples @a@, @b@ and @c@ are taken to be already atomic.
+(ANF). See the module header for the invariants and an example, and 'anfExpr'
+for the traversal (including the 'ECall' special case).
 -}
 administrativeNormalForm :: (Monad m) => Pass m (Module Type) (Module Type)
 administrativeNormalForm m = do
@@ -142,166 +93,148 @@ isAtomic =
     _ -> False
 
 -- ---------------------------------------------------------------------------
--- Tail-position normalization
+-- Core traversal
 -- ---------------------------------------------------------------------------
 
-{- | Normalize @expr@ in tail position.
+{- | Where a normalized expression sits in the surrounding program.
 
-In tail position @EIf@ and @ECase@ are permitted. Their operands are
-atomized and their branches are normalized tail-recursively.
+The position determines two things: whether the result must be made atomic,
+and which type annotation a normalized @case@ keeps (see 'caseResultType').
 -}
-anfTail :: (Monad m) => Expr Type -> PipelineT m (Expr Type)
-anfTail expr =
-  case expr of
-    EVar _ -> pure expr
-    ECon _ -> pure expr
-    ELit _ -> pure expr
-    ENil -> pure expr
-    ELam params body ->
-      ELam params <$> anfTail body
-    ELet bs body ->
-      anfLetSeq (NonEmpty.toList bs) (anfTail body)
-    EIf cond th el ->
-      anfValue cond $ \condAtom -> do
-        th' <- anfTail th
-        el' <- anfTail el
-        pure (EIf condAtom th' el')
-    ECase t scrutinee clauses ->
-      anfValue scrutinee $ \scrutAtom -> do
-        clauses' <- mapM anfClause clauses
-        pure (ECase t scrutAtom clauses')
-    EApp t f args ->
-      anfValue f $ \fAtom ->
-        anfAll (NonEmpty.toList args) $ \argAtoms ->
-          pure (EApp t fAtom (NonEmpty.fromList argAtoms))
-    EOp op ->
-      anfAll (opOperands op) $ \atoms ->
-        pure (EOp (rebuildOp atoms op))
-    EExt name e1 e2 ->
-      anfValue e1 $ \e1Atom ->
-        anfValue e2 $ \e2Atom ->
-          pure (EExt name e1Atom e2Atom)
-    EGet lbl e ->
-      anfValue e $ \eAtom ->
-        pure (EGet lbl eAtom)
-    ECall (Label t name) args k ->
-      anfAll args $ \argAtoms ->
-        anfValue k $ \kAtom ->
-          pure (ECall (Label t name) argAtoms kAtom)
+data Position
+  = {- | A function/constant body, or a branch/clause body in tail position:
+    the result is returned /in place/.
+    -}
+    InTail
+  | -- | The RHS of a @let@-binding: like 'InTail', but see 'caseResultType'.
+    InBinding
+  | {- | An operand (application function/argument, operator input, record
+    field/row, scrutinee, condition, or 'ECall' argument/continuation): the
+    result must be atomic.
+    -}
+    InOperand
 
--- ---------------------------------------------------------------------------
--- Value-position normalization (continuation-passing)
--- ---------------------------------------------------------------------------
+{- | The position in which a nested branch or clause body is normalized.
 
-{- | Normalize @expr@ in value (operand) position and pass the /atomic/
-result to @cont@.
-
-When @expr@ is @EIf@ or @ECase@, the control flow is bound to a fresh
-@let@-variable and the continuation is applied exactly once. This avoids
-floating a shared continuation into every branch, which would duplicate the
-surrounding code for each control-flow expression (quadratic blow-up):
-
-@
-  anfValue (if c then a else b) cont
-    ≡  let anf.N = if c_atom then a' else b' in cont anf.N
-@
-
-Branches and clause bodies are normalized as value expressions (their
-operands atomized) with an identity continuation, so they are computed
-exactly once.
-
-For all other non-atomic expressions sub-expressions are atomized
-(possibly binding control flow from them) and the result is bound
-to a fresh name via 'bindFresh'.
+Tail position is inherited; an operand's branches are normalized in binding
+position. (This mirrors the rules the pass has always applied.)
 -}
-anfValue ::
+nestedPosition :: Position -> Position
+nestedPosition InTail = InTail
+nestedPosition _ = InBinding
+
+-- | Whether the result of the expression must be made atomic by the caller.
+bindsResult :: Position -> Bool
+bindsResult InOperand = True
+bindsResult _ = False
+
+{- | The result type to give a normalized @case@.
+
+In tail position the declared annotation is preserved. In binding and operand
+position the type is re-derived from the first normalized clause body — the
+shape codegen unboxes with ('Coal.Kernel.LLVM.Codegen.irValue'). The two
+coincide for well-typed input; both rules are preserved so that this pass's
+output is unchanged.
+-}
+caseResultType :: Position -> Type -> NonEmpty (Clause Type) -> Type
+caseResultType InTail t _ = t
+caseResultType _ _ clauses = case clauses of Clause _ body :| _ -> typeOf body
+
+{- | Normalize @expr@ in the given 'Position', delivering the result to @cont@.
+
+Operands are normalized through a continuation, so any bindings they introduce
+are hoisted to enclose the whole expression (operands must be atomic).
+Branches, clause bodies and lambda bodies are normalized with an identity
+continuation and placed /in position/, so their bindings stay inside the
+branch/lambda rather than being hoisted out of it.
+
+'ECall' is the one non-atomic form allowed to remain in operand position: it is
+a continuation-passing foreign call whose continuation codegen applies itself
+('Coal.Kernel.LLVM.Codegen.irValue'/@irTailECall@), so binding it to a fresh
+variable would change the generated code. It is therefore passed straight to
+@cont@.
+-}
+anfExpr ::
   (Monad m) =>
+  Position ->
   Expr Type ->
   (Expr Type -> PipelineT m (Expr Type)) ->
   PipelineT m (Expr Type)
-anfValue expr cont
-  | isAtomic expr = cont expr
-  | otherwise =
-      case expr of
-        EIf cond th el ->
-          anfValue cond $ \condAtom -> do
-            th' <- anfLetRhs th pure
-            el' <- anfLetRhs el pure
-            bindFresh (EIf condAtom th' el') cont
-        ECase _t scrutinee clauses ->
-          anfValue scrutinee $ \scrutAtom -> do
-            clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfLetRhs b pure) clauses
-            -- Derive the case result type from the normalized first branch.
-            let newT = case clauses' of Clause _ body :| _ -> typeOf body
-            bindFresh (ECase newT scrutAtom clauses') cont
-        ELet bs body ->
-          anfLetSeq (NonEmpty.toList bs) (anfValue body cont)
-        ELam params body -> do
-          body' <- anfTail body
-          bindFresh (ELam params body') cont
-        ECall (Label t name) args k ->
-          anfAll args $ \argAtoms ->
-            anfValue k $ \kAtom ->
-              cont (ECall (Label t name) argAtoms kAtom)
-        _ ->
-          anfLetRhs expr $
-            \expr' -> bindFresh expr' cont
+anfExpr pos expr cont =
+  case expr of
+    EVar _ -> cont expr
+    ECon _ -> cont expr
+    ELit _ -> cont expr
+    ENil -> cont expr
+    EIf cond th el ->
+      anfExpr InOperand cond $ \condAtom -> do
+        th' <- anfExpr (nestedPosition pos) th pure
+        el' <- anfExpr (nestedPosition pos) el pure
+        emit pos cont (EIf condAtom th' el')
+    ECase t scrutinee clauses ->
+      anfExpr InOperand scrutinee $ \scrutAtom -> do
+        clauses' <- traverse (anfClause (nestedPosition pos)) clauses
+        emit pos cont (ECase (caseResultType pos t clauses') scrutAtom clauses')
+    ELet bs body ->
+      anfLetSeq (NonEmpty.toList bs) (anfExpr pos body cont)
+    ELam params body -> do
+      body' <- anfExpr InTail body pure
+      emit pos cont (ELam params body')
+    EApp t f args ->
+      anfExpr InOperand f $ \fAtom ->
+        anfAll (NonEmpty.toList args) $ \argAtoms ->
+          emit pos cont (EApp t fAtom (NonEmpty.fromList argAtoms))
+    EOp op ->
+      anfAll (opOperands op) $ \atoms ->
+        emit pos cont (EOp (rebuildOp atoms op))
+    EExt name e1 e2 ->
+      anfExpr InOperand e1 $ \e1Atom ->
+        anfExpr InOperand e2 $ \e2Atom ->
+          emit pos cont (EExt name e1Atom e2Atom)
+    EGet lbl e ->
+      anfExpr InOperand e $ \eAtom ->
+        emit pos cont (EGet lbl eAtom)
+    ECall (Label t name) args k ->
+      anfAll args $ \argAtoms ->
+        anfExpr InOperand k $ \kAtom ->
+          cont (ECall (Label t name) argAtoms kAtom)
 
--- ---------------------------------------------------------------------------
--- Let-binding RHS normalization
--- ---------------------------------------------------------------------------
+{- | Deliver a normalized expression: bind it to a fresh @anf.N@ variable first
+when the position requires an atomic operand, then pass it to @cont@.
+-}
+emit ::
+  (Monad m) =>
+  Position ->
+  (Expr Type -> PipelineT m (Expr Type)) ->
+  Expr Type ->
+  PipelineT m (Expr Type)
+emit pos cont v
+  | bindsResult pos = bindFresh v cont
+  | otherwise = cont v
 
-{- | Normalize @expr@ for use as the RHS of a @let@-binding.
+-- | Normalize a function/constant body (tail position).
+anfTail :: (Monad m) => Expr Type -> PipelineT m (Expr Type)
+anfTail e = anfExpr InTail e pure
 
-The continuation @cont@ receives a fully normalized value expression. If
-@expr@ is @EIf@ or @ECase@ the control flow is kept as the binding RHS (the
-surrounding computation is applied exactly once, not floated into every
-branch); branches and clause bodies are normalized as value expressions with
-an identity continuation.
+{- | Normalize a @let@-binding RHS (or clause body): control flow is kept bound
+at its point of use and the surrounding computation is applied exactly once.
 -}
 anfLetRhs ::
   (Monad m) =>
   Expr Type ->
   (Expr Type -> PipelineT m (Expr Type)) ->
   PipelineT m (Expr Type)
-anfLetRhs expr cont
-  | isAtomic expr = cont expr
-  | otherwise = case expr of
-      EIf cond th el ->
-        anfValue cond $ \condAtom -> do
-          th' <- anfLetRhs th pure
-          el' <- anfLetRhs el pure
-          cont (EIf condAtom th' el')
-      ECase _t scrutinee clauses ->
-        anfValue scrutinee $ \scrutAtom -> do
-          clauses' <- mapM (\(Clause ps b) -> Clause ps <$> anfLetRhs b pure) clauses
-          let newT = case clauses' of Clause _ body :| _ -> typeOf body
-          cont (ECase newT scrutAtom clauses')
-      ELet bs body ->
-        anfLetSeq (NonEmpty.toList bs) (anfLetRhs body cont)
-      ELam params body -> do
-        body' <- anfTail body
-        cont (ELam params body')
-      EApp t f args ->
-        anfValue f $ \fAtom ->
-          anfAll (NonEmpty.toList args) $ \argAtoms ->
-            cont (EApp t fAtom (NonEmpty.fromList argAtoms))
-      EOp op ->
-        anfAll (opOperands op) $ \atoms ->
-          cont (EOp (rebuildOp atoms op))
-      EExt name e1 e2 ->
-        anfValue e1 $ \e1Atom ->
-          anfValue e2 $ \e2Atom ->
-            cont (EExt name e1Atom e2Atom)
-      EGet lbl e ->
-        anfValue e $ \eAtom ->
-          cont (EGet lbl eAtom)
-      ECall (Label t name) args k ->
-        anfAll args $ \argAtoms ->
-          anfValue k $ \kAtom ->
-            cont (ECall (Label t name) argAtoms kAtom)
-      other ->
-        cont other
+anfLetRhs = anfExpr InBinding
+
+{- | Normalize an expression in operand position and pass the atomic result to
+@cont@ (see 'anfExpr' for the 'ECall' exception).
+-}
+anfValue ::
+  (Monad m) =>
+  Expr Type ->
+  (Expr Type -> PipelineT m (Expr Type)) ->
+  PipelineT m (Expr Type)
+anfValue = anfExpr InOperand
 
 -- ---------------------------------------------------------------------------
 -- Let-binding sequence processing
@@ -346,8 +279,9 @@ anfAll (e : es) cont =
 -- Clause
 -- ---------------------------------------------------------------------------
 
-anfClause :: (Monad m) => Clause Type -> PipelineT m (Clause Type)
-anfClause (Clause params body) = Clause params <$> anfTail body
+-- | Normalize a clause body in the given position.
+anfClause :: (Monad m) => Position -> Clause Type -> PipelineT m (Clause Type)
+anfClause pos (Clause params body) = Clause params <$> anfExpr pos body pure
 
 -- ---------------------------------------------------------------------------
 -- Utilities
