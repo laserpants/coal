@@ -161,6 +161,28 @@ spec = do
                 )
          in runPass administrativeNormalForm input `shouldBe` Right expected
 
+    describe "leaves ECall in operand position (continuation-passing foreign call)" $ do
+      it "f(#ext(x)(k))  =>  f(#ext(x)(k))  (the call is not bound to a fresh let)" $
+        let extCall = ECall (Label TOpq "ext") [var "x"] (var "k")
+            input = modWith (app (var "f") [extCall])
+            expected = modWith (EApp TOpq (var "f") (ne [extCall]))
+         in runPass administrativeNormalForm input `shouldBe` Right expected
+
+      it "and the result satisfies checkAdministrativeNormalForm" $
+        let extCall = ECall (Label TOpq "ext") [var "x"] (var "k")
+            input = modWith (app (var "f") [extCall])
+         in case runPass administrativeNormalForm input of
+              Left err -> fail (show err)
+              Right m ->
+                concatMap
+                  ( \case
+                      DFunction _ _ _ body -> checkAdministrativeNormalForm body
+                      DConstant _ body -> checkAdministrativeNormalForm body
+                      _ -> []
+                  )
+                  (moduleObjectsList m)
+                  `shouldBe` []
+
     describe "invariant: checkAdministrativeNormalForm [] on every object body" $ do
       it "after ANF-ing f(g(x))" $
         let input = mkModule [DFunction Local "f" [] (app (var "f") [app (var "g") [var "x"]])]

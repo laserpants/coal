@@ -5,11 +5,12 @@ Verifies that all expressions are in administrative normal form (ANF).
 
 = Checked invariants
 
-After pass 10, the program must satisfy:
+After pass 9, the program must satisfy:
 
   1. All operands (application function/arguments, operator inputs, record
      fields, scrutinees, conditions) are atomic (@EVar@, @ECon@, @ELit@,
-     @ENil@)
+     @ENil@). The one permitted exception is @ECall@, which the ANF pass
+     leaves in operand position (codegen applies its continuation itself).
   2. Control flow (@EIf@, @ECase@) may appear in tail position or as a
      @let@-binding RHS; every other position requires atomic operands.
      @EIf@/@ECase@ are never used as a direct operand, because the ANF pass
@@ -18,7 +19,7 @@ After pass 10, the program must satisfy:
 = Error reporting
 
 Returns one error per violation: 'NonAtomicOperand' or
-'ControlFlowInNonTailPosition'.
+'ControlFlowInOperandPosition'.
 -}
 module Coal.Kernel.Pipeline.Invariant.AdministrativeNormalForm (
   checkAdministrativeNormalForm,
@@ -32,11 +33,11 @@ import Coal.Kernel.Pipeline.Invariant.Error (InvariantError (..))
 
 {- | Verify that all expressions are in administrative normal form (ANF).
 
-After pass 10, the program must satisfy:
+After pass 9, the program must satisfy:
 
   1. All operands (application function/arguments, operator inputs, record
      fields, scrutinees, conditions) are atomic (@EVar@, @ECon@, @ELit@,
-     @ENil@)
+     @ENil@), except for @ECall@.
   2. Control flow (@EIf@, @ECase@) may appear in tail position or as a
      @let@-binding RHS; every other position requires atomic operands.
 
@@ -105,7 +106,12 @@ checkInTailPosition expr =
       foldMap checkAtomic args
         <> checkInTailPosition k
 
--- | Check that an expression is atomic, report error if not
+{- | Check that an expression is atomic, reporting an error if not.
+
+@ECall@ is the one non-atomic form the ANF pass permits in operand position
+(it is a continuation-passing foreign call), so it is checked recursively
+rather than rejected.
+-}
 checkAtomic :: Expr Type -> [InvariantError]
 checkAtomic expr =
   if isAtomic expr
@@ -116,6 +122,9 @@ checkAtomic expr =
         [ControlFlowInOperandPosition]
       ECase{} ->
         [ControlFlowInOperandPosition]
+      -- Permitted non-atomic operand: check its arguments and continuation.
+      ECall{} ->
+        checkInTailPosition expr
       -- Any other non-atomic expression in operand position
       _ ->
         [NonAtomicOperand]
